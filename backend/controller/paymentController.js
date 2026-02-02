@@ -172,16 +172,47 @@ export const getPaymentStatus = async (req, res) => {
   }
 }
 
+const computeHmac = (message, digest = 'hex') => {
+  return crypto.createHmac('sha256', HITPAY_SALT).update(message).digest(digest)
+}
+
 const computeLegacyHmac = (payloadObj) => {
   const entries = Object.entries(payloadObj)
     .filter(([k]) => k !== 'hmac' && payloadObj[k] !== undefined && payloadObj[k] !== null)
     .sort(([a], [b]) => a.localeCompare(b))
   const message = entries.map(([k, v]) => `${k}:${v}`).join('|')
-  return crypto.createHmac('sha256', HITPAY_SALT).update(message).digest('hex')
+  return computeHmac(message, 'hex')
 }
 
 const computeRawSignature = (rawBody) => {
-  return crypto.createHmac('sha256', HITPAY_SALT).update(rawBody).digest('hex')
+  return computeHmac(rawBody, 'hex')
+}
+
+const buildLegacyHmacCandidates = ({ payload, rawBody }) => {
+  const candidates = []
+  if (rawBody && rawBody.length) {
+    const rawParts = String(rawBody)
+      .split('&')
+      .map((part) => part.trim())
+      .filter(Boolean)
+    const withoutHmac = rawParts
+      .filter((part) => !part.toLowerCase().startsWith('hmac='))
+      .join('&')
+    if (withoutHmac) candidates.push(withoutHmac)
+  }
+
+  const entries = Object.entries(payload || {})
+    .filter(([key, value]) => key !== 'hmac' && value !== undefined && value !== null)
+    .sort(([a], [b]) => a.localeCompare(b))
+
+  if (entries.length) {
+    const keyValueMessage = entries.map(([key, value]) => `${key}=${value}`).join('&')
+    const pipeMessage = entries.map(([key, value]) => `${key}:${value}`).join('|')
+    if (keyValueMessage) candidates.push(keyValueMessage)
+    if (pipeMessage) candidates.push(pipeMessage)
+  }
+
+  return Array.from(new Set(candidates))
 }
 
 const isUuid = (value) => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
@@ -240,7 +271,10 @@ export const hitpayWebhook = async (req, res) => {
     const signatureHeader = Array.isArray(signatureHeaderRaw)
       ? signatureHeaderRaw[0]
       : signatureHeaderRaw
-    const legacyHmac = payload.hmac || req.query?.hmac
+    const legacyHmacRaw = payload.hmac || req.query?.hmac
+    const legacyHmac = legacyHmacRaw
+      ? String(legacyHmacRaw).trim().replace(/^sha256=/i, '')
+      : null
     const signatureDebug = {
       hasSignatureHeader: Boolean(signatureHeader),
       signatureHeaderLength: signatureHeader ? String(signatureHeader).length : 0,
@@ -250,7 +284,10 @@ export const hitpayWebhook = async (req, res) => {
       rawBodyLength: rawBody.length,
       payloadKeys: Object.keys(payload || {}),
       bodyCandidateLengths: bodyCandidates.map((body) => body.length),
-      hasLegacyHmac: Boolean(legacyHmac)
+      hasLegacyHmac: Boolean(legacyHmac),
+      legacyHmacLength: legacyHmac ? String(legacyHmac).length : 0,
+      legacyHmacPrefix: legacyHmac ? String(legacyHmac).slice(0, 12) : null,
+      legacyHmacSuffix: legacyHmac ? String(legacyHmac).slice(-12) : null
     }
 
     if (signatureHeader) {
@@ -275,11 +312,28 @@ export const hitpayWebhook = async (req, res) => {
         matchesBase64
       })
     } else if (legacyHmac) {
-      const calculated = computeLegacyHmac(payload)
-      if (calculated !== legacyHmac) {
-        console.error('[Webhook] Legacy signature mismatch', signatureDebug)
+      const legacyCandidates = buildLegacyHmacCandidates({ payload, rawBody })
+      const matchesLegacyHex = legacyCandidates.some((candidate) =>
+        computeHmac(candidate, 'hex').toLowerCase() === legacyHmac.toLowerCase()
+      )
+      const matchesLegacyBase64 = legacyCandidates.some((candidate) =>
+        computeHmac(candidate, 'base64') === legacyHmac
+      )
+      if (!matchesLegacyHex && !matchesLegacyBase64) {
+        console.error('[Webhook] Legacy signature mismatch', {
+          ...signatureDebug,
+          legacyCandidatesLengths: legacyCandidates.map((candidate) => candidate.length),
+          matchesLegacyHex,
+          matchesLegacyBase64
+        })
         return res.status(401).json({ error: 'Invalid signature' })
       }
+      console.log('[Webhook] Legacy signature verified', {
+        ...signatureDebug,
+        legacyCandidatesLengths: legacyCandidates.map((candidate) => candidate.length),
+        matchesLegacyHex,
+        matchesLegacyBase64
+      })
     } else {
       console.error('[Webhook] Missing signature', signatureDebug)
       return res.status(400).json({ error: 'Missing webhook signature' })
