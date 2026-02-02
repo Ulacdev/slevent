@@ -7,7 +7,7 @@ import { logAudit } from '../utils/auditLogger.js'
 const HITPAY_API_KEY = process.env.HITPAY_API_KEY
 const HITPAY_SALT = process.env.HITPAY_SALT // signature secret
 const HITPAY_BASE_URL = process.env.HITPAY_BASE_URL
-const FRONTEND_URL = process.env.FRONTEND_URL
+const FRONTEND_URL = (process.env.FRONTEND_URL || '').replace(/\/+$/, '')
 const SERVER_BASE_URL = process.env.SERVER_BASE_URL
 const HITPAY_ENABLED = (process.env.HITPAY_ENABLED || 'true').toLowerCase() !== 'false'
 
@@ -50,7 +50,7 @@ export const createHitpayCheckoutSession = async (req, res) => {
     payload.set('amount', String(Number(order.totalAmount)))
     payload.set('currency', order.currency || 'PHP')
     payload.set('reference_number', order.orderId)
-    payload.set('redirect_url', `${FRONTEND_URL}/payment/status?sessionId=${order.orderId}`)
+    payload.set('redirect_url', `${FRONTEND_URL}/#/payment/status?sessionId=${order.orderId}`)
     payload.set('webhook', `${SERVER_BASE_URL}/api/payments/hitpay/webhook`)
     payload.set('purpose', `Order ${order.orderId}`)
     if (order.buyerEmail) payload.set('email', order.buyerEmail)
