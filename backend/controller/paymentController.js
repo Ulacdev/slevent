@@ -623,7 +623,7 @@ export const hitpayWebhook = async (req, res) => {
 
     await supabase
       .from('paymentTransactions')
-      .update({ status: newStatus, rawPayload: payloadForStorage })
+      .update({ status: newStatus, rawPayload: payloadData })
       .eq('paymentTransactionId', resolvedTx.paymentTransactionId)
 
     if (newStatus === 'SUCCEEDED') {
