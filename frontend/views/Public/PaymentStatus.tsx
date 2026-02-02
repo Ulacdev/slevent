@@ -70,6 +70,17 @@ export const PaymentStatusView: React.FC = () => {
             <p className="text-[#1F3A5F]/60">Please do not refresh this page.</p>
           </div>
         );
+      case 'pending':
+        return (
+          <div className="flex flex-col items-center py-20 text-center">
+            <div className="w-12 h-12 border-4 border-[#F4F6F8] border-t-[#F2C94C] rounded-full animate-spin mb-4"></div>
+            <h2 className="text-xl font-bold text-[#1F3A5F]">Payment Pending</h2>
+            <p className="text-[#1F3A5F]/60 max-w-sm">
+              We’re waiting for confirmation from the payment gateway. This can take a few minutes.
+              Please keep this tab open.
+            </p>
+          </div>
+        );
       case 'success':
         return (
           <div className="flex flex-col items-center py-10 px-6 text-center">
