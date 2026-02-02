@@ -428,13 +428,14 @@ export const hitpayWebhook = async (req, res) => {
 
     const externalId = deriveWebhookExternalId({ payload, eventData, rawBody, eventType })
     const receivedAt = new Date().toISOString()
+    const payloadForStorage = payload ? JSON.parse(JSON.stringify(payload)) : null
     const { data: webhookEvent, error: webhookErr } = await supabase
       .from('webhookEvents')
       .insert({
-        gateway: 'HITPAY',
+        gateway: { name: 'HITPAY' },
         eventType: eventType || null,
         externalId,
-        payload,
+        payload: payloadForStorage,
         receivedAt,
         processingStatus: 'RECEIVED'
       })
