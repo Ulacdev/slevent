@@ -1,0 +1,133 @@
+PROMPT START
+
+You are redesigning an existing project to strictly align with the StartupLab Business Center Brand Guidelines (v2.0).
+
+You MUST follow these rules exactly.
+Any deviation is NOT allowed.
+
+1. Brand Authority (Non-Negotiable)
+
+The StartupLab Brand Guidelines v2.0 are the single source of truth.
+If any existing design, layout, color, font, or component conflicts with the brand guidelines, it MUST be changed to comply with the brand.
+
+Do NOT introduce new visual styles, colors, fonts, or logo variations.
+
+2. Logo Rules (STRICT)
+
+Use only approved StartupLab logos
+
+Select logo versions based on background contrast (light vs dark)
+
+NEVER:
+
+Stretch, rotate, skew, or distort the logo
+
+Change logo colors
+
+Add shadows, gradients, outlines, or effects
+
+Recreate or redraw the logo
+
+Logo must always be clear, readable, and high-contrast
+
+If the logo placement violates these rules, it MUST be fixed.
+
+3. Color Palette (STRICT)
+
+Only the following colors are allowed:
+
+#003E86
+
+#3768A2
+
+#38BDF2
+
+#F2F2F2
+
+#2E2E2F
+
+Rules:
+
+Do NOT introduce any new colors
+
+No gradients unless explicitly shown in the brand guide (none allowed by default)
+
+Use colors consistently across all screens and components
+
+Prioritize clarity, contrast, and professionalism
+
+4. Typography (STRICT)
+
+Allowed fonts ONLY:
+
+Helvetica
+
+Neue / Neue Helvetica
+
+Rules:
+
+No decorative, display, or alternative fonts
+
+Maintain clean, professional hierarchy
+
+If existing typography does not match, replace it
+
+5. Iconography
+
+Icons must be clean, minimal, and professional
+
+Must visually align with the StartupLab brand tone
+
+No playful, hand-drawn, overly detailed, or inconsistent icon styles
+
+6. Design Tone & Feel
+
+The final design MUST communicate:
+
+Professionalism
+
+Trust
+
+Stability
+
+Safety
+
+Business credibility
+
+Avoid:
+
+Trendy or experimental UI styles
+
+Over-decoration
+
+Excessive animation or effects
+
+7. Redesign Behavior
+
+You are redesigning, not inventing
+
+Preserve functionality and content
+
+Change visuals ONLY when required to meet brand compliance
+
+If unsure, choose the most conservative, brand-safe option
+
+8. Validation Requirement
+
+Before finalizing:
+
+Verify that every screen complies with:
+
+Logo rules
+
+Color palette
+
+Typography
+
+Brand tone
+
+If any element is non-compliant, revise it
+
+Compliance is more important than creativity.
+
+PROMPT END

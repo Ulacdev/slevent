@@ -70,7 +70,7 @@ export async function createInviteAndSend(req, res) {
 
 // Accept invite and set password
 export async function acceptInvite(req, res) {
-  const { token, password } = req.body;
+  const { token, password, name } = req.body;
   const { data: invites, error } = await db.from('invites').select('*').eq('token', token).gt('expiresAt', new Date().toISOString());
   if (error || !invites.length) return res.status(400).json({ error: 'Invalid or expired invite' });
   const invite = invites[0];
@@ -110,15 +110,45 @@ export async function acceptInvite(req, res) {
     userId = existingUser.userId;
   }
 
-  const { error: userUpsertError } = await db
+  const finalName = (name || invite.name || '').trim();
+  let userUpsertError = null;
+
+  console.log('[invite/acceptInvite] Attempting upsert for user:', { userId, email: invite.email, finalName });
+  let upsertResp = await db
     .from('users')
-    .upsert({ userId, email: invite.email, role: invite.role, name: '' }, { onConflict: 'userId' });
+    .upsert({ userId, email: invite.email, role: invite.role, name: finalName }, { onConflict: 'userId' });
+  userUpsertError = upsertResp.error;
+  if (userUpsertError) console.error('[invite/acceptInvite] Upsert by userId error:', userUpsertError);
+
+  if (userUpsertError && userUpsertError.message?.includes('column "userId"')) {
+    console.log('[invite/acceptInvite] Retrying upsert by id column');
+    upsertResp = await db
+      .from('users')
+      .upsert({ id: userId, email: invite.email, role: invite.role, name: finalName }, { onConflict: 'id' });
+    userUpsertError = upsertResp.error;
+    if (userUpsertError) console.error('[invite/acceptInvite] Upsert by id error:', userUpsertError);
+  }
+
+  // Always update the user's name by email to guarantee it is set
+  const emailToUpdate = (invite.email || '').trim().toLowerCase();
+  const updateName = await db
+    .from('users')
+    .update({ name: finalName })
+    .eq('email', emailToUpdate);
+  if (updateName.error) {
+    console.error('[invite/acceptInvite] Final name update error:', updateName.error);
+    return res.status(500).json({ error: updateName.error.message || 'Failed to update user name' });
+  }
+
+  if (userUpsertError && /duplicate key|unique/i.test(userUpsertError.message || '')) {
+    console.log('[invite/acceptInvite] Upsert duplicate, attempted update by email');
+    // Already updated above
+  }
 
   if (userUpsertError) {
-    const message = userUpsertError.message || '';
-    if (!message.toLowerCase().includes('duplicate key')) {
-      return res.status(500).json({ error: message });
-    }
+    const message = userUpsertError.message || 'Failed to save user';
+    console.error('[invite/acceptInvite] Final error:', message);
+    return res.status(500).json({ error: message });
   }
 
   await db.from('invites').delete().eq('token', token);

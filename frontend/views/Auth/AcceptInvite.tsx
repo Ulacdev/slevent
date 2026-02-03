@@ -4,6 +4,7 @@ import { Card, Button, Input } from '../../components/Shared';
 export const AcceptInvite: React.FC = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') || '';
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
@@ -15,6 +16,10 @@ export const AcceptInvite: React.FC = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    if (!name.trim()) {
+      setError('Name is required');
+      return;
+    }
     if (!password || password.length < 8) {
       setError('Password must be at least 8 characters');
       return;
@@ -26,7 +31,7 @@ export const AcceptInvite: React.FC = () => {
     const res = await fetch(`${API}/api/invite/accept-invite`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, password })
+      body: JSON.stringify({ token, password, name: name.trim() })
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
@@ -38,10 +43,17 @@ export const AcceptInvite: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-      <Card className="p-10 w-full max-w-md">
-        <h2 className="text-2xl font-black mb-6">Set Your Password</h2>
+    <div className="min-h-screen flex items-center justify-center bg-[#F2F2F2] px-4">
+      <Card className="p-10 w-full max-w-md bg-[#F2F2F2] border border-[#3768A2]/20 rounded-[2.5rem]">
+        <h2 className="text-2xl font-black mb-6 text-[#003E86]">Complete Your Account</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
+          <Input
+            label="Full Name"
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+          />
           <Input
             label="New Password"
             type="password"
@@ -56,9 +68,9 @@ export const AcceptInvite: React.FC = () => {
             onChange={e => setConfirm(e.target.value)}
             required
           />
-          {error && <div className="text-rose-600 text-sm font-bold">{error}</div>}
-          {success && <div className="text-emerald-600 text-sm font-bold">{success}</div>}
-          <Button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold">Set Password</Button>
+          {error && <div className="text-[#2E2E2F] text-sm font-bold">{error}</div>}
+          {success && <div className="text-[#003E86] text-sm font-bold">{success}</div>}
+          <Button type="submit" className="w-full py-3 rounded-xl font-bold">Set Password</Button>
         </form>
       </Card>
     </div>

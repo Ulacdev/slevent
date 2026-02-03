@@ -65,17 +65,17 @@ export const PaymentStatusView: React.FC = () => {
       case 'checking':
         return (
           <div className="flex flex-col items-center py-16">
-            <div className="w-10 h-10 border-4 border-[#F4F6F8] border-t-[#2F80ED] rounded-full animate-spin mb-4"></div>
-            <h2 className="text-lg font-bold text-[#1F3A5F]">Verifying Payment...</h2>
-            <p className="text-[#1F3A5F]/60">Please do not refresh this page.</p>
+            <div className="w-10 h-10 border-4 border-[#3768A2]/30 border-t-[#003E86] rounded-full animate-spin mb-4"></div>
+            <h2 className="text-lg font-bold text-[#003E86]">Verifying Payment...</h2>
+            <p className="text-[#2E2E2F]/70">Please do not refresh this page.</p>
           </div>
         );
       case 'pending':
         return (
           <div className="flex flex-col items-center py-16 text-center">
-            <div className="w-10 h-10 border-4 border-[#F4F6F8] border-t-[#F2C94C] rounded-full animate-spin mb-4"></div>
-            <h2 className="text-lg font-bold text-[#1F3A5F]">Payment Pending</h2>
-            <p className="text-[#1F3A5F]/60 max-w-sm">
+            <div className="w-10 h-10 border-4 border-[#3768A2]/30 border-t-[#38BDF2] rounded-full animate-spin mb-4"></div>
+            <h2 className="text-lg font-bold text-[#003E86]">Payment Pending</h2>
+            <p className="text-[#2E2E2F]/70 max-w-sm">
               We’re waiting for confirmation from the payment gateway. This can take a few minutes.
               Please keep this tab open.
             </p>
@@ -84,25 +84,25 @@ export const PaymentStatusView: React.FC = () => {
       case 'success':
         return (
           <div className="flex flex-col items-center py-8 px-6 text-center">
-            <div className="w-14 h-14 bg-[#56CCF2]/20 text-[#2F80ED] rounded-full flex items-center justify-center mb-5">
+            <div className="w-14 h-14 bg-[#38BDF2]/20 text-[#003E86] rounded-full flex items-center justify-center mb-5">
               <ICONS.CheckCircle className="w-7 h-7" />
             </div>
-            <h1 className="text-2xl font-black text-[#1F3A5F] mb-2">Payment Successful!</h1>
-            <p className="text-[#1F3A5F]/60 max-w-sm mb-6">
+            <h1 className="text-2xl font-black text-[#003E86] mb-2">Payment Successful!</h1>
+            <p className="text-[#2E2E2F]/70 max-w-sm mb-6">
               Your registration order <strong>#{order?.orderId}</strong> is confirmed. A copy of your ticket has been sent to your email.
             </p>
             <div className="space-y-3 w-full max-w-xs">
-              <Button className="w-full bg-[#2F80ED] hover:bg-[#1F3A5F] text-white" size="md" onClick={() => navigate(`/tickets/${sessionId}`)}>
+              <Button className="w-full" size="md" onClick={() => navigate(`/tickets/${sessionId}`)}>
                 View Digital Ticket
               </Button>
-              <Button variant="outline" size="md" className="w-full border-[#2F80ED]/30 text-[#1F3A5F] hover:bg-[#F4F6F8]" onClick={() => navigate('/events')}>
+              <Button variant="outline" size="md" className="w-full" onClick={() => navigate('/events')}>
                 Back to Events
               </Button>
             </div>
 
             {tickets.length > 0 && (
               <div className="w-full mt-10 text-left">
-                <h3 className="text-sm font-black text-[#1F3A5F]/60 uppercase tracking-[0.2em] mb-4">Tickets</h3>
+                <h3 className="text-sm font-black text-[#3768A2] uppercase tracking-[0.2em] mb-4">Tickets</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {tickets.map((t) => (
                     <a
@@ -110,14 +110,14 @@ export const PaymentStatusView: React.FC = () => {
                       href={`#/tickets/${t.ticketId}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="border border-[#F4F6F8] rounded-2xl p-4 bg-white shadow-sm flex flex-col items-center gap-3 transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#2F80ED]"
+                      className="border border-[#3768A2]/20 rounded-2xl p-4 bg-[#F2F2F2] flex flex-col items-center gap-3 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]"
                       title="Open this ticket"
                     >
                       <QRCode value={t.qrPayload || t.ticketCode} size={140} />
-                      <div className="text-xs text-[#1F3A5F]/60 break-all text-center">
+                      <div className="text-xs text-[#2E2E2F]/60 break-all text-center">
                         {t.ticketCode}
                       </div>
-                      <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#2F80ED]">{t.status}</span>
+                      <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#003E86]">{t.status}</span>
                     </a>
                   ))}
                 </div>
@@ -128,14 +128,14 @@ export const PaymentStatusView: React.FC = () => {
       case 'failed':
         return (
           <div className="flex flex-col items-center py-8 px-6 text-center">
-            <div className="w-14 h-14 bg-[#1F3A5F]/10 text-[#1F3A5F] rounded-full flex items-center justify-center mb-5">
+            <div className="w-14 h-14 bg-[#2E2E2F]/10 text-[#2E2E2F] rounded-full flex items-center justify-center mb-5">
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </div>
-            <h1 className="text-2xl font-black text-[#1F3A5F] mb-2">Payment Failed</h1>
-            <p className="text-[#1F3A5F]/60 max-w-sm mb-8">
+            <h1 className="text-2xl font-black text-[#2E2E2F] mb-2">Payment Failed</h1>
+            <p className="text-[#2E2E2F]/70 max-w-sm mb-8">
               We couldn't process your payment. Please try again or contact support if the issue persists.
             </p>
-            <Button className="w-full max-w-xs bg-[#2F80ED] hover:bg-[#1F3A5F] text-white" variant="primary" size="md" onClick={() => navigate('/events')}>
+            <Button className="w-full max-w-xs" variant="primary" size="md" onClick={() => navigate('/events')}>
               Try Again
             </Button>
           </div>
@@ -143,14 +143,14 @@ export const PaymentStatusView: React.FC = () => {
       case 'expired':
         return (
           <div className="flex flex-col items-center py-8 px-6 text-center">
-            <div className="w-14 h-14 bg-[#1F3A5F]/10 text-[#1F3A5F] rounded-full flex items-center justify-center mb-5">
+            <div className="w-14 h-14 bg-[#2E2E2F]/10 text-[#2E2E2F] rounded-full flex items-center justify-center mb-5">
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v5m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
-            <h1 className="text-2xl font-black text-[#1F3A5F] mb-2">Reservation Expired</h1>
-            <p className="text-[#1F3A5F]/60 max-w-sm mb-8">
+            <h1 className="text-2xl font-black text-[#2E2E2F] mb-2">Reservation Expired</h1>
+            <p className="text-[#2E2E2F]/70 max-w-sm mb-8">
               Your payment window expired before completion. Please select your tickets again to continue.
             </p>
-            <Button className="w-full max-w-xs bg-[#2F80ED] hover:bg-[#1F3A5F] text-white" variant="primary" size="md" onClick={() => navigate('/events')}>
+            <Button className="w-full max-w-xs" variant="primary" size="md" onClick={() => navigate('/events')}>
               Back to Events
             </Button>
           </div>
@@ -162,7 +162,7 @@ export const PaymentStatusView: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto px-4 py-16">
-      <Card className="shadow-2xl border-none">
+      <Card>
         {renderContent()}
       </Card>
     </div>
