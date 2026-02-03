@@ -126,7 +126,7 @@ export const LoginPerspective: React.FC = () => {
             </div>
             
             <p className="text-[#1F3A5F]/60 text-sm mb-8 leading-relaxed">
-              Full control over events, pricing strategies, detailed revenue analytics, and organization-wide attendee databases rovickromasanta.startuplab@gmail.com.
+              Full control over events, pricing strategies, detailed revenue analytics, and organization-wide attendee databases.
             </p>
 
             <div className="space-y-4 mb-10">
