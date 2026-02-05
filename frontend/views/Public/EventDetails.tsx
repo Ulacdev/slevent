@@ -61,7 +61,7 @@ export const EventDetails: React.FC = () => {
     }
   }, [slug]);
 
-  if (loading) return <PageLoader label="Syncing event profile..." />;
+  if (loading) return <PageLoader label="Loading event details..." />;
   if (!event) return <div className="p-20 text-center text-[#2E2E2F]/60">Session not found.</div>;
 
   const updateQuantity = (ticketTypeId: string, change: number, available: number) => {

@@ -14,6 +14,7 @@ interface TeamMember {
   id: string;
   name: string;
   email: string;
+  imageUrl?: string | null;
   role: string;
   perspective: UserRole;
   status: 'Active' | 'Inactive' | 'Pending';
@@ -59,6 +60,7 @@ export const SettingsView: React.FC = () => {
               id: u.userId,
               name: u.name || '',
               email: u.email,
+              imageUrl: u.imageUrl || null,
               role: u.role || '',
               perspective: u.role === 'STAFF' ? UserRole.STAFF : UserRole.ADMIN,
               permissions: [
@@ -200,11 +202,11 @@ export const SettingsView: React.FC = () => {
         {activeTab === 'team' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-               <h3 className="text-[11px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.3em]">Executive Directory</h3>
+               <label className="block text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-3 ml-1">Team Directory</label>
                <Button onClick={() => setIsInviteModalOpen(true)}>
                  <span className="text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
                    <ICONS.Users className="w-3.5 h-3.5" />
-                   Invite Associate
+                   Invite a Team Member
                  </span>
                </Button>
             </div>
@@ -213,17 +215,21 @@ export const SettingsView: React.FC = () => {
                 <table className="w-full text-left">
                   <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
                     <tr>
-                      <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Full Name / Identity</th>
+                      <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Name</th>
                       <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Position</th>
-                                          </tr>
+                    </tr>
                   </thead>
                   <tbody className="divide-y divide-[#2E2E2F]/10">
                     {teamMembers.map((member) => (
                       <tr key={member.id} className="hover:bg-[#38BDF2]/10 transition-colors group">
                         <td className="px-10 py-8">
                           <div className="flex items-center gap-5">
-                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg ${member.isOwner ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#38BDF2] text-[#2E2E2F]'}`}>
-                              {member.name.charAt(0)}
+                            <div className={`w-12 h-12 rounded-2xl overflow-hidden flex items-center justify-center font-black text-lg ${member.isOwner ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#38BDF2]'} ${!member.imageUrl ? 'text-[#F2F2F2]' : 'text-[#2E2E2F]'}`}>
+                              {member.imageUrl ? (
+                                <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
+                              ) : (
+                                member.name.charAt(0)
+                              )}
                             </div>
                             <div>
                               <div className="flex items-center gap-3 mb-1">
@@ -240,7 +246,7 @@ export const SettingsView: React.FC = () => {
                            <div className="text-[13px] font-black text-[#2E2E2F] uppercase tracking-widest">{member.role}</div>
                            <div className="text-[10px] font-bold text-[#2E2E2F]/60 uppercase tracking-[0.2em] mt-1">{member.perspective} HUB</div>
                         </td>
-                                              </tr>
+                      </tr>
                     ))}
                   </tbody>
                 </table>
@@ -252,15 +258,15 @@ export const SettingsView: React.FC = () => {
         {activeTab === 'permission' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-               <h3 className="text-[11px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.3em]">Personnel Access Matrix</h3>
-               <Badge type="info" className="font-black text-[9px] tracking-widest uppercase bg-[#38BDF2]/20 text-[#2E2E2F]">LIMIT STAFF CAPABILITIES</Badge>
+               <label className="block text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-3 ml-1">Access Control</label>
+               <Badge type="info" className="font-black text-[9px] tracking-widest uppercase bg-[#38BDF2]/20 text-[#2E2E2F]">Manage Team Permissions</Badge>
             </div>
             <Card className="overflow-hidden border-[#2E2E2F]/10 rounded-[2.5rem] bg-[#F2F2F2]">
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
                     <tr>
-                      <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Personnel Name</th>
+                      <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Name</th>
                       <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] text-center">View Events</th>
                       <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] text-center">Edit Events</th>
                       <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] text-center">Manual Check-in</th>
@@ -271,8 +277,12 @@ export const SettingsView: React.FC = () => {
                       <tr key={member.id} className="hover:bg-[#38BDF2]/10 transition-colors group">
                         <td className="px-10 py-8">
                           <div className="flex items-center gap-5">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm ${member.isOwner ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#38BDF2] text-[#2E2E2F]'}`}>
-                              {member.name.charAt(0)}
+                            <div className={`w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center font-black text-sm ${member.isOwner ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#38BDF2] text-[#2E2E2F]'}`}>
+                              {member.imageUrl ? (
+                                <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
+                              ) : (
+                                member.name.charAt(0)
+                              )}
                             </div>
                             <div>
                               <div className="flex items-center gap-2 mb-0.5">
@@ -308,15 +318,15 @@ export const SettingsView: React.FC = () => {
 
       </div>
 
-      <Modal isOpen={isInviteModalOpen} onClose={() => setIsInviteModalOpen(false)} title="Invite Staff Personnel" size="lg">
+      <Modal isOpen={isInviteModalOpen} onClose={() => setIsInviteModalOpen(false)} title="Invite Team Member" size="lg">
         <form onSubmit={handleInviteSubmit} className="space-y-10 px-2">
   <div className="space-y-6">
     <Input label="Work Email" type="email" placeholder="j.miller@startuplab.co" required className="w-full py-5 px-6 rounded-2xl bg-[#F2F2F2] border-[#2E2E2F]/20 text-base" value={inviteData.email} onChange={(e: any) => setInviteData({...inviteData, email: e.target.value})} />
     <Input label="Assigned Position" value="STAFF" disabled className="w-full py-5 px-6 rounded-2xl bg-[#F2F2F2] border-[#2E2E2F]/20 text-[#2E2E2F]/60 text-base" />
   </div>
   <div className="pt-8 flex flex-col sm:flex-row gap-4">
-    <Button className="flex-1" onClick={() => setIsInviteModalOpen(false)}>Discard</Button>
-    <Button type="submit" className="flex-[2]">Generate Invite</Button>
+    <Button className="flex-1" onClick={() => setIsInviteModalOpen(false)}>Cancel</Button>
+    <Button type="submit" className="flex-[2]">Send Invite</Button>
   </div>
 </form>
       </Modal>

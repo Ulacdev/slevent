@@ -1,4 +1,60 @@
 import db from  "../database/db.js";
+import crypto from 'crypto';
+import path from 'path';
+
+const STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'startuplab-business-ticketing';
+
+export const updateUserAvatar = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        const file = req.file;
+        if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+        if (!file) return res.status(400).json({ error: 'Image file is required' });
+        if (!file.mimetype || !file.mimetype.startsWith('image/')) {
+            return res.status(400).json({ error: 'Only image uploads are allowed' });
+        }
+
+        const ext = path.extname(file.originalname || '') || '.png';
+        const fileName = `${userId}/${crypto.randomUUID()}${ext}`;
+        const filePath = `avatars/${fileName}`;
+
+        const { error: uploadError } = await db.storage
+            .from(STORAGE_BUCKET)
+            .upload(filePath, file.buffer, {
+                contentType: file.mimetype,
+                upsert: true,
+            });
+
+        if (uploadError) return res.status(500).json({ error: uploadError.message });
+
+        const { data: publicData } = db.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
+        const imageUrl = publicData?.publicUrl;
+        if (!imageUrl) return res.status(500).json({ error: 'Failed to generate public URL' });
+
+        let { data, error } = await db
+            .from('users')
+            .update({ imageUrl })
+            .eq('userId', userId)
+            .select('userId, name, email, role, imageUrl')
+            .maybeSingle();
+
+        if ((!data && !error) || (error && error.message?.includes('column "userId"'))) {
+            const resp = await db
+                .from('users')
+                .update({ imageUrl })
+                .eq('id', userId)
+                .select('id, name, email, role, imageUrl')
+                .maybeSingle();
+            data = resp.data; error = resp.error;
+        }
+
+        if (error) return res.status(500).json({ error: error.message });
+        if (!data) return res.status(404).json({ error: 'User not found' });
+        return res.json({ imageUrl, user: data, path: filePath });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
 
 export const getUser = async (req, res) => {
     try{

@@ -27,7 +27,7 @@ const ensureEnv = (res) => {
 
 export const createHitpayCheckoutSession = async (req, res) => {
   try {
-    const { orderId, paymentMethod } = req.body
+    const { orderId } = req.body
     if (!orderId) return res.status(400).json({ error: 'orderId required' })
 
     const { data: order, error: orderErr } = await supabase
@@ -55,7 +55,6 @@ export const createHitpayCheckoutSession = async (req, res) => {
     payload.set('purpose', `Order ${order.orderId}`)
     if (order.buyerEmail) payload.set('email', order.buyerEmail)
     if (order.buyerName) payload.set('name', order.buyerName)
-    if (paymentMethod) payload.append('payment_methods[]', String(paymentMethod))
 
     const response = await fetch(`${HITPAY_BASE_URL}/v1/payment-requests`, {
       method: 'POST',

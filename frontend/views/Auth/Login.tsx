@@ -75,7 +75,7 @@ export const LoginPerspective: React.FC = () => {
       className="mx-auto mb-6 w-[240px] max-w-full h-auto"
       style={{ objectFit: 'contain' }}
     />
-    <p className="text-[#2E2E2F]/70 text-lg font-medium">Admin & Staff Portal Login</p>
+    <p className="text-[#2E2E2F]/70 text-lg font-medium">Sign in to your account</p>
     <div className="w-20 h-1 bg-[#38BDF2] mx-auto mt-4 rounded-full"></div>
   </div>
   <form onSubmit={handleLogin} className="flex flex-col gap-6">
@@ -98,7 +98,7 @@ export const LoginPerspective: React.FC = () => {
               type="submit"
               disabled={loading}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Signing you in...' : 'Sign In'}
             </Button>
             {error && (
               <div className="mt-2 text-[#2E2E2F] text-sm font-bold text-center">{error}</div>
@@ -111,7 +111,7 @@ export const LoginPerspective: React.FC = () => {
             onClick={() => navigate('/')}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            Return to Public Website
+            Back to Event Home
           </button>
         </div>
       </div>

@@ -31,50 +31,131 @@ const Branding: React.FC<{ className?: string, light?: boolean }> = ({ className
 const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { role, isAuthenticated, clearUser, setUser, canViewEvents, canManualCheckIn } = useUser();
+  const { role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canViewEvents, canEditEvents, canManualCheckIn } = useUser();
   const isStaff = role === UserRole.STAFF;
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
-  const [editNameModal, setEditNameModal] = React.useState(false);
+  const [profileModalOpen, setProfileModalOpen] = React.useState(false);
   const [nameInput, setNameInput] = React.useState('');
-  const [nameLoading, setNameLoading] = React.useState(false);
-  const [nameError, setNameError] = React.useState('');
-  const [nameSuccess, setNameSuccess] = React.useState('');
+  const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = React.useState<File | null>(null);
+  const [profileLoading, setProfileLoading] = React.useState(false);
+  const [profileError, setProfileError] = React.useState('');
+  const [profileSuccess, setProfileSuccess] = React.useState('');
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
-  const fetchName = async () => {
+  const displayName = name?.trim() || (isStaff ? 'Staff Operative' : 'System Admin');
+  const initials = (displayName || (isStaff ? 'ST' : 'AD'))
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
+  const fetchProfile = async () => {
     try {
-      setNameError('');
-      setNameSuccess('');
-      const res = await fetch(`${API}/api/whoAmI`, { credentials: 'include' });
+      setProfileError('');
+      setProfileSuccess('');
+      const res = await fetch(`${API}/api/whoAmI`, { credentials: 'include', cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setNameInput(data.name || '');
+        setAvatarPreview(data.imageUrl || null);
+        setAvatarFile(null);
+        if (data?.role && data?.email) {
+          setUser({
+            role: data.role,
+            email: data.email,
+            name: data.name ?? null,
+            imageUrl: data.imageUrl ?? null,
+            canViewEvents: data.canViewEvents,
+            canEditEvents: data.canEditEvents,
+            canManualCheckIn: data.canManualCheckIn,
+          });
+        }
       }
     } catch {}
   };
 
   React.useEffect(() => {
-    if (editNameModal) fetchName();
-  }, [editNameModal]);
+    if (profileModalOpen) fetchProfile();
+  }, [profileModalOpen]);
 
-  const handleSaveName = async () => {
-    setNameError(''); setNameSuccess(''); setNameLoading(true);
-    try {
-      const res = await fetch(`${API}/api/user/name`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ name: nameInput })
-      });
-      if (!res.ok) {
-        const payload = await res.json().catch(() => ({}));
-        throw new Error(payload.error || 'Failed to update name.');
+  React.useEffect(() => {
+    return () => {
+      if (avatarPreview?.startsWith('blob:')) {
+        URL.revokeObjectURL(avatarPreview);
       }
-      setNameSuccess('Name updated successfully.');
-      setTimeout(() => setEditNameModal(false), 800);
+    };
+  }, [avatarPreview]);
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
+  const handleSaveProfile = async () => {
+    setProfileError(''); setProfileSuccess(''); setProfileLoading(true);
+    try {
+      const trimmedName = nameInput.trim();
+      if (!trimmedName) throw new Error('Name is required.');
+      let nextName = trimmedName;
+      let nextImageUrl = avatarPreview || imageUrl || null;
+
+      if (avatarFile) {
+        const formData = new FormData();
+        formData.append('image', avatarFile);
+        const res = await fetch(`${API}/api/user/avatar`, {
+          method: 'POST',
+          credentials: 'include',
+          body: formData
+        });
+        if (!res.ok) {
+          const payload = await res.json().catch(() => ({}));
+          throw new Error(payload.error || 'Failed to update avatar.');
+        }
+        const payload = await res.json().catch(() => ({}));
+        nextImageUrl = payload.imageUrl || payload.user?.imageUrl || nextImageUrl;
+        setAvatarFile(null);
+        setAvatarPreview(nextImageUrl || null);
+      }
+
+      if (trimmedName !== (name || '')) {
+        const res = await fetch(`${API}/api/user/name`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ name: trimmedName })
+        });
+        if (!res.ok) {
+          const payload = await res.json().catch(() => ({}));
+          throw new Error(payload.error || 'Failed to update name.');
+        }
+        const payload = await res.json().catch(() => ({}));
+        nextName = payload?.name || trimmedName;
+        if (!nextImageUrl && payload?.imageUrl) nextImageUrl = payload.imageUrl;
+      }
+
+      if (role && email) {
+        setUser({
+          role,
+          email,
+          name: nextName,
+          imageUrl: nextImageUrl,
+          canViewEvents,
+          canEditEvents,
+          canManualCheckIn,
+        });
+      }
+
+      setProfileSuccess('Profile updated successfully.');
+      setTimeout(() => setProfileModalOpen(false), 800);
     } catch (err: any) {
-      setNameError(err?.message || 'Failed to update name.');
+      setProfileError(err?.message || 'Failed to update profile.');
     } finally {
-      setNameLoading(false);
+      setProfileLoading(false);
     }
   };
 
@@ -99,6 +180,8 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         setUser({ 
           role: me.role, 
           email: me.email,
+          name: me.name ?? null,
+          imageUrl: me.imageUrl ?? null,
           canViewEvents: me.canViewEvents,
           canEditEvents: me.canEditEvents,
           canManualCheckIn: me.canManualCheckIn,
@@ -225,11 +308,15 @@ const menuItems = (
         </nav>
         <div className="p-6 mt-auto">
   <div className="bg-[#F2F2F2] rounded-2xl p-4 flex items-center gap-3 border border-[#2E2E2F]/10 cursor-pointer relative group" onClick={() => setUserMenuOpen((v) => !v)}>
-    <div className={`w-10 h-10 rounded-xl bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center font-black text-xs`}>
-      {isStaff ? 'ST' : 'AD'}
+    <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center font-black text-xs">
+      {imageUrl ? (
+        <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
+      ) : (
+        <span className="font-black text-xs text-[#2E2E2F]">{initials}</span>
+      )}
     </div>
     <div className="flex-1 overflow-hidden">
-      <p className="text-xs font-black text-[#2E2E2F] truncate">{isStaff ? 'Staff Operative' : 'System Admin'}</p>
+      <p className="text-xs font-black text-[#2E2E2F] truncate">{displayName}</p>
       <p className="text-[9px] text-[#2E2E2F]/60 font-bold uppercase tracking-widest truncate">StartupLab Global</p>
     </div>
     <svg className="w-4 h-4 text-[#2E2E2F]/50 ml-2" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -242,11 +329,11 @@ const menuItems = (
           className="w-full min-h-[32px] px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]"
           onClick={(event) => {
             event.stopPropagation();
-            setEditNameModal(true);
+            setProfileModalOpen(true);
             setUserMenuOpen(false);
           }}
         >
-          Edit Name
+          Edit Profile
         </button>
         <button
           className="w-full min-h-[32px] px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]"
@@ -287,14 +374,7 @@ const menuItems = (
     />
   </button>
   <div className="flex items-center gap-6 min-w-0">
-    <div className="hidden md:flex flex-col items-end">
-      <span className="text-[8px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">System Status</span>
-      <span className="text-[9px] font-bold text-[#2E2E2F] flex items-center gap-1.5">
-        <span className="w-1 h-1 bg-[#38BDF2] rounded-full"></span>
-        Encrypted & Live
-      </span>
-    </div>
-  </div>
+      </div>
 </header>
         {/* Sidebar overlay for mobile */}
         {sidebarOpen && (
@@ -302,8 +382,7 @@ const menuItems = (
             <div className="fixed inset-0 bg-[#2E2E2F]/70" onClick={() => setSidebarOpen(false)} />
             <aside className="relative w-64 bg-[#F2F2F2] border-r border-[#2E2E2F]/10 flex flex-col h-full z-50">
               <div className="p-8 flex items-center justify-between">
-                <Branding className="text-base" />
-                <button
+                                <button
                   className="min-h-[32px] min-w-[32px] px-2 py-2 rounded-xl bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors"
                   onClick={() => setSidebarOpen(false)}
                   aria-label="Close navigation"
@@ -330,17 +409,21 @@ const menuItems = (
               </nav>
               <div className="p-6 mt-auto">
                 <div className="bg-[#F2F2F2] rounded-2xl p-4 flex items-center gap-3 border border-[#2E2E2F]/10 cursor-pointer relative group" onClick={() => setUserMenuOpen((v) => !v)}>
-                  <div className={`w-10 h-10 rounded-xl bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center font-black text-xs`}>
-                    {isStaff ? 'ST' : 'AD'}
+                  <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center font-black text-xs">
+                    {imageUrl ? (
+                      <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="font-black text-xs text-[#2E2E2F]">{initials}</span>
+                    )}
                   </div>
                   <div className="flex-1 overflow-hidden">
-                    <p className="text-xs font-black text-[#2E2E2F] truncate">{isStaff ? 'Staff Operative' : 'System Admin'}</p>
+                    <p className="text-xs font-black text-[#2E2E2F] truncate">{displayName}</p>
                     <p className="text-[9px] text-[#2E2E2F]/60 font-bold uppercase tracking-widest truncate">StartupLab Global</p>
                   </div>
                   <svg className="w-4 h-4 text-[#2E2E2F]/50 ml-2" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/></svg>
                   {userMenuOpen && (
                     <div className="absolute left-0 bottom-16 w-56 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl shadow-none z-50 p-2 flex flex-col gap-1">
-                      <button className="w-full min-h-[32px] px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]" onClick={() => { setEditNameModal(true); setUserMenuOpen(false); }}>Edit Name</button>
+                      <button className="w-full min-h-[32px] px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]" onClick={() => { setProfileModalOpen(true); setUserMenuOpen(false); }}>Edit Profile</button>
                       <button className="w-full min-h-[32px] px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]" onClick={() => { setUserMenuOpen(false); handleLogout(); }}>Logout</button>
                     </div>
                   )}
@@ -363,24 +446,49 @@ const menuItems = (
           </div>
         </div>
         <Modal
-          isOpen={editNameModal}
-          onClose={() => setEditNameModal(false)}
-          title="Edit Name"
+          isOpen={profileModalOpen}
+          onClose={() => setProfileModalOpen(false)}
+          title="Edit Profile"
           subtitle="Update your profile"
           size="sm"
         >
-          <div className="space-y-4">
+          <div className="space-y-5">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl overflow-hidden border border-[#2E2E2F]/10 bg-[#F2F2F2] flex items-center justify-center">
+                {avatarPreview ? (
+                  <img src={avatarPreview} alt="Profile preview" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="font-black text-sm text-[#2E2E2F]">{initials}</span>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="outline"
+                  className="px-4 py-2"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {avatarPreview ? 'Change Photo' : 'Upload Photo'}
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
+              </div>
+            </div>
             <Input
               label="Your Name"
               value={nameInput}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNameInput(e.target.value)}
             />
-            {nameError && <p className="text-xs text-[#2E2E2F] font-bold">{nameError}</p>}
-            {nameSuccess && <p className="text-xs text-[#2E2E2F] font-bold">{nameSuccess}</p>}
+            {profileError && <p className="text-xs text-[#2E2E2F] font-bold">{profileError}</p>}
+            {profileSuccess && <p className="text-xs text-[#2E2E2F] font-bold">{profileSuccess}</p>}
             <div className="flex gap-3 pt-2">
-              <Button variant="outline" className="flex-1" onClick={() => setEditNameModal(false)}>Cancel</Button>
-              <Button className="flex-1" onClick={handleSaveName} disabled={nameLoading || !nameInput.trim()}>
-                {nameLoading ? 'Saving...' : 'Save'}
+              <Button variant="outline" className="flex-1" onClick={() => setProfileModalOpen(false)}>Cancel</Button>
+              <Button className="flex-1" onClick={handleSaveProfile} disabled={profileLoading || !nameInput.trim()}>
+                {profileLoading ? 'Saving...' : 'Save'}
               </Button>
             </div>
           </div>
@@ -395,8 +503,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     <header className="h-20 bg-[#F2F2F2] border-b border-[#2E2E2F]/10 px-8 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto h-full flex items-center justify-between">
         <Link to="/">
-          <Branding className="text-xl lg:text-2xl" />
-        </Link>
+                  </Link>
         <nav className="flex items-center gap-10">
           <Link to="/" className="text-[11px] font-black uppercase tracking-[0.3em] text-[#2E2E2F]/70 hover:text-[#38BDF2] transition-colors hidden sm:block">
             EVENTS

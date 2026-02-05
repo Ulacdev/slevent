@@ -144,7 +144,7 @@ export const EventList: React.FC = () => {
   const paginatedEvents = useMemo(() => events, [events]);
 
   if (loading) return (
-    <PageLoader label="Syncing Executive Portal..." />
+    <PageLoader label="Loading events..." />
   );
 
   return (
@@ -152,8 +152,8 @@ export const EventList: React.FC = () => {
       {/* Landing Experience Hero Section */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-12">
         <div className="flex-1 min-w-0">
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#38BDF2] text-[10px] text-[#2E2E2F] font-black uppercase tracking-[0.2em] mb-4">
-  <span className="w-1.5 h-1.5 bg-[#2E2E2F] rounded-full"></span>
+          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#38BDF2] text-[10px] text-white font-black uppercase tracking-[0.2em] mb-4">
+  <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
   Explore upcoming StartupLab events and secure your seat.
 </div>
 <h1 className="text-4xl lg:text-5xl font-black text-[#2E2E2F] tracking-tighter leading-tight mb-5">

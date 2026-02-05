@@ -657,7 +657,7 @@ export const AdminDashboard: React.FC = () => {
 
   const renderDetailBody = () => {
     if (detailLoading) {
-      return <div className="text-sm text-[#2E2E2F]">Loading details...</div>;
+      return <div className="text-sm text-[#2E2E2F]">Just a moment, loading details...</div>;
     }
     if (detailError) {
       return <div className="text-sm text-[#2E2E2F]">{detailError}</div>;
@@ -707,14 +707,14 @@ export const AdminDashboard: React.FC = () => {
     );
   }
 
-  if (loading) return <PageLoader label="Loading enterprise reports..." variant="page" />;
+  if (loading) return <PageLoader label="Loading your dashboard..." variant="page" />;
   if (!stats) return null;
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-black text-[#2E2E2F] tracking-tight">Financial Performance</h1>
-        <p className="text-[#2E2E2F] font-medium">Organization-wide revenue and registration analytics.</p>
+        <h1 className="text-2xl font-black text-[#2E2E2F] tracking-tight">Dashboard Overview</h1>
+        <p className="text-[#2E2E2F] font-medium">See your latest registrations, tickets, and revenue at a glance.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -761,7 +761,7 @@ export const AdminDashboard: React.FC = () => {
             All Transactions
           </h3>
           {txLoading ? (
-            <div className="text-[#2E2E2F] text-sm">Loading transactions...</div>
+            <div className="text-[#2E2E2F] text-sm">Getting your transactions...</div>
           ) : transactions.length === 0 ? (
             <div className="text-[#2E2E2F] text-sm">No transactions yet.</div>
           ) : (
@@ -769,7 +769,7 @@ export const AdminDashboard: React.FC = () => {
               {transactions.map((tx) => (
                 <div
                   key={tx.orderId}
-                  className="flex gap-3 items-start pb-4 border-b border-[#2E2E2F]/20 last:border-0 cursor-pointer rounded-xl p-2 -m-2 hover:bg-[#2E2E2F]/10 transition-colors"
+                  className="flex gap-3 items-start pb-4 border-b border-[#2E2E2F]/20 last:border-0 cursor-pointer rounded-xl p-2 -m-2 hover:bg-[#38BDF2]/10 transition-colors"
                   onClick={() => openDetail('transaction', tx.orderId)}
                 >
                   <div className="w-10 h-10 rounded-full bg-[#F2F2F2] border border-[#2E2E2F]/20 flex items-center justify-center text-[#2E2E2F] flex-shrink-0">
@@ -811,7 +811,7 @@ export const AdminDashboard: React.FC = () => {
               {orders.map((order) => (
                 <div
                   key={order.orderId}
-                  className="flex gap-3 items-start pb-4 border-b border-[#2E2E2F]/20 last:border-0 cursor-pointer rounded-xl p-2 -m-2 hover:bg-[#2E2E2F]/10 transition-colors"
+                  className="flex gap-3 items-start pb-4 border-b border-[#2E2E2F]/20 last:border-0 cursor-pointer rounded-xl p-2 -m-2 hover:bg-[#38BDF2]/10 transition-colors"
                   onClick={() => openDetail('order', order.orderId)}
                 >
                   <div className="w-10 h-10 rounded-full bg-[#F2F2F2] border border-[#2E2E2F]/20 flex items-center justify-center text-[#2E2E2F] flex-shrink-0">
@@ -865,7 +865,7 @@ export const AdminDashboard: React.FC = () => {
                 return (
                   <div
                     key={log.auditLogId}
-                    className="flex gap-3 items-start pb-4 border-b border-[#2E2E2F]/20 last:border-0 cursor-pointer rounded-xl p-2 -m-2 hover:bg-[#2E2E2F]/10 transition-colors"
+                    className="flex gap-3 items-start pb-4 border-b border-[#2E2E2F]/20 last:border-0 cursor-pointer rounded-xl p-2 -m-2 hover:bg-[#38BDF2]/10 transition-colors"
                     onClick={() => openDetail('audit', log.auditLogId)}
                   >
                     <div className="w-10 h-10 rounded-full bg-[#F2F2F2] border border-[#2E2E2F]/20 flex items-center justify-center text-[#2E2E2F] flex-shrink-0">

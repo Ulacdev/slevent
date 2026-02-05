@@ -136,7 +136,7 @@ export const RegistrationsList: React.FC = () => {
   }, [debouncedSearch, eventId]);
 
   if (loading) {
-    return <PageLoader label="Loading attendee directory..." variant="section" />;
+    return <PageLoader label="Loading attendees..." variant="section" />;
   }
 
   return (

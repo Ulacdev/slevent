@@ -145,7 +145,7 @@ export const EventsManagement: React.FC = () => {
     if (currentPage > totalPages) setCurrentPage(1);
   }, [currentPage, totalPages]);
 
-  if (loading) return <PageLoader label="Loading event management..." variant="section" />;
+  if (loading) return <PageLoader label="Loading events..." variant="section" />;
 
   const formatDateForInput = (value: string) => {
     if (!value) return { date: '', time: '' };
@@ -311,9 +311,9 @@ export const EventsManagement: React.FC = () => {
 
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-2">
         <div>
-          <h1 className="text-3xl font-black text-[#2E2E2F] tracking-tighter">Events Management</h1>
-          <p className="text-[#2E2E2F]/70 font-medium text-sm mt-1">Configure and manage your organization's event lifecycle.</p>
-        </div>
+          <h1 className="text-3xl font-black text-[#2E2E2F] tracking-tighter">Events</h1>
+<p className="text-[#2E2E2F]/70 font-medium text-sm mt-1">Configure and manage your organization's event lifecycle.</p>
+                  </div>
         <div className="flex flex-col sm:flex-row sm:items-end gap-3 w-full lg:w-auto">
           <div className="relative w-full sm:w-72">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#2E2E2F]/60">
@@ -451,7 +451,7 @@ export const EventsManagement: React.FC = () => {
       <Modal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        title={isEditMode ? 'Modify Session' : 'Launch New Session'}
+        title={isEditMode ? 'Edit Event' : 'Add New Event'}
         size="lg"
       >
         <div className="space-y-12">
@@ -522,7 +522,7 @@ export const EventsManagement: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-10 px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="md:col-span-2">
-                <label className="block text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-3 ml-1">Identity & Status</label>
+                <label className="block text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-3 ml-1">Event Details</label>
                 <div className="flex gap-4">
                   <div className="flex-1">
                     <Input placeholder="Session Name" value={formData.eventName} onChange={(e: any) => setFormData({...formData, eventName: e.target.value})} />
@@ -540,7 +540,7 @@ export const EventsManagement: React.FC = () => {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-3 ml-1">Abstract / Description</label>
+                <label className="block text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-3 ml-1">Description</label>
                 <textarea 
                   className="w-full px-5 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-[1.5rem] text-sm min-h-[120px] focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors outline-none"
                   value={formData.description}
@@ -594,9 +594,9 @@ export const EventsManagement: React.FC = () => {
             </div>
 
             <div className="flex gap-4 pt-8 border-t border-[#2E2E2F]/20">
-              <Button className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors min-h-[32px]" onClick={() => setIsModalOpen(false)}>Discard</Button>
+              <Button className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors min-h-[32px]" onClick={() => setIsModalOpen(false)}>Cancel</Button>
               <Button type="submit" className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors min-h-[32px]" disabled={submitting}>
-                {submitting ? 'Synchronizing...' : (isEditMode ? 'Commit Configuration' : 'Deploy Session')}
+                {submitting ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Event')}
               </Button>
             </div>
           </form>
@@ -825,7 +825,7 @@ const TicketManager: React.FC<TicketManagerProps> = ({ event, onSave, submitting
               onChange={(e: any) => setNewTicket({ ...newTicket, currency: e.target.value.toUpperCase() })}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4 mb-2">
             <Input
               label="Sales Start"
               type="datetime-local"
@@ -979,6 +979,26 @@ const TicketManager: React.FC<TicketManagerProps> = ({ event, onSave, submitting
                       className="w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                       rows={2}
                     />
+                  </div>
+                  <div className="md:col-span-2 space-y-4 mb-2">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Sales Start</label>
+                      <input
+                        type="datetime-local"
+                        value={t.salesStartAt || ''}
+                        onChange={(e) => updateTicket(t.ticketTypeId, { salesStartAt: e.target.value })}
+                        className="w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Sales End</label>
+                      <input
+                        type="datetime-local"
+                        value={t.salesEndAt || ''}
+                        onChange={(e) => updateTicket(t.ticketTypeId, { salesEndAt: e.target.value })}
+                        className="w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                      />
+                    </div>
                   </div>
                 </div>
               )}

@@ -8,107 +8,12 @@ import { ICONS } from '../../constants';
 
 const PAYMENT_METHODS = [
   {
-    id: 'card_local',
-    label: 'Card (Visa/Mastercard)',
-    description: 'Local PHP cards',
-    hitpayMethod: 'card',
-    feeRate: 0.03,
-    feeFixed: 15,
-    feeLabel: '3% + PHP 15'
-  },
-  {
-    id: 'card_intl',
-    label: 'International Card',
-    description: 'Visa/Mastercard (non-PHP)',
-    hitpayMethod: 'card',
-    feeRate: 0.04,
-    feeFixed: 15,
-    feeLabel: '4% + PHP 15'
-  },
-  {
     id: 'gcash',
     label: 'GCash',
     description: 'E-wallet',
     hitpayMethod: 'gcash',
     feeRate: 0.023,
     feeLabel: '2.3%'
-  },
-  {
-    id: 'qrph',
-    label: 'QRPh',
-    description: 'QR code banks',
-    hitpayMethod: 'qrph',
-    feeRate: 0.01,
-    feeMinimum: 20,
-    feeLabel: '1% or PHP 20'
-  },
-  {
-    id: 'unionbank',
-    label: 'UnionBank',
-    description: 'UnionBank direct',
-    hitpayMethod: 'unionbank',
-    feeRate: 0.01,
-    feeMinimum: 20,
-    feeLabel: '1% or PHP 20'
-  },
-  {
-    id: 'instapay',
-    label: 'InstaPay',
-    description: 'PH e-bank',
-    hitpayMethod: 'instapay',
-    feeRate: 0.015,
-    feeMinimum: 35,
-    feeLabel: '1.5% or PHP 35'
-  },
-  {
-    id: 'pesonet',
-    label: 'PESONet',
-    description: 'PH e-bank',
-    hitpayMethod: 'pesonet',
-    feeRate: 0.015,
-    feeMinimum: 35,
-    feeLabel: '1.5% or PHP 35'
-  },
-  {
-    id: 'otc',
-    label: 'Over the Counter',
-    description: 'Bayad, Cebuana, ECPay, Palawan, Robinsons',
-    hitpayMethod: 'otc',
-    feeRate: 0.015,
-    feeMinimum: 30,
-    feeLabel: '1.5% or PHP 30'
-  },
-  {
-    id: 'billease',
-    label: 'Billease',
-    description: 'Buy now pay later',
-    hitpayMethod: 'billease',
-    feeRate: 0.015,
-    feeLabel: '1.5%'
-  },
-  {
-    id: 'grabpay',
-    label: 'GrabPay',
-    description: 'E-wallet',
-    hitpayMethod: 'grabpay',
-    feeRate: 0.022,
-    feeLabel: '2.2%'
-  },
-  {
-    id: 'shopeepay',
-    label: 'ShopeePay',
-    description: 'E-wallet',
-    hitpayMethod: 'shopeepay',
-    feeRate: 0.025,
-    feeLabel: '2.5%'
-  },
-  {
-    id: 'spaylater',
-    label: 'SPayLater',
-    description: 'Shopee PayLater',
-    hitpayMethod: 'spaylater',
-    feeRate: 0.025,
-    feeLabel: '2.5%'
   }
 ];
 
@@ -170,16 +75,7 @@ export const RegistrationForm: React.FC = () => {
   const selectedPayment = PAYMENT_METHODS.find((method) => method.id === paymentMethodId) ?? PAYMENT_METHODS[0];
   let paymentFee = 0;
 if (subtotal > 0) {
-  if (selectedPayment.feeFixed !== undefined) {
-    // percent + fixed
-    paymentFee = roundCurrency(subtotal * selectedPayment.feeRate + selectedPayment.feeFixed);
-  } else if (selectedPayment.feeMinimum !== undefined) {
-    // percent or minimum
-    paymentFee = roundCurrency(Math.max(subtotal * selectedPayment.feeRate, selectedPayment.feeMinimum));
-  } else {
-    // percent only
-    paymentFee = roundCurrency(subtotal * selectedPayment.feeRate);
-  }
+  paymentFee = roundCurrency(subtotal * selectedPayment.feeRate);
 }
   const totalPayable = roundCurrency(subtotal + paymentFee);
   const hasPaid = totalPayable > 0;
@@ -233,7 +129,7 @@ if (subtotal > 0) {
   };
 
   if (loading) return (
-    <PageLoader label="Initializing Secure Session..." variant="page" />
+    <PageLoader label="Loading registration form..." variant="page" />
   );
 
   if (!event || selectedItems.length === 0) return (
@@ -262,7 +158,7 @@ if (subtotal > 0) {
             Complete Registration
           </h1>
           <div className="flex items-center gap-3">
-            <span className="bg-[#38BDF2] text-[#2E2E2F] text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest">
+            <span className="bg-[#38BDF2] text-white text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest">
               {totalQuantity} {totalQuantity === 1 ? 'Ticket' : 'Tickets'}
             </span>
             <p className="text-[#2E2E2F]/70 font-medium text-sm">
@@ -332,10 +228,11 @@ if (subtotal > 0) {
 </div>
 <div className="space-y-3">
   <select
-    className="w-full p-3 rounded-lg border border-[#2E2E2F]/20 bg-[#F2F2F2] text-[13px] font-bold text-[#2E2E2F] focus:border-[#38BDF2]/40 outline-none"
+    className="w-full p-3 rounded-lg border border-[#2E2E2F]/20 bg-[#F2F2F2] text-[13px] font-bold text-[#2E2E2F] focus:border-[#38BDF2]/40 outline-none disabled:opacity-60"
     value={paymentMethodId}
     onChange={e => setPaymentMethodId(e.target.value)}
     aria-label="Select payment method"
+    disabled={subtotal === 0}
   >
     {PAYMENT_METHODS.map((method) => (
       <option key={method.id} value={method.id}>
@@ -343,8 +240,9 @@ if (subtotal > 0) {
       </option>
     ))}
   </select>
-  <div className="mt-2 text-xs text-[#2E2E2F]/80 font-bold">
+  <div className={`mt-2 text-xs font-bold ${subtotal === 0 ? 'text-[#2E2E2F]/30' : 'text-[#2E2E2F]/80'}`}>
     Fee: <span className="text-[#38BDF2]">{selectedPayment.feeLabel}</span>
+    {subtotal === 0 && <span className="ml-2">(No payment required for free ticket)</span>}
   </div>
 </div>
                     </div>
