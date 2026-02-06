@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" style="margin:0;padding:0;">
+  <head>
+    <meta charset="UTF-8">
+    <title>You're Invited: Online Event at StartupLab</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body style="margin:0;padding:0;background:#FFFFFF;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FFFFFF;min-height:100vh;">
+      <tr>
+        <td align="center">
+          <table width="480" cellpadding="0" cellspacing="0" border="0" style="background:#F2F2F2;border-radius:16px;box-shadow:0 4px 24px #2E2E2F10;overflow:hidden;">
+            <tr>
+              <td style="background:#38BDF2;padding:32px 0;text-align:center;">
+                <h1 style="color:#F2F2F2;font-size:24px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;margin:0;letter-spacing:1px;">Online Event Invitation</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:32px 32px 24px 32px;">
+                <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#2E2E2F;font-size:16px;line-height:1.6;margin:0 0 18px 0;">Hello <b>{{1.name}}</b>,<br><br>You are invited to join the online event <b>{{1.meta.eventName}}</b> hosted by <b><span style="color:#38BDF2;">Startup</span><span style="color:#2E2E2F;">Lab Business Center</span></b>.</p>
+
+                <div style="margin:0 0 18px 0;">
+                  <img src="{{1.meta.eventImageUrl}}" alt="Event" width="416" style="display:block;width:100%;max-width:416px;height:auto;border-radius:12px;" />
+                </div>
+
+                <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#2E2E2F;font-size:14px;line-height:1.6;margin:0 0 18px 0;">{{1.meta.eventDescription}}</p>
+                <table cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:24px 0 32px 0;">
+                  <tr>
+                    <td style="color:#38BDF2;font-size:13px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;padding:4px 0;">Date &amp; Time:</td>
+                    <td style="color:#2E2E2F;font-size:13px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;padding:4px 0;">{{1.meta.eventStartAt}} - {{1.meta.eventEndAt}}</td>
+                  </tr>
+                  <tr>
+                    <td style="color:#38BDF2;font-size:13px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;padding:4px 0;">Google Meet Link:</td>
+                    <td style="color:#38BDF2;font-size:13px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;padding:4px 0;">
+                      <a href="{{1.meta.eventLocation}}" style="color:#38BDF2;text-decoration:underline;">Join Meeting</a>
+                    </td>
+                  </tr>
+                </table>
+                <div style="text-align:center;margin:32px 0;">
+                  <a href="{{1.meta.eventLocation}}" style="display:inline-block;padding:12px 24px;background:#38BDF2;color:#F2F2F2;font-size:14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-weight:bold;text-decoration:none;border-radius:6px;letter-spacing:1px;">
+                    Join Google Meet
+                  </a>
+                </div>
+                <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#38BDF2;font-size:13px;line-height:1.5;margin:0 0 8px 0;">If the button doesn't work, copy and paste this link into your browser:</p>
+                <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#2E2E2F;font-size:13px;word-break:break-all;margin:0 0 24px 0;">{{1.meta.eventLocation}}</p>
+                <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#2E2E2F;font-size:13px;line-height:1.5;margin:0;">If you did not expect this invitation, you can safely ignore this email.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="background:#F2F2F2;padding:18px 0;text-align:center;border-radius:0 0 16px 16px;">
+                <span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#2E2E2F;font-size:11px;letter-spacing:2px;font-weight:bold;">
+                  <span style="color:#38BDF2;">Startup</span><span style="color:#2E2E2F;">Lab Business Center</span>
+                </span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

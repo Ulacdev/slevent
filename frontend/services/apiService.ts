@@ -96,7 +96,8 @@ export const apiService = {
   // GET /api/payments/status?sessionId=...
   getPaymentStatus: async (orderId: string): Promise<Order | null> => {
     const res = await fetch(`${API_BASE}/api/payments/status?sessionId=${encodeURIComponent(orderId)}`, {
-      credentials: 'include'
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`Failed to load order: ${res.status}`);
@@ -124,6 +125,10 @@ export const apiService = {
       qrPayload: data.qrPayload || data.ticketCode,
       eventId: data.eventId,
       eventName: data.eventName || '', // backend may need to populate this
+      locationType: data.locationType || null,
+      locationText: data.locationText || null,
+      eventStartAt: data.eventStartAt || null,
+      eventEndAt: data.eventEndAt || null,
       attendeeName: data.attendeeName || '', // backend may need to populate this
       attendeeEmail: data.attendeeEmail || '', // backend may need to populate this
       attendeePhone: data.attendeePhone || null,

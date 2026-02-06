@@ -38,7 +38,6 @@ const formatRange = (startAt?: string, endAt?: string, timezone?: string) => {
 };
 
 export const EventDetails: React.FC = () => {
-  const [showFullDesc, setShowFullDesc] = useState(false);
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [event, setEvent] = useState<Event | null>(null);
@@ -130,10 +129,6 @@ export const EventDetails: React.FC = () => {
                   <ICONS.Calendar className="w-4 h-4 mr-3 text-[#38BDF2]" />
                   {formatRange(event.startAt, event.endAt, event.timezone)}{event.timezone ? ` TZ: ${event.timezone}` : ''}
                 </div>
-                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-4 py-2 rounded-2xl border border-[#2E2E2F]/10 text-[12px]">
-                  <ICONS.MapPin className="w-4 h-4 mr-3 text-[#38BDF2]" />
-                  {event.locationText}
-                </div>
                 <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-2xl border border-[#2E2E2F]/10 text-[11px]">
                   {event.locationType}
                 </div>
@@ -150,15 +145,7 @@ export const EventDetails: React.FC = () => {
               <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border border-[#2E2E2F]/10">
                 <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.4em] mb-6">EVENT OVERVIEW</h3>
                 <p className="text-[#2E2E2F]/70 leading-relaxed text-base font-medium whitespace-pre-wrap">
-                  {showFullDesc ? event.description : (event.description.length > 120 ? `${event.description.slice(0, 120)}...` : event.description)}
-                  {event.description.length > 120 && (
-                    <button
-                      className="ml-2 text-[#2E2E2F] underline text-sm font-bold hover:text-[#38BDF2]"
-                      onClick={(e) => { e.preventDefault(); setShowFullDesc(v => !v); }}
-                    >
-                      {showFullDesc ? 'Show less' : 'Read more'}
-                    </button>
-                  )}
+                  {event.description}
                 </p>
               </div>
             </div>

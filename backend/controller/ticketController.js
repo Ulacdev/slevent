@@ -367,7 +367,7 @@ export const getTicketById = async (req, res) => {
         ? supabase.from('ticketTypes').select('ticketTypeId, name').eq('ticketTypeId', ticket.ticketTypeId).maybeSingle()
         : { data: null, error: null },
       ticket.eventId
-        ? supabase.from('events').select('eventId, eventName').eq('eventId', ticket.eventId).maybeSingle()
+        ? supabase.from('events').select('eventId, eventName, locationType, locationText, startAt, endAt').eq('eventId', ticket.eventId).maybeSingle()
         : { data: null, error: null }
     ]);
 
@@ -379,6 +379,10 @@ export const getTicketById = async (req, res) => {
     return res.json({
       ...ticket,
       eventName: evResp.data?.eventName || '',
+      locationType: evResp.data?.locationType || null,
+      locationText: evResp.data?.locationText || null,
+      eventStartAt: evResp.data?.startAt || null,
+      eventEndAt: evResp.data?.endAt || null,
       attendeeName: attResp.data?.name || '',
       attendeeEmail: attResp.data?.email || '',
       attendeePhone: attResp.data?.phoneNumber || null,

@@ -61,7 +61,6 @@ const EventCard: React.FC<{ event: Event }> = ({ event }) => {
         alt={event.eventName} 
         className="w-full h-full object-cover" 
       />
-      <div className="absolute inset-0 bg-[#2E2E2F]/55"></div>
     </div>
     {/* Content Section */}
     <div className="p-6 flex-1 flex flex-col">

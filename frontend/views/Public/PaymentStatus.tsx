@@ -14,6 +14,9 @@ export const PaymentStatusView: React.FC = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [status, setStatus] = useState<'checking' | 'success' | 'failed' | 'pending' | 'expired'>('checking');
   const [tickets, setTickets] = useState<any[]>([]);
+  const isOnlineEvent = order?.locationType === 'ONLINE';
+  const meetLink = (order?.locationText || '').trim();
+  const showMeetLinkOnly = Boolean(isOnlineEvent && meetLink);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -28,8 +31,10 @@ export const PaymentStatusView: React.FC = () => {
           setOrder(data);
           if (data.status === 'PAID') {
             setStatus('success');
-            const tix = await apiService.getTicketsByOrder(sessionId);
-            if (isMounted) setTickets(Array.isArray(tix) ? tix : []);
+            if (data.locationType !== 'ONLINE') {
+              const tix = await apiService.getTicketsByOrder(sessionId);
+              if (isMounted) setTickets(Array.isArray(tix) ? tix : []);
+            }
             if (pollId) window.clearInterval(pollId);
           } else if (data.status === 'FAILED') {
             setStatus('failed');
@@ -89,18 +94,39 @@ export const PaymentStatusView: React.FC = () => {
             </div>
             <h1 className="text-2xl font-black text-[#2E2E2F] mb-2">Payment Successful!</h1>
             <p className="text-[#2E2E2F]/70 max-w-sm mb-6">
-              Your registration order <strong>#{order?.orderId}</strong> is confirmed. A copy of your ticket has been sent to your email.
+              Your registration order <strong>#{order?.orderId}</strong> is confirmed.
+              {showMeetLinkOnly ? ' Join the session using the Google Meet link below.' : ' A copy of your ticket has been sent to your email.'}
             </p>
             <div className="space-y-3 w-full max-w-xs">
-              <Button className="w-full" size="md" onClick={() => navigate(`/tickets/${sessionId}`)}>
-                View Digital Ticket
-              </Button>
+              {showMeetLinkOnly ? (
+                <Button className="w-full" size="md" onClick={() => { window.location.href = meetLink; }}>
+                  Join Google Meet
+                </Button>
+              ) : (
+                <Button className="w-full" size="md" onClick={() => navigate(`/tickets/${sessionId}`)}>
+                  View Digital Ticket
+                </Button>
+              )}
               <Button variant="outline" size="md" className="w-full" onClick={() => navigate('/')}>
                 Back to Events
               </Button>
             </div>
 
-            {tickets.length > 0 && (
+            {showMeetLinkOnly && (
+              <div className="w-full mt-6 text-left">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/60 mb-2">Google Meet Link</p>
+                <a
+                  href={meetLink}
+                  className="text-[12px] font-bold text-[#38BDF2] break-all"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {meetLink}
+                </a>
+              </div>
+            )}
+
+            {!showMeetLinkOnly && tickets.length > 0 && (
               <div className="w-full mt-10 text-left">
                 <h3 className="text-sm font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">Tickets</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

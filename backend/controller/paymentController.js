@@ -143,6 +143,13 @@ export const getPaymentStatus = async (req, res) => {
     if (orderErr) return res.status(500).json({ error: orderErr.message })
     if (!order) return res.status(404).json({ error: 'Order not found' })
 
+    const { data: event, error: eventErr } = await supabase
+      .from('events')
+      .select('eventId, eventName, locationType, locationText, startAt, endAt')
+      .eq('eventId', order.eventId)
+      .maybeSingle()
+    if (eventErr) return res.status(500).json({ error: eventErr.message })
+
     let normalizedStatus = 'PENDING'
     switch (order.status) {
       case 'PAID':
@@ -166,7 +173,15 @@ export const getPaymentStatus = async (req, res) => {
         normalizedStatus = order.status || 'PENDING'
     }
 
-    return res.status(200).json({ ...order, status: normalizedStatus })
+    return res.status(200).json({
+      ...order,
+      status: normalizedStatus,
+      eventName: event?.eventName || '',
+      locationType: event?.locationType || null,
+      locationText: event?.locationText || null,
+      eventStartAt: event?.startAt || null,
+      eventEndAt: event?.endAt || null
+    })
   } catch (err) {
     return res.status(500).json({ error: err?.message || 'Unexpected error' })
   }

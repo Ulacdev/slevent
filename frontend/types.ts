@@ -68,6 +68,11 @@ export interface Order {
   metadata?: any;
   expiresAt?: string;
   createdAt: string;
+  eventName?: string;
+  locationType?: 'ONSITE' | 'ONLINE' | 'HYBRID' | null;
+  locationText?: string | null;
+  eventStartAt?: string | null;
+  eventEndAt?: string | null;
 }
 
 export interface OrderItem {
@@ -112,6 +117,10 @@ export interface RegistrationView {
   qrPayload?: string;
   eventId: string;
   eventName: string;
+  locationType?: 'ONSITE' | 'ONLINE' | 'HYBRID' | null;
+  locationText?: string | null;
+  eventStartAt?: string | null;
+  eventEndAt?: string | null;
   attendeeName: string;
   attendeeEmail: string;
   attendeePhone?: string;

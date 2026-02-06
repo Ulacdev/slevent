@@ -538,7 +538,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         </div>
         <div className="pt-8 border-t border-[#2E2E2F]/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-[9px] uppercase tracking-[0.3em] font-black text-[#2E2E2F]/60">
-            © 2024 StartupLab Systems International
+            © 2026 StartupLab Business Center
           </div>
           <div className="flex items-center gap-6 opacity-60 grayscale">
              <img src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/images/hitpay.png" alt="HitPay" className="h-3" />
