@@ -1,0 +1,5 @@
+# Passenger Standalone mode
+PassengerEnabled on
+PassengerAppRoot /home/moonshotdigital/public_html/systems
+PassengerAppType node
+PassengerStartupFile server.js

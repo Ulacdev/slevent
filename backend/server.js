@@ -14,6 +14,9 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 import { authMiddleware } from "./middleware/auth.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import { startReservationCleanup } from "./utils/reservationCleanup.js";
+import ticketRoutes from "./routes/ticketRoutes.js";
+import ticketTypeRoutes from "./routes/ticketTypeRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 
 
 dotenv.config();
@@ -92,11 +95,8 @@ app.use(express.json({ verify: rawBodySaver }));
 app.use(express.urlencoded({ extended: false, verify: rawBodySaver }));
 
 app.use("/api/events", eventRoutes);
-import ticketRoutes from "./routes/ticketRoutes.js";
-import ticketTypeRoutes from "./routes/ticketTypeRoutes.js";
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/ticket-types", ticketTypeRoutes);
-import orderRoutes from "./routes/orderRoutes.js";
 app.use("/api", orderRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/auth", authRoutes);
