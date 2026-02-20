@@ -78,7 +78,7 @@ const EventCard: React.FC<{ event: Event }> = ({ event }) => {
           <span>{formatDate(event.startAt, event.timezone, { day: 'numeric', month: 'short', year: 'numeric' })} · {formatTime(event.startAt, event.timezone)}</span>
         </div>
         <div className="text-[#2E2E2F]/70 text-[13px] font-medium mb-6 leading-relaxed">
-          {event.description.length > 120 ? `${event.description.slice(0, 120)}...` : event.description}
+          {(event.description || '').length > 120 ? `${event.description.slice(0, 120)}...` : event.description}
         </div>
       </div>
     </Card>
