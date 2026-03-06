@@ -82,16 +82,23 @@ export const Input: React.FC<{
   label?: string;
   error?: string;
   [key: string]: any;
-}> = ({ label, error, ...props }) => (
-  <div className="space-y-1.5 w-full">
-    {label && <label className="block text-sm font-medium text-[#2E2E2F]/70">{label}</label>}
-    <input
-      className={`block w-full px-3 py-2 bg-[#F2F2F2] border ${error ? 'border-[#2E2E2F]' : 'border-[#2E2E2F]/20'} rounded-lg focus:outline-none focus:ring-2 ${error ? 'focus:ring-[#2E2E2F]/40' : 'focus:ring-[#38BDF2]/40'} transition-colors font-normal`}
-      {...props}
-    />
-    {error && <p className="text-xs text-[#2E2E2F] mt-1">{error}</p>}
-  </div>
-);
+}> = ({ label, error, ...props }) => {
+  const inputProps = { ...props };
+  if (Object.prototype.hasOwnProperty.call(inputProps, 'value') && inputProps.value === null) {
+    inputProps.value = '';
+  }
+
+  return (
+    <div className="space-y-1.5 w-full">
+      {label && <label className="block text-sm font-medium text-[#2E2E2F]/70">{label}</label>}
+      <input
+        className={`block w-full px-3 py-2 bg-[#F2F2F2] border ${error ? 'border-[#2E2E2F]' : 'border-[#2E2E2F]/20'} rounded-lg focus:outline-none focus:ring-2 ${error ? 'focus:ring-[#2E2E2F]/40' : 'focus:ring-[#38BDF2]/40'} transition-colors font-normal`}
+        {...inputProps}
+      />
+      {error && <p className="text-xs text-[#2E2E2F] mt-1">{error}</p>}
+    </div>
+  );
+};
 
 export const Modal: React.FC<{
   isOpen: boolean;

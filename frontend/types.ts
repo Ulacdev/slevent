@@ -7,10 +7,44 @@ export type TicketStatus = 'ISSUED' | 'USED' | 'CANCELLED' | 'REFUNDED';
 
 export const UserRole = {
   ADMIN: 'ADMIN',
-  STAFF: 'STAFF'
+  STAFF: 'STAFF',
+  ORGANIZER: 'ORGANIZER',
+  ATTENDEE: 'ATTENDEE'
 } as const;
 
 export type UserRole = typeof UserRole[keyof typeof UserRole];
+
+export const normalizeUserRole = (role: unknown): UserRole | null => {
+  const normalized = String(role || '').toUpperCase();
+  if (normalized === 'ATTENDEE') return UserRole.ATTENDEE;
+  if (normalized === 'USER') return UserRole.ORGANIZER;
+  if (
+    normalized === UserRole.ADMIN ||
+    normalized === UserRole.STAFF ||
+    normalized === UserRole.ORGANIZER ||
+    normalized === UserRole.ATTENDEE
+  ) {
+    return normalized as UserRole;
+  }
+  return null;
+};
+
+export interface OrganizerProfile {
+  organizerId: string;
+  ownerUserId?: string;
+  organizerName: string;
+  websiteUrl?: string | null;
+  bio?: string | null;
+  eventPageDescription?: string | null;
+  facebookId?: string | null;
+  twitterHandle?: string | null;
+  emailOptIn: boolean;
+  profileImageUrl?: string | null;
+  followersCount: number;
+  eventsHostedCount?: number;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export interface Event {
   eventId: string;
@@ -32,6 +66,9 @@ export interface Event {
   created_at?: string;
   updated_at?: string;
   createdBy?: string;
+  organizerId?: string | null;
+  organizer?: OrganizerProfile | null;
+  likesCount?: number;
 
   // Relations
   ticketTypes: TicketType[];
@@ -75,6 +112,8 @@ export interface Order {
   eventStartAt?: string | null;
   eventEndAt?: string | null;
   streamingPlatform?: string | null;
+  supportEmail?: string;
+  organizerName?: string;
 }
 
 export interface OrderItem {

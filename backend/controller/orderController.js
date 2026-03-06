@@ -6,6 +6,10 @@ import supabase from '../database/db.js';
 import { randomUUID } from 'crypto';
 import { sendMakeNotification } from '../utils/makeWebhook.js';
 import { logAudit } from '../utils/auditLogger.js';
+import {
+  getUserProfileByAuthId,
+  notifyUserByPreference,
+} from '../utils/notificationService.js';
 
 const getReservationTtlMs = () => {
   const raw = process.env.RESERVATION_TTL_MINUTES;
@@ -48,6 +52,33 @@ export const createOrder = async (req, res) => {
   };
 
   try {
+    // 0) Check for duplicate registration for the same event and email
+    const { data: existingAttendee, error: exAttErr } = await supabase
+      .from('attendees')
+      .select('attendeeId')
+      .eq('eventId', eventId)
+      .eq('email', buyerEmail)
+      .limit(1)
+      .maybeSingle();
+
+    if (existingAttendee) {
+      return res.status(400).json({ error: 'You are already registered for this event with this email address.' });
+    }
+
+    // Also check for active (not failed/cancelled/expired) orders
+    const { data: existingOrder, error: exOrdErr } = await supabase
+      .from('orders')
+      .select('orderId')
+      .eq('eventId', eventId)
+      .eq('buyerEmail', buyerEmail)
+      .in('status', ['PAID', 'PENDING_PAYMENT', 'DRAFT'])
+      .limit(1)
+      .maybeSingle();
+
+    if (existingOrder) {
+      return res.status(400).json({ error: 'You have an existing order for this event. Please check your tickets or complete the existing payment.' });
+    }
+
     // 1) Validate inventory and reserve with CAS update
     const ids = items.map(i => i.ticketTypeId);
     const { data: ticketTypes, error: ttErr } = await supabase
@@ -216,7 +247,7 @@ export const createOrder = async (req, res) => {
       // fetch event details
       const { data: event, error: eventErr } = await supabase
         .from('events')
-        .select('eventName, description, startAt, endAt, locationText, locationType, imageUrl, streamingPlatform')
+        .select('eventName, description, startAt, endAt, locationText, locationType, imageUrl, streamingPlatform, organizerId')
         .eq('eventId', eventId)
         .maybeSingle();
       for (const t of issuedTickets) {
@@ -240,6 +271,78 @@ export const createOrder = async (req, res) => {
         };
         console.log('[MakeWebhook] Sending notification payload:', JSON.stringify(notificationPayload, null, 2));
         sendMakeNotification(notificationPayload).catch(() => { });
+
+        // NEW: Notify Attendee directly via SMTP (respecting Organizer settings)
+        try {
+          await notifyUserByPreference({
+            recipientFallbackEmail: buyerEmail,
+            eventId,
+            organizerId: event?.organizerId,
+            type: 'FOLLOW_CONFIRMATION', // Use existing templates for 'THANKS' styling
+            title: `You're going to ${event?.eventName || 'the event'}!`,
+            message: `Thank you for registering! Your tickets for "${event?.eventName}" are now available in your "My Tickets" section.`,
+            metadata: {
+              eventName: event?.eventName,
+              tag: 'THANK YOU',
+              typeIcon: '🎉',
+              actionLabel: 'VIEW MY TICKETS',
+              actionUrl: process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL.replace(/\/$/, '')}/my-tickets` : null,
+            }
+          });
+        } catch (err) {
+          console.error('[Orders] Attendee notification failed:', err.message);
+        }
+      }
+
+      // Notify Organizer about New Free Order
+      try {
+        const { data: eventRow } = await supabase
+          .from('events')
+          .select('eventName, slug, organizerId, createdBy')
+          .eq('eventId', eventId)
+          .maybeSingle();
+
+        if (eventRow) {
+          let recipientUserId = eventRow.createdBy;
+          let organizerName = 'your organization';
+
+          if (eventRow.organizerId) {
+            const { data: org } = await supabase
+              .from('organizers')
+              .select('ownerUserId, organizerName')
+              .eq('organizerId', eventRow.organizerId)
+              .maybeSingle();
+            if (org?.ownerUserId) {
+              recipientUserId = org.ownerUserId;
+              organizerName = org.organizerName || organizerName;
+            }
+          }
+
+          if (recipientUserId) {
+            const recipientProfile = await getUserProfileByAuthId(recipientUserId);
+            const totalQty = items.reduce((sum, i) => sum + i.quantity, 0);
+            const message = `${buyerName} just registered for ${totalQty} free ticket(s) for your event "${eventRow.eventName}".`;
+
+            await notifyUserByPreference({
+              recipientUserId,
+              recipientFallbackEmail: recipientProfile?.email || '',
+              eventId,
+              organizerId: eventRow.organizerId,
+              type: 'ORDER_PLACED',
+              title: 'New Free Registration!',
+              message,
+              metadata: {
+                eventName: eventRow.eventName,
+                tag: 'NEW REGISTRATION',
+                typeIcon: '🎫',
+                actionLabel: 'VIEW ORDER',
+                actionUrl: process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL.replace(/\/$/, '')}/orders/${orderId}` : null,
+              }
+            });
+          }
+        }
+      } catch (err) {
+        console.error('[Orders] Organizer notification failed:', err.message);
       }
     }
 
@@ -308,6 +411,58 @@ export const cancelOrder = async (req, res) => {
 
     return res.status(200).json({ orderId, status });
   } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
+
+// GET /api/orders/my - fetch orders for authenticated user
+export const getMyOrders = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const email = req.user?.email || req.user?.new_email; // Fallback to email in auth user object
+
+    if (!userId || !email) {
+      return res.status(401).json({ error: 'Unauthorized: missing user identifier or email' });
+    }
+
+    console.log(`[Orders] Fetching orders for email: ${email}`);
+
+    // Fetch orders by buyer email and join with events to get event name and date
+    // Fetch orders with events (slug, name, date) and ticket statuses
+    const { data: rawOrders, error: ordersErr } = await supabase
+      .from('orders')
+      .select('*, events(eventName, startAt, slug), tickets(status)')
+      .ilike('buyerEmail', email)
+      .order('created_at', { ascending: false });
+
+    if (ordersErr) {
+      console.error('[Orders] Fetch error:', ordersErr);
+      return res.status(500).json({ error: ordersErr.message });
+    }
+
+    // Flatten and enrich order data
+    const orders = (rawOrders || []).map(order => {
+      const tickets = order.tickets || [];
+      const totalTickets = tickets.length;
+      const usedTickets = tickets.filter(t => t.status === 'USED').length;
+
+      return {
+        ...order,
+        eventName: order.events?.eventName || 'Untitled Event',
+        eventStartAt: order.events?.startAt,
+        eventSlug: order.events?.slug,
+        ticketStats: {
+          total: totalTickets,
+          used: usedTickets,
+          allUsed: totalTickets > 0 && usedTickets === totalTickets,
+          someUsed: usedTickets > 0 && usedTickets < totalTickets
+        }
+      };
+    });
+
+    return res.json({ orders: orders || [], count: (orders || []).length });
+  } catch (err) {
+    console.error('[Orders] Unexpected error in getMyOrders:', err);
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }
 };

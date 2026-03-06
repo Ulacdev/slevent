@@ -42,9 +42,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         prev.canEditEvents === payload.canEditEvents &&
         prev.canManualCheckIn === payload.canManualCheckIn;
       if (sameIdentity && samePermissions && sameProfile) return prev;
-      return { 
-        role: payload.role, 
-        email: payload.email, 
+      return {
+        role: payload.role,
+        email: payload.email,
         name: nextName ?? null,
         imageUrl: nextImageUrl ?? null,
         isAuthenticated: true,

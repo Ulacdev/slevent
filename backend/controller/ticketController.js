@@ -20,6 +20,53 @@ export const getRegistrationsByEvent = async (req, res) => {
     const eventId = req.query?.eventId;
     if (!eventId) return res.status(400).json({ error: 'eventId required' });
 
+    // Data separation check
+    const requesterId = req.user?.id;
+    let { data: userProfile, error: profileErr } = await supabase
+      .from('users')
+      .select('role')
+      .eq('userId', requesterId)
+      .maybeSingle();
+
+    if (!userProfile && (!profileErr || profileErr.message?.includes('column "userId"'))) {
+      const resp = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', requesterId)
+        .maybeSingle();
+      userProfile = resp.data;
+    }
+
+    const userRole = userProfile?.role;
+    const isAdminOrStaff = userRole === 'ADMIN' || userRole === 'STAFF';
+
+    if (isAdminOrStaff) {
+      // Admins/Staff should only see registrations for events created by Admins or Staff
+      const { data: adminUserIds } = await supabase.from('users').select('userId').in('role', ['ADMIN', 'STAFF']);
+      const adminIds = (adminUserIds || []).map(u => u.userId);
+
+      const { data: eventRow } = await supabase
+        .from('events')
+        .select('createdBy')
+        .eq('eventId', eventId)
+        .maybeSingle();
+
+      if (!eventRow || !adminIds.includes(eventRow.createdBy)) {
+        return res.status(403).json({ error: 'Forbidden: This event does not belong to the administrative domain' });
+      }
+    } else {
+      // Check if user owns the event
+      const { data: eventRow } = await supabase
+        .from('events')
+        .select('createdBy')
+        .eq('eventId', eventId)
+        .maybeSingle();
+
+      if (!eventRow || eventRow.createdBy !== requesterId) {
+        return res.status(403).json({ error: 'Forbidden: You do not own this event' });
+      }
+    }
+
     const search = (req.query?.search || '').trim();
     let attendeeFilterIds = null;
 
@@ -133,11 +180,67 @@ export const getAllRegistrations = async (req, res) => {
         });
       }
     }
+    // Data separation: check if admin or regular user
+    const requesterId = req.user?.id;
+    let { data: userProfile, error: profileErr } = await supabase
+      .from('users')
+      .select('role')
+      .eq('userId', requesterId)
+      .maybeSingle();
+
+    if (!userProfile && (!profileErr || profileErr.message?.includes('column "userId"'))) {
+      const resp = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', requesterId)
+        .maybeSingle();
+      userProfile = resp.data;
+    }
+
+    const userRole = userProfile?.role;
+    const isAdminOrStaff = userRole === 'ADMIN' || userRole === 'STAFF';
+    let filteredEventIds = null;
+
+    if (isAdminOrStaff) {
+      // Admins/Staff only see registrations for events created by Admins/Staff
+      const { data: adminUserIds } = await supabase.from('users').select('userId').in('role', ['ADMIN', 'STAFF']);
+      const adminIds = (adminUserIds || []).map(u => u.userId);
+
+      const { data: adminEvents } = await supabase
+        .from('events')
+        .select('eventId')
+        .in('createdBy', adminIds);
+      filteredEventIds = (adminEvents || []).map(e => e.eventId);
+    } else {
+      // Regular users only see attendees for their own events
+      const { data: myEvents } = await supabase
+        .from('events')
+        .select('eventId')
+        .eq('createdBy', requesterId);
+      filteredEventIds = (myEvents || []).map(e => e.eventId);
+    }
+
+    // If we have a filter but no events found, return empty result
+    if (filteredEventIds && !filteredEventIds.length) {
+      return res.json({
+        registrations: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 1
+        }
+      });
+    }
 
     let ticketsQuery = supabase
       .from('tickets')
       .select('ticketId, ticketCode, qrPayload, status, attendeeId, eventId, orderId, ticketTypeId, issuedAt, usedAt', { count: 'exact' })
       .order('created_at', { ascending: false });
+
+    if (filteredEventIds) {
+      ticketsQuery = ticketsQuery.in('eventId', filteredEventIds);
+    }
 
     if (attendeeFilterIds) {
       ticketsQuery = ticketsQuery.in('attendeeId', attendeeFilterIds);
@@ -151,6 +254,10 @@ export const getAllRegistrations = async (req, res) => {
       let countQuery = supabase
         .from('tickets')
         .select('ticketId', { count: 'exact', head: true });
+
+      if (filteredEventIds) {
+        countQuery = countQuery.in('eventId', filteredEventIds);
+      }
 
       if (attendeeFilterIds) {
         countQuery = countQuery.in('attendeeId', attendeeFilterIds);
@@ -268,6 +375,18 @@ export const checkInTicket = async (req, res) => {
 
     if (findErr) return res.status(500).json({ error: findErr.message });
     if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+
+    // Security: Check if user is Admin or Event Owner
+    const requesterId = req.user?.id;
+    const { data: profile } = await supabase.from('users').select('role').eq('id', requesterId).maybeSingle();
+    const isAdmin = profile?.role === 'ADMIN';
+
+    if (!isAdmin) {
+      const { data: event } = await supabase.from('events').select('createdBy').eq('eventId', ticket.eventId).maybeSingle();
+      if (!event || event.createdBy !== requesterId) {
+        return res.status(403).json({ error: 'You do not have permission to check in this attendee.' });
+      }
+    }
 
     // If already checked in / used, reject
     if (ticket.status === 'CHECKED_IN' || ticket.status === 'USED') {

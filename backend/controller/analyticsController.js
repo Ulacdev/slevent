@@ -1,6 +1,25 @@
 import supabase from '../database/db.js';
 
 const MAX_PAGE_SIZE = 10;
+const ADMIN_STAFF_ROLES = ['ADMIN', 'STAFF'];
+const ANALYTICS_BUILD = 'analytics-fix-2026-03-04-01';
+
+const logAnalyticsError = (scope, err, extra = {}) => {
+  console.error(`[Analytics][${scope}]`, {
+    build: ANALYTICS_BUILD,
+    message: err?.message || String(err),
+    code: err?.code,
+    details: err?.details,
+    hint: err?.hint,
+    ...extra
+  });
+};
+
+const normalizeRole = (role) => {
+  const normalized = String(role || '').toUpperCase();
+  if (normalized === 'USER') return 'ORGANIZER';
+  return normalized;
+};
 
 const resolvePagination = (req) => {
   const rawPage = Number(req.query?.page);
@@ -24,6 +43,77 @@ const buildPagination = (page, limit, total) => {
   };
 };
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const isUuid = (value) => UUID_RE.test(String(value || ''));
+const sanitizeUuidList = (values) => Array.from(new Set((values || []).filter(isUuid)));
+
+const getFilteredEventIds = async (req) => {
+  try {
+    const requesterId = req.user?.id || null;
+    const requesterEmail = String(req.user?.email || '').toLowerCase().trim();
+    let userProfile = null;
+
+    // Primary lookup: canonical users.userId mapping from auth user id.
+    if (isUuid(requesterId)) {
+      const byUserId = await supabase
+        .from('users')
+        .select('userId, role, email')
+        .eq('userId', requesterId)
+        .maybeSingle();
+      if (byUserId.error) {
+        // Do not hard-fail analytics for profile lookup errors; fallback to email below.
+        console.warn('[Analytics] users lookup by userId failed:', byUserId.error.message);
+      } else {
+        userProfile = byUserId.data || null;
+      }
+    }
+
+    // Fallback: map by email when auth id and users.userId drift.
+    if (!userProfile && requesterEmail) {
+      const byEmail = await supabase
+        .from('users')
+        .select('userId, role, email')
+        .eq('email', requesterEmail)
+        .maybeSingle();
+      if (byEmail.error) {
+        console.warn('[Analytics] users lookup by email failed:', byEmail.error.message);
+      } else {
+        userProfile = byEmail.data || null;
+      }
+    }
+
+    const userRole = normalizeRole(userProfile?.role);
+    const isAdminOrStaff = ADMIN_STAFF_ROLES.includes(userRole);
+
+    if (isAdminOrStaff) {
+      // Admin/Staff can view global analytics across all events.
+      // `null` means "do not apply eventId filter".
+      return null;
+    }
+
+    const effectiveUserId = userProfile?.userId || (isUuid(requesterId) ? requesterId : null);
+    if (!effectiveUserId) return [];
+
+    // Regular users only see their own events
+    const { data: myEvents, error: myEventsErr } = await supabase
+      .from('events')
+      .select('eventId')
+      .eq('createdBy', effectiveUserId);
+    if (myEventsErr) {
+      logAnalyticsError('getFilteredEventIds.myEvents', myEventsErr, { requesterId, effectiveUserId });
+      // Fail-open to global scope to avoid breaking dashboard on lookup/filter drift.
+      return null;
+    }
+
+    return sanitizeUuidList((myEvents || []).map(e => e.eventId));
+  } catch (err) {
+    logAnalyticsError('getFilteredEventIds', err, { requesterId: req.user?.id, requesterEmail: req.user?.email });
+    // Fail-open to global scope to keep analytics available.
+    return null;
+  }
+};
+
 const loadOrderDetails = async (orderId) => {
   if (!orderId) return null;
   const { data: order, error: orderErr } = await supabase
@@ -37,10 +127,10 @@ const loadOrderDetails = async (orderId) => {
   const [eventResp, orderItemsResp, attendeesResp, ticketsResp, paymentsResp] = await Promise.all([
     order.eventId
       ? supabase
-          .from('events')
-          .select('eventId, eventName, startAt, endAt, timezone, locationText')
-          .eq('eventId', order.eventId)
-          .maybeSingle()
+        .from('events')
+        .select('eventId, eventName, startAt, endAt, timezone, locationText')
+        .eq('eventId', order.eventId)
+        .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     supabase
       .from('orderItems')
@@ -77,9 +167,9 @@ const loadOrderDetails = async (orderId) => {
 
   const { data: ticketTypes, error: ttErr } = ticketTypeIds.length
     ? await supabase
-        .from('ticketTypes')
-        .select('ticketTypeId, name, priceAmount, currency')
-        .in('ticketTypeId', ticketTypeIds)
+      .from('ticketTypes')
+      .select('ticketTypeId, name, priceAmount, currency')
+      .in('ticketTypeId', ticketTypeIds)
     : { data: [], error: null };
   if (ttErr) throw ttErr;
 
@@ -120,31 +210,31 @@ const loadTicketDetails = async (ticketId) => {
   const [attendeeResp, eventResp, orderResp, ticketTypeResp] = await Promise.all([
     ticket.attendeeId
       ? supabase
-          .from('attendees')
-          .select('attendeeId, name, email, phoneNumber, company')
-          .eq('attendeeId', ticket.attendeeId)
-          .maybeSingle()
+        .from('attendees')
+        .select('attendeeId, name, email, phoneNumber, company')
+        .eq('attendeeId', ticket.attendeeId)
+        .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     ticket.eventId
       ? supabase
-          .from('events')
-          .select('eventId, eventName, startAt, endAt, timezone, locationText')
-          .eq('eventId', ticket.eventId)
-          .maybeSingle()
+        .from('events')
+        .select('eventId, eventName, startAt, endAt, timezone, locationText')
+        .eq('eventId', ticket.eventId)
+        .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     ticket.orderId
       ? supabase
-          .from('orders')
-          .select('orderId, status, totalAmount, currency, buyerName, buyerEmail, buyerPhone, created_at')
-          .eq('orderId', ticket.orderId)
-          .maybeSingle()
+        .from('orders')
+        .select('orderId, status, totalAmount, currency, buyerName, buyerEmail, buyerPhone, created_at')
+        .eq('orderId', ticket.orderId)
+        .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     ticket.ticketTypeId
       ? supabase
-          .from('ticketTypes')
-          .select('ticketTypeId, name, priceAmount, currency')
-          .eq('ticketTypeId', ticket.ticketTypeId)
-          .maybeSingle()
+        .from('ticketTypes')
+        .select('ticketTypeId, name, priceAmount, currency')
+        .eq('ticketTypeId', ticket.ticketTypeId)
+        .maybeSingle()
       : Promise.resolve({ data: null, error: null })
   ]);
 
@@ -162,23 +252,47 @@ const loadTicketDetails = async (ticketId) => {
   };
 };
 
-export const getSummary = async (_req, res) => {
+export const getSummary = async (req, res) => {
   try {
+    res.set('x-analytics-build', ANALYTICS_BUILD);
+    console.log(`[Analytics] getSummary build=${ANALYTICS_BUILD} user=${req.user?.id || 'unknown'}`);
+    const filteredEventIds = await getFilteredEventIds(req);
+    if (Array.isArray(filteredEventIds) && filteredEventIds.length === 0) {
+      return res.json({
+        totalRegistrations: 0,
+        ticketsSoldToday: 0,
+        totalRevenue: 0,
+        revenueToday: 0,
+        attendanceRate: 0,
+        paymentSuccessRate: 0,
+      });
+    }
+
     // Tickets and attendance
-    const { data: tickets, error: ticketErr } = await supabase
-      .from('tickets')
-      .select('ticketId, status, issuedAt');
-    if (ticketErr) return res.status(500).json({ error: ticketErr.message });
+    let ticketsQuery = supabase.from('tickets').select('ticketId, status, issuedAt, eventId');
+    if (Array.isArray(filteredEventIds) && filteredEventIds.length > 0) {
+      ticketsQuery = ticketsQuery.in('eventId', filteredEventIds);
+    }
+    const { data: tickets, error: ticketErr } = await ticketsQuery;
+    if (ticketErr) {
+      logAnalyticsError('getSummary.tickets', ticketErr, { requesterId: req.user?.id });
+      return res.status(500).json({ error: ticketErr.message, build: ANALYTICS_BUILD });
+    }
 
     const totalRegistrations = tickets?.length || 0;
     const usedCount = (tickets || []).filter(t => t.status === 'USED').length;
     const attendanceRate = totalRegistrations ? (usedCount / totalRegistrations) * 100 : 0;
 
     // Orders and revenue
-    const { data: orders, error: orderErr } = await supabase
-      .from('orders')
-      .select('orderId, totalAmount, status, created_at');
-    if (orderErr) return res.status(500).json({ error: orderErr.message });
+    let ordersQuery = supabase.from('orders').select('orderId, totalAmount, status, created_at, eventId');
+    if (Array.isArray(filteredEventIds) && filteredEventIds.length > 0) {
+      ordersQuery = ordersQuery.in('eventId', filteredEventIds);
+    }
+    const { data: orders, error: orderErr } = await ordersQuery;
+    if (orderErr) {
+      logAnalyticsError('getSummary.orders', orderErr, { requesterId: req.user?.id });
+      return res.status(500).json({ error: orderErr.message, build: ANALYTICS_BUILD });
+    }
 
     const paidOrders = (orders || []).filter(o => o.status === 'PAID');
     const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
@@ -205,22 +319,42 @@ export const getSummary = async (_req, res) => {
       paymentSuccessRate,
     });
   } catch (err) {
-    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+    logAnalyticsError('getSummary.catch', err, { requesterId: req.user?.id });
+    return res.status(500).json({ error: err?.message || 'Unexpected error', build: ANALYTICS_BUILD });
   }
 };
 
 export const getRecentTransactions = async (req, res) => {
   try {
+    res.set('x-analytics-build', ANALYTICS_BUILD);
+    console.log(`[Analytics] getRecentTransactions build=${ANALYTICS_BUILD} user=${req.user?.id || 'unknown'} page=${req.query?.page || 1}`);
     const { page, limit, from, to } = resolvePagination(req);
-    const { data, error, count } = await supabase
+    const filteredEventIds = await getFilteredEventIds(req);
+    if (Array.isArray(filteredEventIds) && filteredEventIds.length === 0) {
+      return res.json({
+        items: [],
+        pagination: buildPagination(page, limit, 0)
+      });
+    }
+
+    let query = supabase
       .from('orders')
-      .select('orderId, eventId, buyerName, totalAmount, currency, status, created_at', { count: 'exact' })
+      .select('orderId, eventId, buyerName, totalAmount, currency, status, created_at', { count: 'exact' });
+
+    if (Array.isArray(filteredEventIds) && filteredEventIds.length > 0) {
+      query = query.in('eventId', filteredEventIds);
+    }
+
+    const { data, error, count } = await query
       .order('created_at', { ascending: false })
       .range(from, to);
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) {
+      logAnalyticsError('getRecentTransactions.query', error, { requesterId: req.user?.id, page, limit });
+      return res.status(500).json({ error: error.message, build: ANALYTICS_BUILD });
+    }
     const total = typeof count === 'number' ? count : 0;
     const items = data || [];
-    const eventIds = Array.from(new Set(items.map(item => item.eventId).filter(Boolean)));
+    const eventIds = sanitizeUuidList(items.map(item => item.eventId));
     let eventMap = new Map();
 
     if (eventIds.length) {
@@ -228,7 +362,10 @@ export const getRecentTransactions = async (req, res) => {
         .from('events')
         .select('eventId, eventName')
         .in('eventId', eventIds);
-      if (eventErr) return res.status(500).json({ error: eventErr.message });
+      if (eventErr) {
+        logAnalyticsError('getRecentTransactions.events', eventErr, { requesterId: req.user?.id, eventIdsCount: eventIds.length });
+        return res.status(500).json({ error: eventErr.message, build: ANALYTICS_BUILD });
+      }
       eventMap = new Map((eventRows || []).map(row => [row.eventId, row.eventName]));
     }
 
@@ -242,7 +379,8 @@ export const getRecentTransactions = async (req, res) => {
       pagination: buildPagination(page, limit, total)
     });
   } catch (err) {
-    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+    logAnalyticsError('getRecentTransactions.catch', err, { requesterId: req.user?.id, page: req.query?.page, limit: req.query?.limit });
+    return res.status(500).json({ error: err?.message || 'Unexpected error', build: ANALYTICS_BUILD });
   }
 };
 
@@ -315,17 +453,17 @@ export const getAuditLogDetail = async (req, res) => {
       log.ticketId ? loadTicketDetails(log.ticketId) : Promise.resolve(null),
       log.webhookEventsId
         ? supabase
-            .from('webhookEvents')
-            .select('webhookEventsId, eventType, externalId, payload, receivedAt, processedAt, processingStatus')
-            .eq('webhookEventsId', log.webhookEventsId)
-            .maybeSingle()
+          .from('webhookEvents')
+          .select('webhookEventsId, eventType, externalId, payload, receivedAt, processedAt, processingStatus')
+          .eq('webhookEventsId', log.webhookEventsId)
+          .maybeSingle()
         : Promise.resolve({ data: null, error: null }),
       log.paymentTransactionId
         ? supabase
-            .from('paymentTransactions')
-            .select('paymentTransactionId, orderId, hitpayReferenceId, amount, currency, status, gateway, created_at, updated_at, rawPayload')
-            .eq('paymentTransactionId', log.paymentTransactionId)
-            .maybeSingle()
+          .from('paymentTransactions')
+          .select('paymentTransactionId, orderId, hitpayReferenceId, amount, currency, status, gateway, created_at, updated_at, rawPayload')
+          .eq('paymentTransactionId', log.paymentTransactionId)
+          .maybeSingle()
         : Promise.resolve({ data: null, error: null })
     ]);
 
@@ -347,16 +485,35 @@ export const getAuditLogDetail = async (req, res) => {
 
 export const getRecentOrders = async (req, res) => {
   try {
+    res.set('x-analytics-build', ANALYTICS_BUILD);
+    console.log(`[Analytics] getRecentOrders build=${ANALYTICS_BUILD} user=${req.user?.id || 'unknown'} page=${req.query?.page || 1}`);
     const { page, limit, from, to } = resolvePagination(req);
-    const { data, error, count } = await supabase
+    const filteredEventIds = await getFilteredEventIds(req);
+    if (Array.isArray(filteredEventIds) && filteredEventIds.length === 0) {
+      return res.json({
+        items: [],
+        pagination: buildPagination(page, limit, 0)
+      });
+    }
+
+    let query = supabase
       .from('orders')
-      .select('orderId, eventId, buyerName, buyerEmail, totalAmount, currency, status, created_at', { count: 'exact' })
+      .select('orderId, eventId, buyerName, buyerEmail, totalAmount, currency, status, created_at', { count: 'exact' });
+
+    if (Array.isArray(filteredEventIds) && filteredEventIds.length > 0) {
+      query = query.in('eventId', filteredEventIds);
+    }
+
+    const { data, error, count } = await query
       .order('created_at', { ascending: false })
       .range(from, to);
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) {
+      logAnalyticsError('getRecentOrders.query', error, { requesterId: req.user?.id, page, limit });
+      return res.status(500).json({ error: error.message, build: ANALYTICS_BUILD });
+    }
     const total = typeof count === 'number' ? count : 0;
     const items = data || [];
-    const eventIds = Array.from(new Set(items.map(item => item.eventId).filter(Boolean)));
+    const eventIds = sanitizeUuidList(items.map(item => item.eventId));
     let eventMap = new Map();
 
     if (eventIds.length) {
@@ -364,7 +521,10 @@ export const getRecentOrders = async (req, res) => {
         .from('events')
         .select('eventId, eventName')
         .in('eventId', eventIds);
-      if (eventErr) return res.status(500).json({ error: eventErr.message });
+      if (eventErr) {
+        logAnalyticsError('getRecentOrders.events', eventErr, { requesterId: req.user?.id, eventIdsCount: eventIds.length });
+        return res.status(500).json({ error: eventErr.message, build: ANALYTICS_BUILD });
+      }
       eventMap = new Map((eventRows || []).map(row => [row.eventId, row.eventName]));
     }
 
@@ -377,16 +537,30 @@ export const getRecentOrders = async (req, res) => {
       pagination: buildPagination(page, limit, total)
     });
   } catch (err) {
-    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+    logAnalyticsError('getRecentOrders.catch', err, { requesterId: req.user?.id, page: req.query?.page, limit: req.query?.limit });
+    return res.status(500).json({ error: err?.message || 'Unexpected error', build: ANALYTICS_BUILD });
   }
 };
 
 export const getAuditLogs = async (req, res) => {
   try {
     const { page, limit, from, to } = resolvePagination(req);
-    const { data, error, count } = await supabase
+    const filteredEventIds = await getFilteredEventIds(req);
+
+    let query = supabase
       .from('auditLogs')
-      .select('auditLogId, actionType, orderId, ticketId, paymentTransactionId, webhookEventsId, actorUserId, createdAt', { count: 'exact' })
+      .select('auditLogId, actionType, orderId, ticketId, paymentTransactionId, webhookEventsId, actorUserId, createdAt', { count: 'exact' });
+
+    if (filteredEventIds) {
+      // Audit logs don't directly have eventId, we'd need a join or complex filter.
+      // For now, if filteredEventIds is present (not admin), we'll filter by logs where the user is the actor OR it's their event's order
+      // But simpler: just filter by actorUserId if they are not admin, or just don't show generic audit logs.
+      // Actually, if it's a regular user, they probably only want to see THEIR actions?
+      // Re-evaluating: user.id == actorUserId
+      query = query.eq('actorUserId', req.user.id);
+    }
+
+    const { data, error, count } = await query
       .order('createdAt', { ascending: false })
       .range(from, to);
     if (error) return res.status(500).json({ error: error.message });

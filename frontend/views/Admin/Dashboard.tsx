@@ -681,13 +681,28 @@ export const AdminDashboard: React.FC = () => {
 
   React.useEffect(() => {
     if (!isStaff) {
-      apiService.getAnalytics().then(data => {
-        setStats(data);
-        setLoading(false);
-      });
+      apiService.getAnalytics()
+        .then(data => {
+          setStats(data);
+        })
+        .catch(() => {
+          setStats({
+            totalRegistrations: 0,
+            ticketsSoldToday: 0,
+            totalRevenue: 0,
+            revenueToday: 0,
+            attendanceRate: 0,
+            paymentSuccessRate: 0,
+          });
+        })
+        .finally(() => {
+          setLoading(false);
+        });
       loadTransactions(1);
       loadOrders(1);
-      loadAuditLogs(1);
+      if (role === UserRole.ADMIN) {
+        loadAuditLogs(1);
+      }
     }
   }, [isStaff]);
 
@@ -841,53 +856,55 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="p-6">
-          <h3 className="font-bold text-lg mb-6 flex items-center text-[#2E2E2F] hover:text-[#2E2E2F]">
-            <ICONS.CheckCircle className="w-5 h-5 mr-2 text-[#2E2E2F]" />
-            Audit Logs
-          </h3>
-          {auditLoading ? (
-            <div className="text-[#2E2E2F] text-sm">Loading audit logs...</div>
-          ) : auditLogs.length === 0 ? (
-            <div className="text-[#2E2E2F] text-sm">No audit logs yet.</div>
-          ) : (
-            <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1" onScroll={handleAuditScroll}>
-              {auditLogs.map((log) => {
-                const targetLabel = log.orderId
-                  ? `Order #${log.orderId.slice(0, 8)}`
-                  : log.ticketId
-                    ? `Ticket #${log.ticketId.slice(0, 8)}`
-                    : log.paymentTransactionId
-                      ? `Payment #${log.paymentTransactionId.slice(0, 8)}`
-                      : log.webhookEventsId
-                        ? `Webhook #${log.webhookEventsId.slice(0, 8)}`
-                        : '—';
-                return (
-                  <div
-                    key={log.auditLogId}
-                    className="flex gap-3 items-start pb-4 border-b border-[#2E2E2F]/20 last:border-0 cursor-pointer rounded-xl p-2 -m-2 hover:bg-[#38BDF2]/10 transition-colors"
-                    onClick={() => openDetail('audit', log.auditLogId)}
-                  >
-                    <div className="w-10 h-10 rounded-full bg-[#F2F2F2] border border-[#2E2E2F]/20 flex items-center justify-center text-[#2E2E2F] flex-shrink-0">
-                      <ICONS.Layout className="w-5 h-5" />
+        {role === UserRole.ADMIN && (
+          <Card className="p-6">
+            <h3 className="font-bold text-lg mb-6 flex items-center text-[#2E2E2F] hover:text-[#2E2E2F]">
+              <ICONS.CheckCircle className="w-5 h-5 mr-2 text-[#2E2E2F]" />
+              Audit Logs
+            </h3>
+            {auditLoading ? (
+              <div className="text-[#2E2E2F] text-sm">Loading audit logs...</div>
+            ) : auditLogs.length === 0 ? (
+              <div className="text-[#2E2E2F] text-sm">No audit logs yet.</div>
+            ) : (
+              <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1" onScroll={handleAuditScroll}>
+                {auditLogs.map((log) => {
+                  const targetLabel = log.orderId
+                    ? `Order #${log.orderId.slice(0, 8)}`
+                    : log.ticketId
+                      ? `Ticket #${log.ticketId.slice(0, 8)}`
+                      : log.paymentTransactionId
+                        ? `Payment #${log.paymentTransactionId.slice(0, 8)}`
+                        : log.webhookEventsId
+                          ? `Webhook #${log.webhookEventsId.slice(0, 8)}`
+                          : '—';
+                  return (
+                    <div
+                      key={log.auditLogId}
+                      className="flex gap-3 items-start pb-4 border-b border-[#2E2E2F]/20 last:border-0 cursor-pointer rounded-xl p-2 -m-2 hover:bg-[#38BDF2]/10 transition-colors"
+                      onClick={() => openDetail('audit', log.auditLogId)}
+                    >
+                      <div className="w-10 h-10 rounded-full bg-[#F2F2F2] border border-[#2E2E2F]/20 flex items-center justify-center text-[#2E2E2F] flex-shrink-0">
+                        <ICONS.Layout className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-[#2E2E2F] truncate">{log.actionType}</p>
+                        <p className="text-xs text-[#2E2E2F] truncate">Target {targetLabel}</p>
+                        <p className="text-[10px] text-[#2E2E2F] mt-2">{log.createdAt ? new Date(log.createdAt).toLocaleString() : ''}</p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-[#2E2E2F] truncate">{log.actionType}</p>
-                      <p className="text-xs text-[#2E2E2F] truncate">Target {targetLabel}</p>
-                      <p className="text-[10px] text-[#2E2E2F] mt-2">{log.createdAt ? new Date(log.createdAt).toLocaleString() : ''}</p>
-                    </div>
-                  </div>
-                );
-              })}
-              {auditFetching && !auditLoading && (
-                <div className="text-xs text-[#2E2E2F]">Loading more...</div>
-              )}
-              {!auditHasMore && auditLogs.length > 0 && (
-                <div className="text-[10px] uppercase tracking-[0.2em] text-[#2E2E2F]/50">End of list</div>
-              )}
-            </div>
-          )}
-        </Card>
+                  );
+                })}
+                {auditFetching && !auditLoading && (
+                  <div className="text-xs text-[#2E2E2F]">Loading more...</div>
+                )}
+                {!auditHasMore && auditLogs.length > 0 && (
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-[#2E2E2F]/50">End of list</div>
+                )}
+              </div>
+            )}
+          </Card>
+        )}
 
         <Card className="p-8 flex flex-col items-center justify-center text-center border-dashed border-2 bg-[#F2F2F2] border-[#2E2E2F]/30">
           <div className="w-20 h-20 bg-[#F2F2F2] border border-[#2E2E2F]/20 text-[#2E2E2F] rounded-3xl flex items-center justify-center mb-6">

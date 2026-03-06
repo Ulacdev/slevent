@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { Event, TicketType } from '../../types';
 import { Button, Card, Input, PageLoader } from '../../components/Shared';
 import { ICONS } from '../../constants';
+import { useUser } from '../../context/UserContext';
 
 const PAYMENT_METHODS = [
   {
@@ -29,6 +29,7 @@ export const RegistrationForm: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { name: userName, email: userEmail, isAuthenticated } = useUser();
 
   const [event, setEvent] = useState<Event | null>(null);
   const [selectedItems, setSelectedItems] = useState<{ ticket: TicketType, qty: number }[]>([]);
@@ -44,7 +45,18 @@ export const RegistrationForm: React.FC = () => {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [apiError, setApiError] = useState<string | null>(null);
   const [paymentMethodId, setPaymentMethodId] = useState(PAYMENT_METHODS[0].id);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name || userName || '',
+        email: prev.email || userEmail || ''
+      }));
+    }
+  }, [isAuthenticated, userName, userEmail]);
 
   useEffect(() => {
     if (slug) {
@@ -91,6 +103,7 @@ export const RegistrationForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setApiError(null);
     if (!validate() || !event || selectedItems.length === 0) return;
 
     setSubmitting(true);
@@ -117,8 +130,10 @@ export const RegistrationForm: React.FC = () => {
           navigate(`/payment/status?sessionId=${orderId}&status=${status || 'PAID'}`);
         }
       }
-    } catch (err) {
-      alert('Registration failed. Please try again.');
+    } catch (err: any) {
+      console.error('[Registration] Error:', err);
+      const message = err.response?.data?.error || err.message || 'Registration failed. Please try again.';
+      setApiError(message);
     } finally {
       setSubmitting(false);
     }
@@ -176,6 +191,15 @@ export const RegistrationForm: React.FC = () => {
                     </h3>
                     <div className="w-12 h-px bg-[#2E2E2F]/10"></div>
                   </div>
+
+                  {apiError && (
+                    <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-100 flex items-center gap-3 text-red-600">
+                      <ICONS.AlertTriangle className="w-5 h-5 shrink-0" />
+                      <p className="text-xs font-semibold uppercase tracking-wide leading-relaxed">
+                        {apiError}
+                      </p>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 sm:gap-x-6 gap-y-5 sm:gap-y-6">
                     <div className="space-y-2">

@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { Event, UserRole, TicketType, RegistrationView, EventStatus, Ticket } from '../../types';
 import { Card, Badge, Button, Modal, Input, PageLoader } from '../../components/Shared';
+import { OnsiteLocationAssistant } from '../../components/OnsiteLocationAssistant';
 import { ICONS } from '../../constants';
 import { useUser } from '../../context/UserContext';
 
@@ -28,6 +29,7 @@ export const EventsManagement: React.FC = () => {
   const [currentEventId, setCurrentEventId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<Event | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -54,6 +56,7 @@ export const EventsManagement: React.FC = () => {
     imageUrl: 'https://images.unsplash.com/photo-1540575861501-7ad0582373f3?auto=format&fit=crop&q=80&w=800',
     status: 'PUBLISHED' as EventStatus,
     regOpenDate: new Date().toISOString().split('T')[0],
+    regOpenTime: '00:00',
     regCloseDate: '',
     regCloseTime: '',
     streamingPlatform: '',
@@ -262,6 +265,20 @@ export const EventsManagement: React.FC = () => {
     }
   };
 
+  const applyLocationValue = (locationValue: string) => {
+    const nextData: any = { ...formData, location: locationValue };
+
+    if ((formData.locationType === 'ONLINE' || formData.locationType === 'HYBRID') && !formData.streamingPlatform) {
+      const lowUrl = locationValue.toLowerCase();
+      if (lowUrl.includes('meet.google.com')) nextData.streamingPlatform = 'Google Meet';
+      else if (lowUrl.includes('zoom.us') || lowUrl.includes('zoom.com')) nextData.streamingPlatform = 'Zoom';
+      else if (lowUrl.includes('teams.microsoft.com') || lowUrl.includes('teams.live.com')) nextData.streamingPlatform = 'Microsoft Teams';
+      else if (lowUrl.includes('youtube.com') || lowUrl.includes('youtu.be')) nextData.streamingPlatform = 'YouTube Live';
+    }
+
+    setFormData(nextData);
+  };
+
   const handleSaveTickets = async (updatedTickets: TicketType[]) => {
     if (!selectedEvent) return;
     setSubmitting(true);
@@ -289,6 +306,21 @@ export const EventsManagement: React.FC = () => {
     }
   };
 
+
+  const handleDeleteEvent = async () => {
+    if (!deleteConfirm) return;
+    setSubmitting(true);
+    try {
+      await apiService.deleteEvent(deleteConfirm.eventId);
+      setNotification({ message: `"${deleteConfirm.eventName}" has been permanently deleted.`, type: 'success' });
+      setDeleteConfirm(null);
+      fetchEvents();
+    } catch (err) {
+      setNotification({ message: 'Failed to delete event. Please retry.', type: 'error' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -417,6 +449,15 @@ export const EventsManagement: React.FC = () => {
                       >
                         <svg className="w-[1.2rem] h-[1.2rem]" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                       </button>
+                      {!isStaff && (
+                        <button
+                          onClick={() => setDeleteConfirm(event)}
+                          className="text-[#2E2E2F]/60 hover:text-red-500 transition-colors p-1"
+                          title="Delete Event"
+                        >
+                          <ICONS.Trash className="w-[1.2rem] h-[1.2rem]" strokeWidth={2.2} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -590,23 +631,18 @@ export const EventsManagement: React.FC = () => {
                   label="Location / Connection Link"
                   placeholder="e.g. Global Tech Center"
                   value={formData.location}
-                  onChange={(e: any) => {
-                    const link = e.target.value;
-                    const nextData: any = { ...formData, location: link };
-
-                    // Auto-detect provider if choosing Online/Hybrid and no provider set
-                    if ((formData.locationType === 'ONLINE' || formData.locationType === 'HYBRID') && !formData.streamingPlatform) {
-                      const lowUrl = link.toLowerCase();
-                      if (lowUrl.includes('meet.google.com')) nextData.streamingPlatform = 'Google Meet';
-                      else if (lowUrl.includes('zoom.us') || lowUrl.includes('zoom.com')) nextData.streamingPlatform = 'Zoom';
-                      else if (lowUrl.includes('teams.microsoft.com') || lowUrl.includes('teams.live.com')) nextData.streamingPlatform = 'Microsoft Teams';
-                      else if (lowUrl.includes('youtube.com') || lowUrl.includes('youtu.be')) nextData.streamingPlatform = 'YouTube Live';
-                    }
-
-                    setFormData(nextData);
-                  }}
+                  onChange={(e: any) => applyLocationValue(e.target.value)}
                 />
               </div>
+
+              {formData.locationType === 'ONSITE' && (
+                <div className="md:col-span-2">
+                  <OnsiteLocationAssistant
+                    value={formData.location}
+                    onChange={applyLocationValue}
+                  />
+                </div>
+              )}
 
               {(formData.locationType === 'ONLINE' || formData.locationType === 'HYBRID') && (
                 <div className="md:col-span-2">
@@ -696,6 +732,46 @@ export const EventsManagement: React.FC = () => {
               onClick={() => navigate('/attendees')}
             >
               Open Full Directory
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        title="Delete Event"
+      >
+        <div className="space-y-6">
+          <div className="flex items-start gap-5 p-6 bg-red-50 border border-red-200 rounded-[1.75rem]">
+            <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center shrink-0">
+              <ICONS.Trash className="w-6 h-6 text-red-500" strokeWidth={2} />
+            </div>
+            <div>
+              <p className="font-bold text-[#2E2E2F] text-[16px] tracking-tight">
+                Are you sure you want to delete this event?
+              </p>
+              <p className="text-[13px] text-[#2E2E2F]/60 font-medium mt-2 leading-relaxed">
+                This will permanently remove <strong>"{deleteConfirm?.eventName}"</strong> and all associated data including ticket types, registrations, and attendee records. This action cannot be undone.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            <Button
+              className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border border-[#2E2E2F]/20 hover:bg-[#2E2E2F]/10 transition-colors min-h-[32px]"
+              onClick={() => setDeleteConfirm(null)}
+              disabled={submitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 transition-colors min-h-[32px]"
+              onClick={handleDeleteEvent}
+              disabled={submitting}
+            >
+              {submitting ? 'Deleting...' : 'Yes, Delete Event'}
             </Button>
           </div>
         </div>

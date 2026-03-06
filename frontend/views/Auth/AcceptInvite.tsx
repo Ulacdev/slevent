@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, Button, Input } from '../../components/Shared';
 export const AcceptInvite: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token') || '';
+  const rawToken = searchParams.get('token') || '';
+  const token = rawToken.trim().replace(/[?.,;:!]+$/, '');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');

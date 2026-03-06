@@ -132,7 +132,7 @@ export const RegistrationsList: React.FC = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-black text-[#2E2E2F] tracking-tighter">Attendee List</h1>
+          <h1 className="text-4xl font-black text-[#2E2E2F] tracking-tighter">Attendee List</h1>
           <p className="text-[#2E2E2F]/70 font-medium text-sm mt-1">
             Full visibility of confirmed registrations and financial transactions.
           </p>
@@ -193,8 +193,8 @@ export const RegistrationsList: React.FC = () => {
                     </td>
                     <td className="px-8 py-6">
                       <span className={`inline-flex px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${isCheckedIn
-                          ? 'bg-[#38BDF2]/20 text-[#2E2E2F]'
-                          : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
+                        ? 'bg-[#38BDF2]/20 text-[#2E2E2F]'
+                        : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
                         }`}>
                         {isCheckedIn ? 'CHECKED_IN' : 'ISSUED'}
                       </span>
@@ -230,7 +230,7 @@ export const RegistrationsList: React.FC = () => {
         {filteredRegs.length === 0 && !loading && (
           <div className="py-24 text-center">
             <ICONS.Users className="w-12 h-12 text-[#2E2E2F]/30 mx-auto mb-4" />
-            <p className="text-[#2E2E2F]/60 font-bold uppercase tracking-widest text-[10px]">No active attendees found.</p>
+            <p className="text-[#2E2E2F]/60 font-bold uppercase tracking-widest text-[10px]">No attendees</p>
           </div>
         )}
       </Card>
@@ -300,8 +300,8 @@ export const RegistrationsList: React.FC = () => {
                 key={i}
                 onClick={() => handlePageChange(i + 1)}
                 className={`min-h-[32px] px-4 rounded-full text-[9px] font-black uppercase tracking-widest transition-colors focus:outline-none focus:ring-2 focus:ring-[#38BDF2] focus:ring-offset-2 ${currentPage === i + 1
-                    ? 'bg-[#38BDF2] text-[#F2F2F2]'
-                    : 'bg-[#F2F2F2] text-[#2E2E2F] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]'
+                  ? 'bg-[#38BDF2] text-[#F2F2F2]'
+                  : 'bg-[#F2F2F2] text-[#2E2E2F] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]'
                   }`}
               >
                 {i + 1}

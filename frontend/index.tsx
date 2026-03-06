@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { UserProvider } from './context/UserContext';
+import { EngagementProvider } from './context/EngagementContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -13,7 +14,9 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <UserProvider>
-      <App />
+      <EngagementProvider>
+        <App />
+      </EngagementProvider>
     </UserProvider>
   </React.StrictMode>
 );

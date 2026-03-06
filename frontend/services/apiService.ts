@@ -1,5 +1,17 @@
 
-import { Event, Order, OrderItem, Attendee, Ticket, TicketType, AnalyticsSummary, RegistrationView, TicketStatus, OrderStatus } from '../types';
+import {
+  Event,
+  Order,
+  OrderItem,
+  Attendee,
+  Ticket,
+  TicketType,
+  AnalyticsSummary,
+  RegistrationView,
+  TicketStatus,
+  OrderStatus,
+  OrganizerProfile
+} from '../types';
 import { MOCK_EVENTS } from './mockData';
 // Local storage keys
 const STORAGE_EVENTS = 'ef_events';
@@ -30,6 +42,189 @@ export const apiService = {
       body: JSON.stringify({ name })
     });
     if (!res.ok) throw new Error((await res.json()).error || 'Failed to update name');
+    return await res.json();
+  },
+
+  // --- SMTP Settings APIs ---
+  getSmtpSettings: async () => {
+    const res = await fetch(`${API_BASE}/api/settings/smtp`, {
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      cache: 'no-store'
+    });
+    if (!res.ok) throw new Error(`Failed to load SMTP settings: ${res.status}`);
+    return await res.json();
+  },
+
+  updateSmtpSettings: async (payload: any) => {
+    const res = await fetch(`${API_BASE}/api/settings/smtp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`Failed to update SMTP settings: ${res.status}`);
+    return await res.json();
+  },
+
+  testSmtpSettings: async (payload: any) => {
+    const res = await fetch(`${API_BASE}/api/settings/smtp/test`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.error || `SMTP Test failed: ${res.status}`);
+    }
+    return await res.json();
+  },
+
+  // --- Organizer APIs ---
+  getMyOrganizer: async (): Promise<OrganizerProfile | null> => {
+    const res = await fetch(`${API_BASE}/api/organizer/me`, {
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      cache: 'no-store'
+    });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`Failed to load organizer profile: ${res.status}`);
+    return await res.json();
+  },
+
+  getOrganizerById: async (id: string): Promise<OrganizerProfile | null> => {
+    const res = await fetch(`${API_BASE}/api/organizer/${encodeURIComponent(id)}`, {
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store'
+    });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`Failed to load organizer: ${res.status}`);
+    return await res.json();
+  },
+
+  upsertOrganizer: async (payload: Partial<OrganizerProfile>): Promise<OrganizerProfile> => {
+    const res = await fetch(`${API_BASE}/api/organizer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to save organizer profile: ${res.status}`);
+    }
+    return await res.json();
+  },
+
+  uploadOrganizerImage: async (file: File): Promise<{ publicUrl: string; organizer?: OrganizerProfile | null }> => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const res = await fetch(`${API_BASE}/api/organizer/image`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData
+    });
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to upload organizer image: ${res.status}`);
+    }
+    const data = await res.json();
+    return { publicUrl: data.publicUrl, organizer: data.organizer || null };
+  },
+
+  getMyFollowingOrganizerIds: async (): Promise<string[]> => {
+    const res = await fetch(`${API_BASE}/api/organizer/followings`, {
+      credentials: 'include',
+      cache: 'no-store'
+    });
+    if (res.status === 404) return [];
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to load followings: ${res.status}`);
+    }
+    const data = await res.json();
+    return Array.isArray(data?.organizerIds) ? data.organizerIds : [];
+  },
+
+  getMyLikedEventIds: async (): Promise<string[]> => {
+    const res = await fetch(`${API_BASE}/api/events/likes/me`, {
+      credentials: 'include',
+      cache: 'no-store'
+    });
+    if (res.status === 404) return [];
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to load liked events: ${res.status}`);
+    }
+    const data = await res.json();
+    return Array.isArray(data?.eventIds) ? data.eventIds : [];
+  },
+
+  likeEvent: async (eventId: string): Promise<{ eventId: string; liked: boolean; likesCount: number }> => {
+    const res = await fetch(`${API_BASE}/api/events/${encodeURIComponent(eventId)}/like`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to like event: ${res.status}`);
+    }
+    return await res.json();
+  },
+
+  unlikeEvent: async (eventId: string): Promise<{ eventId: string; liked: boolean; likesCount: number }> => {
+    const res = await fetch(`${API_BASE}/api/events/${encodeURIComponent(eventId)}/like`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to unlike event: ${res.status}`);
+    }
+    return await res.json();
+  },
+
+  followOrganizer: async (organizerId: string): Promise<{ organizerId: string; following: boolean; followersCount: number; confirmationEmailSent: boolean }> => {
+    const res = await fetch(`${API_BASE}/api/organizer/${encodeURIComponent(organizerId)}/follow`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to follow organizer: ${res.status}`);
+    }
+    return await res.json();
+  },
+
+  unfollowOrganizer: async (organizerId: string): Promise<{ organizerId: string; following: boolean; followersCount: number }> => {
+    const res = await fetch(`${API_BASE}/api/organizer/${encodeURIComponent(organizerId)}/follow`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to unfollow organizer: ${res.status}`);
+    }
+    return await res.json();
+  },
+
+  // --- User Orders ---
+  getMyOrders: async (): Promise<{ orders: any[]; count: number }> => {
+    const res = await fetch(`${API_BASE}/api/orders/my`, {
+      credentials: 'include',
+      cache: 'no-store'
+    });
+    if (res.status === 401) return { orders: [], count: 0 };
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to load orders: ${res.status}`);
+    }
     return await res.json();
   },
 
@@ -221,6 +416,61 @@ export const apiService = {
     return (data || []).map((event: Event) => ({ ...event, ticketTypes: event.ticketTypes || [] }));
   },
 
+  // User-specific events (only events created by the logged-in user)
+  getUserEvents: async (search = ''): Promise<Event[]> => {
+    const searchParam = search ? `?search=${encodeURIComponent(search)}` : '';
+    const res = await fetch(`${API_BASE}/api/user/events${searchParam}`, {
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error(`Failed to load user events: ${res.status}`);
+    const data = await res.json();
+    return (data || []).map((event: Event) => ({ ...event, ticketTypes: event.ticketTypes || [] }));
+  },
+
+  createUserEvent: async (eventData: Partial<Event>): Promise<Event> => {
+    const res = await fetch(`${API_BASE}/api/user/events`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(eventData)
+    });
+    if (!res.ok) throw new Error(`Failed to create user event: ${res.status}`);
+    const data = await res.json();
+    return { ...data, ticketTypes: data?.ticketTypes || eventData.ticketTypes || [] } as Event;
+  },
+
+  updateUserEvent: async (id: string, eventData: Partial<Event>): Promise<Event> => {
+    const res = await fetch(`${API_BASE}/api/user/events/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(eventData)
+    });
+    if (!res.ok) throw new Error(`Failed to update user event: ${res.status}`);
+    const data = await res.json();
+    return { ...data, ticketTypes: data?.ticketTypes || eventData.ticketTypes || [] } as Event;
+  },
+
+  uploadUserEventImage: async (file: File, eventId?: string): Promise<{ publicUrl: string }> => {
+    const formData = new FormData();
+    formData.append('image', file);
+    if (eventId) formData.append('eventId', eventId);
+
+    const endpoint = eventId
+      ? `${API_BASE}/api/user/events/${encodeURIComponent(eventId)}/image`
+      : `${API_BASE}/api/user/events/image`;
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData
+    });
+    if (!res.ok) throw new Error(`Failed to upload user event image: ${res.status}`);
+    const data = await res.json();
+    return { publicUrl: data.publicUrl };
+  },
+
   createEvent: async (eventData: Partial<Event>): Promise<Event> => {
     const res = await fetch(`${API_BASE}/api/admin/events`, {
       method: 'POST',
@@ -243,6 +493,15 @@ export const apiService = {
     if (!res.ok) throw new Error(`Failed to update event: ${res.status}`);
     const data = await res.json();
     return { ...data, ticketTypes: data?.ticketTypes || eventData.ticketTypes || [] } as Event;
+  },
+
+  // DELETE /api/admin/events/:id
+  deleteEvent: async (id: string): Promise<void> => {
+    const res = await fetch(`${API_BASE}/api/admin/events/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error(`Failed to delete event: ${res.status}`);
   },
 
   uploadEventImage: async (file: File, eventId?: string): Promise<{ publicUrl: string }> => {

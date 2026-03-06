@@ -320,9 +320,15 @@ export const PaymentStatusView: React.FC = () => {
               <div className="w-10 h-10 bg-[#38BDF2]/10 rounded-xl flex items-center justify-center text-[#38BDF2] mb-6">
                 <ICONS.Users className="w-5 h-5" />
               </div>
-              <h4 className="text-sm font-black text-[#2E2E2F] uppercase tracking-wide mb-2">Guest Support</h4>
+              <h4 className="text-sm font-black text-[#2E2E2F] uppercase tracking-wide mb-2">
+                {order?.organizerName || 'Guest Support'}
+              </h4>
               <p className="text-xs text-[#2E2E2F]/60 font-medium leading-relaxed">
-                Need assistance with your booking? Our concierge team is ready to help at the event venue.
+                Need assistance with your booking? Contact us at{' '}
+                <span className="text-[#38BDF2] font-bold">
+                  {order?.supportEmail || 'help@startuplab.com'}
+                </span>
+                .
               </p>
             </Card>
           </div>

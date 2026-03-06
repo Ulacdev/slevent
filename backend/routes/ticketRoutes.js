@@ -10,13 +10,13 @@ import {
   getRegistrationsByEvent,
   getAllRegistrations
 } from '../controller/ticketController.js';
-import {authMiddleware} from '../middleware/auth.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 
 const router = express.Router();
 
 // GET /api/tickets
-router.get('/',authMiddleware, listTickets);
+router.get('/', authMiddleware, listTickets);
 
 // GET /api/tickets/order/:orderId
 router.get('/order/:orderId', getTicketsByOrder);
@@ -36,7 +36,7 @@ router.post('/', authMiddleware, createTicket);
 router.post('/checkin', authMiddleware, checkInTicket);
 
 // PUT /api/tickets/:id
-router.put('/:id',authMiddleware, updateTicket);
+router.put('/:id', authMiddleware, updateTicket);
 
 // DELETE /api/tickets/:id
 router.delete('/:id', authMiddleware, deleteTicket);

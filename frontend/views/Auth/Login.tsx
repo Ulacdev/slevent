@@ -5,6 +5,7 @@ import { Card, Button, Input } from '../../components/Shared';
 import { ICONS } from '../../constants';
 import { supabase } from "../../supabase/supabaseClient.js";
 import { useUser } from '../../context/UserContext';
+import { UserRole, normalizeUserRole } from '../../types';
 
 const API = import.meta.env.VITE_API_BASE;
 
@@ -36,12 +37,13 @@ export const LoginPerspective: React.FC = () => {
       return;
     }
     const userData = await roleRes.json().catch(() => null);
-    if (!userData || (userData.role !== 'ADMIN' && userData.role !== 'STAFF')) {
+    const normalizedRole = normalizeUserRole(userData?.role);
+    if (!normalizedRole) {
       setLoading(false);
-      setError('Only admin and staff accounts can log in.');
+      setError('Account not found or not authorized.');
       return;
     }
-    setUser({ role: userData.role, email });
+    setUser({ role: normalizedRole, email });
     const { access_token, refresh_token } = data.session;
     const response = await fetch(`${API}/api/auth/login`, {
       method: "POST",
@@ -57,10 +59,14 @@ export const LoginPerspective: React.FC = () => {
     }
     localStorage.removeItem("sb-ddkkbtijqrgpitncxylx-auth-token");
     setLoading(false);
-    if (userData.role === 'ADMIN') {
+    if (normalizedRole === UserRole.ADMIN) {
       navigate('/dashboard');
-    } else if (userData.role === 'STAFF') {
+    } else if (normalizedRole === UserRole.STAFF) {
       navigate('/events');
+    } else if (normalizedRole === UserRole.ORGANIZER) {
+      navigate('/user-home');
+    } else if (normalizedRole === UserRole.ATTENDEE) {
+      navigate('/browse-events');
     }
   };
 
@@ -104,6 +110,17 @@ export const LoginPerspective: React.FC = () => {
               <div className="mt-2 text-[#2E2E2F] text-sm font-bold text-center">{error}</div>
             )}
           </form>
+          <div className="mt-8 pt-6 border-t border-[#2E2E2F]/10 text-center">
+            <p className="text-[#2E2E2F]/60 text-sm font-medium">
+              Don't have an account?{' '}
+              <button
+                className="text-[#38BDF2] font-bold hover:text-[#2E2E2F] transition-colors"
+                onClick={() => navigate('/signup')}
+              >
+                Create an Account
+              </button>
+            </p>
+          </div>
         </Card>
         <div className="mt-16 flex flex-col items-center gap-6">
           <button

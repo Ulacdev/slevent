@@ -3,6 +3,10 @@ import crypto from 'crypto'
 import { randomUUID } from 'crypto'
 import { sendMakeNotification } from '../utils/makeWebhook.js'
 import { logAudit } from '../utils/auditLogger.js'
+import {
+  getUserProfileByAuthId,
+  notifyUserByPreference,
+} from '../utils/notificationService.js'
 
 const HITPAY_API_KEY = process.env.HITPAY_API_KEY
 const HITPAY_SALT = process.env.HITPAY_SALT // signature secret
@@ -145,10 +149,37 @@ export const getPaymentStatus = async (req, res) => {
 
     const { data: event, error: eventErr } = await supabase
       .from('events')
-      .select('eventId, eventName, locationType, locationText, streamingPlatform, startAt, endAt')
+      .select('eventId, eventName, locationType, locationText, streamingPlatform, startAt, endAt, organizerId')
       .eq('eventId', order.eventId)
       .maybeSingle()
     if (eventErr) return res.status(500).json({ error: eventErr.message })
+
+    let supportEmail = 'help@startuplab.com'
+    let organizerName = 'StartupLab Support'
+
+    if (event?.organizerId) {
+      // Fetch organizer details for name
+      const { data: orgData } = await supabase
+        .from('organizers')
+        .select('organizerName')
+        .eq('organizerId', event.organizerId)
+        .maybeSingle()
+
+      if (orgData?.organizerName) {
+        organizerName = orgData.organizerName
+      }
+
+      // Fetch custom support email from settings
+      const { data: emailSettings } = await supabase
+        .from('organizerEmailSettings')
+        .select('fromAddress')
+        .eq('organizerId', event.organizerId)
+        .maybeSingle()
+
+      if (emailSettings?.fromAddress) {
+        supportEmail = emailSettings.fromAddress
+      }
+    }
 
     let normalizedStatus = 'PENDING'
     switch (order.status) {
@@ -182,7 +213,9 @@ export const getPaymentStatus = async (req, res) => {
       locationText: event?.locationText || null,
       streamingPlatform: event?.streamingPlatform || null,
       eventStartAt: event?.startAt || null,
-      eventEndAt: event?.endAt || null
+      eventEndAt: event?.endAt || null,
+      supportEmail,
+      organizerName
     })
   } catch (err) {
     return res.status(500).json({ error: err?.message || 'Unexpected error' })
@@ -647,6 +680,51 @@ export const hitpayWebhook = async (req, res) => {
       // mark order paid
       await supabase.from('orders').update({ status: 'PAID' }).eq('orderId', resolvedTx.orderId)
 
+      // Notify Organizer about New Paid Order
+      try {
+        const { data: eventRow } = await supabase
+          .from('events')
+          .select('eventName, slug, organizerId, createdBy')
+          .eq('eventId', order.eventId)
+          .maybeSingle();
+
+        if (eventRow) {
+          let recipientUserId = eventRow.createdBy;
+          if (eventRow.organizerId) {
+            const { data: org } = await supabase
+              .from('organizers')
+              .select('ownerUserId')
+              .eq('organizerId', eventRow.organizerId)
+              .maybeSingle();
+            if (org?.ownerUserId) recipientUserId = org.ownerUserId;
+          }
+
+          if (recipientUserId) {
+            const recipientProfile = await getUserProfileByAuthId(recipientUserId);
+            const amountStr = `${order.currency} ${order.totalAmount}`;
+            const message = `Great news! ${order.buyerName} just purchased tickets for "${eventRow.eventName}". Total: ${amountStr}`;
+
+            await notifyUserByPreference({
+              recipientUserId,
+              recipientFallbackEmail: recipientProfile?.email || '',
+              eventId: order.eventId,
+              organizerId: eventRow.organizerId,
+              type: 'ORDER_PLACED',
+              title: 'New Ticket Sale!',
+              message,
+              metadata: {
+                eventName: eventRow.eventName,
+                tag: 'NEW SALE',
+                actionLabel: 'VIEW ORDER',
+                actionUrl: process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL.replace(/\/$/, '')}/orders/${order.orderId}` : null,
+              }
+            });
+          }
+        }
+      } catch (err) {
+        console.error('[Payments] Organizer notification failed:', err.message);
+      }
+
       // issue tickets only if not already issued
       const { count: existingTickets, error: ticketCountErr } = await supabase
         .from('tickets')
@@ -706,7 +784,7 @@ export const hitpayWebhook = async (req, res) => {
             // fetch event details
             const { data: event } = await supabase
               .from('events')
-              .select('eventName, description, startAt, endAt, locationText, locationType, imageUrl, streamingPlatform')
+              .select('eventName, description, startAt, endAt, locationText, locationType, imageUrl, streamingPlatform, organizerId')
               .eq('eventId', order.eventId)
               .maybeSingle()
             sendMakeNotification({
@@ -727,6 +805,29 @@ export const hitpayWebhook = async (req, res) => {
                 ticket: { ticketCode, qrPayload: ticketCode, status: 'ISSUED' }
               }
             }).catch(() => { })
+
+            // Send direct "Thank You" email once per attendee email
+            if (i === 0) { // Send only for the first ticket to avoid spamming for multiple tickets in one order
+              try {
+                await notifyUserByPreference({
+                  recipientFallbackEmail: order.buyerEmail,
+                  eventId: order.eventId,
+                  organizerId: event?.organizerId,
+                  type: 'FOLLOW_CONFIRMATION',
+                  title: `Thanks for your purchase!`,
+                  message: `Thank you for your order! Your tickets for "${event?.eventName}" are now ready. You can access them anytime in your "My Tickets" section.`,
+                  metadata: {
+                    eventName: event?.eventName,
+                    tag: 'THANK YOU',
+                    typeIcon: '🎟️',
+                    actionLabel: 'VIEW MY TICKETS',
+                    actionUrl: process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL.replace(/\/$/, '')}/my-tickets` : null,
+                  }
+                });
+              } catch (err) {
+                console.error('[Payments] Attendee notification failed:', err.message);
+              }
+            }
           }
         }
 

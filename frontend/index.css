@@ -1,11 +1,7 @@
-/**
- * StartupLab Business Ticketing - Global Styles
- * Brand Guidelines v2.0 Compliant
- */
-
 /* ========================================
-   TYPOGRAPHY - HELVETICA NEUE (REQUIRED)
+   TYPOGRAPHY - PREMIUM UI FONTS
    ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
 * {
   margin: 0;
@@ -15,15 +11,31 @@
 
 html,
 body {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Ensure all text elements inherit Helvetica */
-h1, h2, h3, h4, h5, h6,
-p, span, div, a, button, input, textarea, select, label {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+/* Ensure all text elements inherit Inter/Outfit */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Outfit', sans-serif;
+}
+
+p,
+span,
+div,
+a,
+button,
+input,
+textarea,
+select,
+label {
+  font-family: 'Inter', sans-serif;
 }
 
 /* ========================================
@@ -35,17 +47,17 @@ p, span, div, a, button, input, textarea, select, label {
   --color-primary: #38BDF2;
   --color-text: #2E2E2F;
   --color-background: #F2F2F2;
-  
+
   /* Extended Brand Colors (from guidelines) */
   --color-navy: #003E86;
   --color-medium-blue: #3768A2;
-  
+
   /* Opacity Variations */
   --color-primary-10: rgba(56, 189, 242, 0.1);
   --color-primary-20: rgba(56, 189, 242, 0.2);
   --color-primary-30: rgba(56, 189, 242, 0.3);
   --color-primary-40: rgba(56, 189, 242, 0.4);
-  
+
   --color-text-10: rgba(46, 46, 47, 0.1);
   --color-text-20: rgba(46, 46, 47, 0.2);
   --color-text-40: rgba(46, 46, 47, 0.4);
@@ -103,6 +115,7 @@ img {
 
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -148,17 +161,67 @@ img {
   top: 0;
 }
 
+/* Category marquee */
+.category-marquee {
+  overflow: hidden;
+  position: relative;
+}
+
+.category-marquee::before,
+.category-marquee::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 48px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.category-marquee::before {
+  left: 0;
+  background: linear-gradient(to right, var(--color-background), rgba(242, 242, 242, 0));
+}
+
+.category-marquee::after {
+  right: 0;
+  background: linear-gradient(to left, var(--color-background), rgba(242, 242, 242, 0));
+}
+
+.category-marquee__track {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: max-content;
+  animation: category-marquee-scroll 32s linear infinite;
+}
+
+.category-marquee:hover .category-marquee__track {
+  animation-play-state: paused;
+}
+
+@keyframes category-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 /* ========================================
    PRINT STYLES
    ======================================== */
 
 @media print {
+
   /* Optimize for ticket printing */
   body {
     background: white;
     color: black;
   }
-  
+
   /* Hide navigation and non-essential elements */
   nav,
   header,
@@ -166,7 +229,7 @@ img {
   .no-print {
     display: none !important;
   }
-  
+
   /* Ensure QR codes print clearly */
   svg,
   img {

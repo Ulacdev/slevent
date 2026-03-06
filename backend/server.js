@@ -17,6 +17,9 @@ import { startReservationCleanup } from "./utils/reservationCleanup.js";
 import ticketRoutes from "./routes/ticketRoutes.js";
 import ticketTypeRoutes from "./routes/ticketTypeRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import organizerRoutes from "./routes/organizerRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import settingsRoutes from "./routes/settingsRoutes.js";
 
 
 dotenv.config();
@@ -103,6 +106,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/invite", inviteRoutes);
 app.use("/api", analyticsRoutes);
 app.use("/api", userRoutes);
+app.use("/api", organizerRoutes);
+app.use("/api", notificationRoutes);
+app.use("/api/settings", settingsRoutes);
 app.use("/api/admin/events", authMiddleware, adminEventRoutes);
 
 startReservationCleanup();
