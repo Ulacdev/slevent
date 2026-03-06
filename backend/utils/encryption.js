@@ -1,11 +1,20 @@
 import crypto from 'crypto';
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex'); // 32 bytes (256 bits)
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 const ALGORITHM = 'aes-256-cbc';
+
+if (!ENCRYPTION_KEY) {
+    console.warn('⚠️ [Encryption] No ENCRYPTION_KEY found in process.env. Using a temporary random key. Data will not persist across restarts!');
+} else {
+    const keyInfo = ENCRYPTION_KEY.startsWith('dead') ? 'Identified stable key' : 'Custom key';
+    console.log(`🛡️ [Encryption] Using ENCRYPTION_KEY from environment (${keyInfo}).`);
+}
+
+const USE_KEY_SOURCE = ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
 
 // Helper to ensure key is exactly 32 bytes
 const hashKey = (key) => crypto.createHash('sha256').update(String(key)).digest('base64').substr(0, 32);
-const USE_KEY = ENCRYPTION_KEY.length === 32 ? ENCRYPTION_KEY : hashKey(ENCRYPTION_KEY);
+const USE_KEY = USE_KEY_SOURCE.length === 32 ? USE_KEY_SOURCE : hashKey(USE_KEY_SOURCE);
 
 export function encryptString(text) {
     if (!text) return text;

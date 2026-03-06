@@ -25,6 +25,19 @@ export const EventDiscoveryPage: React.FC = () => {
     const [selectedFormat, setSelectedFormat] = useState<string>('all');
     const [showFollowedOnly, setShowFollowedOnly] = useState(false);
     const [sortBy, setSortBy] = useState<string>('relevance');
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+    const [sectionsOpen, setSectionsOpen] = useState({
+        categories: true,
+        date: true,
+        price: true,
+        format: true,
+        advanced: true
+    });
+
+    const toggleSection = (section: keyof typeof sectionsOpen) => {
+        setSectionsOpen(prev => ({ ...prev, [section]: !prev[section] }));
+    };
 
     // Data state
     const [events, setEvents] = useState<Event[]>([]);
@@ -148,136 +161,205 @@ export const EventDiscoveryPage: React.FC = () => {
 
             <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-12">
                 {/* Filter Sidebar */}
-                <aside className="w-full lg:w-72 shrink-0 space-y-12">
+                <aside className={`${isSidebarCollapsed ? 'w-full lg:w-14' : 'w-full lg:w-72'} shrink-0`}>
+                    <div className={`${isSidebarCollapsed ? '' : 'border-b border-[#2E2E2F]/5 pb-6'} mb-6`}>
+                        <button
+                            type="button"
+                            onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+                            className={`inline-flex items-center gap-2 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/55 hover:text-[#2E2E2F] hover:border-[#38BDF2]/40 transition-colors ${isSidebarCollapsed ? 'w-full lg:w-auto lg:px-2.5 justify-center' : ''}`}
+                        >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.8" d={isSidebarCollapsed ? "M4 6h16M4 12h16M4 18h16" : "M4 6h16M4 12h10M4 18h16"} />
+                            </svg>
+                            <span className={isSidebarCollapsed ? 'lg:hidden' : ''}>{isSidebarCollapsed ? 'Show Filters' : 'Hide Filters'}</span>
+                        </button>
+                    </div>
+
+                    {!isSidebarCollapsed && (
+                        <div className="space-y-12">
                     {/* Category Filter */}
-                    <div>
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-6">Category</h3>
-                        <div className="flex flex-col gap-3.5">
-                            {EVENT_CATEGORIES.map(cat => (
-                                <label key={cat.key} className="flex items-center gap-3 cursor-pointer group">
-                                    <div className="relative flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            className="peer sr-only"
-                                            checked={selectedCategories.includes(cat.key)}
-                                            onChange={() => toggleCategory(cat.key)}
-                                        />
-                                        <div className="w-5 h-5 rounded-lg border-2 border-[#2E2E2F]/10 bg-[#F2F2F2] peer-checked:bg-[#38BDF2] peer-checked:border-[#38BDF2] transition-all duration-200" />
-                                        <ICONS.Check className="absolute inset-0 m-auto w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" strokeWidth={4} />
-                                    </div>
-                                    <span className="text-sm font-bold text-[#2E2E2F]/70 group-hover:text-[#2E2E2F] transition-colors">{cat.label}</span>
-                                </label>
-                            ))}
-                        </div>
+                    <div className="border-b border-[#2E2E2F]/5 pb-8">
+                        <button
+                            onClick={() => toggleSection('categories')}
+                            className="w-full flex items-center justify-between group mb-2"
+                        >
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 group-hover:text-[#2E2E2F] transition-colors">Category</h3>
+                            <svg className={`w-3.5 h-3.5 text-[#2E2E2F]/30 transition-transform duration-300 ${sectionsOpen.categories ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        {sectionsOpen.categories && (
+                            <div className="flex flex-col gap-3.5 mt-6 animate-in slide-in-from-top-2 duration-300">
+                                {EVENT_CATEGORIES.map(cat => {
+                                    const isChecked = selectedCategories.includes(cat.key);
+                                    return (
+                                        <label key={cat.key} className="flex items-center gap-3 cursor-pointer group">
+                                            <div className="relative flex items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    className="peer sr-only"
+                                                    checked={isChecked}
+                                                    onChange={() => toggleCategory(cat.key)}
+                                                />
+                                                <div className="w-5 h-5 rounded-lg border-2 border-[#2E2E2F]/10 bg-[#F2F2F2] peer-checked:bg-[#38BDF2] peer-checked:border-[#38BDF2] transition-all duration-200" />
+                                                <ICONS.Check className="absolute inset-0 m-auto w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" strokeWidth={4} />
+                                            </div>
+                                            <div className={`w-6 h-6 rounded-lg border transition-colors flex items-center justify-center ${isChecked
+                                                ? 'border-[#38BDF2]/45 bg-[#38BDF2]/10 text-[#38BDF2]'
+                                                : 'border-[#2E2E2F]/10 bg-[#F2F2F2] text-[#2E2E2F]/55 group-hover:text-[#38BDF2] group-hover:border-[#38BDF2]/30'
+                                                }`}>
+                                                <cat.Icon className="w-3.5 h-3.5" />
+                                            </div>
+                                            <span className="text-sm font-bold text-[#2E2E2F]/70 group-hover:text-[#2E2E2F] transition-colors">{cat.label}</span>
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
 
                     {/* Date Filter */}
-                    <div>
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-6">Date</h3>
-                        <div className="flex flex-col gap-3.5">
-                            {[
-                                { id: 'all', label: 'Any time' },
-                                { id: 'today', label: 'Today' },
-                                { id: 'tomorrow', label: 'Tomorrow' },
-                                { id: 'weekend', label: 'This Weekend' },
-                            ].map(date => (
-                                <label key={date.id} className="flex items-center gap-3 cursor-pointer group">
-                                    <input
-                                        type="radio"
-                                        name="date"
-                                        className="peer sr-only"
-                                        checked={selectedDate === date.id}
-                                        onChange={() => setSelectedDate(date.id)}
-                                    />
-                                    <div className="w-5 h-5 rounded-full border-2 border-[#2E2E2F]/10 bg-[#F2F2F2] peer-checked:border-[#38BDF2] peer-checked:bg-[#38BDF2]/10 transition-all duration-200 flex items-center justify-center">
-                                        <div className="w-2 h-2 rounded-full bg-[#38BDF2] opacity-0 peer-checked:opacity-100 transition-opacity" />
-                                    </div>
-                                    <span className="text-sm font-bold text-[#2E2E2F]/70 group-hover:text-[#2E2E2F] transition-colors">{date.label}</span>
-                                </label>
-                            ))}
-                        </div>
+                    <div className="border-b border-[#2E2E2F]/5 pb-8">
+                        <button
+                            onClick={() => toggleSection('date')}
+                            className="w-full flex items-center justify-between group mb-2"
+                        >
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 group-hover:text-[#2E2E2F] transition-colors">Date</h3>
+                            <svg className={`w-3.5 h-3.5 text-[#2E2E2F]/30 transition-transform duration-300 ${sectionsOpen.date ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        {sectionsOpen.date && (
+                            <div className="flex flex-col gap-3.5 mt-6 animate-in slide-in-from-top-2 duration-300">
+                                {[
+                                    { id: 'all', label: 'Any time' },
+                                    { id: 'today', label: 'Today' },
+                                    { id: 'tomorrow', label: 'Tomorrow' },
+                                    { id: 'weekend', label: 'This Weekend' },
+                                ].map(date => (
+                                    <label key={date.id} className="flex items-center gap-3 cursor-pointer group">
+                                        <input
+                                            type="radio"
+                                            name="date"
+                                            className="peer sr-only"
+                                            checked={selectedDate === date.id}
+                                            onChange={() => setSelectedDate(date.id)}
+                                        />
+                                        <div className="w-5 h-5 rounded-full border-2 border-[#2E2E2F]/10 bg-[#F2F2F2] peer-checked:border-[#38BDF2] peer-checked:bg-[#38BDF2]/10 transition-all duration-200 flex items-center justify-center">
+                                            <div className="w-2 h-2 rounded-full bg-[#38BDF2] opacity-0 peer-checked:opacity-100 transition-opacity" />
+                                        </div>
+                                        <span className="text-sm font-bold text-[#2E2E2F]/70 group-hover:text-[#2E2E2F] transition-colors">{date.label}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Price Filter */}
-                    <div>
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-6">Price</h3>
-                        <div className="flex flex-col gap-3">
-                            {[
-                                { id: 'all', label: 'All Prices' },
-                                { id: 'free', label: 'Free' },
-                                { id: 'paid', label: 'Paid' },
-                            ].map(price => (
-                                <button
-                                    key={price.id}
-                                    onClick={() => setSelectedPrice(price.id)}
-                                    className={`text-left px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${selectedPrice === price.id
-                                        ? 'bg-[#2E2E2F] text-white border-[#2E2E2F]'
-                                        : 'bg-[#F2F2F2] text-[#2E2E2F]/40 border-[#2E2E2F]/10 hover:border-[#38BDF2]/40 hover:text-[#38BDF2]'
-                                        }`}
-                                >
-                                    {price.label}
-                                </button>
-                            ))}
-                        </div>
+                    <div className="border-b border-[#2E2E2F]/5 pb-8">
+                        <button
+                            onClick={() => toggleSection('price')}
+                            className="w-full flex items-center justify-between group mb-2"
+                        >
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 group-hover:text-[#2E2E2F] transition-colors">Price</h3>
+                            <svg className={`w-3.5 h-3.5 text-[#2E2E2F]/30 transition-transform duration-300 ${sectionsOpen.price ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        {sectionsOpen.price && (
+                            <div className="flex flex-col gap-3 mt-6 animate-in slide-in-from-top-2 duration-300">
+                                {[
+                                    { id: 'all', label: 'All Prices' },
+                                    { id: 'free', label: 'Free' },
+                                    { id: 'paid', label: 'Paid' },
+                                ].map(price => (
+                                    <button
+                                        key={price.id}
+                                        onClick={() => setSelectedPrice(price.id)}
+                                        className={`text-left px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${selectedPrice === price.id
+                                            ? 'bg-[#2E2E2F] text-white border-[#2E2E2F]'
+                                            : 'bg-[#F2F2F2] text-[#2E2E2F]/40 border-[#2E2E2F]/10 hover:border-[#38BDF2]/40 hover:text-[#38BDF2]'
+                                            }`}
+                                    >
+                                        {price.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Format Filter */}
-                    <div>
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-6">Format</h3>
-                        <div className="flex flex-col gap-3.5">
-                            {[
-                                { id: 'all', label: 'All Formats' },
-                                { id: 'online', label: 'Online' },
-                                { id: 'in-person', label: 'In-person' },
-                            ].map(format => (
-                                <label key={format.id} className="flex items-center gap-3 cursor-pointer group">
-                                    <input
-                                        type="radio"
-                                        name="format"
-                                        className="peer sr-only"
-                                        checked={selectedFormat === format.id}
-                                        onChange={() => setSelectedFormat(format.id)}
-                                    />
-                                    <div className="w-5 h-5 rounded-lg border-2 border-[#2E2E2F]/10 bg-[#F2F2F2] peer-checked:border-[#38BDF2] peer-checked:bg-[#38BDF2]/10 transition-all duration-200 flex items-center justify-center">
-                                        <ICONS.Check className="w-3 h-3 text-[#38BDF2] opacity-0 peer-checked:opacity-100 transition-opacity" strokeWidth={4} />
-                                    </div>
-                                    <span className="text-sm font-bold text-[#2E2E2F]/70 group-hover:text-[#2E2E2F] transition-colors">{format.label}</span>
-                                </label>
-                            ))}
-                        </div>
+                    <div className="border-b border-[#2E2E2F]/5 pb-8">
+                        <button
+                            onClick={() => toggleSection('format')}
+                            className="w-full flex items-center justify-between group mb-2"
+                        >
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 group-hover:text-[#2E2E2F] transition-colors">Format</h3>
+                            <svg className={`w-3.5 h-3.5 text-[#2E2E2F]/30 transition-transform duration-300 ${sectionsOpen.format ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        {sectionsOpen.format && (
+                            <div className="flex flex-col gap-3.5 mt-6 animate-in slide-in-from-top-2 duration-300">
+                                {[
+                                    { id: 'all', label: 'All Formats' },
+                                    { id: 'online', label: 'Online' },
+                                    { id: 'in-person', label: 'In-person' },
+                                ].map(format => (
+                                    <label key={format.id} className="flex items-center gap-3 cursor-pointer group">
+                                        <input
+                                            type="radio"
+                                            name="format"
+                                            className="peer sr-only"
+                                            checked={selectedFormat === format.id}
+                                            onChange={() => setSelectedFormat(format.id)}
+                                        />
+                                        <div className="w-5 h-5 rounded-lg border-2 border-[#2E2E2F]/10 bg-[#F2F2F2] peer-checked:border-[#38BDF2] peer-checked:bg-[#38BDF2]/10 transition-all duration-200 flex items-center justify-center">
+                                            <ICONS.Check className="w-3 h-3 text-[#38BDF2] opacity-0 peer-checked:opacity-100 transition-opacity" strokeWidth={4} />
+                                        </div>
+                                        <span className="text-sm font-bold text-[#2E2E2F]/70 group-hover:text-[#2E2E2F] transition-colors">{format.label}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Language and Following */}
-                    <div className="space-y-8 pt-4 border-t border-[#2E2E2F]/5">
-                        <div>
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-5">Language</h3>
-                            <select
-                                className="w-full bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl px-5 py-3.5 text-xs font-bold text-[#2E2E2F] outline-none focus:border-[#38BDF2]/40 appearance-none"
-                                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232E2E2F' stroke-width='3'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1.25rem center', backgroundSize: '1rem' }}
-                            >
-                                <option>English</option>
-                                <option>Tagalog / Filipino</option>
-                                <option>Others</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-5">By Following</h3>
-                            <label className="flex items-center justify-between cursor-pointer group">
-                                <span className="text-xs font-bold text-[#2E2E2F]/70 group-hover:text-[#2E2E2F] transition-colors">Following Only</span>
-                                <div className="relative">
-                                    <input
-                                        type="checkbox"
-                                        className="sr-only peer"
-                                        checked={showFollowedOnly}
-                                        onChange={() => setShowFollowedOnly(!showFollowedOnly)}
-                                    />
-                                    <div className="w-10 h-6 bg-[#2E2E2F]/10 rounded-full peer peer-checked:bg-[#38BDF2] transition-all duration-300" />
-                                    <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 peer-checked:translate-x-4 shadow-sm" />
+                    <div>
+                        <button
+                            onClick={() => toggleSection('advanced')}
+                            className="w-full flex items-center justify-between group mb-2"
+                        >
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 group-hover:text-[#2E2E2F] transition-colors">Advanced</h3>
+                            <svg className={`w-3.5 h-3.5 text-[#2E2E2F]/30 transition-transform duration-300 ${sectionsOpen.advanced ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        {sectionsOpen.advanced && (
+                            <div className="space-y-8 mt-8 animate-in slide-in-from-top-2 duration-300">
+                                <div>
+                                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-5">Language</h3>
+                                    <select
+                                        className="w-full bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl px-5 py-3.5 text-xs font-bold text-[#2E2E2F] outline-none focus:border-[#38BDF2]/40 appearance-none"
+                                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232E2E2F' stroke-width='3'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1.25rem center', backgroundSize: '1rem' }}
+                                    >
+                                        <option>English</option>
+                                        <option>Tagalog / Filipino</option>
+                                        <option>Others</option>
+                                    </select>
                                 </div>
-                            </label>
-                        </div>
+
+                                <div>
+                                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-5">By Following</h3>
+                                    <label className="flex items-center justify-between cursor-pointer group">
+                                        <span className="text-xs font-bold text-[#2E2E2F]/70 group-hover:text-[#2E2E2F] transition-colors">Following Only</span>
+                                        <div className="relative">
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only peer"
+                                                checked={showFollowedOnly}
+                                                onChange={() => setShowFollowedOnly(!showFollowedOnly)}
+                                            />
+                                            <div className="w-10 h-6 bg-[#2E2E2F]/10 rounded-full peer peer-checked:bg-[#38BDF2] transition-all duration-300" />
+                                            <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 peer-checked:translate-x-4 shadow-sm" />
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        )}
                     </div>
+                        </div>
+                    )}
                 </aside>
 
                 {/* Event Listings */}
@@ -287,7 +369,7 @@ export const EventDiscoveryPage: React.FC = () => {
                             <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tight">Events in <span className="text-[#38BDF2]">{locationTerm || 'Anywhere'}</span></h2>
                             <p className="text-[#2E2E2F]/40 text-[10px] font-black uppercase tracking-widest mt-2">{filteredEvents.length} results matching filters</p>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-wrap justify-start sm:justify-end">
                             <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/40">Sort:</span>
                             <select
                                 value={sortBy}
@@ -303,7 +385,7 @@ export const EventDiscoveryPage: React.FC = () => {
                     </div>
 
                     {filteredEvents.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                        <div className={`grid gap-8 ${isSidebarCollapsed ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'}`}>
                             {filteredEvents.map(event => (
                                 <EventCard key={event.eventId} event={event} onActionNotice={setInteractionNotice} />
                             ))}

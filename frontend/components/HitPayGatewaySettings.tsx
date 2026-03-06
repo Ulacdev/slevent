@@ -83,12 +83,12 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
     setStoredSettings(settings);
     setFormData({
       enabled: !!settings?.enabled,
-      mode: settings?.mode || 'live',
-      hitpayApiKey: '',
-      hitpaySalt: ''
+      mode: (settings?.mode as 'sandbox' | 'live') || 'live',
+      hitpayApiKey: settings?.hitpayApiKey || '',
+      hitpaySalt: settings?.hitpaySalt || ''
     });
-    setEditingApiKey(!settings?.maskedHitpayApiKey);
-    setEditingSalt(!settings?.maskedHitpaySalt);
+    setEditingApiKey(!settings?.hitpayApiKey && !settings?.maskedHitpayApiKey);
+    setEditingSalt(!settings?.hitpaySalt && !settings?.maskedHitpaySalt);
   }, []);
 
   React.useEffect(() => {
@@ -219,11 +219,11 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
   ) => {
 
     const onFocusInput = () => {
-      if (hasStored && !isEditing) {
-        // when user clicks the masked input, we clear it and let them edit
-        setIsEditing(true);
-        setFormData(prev => ({ ...prev, [field]: '' }));
-      }
+    };
+
+    const handleEditClick = () => {
+      setIsEditing(true);
+      setFormData(prev => ({ ...prev, [field]: '' }));
     };
 
     return (
@@ -232,12 +232,13 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
         <div className="relative group">
           <input
             type={show ? "text" : "password"}
-            value={!isEditing && hasStored ? (maskedValue || '') : value}
+            value={value || (!isEditing && hasStored ? maskedValue || '' : '')}
             onChange={(e) => handleInputChange(field, e.target.value)}
             onFocus={onFocusInput}
             placeholder={hasStored && !isEditing ? "••••••••••••••••" : "Enter credential..."}
-            className="w-full text-sm font-mono border border-[#2E2E2F]/10 rounded-lg py-2.5 pl-3 pr-10 focus:outline-none focus:border-[#38BDF2] focus:ring-1 focus:ring-[#38BDF2] text-gray-800 transition-colors bg-[#F2F2F2]"
+            className={`w-full text-sm font-mono border border-[#2E2E2F]/10 rounded-lg py-2.5 pl-3 pr-10 focus:outline-none focus:border-[#38BDF2] focus:ring-1 focus:ring-[#38BDF2] text-gray-800 transition-colors ${!isEditing && hasStored ? 'bg-[#F2F2F2]' : 'bg-white'}`}
             disabled={!formData.enabled}
+            readOnly={!isEditing && hasStored}
           />
           <button
             type="button"
@@ -249,7 +250,10 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
           </button>
         </div>
         {hasStored && !isEditing && formData.enabled && (
-          <p className="mt-1 text-xs text-blue-600 font-medium cursor-pointer hover:underline inline-block" onClick={() => setIsEditing(true)}>Edit value</p>
+          <p className="mt-1.5 text-[10px] font-black uppercase tracking-widest text-[#38BDF2] cursor-pointer hover:text-[#2E2E2F] transition-colors flex items-center gap-1.5" onClick={handleEditClick}>
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+            Edit Credential
+          </p>
         )}
       </div>
     );
@@ -390,4 +394,3 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
     </div>
   );
 };
-

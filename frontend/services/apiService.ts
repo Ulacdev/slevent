@@ -34,6 +34,15 @@ initializeData();
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
+const normalizeHitPaySettingsPayload = (data: any): HitPaySettings | null => {
+  if (!data) return null;
+  // GET returns plain settings; POST update may return { backendReady, settings }.
+  if (data.settings && typeof data.settings === 'object') {
+    return data.settings as HitPaySettings;
+  }
+  return data as HitPaySettings;
+};
+
 export const apiService = {
   // PATCH /api/user/name
   updateUserName: async (name: string) => {
@@ -100,7 +109,7 @@ export const apiService = {
     }
 
     const data = await res.json();
-    return { backendReady: true, settings: (data || null) as HitPaySettings | null };
+    return { backendReady: true, settings: normalizeHitPaySettingsPayload(data) };
   },
 
   updateHitPaySettings: async (
@@ -124,7 +133,7 @@ export const apiService = {
     }
 
     const data = await res.json();
-    return { backendReady: true, settings: (data || null) as HitPaySettings | null };
+    return { backendReady: true, settings: normalizeHitPaySettingsPayload(data) };
   },
 
   // --- Organizer APIs ---
@@ -498,6 +507,15 @@ export const apiService = {
     const data = await res.json();
     return { ...data, ticketTypes: data?.ticketTypes || eventData.ticketTypes || [] } as Event;
   },
+
+  deleteUserEvent: async (id: string): Promise<void> => {
+    const res = await fetch(`${API_BASE}/api/user/events/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error(`Failed to delete user event: ${res.status}`);
+  },
+
 
   uploadUserEventImage: async (file: File, eventId?: string): Promise<{ publicUrl: string }> => {
     const formData = new FormData();

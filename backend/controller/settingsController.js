@@ -160,9 +160,21 @@ export async function updateHitPaySettings(req, res) {
 
         // Ensure only admin can save scope=admin
         if (scope === 'admin') {
-            const { data: userRecord } = await supabase.from('users').select('role').eq('id', userId).maybeSingle();
-            if (userRecord?.role !== 'ADMIN') {
-                return res.status(403).json({ error: 'Only admins can modify platform payment settings' });
+            let { data: userRecord } = await supabase.from('users').select('role').eq('id', userId).maybeSingle();
+
+            // Fallback to userId column if id didn't return a record
+            if (!userRecord) {
+                const { data: altRecord } = await supabase.from('users').select('role').eq('userId', userId).maybeSingle();
+                userRecord = altRecord;
+            }
+
+            const role = String(userRecord?.role || '').toUpperCase();
+            console.log(`[HitPay] User ${userId} has role: ${role} trying to update admin scope.`);
+
+            if (role !== 'ADMIN') {
+                return res.status(403).json({
+                    error: `Only admins can modify platform payment settings. (Current User: ${userId}, Role: ${role || 'NOT_FOUND'})`
+                });
             }
         }
 
@@ -196,13 +208,20 @@ export async function updateHitPaySettings(req, res) {
         const mapped = {};
         updatedData?.forEach(item => mapped[item.key] = item.value);
 
+        const rawApiKey = mapped['hitpay_api_key'];
+        const rawSalt = mapped['hitpay_salt'];
+        const decryptedApiKey = decryptString(rawApiKey);
+        const decryptedSalt = decryptString(rawSalt);
+
         return res.json({
             backendReady: true,
             settings: {
                 enabled: mapped['hitpay_enabled'] === 'true',
                 mode: mapped['hitpay_mode'] || 'live',
-                maskedHitpayApiKey: maskString(decryptString(mapped['hitpay_api_key'])),
-                maskedHitpaySalt: maskString(decryptString(mapped['hitpay_salt'])),
+                hitpayApiKey: decryptedApiKey,
+                hitpaySalt: decryptedSalt,
+                maskedHitpayApiKey: decryptedApiKey ? maskString(decryptedApiKey) : (rawApiKey ? '••••••••••••••••' : null),
+                maskedHitpaySalt: decryptedSalt ? maskString(decryptedSalt) : (rawSalt ? '••••••••••••••••' : null),
                 isConfigured: mapped['hitpay_enabled'] === 'true',
                 updatedAt: new Date().toISOString()
             }
@@ -244,11 +263,20 @@ export async function getHitPaySettings(req, res) {
         });
 
         // Mask results
+        const rawApiKey = mapped['hitpay_api_key'];
+        const rawSalt = mapped['hitpay_salt'];
+
+        const decryptedApiKey = decryptString(rawApiKey);
+        const decryptedSalt = decryptString(rawSalt);
+
+        // Mask results - if decrypt fails, we still want to indicate it exists
         const result = {
             enabled: mapped['hitpay_enabled'] === 'true',
             mode: mapped['hitpay_mode'] || 'live',
-            maskedHitpayApiKey: maskString(decryptString(mapped['hitpay_api_key'])),
-            maskedHitpaySalt: maskString(decryptString(mapped['hitpay_salt'])),
+            hitpayApiKey: decryptedApiKey,
+            hitpaySalt: decryptedSalt,
+            maskedHitpayApiKey: decryptedApiKey ? maskString(decryptedApiKey) : (rawApiKey ? '••••••••••••••••' : null),
+            maskedHitpaySalt: decryptedSalt ? maskString(decryptedSalt) : (rawSalt ? '••••••••••••••••' : null),
             isConfigured: !!mapped['hitpay_enabled'],
             updatedAt: latestUpdate
         };

@@ -36,6 +36,7 @@ export const UserEvents: React.FC = () => {
     const [attendees, setAttendees] = useState<RegistrationView[]>([]);
     const [organizerProfile, setOrganizerProfile] = useState<OrganizerProfile | null>(null);
     const [organizerLoading, setOrganizerLoading] = useState(true);
+    const [deleteConfirm, setDeleteConfirm] = useState<Event | null>(null);
 
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -250,6 +251,21 @@ export const UserEvents: React.FC = () => {
         }
     };
 
+    const handleDeleteEvent = async () => {
+        if (!deleteConfirm) return;
+        setSubmitting(true);
+        try {
+            await apiService.deleteUserEvent(deleteConfirm.eventId);
+            setNotification({ message: 'Event successfully deleted.', type: 'success' });
+            setDeleteConfirm(null);
+            fetchEvents();
+        } catch (err) {
+            setNotification({ message: 'Failed to delete event.', type: 'error' });
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
@@ -396,8 +412,13 @@ export const UserEvents: React.FC = () => {
                                                     <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border border-[#2E2E2F]/20">
                                                         <img src={getImageUrl(event.imageUrl)} alt="" className="w-full h-full object-cover" />
                                                     </div>
-                                                    <div>
+                                                    <div className="space-y-1">
                                                         <div className="font-bold text-[#2E2E2F] text-[16px] tracking-tight group-hover:text-[#2E2E2F] transition-colors">{event.eventName}</div>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="text-[11px] font-medium text-[#2E2E2F]/40 uppercase tracking-widest">{event.eventId.split('-')[0]}</span>
+                                                            <span className="w-1 h-1 rounded-full bg-[#2E2E2F]/10"></span>
+                                                            <span className="text-[11px] font-medium text-[#2E2E2F]/60 tracking-tight">/{event.slug}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -449,6 +470,13 @@ export const UserEvents: React.FC = () => {
                                                         title="Edit Session"
                                                     >
                                                         <svg className="w-[1.2rem] h-[1.2rem]" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setDeleteConfirm(event); }}
+                                                        className="text-[#2E2E2F]/60 hover:text-red-500 transition-colors p-1"
+                                                        title="Delete Event"
+                                                    >
+                                                        <ICONS.Trash className="w-[1.2rem] h-[1.2rem]" strokeWidth={2.2} />
                                                     </button>
                                                 </div>
                                             </td>
@@ -719,40 +747,84 @@ export const UserEvents: React.FC = () => {
                 onClose={() => setIsAttendeeModalOpen(false)}
                 title={`Guest List: ${selectedEvent?.eventName || ''}`}
             >
-                <div>
-                    <div className="space-y-6">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Confirmed Registrations</span>
-                            <Badge type="info" className="px-3 py-1 font-semibold text-[10px] tracking-wide">{attendees.filter(r => r.eventId === selectedEvent?.eventId).length} GUESTS</Badge>
-                        </div>
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Confirmed Registrations</span>
+                        <Badge type="info" className="px-3 py-1 font-semibold text-[10px] tracking-wide">{attendees.filter(r => r.eventId === selectedEvent?.eventId).length} GUESTS</Badge>
+                    </div>
 
-                        <div className="max-h-[500px] overflow-y-auto pr-2 space-y-4">
-                            {attendees.filter(r => r.eventId === selectedEvent?.eventId).map((reg) => (
-                                <div key={reg.id} className="flex items-center justify-between p-5 bg-[#F8F8F8] border border-[#2E2E2F]/5 rounded-[1.75rem] hover:border-[#38BDF2]/30 transition-colors group">
-                                    <div className="flex items-center gap-5">
-                                        <div className="w-11 h-11 rounded-2xl bg-white border border-[#2E2E2F]/10 flex items-center justify-center text-[#2E2E2F] font-semibold text-sm group-hover:bg-[#38BDF2] group-hover:text-white transition-colors">
-                                            {reg.attendeeName.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-[#2E2E2F] text-[15px] tracking-tight">{reg.attendeeName}</p>
-                                            <p className="text-[12px] text-[#2E2E2F]/40 font-medium uppercase tracking-tight mt-0.5">{reg.attendeeEmail}</p>
-                                        </div>
+                    <div className="max-h-[500px] overflow-y-auto pr-2 space-y-4">
+                        {attendees.filter(r => r.eventId === selectedEvent?.eventId).map((reg) => (
+                            <div key={reg.id} className="flex items-center justify-between p-5 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-[1.75rem] hover:border-[#38BDF2]/30 transition-colors group">
+                                <div className="flex items-center gap-5">
+                                    <div className="w-11 h-11 rounded-2xl bg-[#F2F2F2] flex items-center justify-center text-[#2E2E2F] font-semibold text-sm border border-[#2E2E2F]/20 group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors">
+                                        {reg.attendeeName.charAt(0)}
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-[11px] font-medium text-[#2E2E2F] uppercase tracking-wide mb-1.5">{reg.ticketName}</p>
-                                        <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-semibold uppercase tracking-wide ${reg.status === 'USED' ? 'bg-[#38BDF2]/10 text-[#38BDF2]' : 'bg-[#2E2E2F]/5 text-[#2E2E2F]/40'}`}>
-                                            {reg.status}
-                                        </span>
+                                    <div>
+                                        <p className="font-semibold text-[#2E2E2F] text-[15px] tracking-tight">{reg.attendeeName}</p>
+                                        <p className="text-[12px] text-[#2E2E2F]/60 font-medium uppercase tracking-tight mt-0.5">{reg.attendeeEmail}</p>
                                     </div>
                                 </div>
-                            ))}
-                            {attendees.filter(r => r.eventId === selectedEvent?.eventId).length === 0 && (
-                                <div className="py-24 text-center text-[#2E2E2F]/20">
-                                    <ICONS.Users className="w-14 h-14 mx-auto mb-5" />
-                                    <p className="font-bold uppercase tracking-widest text-[11px]">No confirmed guests found</p>
+                                <div className="text-right">
+                                    <p className="text-[11px] font-medium text-[#2E2E2F] uppercase tracking-wide mb-1.5">{reg.ticketName}</p>
+                                    <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-semibold uppercase tracking-wide ${reg.status === 'USED' ? 'bg-[#38BDF2]/20 text-[#2E2E2F]' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'}`}>
+                                        {reg.status}
+                                    </span>
                                 </div>
-                            )}
+                            </div>
+                        ))}
+                        {attendees.filter(r => r.eventId === selectedEvent?.eventId).length === 0 && (
+                            <div className="py-24 text-center text-[#2E2E2F]/50">
+                                <ICONS.Users className="w-14 h-14 mx-auto mb-5 opacity-20" />
+                                <p className="font-medium uppercase tracking-wide text-[11px]">No confirmed guests detected</p>
+                            </div>
+                        )}
+                    </div>
+                    <Button
+                        className="w-full py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors min-h-[32px]"
+                        onClick={() => navigate('/attendees')}
+                    >
+                        Open Full Directory
+                    </Button>
+                </div>
+            </Modal>
+
+            {/* Delete Confirmation Modal */}
+            <Modal
+                isOpen={!!deleteConfirm}
+                onClose={() => setDeleteConfirm(null)}
+                title="Delete Event"
+            >
+                <div className="space-y-6">
+                    <div className="flex items-start gap-5 p-6 bg-red-50 border border-red-200 rounded-[1.75rem]">
+                        <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center shrink-0">
+                            <ICONS.Trash className="w-6 h-6 text-red-500" strokeWidth={2} />
                         </div>
+                        <div>
+                            <p className="font-bold text-[#2E2E2F] text-[16px] tracking-tight">
+                                Are you sure you want to delete this event?
+                            </p>
+                            <p className="text-[13px] text-[#2E2E2F]/60 font-medium mt-2 leading-relaxed">
+                                This will permanently remove <strong>"{deleteConfirm?.eventName}"</strong> and all associated data including ticket types, registrations, and attendee records. This action cannot be undone.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                        <Button
+                            className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border border-[#2E2E2F]/20 hover:bg-[#2E2E2F]/10 transition-colors min-h-[32px]"
+                            onClick={() => setDeleteConfirm(null)}
+                            disabled={submitting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 transition-colors min-h-[32px]"
+                            onClick={handleDeleteEvent}
+                            disabled={submitting}
+                        >
+                            {submitting ? 'Deleting...' : 'Yes, Delete Event'}
+                        </Button>
                     </div>
                 </div>
             </Modal>
@@ -770,6 +842,21 @@ interface TicketManagerProps {
 const TicketManager: React.FC<TicketManagerProps> = ({ event, onSave, submitting, setNotification }) => {
     const [tickets, setTickets] = useState<TicketType[]>([]);
     const [expandedTicketId, setExpandedTicketId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchTickets = async () => {
+            if (event?.eventId) {
+                const fetched = await apiService.getTicketTypes(event.eventId);
+                setTickets(fetched);
+                setExpandedTicketId(null);
+            } else {
+                setTickets([]);
+                setExpandedTicketId(null);
+            }
+        };
+        fetchTickets();
+    }, [event?.eventId]);
+
     const [newTicket, setNewTicket] = useState({
         name: '',
         description: '',
@@ -780,17 +867,6 @@ const TicketManager: React.FC<TicketManagerProps> = ({ event, onSave, submitting
         salesEndAt: '',
         status: true
     });
-
-    useEffect(() => {
-        const fetchTickets = async () => {
-            if (event?.eventId) {
-                const fetched = await apiService.getTicketTypes(event.eventId);
-                setTickets(fetched);
-                setExpandedTicketId(null);
-            }
-        };
-        fetchTickets();
-    }, [event?.eventId]);
 
     const addTicket = () => {
         if (!newTicket.name) return;
@@ -808,60 +884,76 @@ const TicketManager: React.FC<TicketManagerProps> = ({ event, onSave, submitting
             status: newTicket.status
         };
         setTickets([...tickets, item]);
-        setNewTicket({ name: '', description: '', priceAmount: 0, currency: 'PHP', quantityTotal: 100, salesStartAt: '', salesEndAt: '', status: true });
+        setNewTicket({
+            name: '',
+            description: '',
+            priceAmount: 0,
+            currency: 'PHP',
+            quantityTotal: 100,
+            salesStartAt: '',
+            salesEndAt: '',
+            status: true
+        });
     };
 
     const removeTicket = async (id: string) => {
-        if (!id.startsWith('tk-')) {
+        const ticket = tickets.find(t => t.ticketTypeId === id);
+        if (ticket && !id.startsWith('tk-')) {
             try {
                 await apiService.deleteTicketType(id);
-            } catch {
+                if (event?.eventId) {
+                    const updated = await apiService.getTicketTypes(event.eventId);
+                    setTickets(updated);
+                }
+            } catch (err) {
                 setNotification({ message: 'Failed to delete ticket type.', type: 'error' });
-                return;
             }
+        } else {
+            setTickets(tickets.filter(t => t.ticketTypeId !== id));
         }
-        setTickets(tickets.filter(t => t.ticketTypeId !== id));
     };
 
     const updateTicket = (id: string, updates: Partial<TicketType>) => {
-        setTickets(prev => prev.map(t => t.ticketTypeId === id ? { ...t, ...updates } : t));
+        setTickets(prev => prev.map(ticket => (
+            ticket.ticketTypeId === id ? { ...ticket, ...updates } : ticket
+        )));
     };
 
     return (
         <div className="space-y-8">
-            <div className="bg-[#F8F8F8] p-6 rounded-3xl border border-[#2E2E2F]/5">
-                <h4 className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em] mb-4 ml-1">Add Ticket Tier</h4>
+            <div className="bg-[#F2F2F2] p-6 rounded-3xl border border-[#2E2E2F]/20">
+                <h4 className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide mb-4">Add Ticket Tier</h4>
                 <div className="space-y-4">
                     <Input
-                        label="Tier Name (e.g. VIP Access)"
+                        placeholder="Tier Name (e.g. VIP Access)"
                         value={newTicket.name}
                         onChange={(e: any) => setNewTicket({ ...newTicket, name: e.target.value })}
                     />
-                    <div className="space-y-1.5 w-full">
-                        <label className="block text-sm font-medium text-[#2E2E2F]/70">Description (optional)</label>
-                        <textarea
-                            className="block w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 transition-colors font-normal text-sm"
-                            rows={2}
-                            value={newTicket.description}
-                            onChange={(e) => setNewTicket({ ...newTicket, description: e.target.value })}
-                        />
-                    </div>
+                    <textarea
+                        className="w-full px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                        placeholder="Description (optional)"
+                        value={newTicket.description}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewTicket({ ...newTicket, description: e.target.value })}
+                    />
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1.5 w-full">
-                            <label className="block text-sm font-medium text-[#2E2E2F]/70">Type</label>
+                        <div className="space-y-1.5">
+                            <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Type</label>
                             <select
-                                className="block w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 transition-colors font-normal text-sm"
+                                className="w-full px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                 value={newTicket.priceAmount === 0 ? 'FREE' : 'PAID'}
-                                onChange={(e) => setNewTicket({ ...newTicket, priceAmount: e.target.value === 'FREE' ? 0 : (newTicket.priceAmount || 100) })}
+                                onChange={(e) => setNewTicket({
+                                    ...newTicket,
+                                    priceAmount: e.target.value === 'FREE' ? 0 : 100,
+                                })}
                             >
                                 <option value="FREE">Free</option>
                                 <option value="PAID">Paid</option>
                             </select>
                         </div>
-                        <div className="space-y-1.5 w-full">
-                            <label className="block text-sm font-medium text-[#2E2E2F]/70">Status</label>
+                        <div className="space-y-1.5">
+                            <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Status</label>
                             <select
-                                className="block w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 transition-colors font-normal text-sm"
+                                className="w-full px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                 value={newTicket.status ? 'ACTIVE' : 'INACTIVE'}
                                 onChange={(e) => setNewTicket({ ...newTicket, status: e.target.value === 'ACTIVE' })}
                             >
@@ -870,6 +962,14 @@ const TicketManager: React.FC<TicketManagerProps> = ({ event, onSave, submitting
                             </select>
                         </div>
                     </div>
+                    {newTicket.priceAmount > 0 && (
+                        <Input
+                            label={`Price (${newTicket.currency})`}
+                            type="number"
+                            value={newTicket.priceAmount}
+                            onChange={(e: any) => setNewTicket({ ...newTicket, priceAmount: parseFloat(e.target.value) })}
+                        />
+                    )}
                     <div className="grid grid-cols-2 gap-4">
                         <Input
                             label="Quantity Total"
@@ -883,7 +983,7 @@ const TicketManager: React.FC<TicketManagerProps> = ({ event, onSave, submitting
                             onChange={(e: any) => setNewTicket({ ...newTicket, currency: e.target.value.toUpperCase() })}
                         />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-4 mb-2">
                         <Input
                             label="Sales Start"
                             type="datetime-local"
@@ -897,32 +997,182 @@ const TicketManager: React.FC<TicketManagerProps> = ({ event, onSave, submitting
                             onChange={(e: any) => setNewTicket({ ...newTicket, salesEndAt: e.target.value })}
                         />
                     </div>
-                    <Button onClick={addTicket} className="w-full rounded-2xl py-4 text-[10px] font-black uppercase tracking-[0.2em]">Add to Inventory</Button>
+                    <Button
+                        onClick={() => {
+                            addTicket();
+                        }}
+                        className="w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:text-[#F2F2F2] transition-colors"
+                    >
+                        Add to Inventory
+                    </Button>
                 </div>
             </div>
 
-            <div className="space-y-3">
-                <h4 className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em] mb-2 ml-1">Current Inventory</h4>
-                {tickets.length === 0 ? (
-                    <p className="text-center py-6 text-[#2E2E2F]/30 text-[10px] font-bold uppercase tracking-widest">No tickets configured</p>
-                ) : (
-                    tickets.map(t => (
-                        <div key={t.ticketTypeId} className="p-5 bg-white border border-[#2E2E2F]/10 rounded-2xl flex items-center justify-between group">
-                            <div>
-                                <p className="font-bold text-[#2E2E2F] text-sm">{t.name}</p>
-                                <p className="text-[10px] text-[#2E2E2F]/40 font-bold uppercase tracking-widest mt-0.5">
-                                    {t.priceAmount === 0 ? 'Free' : `${t.currency} ${t.priceAmount}`} • Qty {t.quantityTotal}
-                                </p>
+            <div className="space-y-4">
+                <h4 className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Current Inventory</h4>
+                {tickets.map((t) => {
+                    const isExpanded = expandedTicketId === t.ticketTypeId;
+                    const priceLabel = t.priceAmount === 0 ? 'Complimentary' : `PHP ${t.priceAmount.toLocaleString()}`;
+
+                    return (
+                        <div
+                            key={t.ticketTypeId}
+                            className={`flex flex-col gap-4 p-4 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl transition-colors ${!isExpanded ? 'cursor-pointer hover:border-[#38BDF2]/30' : ''
+                                }`}
+                            onClick={() => {
+                                if (!isExpanded) setExpandedTicketId(t.ticketTypeId);
+                            }}
+                        >
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="space-y-1">
+                                    <p className="font-bold text-[#2E2E2F] text-sm">{t.name || 'Untitled Ticket'}</p>
+                                    <div className="flex flex-wrap items-center gap-3 text-[11px] font-medium uppercase tracking-wide">
+                                        <span className="text-[#2E2E2F]">{priceLabel}</span>
+                                        <span className="text-[#2E2E2F]/60">{t.status ? 'Active' : 'Inactive'}</span>
+                                        <span className="text-[#2E2E2F]/60">Qty {t.quantityTotal}</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setExpandedTicketId(isExpanded ? null : t.ticketTypeId);
+                                        }}
+                                        className="text-[11px] font-semibold uppercase tracking-wide text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors"
+                                    >
+                                        {isExpanded ? 'Collapse' : 'Edit'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            removeTicket(t.ticketTypeId);
+                                        }}
+                                        className="text-[#2E2E2F] hover:bg-[#38BDF2]/10 p-2 rounded-lg transition-colors"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
                             </div>
-                            <button onClick={() => removeTicket(t.ticketTypeId)} className="p-2 text-[#2E2E2F]/20 hover:text-red-500 transition-colors">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            </button>
+
+                            {isExpanded && (
+                                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-[#2E2E2F]/20">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Tier Name</label>
+                                        <input
+                                            value={t.name}
+                                            onChange={(e) => updateTicket(t.ticketTypeId, { name: e.target.value })}
+                                            className="w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Status</label>
+                                        <select
+                                            className="w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                            value={t.status ? 'ACTIVE' : 'INACTIVE'}
+                                            onChange={(e) => updateTicket(t.ticketTypeId, { status: e.target.value === 'ACTIVE' })}
+                                        >
+                                            <option value="ACTIVE">Active</option>
+                                            <option value="INACTIVE">Inactive</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Type</label>
+                                        <select
+                                            className="w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                            value={t.priceAmount === 0 ? 'FREE' : 'PAID'}
+                                            onChange={(e) => {
+                                                const isFree = e.target.value === 'FREE';
+                                                const nextPrice = isFree ? 0 : Math.max(t.priceAmount || 0, 100);
+                                                updateTicket(t.ticketTypeId, { priceAmount: nextPrice });
+                                            }}
+                                        >
+                                            <option value="FREE">Free</option>
+                                            <option value="PAID">Paid</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Price ({t.currency || 'PHP'})</label>
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            step="0.01"
+                                            disabled={t.priceAmount === 0}
+                                            value={t.priceAmount}
+                                            onChange={(e) => updateTicket(t.ticketTypeId, { priceAmount: Math.max(0, parseFloat(e.target.value) || 0) })}
+                                            className={`w-full px-3 py-2 border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2] ${t.priceAmount === 0 ? 'bg-[#F2F2F2] text-[#2E2E2F]/60' : 'bg-[#F2F2F2]'}`}
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Quantity Total</label>
+                                        <input
+                                            type="number"
+                                            min={t.quantitySold || 0}
+                                            value={t.quantityTotal}
+                                            onChange={(e) => {
+                                                const nextValue = parseInt(e.target.value, 10) || 0;
+                                                updateTicket(t.ticketTypeId, {
+                                                    quantityTotal: Math.max(nextValue, t.quantitySold || 0)
+                                                });
+                                            }}
+                                            className="w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Currency</label>
+                                        <input
+                                            value={t.currency}
+                                            onChange={(e) => updateTicket(t.ticketTypeId, { currency: e.target.value.toUpperCase() })}
+                                            className="w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2 space-y-1.5">
+                                        <label className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Description</label>
+                                        <textarea
+                                            value={t.description || ''}
+                                            onChange={(e) => updateTicket(t.ticketTypeId, { description: e.target.value })}
+                                            className="w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                            rows={2}
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2 space-y-4 mb-2">
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Sales Start</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={t.salesStartAt || ''}
+                                                onChange={(e) => updateTicket(t.ticketTypeId, { salesStartAt: e.target.value })}
+                                                className="w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Sales End</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={t.salesEndAt || ''}
+                                                onChange={(e) => updateTicket(t.ticketTypeId, { salesEndAt: e.target.value })}
+                                                className="w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">
+                                Sold: {t.quantitySold || 0}
+                            </div>
                         </div>
-                    ))
-                )}
+                    );
+                })}
+                {tickets.length === 0 && <p className="text-center py-6 text-[#2E2E2F]/50 text-xs font-bold uppercase tracking-widest">No tickets configured</p>}
             </div>
 
-            <Button onClick={() => onSave(tickets)} disabled={submitting} className="w-full rounded-2xl py-4 bg-[#2E2E2F] text-white hover:bg-black font-black text-[11px] uppercase tracking-[0.2em]">
+            <Button
+                onClick={() => onSave(tickets)}
+                disabled={submitting}
+                className="w-full py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors min-h-[32px]"
+            >
                 {submitting ? 'Updating...' : 'Commit Inventory Changes'}
             </Button>
         </div>

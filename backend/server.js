@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -20,9 +21,6 @@ import orderRoutes from "./routes/orderRoutes.js";
 import organizerRoutes from "./routes/organizerRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
-
-
-dotenv.config();
 const PORT = process.env.BACKEND_PORT
 const app = express();
 
