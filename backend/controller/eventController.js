@@ -58,9 +58,41 @@ async function fetchEventByIdentifier(identifier) {
   return { error: null, event: (byId.data || [])[0] || null };
 }
 
+export const listLiveEvents = async (req, res) => {
+  try {
+    const { data: events, error: eventsError } = await supabase
+      .from('events')
+      .select('*')
+      .in('status', ['LIVE', 'PUBLISHED'])
+      .order('startAt', { ascending: false });
+
+    if (eventsError) return res.status(500).json({ error: eventsError.message });
+
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+    const filteredEvents = (events || []).filter(e => {
+      const start = new Date(e.startAt);
+      const end = new Date(e.endAt);
+      const hasContent = (e.locationText && e.locationText.trim() !== '') || (e.streaming_url && e.streaming_url.trim() !== '');
+
+      // Show if the event date overlaps with today and it has broadcast info
+      const isToday = start <= endOfToday && end >= startOfToday;
+      return hasContent && isToday;
+    });
+
+    const enrichedEvents = await enrichEventsWithOrganizer(filteredEvents);
+    return res.json({ success: true, data: enrichedEvents });
+  } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
+
 export const listEvents = async (req, res) => {
   try {
-    const status = (req.query.status || 'PUBLISHED').toString();
+    const statusStr = req.query.status ? req.query.status.toString() : 'PUBLISHED,LIVE';
+    const statuses = statusStr.split(',');
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const offset = (page - 1) * limit;
@@ -70,7 +102,7 @@ export const listEvents = async (req, res) => {
 
     // 1) Fetch all events (optionally filter by status)
     let query = supabase.from('events').select('*');
-    if (status) query = query.eq('status', status);
+    if (statuses.length > 0) query = query.in('status', statuses);
     if (organizerId) query = query.eq('organizerId', organizerId);
 
     // Detailed search filter

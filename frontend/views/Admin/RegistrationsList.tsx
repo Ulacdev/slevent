@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { RegistrationView, UserRole } from '../../types';
-import { Card, Modal, PageLoader } from '../../components/Shared';
+import { Card, Badge, Button, Modal, Input, PageLoader } from '../../components/Shared';
 import { ICONS } from '../../constants';
 import { useUser } from '../../context/UserContext';
 import QRCode from 'react-qr-code';
@@ -156,7 +156,63 @@ export const RegistrationsList: React.FC = () => {
         </div>
       </div>
 
-      <Card className="overflow-hidden border-[#2E2E2F]/10 rounded-2xl bg-[#F2F2F2]">
+      <div className="grid grid-cols-1 gap-4 md:hidden">
+        {pagedRegs.map((reg, index) => {
+          const isCheckedIn = reg.status === 'USED';
+          return (
+            <Card
+              key={reg.id ?? reg.ticketCode ?? index}
+              className="p-5 border-[#2E2E2F]/10 hover:border-[#38BDF2]/40 transition-colors cursor-pointer"
+              onClick={() => setSelectedReg(reg)}
+            >
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="min-w-0">
+                  <h3 className="font-bold text-[#2E2E2F] text-base truncate">{reg.attendeeName}</h3>
+                  <p className="text-[12px] text-[#2E2E2F]/60 font-medium truncate">{reg.attendeeEmail}</p>
+                </div>
+                <Badge
+                  type={isCheckedIn ? 'success' : 'neutral'}
+                  className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 shrink-0"
+                >
+                  {isCheckedIn ? 'CHECKED_IN' : 'ISSUED'}
+                </Badge>
+              </div>
+
+              <div className="space-y-3 mb-5">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Event</span>
+                  <span className="text-[13px] font-bold text-[#2E2E2F] truncate">{reg.eventName}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Ticket</span>
+                  <span className="text-[13px] font-semibold text-[#2E2E2F]/70">{reg.ticketName}</span>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Payment</span>
+                    <span className="text-[14px] font-black text-[#2E2E2F]">{reg.currency} {(reg.amountPaid ?? 0).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {!isCheckedIn && (
+                <button
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleCheckIn(reg);
+                  }}
+                  className="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] transition-colors"
+                  disabled={isStaff && !canManualCheckIn}
+                >
+                  MANUAL CHECK-IN
+                </button>
+              )}
+            </Card>
+          );
+        })}
+      </div>
+
+      <Card className="hidden md:block overflow-hidden border-[#2E2E2F]/10 rounded-2xl bg-[#F2F2F2]">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
@@ -227,13 +283,13 @@ export const RegistrationsList: React.FC = () => {
             </tbody>
           </table>
         </div>
-        {filteredRegs.length === 0 && !loading && (
-          <div className="py-24 text-center">
-            <ICONS.Users className="w-12 h-12 text-[#2E2E2F]/30 mx-auto mb-4" />
-            <p className="text-[#2E2E2F]/60 font-bold uppercase tracking-widest text-[10px]">No attendees</p>
-          </div>
-        )}
       </Card>
+      {pagedRegs.length === 0 && !loading && (
+        <div className="py-24 text-center">
+          <ICONS.Users className="w-12 h-12 text-[#2E2E2F]/30 mx-auto mb-4" />
+          <p className="text-[#2E2E2F]/60 font-bold uppercase tracking-widest text-[10px]">No attendees</p>
+        </div>
+      )}
       <Modal
         isOpen={Boolean(selectedReg)}
         onClose={() => setSelectedReg(null)}

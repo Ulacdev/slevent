@@ -45,6 +45,137 @@ const formatCompactCount = (value: number) => (
   )
 );
 
+
+const StreamStatusBanner: React.FC<{ event: Event; isOwner?: boolean }> = ({ event, isOwner }) => {
+  // Check if event is LIVE either by status or by time (event is happening now)
+  const now = new Date();
+  const startAt = event.startAt ? new Date(event.startAt) : null;
+  const endAt = event.endAt ? new Date(event.endAt) : null;
+  const isLiveByTime = startAt && now >= startAt && (!endAt || now <= endAt);
+  const isLiveStatus = event.status === 'LIVE' || isLiveByTime;
+  const isOnline = event.locationType === 'ONLINE' || event.locationType === 'HYBRID' || isLiveStatus;
+  const url = event.streaming_url || event.locationText || '';
+  const normalizedUrl = url && !url.startsWith('http') ? `https://${url}` : url;
+  const isYouTube = /youtube\.com|youtu\.be/.test(normalizedUrl);
+  const isFacebook = /facebook\.com|fb\.watch|fb\.com/.test(normalizedUrl);
+
+  const getYouTubeId = (url: string) => {
+    try {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/|live\/)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      const id = (match && match[2].length === 11) ? match[2] : null;
+      console.log('YouTube ID extraction:', { url, id });
+      return id;
+    } catch (e) {
+      console.error('YouTube extraction error:', e);
+      return null;
+    }
+  };
+
+  const videoId = isYouTube ? getYouTubeId(normalizedUrl) : null;
+  const hasLink = !!(normalizedUrl && normalizedUrl.startsWith('http'));
+
+  // Logic: if it has a link, we show it IF it's either explicitly LIVE status OR set as Online/Hybrid
+  const showingLive = hasLink && (isLiveStatus || isOnline);
+
+  // Hide entire banner if not online or no streaming URL
+  if (!isOnline || !hasLink) return null;
+
+  return (
+    <div className={`overflow-hidden rounded-[2.5rem] border border-[#2E2E2F]/10 mb-10 shadow-2xl ${isOwner && hasLink ? 'ring-2 ring-[#2E2E2F]/30' : ''}`}>
+      {/* Header */}
+      <div className="bg-[#00AEEF] p-6 text-white text-left flex justify-between items-center border-b border-[#00AEEF]/20 shadow-[0_4px_20px_rgba(0,174,239,0.3)]">
+        <div>
+          <h2 className="text-xl font-black tracking-tight leading-tight">{event.eventName} {isLiveStatus && <span className="ml-2 px-2 py-0.5 bg-red-600 rounded text-[9px] animate-pulse text-white">LIVE</span>}</h2>
+          <p className="text-[11px] font-bold opacity-90 mt-1 uppercase tracking-widest text-[#F2F2F2]">
+            {formatDate(event.startAt, event.timezone, { weekday: 'long' })} AT {formatDate(event.startAt, event.timezone, { timeStyle: 'short' })}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 z-10 bg-red-600 px-4 py-1.5 rounded-full border border-red-500 shadow-[0_0_15px_rgba(220,38,38,0.4)] animate-pulse">
+          <div className="w-2 h-2 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+          <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{isLiveStatus ? 'BROADCASTING' : 'LIVE NOW'}</span>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className={`bg-[#F2F2F2] ${showingLive ? 'p-4' : 'p-12'} flex flex-col items-center justify-center text-center relative border-t border-[#2E2E2F]/10`}>
+        {isOwner && showingLive && (
+          <div className="absolute top-4 left-4 flex items-center gap-2 z-10 bg-[#2E2E2F]/5 px-2 py-1 rounded-lg border border-[#2E2E2F]/10">
+            <ICONS.Monitor className="w-2.5 h-2.5 text-[#2E2E2F]" />
+            <span className="text-[8px] font-black text-[#2E2E2F] uppercase tracking-[0.1em]">Organizer Preview</span>
+          </div>
+        )}
+
+        {!showingLive ? (
+          <>
+            <div className="mb-6 opacity-30">
+              <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#2E2E2F" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m16 16-3.5 1.5M2 2l20 20M7 7H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2M21 16V9a2 2 0 0 0-2-2h-3L12 3v1" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-black text-[#2E2E2F] mb-2 uppercase tracking-tighter">No Live Stream</h3>
+            <p className="text-[#2E2E2F]/60 text-xs max-w-sm mb-8 font-medium leading-relaxed">
+              There is no live stream at the moment. Please check back during our service times.
+            </p>
+            <button
+              className="bg-[#2E2E2F] text-white px-8 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] flex items-center gap-2"
+              onClick={() => {
+                const el = document.getElementById('event-schedule-info');
+                el?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              <ICONS.Calendar className="w-4 h-4" />
+              VIEW SERVICE TIMES
+            </button>
+          </>
+        ) : (
+          <div className="w-full">
+            {isYouTube && videoId ? (
+              <div className="relative aspect-video rounded-3xl overflow-hidden bg-[#2E2E2F]/5 border border-[#2E2E2F]/10 shadow-inner">
+                <iframe
+                  className="absolute inset-0 w-full h-full"
+                  src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0&modestbranding=1`}
+                  title="YouTube Live Session"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            ) : isFacebook ? (
+              <div className="relative aspect-video rounded-3xl overflow-hidden bg-[#2E2E2F]/5 border border-[#2E2E2F]/10 shadow-inner">
+                <iframe
+                  className="absolute inset-0 w-full h-full"
+                  src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(normalizedUrl)}&show_text=0&autoplay=1&mute=1`}
+                  title="Facebook Video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <a
+                href={normalizedUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex flex-col items-center justify-center p-14 rounded-3xl bg-[#F2F2F2] border border-[#2E2E2F]/10 hover:bg-[#2E2E2F]/5 hover:border-[#2E2E2F]/30 transition-all group shadow-sm text-[#2E2E2F]"
+              >
+                <div className="w-20 h-20 rounded-full bg-[#2E2E2F]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                  <ICONS.Monitor className="w-10 h-10 text-[#2E2E2F]" />
+                </div>
+                <p className="text-[#2E2E2F] font-black text-xl tracking-tight">Open Live Stream Channel</p>
+                <div className="mt-4 flex items-center gap-2 text-[10px] text-[#2E2E2F]/40 uppercase tracking-[0.3em] font-black group-hover:text-[#2E2E2F] transition-colors">
+                  <span>Watch External</span>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7-7 7M5 12h16" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </div>
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const EventDetails: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -156,7 +287,7 @@ export const EventDetails: React.FC = () => {
     regState = `Closes ${formatDate(regClose.toISOString(), event.timezone, { year: 'numeric', month: 'short', day: 'numeric' })}`;
   }
 
-  const hasPhysicalLocation = (event.locationType === 'ONSITE' || event.locationType === 'HYBRID') && !!event.locationText?.trim();
+  const hasPhysicalLocation = !!event.locationText?.trim() && !event.locationText.startsWith('http');
   const mapEmbedUrl = hasPhysicalLocation
     ? `https://maps.google.com/maps?q=${encodeURIComponent(event.locationText.trim())}&z=15&output=embed`
     : '';
@@ -295,7 +426,7 @@ export const EventDetails: React.FC = () => {
     : `${formatCompactCount(likesCount)} likes`;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 pb-72 lg:py-16 lg:pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pb-24 sm:pb-32 lg:py-16 lg:pb-16">
       <div className="mb-8">
         <button
           onClick={() => navigate('/')}
@@ -307,14 +438,8 @@ export const EventDetails: React.FC = () => {
 
         <div className="flex flex-col lg:flex-row gap-16 items-start">
           <div className="flex-1 space-y-10">
+
             {/* Visual Header */}
-            <div className="overflow-hidden rounded-[2.5rem] border border-[#2E2E2F]/10">
-              <img
-                src={getImageUrl(event.imageUrl)}
-                alt={event.eventName}
-                className="w-full aspect-video object-cover"
-              />
-            </div>
 
             {/* Event Profile */}
             <div>
@@ -344,18 +469,20 @@ export const EventDetails: React.FC = () => {
                   </button>
                 </div>
               </div>
-              <div className="mb-4 flex items-center gap-2 text-[12px] font-semibold text-[#2E2E2F]/70">
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center ${liked ? 'bg-red-500 text-white' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]/65'}`}>
-                  <ICONS.Heart className="w-3.5 h-3.5" />
-                </span>
-                <span>{likesLabel}</span>
+              {/* Visual Header */}
+              <div className="overflow-hidden rounded-[2.5rem] border border-[#2E2E2F]/10">
+                <img
+                  src={getImageUrl(event.imageUrl)}
+                  alt={event.eventName}
+                  className="w-full aspect-video object-cover"
+                />
               </div>
               {interactionNotice && (
                 <div className="mb-4 rounded-xl border border-[#38BDF2]/30 bg-[#38BDF2]/10 px-3 py-2 text-xs font-semibold text-[#2E2E2F]">
                   {interactionNotice}
                 </div>
               )}
-              <div className="flex flex-wrap gap-4 mb-12">
+              <div id="event-schedule-info" className="flex flex-wrap gap-4 mb-12">
                 <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-4 py-2 rounded-2xl border border-[#2E2E2F]/10 text-[12px]">
                   <ICONS.Calendar className="w-4 h-4 mr-3 text-[#38BDF2]" />
                   {formatRange(event.startAt, event.endAt, event.timezone)}{event.timezone ? ` TZ: ${event.timezone}` : ''}
@@ -378,6 +505,7 @@ export const EventDetails: React.FC = () => {
                   </div>
                 )}
               </div>
+
 
               <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border border-[#2E2E2F]/10">
                 <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.4em] mb-6">EVENT DETAILS</h3>
@@ -476,6 +604,23 @@ export const EventDetails: React.FC = () => {
                     </div>
                   </div>
                 )}
+
+                {/* Live Stream Section - Consolidated at bottom of Organized By card */}
+                {(() => {
+                  const now = new Date();
+                  const startAt = event.startAt ? new Date(event.startAt) : null;
+                  const endAt = event.endAt ? new Date(event.endAt) : null;
+                  const isLiveByTime = startAt && now >= startAt && (!endAt || now <= endAt);
+                  const isEventLive = event.status === 'LIVE' || isLiveByTime;
+                  return (event.locationType === 'ONLINE' || event.locationType === 'HYBRID' || isEventLive);
+                })() && (
+                    <div className="mt-8 pt-8 border-t border-[#2E2E2F]/10">
+                      <StreamStatusBanner
+                        event={event}
+                        isOwner={isOwnEvent}
+                      />
+                    </div>
+                  )}
               </div>
 
               {hasPhysicalLocation && (
@@ -604,32 +749,34 @@ export const EventDetails: React.FC = () => {
         </div>
       </div>
 
-      {!isOwnEvent && (
-        <div
-          className="fixed inset-x-0 z-[60] px-3 sm:px-4 lg:hidden pointer-events-none"
-          style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
-        >
-          <div className="pointer-events-auto mx-auto w-full max-w-xl max-h-[calc(100dvh-7.5rem)] overflow-y-auto overscroll-contain rounded-[2rem] border border-[#2E2E2F]/15 bg-[#F2F2F2]/98 backdrop-blur px-6 py-6 shadow-[0_18px_38px_-18px_rgba(46,46,47,0.35)]">
-            <p className="text-xl font-black text-[#2E2E2F] tracking-tight">
-              Get Tickets
-            </p>
-            <div className="mt-5 border-t border-[#2E2E2F]/10" />
-            <Button
-              className="w-full mt-5"
-              disabled={totalQuantity === 0}
-              onClick={handleRegister}
-            >
-              {ctaLabel}
-            </Button>
-            <div className="mt-4 flex items-center justify-center gap-2 opacity-40">
-              <ICONS.CreditCard className="w-4 h-4" />
-              <p className="text-[9px] text-center font-black uppercase tracking-[0.3em] text-[#2E2E2F]">
-                SECURE HITPAY CHECKOUT
+      {
+        !isOwnEvent && (
+          <div
+            className="fixed inset-x-0 z-[60] px-3 sm:px-4 lg:hidden pointer-events-none"
+            style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
+          >
+            <div className="pointer-events-auto mx-auto w-full max-w-xl max-h-[calc(100dvh-7.5rem)] overflow-y-auto overscroll-contain rounded-[2rem] border border-[#2E2E2F]/15 bg-[#F2F2F2]/98 backdrop-blur px-6 py-6 shadow-[0_18px_38px_-18px_rgba(46,46,47,0.35)]">
+              <p className="text-xl font-black text-[#2E2E2F] tracking-tight">
+                Get Tickets
               </p>
+              <div className="mt-5 border-t border-[#2E2E2F]/10" />
+              <Button
+                className="w-full mt-5"
+                disabled={totalQuantity === 0}
+                onClick={handleRegister}
+              >
+                {ctaLabel}
+              </Button>
+              <div className="mt-4 flex items-center justify-center gap-2 opacity-40">
+                <ICONS.CreditCard className="w-4 h-4" />
+                <p className="text-[9px] text-center font-black uppercase tracking-[0.3em] text-[#2E2E2F]">
+                  SECURE HITPAY CHECKOUT
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 };

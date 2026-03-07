@@ -382,7 +382,8 @@ export const createEvent = async (req, res) => {
       regCloseAt,
       status = 'DRAFT',
       imageUrl,
-      streamingPlatform
+      streamingPlatform,
+      streaming_url
     } = req.body || {};
 
     if (!eventName) return res.status(400).json({ error: 'eventName is required' });
@@ -421,6 +422,7 @@ export const createEvent = async (req, res) => {
       status,
       imageUrl: imageUrl || null,
       streamingPlatform: streamingPlatform || null,
+      streaming_url: streaming_url || null,
       organizerId,
       createdBy: req.user?.id || null,
       updated_at: new Date().toISOString()

@@ -1,5 +1,5 @@
 
-export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED' | 'CANCELLED';
+export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'LIVE' | 'CLOSED' | 'CANCELLED';
 export type TicketTypeStatus = boolean; // true = ACTIVE, false = INACTIVE
 export type OrderStatus = 'DRAFT' | 'PENDING_PAYMENT' | 'PAID' | 'FAILED' | 'CANCELLED' | 'EXPIRED';
 export type PaymentStatus = 'INITIATED' | 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'REFUNDED';
@@ -76,16 +76,16 @@ export interface AdminPlan {
   isRecommended: boolean;
   isActive: boolean;
   features: {
-    aiIntegration: boolean;
-    branding: boolean;
-    weddingSuppliers: boolean;
+    enable_custom_branding: boolean;
+    enable_discount_codes: boolean;
+    enable_advanced_reports: boolean;
+    enable_priority_support: boolean;
   };
   limits: {
-    users: number | string;
-    projects: number | string;
-    contacts: number | string;
-    accounts: number | string;
-    storage: string;
+    max_events: number | string;
+    max_active_events: number | string;
+    max_staff_accounts: number | string;
+    max_attendees_per_month: number | string;
   };
   created_at?: string;
   updated_at?: string;
@@ -106,6 +106,10 @@ export interface Event {
   regCloseAt?: string; // date string
   status: EventStatus;
   streamingPlatform?: string;
+  streaming_url?: string;
+  brandColor?: string;
+  externalLogoUrl?: string;
+  enableDiscountCodes?: boolean;
 
   // Audit fields from DB
   created_at?: string;

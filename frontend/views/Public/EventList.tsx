@@ -578,11 +578,11 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   );
 
   return (
-    <div className={`max-w-[88rem] mx-auto px-6 pb-16 ${isLanding ? 'pt-10' : 'pt-8'}`}>
+    <div className={`max-w-[88rem] mx-auto px-4 sm:px-6 pb-16 ${isLanding ? 'pt-6 sm:pt-10' : 'pt-4 sm:pt-8'}`}>
       {isLanding && (
         <>
           {/* Premium Hero Section */}
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-14 mb-20">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-14 mb-16 lg:mb-20">
             {/* Left Column: Content */}
             <div className="flex-1 min-w-0 flex flex-col items-start text-left">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FAFAFA] border border-[#2E2E2F]/5 text-[10px] font-bold text-[#2E2E2F] mb-7 shadow-sm">
@@ -590,7 +590,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 <span className="opacity-80">New: Advanced QR Ticketing & Analytics Launched!</span>
               </div>
 
-              <h1 className="text-4xl lg:text-6xl font-black text-[#2E2E2F] tracking-tighter leading-[1.05] mb-7">
+              <h1 className="text-3xl sm:text-4xl lg:text-6xl font-black text-[#2E2E2F] tracking-tighter leading-[1.05] mb-7">
                 Smart Events for<br />
                 Growing Philippine<br />
                 Organizers
@@ -833,7 +833,82 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
       {isLanding && <PricingSection />}
       {isLanding && <FeaturedOrganizers />}
+      {isLanding && <FAQSection />}
     </div>
+  );
+};
+
+const FAQSection: React.FC = () => {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const faqs = [
+    {
+      question: "How can I maximize visibility for my event listing?",
+      answer: "Utilize our built-in SEO tools, share your event on social media, and leverage our follower notification system to alert your audience as soon as you publish."
+    },
+    {
+      question: "What's included when I use StartupLab?",
+      answer: "StartupLab provides a comprehensive suite of tools including QR-based ticketing, real-time analytics, attendee management, and seamless payment processing via HitPay."
+    },
+    {
+      question: "Is it free to use StartupLab?",
+      answer: "We offer a flexible pricing structure including a 14-day free trial on most plans, allowing you to explore all premium features before committing."
+    },
+    {
+      question: "How do I track the performance of my event ticket sales?",
+      answer: "Our Advanced Reports module gives you real-time insights into ticket sales, registration trends, and attendee demographics through a clean, intuitive dashboard."
+    },
+    {
+      question: "How to sell more event tickets?",
+      answer: "Use our Discount Codes feature to run early-bird promotions and flash sales, and encourage your followers to share event links with their network."
+    },
+    {
+      question: "What strategy should I use when pricing my event tickets?",
+      answer: "Consider a tiered pricing strategy (Early Bird, Regular, Last Minute) to drive early registrations and maximize revenue based on demand."
+    }
+  ];
+
+  return (
+    <section className="mt-20 mb-20 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+      <div className="text-center mb-16">
+        <h2 className="text-4xl lg:text-5xl font-black text-[#2E2E2F] tracking-tighter uppercase mb-4">Frequently Asked Questions</h2>
+        <p className="text-[#2E2E2F]/50 text-base font-bold uppercase tracking-widest italic">Everything you need to know about StartupLab Event SaaS.</p>
+      </div>
+      <div className="max-w-4xl mx-auto space-y-4">
+        {faqs.map((faq, index) => (
+          <div
+            key={index}
+            className={`group rounded-[2rem] overflow-hidden transition-all duration-500 border-2 ${openIndex === index
+              ? 'bg-white border-[#38BDF2] shadow-[0_20px_50px_-12px_rgba(56,189,242,0.2)]'
+              : 'bg-[#F2F2F2] border-[#2E2E2F]/5 hover:border-[#38BDF2]/30'
+              }`}
+          >
+            <button
+              onClick={() => setOpenIndex(openIndex === index ? null : index)}
+              className="w-full px-8 py-7 flex items-center justify-between text-left focus:outline-none"
+            >
+              <span className={`text-lg font-black tracking-tight transition-colors duration-300 ${openIndex === index ? 'text-[#38BDF2]' : 'text-[#2E2E2F]'}`}>
+                {faq.question}
+              </span>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 ${openIndex === index ? 'bg-[#38BDF2] text-white rotate-180' : 'bg-[#2E2E2F]/5 text-[#2E2E2F]/40 group-hover:bg-[#38BDF2]/10 group-hover:text-[#38BDF2]'
+                }`}>
+                <ICONS.ChevronDown className="w-6 h-6" strokeWidth={3} />
+              </div>
+            </button>
+            <div
+              className={`px-8 overflow-hidden transition-all duration-500 ease-in-out ${openIndex === index ? 'max-h-[500px] pb-8 opacity-100' : 'max-h-0 opacity-0'
+                }`}
+            >
+              <div className="pt-2 border-t border-[#2E2E2F]/5 mt-2">
+                <p className="text-[#2E2E2F]/60 text-base font-medium leading-relaxed mt-4">
+                  {faq.answer}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 };
 

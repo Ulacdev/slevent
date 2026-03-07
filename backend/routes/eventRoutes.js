@@ -1,10 +1,13 @@
 import express from 'express';
-import { listEvents, getEventBySlug } from '../controller/eventController.js';
+import { listEvents, getEventBySlug, listLiveEvents } from '../controller/eventController.js';
 import { getMyLikedEvents, likeEvent, unlikeEvent } from '../controller/eventLikeController.js';
 import { createEvent } from '../controller/adminEventController.js';
 import { authMiddleware } from '../middleware/auth.js';
 
 const router = express.Router();
+
+// GET /api/events/live
+router.get('/live', listLiveEvents);
 
 // GET /api/events
 router.get('/', listEvents);

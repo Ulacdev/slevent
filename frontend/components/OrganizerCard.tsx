@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { OrganizerProfile } from '../../types';
-import { ICONS } from '../../constants';
-import { useUser } from '../../context/UserContext';
-import { useEngagement } from '../../context/EngagementContext';
+import { OrganizerProfile } from '../types';
+import { useUser } from '../context/UserContext';
+import { useEngagement } from '../context/EngagementContext';
 
 const getImageUrl = (img: any): string => {
     if (!img) return '';
@@ -35,6 +34,7 @@ export const OrganizerCard: React.FC<OrganizerCardProps> = ({
     const navigate = useNavigate();
     const { isAuthenticated } = useUser();
     const { isFollowing, toggleFollowing, canLikeFollow } = useEngagement();
+    const [bioExpanded, setBioExpanded] = useState(false);
 
     const following = isFollowing(organizer.organizerId);
     const organizerImage = getImageUrl(organizer.profileImageUrl);
@@ -58,7 +58,7 @@ export const OrganizerCard: React.FC<OrganizerCardProps> = ({
     };
 
     const handleClick = () => {
-        navigate(`/organizers/${organizer.organizerId}`);
+        navigate(`/organizer/${organizer.organizerId}`);
     };
 
     // Horizontal variant - for dropdown selector
@@ -156,9 +156,19 @@ export const OrganizerCard: React.FC<OrganizerCardProps> = ({
             </div>
 
             {showBio && organizer.bio && (
-                <p className="text-[#2E2E2F]/70 text-sm font-medium leading-relaxed mb-4 line-clamp-2">
-                    {organizer.bio}
-                </p>
+                <>
+                    <p className={`text-[#2E2E2F]/70 text-sm font-medium leading-relaxed mb-3 ${bioExpanded ? '' : 'line-clamp-2'}`}>
+                        {organizer.bio}
+                    </p>
+                    {organizer.bio.length > 100 && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setBioExpanded(!bioExpanded); }}
+                            className="text-[#38BDF2] text-xs font-bold hover:underline mb-2"
+                        >
+                            {bioExpanded ? 'See less' : 'See more'}
+                        </button>
+                    )}
+                </>
             )}
 
             <div className="flex items-center justify-between gap-3">
@@ -180,7 +190,8 @@ export const OrganizerCard: React.FC<OrganizerCardProps> = ({
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="p-2 rounded-lg border border-[#2E2E2F]/10 bg-white text-[#2E2E2F]/60 hover:text-[#38BDF2] transition-colors"
+                                className="p-3 rounded-xl bg-[#2E2E2F] text-white hover:bg-[#38BDF2] transition-colors"
+                                title="Visit Website"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -193,7 +204,7 @@ export const OrganizerCard: React.FC<OrganizerCardProps> = ({
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="p-2 rounded-lg border border-[#2E2E2F]/10 bg-white text-[#2E2E2F]/60 hover:text-[#1877F2] transition-colors"
+                                className="p-3 rounded-xl bg-[#2E2E2F] text-white hover:bg-[#1877F2] transition-colors"
                             >
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
@@ -206,10 +217,11 @@ export const OrganizerCard: React.FC<OrganizerCardProps> = ({
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="p-2 rounded-lg border border-[#2E2E2F]/10 bg-white text-[#2E2E2F]/60 hover:text-[#1DA1F2] transition-colors"
+                                className="p-3 rounded-xl bg-[#2E2E2F] text-white hover:bg-[#000000] transition-colors"
+                                title="X (Twitter)"
                             >
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.84 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
+                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                                 </svg>
                             </a>
                         )}

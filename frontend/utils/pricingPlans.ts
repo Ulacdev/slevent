@@ -32,16 +32,27 @@ export const getPlanAmount = (plan: AdminPlan, billingCycle: PlanBillingCycle): 
   return Number(plan.monthlyPrice || 0);
 };
 
-export const getPlanValueItems = (plan: AdminPlan): string[] => [
-  `Users: ${formatLimitValue(plan.limits?.users ?? 0)}`,
-  `Projects: ${formatLimitValue(plan.limits?.projects ?? 0)}`,
-  `Contacts: ${formatLimitValue(plan.limits?.contacts ?? 0)}`,
-  `Accounts: ${formatLimitValue(plan.limits?.accounts ?? 0)}`,
-  `Storage: ${String(plan.limits?.storage || 'N/A')}`,
-  `AI Integration: ${plan.features?.aiIntegration ? 'Included' : 'Not included'}`,
-  `Branding: ${plan.features?.branding ? 'Included' : 'Not included'}`,
-  `Wedding Suppliers: ${plan.features?.weddingSuppliers ? 'Included' : 'Not included'}`,
-];
+export const getPlanValueItems = (plan: AdminPlan): string[] => {
+  const items: string[] = [];
+
+  // Limits
+  if (plan.limits) {
+    items.push(`${formatLimitValue(plan.limits.max_events)} Total Events`);
+    items.push(`${formatLimitValue(plan.limits.max_active_events)} Active Events`);
+    items.push(`${formatLimitValue(plan.limits.max_staff_accounts)} Staff Accounts`);
+    items.push(`${formatLimitValue(plan.limits.max_attendees_per_month)} Monthly Attendees`);
+  }
+
+  // Features
+  if (plan.features) {
+    if (plan.features.enable_custom_branding) items.push('Custom Branding');
+    if (plan.features.enable_discount_codes) items.push('Discount Codes');
+    if (plan.features.enable_advanced_reports) items.push('Advanced Reports');
+    if (plan.features.enable_priority_support) items.push('Priority Support');
+  }
+
+  return items;
+};
 
 export const sortPlansForDisplay = (plans: AdminPlan[]): AdminPlan[] => {
   return [...plans].sort((a, b) => {

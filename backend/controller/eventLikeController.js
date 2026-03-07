@@ -222,12 +222,14 @@ export const likeEvent = async (req, res) => {
             .eq('ownerUserId', context.organizerOwnerUserId)
             .maybeSingle();
 
+          const recipientProfile = await getUserProfileByAuthId(context.organizerOwnerUserId);
+          const organizerEmail = recipientProfile?.email || '';
+
           if (orgData?.emailOptIn) {
             debugLog(`📡 [Like] Sending notification to Organizer: ${context.organizerOwnerUserId}`);
-            const recipientProfile = await getUserProfileByAuthId(context.organizerOwnerUserId);
             await notifyUserByPreference({
               recipientUserId: context.organizerOwnerUserId,
-              recipientFallbackEmail: recipientProfile?.email || '',
+              recipientFallbackEmail: organizerEmail,
               actorUserId: userId,
               eventId: context.eventId,
               organizerId: context.organizerId,
@@ -255,6 +257,7 @@ export const likeEvent = async (req, res) => {
           attendeeNotif = await notifyUserByPreference({
             recipientUserId: userId,
             recipientFallbackEmail: requesterEmail,
+            actorUserId: context.organizerOwnerUserId,
             eventId: context.eventId,
             organizerId: context.organizerId,
             type: 'LIKE_CONFIRMATION',
@@ -266,6 +269,8 @@ export const likeEvent = async (req, res) => {
               actionUrl: process.env.FRONTEND_URL || 'https://events.moonshotdigital.com.ph',
             },
             emailSubject: `Thanks for liking ${context.eventName}!`,
+            fromName: context.organizerName || 'Organizer',
+            replyTo: organizerEmail || undefined,
           });
         } else {
           debugLog(`ℹ️ [Like] No notification sent. Reason: ${!likeCreated ? 'Already liked' : 'Self-like or No owner'}`);

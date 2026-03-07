@@ -27,16 +27,16 @@ const defaultDraft: PlanDraft = {
   isRecommended: false,
   isActive: true,
   features: {
-    aiIntegration: false,
-    branding: false,
-    weddingSuppliers: false,
+    enable_custom_branding: false,
+    enable_discount_codes: false,
+    enable_advanced_reports: false,
+    enable_priority_support: false,
   },
   limits: {
-    users: 1,
-    projects: 1,
-    contacts: 50,
-    accounts: 25,
-    storage: '1 GB',
+    max_events: 3,
+    max_active_events: 2,
+    max_staff_accounts: 2,
+    max_attendees_per_month: 100,
   },
 };
 
@@ -66,16 +66,16 @@ const toDraft = (plan: AdminPlan): PlanDraft => ({
   isRecommended: !!plan.isRecommended,
   isActive: !!plan.isActive,
   features: {
-    aiIntegration: !!plan.features?.aiIntegration,
-    branding: !!plan.features?.branding,
-    weddingSuppliers: !!plan.features?.weddingSuppliers,
+    enable_custom_branding: !!plan.features?.enable_custom_branding,
+    enable_discount_codes: !!plan.features?.enable_discount_codes,
+    enable_advanced_reports: !!plan.features?.enable_advanced_reports,
+    enable_priority_support: !!plan.features?.enable_priority_support,
   },
   limits: {
-    users: plan.limits?.users ?? 0,
-    projects: plan.limits?.projects ?? 0,
-    contacts: plan.limits?.contacts ?? 0,
-    accounts: plan.limits?.accounts ?? 0,
-    storage: String(plan.limits?.storage || '1 GB'),
+    max_events: plan.limits?.max_events ?? 0,
+    max_active_events: plan.limits?.max_active_events ?? 0,
+    max_staff_accounts: plan.limits?.max_staff_accounts ?? 0,
+    max_attendees_per_month: plan.limits?.max_attendees_per_month ?? 0,
   },
 });
 
@@ -89,16 +89,16 @@ const toPayload = (draft: PlanDraft): Partial<AdminPlan> => ({
   isRecommended: !!draft.isRecommended,
   isActive: !!draft.isActive,
   features: {
-    aiIntegration: !!draft.features.aiIntegration,
-    branding: !!draft.features.branding,
-    weddingSuppliers: !!draft.features.weddingSuppliers,
+    enable_custom_branding: !!draft.features.enable_custom_branding,
+    enable_discount_codes: !!draft.features.enable_discount_codes,
+    enable_advanced_reports: !!draft.features.enable_advanced_reports,
+    enable_priority_support: !!draft.features.enable_priority_support,
   },
   limits: {
-    users: draft.limits.users,
-    projects: draft.limits.projects,
-    contacts: draft.limits.contacts,
-    accounts: draft.limits.accounts,
-    storage: String(draft.limits.storage || '1 GB').trim(),
+    max_events: draft.limits.max_events,
+    max_active_events: draft.limits.max_active_events,
+    max_staff_accounts: draft.limits.max_staff_accounts,
+    max_attendees_per_month: draft.limits.max_attendees_per_month,
   },
 });
 
@@ -222,7 +222,7 @@ export const SubscriptionPlans: React.FC = () => {
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <label className="block text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-3 ml-1">Plan Management Architecture</label>
+          <label className="block text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-3 ml-1">Necessary Plan Features for Event SaaS</label>
           <div className="bg-[#F2F2F2] p-1 rounded-2xl border border-[#2E2E2F]/10 flex items-center self-start">
             <button
               onClick={() => setBillingCycle('monthly')}
@@ -302,12 +302,13 @@ export const SubscriptionPlans: React.FC = () => {
 
                 <div className="space-y-10 mt-auto">
                   <div>
-                    <label className="block text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em] mb-4 ml-1">System Modules</label>
+                    <label className="block text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em] mb-4 ml-1">Recommended Core Plan Features</label>
                     <div className="grid grid-cols-1 gap-3">
                       {[
-                        { label: 'AI Intelligence Node', enabled: plan.features.aiIntegration },
-                        { label: 'White-Label Branding', enabled: plan.features.branding },
-                        { label: 'Supplier Marketplace', enabled: plan.features.weddingSuppliers },
+                        { label: 'Custom Branding', enabled: plan.features.enable_custom_branding },
+                        { label: 'Discount Codes', enabled: plan.features.enable_discount_codes },
+                        { label: 'Advanced Reports', enabled: plan.features.enable_advanced_reports },
+                        { label: 'Priority Support', enabled: plan.features.enable_priority_support },
                       ].map((feature, idx) => (
                         <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-[#F2F2F2]/50 border border-[#2E2E2F]/5 group/feat transition-all hover:border-[#38BDF2]/30 hover:shadow-sm">
                           <span className={`text-[11px] font-black uppercase tracking-widest ${feature.enabled ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]/30'}`}>{feature.label}</span>
@@ -326,13 +327,13 @@ export const SubscriptionPlans: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em] mb-4 ml-1">Allocated Quotas</label>
+                    <label className="block text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em] mb-4 ml-1">Plan Limits & Constraints</label>
                     <div className="grid grid-cols-2 gap-3">
                       {[
-                        { label: 'Concurrent Users', val: plan.limits.users, icon: <ICONS.Users /> },
-                        { label: 'Active Projects', val: plan.limits.projects, icon: <ICONS.Box /> },
-                        { label: 'Contact Matrix', val: plan.limits.contacts, icon: <ICONS.Users /> },
-                        { label: 'Linked Accounts', val: plan.limits.accounts, icon: <ICONS.Globe /> },
+                        { label: 'Total Events', val: plan.limits.max_events, icon: <ICONS.Box /> },
+                        { label: 'Active Events', val: plan.limits.max_active_events, icon: <ICONS.CheckCircle /> },
+                        { label: 'Staff Accounts', val: plan.limits.max_staff_accounts, icon: <ICONS.Users /> },
+                        { label: 'Monthly Attendees', val: plan.limits.max_attendees_per_month, icon: <ICONS.Users /> },
                       ].map((limit, idx) => (
                         <div key={idx} className="p-4 bg-[#F2F2F2]/50 rounded-2xl border border-[#2E2E2F]/5 hover:border-[#38BDF2]/30 transition-all group/limit hover:shadow-sm">
                           <div className="flex items-center gap-2 mb-2">
@@ -344,15 +345,6 @@ export const SubscriptionPlans: React.FC = () => {
                           <p className="text-[8px] font-black uppercase tracking-[0.2em] text-[#38BDF2]/50">{limit.label}</p>
                         </div>
                       ))}
-                      <div className="p-4 bg-[#F2F2F2]/50 rounded-2xl border border-[#2E2E2F]/5 hover:border-[#38BDF2]/30 transition-all group/limit col-span-2 flex items-center justify-between hover:shadow-sm">
-                        <div>
-                          <p className="text-[8px] font-black uppercase tracking-[0.2em] text-amber-600/50 mb-1">Persistent Storage</p>
-                          <span className="text-[16px] font-black text-[#2E2E2F] tracking-tighter leading-none">{plan.limits.storage}</span>
-                        </div>
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                          <ICONS.HardDrive className="w-5 h-5" strokeWidth={3} />
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -393,7 +385,7 @@ export const SubscriptionPlans: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
-        title={editingPlan ? 'Refine Plan Architecture' : 'Initialize New Plan'}
+        title={editingPlan ? 'Necessary Plan Features for Event SaaS' : 'Necessary Plan Features for Event SaaS'}
         subtitle={editingPlan ? `Synchronizing parameters for ${editingPlan.name}` : 'Provisioning a new system-wide subscription node'}
         size="xl"
       >
@@ -440,13 +432,12 @@ export const SubscriptionPlans: React.FC = () => {
 
             <div className="space-y-8">
               <div>
-                <label className="block text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-3 ml-1">Quota Constraints</label>
+                <label className="block text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-3 ml-1">Plan Limits & Constraints</label>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-6">
-                  <Input label="User Seats" type="number" value={draft.limits.users} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, users: parseNumeric(e.target.value, 0) } }))} />
-                  <Input label="Project Hubs" type="number" value={draft.limits.projects} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, projects: parseNumeric(e.target.value, 0) } }))} />
-                  <Input label="Contact Vectors" type="number" value={draft.limits.contacts} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, contacts: parseNumeric(e.target.value, 0) } }))} />
-                  <Input label="Account Nodes" type="number" value={draft.limits.accounts} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, accounts: parseNumeric(e.target.value, 0) } }))} />
-                  <Input label="Storage (e.g. 5 GB)" value={draft.limits.storage} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, storage: e.target.value } }))} />
+                  <Input label="Max Total Events" type="number" value={draft.limits.max_events} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, max_events: parseNumeric(e.target.value, 0) } }))} />
+                  <Input label="Max Active Events" type="number" value={draft.limits.max_active_events} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, max_active_events: parseNumeric(e.target.value, 0) } }))} />
+                  <Input label="Max Staff Accounts" type="number" value={draft.limits.max_staff_accounts} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, max_staff_accounts: parseNumeric(e.target.value, 0) } }))} />
+                  <Input label="Monthly Attendees" type="number" value={draft.limits.max_attendees_per_month} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, max_attendees_per_month: parseNumeric(e.target.value, 0) } }))} />
                   <Input label="Trial Lifecycle" type="number" value={draft.trialDays} onChange={(e: any) => setDraft((prev) => ({ ...prev, trialDays: Math.max(0, Math.floor(parseNumeric(e.target.value, 0))) }))} />
                 </div>
               </div>
@@ -454,29 +445,36 @@ export const SubscriptionPlans: React.FC = () => {
           </div>
 
           <div className="space-y-6">
-            <label className="block text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] ml-1">Active Modules & Protocols</label>
+            <label className="block text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] ml-1">Recommended Core Plan Features</label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 {
-                  id: 'ai',
-                  label: 'AI Integration Protocol',
-                  desc: 'Enable neural processing and automated insights',
-                  enabled: draft.features.aiIntegration,
-                  onToggle: (value: boolean) => setDraft((prev) => ({ ...prev, features: { ...prev.features, aiIntegration: value } })),
+                  id: 'branding',
+                  label: 'Custom Branding',
+                  desc: 'Allow organizers to use their own brand colors and logo',
+                  enabled: draft.features.enable_custom_branding,
+                  onToggle: (value: boolean) => setDraft((prev) => ({ ...prev, features: { ...prev.features, enable_custom_branding: value } })),
                 },
                 {
-                  id: 'brand',
-                  label: 'Sovereign Branding',
-                  desc: 'Remove system-level watermarks from client views',
-                  enabled: draft.features.branding,
-                  onToggle: (value: boolean) => setDraft((prev) => ({ ...prev, features: { ...prev.features, branding: value } })),
+                  id: 'discount',
+                  label: 'Discount Codes',
+                  desc: 'Enable creation of promotional codes for events',
+                  enabled: draft.features.enable_discount_codes,
+                  onToggle: (value: boolean) => setDraft((prev) => ({ ...prev, features: { ...prev.features, enable_discount_codes: value } })),
                 },
                 {
-                  id: 'market',
-                  label: 'Supplier Ecosystem',
-                  desc: 'Connect to the centralized service marketplace',
-                  enabled: draft.features.weddingSuppliers,
-                  onToggle: (value: boolean) => setDraft((prev) => ({ ...prev, features: { ...prev.features, weddingSuppliers: value } })),
+                  id: 'reports',
+                  label: 'Advanced Reports',
+                  desc: 'Unlocks deeper analytics and exportable reports',
+                  enabled: draft.features.enable_advanced_reports,
+                  onToggle: (value: boolean) => setDraft((prev) => ({ ...prev, features: { ...prev.features, enable_advanced_reports: value } })),
+                },
+                {
+                  id: 'support',
+                  label: 'Priority Support',
+                  desc: 'Guaranteed faster response times for support requests',
+                  enabled: draft.features.enable_priority_support,
+                  onToggle: (value: boolean) => setDraft((prev) => ({ ...prev, features: { ...prev.features, enable_priority_support: value } })),
                 },
                 {
                   id: 'default',

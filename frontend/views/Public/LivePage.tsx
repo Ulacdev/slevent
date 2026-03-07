@@ -1,0 +1,273 @@
+
+import React, { useEffect, useState } from 'react';
+import { apiService } from '../../services/apiService';
+import { Event } from '../../types';
+import { ICONS } from '../../constants';
+import { PageLoader } from '../../components/Shared';
+import { Link } from 'react-router-dom';
+
+const getEmbedUrl = (link: string) => {
+    if (!link) return null;
+    const normalized = link.startsWith('http') ? link : `https://${link}`;
+
+    // YouTube
+    if (normalized.includes('youtube.com') || normalized.includes('youtu.be')) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/|live\/)([^#\&\?]*).*/;
+        const match = normalized.match(regExp);
+        const videoId = (match && match[2].length === 11) ? match[2] : null;
+        return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0` : null;
+    }
+
+    // Facebook
+    if (normalized.includes('facebook.com') || normalized.includes('fb.watch')) {
+        return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(normalized)}&show_text=0&width=500&autoplay=true&mute=true`;
+    }
+
+    // Vimeo
+    if (normalized.includes('vimeo.com')) {
+        const match = normalized.match(/vimeo\.com\/(\d+)/);
+        const videoId = match ? match[1] : null;
+        return videoId ? `https://player.vimeo.com/video/${videoId}?autoplay=1&muted=1` : null;
+    }
+
+    return null;
+};
+
+export const LivePage: React.FC = () => {
+    const [events, setEvents] = useState<Event[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
+
+    useEffect(() => {
+        const fetchLive = async () => {
+            try {
+                const data = await apiService.getLiveEvents();
+                setEvents(data);
+                if (data.length > 0) {
+                    setCurrentEvent(data[0]);
+                }
+            } catch (err) {
+                console.error('Failed to fetch live events:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchLive();
+    }, []);
+
+    if (loading) return <PageLoader label="Loading Live Broadcasts..." variant="page" />;
+
+    const embedUrl = currentEvent ? getEmbedUrl(currentEvent.streaming_url || currentEvent.locationText) : null;
+
+    return (
+        <div className="min-h-screen bg-[#F2F2F2]">
+            <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[260px] sm:h-[300px] lg:h-[350px] overflow-hidden mb-12">
+                <div className="absolute inset-0 bg-[linear-gradient(116deg,#38BDF2_0%,#38BDF2_44%,#F2F2F2_100%)]" />
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,62,134,0.45)_0%,rgba(0,62,134,0.2)_34%,rgba(0,62,134,0)_72%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />
+                <div className="relative z-10 mx-auto flex h-full w-full max-w-[88rem] items-center px-6 sm:px-12">
+                    <div className="max-w-[740px]">
+                        <h1 className="text-[2.5rem] font-black leading-none tracking-tight text-white sm:text-7xl uppercase">
+                            Broadcasts
+                        </h1>
+                        <p className="mt-6 max-w-[600px] text-base leading-relaxed text-white/95 sm:text-[1.1rem] font-medium uppercase tracking-[0.3em]">
+                            Streaming live from StartupLab
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-8 pb-20">
+
+                {currentEvent ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+
+                        {/* Main Player Area */}
+                        <div className="lg:col-span-8 space-y-8">
+                            <div className="overflow-hidden rounded-[3rem] border border-[#2E2E2F]/10 shadow-2xl bg-[#F2F2F2]">
+                                {/* Integrated Header */}
+                                <div className="bg-[#00AEEF] p-8 text-white text-left flex justify-between items-center border-b border-[#00AEEF]/20 shadow-[0_4px_20px_rgba(0,174,239,0.3)]">
+                                    <div>
+                                        <h2 className="text-3xl font-black tracking-tight leading-tight uppercase mb-1">{currentEvent.eventName}</h2>
+                                        <p className="text-[12px] font-black opacity-90 uppercase tracking-[0.2em] text-[#F2F2F2]">
+                                            {new Date(currentEvent.startAt).toLocaleDateString('en-US', { weekday: 'long' })} AT {new Date(currentEvent.startAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2.5 bg-red-600 px-5 py-2.5 rounded-full border border-red-500 shadow-[0_0_20px_rgba(220,38,38,0.5)] animate-pulse">
+                                        <div className="w-2.5 h-2.5 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.9)]" />
+                                        <span className="text-[11px] font-black text-white uppercase tracking-[0.2em]">Live Now</span>
+                                    </div>
+                                </div>
+
+                                {/* Body / Player */}
+                                <div className="p-4 bg-[#F2F2F2]">
+                                    <div className="overflow-hidden rounded-[2.5rem] border border-[#2E2E2F]/10 shadow-inner bg-black relative aspect-video group">
+                                        {/* Watermark */}
+                                        <div className="absolute top-6 left-8 flex items-center gap-2.5 z-10 bg-black/20 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-white/10 group-hover:bg-black/40 transition-all">
+                                            <ICONS.Monitor className="w-3.5 h-3.5 text-white/60" />
+                                            <span className="text-[9px] font-black text-white/60 uppercase tracking-[0.2em]">Organizer Preview</span>
+                                        </div>
+
+                                        {embedUrl ? (
+                                            <iframe
+                                                className="absolute inset-0 w-full h-full"
+                                                src={embedUrl}
+                                                title="Live Stream"
+                                                frameBorder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                allowFullScreen
+                                            />
+                                        ) : (
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12 bg-[#F2F2F2]">
+                                                <div className="w-24 h-24 rounded-full bg-[#2E2E2F]/5 flex items-center justify-center mb-8 border border-[#2E2E2F]/10">
+                                                    <ICONS.Monitor className="w-10 h-10 text-[#2E2E2F]/40" />
+                                                </div>
+                                                <h3 className="text-2xl font-black text-[#2E2E2F] mb-4 uppercase tracking-tighter">External Link</h3>
+                                                <p className="text-[#2E2E2F]/60 text-sm max-w-sm mb-10 font-medium leading-relaxed">
+                                                    This broadcast is being hosted on an external platform. Click the button below to join the stream.
+                                                </p>
+                                                <a
+                                                    href={currentEvent.streaming_url || currentEvent.locationText}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="bg-[#00AEEF] text-white px-10 py-5 rounded-2xl font-black text-[12px] uppercase tracking-[0.2em] flex items-center gap-3 transition-all hover:scale-105 hover:bg-[#0098D6] active:scale-95 shadow-2xl"
+                                                >
+                                                    <ICONS.Globe className="w-5 h-5" />
+                                                    Watch on {currentEvent.streamingPlatform || 'Platform'}
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-10 rounded-[2.5rem] bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-xl">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tighter">
+                                        {currentEvent.eventName}
+                                    </h2>
+                                    <div className="flex items-center gap-3 bg-[#00AEEF]/10 px-4 py-2 rounded-xl text-[#00AEEF]">
+                                        <ICONS.Monitor className="w-4 h-4" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">{currentEvent.streamingPlatform || 'Broadcast'}</span>
+                                    </div>
+                                </div>
+                                <p className="text-[#2E2E2F]/60 text-lg leading-relaxed font-medium line-clamp-3">
+                                    {currentEvent.description}
+                                </p>
+                                <div className="mt-10 pt-10 border-t border-[#2E2E2F]/5 flex flex-wrap gap-8 items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        {currentEvent.organizer?.profileImageUrl ? (
+                                            <img
+                                                src={currentEvent.organizer.profileImageUrl}
+                                                alt={currentEvent.organizer?.organizerName}
+                                                className="w-14 h-14 rounded-2xl object-cover border border-[#2E2E2F]/10 shadow-sm"
+                                            />
+                                        ) : (
+                                            <div className="w-14 h-14 rounded-2xl bg-[#2E2E2F] flex items-center justify-center text-white text-lg font-bold shadow-lg">
+                                                {currentEvent.organizer?.organizerName?.[0] || 'O'}
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-1">Organized By</p>
+                                            <p className="text-base font-black text-[#2E2E2F] tracking-tight">{currentEvent.organizer?.organizerName || 'Organizer'}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center gap-x-12 gap-y-6">
+                                        <div className="flex flex-col">
+                                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-1">Schedule</p>
+                                            <div className="flex items-center gap-2 text-[#2E2E2F]">
+                                                <ICONS.Calendar className="w-3.5 h-3.5 opacity-50" />
+                                                <p className="text-xs font-bold uppercase tracking-wider">
+                                                    {new Date(currentEvent.startAt).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} AT {new Date(currentEvent.startAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {currentEvent.locationType !== 'ONLINE' && (
+                                            <div className="flex flex-col">
+                                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-1">Venue</p>
+                                                <div className="flex items-center gap-2 text-[#2E2E2F]">
+                                                    <ICONS.MapPin className="w-3.5 h-3.5 opacity-50" />
+                                                    <p className="text-xs font-bold uppercase tracking-wider line-clamp-1 max-w-[150px]">
+                                                        {currentEvent.locationText}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <Link to={`/events/${currentEvent.slug}`} className="px-6 py-3 rounded-xl bg-[#00AEEF] text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-[#0098D6] transition-all shadow-lg shadow-[#00AEEF]/20 active:scale-95">
+                                            View Full Details
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sidebar List */}
+                        <div className="lg:col-span-4 space-y-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-[10px] font-black text-[#2E2E2F]/50 uppercase tracking-[0.3em]">More Broadcasts</h3>
+                                <span className="text-[10px] font-black text-white bg-[#00AEEF] px-2 py-0.5 rounded-md shadow-lg shadow-[#00AEEF]/20">{events.length}</span>
+                            </div>
+                            <div className="space-y-4">
+                                {events.map((event) => (
+                                    <button
+                                        key={event.eventId}
+                                        onClick={() => {
+                                            setCurrentEvent(event);
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }}
+                                        className={`w-full text-left p-6 rounded-[2rem] transition-all duration-300 border ${currentEvent?.eventId === event.eventId
+                                            ? 'bg-[#F2F2F2] border-[#00AEEF] shadow-xl shadow-[#00AEEF]/10 scale-[1.02] ring-1 ring-[#00AEEF]/30'
+                                            : 'bg-[#F2F2F2] border-[#2E2E2F]/5 hover:border-[#00AEEF]/40 hover:scale-[1.01]'
+                                            }`}
+                                    >
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-24 h-16 rounded-xl bg-[#2E2E2F]/5 flex items-center justify-center overflow-hidden border border-[#2E2E2F]/5 shrink-0 relative">
+                                                {event.imageUrl ? (
+                                                    <img src={typeof event.imageUrl === 'string' ? event.imageUrl : event.imageUrl?.url} className="w-full h-full object-cover" alt="" />
+                                                ) : (
+                                                    <ICONS.Monitor className="w-5 h-5 text-[#2E2E2F]/20" />
+                                                )}
+                                                <div className="absolute bottom-1 right-1 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded text-[7px] font-black text-white uppercase tracking-widest">
+                                                    {event.status}
+                                                </div>
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h4 className="text-sm font-bold text-[#2E2E2F] line-clamp-1 mb-1 tracking-tight">
+                                                    {event.eventName}
+                                                </h4>
+                                                <p className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-wider mb-2">
+                                                    {event.streamingPlatform || 'Live'}
+                                                </p>
+                                                <div className="flex items-center gap-2 text-[9px] font-bold text-[#2E2E2F]/40 uppercase tracking-widest">
+                                                    <ICONS.Calendar className="w-3 h-3" />
+                                                    <span>{new Date(event.startAt).toLocaleDateString()}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-32 text-center bg-[#F2F2F2] border border-[#2E2E2F]/5 rounded-[4rem] shadow-sm">
+                        <div className="w-32 h-32 rounded-full bg-[#F2F2F2] flex items-center justify-center mb-10">
+                            <ICONS.Globe className="w-12 h-12 text-[#2E2E2F]/20" />
+                        </div>
+                        <h2 className="text-4xl font-black text-[#2E2E2F] mb-4 uppercase tracking-tighter">No Active Broadcasts</h2>
+                        <p className="text-[#2E2E2F]/40 text-sm max-w-sm mb-12 font-medium leading-relaxed">
+                            There are no events streaming right now. Check back later or browse upcoming sessions in our event discovery.
+                        </p>
+                        <Link to="/browse-events" className="bg-[#00AEEF] text-white px-10 py-5 rounded-2xl font-black text-[12px] uppercase tracking-[0.2em] transition-all hover:bg-[#0098D6] hover:scale-105 shadow-xl shadow-[#00AEEF]/20">
+                            Browse Events
+                        </Link>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};

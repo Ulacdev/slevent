@@ -44,20 +44,20 @@ const DesktopPreviewIcon: React.FC<any> = (props) => (
     </svg>
 );
 
-type EventSetupStep = 1 | 2 | 3 | 4;
+export type EventSetupStep = 1 | 2 | 3 | 4;
 
-const EVENT_SETUP_STEPS: Array<{ id: EventSetupStep; title: string; subtitle: string }> = [
-    { id: 1, title: 'Identity', subtitle: 'Name, story, key visual' },
-    { id: 2, title: 'Schedule', subtitle: 'Date, time, location' },
-    { id: 3, title: 'Registration', subtitle: 'Capacity and windows' },
-    { id: 4, title: 'Publish', subtitle: 'Ticket check and visibility' },
+export const EVENT_SETUP_STEPS: { id: EventSetupStep; title: string }[] = [
+    { id: 1, title: 'Identity' },
+    { id: 2, title: 'Schedule' },
+    { id: 3, title: 'Registration' },
+    { id: 4, title: 'Publish' },
 ];
 
-const EVENT_SETUP_STEP_DETAIL: Record<EventSetupStep, string> = {
-    1: 'Build event page and describe what attendees can expect.',
-    2: 'Set venue or online link, schedule, and timezone.',
-    3: 'Save as draft and continue directly to ticket setup.',
-    4: 'Choose final event status after ticket configuration.',
+export const EVENT_SETUP_STEP_DETAIL: Record<EventSetupStep, string> = {
+    1: 'Name, story, and visual',
+    2: 'Date, time, and location',
+    3: 'Capacity and access',
+    4: 'Review and go live',
 };
 
 export const UserEvents: React.FC = () => {
@@ -115,14 +115,15 @@ export const UserEvents: React.FC = () => {
         regCloseDate: '',
         regCloseTime: '',
         streamingPlatform: '',
-        ticketTypes: [] as TicketType[]
+        streamingUrl: '',
+        ticketTypes: [] as TicketType[],
     };
 
     const [formData, setFormData] = useState(initialFormData);
     const isPersonalProfileReady = !!name?.trim();
     const isOrganizerProfileReady = !!organizerProfile?.organizerId && !!organizerProfile?.organizerName?.trim();
     const canStartCreation = isPersonalProfileReady && isOrganizerProfileReady;
-    const canPublishByTicketRule = initialEventStatus === 'PUBLISHED' || activeEventTicketCount > 0;
+    const canPublishByTicketRule = initialEventStatus === 'PUBLISHED' || initialEventStatus === 'LIVE' || activeEventTicketCount > 0;
     const hasExistingEvents = events.length > 0;
     const hasPublishedEvent = events.some((event) => event.status === 'PUBLISHED');
     const workflowCompletedCount = [
@@ -145,7 +146,7 @@ export const UserEvents: React.FC = () => {
             minute: '2-digit',
         });
     })();
-    const hasPreviewPhysicalLocation = (formData.locationType === 'ONSITE' || formData.locationType === 'HYBRID') && !!formData.location.trim();
+    const hasPreviewPhysicalLocation = !!formData.location.trim();
     const previewMapEmbedUrl = hasPreviewPhysicalLocation
         ? `https://maps.google.com/maps?q=${encodeURIComponent(formData.location.trim())}&z=15&output=embed`
         : '';
@@ -342,7 +343,8 @@ export const UserEvents: React.FC = () => {
             endTime: endDT.time,
             timezone: event.timezone || 'Asia/Manila',
             locationType: event.locationType || 'ONSITE',
-            location: event.locationText,
+            location: event.locationText || '',
+            streamingUrl: event.streaming_url || '',
             capacityTotal: event.capacityTotal,
             imageUrl: getImageUrl(event.imageUrl),
             status: event.status,
@@ -350,7 +352,7 @@ export const UserEvents: React.FC = () => {
             regCloseDate: formatDateForInput(event.regCloseAt || '').date,
             regCloseTime: formatDateForInput(event.regCloseAt || '').time,
             streamingPlatform: event.streamingPlatform || '',
-            ticketTypes: event.ticketTypes
+            ticketTypes: event.ticketTypes,
         });
         setInitialEventStatus(event.status || 'DRAFT');
         setCurrentEventId(event.eventId);
@@ -359,7 +361,7 @@ export const UserEvents: React.FC = () => {
         setWizardStep(1);
         setIsPreviewMode(false);
         setPreviewDevice('mobile');
-        setFinalStatusDecision('');
+        setFinalStatusDecision(event.status || 'DRAFT');
         void loadEventTicketReadiness(event.eventId);
         setIsModalOpen(true);
     };
@@ -469,10 +471,10 @@ export const UserEvents: React.FC = () => {
             capacityTotal: formData.capacityTotal,
             imageUrl: formData.imageUrl,
             status: statusOverride || formData.status,
-            regOpenAt: formData.regOpenDate ? mergeDateTime(formData.regOpenDate, '00:00') : null,
             regCloseAt: formData.regCloseDate ? mergeDateTime(formData.regCloseDate, formData.regCloseTime || '23:59') : null,
             streamingPlatform: formData.streamingPlatform,
-            organizerId: organizerProfile?.organizerId || null
+            streaming_url: formData.streamingUrl || null,
+            organizerId: organizerProfile?.organizerId || null,
         };
     };
 
@@ -536,13 +538,15 @@ export const UserEvents: React.FC = () => {
             setNotification({ message: 'Set the event schedule and location before saving.', type: 'error' });
             return;
         }
-        if (!finalStatusDecision) {
+        const isQuickUpdate = e && (e.target as any)?.dataset?.quickUpdate === 'true';
+
+        if (!finalStatusDecision && !isQuickUpdate) {
             setWizardStep(4);
             setNotification({ message: 'Step 4: choose if this event should stay Draft or be Published.', type: 'error' });
             return;
         }
 
-        const isPublishingTransition = formData.status === 'PUBLISHED' && initialEventStatus !== 'PUBLISHED';
+        const isPublishingTransition = (formData.status === 'PUBLISHED' || formData.status === 'LIVE') && (initialEventStatus !== 'PUBLISHED' && initialEventStatus !== 'LIVE');
         if (isPublishingTransition && !canPublishByTicketRule) {
             setWizardStep(4);
             setNotification({ message: 'Add at least one ticket type before publishing this event.', type: 'error' });
@@ -570,9 +574,15 @@ export const UserEvents: React.FC = () => {
 
     const applyLocationValue = (locationValue: string) => {
         const nextData: any = { ...formData, location: locationValue };
-        if ((formData.locationType === 'ONLINE' || formData.locationType === 'HYBRID') && !formData.streamingPlatform) {
+        const isUrl = locationValue.startsWith('http');
+        if (isUrl) {
+            nextData.streamingUrl = locationValue;
+        }
+        if (!formData.streamingPlatform && isUrl) {
             const lowUrl = locationValue.toLowerCase();
-            if (lowUrl.includes('meet.google.com')) nextData.streamingPlatform = 'Google Meet';
+            if (lowUrl.includes('youtube.com') || lowUrl.includes('youtu.be')) nextData.streamingPlatform = 'YouTube';
+            else if (lowUrl.includes('facebook.com') || lowUrl.includes('fb.watch')) nextData.streamingPlatform = 'Facebook';
+            else if (lowUrl.includes('meet.google.com')) nextData.streamingPlatform = 'Google Meet';
             else if (lowUrl.includes('zoom.us') || lowUrl.includes('zoom.com')) nextData.streamingPlatform = 'Zoom';
             else if (lowUrl.includes('teams.microsoft.com')) nextData.streamingPlatform = 'Microsoft Teams';
         }
@@ -668,99 +678,169 @@ export const UserEvents: React.FC = () => {
                         <p className="text-base font-medium text-[#2E2E2F]/60 tracking-tight">No events to show</p>
                     </div>
                 ) : (
-                    <Card className="overflow-hidden border-[#2E2E2F]/10 rounded-[2.5rem] bg-[#F2F2F2]">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
-                                    <tr>
-                                        <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Event Identity</th>
-                                        <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Date & Location</th>
-                                        <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Lifecycle</th>
-                                        <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide text-center">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-[#2E2E2F]/10">
-                                    {filteredEvents.map(event => (
-                                        <tr key={event.eventId} className="hover:bg-[#38BDF2]/10 transition-colors group cursor-pointer" onClick={() => handleOpenEdit(event)}>
-                                            <td className="px-8 py-7">
-                                                <div className="flex items-center gap-5">
-                                                    <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border border-[#2E2E2F]/20">
-                                                        <img src={getImageUrl(event.imageUrl)} alt="" className="w-full h-full object-cover" />
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <div className="font-bold text-[#2E2E2F] text-[16px] tracking-tight group-hover:text-[#2E2E2F] transition-colors">{event.eventName}</div>
-                                                        <div className="flex items-center gap-3">
-                                                            <span className="text-[11px] font-medium text-[#2E2E2F]/40 uppercase tracking-widest">{event.eventId.split('-')[0]}</span>
-                                                            <span className="w-1 h-1 rounded-full bg-[#2E2E2F]/10"></span>
-                                                            <span className="text-[11px] font-medium text-[#2E2E2F]/60 tracking-tight">/{event.slug}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-8 py-7">
-                                                <div className="text-[14px] font-semibold text-[#2E2E2F] tracking-tight">
+                    <>
+                        {/* Mobile Card View */}
+                        <div className="grid grid-cols-1 gap-4 md:hidden">
+                            {filteredEvents.map(event => (
+                                <Card
+                                    key={event.eventId}
+                                    className="p-5 border-[#2E2E2F]/10 hover:border-[#38BDF2]/40 transition-colors cursor-pointer"
+                                    onClick={() => handleOpenEdit(event)}
+                                >
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-[#2E2E2F]/10">
+                                            <img src={getImageUrl(event.imageUrl)} alt="" className="w-full h-full object-cover" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between gap-2 mb-1">
+                                                <Badge
+                                                    type={event.status === 'PUBLISHED' ? 'success' : 'neutral'}
+                                                    className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5"
+                                                >
+                                                    {event.status}
+                                                </Badge>
+                                                <span className="text-[10px] font-medium text-[#2E2E2F]/40 truncate">
+                                                    ID: {event.eventId.split('-')[0]}
+                                                </span>
+                                            </div>
+                                            <h3 className="font-bold text-[#2E2E2F] text-base truncate mb-2">
+                                                {event.eventName}
+                                            </h3>
+                                            <div className="space-y-1.5">
+                                                <div className="flex items-center gap-2 text-[12px] text-[#2E2E2F]/60 font-medium">
+                                                    <ICONS.Calendar className="w-3.5 h-3.5 text-[#38BDF2]" />
                                                     {new Date(event.startAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                                 </div>
-                                                <div className="text-[12px] text-[#2E2E2F]/60 font-medium mt-1.5 flex items-center gap-2">
-                                                    <ICONS.MapPin className="w-3 h-3 text-[#2E2E2F]/50" />
-                                                    <span className="truncate max-w-[200px]">{event.locationText}</span>
+                                                <div className="flex items-center gap-2 text-[12px] text-[#2E2E2F]/60 font-medium">
+                                                    <ICONS.MapPin className="w-3.5 h-3.5 text-[#38BDF2]" />
+                                                    <span className="truncate">{event.locationText}</span>
                                                 </div>
-                                            </td>
-                                            <td className="px-8 py-7">
-                                                <div className={`inline-flex px-3.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${event.status === 'PUBLISHED'
-                                                    ? 'bg-[#38BDF2]/20 text-[#2E2E2F]'
-                                                    : event.status === 'DRAFT'
-                                                        ? 'bg-[#F2F2F2] text-[#2E2E2F]/60 border border-[#2E2E2F]/20'
-                                                        : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
-                                                    }`}>
-                                                    {event.status}
-                                                </div>
-                                            </td>
-                                            <td className="px-8 py-7 text-center">
-                                                <div className="flex justify-center items-center gap-6 opacity-70 group-hover:opacity-100 transition-colors">
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }}
-                                                        className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
-                                                        title="View Public Page"
-                                                    >
-                                                        <svg className="w-[1.2rem] h-[1.2rem]" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); handleOpenTickets(event); }}
-                                                        className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
-                                                        title="Manage Tickets"
-                                                    >
-                                                        <ICONS.CreditCard className="w-[1.2rem] h-[1.2rem]" strokeWidth={2.2} />
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); handleOpenAttendeePop(event); }}
-                                                        className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
-                                                        title="View Confirmed Guests"
-                                                    >
-                                                        <ICONS.Users className="w-[1.2rem] h-[1.2rem]" strokeWidth={2.2} />
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); handleOpenEdit(event); }}
-                                                        className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
-                                                        title="Edit Session"
-                                                    >
-                                                        <svg className="w-[1.2rem] h-[1.2rem]" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); setDeleteConfirm(event); }}
-                                                        className="text-[#2E2E2F]/60 hover:text-red-500 transition-colors p-1"
-                                                        title="Delete Event"
-                                                    >
-                                                        <ICONS.Trash className="w-[1.2rem] h-[1.2rem]" strokeWidth={2.2} />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-5 pt-4 border-t border-[#2E2E2F]/5 flex items-center justify-around">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }}
+                                            className="p-3 text-[#2E2E2F]/60 hover:text-[#38BDF2] transition-colors"
+                                            title="View"
+                                        >
+                                            <EyeIcon className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleOpenTickets(event); }}
+                                            className="p-3 text-[#2E2E2F]/60 hover:text-[#38BDF2] transition-colors"
+                                            title="Tickets"
+                                        >
+                                            <ICONS.CreditCard className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleOpenAttendeePop(event); }}
+                                            className="p-3 text-[#2E2E2F]/60 hover:text-[#38BDF2] transition-colors"
+                                            title="Attendees"
+                                        >
+                                            <ICONS.Users className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleOpenEdit(event); }}
+                                            className="p-3 text-[#2E2E2F]/60 hover:text-[#38BDF2] transition-colors"
+                                            title="Edit"
+                                        >
+                                            <ICONS.Edit className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </Card>
+                            ))}
                         </div>
-                    </Card>
+
+                        {/* Desktop Table View */}
+                        <Card className="hidden md:block overflow-hidden border-[#2E2E2F]/10 rounded-[2.5rem] bg-[#F2F2F2]">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
+                                        <tr>
+                                            <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Event Identity</th>
+                                            <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Date & Location</th>
+                                            <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Lifecycle</th>
+                                            <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-[#2E2E2F]/10">
+                                        {filteredEvents.map(event => (
+                                            <tr key={event.eventId} className="hover:bg-[#38BDF2]/10 transition-colors group cursor-pointer" onClick={() => handleOpenEdit(event)}>
+                                                <td className="px-8 py-7">
+                                                    <div className="flex items-center gap-5">
+                                                        <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border border-[#2E2E2F]/20">
+                                                            <img src={getImageUrl(event.imageUrl)} alt="" className="w-full h-full object-cover" />
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <div className="font-bold text-[#2E2E2F] text-[16px] tracking-tight group-hover:text-[#2E2E2F] transition-colors">{event.eventName}</div>
+                                                            <div className="flex items-center gap-3">
+                                                                <span className="text-[11px] font-medium text-[#2E2E2F]/40 uppercase tracking-widest">{event.eventId.split('-')[0]}</span>
+                                                                <span className="w-1 h-1 rounded-full bg-[#2E2E2F]/10"></span>
+                                                                <span className="text-[11px] font-medium text-[#2E2E2F]/60 tracking-tight">/{event.slug}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-7">
+                                                    <div className="text-[14px] font-semibold text-[#2E2E2F] tracking-tight">
+                                                        {new Date(event.startAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                    </div>
+                                                    <div className="text-[12px] text-[#2E2E2F]/60 font-medium mt-1.5 flex items-center gap-2">
+                                                        <ICONS.MapPin className="w-3 h-3 text-[#2E2E2F]/50" />
+                                                        <span className="truncate max-w-[200px]">{event.locationText}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-7">
+                                                    <div className={`inline-flex px-3.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${event.status === 'PUBLISHED'
+                                                        ? 'bg-[#38BDF2]/20 text-[#2E2E2F]'
+                                                        : event.status === 'DRAFT'
+                                                            ? 'bg-[#F2F2F2] text-[#2E2E2F]/60 border border-[#2E2E2F]/20'
+                                                            : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
+                                                        }`}>
+                                                        {event.status}
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-7 text-center">
+                                                    <div className="flex justify-center items-center gap-6 opacity-70 group-hover:opacity-100 transition-colors">
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }}
+                                                            className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
+                                                            title="View Public Page"
+                                                        >
+                                                            <svg className="w-[1.2rem] h-[1.2rem]" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleOpenTickets(event); }}
+                                                            className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
+                                                            title="Manage Tickets"
+                                                        >
+                                                            <ICONS.CreditCard className="w-[1.2rem] h-[1.2rem]" strokeWidth={2.2} />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleOpenAttendeePop(event); }}
+                                                            className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
+                                                            title="View Confirmed Guests"
+                                                        >
+                                                            <ICONS.Users className="w-[1.2rem] h-[1.2rem]" strokeWidth={2.2} />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleOpenEdit(event); }}
+                                                            className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
+                                                            title="Edit Session"
+                                                        >
+                                                            <svg className="w-[1.2rem] h-[1.2rem]" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </Card>
+                    </>
                 )
             ) : (
                 /* ─── CALENDAR VIEW ─── */
@@ -792,17 +872,15 @@ export const UserEvents: React.FC = () => {
                             return (
                                 <div
                                     key={day}
-                                    className={`h-20 rounded-xl border p-1.5 flex flex-col transition-colors ${isToday ? '' : 'border-[#2E2E2F]/5 hover:border-[#2E2E2F]/15'}`}
-                                    style={isToday ? { borderColor: 'var(--color-primary-40)', backgroundColor: 'var(--color-primary-10)' } : undefined}
+                                    className={`h-20 rounded-xl border p-1.5 flex flex-col transition-colors ${isToday ? 'border-[var(--color-primary-40)] bg-[var(--color-primary-10)]' : 'border-[#2E2E2F]/5 hover:border-[#2E2E2F]/15'}`}
                                 >
-                                    <span className={`text-[11px] font-bold ${isToday ? '' : 'text-[#2E2E2F]/60'}`} style={isToday ? { color: 'var(--color-primary)' } : undefined}>{day}</span>
+                                    <span className={`text-[11px] font-bold ${isToday ? 'text-[var(--color-primary)]' : 'text-[#2E2E2F]/60'}`}>{day}</span>
                                     <div className="flex-1 overflow-hidden mt-0.5 space-y-0.5">
                                         {dayEvents.slice(0, 2).map(ev => (
                                             <div
                                                 key={ev.eventId}
                                                 onClick={() => handleOpenEdit(ev)}
-                                                className="text-[8px] font-bold rounded px-1 py-0.5 truncate cursor-pointer hover:opacity-90 transition-opacity"
-                                                style={{ backgroundColor: 'var(--color-primary-20)', color: 'var(--color-text)' }}
+                                                className="text-[8px] font-bold rounded px-1 py-0.5 truncate cursor-pointer hover:opacity-90 transition-opacity bg-[var(--color-primary-20)] text-[var(--color-text)]"
                                             >
                                                 {ev.eventName}
                                             </div>
@@ -863,79 +941,47 @@ export const UserEvents: React.FC = () => {
                 size="xl"
                 className="max-w-[96vw]"
             >
-                <div
-                    className={`grid grid-cols-1 gap-6 ${
-                        previewDevice === 'desktop'
-                            ? 'xl:grid-cols-[300px_minmax(0,1fr)_540px]'
-                            : 'xl:grid-cols-[300px_minmax(0,1fr)_380px]'
-                    }`}
-                >
+                <div className={`grid grid-cols-1 gap-6 ${!isPreviewMode ? 'xl:grid-cols-[300px_minmax(0,1fr)]' : previewDevice === 'desktop' ? 'xl:grid-cols-[300px_minmax(0,1fr)_minmax(450px,650px)]' : 'xl:grid-cols-[300px_minmax(0,1fr)_380px]'}`}>
                     <div className="space-y-5 xl:sticky xl:top-0 self-start xl:max-h-[calc(70vh-1rem)] xl:overflow-y-auto xl:pr-1">
-                        {/* Sidebar summary */}
                         <div className="bg-[#F2F2F2] rounded-[2rem] border border-[#2E2E2F]/10 overflow-hidden">
                             <div className="h-16 bg-gradient-to-r from-[#BAF3FF] via-[#67E8F9] to-[#38BDF2]" />
                             <div className="p-4 space-y-4">
-                                <h1 className="text-3xl font-black text-[#2E2E2F] tracking-tight leading-tight">
-                                    {formData.eventName || 'Event Title'}
-                                </h1>
+                                <h1 className="text-3xl font-black text-[#2E2E2F] tracking-tight leading-tight">{formData.eventName || 'Event Title'}</h1>
                                 <div className="flex flex-wrap items-center gap-3">
-                                    <div className={`px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-wide border ${formData.status === 'PUBLISHED' ? 'bg-[#38BDF2]/20 border-[#38BDF2]/40 text-[#2E2E2F]' : 'bg-[#F2F2F2] border-[#2E2E2F]/20 text-[#2E2E2F]/60'}`}>
-                                        {formData.status}
-                                    </div>
+                                    <div className={`px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-wide border ${formData.status === 'PUBLISHED' ? 'bg-[#38BDF2]/20 border-[#38BDF2]/40 text-[#2E2E2F]' : 'bg-[#F2F2F2] border-[#2E2E2F]/20 text-[#2E2E2F]/60'}`}>{formData.status}</div>
                                 </div>
                                 <div className="space-y-3 pt-1">
                                     <div className="flex items-center gap-3 bg-[#F2F2F2] px-4 py-3 rounded-2xl border border-[#2E2E2F]/20">
-                                        <div className="w-8 h-8 bg-[#38BDF2]/10 text-[#2E2E2F] rounded-lg flex items-center justify-center">
-                                            <ICONS.Calendar className="w-4 h-4" strokeWidth={2.5} />
-                                        </div>
-                                        <span className="text-[13px] font-semibold text-[#2E2E2F] tracking-tight">
-                                            {previewDateLabel}
-                                        </span>
+                                        <div className="w-8 h-8 bg-[#38BDF2]/10 text-[#2E2E2F] rounded-lg flex items-center justify-center"><ICONS.Calendar className="w-4 h-4" strokeWidth={2.5} /></div>
+                                        <span className="text-[13px] font-semibold text-[#2E2E2F] tracking-tight">{previewDateLabel}</span>
                                     </div>
                                     <div className="flex items-center gap-3 bg-[#F2F2F2] px-4 py-3 rounded-2xl border border-[#2E2E2F]/20">
-                                        <div className="w-8 h-8 bg-[#38BDF2]/10 text-[#2E2E2F] rounded-lg flex items-center justify-center">
-                                            <ICONS.MapPin className="w-4 h-4" strokeWidth={2.5} />
-                                        </div>
-                                        <span className="text-[13px] font-semibold text-[#2E2E2F] tracking-tight truncate max-w-[210px]">
-                                            {formData.location || 'Set Venue / Connection'}
-                                        </span>
+                                        <div className="w-8 h-8 bg-[#38BDF2]/10 text-[#2E2E2F] rounded-lg flex items-center justify-center"><ICONS.MapPin className="w-4 h-4" strokeWidth={2.5} /></div>
+                                        <span className="text-[13px] font-semibold text-[#2E2E2F] tracking-tight truncate max-w-[210px]">{formData.location || 'Set Venue / Connection'}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        {/* Sidebar steps */}
                         <div className="bg-[#F2F2F2] rounded-[2rem] border border-[#2E2E2F]/10 overflow-hidden">
-                            <div className="px-5 py-3 border-b border-[#2E2E2F]/10">
-                                <p className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Steps</p>
-                            </div>
-                            {EVENT_SETUP_STEPS.map((step) => {
-                                const isActive = wizardStep === step.id;
-                                const isDone = wizardStep > step.id;
-                                const canJumpToStep = step.id <= wizardStep;
-                                return (
-                                    <button
-                                        key={step.id}
-                                        type="button"
-                                        onClick={() => {
-                                            if (!canJumpToStep) return;
-                                            setWizardStep(step.id);
-                                            setIsPreviewMode(false);
-                                        }}
-                                        disabled={!canJumpToStep}
-                                        className={`w-full text-left px-5 py-4 border-b border-[#2E2E2F]/10 last:border-b-0 transition-colors ${canJumpToStep ? 'hover:bg-[#38BDF2]/5' : 'opacity-45 cursor-not-allowed'} ${isActive ? 'bg-[#38BDF2]/10' : ''}`}
-                                    >
-                                        <div className="flex items-start gap-3">
-                                            <span className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center ${isActive || isDone ? 'border-[#2563EB]' : 'border-[#2E2E2F]/20'}`}>
-                                                {(isActive || isDone) && <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]" />}
-                                            </span>
-                                            <div>
-                                                <p className="text-[18px] leading-none font-bold text-[#2E2E2F]">{step.title}</p>
-                                                <p className="mt-2 text-[13px] leading-5 text-[#2E2E2F]/70">{EVENT_SETUP_STEP_DETAIL[step.id]}</p>
-                                            </div>
+                            <div className="px-5 py-3 border-b border-[#2E2E2F]/10"><p className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Steps</p></div>
+                            {EVENT_SETUP_STEPS.map((step) => (
+                                <button
+                                    key={step.id}
+                                    type="button"
+                                    onClick={() => { setWizardStep(step.id); setIsPreviewMode(false); }}
+                                    className={`w-full text-left px-5 py-4 border-b border-[#2E2E2F]/10 last:border-b-0 transition-colors hover:bg-[#38BDF2]/5 ${wizardStep === step.id ? 'bg-[#38BDF2]/10' : ''}`}
+                                >
+                                    <div className="flex items-start gap-3">
+                                        <span className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center ${wizardStep >= step.id ? 'border-[#2563EB]' : 'border-[#2E2E2F]/20'}`}>
+                                            {wizardStep >= step.id && <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]" />}
+                                        </span>
+                                        <div>
+                                            <p className="text-[18px] leading-none font-bold text-[#2E2E2F]">{step.title}</p>
+                                            <p className="mt-2 text-[13px] leading-5 text-[#2E2E2F]/70">{EVENT_SETUP_STEP_DETAIL[step.id]}</p>
                                         </div>
-                                    </button>
-                                );
-                            })}
+                                    </div>
+                                </button>
+                            ))}
                         </div>
                     </div>
 
@@ -943,288 +989,358 @@ export const UserEvents: React.FC = () => {
                         <div className="flex flex-wrap items-center justify-between gap-3">
                             <div>
                                 <h3 className="text-2xl font-black text-[#2E2E2F] tracking-tight">{activeStepMeta.title}</h3>
-                                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#2E2E2F]/55 mt-1">{activeStepMeta.subtitle}</p>
+                                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#2E2E2F]/55 mt-1">{EVENT_SETUP_STEP_DETAIL[wizardStep]}</p>
                             </div>
-                            <div className="flex items-center gap-2 xl:hidden">
+                            {!isPreviewMode && (
                                 <button
                                     type="button"
-                                    onClick={() => setIsPreviewMode((prev) => !prev)}
+                                    onClick={() => setIsPreviewMode(true)}
                                     className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#2E2E2F]/20 bg-[#F2F2F2] text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/35 transition-colors text-[13px] font-bold"
                                 >
                                     <EyeIcon className="w-4 h-4" />
-                                    {isPreviewMode ? 'Hide Preview' : 'Show Preview'}
+                                    Show Preview
                                 </button>
-                            </div>
+                            )}
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-8 px-1">
-
-                        {wizardStep === 1 && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-                                <div className="md:col-span-2">
-                                    <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Organizer Name</label>
-                                    <select
-                                        value={organizerProfile?.organizerId || ''}
-                                        disabled
-                                        className="w-full px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[12px] font-semibold tracking-wide outline-none"
-                                    >
-                                        {organizerProfile?.organizerId ? (
-                                            <option value={organizerProfile.organizerId}>{organizerProfile.organizerName}</option>
-                                        ) : (
-                                            <option value="">No organizer profile set</option>
-                                        )}
-                                    </select>
+                            {wizardStep === 1 && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+                                    <div className="md:col-span-2">
+                                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Organizer Name</label>
+                                        <select value={organizerProfile?.organizerId || ''} disabled className="w-full px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[12px] font-semibold tracking-wide outline-none">
+                                            {organizerProfile?.organizerId ? <option value={organizerProfile.organizerId}>{organizerProfile.organizerName}</option> : <option value="">No organizer profile set</option>}
+                                        </select>
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <Input label="Event Name" placeholder="e.g. Founder Growth Summit 2026" value={formData.eventName} onChange={(e: any) => setFormData({ ...formData, eventName: e.target.value })} />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Description</label>
+                                        <textarea className="w-full px-5 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-[1.5rem] text-sm min-h-[130px] focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors outline-none" value={formData.description} onChange={(e: any) => setFormData({ ...formData, description: e.target.value })} />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <div className="flex flex-col gap-2 mb-1 px-1">
+                                            <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Visual Media</label>
+                                            <div
+                                                className="relative group w-full h-44 rounded-[1.5rem] border-2 border-dashed border-[#2E2E2F]/30 bg-[#F2F2F2] flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#38BDF2] hover:bg-[#38BDF2]/10 transition-colors"
+                                                onClick={() => fileInputRef.current?.click()}
+                                            >
+                                                {formData.imageUrl ? (
+                                                    <img src={getImageUrl(formData.imageUrl)} alt="Preview" className="w-full h-full object-cover rounded-[1.5rem]" />
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center w-full h-full">
+                                                        <svg className="w-10 h-10 text-[#2E2E2F]/40 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="2.5" /><path d="M21 15l-5-5L5 21" /></svg>
+                                                        <span className="text-[12px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Upload Event Image</span>
+                                                    </div>
+                                                )}
+                                                <div className="absolute bottom-3 right-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-lg px-3 py-1 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors pointer-events-none">Browse</div>
+                                            </div>
+                                            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
+                                        </div>
+                                    </div>
                                 </div>
+                            )}
 
-                                <div className="md:col-span-2">
-                                    <Input
-                                        label="Event Name"
-                                        placeholder="e.g. Founder Growth Summit 2026"
-                                        value={formData.eventName}
-                                        onChange={(e: any) => setFormData({ ...formData, eventName: e.target.value })}
-                                    />
-                                </div>
+                            {wizardStep === 2 && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+                                    <Input label="Session Date" type="date" value={formData.eventDate} onChange={(e: any) => setFormData({ ...formData, eventDate: e.target.value })} />
+                                    <Input label="Start Time" type="time" value={formData.eventTime} onChange={(e: any) => setFormData({ ...formData, eventTime: e.target.value })} />
+                                    <Input label="End Date" type="date" value={formData.endDate} onChange={(e: any) => setFormData({ ...formData, endDate: e.target.value })} />
+                                    <Input label="End Time" type="time" value={formData.endTime} onChange={(e: any) => setFormData({ ...formData, endTime: e.target.value })} />
 
-                                <div className="md:col-span-2">
-                                    <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Description</label>
-                                    <textarea
-                                        className="w-full px-5 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-[1.5rem] text-sm min-h-[130px] focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors outline-none"
-                                        value={formData.description}
-                                        onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                    />
-                                </div>
-
-                                <div className="md:col-span-2">
-                                    <div className="flex flex-col gap-2 mb-1 px-1">
-                                        <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Visual Media</label>
-                                        <div
-                                            className="relative group w-full h-44 rounded-[1.5rem] border-2 border-dashed border-[#2E2E2F]/30 bg-[#F2F2F2] flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#38BDF2] hover:bg-[#38BDF2]/10 transition-colors"
-                                            onClick={() => fileInputRef.current?.click()}
+                                    <div>
+                                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Location Type</label>
+                                        <select
+                                            className="w-full px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]"
+                                            value={formData.locationType}
+                                            onChange={(e) => setFormData({ ...formData, locationType: e.target.value as Event['locationType'] })}
                                         >
-                                            {formData.imageUrl ? (
-                                                <img src={getImageUrl(formData.imageUrl)} alt="Preview" className="w-full h-full object-cover rounded-[1.5rem]" />
-                                            ) : (
-                                                <div className="flex flex-col items-center justify-center w-full h-full">
-                                                    <svg className="w-10 h-10 text-[#2E2E2F]/40 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="2.5" /><path d="M21 15l-5-5L5 21" /></svg>
-                                                    <span className="text-[12px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Upload Event Image</span>
+                                            <option value="ONSITE">Onsite</option>
+                                            <option value="ONLINE">Online</option>
+                                            <option value="HYBRID">Hybrid</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Timezone</label>
+                                        <Input value={formData.timezone} onChange={(e: any) => setFormData({ ...formData, timezone: e.target.value })} />
+                                    </div>
+
+                                    <div className="md:col-span-2 space-y-8">
+                                        {/* Physical Venue Section */}
+                                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/15">
+                                            <div className="flex items-center gap-3 mb-5">
+                                                <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]">
+                                                    <ICONS.MapPin className="w-4 h-4" />
+                                                </div>
+                                                <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Venue Details</h4>
+                                            </div>
+                                            <Input
+                                                label={formData.locationType === 'ONLINE' ? 'Physical Hub (Optional)' : 'Venue Address'}
+                                                placeholder="e.g. Global Tech Center"
+                                                value={formData.location}
+                                                onChange={(e: any) => setFormData({ ...formData, location: e.target.value })}
+                                            />
+                                            <div className="mt-4">
+                                                <OnsiteLocationAssistant
+                                                    value={formData.location}
+                                                    onChange={applyLocationValue}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Broadcast Section */}
+                                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/15">
+                                            <div className="flex items-center gap-3 mb-5">
+                                                <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]">
+                                                    <ICONS.Monitor className="w-4 h-4" />
+                                                </div>
+                                                <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Broadcast Settings</h4>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <Input
+                                                    label="Platform Name"
+                                                    placeholder="e.g. YouTube, Google Meet"
+                                                    value={formData.streamingPlatform}
+                                                    onChange={(e: any) => setFormData({ ...formData, streamingPlatform: e.target.value })}
+                                                />
+                                                <Input
+                                                    label="Connection URL"
+                                                    placeholder="Link to stream or meeting"
+                                                    value={formData.streamingUrl}
+                                                    onChange={(e: any) => applyLocationValue(e.target.value)}
+                                                />
+                                            </div>
+
+                                            {formData.streamingUrl && formData.streamingUrl.startsWith('http') && (
+                                                <div className="mt-6 p-6 bg-black rounded-3xl border border-white/10 overflow-hidden shadow-xl">
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <h4 className="text-[12px] font-black text-white uppercase tracking-widest">Stream Preview</h4>
+                                                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-red-500/20 border border-red-500/30 rounded-full">
+                                                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                                                            <span className="text-[9px] font-medium text-white uppercase">Live</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {(formData.streamingUrl.includes('youtube.com') || formData.streamingUrl.includes('youtu.be')) ? (
+                                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-white/5 border border-white/5">
+                                                            {(() => {
+                                                                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/|live\/)([^#\&\?]*).*/;
+                                                                const match = formData.streamingUrl.match(regExp);
+                                                                const videoId = (match && match[2].length === 11) ? match[2] : null;
+
+                                                                return videoId ? (
+                                                                    <iframe
+                                                                        className="absolute inset-0 w-full h-full"
+                                                                        src={`https://www.youtube.com/embed/${videoId}`}
+                                                                        title="YouTube Preview"
+                                                                        frameBorder="0"
+                                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                                        allowFullScreen
+                                                                    />
+                                                                ) : <div className="flex items-center justify-center w-full h-full text-white/30 text-xs">Invalid YouTube Link</div>;
+                                                            })()}
+                                                        </div>
+                                                    ) : (formData.streamingUrl.includes('facebook.com') || formData.streamingUrl.includes('fb.watch')) ? (
+                                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-white/5 border border-white/5">
+                                                            <iframe
+                                                                className="absolute inset-0 w-full h-full"
+                                                                src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(formData.streamingUrl)}&show_text=0&width=560&t=0`}
+                                                                title="Facebook Preview"
+                                                                frameBorder="0"
+                                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                                allowFullScreen
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-col items-center justify-center p-10 rounded-2xl bg-white/5 border border-white/5 border-dashed">
+                                                            <ICONS.Monitor className="w-8 h-8 text-white/20 mb-3" />
+                                                            <p className="text-white/40 text-[11px] text-center font-medium">This platform doesn't support direct previews, but the link will be provided to attendees.</p>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
-                                            <div className="absolute bottom-3 right-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-lg px-3 py-1 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors pointer-events-none">Browse</div>
                                         </div>
-                                        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {wizardStep === 2 && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-                                <Input label="Session Date" type="date" value={formData.eventDate} onChange={(e: any) => setFormData({ ...formData, eventDate: e.target.value })} />
-                                <Input label="Start Time" type="time" value={formData.eventTime} onChange={(e: any) => setFormData({ ...formData, eventTime: e.target.value })} />
-                                <Input label="End Date" type="date" value={formData.endDate} onChange={(e: any) => setFormData({ ...formData, endDate: e.target.value })} />
-                                <Input label="End Time" type="time" value={formData.endTime} onChange={(e: any) => setFormData({ ...formData, endTime: e.target.value })} />
-
-                                <div>
-                                    <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Location Type</label>
-                                    <select
-                                        className="w-full px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]"
-                                        value={formData.locationType}
-                                        onChange={(e) => setFormData({ ...formData, locationType: e.target.value as Event['locationType'] })}
-                                    >
-                                        <option value="ONSITE">Onsite</option>
-                                        <option value="ONLINE">Online</option>
-                                        <option value="HYBRID">Hybrid</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Timezone</label>
-                                    <Input value={formData.timezone} onChange={(e: any) => setFormData({ ...formData, timezone: e.target.value })} />
-                                </div>
-
-                                <div className="md:col-span-2">
+                            {wizardStep === 3 && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
                                     <Input
-                                        label="Location / Connection Link"
-                                        placeholder="e.g. Global Tech Center"
-                                        value={formData.location}
-                                        onChange={(e: any) => applyLocationValue(e.target.value)}
+                                        label="Capacity Total"
+                                        type="number"
+                                        min={1}
+                                        value={formData.capacityTotal}
+                                        onChange={(e: any) => {
+                                            const nextValue = Math.max(1, parseInt(e.target.value, 10) || 1);
+                                            setFormData({ ...formData, capacityTotal: nextValue });
+                                        }}
                                     />
-                                </div>
+                                    <Input
+                                        label="Registration Open Date"
+                                        type="date"
+                                        value={formData.regOpenDate}
+                                        onChange={(e: any) => setFormData({ ...formData, regOpenDate: e.target.value })}
+                                    />
+                                    <Input
+                                        label="Registration Close Date"
+                                        type="date"
+                                        value={formData.regCloseDate}
+                                        onChange={(e: any) => setFormData({ ...formData, regCloseDate: e.target.value })}
+                                    />
+                                    <Input
+                                        label="Registration Close Time"
+                                        type="time"
+                                        value={formData.regCloseTime}
+                                        onChange={(e: any) => setFormData({ ...formData, regCloseTime: e.target.value })}
+                                    />
 
-                                {formData.locationType === 'ONSITE' && (
-                                    <div className="md:col-span-2">
-                                        <OnsiteLocationAssistant
-                                            value={formData.location}
-                                            onChange={applyLocationValue}
-                                        />
-                                    </div>
-                                )}
-
-                                {(formData.locationType === 'ONLINE' || formData.locationType === 'HYBRID') && (
-                                    <div className="md:col-span-2">
-                                        <Input
-                                            label="Streaming Platform"
-                                            placeholder="e.g. Google Meet, Zoom"
-                                            value={formData.streamingPlatform}
-                                            onChange={(e: any) => setFormData({ ...formData, streamingPlatform: e.target.value })}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {wizardStep === 3 && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-                                <Input
-                                    label="Capacity Total"
-                                    type="number"
-                                    min={1}
-                                    value={formData.capacityTotal}
-                                    onChange={(e: any) => {
-                                        const nextValue = Math.max(1, parseInt(e.target.value, 10) || 1);
-                                        setFormData({ ...formData, capacityTotal: nextValue });
-                                    }}
-                                />
-                                <Input
-                                    label="Registration Open Date"
-                                    type="date"
-                                    value={formData.regOpenDate}
-                                    onChange={(e: any) => setFormData({ ...formData, regOpenDate: e.target.value })}
-                                />
-                                <Input
-                                    label="Registration Close Date"
-                                    type="date"
-                                    value={formData.regCloseDate}
-                                    onChange={(e: any) => setFormData({ ...formData, regCloseDate: e.target.value })}
-                                />
-                                <Input
-                                    label="Registration Close Time"
-                                    type="time"
-                                    value={formData.regCloseTime}
-                                    onChange={(e: any) => setFormData({ ...formData, regCloseTime: e.target.value })}
-                                />
-
-                                <div className="md:col-span-2 rounded-2xl border border-[#2E2E2F]/15 bg-[#F2F2F2] px-5 py-4">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2E2E2F]/45">Ticket Setup Rule</p>
-                                    <p className="mt-2 text-sm font-semibold text-[#2E2E2F]">
-                                        Publishing is locked until at least one ticket type is configured.
-                                    </p>
-                                    <p className="mt-1 text-[12px] text-[#2E2E2F]/60">
-                                        Clicking next will save draft and open ticket setup automatically.
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-
-                        {wizardStep === 4 && (
-                            <div className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                    <div className={`rounded-2xl border px-4 py-4 ${isPersonalProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Account Profile</p>
-                                        <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{isPersonalProfileReady ? 'Ready' : 'Incomplete'}</p>
-                                    </div>
-                                    <div className={`rounded-2xl border px-4 py-4 ${isOrganizerProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Organization Profile</p>
-                                        <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{isOrganizerProfileReady ? 'Ready' : 'Incomplete'}</p>
-                                    </div>
-                                    <div className={`rounded-2xl border px-4 py-4 ${canPublishByTicketRule ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Ticket Setup</p>
-                                        <p className="mt-2 text-sm font-bold text-[#2E2E2F]">
-                                            {ticketReadinessLoading
-                                                ? 'Checking...'
-                                                : isEditMode
-                                                    ? `${activeEventTicketCount} ticket type(s)`
-                                                    : 'Save draft first'}
+                                    <div className="md:col-span-2 rounded-2xl border border-[#2E2E2F]/15 bg-[#F2F2F2] px-5 py-4">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2E2E2F]/45">Ticket Setup Rule</p>
+                                        <p className="mt-2 text-sm font-semibold text-[#2E2E2F]">
+                                            Publishing is locked until at least one ticket type is configured.
+                                        </p>
+                                        <p className="mt-1 text-[12px] text-[#2E2E2F]/60">
+                                            Clicking next will save draft and open ticket setup automatically.
                                         </p>
                                     </div>
                                 </div>
+                            )}
 
-                                <div>
-                                    <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Event Status</label>
-                                    <p className="mb-2 text-[11px] text-[#2E2E2F]/60">
-                                        Current: <span className="font-bold text-[#2E2E2F]">{initialEventStatus}</span> · Choose final status below.
-                                    </p>
-                                    <select
-                                        className="w-full px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]"
-                                        value={finalStatusDecision}
-                                        onChange={(e) => {
-                                            const nextStatus = e.target.value as EventStatus | '';
-                                            setFinalStatusDecision(nextStatus);
-                                            if (nextStatus) {
-                                                setFormData({ ...formData, status: nextStatus as EventStatus });
-                                            }
-                                        }}
-                                    >
-                                        <option value="">Select final status</option>
-                                        <option value="DRAFT">Draft / Private</option>
-                                        <option value="PUBLISHED" disabled={!canPublishByTicketRule}>
-                                            {canPublishByTicketRule ? 'Live / Published' : 'Live / Published (Add ticket first)'}
-                                        </option>
-                                        {isEditMode && <option value="CLOSED">Closed</option>}
-                                    </select>
+                            {wizardStep === 4 && (
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div className={`rounded-2xl border px-4 py-4 ${isPersonalProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Account Profile</p>
+                                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{isPersonalProfileReady ? 'Ready' : 'Incomplete'}</p>
+                                        </div>
+                                        <div className={`rounded-2xl border px-4 py-4 ${isOrganizerProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Organization Profile</p>
+                                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{isOrganizerProfileReady ? 'Ready' : 'Incomplete'}</p>
+                                        </div>
+                                        <div className={`rounded-2xl border px-4 py-4 ${canPublishByTicketRule ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Ticket Setup</p>
+                                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">
+                                                {ticketReadinessLoading
+                                                    ? 'Checking...'
+                                                    : isEditMode
+                                                        ? `${activeEventTicketCount} ticket type(s)`
+                                                        : 'Save draft first'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Event Status</label>
+                                        <p className="mb-2 text-[11px] text-[#2E2E2F]/60">
+                                            Current: <span className="font-bold text-[#2E2E2F]">{initialEventStatus}</span> · Choose final status below.
+                                        </p>
+                                        <select
+                                            className="w-full px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]"
+                                            value={finalStatusDecision}
+                                            onChange={(e) => {
+                                                const nextStatus = e.target.value as EventStatus | '';
+                                                setFinalStatusDecision(nextStatus);
+                                                if (nextStatus) {
+                                                    setFormData({ ...formData, status: nextStatus as EventStatus });
+                                                }
+                                            }}
+                                        >
+                                            <option value="">Select final status</option>
+                                            <option value="DRAFT">Draft / Private</option>
+                                            <option value="PUBLISHED" disabled={!canPublishByTicketRule}>
+                                                {canPublishByTicketRule ? 'Published' : 'Published (Add ticket first)'}
+                                            </option>
+                                            <option value="LIVE" disabled={!canPublishByTicketRule}>
+                                                {canPublishByTicketRule ? '🎉 GO LIVE NOW' : 'GO LIVE NOW (Add ticket first)'}
+                                            </option>
+                                            {isEditMode && <option value="CLOSED">Closed</option>}
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        <div className="flex gap-4 pt-8 border-t border-[#2E2E2F]/20">
-                            <Button
-                                type="button"
-                                className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border border-[#2E2E2F]/25 hover:bg-[#2E2E2F]/5 transition-colors min-h-[32px]"
-                                onClick={() => {
-                                    if (wizardStep === 1) {
-                                        handleCloseEventModal();
-                                        return;
-                                    }
-                                    setWizardStep((prev) => (prev > 1 ? ((prev - 1) as EventSetupStep) : prev));
-                                }}
-                            >
-                                {wizardStep === 1 ? 'Cancel' : 'Back'}
-                            </Button>
-
-                            {wizardStep < 4 ? (
+                            <div className="flex gap-4 pt-8 border-t border-[#2E2E2F]/20">
                                 <Button
                                     type="button"
-                                    className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors min-h-[32px]"
-                                    onClick={handleNextWizardStep}
-                                    disabled={submitting}
+                                    className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border border-[#2E2E2F]/25 hover:bg-[#2E2E2F]/5 transition-colors min-h-[32px]"
+                                    onClick={() => {
+                                        if (wizardStep === 1) {
+                                            handleCloseEventModal();
+                                            return;
+                                        }
+                                        setWizardStep((prev) => (prev > 1 ? ((prev - 1) as EventSetupStep) : prev));
+                                    }}
                                 >
-                                    {submitting && wizardStep === 3 && !isEditMode ? 'Saving Draft...' : (wizardStep === 3 && !isEditMode ? 'Continue to Tickets' : 'Next Step')}
+                                    {wizardStep === 1 ? 'Cancel' : 'Back'}
                                 </Button>
-                            ) : (
-                                <Button
-                                    type="submit"
-                                    className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors min-h-[32px]"
-                                    disabled={submitting}
-                                >
-                                    {submitting ? 'Saving...' : 'Apply Event Status'}
-                                </Button>
-                            )}
-                        </div>
+
+                                {isEditMode && wizardStep < 4 && (
+                                    <Button
+                                        type="submit"
+                                        data-quick-update="true"
+                                        className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border border-[#2E2E2F]/25 hover:bg-[#2E2E2F]/5 transition-colors min-h-[32px]"
+                                        disabled={submitting}
+                                    >
+                                        {submitting ? 'Saving...' : 'Save Changes'}
+                                    </Button>
+                                )}
+
+                                {wizardStep < 4 ? (
+                                    <Button
+                                        type="button"
+                                        className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors min-h-[32px]"
+                                        onClick={handleNextWizardStep}
+                                        disabled={submitting}
+                                    >
+                                        {submitting && wizardStep === 3 && !isEditMode ? 'Saving Draft...' : (wizardStep === 3 && !isEditMode ? 'Continue to Tickets' : 'Next Step')}
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        type="submit"
+                                        className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors min-h-[32px]"
+                                        disabled={submitting}
+                                    >
+                                        {submitting ? 'Saving...' : 'Apply Event Status'}
+                                    </Button>
+                                )}
+                            </div>
                         </form>
                     </div>
 
-                    <div className={`${isPreviewMode ? 'block' : 'hidden'} xl:block xl:sticky xl:top-0 self-start space-y-3 xl:max-h-[calc(70vh-1rem)] xl:overflow-y-auto xl:pr-1`}>
+                    <div className={`${isPreviewMode ? 'block' : 'hidden'} xl:sticky xl:top-0 self-start space-y-3 xl:max-h-[calc(70vh-1rem)] xl:overflow-y-auto xl:pr-1`}>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <ICONS.ChevronRight className="w-4 h-4 text-[#2E2E2F]/65" />
                                 <h4 className="text-[30px] font-black text-[#2E2E2F] tracking-tight">Preview</h4>
                             </div>
-                            <div className="inline-flex items-center rounded-xl border border-[#2E2E2F]/15 bg-[#F2F2F2] p-1">
+                            <div className="flex items-center gap-2">
                                 <button
                                     type="button"
-                                    onClick={() => setPreviewDevice('mobile')}
-                                    className={`w-9 h-9 rounded-lg flex items-center justify-center ${previewDevice === 'mobile' ? 'bg-[#2563EB]/15 text-[#2563EB]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
-                                    title="Mobile preview"
+                                    onClick={() => setIsPreviewMode(false)}
+                                    className="px-4 py-1.5 rounded-full border border-[#2E2E2F]/15 bg-[#F2F2F2] text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/60 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors"
                                 >
-                                    <MobilePreviewIcon className="w-4 h-4" />
+                                    Hide Preview
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setPreviewDevice('desktop')}
-                                    className={`w-9 h-9 rounded-lg flex items-center justify-center ${previewDevice === 'desktop' ? 'bg-[#2563EB]/15 text-[#2563EB]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
-                                    title="Desktop preview"
-                                >
-                                    <DesktopPreviewIcon className="w-4 h-4" />
-                                </button>
+                                <div className="inline-flex items-center rounded-xl border border-[#2E2E2F]/15 bg-[#F2F2F2] p-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setPreviewDevice('mobile')}
+                                        className={`w-9 h-9 rounded-lg flex items-center justify-center ${previewDevice === 'mobile' ? 'bg-[#2563EB]/15 text-[#2563EB]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
+                                        title="Mobile preview"
+                                    >
+                                        <MobilePreviewIcon className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setPreviewDevice('desktop')}
+                                        className={`w-9 h-9 rounded-lg flex items-center justify-center ${previewDevice === 'desktop' ? 'bg-[#2563EB]/15 text-[#2563EB]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
+                                        title="Desktop preview"
+                                    >
+                                        <DesktopPreviewIcon className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -1242,97 +1358,139 @@ export const UserEvents: React.FC = () => {
                                             <ICONS.MoreHorizontal className="w-4 h-4" />
                                         </div>
                                     </div>
-                                    <div className={`p-5 ${previewDevice === 'mobile' ? 'space-y-4' : 'space-y-5'}`}>
-                                        <div className={`${previewDevice === 'mobile' ? 'aspect-[16/10]' : 'aspect-[21/9]'} rounded-2xl overflow-hidden border border-[#2E2E2F]/10`}>
-                                            <img
-                                                src={getImageUrl(formData.imageUrl)}
-                                                alt="Event Preview"
-                                                className="w-full h-full object-cover"
-                                            />
+                                    <div className={`p-5 ${previewDevice === 'mobile' ? 'space-y-4' : 'space-y-6'}`}>
+                                        <div>
+                                            <div className="flex items-start justify-between gap-4 mb-4">
+                                                <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tighter leading-tight">
+                                                    {formData.eventName || 'Event title'}
+                                                </h2>
+                                                <div className="flex items-center gap-2 shrink-0">
+                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/10 flex items-center justify-center">
+                                                        <ICONS.Heart className="w-4 h-4 text-[#2E2E2F]/40" />
+                                                    </div>
+                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/10 flex items-center justify-center">
+                                                        <ICONS.Download className="w-4 h-4 text-[#2E2E2F]/40" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="rounded-[2.5rem] overflow-hidden border border-[#2E2E2F]/10 mb-6 group">
+                                                <img
+                                                    src={getImageUrl(formData.imageUrl)}
+                                                    alt="Event Preview"
+                                                    className="w-full aspect-video object-cover"
+                                                />
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F]/70">
+                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border border-[#2E2E2F]/10 text-[10px] font-bold">
+                                                    <ICONS.Calendar className="w-3.5 h-3.5 mr-2 text-[#38BDF2]" />
+                                                    {previewDateLabel}
+                                                </div>
+                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border border-[#2E2E2F]/10 text-[10px] font-bold">
+                                                    <ICONS.Monitor className="w-3.5 h-3.5 mr-2 text-[#38BDF2]" />
+                                                    {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
+                                                </div>
+                                                {formData.streamingPlatform && (
+                                                    <div className="flex items-center text-[#38BDF2] bg-[#38BDF2]/5 px-3 py-1.5 rounded-xl border border-[#38BDF2]/20 text-[10px] font-black tracking-wide">
+                                                        VIA {formData.streamingPlatform.toUpperCase()}
+                                                    </div>
+                                                )}
+                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border border-[#2E2E2F]/10 text-[10px] font-bold">
+                                                    CAPACITY: {formData.capacityTotal}
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <h2 className="text-4xl font-black text-[#2E2E2F] tracking-tight leading-tight">
-                                            {formData.eventName || 'Event title'}
-                                        </h2>
-
-                                        <div className="space-y-2 text-[#2E2E2F]/70">
-                                            <div className="flex items-center gap-2 text-sm">
-                                                <ICONS.MapPin className="w-4 h-4" />
-                                                <span>{formData.location || 'Venue'}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-sm">
-                                                <ICONS.Calendar className="w-4 h-4" />
-                                                <span>{previewDateLabel}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="pt-2 border-t border-[#2E2E2F]/10">
-                                            <h4 className="text-3xl font-black text-[#2E2E2F] tracking-tight mb-2">Overview</h4>
-                                            <p className="text-[16px] leading-7 text-[#2E2E2F]/75">
-                                                {formData.description || 'A short and sweet sentence about your event.'}
+                                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/10">
+                                            <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
+                                            <p className="text-[#2E2E2F]/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
+                                                {formData.description || 'Provide an executive summary of this event session...'}
                                             </p>
                                         </div>
 
-                                        <div className="pt-2 border-t border-[#2E2E2F]/10">
-                                            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#2E2E2F]/55">Organized By</p>
-                                            <div className="mt-3 rounded-2xl border border-[#2E2E2F]/12 bg-[#F2F2F2] p-4 flex items-center gap-3">
-                                                <div className="w-11 h-11 rounded-full overflow-hidden bg-[#2E2E2F]/90 text-[#F2F2F2] text-sm font-bold flex items-center justify-center shrink-0">
-                                                    {organizerProfile?.profileImageUrl ? (
-                                                        <img src={getImageUrl(organizerProfile.profileImageUrl)} alt={organizerProfile.organizerName || 'Organizer'} className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        organizerPreviewInitial
-                                                    )}
+                                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/10">
+                                            <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
+                                            <div className="rounded-[1.2rem] border border-[#2E2E2F]/10 bg-[#F2F2F2] p-4 flex flex-col gap-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-full overflow-hidden bg-[#2E2E2F] text-[#F2F2F2] flex items-center justify-center text-lg font-bold shrink-0">
+                                                        {organizerProfile?.profileImageUrl ? (
+                                                            <img src={getImageUrl(organizerProfile.profileImageUrl)} alt={organizerProfile.organizerName || 'Organizer'} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            organizerPreviewInitial
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-lg font-black text-[#2E2E2F] tracking-tight truncate">
+                                                            {organizerProfile?.organizerName || 'Organizer Profile'}
+                                                        </p>
+                                                        <div className="flex items-center gap-4 mt-1">
+                                                            <div>
+                                                                <p className="text-[8px] uppercase tracking-widest font-black text-[#2E2E2F]/40">Followers</p>
+                                                                <p className="text-sm font-black">{organizerProfile?.followersCount || 0}</p>
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[8px] uppercase tracking-widest font-black text-[#2E2E2F]/40">Events</p>
+                                                                <p className="text-sm font-black">1</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div className="min-w-0 flex-1">
-                                                    <p className="text-[15px] font-bold text-[#2E2E2F] truncate">{organizerProfile?.organizerName || 'Organizer name'}</p>
-                                                    <p className="text-[11px] font-semibold text-[#2E2E2F]/55">
-                                                        {`${organizerProfile?.followersCount || 0} follower${(organizerProfile?.followersCount || 0) === 1 ? '' : 's'}`}
-                                                    </p>
+                                                <div className="flex gap-2">
+                                                    <button type="button" className="flex-1 py-2 rounded-xl border border-[#2E2E2F]/20 text-[#2E2E2F] font-black text-[10px] uppercase tracking-widest">
+                                                        Contact
+                                                    </button>
+                                                    <button type="button" className="flex-1 py-2 rounded-xl bg-[#00D4FF] text-white font-black text-[10px] uppercase tracking-widest shadow-[0_0_12px_rgba(0,212,255,0.3)]">
+                                                        Follow
+                                                    </button>
                                                 </div>
-                                                <button type="button" className="px-3 py-2 text-[11px] font-bold border border-[#2E2E2F]/20 rounded-lg text-[#2E2E2F]/80">
-                                                    Follow
-                                                </button>
                                             </div>
-                                            {!!organizerProfile?.eventPageDescription && (
-                                                <p className="mt-3 text-[12px] leading-5 text-[#2E2E2F]/70">
-                                                    {organizerProfile.eventPageDescription}
-                                                </p>
+
+                                            {/* Live Stream Section in Preview */}
+                                            {((formData.locationType === 'ONLINE' || formData.locationType === 'HYBRID')) && (
+                                                <div className="mt-6 pt-6 border-t border-[#2E2E2F]/10">
+                                                    <div className="overflow-hidden rounded-[1.5rem] border border-[#2E2E2F]/10 shadow-lg">
+                                                        <div className="bg-[#00AEEF] px-4 py-3 text-white flex justify-between items-center">
+                                                            <span className="text-[10px] font-black tracking-tight uppercase">BROADCAST PREVIEW</span>
+                                                            <div className="flex items-center gap-1.5 bg-red-600 px-2.5 py-1 rounded-full border border-red-500 animate-pulse">
+                                                                <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                                                                <span className="text-[8px] font-black uppercase tracking-widest">LIVE</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="aspect-video bg-[#2E2E2F]/5 flex items-center justify-center border-t border-[#2E2E2F]/10">
+                                                            {formData.streamingUrl ? (
+                                                                <div className="text-center p-4">
+                                                                    <ICONS.Monitor className="w-8 h-8 text-[#2E2E2F]/20 mx-auto mb-2" />
+                                                                    <p className="text-[10px] font-bold text-[#2E2E2F]/40 uppercase tracking-widest">Connection Detected</p>
+                                                                    <p className="text-[9px] text-[#2E2E2F]/30 mt-1 truncate max-w-[200px]">{formData.streamingUrl}</p>
+                                                                </div>
+                                                            ) : (
+                                                                <p className="text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-tighter">Enter URL to preview stream</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             )}
                                         </div>
 
-                                        <div className="pt-2 border-t border-[#2E2E2F]/10">
-                                            <div className="flex items-center justify-between gap-3">
-                                                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#2E2E2F]/55">Exact Location</p>
-                                                {hasPreviewPhysicalLocation && (
-                                                    <a
-                                                        href={previewOpenMapUrl}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="text-[10px] font-black uppercase tracking-widest text-[#38BDF2] hover:text-[#2E2E2F] transition-colors"
-                                                    >
+                                        {hasPreviewPhysicalLocation && (
+                                            <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/10">
+                                                <div className="flex items-center justify-between gap-3 mb-4">
+                                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-[#38BDF2]">
                                                         Open in Maps
-                                                    </a>
-                                                )}
-                                            </div>
-                                            <p className="mt-2 text-sm text-[#2E2E2F]/70 font-medium">
-                                                {formData.location || 'Venue not set yet.'}
-                                            </p>
-                                            {hasPreviewPhysicalLocation ? (
-                                                <div className="mt-3 rounded-2xl overflow-hidden border border-[#2E2E2F]/10 bg-[#F2F2F2]">
+                                                    </span>
+                                                </div>
+                                                <p className="text-[12px] text-[#2E2E2F]/70 font-medium mb-4">{formData.location}</p>
+                                                <div className="rounded-xl overflow-hidden border border-[#2E2E2F]/10 bg-[#F2F2F2]">
                                                     <iframe
                                                         src={previewMapEmbedUrl}
-                                                        title="Preview event location map"
-                                                        className={`w-full ${previewDevice === 'mobile' ? 'h-44' : 'h-56'}`}
+                                                        title="Preview map"
+                                                        className={`w-full ${previewDevice === 'mobile' ? 'h-40' : 'h-56'}`}
                                                         loading="lazy"
-                                                        referrerPolicy="no-referrer-when-downgrade"
                                                     />
                                                 </div>
-                                            ) : (
-                                                <div className="mt-3 rounded-2xl border border-[#2E2E2F]/12 bg-[#F2F2F2] px-4 py-3 text-[12px] text-[#2E2E2F]/60">
-                                                    Map preview appears when Location Type is set to Onsite or Hybrid.
-                                                </div>
-                                            )}
-                                        </div>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="px-5 py-4 border-t border-[#2E2E2F]/10 bg-[#F2F2F2] flex items-center justify-between gap-3">
                                         <div>
@@ -1452,7 +1610,7 @@ export const UserEvents: React.FC = () => {
                     </div>
                 </div>
             </Modal>
-        </div >
+        </div>
     );
 };
 
@@ -1463,7 +1621,7 @@ interface TicketManagerProps {
     setNotification: (n: { message: string; type: 'success' | 'error' }) => void;
 }
 
-const TicketManager: React.FC<TicketManagerProps> = ({ event, onSave, submitting, setNotification }) => {
+function TicketManager({ event, onSave, submitting, setNotification }: TicketManagerProps) {
     const [tickets, setTickets] = useState<TicketType[]>([]);
     const [expandedTicketId, setExpandedTicketId] = useState<string | null>(null);
 
@@ -1801,4 +1959,4 @@ const TicketManager: React.FC<TicketManagerProps> = ({ event, onSave, submitting
             </Button>
         </div>
     );
-};
+}

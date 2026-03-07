@@ -216,7 +216,7 @@ export async function getSmtpConfig(organizerId = null, triggerUserId = null, re
  */
 export async function getAdminSmtpConfig() {
   debugLog('🔍 [SMTP] Getting Admin SMTP config for system emails...');
-  
+
   // Look for any user with ADMIN role
   const { data: adminUser } = await supabase
     .from('users')
@@ -232,7 +232,7 @@ export async function getAdminSmtpConfig() {
       return config;
     }
   }
-  
+
   debugLog('⚠️ [SMTP] No admin SMTP config found.');
   return null;
 }
@@ -473,7 +473,7 @@ export async function notifyUserByPreference({
   // Fetch SMTP config based on professional hierarchy (Organizer -> Superadmin Fallback)
   // OR use the override if provided (for system emails like password reset)
   let smtpConfig = smtpConfigOverride || null;
-  
+
   if (!smtpConfig) {
     try {
       // Resolve context using both organizerId and actorUserId (for staff detection)
@@ -552,9 +552,10 @@ export async function notifyUserByPreference({
     const subject = String(emailSubject || title || 'Notification');
     const text = String(emailText || message || '');
 
+    let computedFromName = fromName || smtpConfig?.fromName;
     let finalFrom = fromEmail
-      ? (fromName ? `${fromName} <${fromEmail}>` : fromEmail)
-      : (smtpConfig?.fromAddress ? (smtpConfig.fromName ? `${smtpConfig.fromName} <${smtpConfig.fromAddress}>` : smtpConfig.fromAddress) : undefined);
+      ? (computedFromName ? `${computedFromName} <${fromEmail}>` : fromEmail)
+      : (smtpConfig?.fromAddress ? (computedFromName ? `${computedFromName} <${smtpConfig.fromAddress}>` : smtpConfig.fromAddress) : undefined);
 
     debugLog(`🚀 [Notifications] SMTP Attempt: TO=${to}, FROM=${finalFrom}`);
 

@@ -366,6 +366,16 @@ export const apiService = {
     return Array.isArray(data?.plans) ? data.plans : [];
   },
 
+  // GET /api/events/live
+  getLiveEvents: async (): Promise<Event[]> => {
+    const res = await fetch(`${API_BASE}/api/events/live`, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error(`Failed to load live events: ${res.status}`);
+    const data = await res.json();
+    return Array.isArray(data?.data) ? data.data : [];
+  },
+
   // GET /api/events
   getEvents: async (page = 1, limit = 10, search = '', location = '', organizerId = ''): Promise<{ events: Event[], pagination: any }> => {
     const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
@@ -838,6 +848,48 @@ export const apiService = {
     if (!res.ok) {
       const text = await res.text().catch(() => '');
       throw new Error(text || `Failed to update permissions: ${res.status}`);
+    }
+    return res.json();
+  },
+
+  // =====================
+  // Notifications API
+  // =====================
+
+  // GET /api/notifications/me - Get current user's notifications
+  getMyNotifications: async (limit = 25): Promise<{ notifications: any[], unreadCount: number }> => {
+    const res = await fetch(`${API_BASE}/api/notifications/me?limit=${limit}`, {
+      credentials: 'include'
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(text || `Failed to load notifications: ${res.status}`);
+    }
+    return res.json();
+  },
+
+  // PATCH /api/notifications/:id/read - Mark a notification as read
+  markNotificationRead: async (notificationId: string): Promise<any> => {
+    const res = await fetch(`${API_BASE}/api/notifications/${encodeURIComponent(notificationId)}/read`, {
+      method: 'PATCH',
+      credentials: 'include'
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(text || `Failed to mark notification as read: ${res.status}`);
+    }
+    return res.json();
+  },
+
+  // PATCH /api/notifications/read-all - Mark all notifications as read
+  markAllNotificationsRead: async (): Promise<{ success: boolean }> => {
+    const res = await fetch(`${API_BASE}/api/notifications/read-all`, {
+      method: 'PATCH',
+      credentials: 'include'
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(text || `Failed to mark all notifications as read: ${res.status}`);
     }
     return res.json();
   }

@@ -1,17 +1,17 @@
 import supabase from '../database/db.js';
 
 const FEATURE_KEYS = {
-  aiIntegration: 'feature_aiIntegration',
-  branding: 'feature_branding',
-  weddingSuppliers: 'feature_weddingSuppliers',
+  enable_custom_branding: 'enable_custom_branding',
+  enable_discount_codes: 'enable_discount_codes',
+  enable_advanced_reports: 'enable_advanced_reports',
+  enable_priority_support: 'enable_priority_support',
 };
 
 const LIMIT_KEYS = {
-  users: 'limit_users',
-  projects: 'limit_projects',
-  contacts: 'limit_contacts',
-  accounts: 'limit_accounts',
-  storage: 'limit_storage',
+  max_events: 'max_events',
+  max_active_events: 'max_active_events',
+  max_staff_accounts: 'max_staff_accounts',
+  max_attendees_per_month: 'max_attendees_per_month',
 };
 
 const toBoolean = (value, fallback = false) => {
@@ -40,28 +40,28 @@ const coerceLimitValue = (value) => {
 
 const mapPlan = (row, featureRows = []) => {
   const features = {
-    aiIntegration: false,
-    branding: false,
-    weddingSuppliers: false,
+    enable_custom_branding: false,
+    enable_discount_codes: false,
+    enable_advanced_reports: false,
+    enable_priority_support: false,
   };
   const limits = {
-    users: 0,
-    projects: 0,
-    contacts: 0,
-    accounts: 0,
-    storage: 'N/A',
+    max_events: 0,
+    max_active_events: 0,
+    max_staff_accounts: 0,
+    max_attendees_per_month: 0,
   };
 
   featureRows.forEach((item) => {
     if (!item) return;
-    if (item.key === FEATURE_KEYS.aiIntegration) features.aiIntegration = toBoolean(item.value, false);
-    if (item.key === FEATURE_KEYS.branding) features.branding = toBoolean(item.value, false);
-    if (item.key === FEATURE_KEYS.weddingSuppliers) features.weddingSuppliers = toBoolean(item.value, false);
-    if (item.key === LIMIT_KEYS.users) limits.users = coerceLimitValue(item.value);
-    if (item.key === LIMIT_KEYS.projects) limits.projects = coerceLimitValue(item.value);
-    if (item.key === LIMIT_KEYS.contacts) limits.contacts = coerceLimitValue(item.value);
-    if (item.key === LIMIT_KEYS.accounts) limits.accounts = coerceLimitValue(item.value);
-    if (item.key === LIMIT_KEYS.storage) limits.storage = String(item.value || 'N/A');
+    if (item.key === FEATURE_KEYS.enable_custom_branding) features.enable_custom_branding = toBoolean(item.value, false);
+    if (item.key === FEATURE_KEYS.enable_discount_codes) features.enable_discount_codes = toBoolean(item.value, false);
+    if (item.key === FEATURE_KEYS.enable_advanced_reports) features.enable_advanced_reports = toBoolean(item.value, false);
+    if (item.key === FEATURE_KEYS.enable_priority_support) features.enable_priority_support = toBoolean(item.value, false);
+    if (item.key === LIMIT_KEYS.max_events) limits.max_events = coerceLimitValue(item.value);
+    if (item.key === LIMIT_KEYS.max_active_events) limits.max_active_events = coerceLimitValue(item.value);
+    if (item.key === LIMIT_KEYS.max_staff_accounts) limits.max_staff_accounts = coerceLimitValue(item.value);
+    if (item.key === LIMIT_KEYS.max_attendees_per_month) limits.max_attendees_per_month = coerceLimitValue(item.value);
   });
 
   return {

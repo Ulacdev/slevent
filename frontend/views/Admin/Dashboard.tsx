@@ -72,20 +72,22 @@ type DetailType = 'transaction' | 'order' | 'audit';
 const PAGE_SIZE = 10;
 
 const StatCard: React.FC<{ title: string, value: string | number, icon: React.ReactNode, trend?: string, color?: string }> = ({ title, value, icon, trend, color = 'indigo' }) => (
-  <Card className="p-6">
+  <Card className="p-4 sm:p-6">
     <div className="flex items-start justify-between">
       <div>
-        <p className="text-sm font-medium text-[#2E2E2F] mb-1">{title}</p>
-        <h3 className="text-2xl font-bold text-[#2E2E2F]">{value}</h3>
+        <p className="text-[11px] sm:text-sm font-medium text-[#2E2E2F] mb-1">{title}</p>
+        <h3 className="text-xl sm:text-2xl font-bold text-[#2E2E2F]">{value}</h3>
         {trend && (
-          <p className={`text-xs mt-2 flex items-center ${trend.startsWith('+') ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]'}`}>
+          <p className="text-[10px] sm:text-xs mt-2 flex items-center text-[#2E2E2F]">
             <ICONS.TrendingUp className="w-3 h-3 mr-1" />
             {trend} from last month
           </p>
         )}
       </div>
-      <div className="p-3 bg-[#38BDF2]/10 text-[#2E2E2F] rounded-xl">
-        {icon}
+      <div className="p-2 sm:p-3 bg-[#38BDF2]/10 text-[#2E2E2F] rounded-xl flex-shrink-0">
+        <div className="w-5 h-5 sm:w-6 sm:h-6 [&>svg]:w-full [&>svg]:h-full">
+          {icon}
+        </div>
       </div>
     </div>
   </Card>

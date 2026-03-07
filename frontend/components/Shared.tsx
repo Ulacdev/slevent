@@ -135,7 +135,7 @@ export const Modal: React.FC<{
     };
 
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4">
         {/* Backdrop */}
         <div
           className="fixed inset-0 z-[90] bg-[#2E2E2F]/60 transition-opacity"
@@ -147,8 +147,8 @@ export const Modal: React.FC<{
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-title"
-          className={`relative z-[110] bg-[#F2F2F2] rounded-3xl border border-[#2E2E2F]/10 w-full ${sizes[size]
-            } max-h-[90vh] overflow-hidden ${className}`}
+          className={`relative z-[110] bg-[#F2F2F2] sm:rounded-3xl rounded-none border-x-0 sm:border-x sm:rounded-3xl border-[#2E2E2F]/10 w-full ${sizes[size]
+            } h-full sm:h-auto sm:max-h-[90vh] overflow-hidden ${className}`}
         >
           <div className="px-6 py-5 border-b border-[#2E2E2F]/10 flex items-start justify-between gap-4 sticky top-0 bg-[#F2F2F2] z-10">
             <div>
@@ -171,7 +171,7 @@ export const Modal: React.FC<{
               </button>
             )}
           </div>
-          <div className={`p-6 overflow-y-auto max-h-[70vh] ${contentClassName}`}>
+          <div className={`p-6 overflow-y-auto max-h-[calc(100vh-140px)] sm:max-h-[70vh] ${contentClassName}`}>
             {children}
           </div>
           {footer && (

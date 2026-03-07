@@ -60,6 +60,7 @@ export const EventsManagement: React.FC = () => {
     regCloseDate: '',
     regCloseTime: '',
     streamingPlatform: '',
+    streamingUrl: '',
     ticketTypes: [] as TicketType[]
   };
 
@@ -172,7 +173,8 @@ export const EventsManagement: React.FC = () => {
       endTime: endDT.time,
       timezone: event.timezone || 'Asia/Manila',
       locationType: event.locationType || 'ONSITE',
-      location: event.locationText,
+      location: event.locationText || '',
+      streamingUrl: event.streaming_url || '',
       capacityTotal: event.capacityTotal,
       imageUrl: getImageUrl(event.imageUrl),
       status: event.status,
@@ -245,7 +247,8 @@ export const EventsManagement: React.FC = () => {
         status: formData.status,
         regOpenAt: formData.regOpenDate || null,
         regCloseAt: formData.regCloseDate || null,
-        streamingPlatform: formData.streamingPlatform
+        streamingPlatform: formData.streamingPlatform,
+        streaming_url: formData.streamingUrl || null
       };
 
       if (isEditMode && currentEventId) {
@@ -267,8 +270,12 @@ export const EventsManagement: React.FC = () => {
 
   const applyLocationValue = (locationValue: string) => {
     const nextData: any = { ...formData, location: locationValue };
+    const isUrl = locationValue.startsWith('http');
+    if (isUrl) {
+      nextData.streamingUrl = locationValue;
+    }
 
-    if ((formData.locationType === 'ONLINE' || formData.locationType === 'HYBRID') && !formData.streamingPlatform) {
+    if (!formData.streamingPlatform && isUrl) {
       const lowUrl = locationValue.toLowerCase();
       if (lowUrl.includes('meet.google.com')) nextData.streamingPlatform = 'Google Meet';
       else if (lowUrl.includes('zoom.us') || lowUrl.includes('zoom.com')) nextData.streamingPlatform = 'Zoom';
@@ -626,37 +633,53 @@ export const EventsManagement: React.FC = () => {
                   <Input value={formData.timezone} onChange={(e: any) => setFormData({ ...formData, timezone: e.target.value })} />
                 </div>
               </div>
-              <div className="md:col-span-2">
-                <Input
-                  label="Location / Connection Link"
-                  placeholder="e.g. Global Tech Center"
-                  value={formData.location}
-                  onChange={(e: any) => applyLocationValue(e.target.value)}
-                />
-              </div>
-
-              {formData.locationType === 'ONSITE' && (
-                <div className="md:col-span-2">
-                  <OnsiteLocationAssistant
-                    value={formData.location}
-                    onChange={applyLocationValue}
-                  />
-                </div>
-              )}
-
-              {(formData.locationType === 'ONLINE' || formData.locationType === 'HYBRID') && (
-                <div className="md:col-span-2">
+              <div className="md:col-span-2 space-y-8">
+                {/* Physical Venue Section */}
+                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/15">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]">
+                      <ICONS.MapPin className="w-4 h-4" />
+                    </div>
+                    <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Venue Details</h4>
+                  </div>
                   <Input
-                    label="Streaming Platform"
-                    placeholder="e.g. Google Meet, Zoom, Private Portal"
-                    value={formData.streamingPlatform}
-                    onChange={(e: any) => setFormData({ ...formData, streamingPlatform: e.target.value })}
+                    label={formData.locationType === 'ONLINE' ? 'Physical Hub (Optional)' : 'Venue Address'}
+                    placeholder="e.g. Global Tech Center"
+                    value={formData.location}
+                    onChange={(e: any) => setFormData({ ...formData, location: e.target.value })}
                   />
-                  <p className="mt-2 text-[10px] text-[#2E2E2F]/40 font-medium uppercase tracking-wide ml-1">
-                    Used to label the virtual access dashboard for attendees.
-                  </p>
+                  <div className="mt-4">
+                    <OnsiteLocationAssistant
+                      value={formData.location}
+                      onChange={applyLocationValue}
+                    />
+                  </div>
                 </div>
-              )}
+
+                {/* Broadcast Section */}
+                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/15">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]">
+                      <ICONS.Monitor className="w-4 h-4" />
+                    </div>
+                    <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Broadcast Settings</h4>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Input
+                      label="Platform Name"
+                      placeholder="e.g. YouTube, Google Meet"
+                      value={formData.streamingPlatform}
+                      onChange={(e: any) => setFormData({ ...formData, streamingPlatform: e.target.value })}
+                    />
+                    <Input
+                      label="Connection URL"
+                      placeholder="Link to stream or meeting"
+                      value={formData.streamingUrl}
+                      onChange={(e: any) => applyLocationValue(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-4 pt-8 border-t border-[#2E2E2F]/20">

@@ -21,6 +21,7 @@ import {
   FaqPage,
   RefundPolicyPage
 } from './views/Public/InfoPages';
+import { LivePage } from './views/Public/LivePage';
 import { AdminDashboard } from './views/Admin/Dashboard';
 import { EventsManagement } from './views/Admin/EventsManagement';
 import { RegistrationsList } from './views/Admin/RegistrationsList';
@@ -120,6 +121,70 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const [profileSuccess, setProfileSuccess] = React.useState('');
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const [notificationOpen, setNotificationOpen] = React.useState(false);
+  const [notifications, setNotifications] = React.useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = React.useState(0);
+  const [notificationsLoading, setNotificationsLoading] = React.useState(false);
+
+  // Fetch notifications for the notification bell
+  const fetchNotifications = React.useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      setNotificationsLoading(true);
+      const data = await apiService.getMyNotifications(25);
+      setNotifications(data.notifications || []);
+      setUnreadCount(data.unreadCount || 0);
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  }, [isAuthenticated]);
+
+  // Mark a single notification as read
+  const handleMarkNotificationRead = async (notificationId: string) => {
+    try {
+      await apiService.markNotificationRead(notificationId);
+      setNotifications(prev => prev.map(n =>
+        n.notificationId === notificationId ? { ...n, isRead: true } : n
+      ));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error('Failed to mark notification as read:', err);
+    }
+  };
+
+  // Mark all notifications as read
+  const handleMarkAllRead = async () => {
+    try {
+      await apiService.markAllNotificationsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error('Failed to mark all notifications as read:', err);
+    }
+  };
+
+  // Real-time polling for new notifications (every 30 seconds)
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+
+    // Fetch immediately on mount
+    fetchNotifications();
+
+    // Poll every 30 seconds
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, fetchNotifications]);
+
+  // Also fetch when notification panel opens
+  React.useEffect(() => {
+    if (notificationOpen && isAuthenticated) {
+      fetchNotifications();
+    }
+  }, [notificationOpen, isAuthenticated, fetchNotifications]);
 
   const displayName = email?.trim() || name?.trim() || (isStaff ? 'Staff Operative' : 'System Admin');
   const roleLabel = getRoleLabel(role);
@@ -399,8 +464,33 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [desktopSidebarOpen, setDesktopSidebarOpen] = React.useState(true);
+
+  // Bottom Navigation Items for Mobile
+  const bottomNavItems = (
+    !isAuthenticated || !role || !staffPermsLoaded
+      ? []
+      : role === UserRole.STAFF && canViewEvents === false && canManualCheckIn === false
+        ? [
+          { label: 'Attendees', path: '/attendees', icon: <ICONS.Users className="w-5 h-5" /> },
+          { label: 'Settings', path: '/settings?tab=profile', icon: <ICONS.Settings className="w-5 h-5" /> },
+        ]
+        : role === UserRole.STAFF
+          ? [
+            ...(canViewEvents !== false ? [{ label: 'Events', path: '/events', icon: <ICONS.Calendar className="w-5 h-5" /> }] : []),
+            { label: 'Attendees', path: '/attendees', icon: <ICONS.Users className="w-5 h-5" /> },
+            ...(canManualCheckIn !== false ? [{ label: 'Check-In', path: '/checkin', icon: <ICONS.CheckCircle className="w-5 h-5" /> }] : []),
+            { label: 'Settings', path: '/settings?tab=profile', icon: <ICONS.Settings className="w-5 h-5" /> },
+          ]
+          : [
+            { label: 'Home', path: '/dashboard', icon: <ICONS.Layout className="w-5 h-5" /> },
+            { label: 'Events', path: '/events', icon: <ICONS.Calendar className="w-5 h-5" /> },
+            { label: 'Attendees', path: '/attendees', icon: <ICONS.Users className="w-5 h-5" /> },
+            { label: 'Settings', path: '/settings?tab=profile', icon: <ICONS.Settings className="w-5 h-5" /> },
+          ]
+  );
+
   return (
-    <div className="min-h-screen flex bg-[#F2F2F2]">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#F2F2F2] font-sans selection:bg-[#38BDF2]/30">
       {/* Sidebar for desktop */}
       <aside
         className={`bg-[#F2F2F2] border-r border-[#2E2E2F]/10 hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-72' : 'w-20'
@@ -462,8 +552,8 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       </aside>
 
       <main
-        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-72' : 'md:pl-20'
-          }`}
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out md:pb-0 ${desktopSidebarOpen ? 'md:pl-72' : 'md:pl-20'
+          } ${bottomNavItems.length > 0 ? 'pb-24' : ''}`}
       >
         <header className="h-20 bg-[#F2F2F2] border-b border-[#2E2E2F]/10 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20 w-full">
           <div className="flex items-center gap-3">
@@ -495,30 +585,99 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           <div className="flex items-center gap-4 min-w-0">
             <div className="relative">
               <button
-                className="w-10 h-10 flex items-center justify-center rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 transition-colors relative"
+                className="w-10 h-10 flex items-center justify-center rounded-xl border border-[#00ADC1]/20 bg-[#00ADC1]/5 hover:bg-[#00ADC1]/15 transition-colors relative"
                 onClick={() => setNotificationOpen(!notificationOpen)}
               >
-                <ICONS.Bell className="w-5 h-5 text-[#2E2E2F]/60" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-[#F2F2F2]"></span>
+                <ICONS.Bell className="w-5 h-5 text-[#00ADC1]" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </button>
               {notificationOpen && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setNotificationOpen(false)} />
-                  <div className="absolute right-0 top-[calc(100%+8px)] w-80 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl shadow-xl z-50 p-4 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#2E2E2F]/5">
-                      <h4 className="text-xs font-black uppercase tracking-widest text-[#2E2E2F]">Notifications</h4>
-                      <span className="text-[10px] font-bold text-[#38BDF2]">Mark all as read</span>
-                    </div>
-                    <div className="space-y-3 py-2">
-                      <div className="flex gap-3 p-3 rounded-xl bg-white border border-[#2E2E2F]/5">
-                        <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center shrink-0">
-                          <ICONS.Calendar className="w-4 h-4 text-[#38BDF2]" />
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-[#2E2E2F]">System Maintenance</p>
-                          <p className="text-[10px] text-[#2E2E2F]/50 mt-1">Scheduled for this weekend.</p>
-                        </div>
+                  <div className="fixed inset-0 z-[100] bg-[#2E2E2F]/20 backdrop-blur-sm" onClick={() => setNotificationOpen(false)} />
+                  <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[400px] bg-white border-l border-[#2E2E2F]/10 shadow-2xl z-[101] flex flex-col animate-in slide-in-from-right duration-300">
+                    <div className="p-6 border-b border-[#2E2E2F]/5 flex items-start justify-between bg-white pt-8">
+                      <div>
+                        <h2 className="text-[22px] font-black tracking-tight text-[#140C3F]">Notifications</h2>
+                        <p className="text-[#140C3F]/70 text-sm mt-1 font-medium">Stay up to date on important information</p>
                       </div>
+                      <button onClick={() => setNotificationOpen(false)} className="text-[#140C3F]/40 hover:text-[#140C3F] hover:bg-[#140C3F]/5 p-2 rounded-xl transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto bg-white">
+                      {notificationsLoading && notifications.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center p-12 text-center h-full">
+                          <div className="w-12 h-12 border-4 border-[#38BDF2]/30 border-t-[#38BDF2] rounded-full animate-spin mb-4" />
+                          <p className="text-[#140C3F]/60 font-medium tracking-tight">Fetching notifications...</p>
+                        </div>
+                      ) : notifications.length > 0 ? (
+                        <div className="divide-y divide-[#2E2E2F]/5">
+                          <div className="p-4 bg-[#F8FAFC]/50 flex justify-between items-center px-6 border-b border-[#2E2E2F]/5">
+                            <span className="text-[10px] font-black text-[#140C3F]/40 uppercase tracking-[0.2em]">{unreadCount} UNREAD</span>
+                            <button
+                              onClick={handleMarkAllRead}
+                              className="text-[10px] font-black text-[#38BDF2] hover:text-[#00ADC1] uppercase tracking-[0.2em] transition-colors"
+                            >
+                              Mark all as read
+                            </button>
+                          </div>
+                          {notifications.map((n) => (
+                            <div
+                              key={n.notificationId || Math.random()}
+                              className={`p-6 transition-all border-l-4 group relative ${n.isRead ? 'border-transparent opacity-60' : 'border-[#38BDF2] bg-[#38BDF2]/5 shadow-[inset_0_0_40px_rgba(56,189,242,0.03)]'
+                                }`}
+                            >
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="text-sm font-black text-[#140C3F] tracking-tight">{n.title}</h4>
+                                    {!n.isRead && <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF2] animate-pulse" />}
+                                  </div>
+                                  <p className="text-xs text-[#140C3F]/70 font-medium leading-relaxed mb-3 line-clamp-3">{n.message}</p>
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-[10px] text-[#140C3F]/40 font-bold tracking-widest uppercase">
+                                      {n.createdAt ? new Date(n.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently'}
+                                    </span>
+                                  </div>
+                                </div>
+                                {!n.isRead && (
+                                  <button
+                                    onClick={() => handleMarkNotificationRead(n.notificationId)}
+                                    className="p-2 rounded-xl bg-white border border-[#2E2E2F]/10 text-[#38BDF2] hover:bg-[#38BDF2] hover:text-white transition-all shadow-sm flex-shrink-0"
+                                    title="Mark as read"
+                                  >
+                                    <ICONS.CheckCircle className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-8 text-center h-full">
+                          <div className="w-56 h-56 bg-[#F3F4F6] rounded-full flex items-center justify-center mb-6 overflow-hidden relative">
+                            <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[45%]">
+                              <path d="M50 100 L120 50 A 20 20 0 0 1 130 55 L140 130 A 20 20 0 0 1 120 135 L50 110 A 10 10 0 0 1 40 100 Z" fill="#FFFFFF" />
+                              <circle cx="50" cy="105" r="8" fill="#145A6" />
+                              <ellipse cx="132" cy="93" rx="10" ry="25" fill="#5F6A80" />
+                              <ellipse cx="133" cy="94" rx="6" ry="12" fill="#F05133" />
+                              <path d="M65 110 L85 155 A 10 10 0 0 1 65 160 L45 115 Z" fill="#1E1A34" />
+                              <path d="M40 135 L80 160 A 15 15 0 0 1 60 180 L20 155 Z" fill="#B2765A" />
+                            </svg>
+                          </div>
+                          <h3 className="text-[24px] font-black tracking-tight text-[#140C3F] mb-1 leading-none">All caught up!</h3>
+                          <p className="text-sm font-medium text-[#140C3F]/50 max-w-[240px] mx-auto leading-relaxed">
+                            We'll let you know when something new arrives
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </>
@@ -626,46 +785,89 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             </div>
           </div>
         </header>
+        {/* Mobile Bottom Navigation Bar */}
+        {bottomNavItems.length > 0 && (
+          <nav className="fixed bottom-0 left-0 right-0 z-[60] bg-white border-t border-[#2E2E2F]/10 md:hidden flex items-center justify-around h-20 px-4 pb-safe shadow-[0_-4px_20px_-5px_rgba(46,46,47,0.1)]">
+            {bottomNavItems.map((item) => {
+              const isActive = checkIsActiveAdmin(item.path);
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex flex-col items-center justify-center gap-1.5 min-w-[64px] transition-all duration-300 ${isActive
+                    ? 'text-[#38BDF2]'
+                    : 'text-[#2E2E2F]/40 hover:text-[#38BDF2]/70'
+                    }`}
+                >
+                  <div className={`p-1.5 rounded-xl transition-colors ${isActive ? 'bg-[#38BDF2]/10' : ''}`}>
+                    <div className={`w-5 h-5 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full ${isActive ? '[&>svg]:stroke-[2.5px]' : '[&>svg]:stroke-2'}`}>
+                      {item.icon}
+                    </div>
+                  </div>
+                  <span className={`text-[9px] font-black uppercase tracking-widest transition-opacity ${isActive ? 'opacity-100' : 'opacity-60'}`}>
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
+        )}
+
         {/* Sidebar overlay for mobile */}
         {sidebarOpen && (
-          <div className="fixed inset-0 z-40 flex md:hidden">
-            <div className="fixed inset-0 bg-[#2E2E2F]/70" onClick={() => setSidebarOpen(false)} />
-            <aside className="relative w-64 bg-[#38BDF2] flex flex-col h-full z-50 animate-in slide-in-from-left">
-              <div className="p-8 flex items-center justify-between">
-                <Branding className="text-base" />
+          <div className="fixed inset-0 z-[100] flex md:hidden">
+            <div className="fixed inset-0 bg-[#2E2E2F]/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+            <aside className="relative w-72 bg-[#38BDF2] flex flex-col h-full z-[110] animate-in slide-in-from-left duration-300">
+              <div className="p-8 flex items-center justify-between border-b border-white/10">
+                <Branding className="h-12 sm:h-auto" light />
                 <button
-                  className="min-h-[32px] min-w-[32px] px-2 py-2 rounded-xl bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
                   onClick={() => setSidebarOpen(false)}
                   aria-label="Close navigation"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
-              <nav className="flex-1 px-4 py-4 space-y-1">
+              <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto pb-24">
                 {menuItems.map((item) => {
                   const isActive = checkIsActiveAdmin(item.path);
                   return (
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${isActive
-                        ? 'bg-white text-[#38BDF2] shadow-lg shadow-black/5'
-                        : 'text-white/60 hover:bg-[#2E2E2F] hover:text-white'
+                      className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 group ${isActive
+                        ? 'bg-white text-[#38BDF2] shadow-xl shadow-black/10'
+                        : 'text-white/70 hover:bg-white/10 hover:text-white'
                         }`}
                       onClick={() => setSidebarOpen(false)}
                     >
-                      {item.icon}
+                      <div className={isActive ? 'text-[#38BDF2]' : 'text-white/60 group-hover:text-white'}>
+                        {item.icon}
+                      </div>
                       <span className="font-bold text-sm tracking-tight">{item.label}</span>
                     </Link>
                   );
                 })}
-              </nav>
 
+                <div className="mt-8 pt-8 border-t border-white/10">
+                  <button
+                    onClick={() => { handleLogout(); setSidebarOpen(false); }}
+                    className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-white/70 hover:bg-red-500 hover:text-white transition-all duration-300 group"
+                  >
+                    <svg className="w-5 h-5 opacity-60 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span className="font-bold text-sm tracking-tight">Logout</span>
+                  </button>
+                </div>
+              </nav>
             </aside>
           </div>
         )}
 
-        <div className="flex-1 p-6 lg:p-8 overflow-y-auto">
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
             {(noStaffPerms && location.pathname !== '/attendees') ? (
               <div className="flex flex-col items-center justify-center min-h-[40vh]">
@@ -741,6 +943,8 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const location = useLocation();
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const [headerSearchTerm, setHeaderSearchTerm] = React.useState('');
+  const [animatedPlaceholder, setAnimatedPlaceholder] = React.useState('');
+  const fullPlaceholder = 'Find your events';
   const [headerLocationTerm, setHeaderLocationTerm] = React.useState(DEFAULT_HEADER_LOCATION);
   const [headerLocationMenuOpen, setHeaderLocationMenuOpen] = React.useState(false);
   const [headerLocating, setHeaderLocating] = React.useState(false);
@@ -749,6 +953,39 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const isOrganizer = isAuthenticated && role === UserRole.ORGANIZER;
   const publicMenuMode = isOrganizer ? publicMode : 'attending';
   const showHeaderSearchBar = !isAuthenticated || !isOrganizer || isAttendingView;
+
+  // Typing animation for search placeholder
+  React.useEffect(() => {
+    const text = 'Find your events';
+    let index = 0;
+    let isDeleting = false;
+    let timer: NodeJS.Timeout;
+
+    const type = () => {
+      if (isDeleting) {
+        setAnimatedPlaceholder(text.substring(0, index - 1));
+        index--;
+        if (index === 0) {
+          isDeleting = false;
+          timer = setTimeout(type, 500);
+        } else {
+          timer = setTimeout(type, 50);
+        }
+      } else {
+        setAnimatedPlaceholder(text.substring(0, index + 1));
+        index++;
+        if (index === text.length) {
+          isDeleting = true;
+          timer = setTimeout(type, 2000);
+        } else {
+          timer = setTimeout(type, 100);
+        }
+      }
+    };
+
+    type();
+    return () => clearTimeout(timer);
+  }, []);
 
   const displayName = email?.trim() || name?.trim() || 'User';
   const roleLabel = isOrganizer && isAttendingView ? 'Attending' : getRoleLabel(role);
@@ -957,12 +1194,12 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               <form onSubmit={handleHeaderSearchSubmit} className="flex-1 max-w-[750px]">
                 <div className="flex items-center h-13 rounded-2xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.1)] focus-within:border-[#38BDF2]/50 focus-within:shadow-[0_15px_35px_-12px_rgba(56,189,242,0.15)] transition-all duration-300">
                   <label className="flex items-center gap-3 px-5 py-3 min-w-0 flex-1 border-r border-[#2E2E2F]/5 hover:bg-white/40 transition-colors">
-                    <ICONS.Search className="w-4 h-4 text-[#38BDF2] shrink-0" />
+                    <ICONS.Search className="w-4 h-4 text-[#2E2E2F] shrink-0" />
                     <input
                       type="text"
                       value={headerSearchTerm}
                       onChange={(event) => setHeaderSearchTerm(event.target.value)}
-                      placeholder="Search"
+                      placeholder={animatedPlaceholder || 'Find your events'}
                       className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 outline-none"
                     />
                   </label>
@@ -972,7 +1209,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   >
                     <div className="w-full h-full flex items-center">
                       <div className="flex-1 min-w-0 flex items-center gap-3 px-5 py-3 cursor-text" onClick={() => setHeaderLocationMenuOpen(true)}>
-                        <ICONS.MapPin className="w-4 h-4 text-[#38BDF2] shrink-0" />
+                        <ICONS.MapPin className="w-4 h-4 text-[#2E2E2F] shrink-0" />
                         <input
                           type="text"
                           value={hasHeaderExplicitLocation ? headerLocationTerm : ''}
@@ -1356,6 +1593,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               <div className="space-y-4">
                 <p className="text-[#2E2E2F]/50 mb-4">Platform</p>
                 <Link to="/" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">Events List</Link>
+                <Link to="/live" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">Live Broadcasts</Link>
               </div>
               <div className="space-y-4">
                 <Link to="/" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">Home</Link>
@@ -1399,6 +1637,70 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   const [desktopSidebarOpen, setDesktopSidebarOpen] = React.useState(true);
   const [settingsOpen, setSettingsOpen] = React.useState(location.pathname === '/user-settings');
   const [notificationOpen, setNotificationOpen] = React.useState(false);
+  const [notifications, setNotifications] = React.useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = React.useState(0);
+  const [notificationsLoading, setNotificationsLoading] = React.useState(false);
+
+  // Fetch notifications for the notification bell
+  const fetchNotifications = React.useCallback(async () => {
+    const isAuthenticated = Boolean(email);
+    if (!isAuthenticated) return;
+    try {
+      setNotificationsLoading(true);
+      const data = await apiService.getMyNotifications(25);
+      setNotifications(data.notifications || []);
+      setUnreadCount(data.unreadCount || 0);
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  }, [email]);
+
+  // Mark a single notification as read
+  const handleMarkNotificationRead = async (notificationId: string) => {
+    try {
+      await apiService.markNotificationRead(notificationId);
+      setNotifications(prev => prev.map(n =>
+        n.notificationId === notificationId ? { ...n, isRead: true } : n
+      ));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error('Failed to mark notification as read:', err);
+    }
+  };
+
+  // Mark all notifications as read
+  const handleMarkAllRead = async () => {
+    try {
+      await apiService.markAllNotificationsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error('Failed to mark all notifications as read:', err);
+    }
+  };
+
+  // Real-time polling for new notifications (every 30 seconds)
+  React.useEffect(() => {
+    const isAuthenticated = Boolean(email);
+    if (!isAuthenticated) return;
+
+    fetchNotifications();
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [email, fetchNotifications]);
+
+  // Also fetch when notification panel opens
+  React.useEffect(() => {
+    const isAuthenticated = Boolean(email);
+    if (notificationOpen && isAuthenticated) {
+      fetchNotifications();
+    }
+  }, [notificationOpen, email, fetchNotifications]);
 
   React.useEffect(() => {
     if (location.pathname === '/user-settings') setSettingsOpen(true);
@@ -1586,30 +1888,99 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
           <div className="ml-auto flex items-center gap-4">
             <div className="relative">
               <button
-                className="w-10 h-10 flex items-center justify-center rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 transition-colors relative"
+                className="w-10 h-10 flex items-center justify-center rounded-xl border border-[#00ADC1]/20 bg-[#00ADC1]/5 hover:bg-[#00ADC1]/15 transition-colors relative"
                 onClick={() => setNotificationOpen(!notificationOpen)}
               >
-                <ICONS.Bell className="w-5 h-5 text-[#2E2E2F]/60" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-[#F2F2F2]"></span>
+                <ICONS.Bell className="w-5 h-5 text-[#00ADC1]" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-white">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </button>
               {notificationOpen && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setNotificationOpen(false)} />
-                  <div className="absolute right-0 top-[calc(100%+8px)] w-80 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl shadow-xl z-50 p-4 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#2E2E2F]/5">
-                      <h4 className="text-xs font-black uppercase tracking-widest text-[#2E2E2F]">Notifications</h4>
-                      <span className="text-[10px] font-bold text-[#38BDF2]">Mark all as read</span>
-                    </div>
-                    <div className="space-y-3 py-2">
-                      <div className="flex gap-3 p-3 rounded-xl bg-white border border-[#2E2E2F]/5">
-                        <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center shrink-0">
-                          <ICONS.Calendar className="w-4 h-4 text-[#38BDF2]" />
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-[#2E2E2F]">Welcome to StartupLab!</p>
-                          <p className="text-[10px] text-[#2E2E2F]/50 mt-1">Start creating your first event today.</p>
-                        </div>
+                  <div className="fixed inset-0 z-[100] bg-[#2E2E2F]/20 backdrop-blur-sm" onClick={() => setNotificationOpen(false)} />
+                  <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[400px] bg-white border-l border-[#2E2E2F]/10 shadow-2xl z-[101] flex flex-col animate-in slide-in-from-right duration-300">
+                    <div className="p-6 border-b border-[#2E2E2F]/5 flex items-start justify-between bg-white pt-8">
+                      <div>
+                        <h2 className="text-[22px] font-black tracking-tight text-[#140C3F]">Notifications</h2>
+                        <p className="text-[#140C3F]/70 text-sm mt-1 font-medium">Stay up to date on important information</p>
                       </div>
+                      <button onClick={() => setNotificationOpen(false)} className="text-[#140C3F]/40 hover:text-[#140C3F] hover:bg-[#140C3F]/5 p-2 rounded-xl transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto bg-white">
+                      {notificationsLoading && notifications.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center p-12 text-center h-full">
+                          <div className="w-12 h-12 border-4 border-[#38BDF2]/30 border-t-[#38BDF2] rounded-full animate-spin mb-4" />
+                          <p className="text-[#140C3F]/60 font-medium tracking-tight">Fetching notifications...</p>
+                        </div>
+                      ) : notifications.length > 0 ? (
+                        <div className="divide-y divide-[#2E2E2F]/5">
+                          <div className="p-4 bg-[#F8FAFC]/50 flex justify-between items-center px-6 border-b border-[#2E2E2F]/5">
+                            <span className="text-[10px] font-black text-[#140C3F]/40 uppercase tracking-[0.2em]">{unreadCount} UNREAD</span>
+                            <button
+                              onClick={handleMarkAllRead}
+                              className="text-[10px] font-black text-[#38BDF2] hover:text-[#00ADC1] uppercase tracking-[0.2em] transition-colors"
+                            >
+                              Mark all as read
+                            </button>
+                          </div>
+                          {notifications.map((n) => (
+                            <div
+                              key={n.notificationId || Math.random()}
+                              className={`p-6 transition-all border-l-4 group relative ${n.isRead ? 'border-transparent opacity-60' : 'border-[#38BDF2] bg-[#38BDF2]/5 shadow-[inset_0_0_40px_rgba(56,189,242,0.03)]'
+                                }`}
+                            >
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="text-sm font-black text-[#140C3F] tracking-tight">{n.title}</h4>
+                                    {!n.isRead && <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF2] animate-pulse" />}
+                                  </div>
+                                  <p className="text-xs text-[#140C3F]/70 font-medium leading-relaxed mb-3 line-clamp-3">{n.message}</p>
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-[10px] text-[#140C3F]/40 font-bold tracking-widest uppercase">
+                                      {n.createdAt ? new Date(n.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently'}
+                                    </span>
+                                  </div>
+                                </div>
+                                {!n.isRead && (
+                                  <button
+                                    onClick={() => handleMarkNotificationRead(n.notificationId)}
+                                    className="p-2 rounded-xl bg-white border border-[#2E2E2F]/10 text-[#38BDF2] hover:bg-[#38BDF2] hover:text-white transition-all shadow-sm flex-shrink-0"
+                                    title="Mark as read"
+                                  >
+                                    <ICONS.CheckCircle className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-8 text-center h-full">
+                          <div className="w-56 h-56 bg-[#F3F4F6] rounded-full flex items-center justify-center mb-6 overflow-hidden relative">
+                            <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[45%]">
+                              <path d="M50 100 L120 50 A 20 20 0 0 1 130 55 L140 130 A 20 20 0 0 1 120 135 L50 110 A 10 10 0 0 1 40 100 Z" fill="#FFFFFF" />
+                              <circle cx="50" cy="105" r="8" fill="#145A6" />
+                              <ellipse cx="132" cy="93" rx="10" ry="25" fill="#5F6A80" />
+                              <ellipse cx="133" cy="94" rx="6" ry="12" fill="#F05133" />
+                              <path d="M65 110 L85 155 A 10 10 0 0 1 65 160 L45 115 Z" fill="#1E1A34" />
+                              <path d="M40 135 L80 160 A 15 15 0 0 1 60 180 L20 155 Z" fill="#B2765A" />
+                            </svg>
+                          </div>
+                          <h3 className="text-[24px] font-black tracking-tight text-[#140C3F] mb-1 leading-none">All caught up!</h3>
+                          <p className="text-sm font-medium text-[#140C3F]/50 max-w-[240px] mx-auto leading-relaxed">
+                            We'll let you know when something new arrives
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </>
@@ -1858,6 +2229,7 @@ const App: React.FC = () => (
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/accept-invite" element={<AcceptInvite />} />
       <Route path="/" element={<PublicLayout><EventList /></PublicLayout>} />
+      <Route path="/live" element={<PublicLayout><LivePage /></PublicLayout>} />
       <Route path="/categories/:categoryKey" element={<PublicLayout><CategoryEvents /></PublicLayout>} />
       <Route path="/events/:slug" element={<PublicLayout><EventDetails /></PublicLayout>} />
       <Route path="/organizer/:id" element={<PublicLayout><OrganizerProfilePage /></PublicLayout>} />

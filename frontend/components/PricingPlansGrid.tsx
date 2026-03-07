@@ -102,8 +102,8 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
                 </Button>
 
                 <div className="flex-1">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-6">
-                    Output values:
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-6 font-black uppercase tracking-[0.2em]">
+                    Core Plan Features:
                   </p>
                   <ul className="space-y-4">
                     {items.map((feature, idx) => (
