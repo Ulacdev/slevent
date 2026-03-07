@@ -2,7 +2,7 @@ import db from "../database/db.js";
 import supabase, { createAuthClient } from '../database/db.js';
 import { sendMakeNotification } from '../utils/makeWebhook.js';
 
-import { notifyUserByPreference } from "../utils/notificationService.js";
+import { notifyUserByPreference, getAdminSmtpConfig } from "../utils/notificationService.js";
 
 const ORGANIZER_ROLE = 'ORGANIZER';
 
@@ -106,36 +106,46 @@ export const register = async (req, res) => {
     }
 
     // Notify User via the Admin's Professional SMTP settings (Fallback mechanism)
-    try {
-      const frontendUrl = (process.env.FRONTEND_URL || '').replace(/\/$/, '');
-      const loginUrl = `${frontendUrl}/#/login`;
-
-      await notifyUserByPreference({
-        recipientUserId: userId,
-        recipientFallbackEmail: email.toLowerCase().trim(),
-        type: 'ADMIN_ALERT', // Using system template
-        title: 'Welcome to StartupLab!',
-        message: `Hello ${name.trim()}, your account for StartupLab has been created as an ${ORGANIZER_ROLE}. You can now sign in using your credentials.`,
-        metadata: {
-          tag: 'WELCOME',
-          typeIcon: '🚀',
-          actionLabel: 'SIGN IN TO DASHBOARD',
-          actionUrl: loginUrl,
-        }
-      });
-      console.log(`✅ [Auth] Welcome email queued for ${email} via Admin SMTP.`);
-    } catch (notifyErr) {
-      console.warn("[Auth] SMTP Welcome notification failed:", notifyErr?.message);
-      // Fallback to Make.com as a secondary if SMTP is not configured
+    // Check if admin SMTP is configured - if not, show error
+    const adminSmtpConfig = await getAdminSmtpConfig();
+    
+    if (!adminSmtpConfig) {
+      // Still allow account creation, but warn about email
+      console.warn('[Auth] Admin SMTP not configured - welcome email will not be sent.');
+    } else {
       try {
-        await sendMakeNotification({
-          type: 'invite',
-          email: email.toLowerCase().trim(),
-          name: name.trim(),
-          meta: { inviteLink: `${(process.env.FRONTEND_URL || '').replace(/\/$/, '')}/#/login`, role: ORGANIZER_ROLE }
+        const frontendUrl = (process.env.FRONTEND_URL || '').replace(/\/$/, '');
+        const loginUrl = `${frontendUrl}/#/login`;
+
+        await notifyUserByPreference({
+          recipientUserId: userId,
+          recipientFallbackEmail: email.toLowerCase().trim(),
+          type: 'ADMIN_ALERT', // Using system template
+          title: 'Welcome to StartupLab!',
+          message: `Hello ${name.trim()}, your account for StartupLab has been created as an ${ORGANIZER_ROLE}. You can now sign in using your credentials.`,
+          metadata: {
+            tag: 'WELCOME',
+            typeIcon: '🚀',
+            actionLabel: 'SIGN IN TO DASHBOARD',
+            actionUrl: loginUrl,
+          },
+          // Force use of admin SMTP config for system emails
+          smtpConfigOverride: adminSmtpConfig
         });
-      } catch (webhookErr) {
-        console.warn("Make.com fallback also failed:", webhookErr?.message);
+        console.log(`✅ [Auth] Welcome email queued for ${email} via Admin SMTP.`);
+      } catch (notifyErr) {
+        console.warn("[Auth] SMTP Welcome notification failed:", notifyErr?.message);
+        // Fallback to Make.com as a secondary if SMTP is not configured
+        try {
+          await sendMakeNotification({
+            type: 'invite',
+            email: email.toLowerCase().trim(),
+            name: name.trim(),
+            meta: { inviteLink: `${(process.env.FRONTEND_URL || '').replace(/\/$/, '')}/#/login`, role: ORGANIZER_ROLE }
+          });
+        } catch (webhookErr) {
+          console.warn("Make.com fallback also failed:", webhookErr?.message);
+        }
       }
     }
 
@@ -275,6 +285,16 @@ export const forgotPassword = async (req, res) => {
     if (!resetLink) throw new Error('Failed to generate reset link');
 
     // 3. Send the link via Professional SMTP hierarchy (Admin fallback)
+    // Check if admin SMTP is configured - if not, show error
+    const adminSmtpConfig = await getAdminSmtpConfig();
+    
+    if (!adminSmtpConfig) {
+      return res.status(503).json({ 
+        error: 'Email service not configured. Please contact the administrator to set up SMTP settings in Admin Settings > Email Configuration.',
+        code: 'SMTP_NOT_CONFIGURED'
+      });
+    }
+    
     await notifyUserByPreference({
       recipientUserId: user?.userId,
       recipientFallbackEmail: normalizedEmail,
@@ -286,7 +306,9 @@ export const forgotPassword = async (req, res) => {
         typeIcon: '🔐',
         actionLabel: 'RESET PASSWORD',
         actionUrl: resetLink,
-      }
+      },
+      // Force use of admin SMTP config for system emails
+      smtpConfigOverride: adminSmtpConfig
     });
 
     return res.status(200).json({ message: 'Reset link sent successfully.' });

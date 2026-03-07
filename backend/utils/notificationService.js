@@ -174,10 +174,66 @@ export async function getSmtpConfig(organizerId = null, triggerUserId = null, re
     }
   }
 
-  // 3. NO SYSTEM FALLBACK
-  // Per developer request, platform (robiemail) should NOT be used if the organizer
-  // did not set up their own explicit email config.
-  debugLog('🔍 [SMTP] No organizer config found. Refusing to fallback to platform/admin emails.');
+  // Fetch Settings from general settings table if owner resolved
+  if (targetUserId) {
+    const config = await fetchSmtpFromSettingsTable(targetUserId);
+    if (config) {
+      debugLog('✅ [SMTP] Custom general settings loaded.');
+      return config;
+    }
+
+    if (organizerId && String(recipientUserId) === String(targetUserId)) {
+      debugLog(`🚫 [SMTP] Organizer (${targetUserId}) has NO custom settings.`);
+      return null;
+    }
+  }
+
+  // 3. FALLBACK: Use the Superadmin SMTP settings (role = 'ADMIN')
+  // This is used for system emails like forgot password, account creation, etc.
+  const { data: adminUser } = await supabase
+    .from('users')
+    .select('userId')
+    .eq('role', 'ADMIN')
+    .limit(1)
+    .maybeSingle();
+
+  if (adminUser?.userId) {
+    const config = await fetchSmtpFromSettingsTable(adminUser.userId);
+    if (config) {
+      debugLog('✅ [SMTP] Admin fallback settings loaded.');
+      return config;
+    }
+  }
+
+  // 4. NO SYSTEM FALLBACK - Admin must configure SMTP for system emails
+  debugLog('🔍 [SMTP] No admin SMTP config found. System emails require admin SMTP setup.');
+  return null;
+}
+
+/**
+ * Get Admin SMTP Config specifically for system emails (password reset, account creation)
+ * This explicitly fetches the ADMIN user's SMTP settings regardless of organizer hierarchy
+ */
+export async function getAdminSmtpConfig() {
+  debugLog('🔍 [SMTP] Getting Admin SMTP config for system emails...');
+  
+  // Look for any user with ADMIN role
+  const { data: adminUser } = await supabase
+    .from('users')
+    .select('userId')
+    .eq('role', 'ADMIN')
+    .limit(1)
+    .maybeSingle();
+
+  if (adminUser?.userId) {
+    const config = await fetchSmtpFromSettingsTable(adminUser.userId);
+    if (config) {
+      debugLog('✅ [SMTP] Admin SMTP config loaded for system emails.');
+      return config;
+    }
+  }
+  
+  debugLog('⚠️ [SMTP] No admin SMTP config found.');
   return null;
 }
 
@@ -410,17 +466,24 @@ export async function notifyUserByPreference({
   replyTo,
   fromName,
   fromEmail,
+  smtpConfigOverride, // New parameter to force a specific SMTP config
 }) {
   if (!recipientUserId && !recipientFallbackEmail) return { inApp: false, email: false };
 
   // Fetch SMTP config based on professional hierarchy (Organizer -> Superadmin Fallback)
-  let smtpConfig = null;
-  try {
-    // Resolve context using both organizerId and actorUserId (for staff detection)
-    smtpConfig = await getSmtpConfig(organizerId, actorUserId, recipientUserId);
-    debugLog(`🔍 [Notifications] SMTP Config Resolved: ${smtpConfig ? 'YES' : 'NO'}`);
-  } catch (err) {
-    debugLog(`🚫 [Notifications] Failed to resolve SMTP config: ${err.message}`);
+  // OR use the override if provided (for system emails like password reset)
+  let smtpConfig = smtpConfigOverride || null;
+  
+  if (!smtpConfig) {
+    try {
+      // Resolve context using both organizerId and actorUserId (for staff detection)
+      smtpConfig = await getSmtpConfig(organizerId, actorUserId, recipientUserId);
+      debugLog(`🔍 [Notifications] SMTP Config Resolved: ${smtpConfig ? 'YES' : 'NO'}`);
+    } catch (err) {
+      debugLog(`🚫 [Notifications] Failed to resolve SMTP config: ${err.message}`);
+    }
+  } else {
+    debugLog(`🔍 [Notifications] Using SMTP Config Override (Admin SMTP for system emails)`);
   }
 
   // Auto-generate HTML if not provided but we have a type
