@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, PageLoader } from '../../components/Shared';
+import { OrganizerCard } from '../../components/OrganizerCard';
 import { apiService } from '../../services/apiService';
 import { Event, OrganizerProfile } from '../../types';
 import { ICONS } from '../../constants';
@@ -312,35 +313,13 @@ export const FollowingsEventsPage: React.FC = () => {
             <span className="text-[11px] font-semibold text-[#2E2E2F]/55">{organizers.length} organization(s)</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {organizers.map((organizer) => {
-              const image = getProfileImageUrl(organizer.profileImageUrl);
-              const initial = (organizer.organizerName || 'O').charAt(0).toUpperCase();
-              return (
-                <button
-                  key={organizer.organizerId}
-                  type="button"
-                  onClick={() => setSelectedOrganizerId(organizer.organizerId)}
-                  className="group text-left rounded-2xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden hover:border-[#38BDF2]/45 transition-colors"
-                >
-                  <div className="aspect-[4/3] bg-[#2E2E2F]/5">
-                    {image ? (
-                      <img
-                        src={image}
-                        alt={organizer.organizerName}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[#2E2E2F] text-[#F2F2F2] text-4xl font-black">
-                        {initial}
-                      </div>
-                    )}
-                  </div>
-                  <div className="px-4 py-3">
-                    <p className="text-sm font-bold text-[#2E2E2F] truncate">{organizer.organizerName}</p>
-                  </div>
-                </button>
-              );
-            })}
+            {organizers.map((organizer) => (
+              <OrganizerCard
+                key={organizer.organizerId}
+                organizer={organizer}
+                variant="compact"
+              />
+            ))}
           </div>
         </section>
       )}
@@ -366,34 +345,13 @@ export const FollowingsEventsPage: React.FC = () => {
 
             {organizers.length > 1 && (
               <div className="flex gap-3 overflow-x-auto pb-1">
-                {organizers.map((organizer) => {
-                  const selected = organizer.organizerId === selectedOrganizer.organizerId;
-                  const image = getProfileImageUrl(organizer.profileImageUrl);
-                  const initial = (organizer.organizerName || 'O').charAt(0).toUpperCase();
-                  return (
-                    <button
-                      key={organizer.organizerId}
-                      type="button"
-                      className={`min-w-[220px] rounded-2xl border px-4 py-3 text-left transition-colors ${selected
-                        ? 'border-[#38BDF2] bg-[#38BDF2]/10'
-                        : 'border-[#2E2E2F]/10 bg-[#F2F2F2] hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/5'
-                        }`}
-                      onClick={() => setSelectedOrganizerId(organizer.organizerId)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-[#2E2E2F] text-[#F2F2F2] flex items-center justify-center font-bold text-sm">
-                          {image ? <img src={image} alt={organizer.organizerName} className="w-full h-full object-cover" /> : initial}
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-[#2E2E2F] leading-tight">{organizer.organizerName}</p>
-                          <p className="text-[11px] text-[#2E2E2F]/60">
-                            {(eventsCountByOrganizer.get(organizer.organizerId) || 0).toLocaleString()} event(s)
-                          </p>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
+                {organizers.map((organizer) => (
+                  <OrganizerCard
+                    key={organizer.organizerId}
+                    organizer={organizer}
+                    variant="horizontal"
+                  />
+                ))}
               </div>
             )}
           </section>
