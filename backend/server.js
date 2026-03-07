@@ -21,6 +21,8 @@ import orderRoutes from "./routes/orderRoutes.js";
 import organizerRoutes from "./routes/organizerRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
+import adminPlanRoutes from "./routes/adminPlanRoutes.js";
+import planRoutes from "./routes/planRoutes.js";
 const PORT = process.env.BACKEND_PORT
 const app = express();
 
@@ -107,7 +109,9 @@ app.use("/api", userRoutes);
 app.use("/api", organizerRoutes);
 app.use("/api", notificationRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/plans", planRoutes);
 app.use("/api/admin/events", authMiddleware, adminEventRoutes);
+app.use("/api/admin/plans", authMiddleware, adminPlanRoutes);
 
 startReservationCleanup();
 

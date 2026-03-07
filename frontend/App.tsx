@@ -325,9 +325,25 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             { label: 'Events', path: '/events', icon: <ICONS.Calendar className="w-5 h-5" /> },
             { label: 'Attendees', path: '/attendees', icon: <ICONS.Users className="w-5 h-5" /> },
             { label: 'Check-In', path: '/checkin', icon: <ICONS.CheckCircle className="w-5 h-5" /> },
-            { label: 'Settings', path: '/settings', icon: <ICONS.Settings className="w-5 h-5" /> },
+            { label: 'Teams & Access', path: '/settings?tab=team', icon: <ICONS.Users className="w-5 h-5" /> },
+            { label: 'Subscription Plans', path: '/settings?tab=plans', icon: <ICONS.Layout className="w-5 h-5" /> },
+            { label: 'Email Config', path: '/settings?tab=email', icon: <ICONS.Mail className="w-5 h-5" /> },
+            { label: 'Payment Gateway', path: '/settings?tab=payments', icon: <ICONS.CreditCard className="w-5 h-5" /> },
+            { label: 'Profile & Security', path: '/settings?tab=profile', icon: <ICONS.Settings className="w-5 h-5" /> },
           ]
   );
+
+  const checkIsActiveAdmin = (itemPath: string) => {
+    if (itemPath.includes('?')) {
+      const [base, query] = itemPath.split('?');
+      if (location.pathname !== base) return false;
+      const tab = new URLSearchParams(query).get('tab');
+      const currentTab = new URLSearchParams(location.search).get('tab');
+      if (!currentTab && tab === 'team') return true;
+      return currentTab === tab;
+    }
+    return location.pathname === itemPath;
+  };
 
 
   const handleLogout = async () => {
@@ -355,11 +371,6 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [desktopSidebarOpen, setDesktopSidebarOpen] = React.useState(true);
-  const [settingsOpen, setSettingsOpen] = React.useState(location.pathname === '/settings');
-
-  React.useEffect(() => {
-    if (location.pathname === '/settings') setSettingsOpen(true);
-  }, [location.pathname]);
   return (
     <div className="min-h-screen flex bg-[#F2F2F2]">
       {/* Sidebar for desktop */}
@@ -387,96 +398,13 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         </div>
         <nav className={`flex-1 ${desktopSidebarOpen ? 'px-4' : 'px-2'} py-4 space-y-1`}>
           {menuItems.map((item) => {
-            if (item.label === 'Settings') {
-              const isActive = location.pathname === '/settings';
-              return (
-                <div key="settings-group" className="space-y-1">
-                  <button
-                    onClick={() => desktopSidebarOpen ? setSettingsOpen(!settingsOpen) : navigate('/settings')}
-                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors group ${isActive
-                      ? 'bg-[#38BDF2]/10 text-[#38BDF2]'
-                      : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
-                      } ${!desktopSidebarOpen ? 'justify-center border-none' : 'justify-between'}`}
-                    title={!desktopSidebarOpen ? item.label : undefined}
-                  >
-                    <div className="flex items-center gap-3">
-                      {item.icon}
-                      {desktopSidebarOpen && <span className="font-bold text-sm tracking-tight">{item.label}</span>}
-                    </div>
-                    {desktopSidebarOpen && (
-                      <svg
-                        className={`w-4 h-4 transition-transform duration-200 ${settingsOpen ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M19 9l-7 7-7-7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </button>
-                  {settingsOpen && desktopSidebarOpen && (
-                    <div className="ml-6 space-y-1 animate-in slide-in-from-top-2 duration-200 border-l border-[#2E2E2F]/10 pl-4">
-                      <Link
-                        to="/settings?tab=team"
-                        className={`flex items-center gap-3 px-4 py-2 rounded-xl text-[13px] font-bold tracking-tight transition-colors ${location.search.includes('tab=team') || (location.pathname === '/settings' && !location.search)
-                          ? 'text-[#38BDF2] bg-[#38BDF2]/5'
-                          : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
-                          }`}
-                      >
-                        <ICONS.Users className="w-4 h-4 opacity-80" />
-                        Teams & Access
-                      </Link>
-                      <Link
-                        to="/settings?tab=plans"
-                        className={`flex items-center gap-3 px-4 py-2 rounded-xl text-[13px] font-bold tracking-tight transition-colors ${location.search.includes('tab=plans')
-                          ? 'text-[#38BDF2] bg-[#38BDF2]/5'
-                          : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
-                          }`}
-                      >
-                        <ICONS.Layout className="w-4 h-4 opacity-80" />
-                        Subscription Plans
-                      </Link>
-                      <Link
-                        to="/settings?tab=email"
-                        className={`flex items-center gap-3 px-4 py-2 rounded-xl text-[13px] font-bold tracking-tight transition-colors ${location.search.includes('tab=email')
-                          ? 'text-[#38BDF2] bg-[#38BDF2]/5'
-                          : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
-                          }`}
-                      >
-                        <ICONS.Mail className="w-4 h-4 opacity-80" />
-                        Email Config
-                      </Link>
-                      <Link
-                        to="/settings?tab=payments"
-                        className={`flex items-center gap-3 px-4 py-2 rounded-xl text-[13px] font-bold tracking-tight transition-colors ${location.search.includes('tab=payments')
-                          ? 'text-[#38BDF2] bg-[#38BDF2]/5'
-                          : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
-                          }`}
-                      >
-                        <ICONS.CreditCard className="w-4 h-4 opacity-80" />
-                        Payment Gateway
-                      </Link>
-                      <Link
-                        to="/settings?tab=profile"
-                        className={`flex items-center gap-3 px-4 py-2 rounded-xl text-[13px] font-bold tracking-tight transition-colors ${location.search.includes('tab=profile')
-                          ? 'text-[#38BDF2] bg-[#38BDF2]/5'
-                          : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
-                          }`}
-                      >
-                        <ICONS.Settings className="w-4 h-4 opacity-80" />
-                        Profile & Security
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              );
-            }
+            const isActive = checkIsActiveAdmin(item.path);
 
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors group ${location.pathname === item.path
+                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors group ${isActive
                   ? 'bg-[#38BDF2] text-[#F2F2F2]'
                   : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
                   } ${!desktopSidebarOpen ? 'justify-center border-none' : ''}`}
@@ -668,20 +596,23 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 </button>
               </div>
               <nav className="flex-1 px-4 py-4 space-y-1">
-                {menuItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${location.pathname === item.path
-                      ? 'bg-white text-[#38BDF2] shadow-lg shadow-black/5'
-                      : 'text-white/60 hover:bg-[#2E2E2F] hover:text-white'
-                      }`}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    {item.icon}
-                    <span className="font-bold text-sm tracking-tight">{item.label}</span>
-                  </Link>
-                ))}
+                {menuItems.map((item) => {
+                  const isActive = checkIsActiveAdmin(item.path);
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${isActive
+                        ? 'bg-white text-[#38BDF2] shadow-lg shadow-black/5'
+                        : 'text-white/60 hover:bg-[#2E2E2F] hover:text-white'
+                        }`}
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      {item.icon}
+                      <span className="font-bold text-sm tracking-tight">{item.label}</span>
+                    </Link>
+                  );
+                })}
               </nav>
 
             </aside>
@@ -1494,10 +1425,26 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
     { label: 'Home', path: '/user-home', icon: <ICONS.Home className="w-5 h-5" /> },
     { label: 'Dashboard', path: '/dashboard', icon: <ICONS.Layout className="w-5 h-5" /> },
     { label: 'Events', path: '/my-events', icon: <ICONS.Calendar className="w-5 h-5" /> },
-    { label: 'Settings', path: '/user-settings', icon: <ICONS.Settings className="w-5 h-5" /> },
     { label: 'Attendees', path: '/user/attendees', icon: <ICONS.Users className="w-5 h-5" /> },
     { label: 'Check-In', path: '/user/checkin', icon: <ICONS.CheckCircle className="w-5 h-5" /> },
+    { label: 'Org Profile', path: '/user-settings?tab=organizer', icon: <ICONS.Users className="w-5 h-5" /> },
+    { label: 'Teams & Access', path: '/user-settings?tab=team', icon: <ICONS.Shield className="w-5 h-5" /> },
+    { label: 'Email Setup', path: '/user-settings?tab=email', icon: <ICONS.Mail className="w-5 h-5" /> },
+    { label: 'Payment Gateway', path: '/user-settings?tab=payments', icon: <ICONS.CreditCard className="w-5 h-5" /> },
+    { label: 'Account', path: '/user-settings?tab=account', icon: <ICONS.Settings className="w-5 h-5" /> },
   ];
+
+  const checkIsActive = (itemPath: string) => {
+    if (itemPath.includes('?')) {
+      const [base, query] = itemPath.split('?');
+      if (location.pathname !== base) return false;
+      const tab = new URLSearchParams(query).get('tab');
+      const currentTab = new URLSearchParams(location.search).get('tab');
+      if (!currentTab && tab === 'organizer') return true;
+      return currentTab === tab;
+    }
+    return location.pathname === itemPath;
+  };
 
   const handleToggleAttendingMode = () => {
     if (isAttendingView) {
@@ -1538,96 +1485,13 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
         </div>
         <nav className={`flex-1 ${desktopSidebarOpen ? 'px-4' : 'px-2'} py-4 space-y-1`}>
           {menuItems.map((item) => {
-            if (item.label === 'Settings') {
-              const isActive = location.pathname === '/user-settings';
-              return (
-                <div key="settings-group" className="space-y-1">
-                  <button
-                    onClick={() => desktopSidebarOpen ? setSettingsOpen(!settingsOpen) : navigate('/user-settings')}
-                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors group ${isActive
-                      ? 'bg-[#38BDF2]/10 text-[#38BDF2]'
-                      : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
-                      } ${!desktopSidebarOpen ? 'justify-center border-none' : 'justify-between'}`}
-                    title={!desktopSidebarOpen ? item.label : undefined}
-                  >
-                    <div className="flex items-center gap-3">
-                      {item.icon}
-                      {desktopSidebarOpen && <span className="font-bold text-sm tracking-tight">{item.label}</span>}
-                    </div>
-                    {desktopSidebarOpen && (
-                      <svg
-                        className={`w-4 h-4 transition-transform duration-200 ${settingsOpen ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M19 9l-7 7-7-7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </button>
-                  {settingsOpen && desktopSidebarOpen && (
-                    <div className="ml-6 space-y-1 animate-in slide-in-from-top-2 duration-200 border-l border-[#2E2E2F]/10 pl-4">
-                      <Link
-                        to="/user-settings?tab=organizer"
-                        className={`flex items-center gap-3 px-4 py-2 rounded-xl text-[13px] font-bold tracking-tight transition-colors ${location.search.includes('tab=organizer') || (location.pathname === '/user-settings' && !location.search)
-                          ? 'text-[#38BDF2] bg-[#38BDF2]/5'
-                          : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
-                          }`}
-                      >
-                        <ICONS.Users className="w-4 h-4 opacity-80" />
-                        Org Profile
-                      </Link>
-                      <Link
-                        to="/user-settings?tab=team"
-                        className={`flex items-center gap-3 px-4 py-2 rounded-xl text-[13px] font-bold tracking-tight transition-colors ${location.search.includes('tab=team')
-                          ? 'text-[#38BDF2] bg-[#38BDF2]/5'
-                          : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
-                          }`}
-                      >
-                        <ICONS.Shield className="w-4 h-4 opacity-80" />
-                        Teams & Access
-                      </Link>
-                      <Link
-                        to="/user-settings?tab=email"
-                        className={`flex items-center gap-3 px-4 py-2 rounded-xl text-[13px] font-bold tracking-tight transition-colors ${location.search.includes('tab=email')
-                          ? 'text-[#38BDF2] bg-[#38BDF2]/5'
-                          : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
-                          }`}
-                      >
-                        <ICONS.Mail className="w-4 h-4 opacity-80" />
-                        Email Setup
-                      </Link>
-                      <Link
-                        to="/user-settings?tab=payments"
-                        className={`flex items-center gap-3 px-4 py-2 rounded-xl text-[13px] font-bold tracking-tight transition-colors ${location.search.includes('tab=payments')
-                          ? 'text-[#38BDF2] bg-[#38BDF2]/5'
-                          : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
-                          }`}
-                      >
-                        <ICONS.CreditCard className="w-4 h-4 opacity-80" />
-                        Payment Gateway
-                      </Link>
-                      <Link
-                        to="/user-settings?tab=account"
-                        className={`flex items-center gap-3 px-4 py-2 rounded-xl text-[13px] font-bold tracking-tight transition-colors ${location.search.includes('tab=account')
-                          ? 'text-[#38BDF2] bg-[#38BDF2]/5'
-                          : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
-                          }`}
-                      >
-                        <ICONS.Settings className="w-4 h-4 opacity-80" />
-                        Account
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              );
-            }
+            const isActive = checkIsActive(item.path);
 
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors group ${location.pathname === item.path
+                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors group ${isActive
                   ? 'bg-[#38BDF2] text-[#F2F2F2]'
                   : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
                   } ${!desktopSidebarOpen ? 'justify-center border-none' : ''}`}
@@ -1855,20 +1719,23 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 </button>
               </div>
               <nav className="flex-1 px-4 py-4 space-y-1">
-                {menuItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${location.pathname === item.path
-                      ? 'bg-white text-[#38BDF2] shadow-lg shadow-black/5'
-                      : 'text-white/60 hover:bg-[#2E2E2F] hover:text-white'
-                      }`}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    {item.icon}
-                    <span className="font-bold text-sm tracking-tight">{item.label}</span>
-                  </Link>
-                ))}
+                {menuItems.map((item) => {
+                  const isActive = checkIsActive(item.path);
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${isActive
+                        ? 'bg-white text-[#38BDF2] shadow-lg shadow-black/5'
+                        : 'text-white/60 hover:bg-[#2E2E2F] hover:text-white'
+                        }`}
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      {item.icon}
+                      <span className="font-bold text-sm tracking-tight">{item.label}</span>
+                    </Link>
+                  );
+                })}
               </nav>
             </aside>
           </div>

@@ -11,6 +11,7 @@ import {
   TicketStatus,
   OrderStatus,
   OrganizerProfile,
+  AdminPlan,
   HitPaySettings,
   HitPaySettingsResponse
 } from '../types';
@@ -134,6 +135,66 @@ export const apiService = {
 
     const data = await res.json();
     return { backendReady: true, settings: normalizeHitPaySettingsPayload(data) };
+  },
+
+  getAdminPlans: async (): Promise<AdminPlan[]> => {
+    const res = await fetch(`${API_BASE}/api/admin/plans`, {
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      cache: 'no-store'
+    });
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to load plans: ${res.status}`);
+    }
+    const data = await res.json();
+    return Array.isArray(data?.plans) ? data.plans : [];
+  },
+
+  createAdminPlan: async (payload: Partial<AdminPlan>): Promise<AdminPlan> => {
+    const res = await fetch(`${API_BASE}/api/admin/plans`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || `Failed to create plan: ${res.status}`);
+    return data.plan as AdminPlan;
+  },
+
+  updateAdminPlan: async (planId: string, payload: Partial<AdminPlan>): Promise<AdminPlan> => {
+    const res = await fetch(`${API_BASE}/api/admin/plans/${encodeURIComponent(planId)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || `Failed to update plan: ${res.status}`);
+    return data.plan as AdminPlan;
+  },
+
+  updateAdminPlanStatus: async (planId: string, isActive: boolean): Promise<{ planId: string; isActive: boolean }> => {
+    const res = await fetch(`${API_BASE}/api/admin/plans/${encodeURIComponent(planId)}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ isActive })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || `Failed to update plan status: ${res.status}`);
+    return { planId: data.planId, isActive: !!data.isActive };
+  },
+
+  deleteAdminPlan: async (planId: string): Promise<void> => {
+    const res = await fetch(`${API_BASE}/api/admin/plans/${encodeURIComponent(planId)}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || `Failed to delete plan: ${res.status}`);
   },
 
   // --- Organizer APIs ---
@@ -292,6 +353,18 @@ export const apiService = {
   },
 
   // --- Public APIs ---
+  getPublicPlans: async (): Promise<AdminPlan[]> => {
+    const res = await fetch(`${API_BASE}/api/plans`, {
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store'
+    });
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to load plans: ${res.status}`);
+    }
+    const data = await res.json();
+    return Array.isArray(data?.plans) ? data.plans : [];
+  },
 
   // GET /api/events
   getEvents: async (page = 1, limit = 10, search = '', location = '', organizerId = ''): Promise<{ events: Event[], pagination: any }> => {

@@ -62,6 +62,35 @@ export interface HitPaySettingsResponse {
   settings: HitPaySettings | null;
 }
 
+export interface AdminPlan {
+  planId: string;
+  name: string;
+  slug?: string | null;
+  description: string;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  currency: string;
+  billingInterval: 'monthly' | 'yearly';
+  trialDays: number;
+  isDefault: boolean;
+  isRecommended: boolean;
+  isActive: boolean;
+  features: {
+    aiIntegration: boolean;
+    branding: boolean;
+    weddingSuppliers: boolean;
+  };
+  limits: {
+    users: number | string;
+    projects: number | string;
+    contacts: number | string;
+    accounts: number | string;
+    storage: string;
+  };
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Event {
   eventId: string;
   slug: string;
