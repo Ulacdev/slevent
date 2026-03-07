@@ -13,6 +13,7 @@ import { EventDiscoveryPage } from './views/Public/EventDiscoveryPage';
 import { LikedEventsPage } from './views/Public/LikedEventsPage';
 import { FollowingsEventsPage } from './views/Public/FollowingsEventsPage';
 import MyTicketsPage from './views/Public/MyTicketsPage';
+import { OrganizerProfilePage } from './views/Public/OrganizerProfile';
 import { PricingPage } from './views/Public/PricingPage';
 import {
   PrivacyPolicyPage,
@@ -1946,6 +1947,7 @@ const App: React.FC = () => (
       <Route path="/" element={<PublicLayout><EventList /></PublicLayout>} />
       <Route path="/categories/:categoryKey" element={<PublicLayout><CategoryEvents /></PublicLayout>} />
       <Route path="/events/:slug" element={<PublicLayout><EventDetails /></PublicLayout>} />
+      <Route path="/organizer/:id" element={<PublicLayout><OrganizerProfilePage /></PublicLayout>} />
       <Route path="/events/:slug/register" element={<PublicLayout><RegistrationForm /></PublicLayout>} />
       <Route path="/payment/status" element={<PublicLayout><PaymentStatusView /></PublicLayout>} />
       <Route path="/tickets/:ticketId" element={<PublicLayout><TicketView /></PublicLayout>} />

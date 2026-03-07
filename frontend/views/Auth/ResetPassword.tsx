@@ -1,13 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, Button, Input } from '../../components/Shared';
 import { supabase } from "../../supabase/supabaseClient.js";
 
+const parseResetParams = (): URLSearchParams => {
+    const merged = new URLSearchParams(window.location.search);
+    const hash = window.location.hash.startsWith('#')
+        ? window.location.hash.slice(1)
+        : window.location.hash;
+
+    const segments = hash.split('#').filter(Boolean);
+    for (const segment of segments) {
+        const queryPart = segment.includes('?') ? segment.split('?').slice(1).join('?') : segment;
+        if (!queryPart.includes('=')) continue;
+        const params = new URLSearchParams(queryPart);
+        params.forEach((value, key) => {
+            if (!merged.has(key)) merged.set(key, value);
+        });
+    }
+
+    return merged;
+};
+
+const clearResetUrlTokens = () => {
+    window.history.replaceState({}, document.title, `${window.location.pathname}#/reset-password`);
+};
+
 export const ResetPassword: React.FC = () => {
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
+    const resetParams = useMemo(() => parseResetParams(), []);
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [recoveryVerified, setRecoveryVerified] = useState(false);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
@@ -27,12 +51,41 @@ export const ResetPassword: React.FC = () => {
         setError('');
 
         try {
+            if (!recoveryVerified) {
+                const tokenHash = resetParams.get('token_hash');
+                const accessToken = resetParams.get('access_token');
+                const refreshToken = resetParams.get('refresh_token');
+                const code = resetParams.get('code');
+
+                if (tokenHash) {
+                    const { error: verifyErr } = await supabase.auth.verifyOtp({
+                        type: 'recovery',
+                        token_hash: tokenHash,
+                    });
+                    if (verifyErr) throw verifyErr;
+                } else if (accessToken && refreshToken) {
+                    const { error: sessionErr } = await supabase.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: refreshToken,
+                    });
+                    if (sessionErr) throw sessionErr;
+                } else if (code) {
+                    const { error: codeErr } = await supabase.auth.exchangeCodeForSession(code);
+                    if (codeErr) throw codeErr;
+                } else {
+                    throw new Error('Reset link is invalid or expired. Please request a new one.');
+                }
+
+                setRecoveryVerified(true);
+            }
+
             const { error: resetError } = await supabase.auth.updateUser({
                 password: password
             });
 
             if (resetError) throw resetError;
 
+            clearResetUrlTokens();
             setMessage('Your password has been successfully updated.');
             setTimeout(() => {
                 navigate('/login');

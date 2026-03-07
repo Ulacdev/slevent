@@ -255,17 +255,22 @@ export const forgotPassword = async (req, res) => {
 
     // 2. Generate Supabase Password Reset Link
     // Note: This requires the service role key (admin client)
+    const frontendUrl = (process.env.FRONTEND_URL || '').replace(/\/$/, '');
+
     const { data, error: resetErr } = await supabase.auth.admin.generateLink({
       type: 'recovery',
       email: normalizedEmail,
       options: {
-        redirectTo: `${(process.env.FRONTEND_URL || '').replace(/\/$/, '')}/#/reset-password`
+        redirectTo: `${frontendUrl}/#/reset-password`
       }
     });
 
     if (resetErr) throw resetErr;
 
-    const resetLink = data.properties?.action_link;
+    const tokenHash = data.properties?.hashed_token;
+    const resetLink = tokenHash
+      ? `${frontendUrl}/#/reset-password?token_hash=${encodeURIComponent(tokenHash)}&type=recovery`
+      : data.properties?.action_link;
     if (!resetLink) throw new Error('Failed to generate reset link');
 
     // 3. Send the link via Professional SMTP hierarchy (Admin fallback)

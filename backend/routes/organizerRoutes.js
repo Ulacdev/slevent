@@ -9,6 +9,7 @@ import {
   followOrganizer,
   unfollowOrganizer,
   getMyFollowings,
+  getAllOrganizers,
 } from '../controller/organizerController.js';
 
 const router = express.Router();
@@ -25,6 +26,9 @@ router.get('/organizer/me', authMiddleware, getMyOrganizer);
 
 // GET /api/organizer/followings
 router.get('/organizer/followings', authMiddleware, getMyFollowings);
+
+// GET /api/organizer/all
+router.get('/organizers/all', getAllOrganizers);
 
 // GET /api/organizer/:id
 router.get('/organizer/:id', getOrganizerById);

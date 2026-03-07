@@ -66,10 +66,12 @@ export const listEvents = async (req, res) => {
     const offset = (page - 1) * limit;
     const search = (req.query.search || '').toString().trim();
     const location = (req.query.location || '').toString().trim();
+    const organizerId = (req.query.organizerId || '').toString().trim();
 
     // 1) Fetch all events (optionally filter by status)
     let query = supabase.from('events').select('*');
     if (status) query = query.eq('status', status);
+    if (organizerId) query = query.eq('organizerId', organizerId);
 
     // Detailed search filter
     if (search) {

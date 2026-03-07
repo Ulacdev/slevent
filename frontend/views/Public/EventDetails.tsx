@@ -141,6 +141,7 @@ export const EventDetails: React.FC = () => {
 
   const totalQuantity = (Object.values(quantities) as number[]).reduce((acc: number, q: number) => acc + q, 0);
   const grandTotal = event.ticketTypes.reduce((acc: number, t: TicketType) => acc + (t.priceAmount * (Number(quantities[t.ticketTypeId]) || 0)), 0);
+  const ctaLabel = totalQuantity === 0 ? 'Select Tickets' : 'Reserve Access';
 
   // Registration window
   const now = new Date();
@@ -294,7 +295,7 @@ export const EventDetails: React.FC = () => {
     : `${formatCompactCount(likesCount)} likes`;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 lg:py-16">
+    <div className="max-w-7xl mx-auto px-6 py-12 pb-72 lg:py-16 lg:pb-16">
       <div className="mb-8">
         <button
           onClick={() => navigate('/')}
@@ -506,8 +507,8 @@ export const EventDetails: React.FC = () => {
           </div>
 
           {/* Secure Access Sidebar */}
-          <div className="w-full lg:w-[380px] shrink-0">
-            <Card className="p-8 sticky top-10 rounded-[2.5rem] bg-[#F2F2F2] border border-[#2E2E2F]/10">
+          <div className="w-full lg:w-[380px] shrink-0 lg:sticky lg:top-24 self-start">
+            <Card className="p-8 rounded-[2.5rem] bg-[#F2F2F2] border border-[#2E2E2F]/10 lg:max-h-[calc(100vh-7rem)] lg:flex lg:flex-col">
               {isOwnEvent ? (
                 <div className="flex flex-col items-center text-center py-6">
                   <div className="w-16 h-16 rounded-2xl bg-[#38BDF2]/10 flex items-center justify-center mb-5">
@@ -528,11 +529,11 @@ export const EventDetails: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <h2 className="text-xl font-black text-[#2E2E2F] mb-8 tracking-tight">
+                  <h2 className="text-xl font-black text-[#2E2E2F] mb-8 lg:mb-6 tracking-tight lg:shrink-0">
                     Get Tickets
                   </h2>
 
-                  <div className="space-y-5 mb-10">
+                  <div className="space-y-5 mb-10 lg:flex-1 lg:min-h-0 lg:overflow-y-auto lg:pr-2 lg:mb-6">
                     {event.ticketTypes.map(ticket => {
                       const qty = quantities[ticket.ticketTypeId] || 0;
                       const available = ticket.quantityTotal - ticket.quantitySold;
@@ -581,13 +582,13 @@ export const EventDetails: React.FC = () => {
                     })}
                   </div>
 
-                  <div className="space-y-6">
+                  <div className="space-y-6 lg:pt-6 lg:border-t lg:border-[#2E2E2F]/10 lg:shrink-0">
                     <Button
                       className="w-full"
                       disabled={totalQuantity === 0}
                       onClick={handleRegister}
                     >
-                      {totalQuantity === 0 ? 'Select Tickets' : `Reserve Access`}
+                      {ctaLabel}
                     </Button>
                     <div className="flex items-center justify-center gap-3 opacity-30">
                       <ICONS.CreditCard className="w-4 h-4" />
@@ -602,6 +603,33 @@ export const EventDetails: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {!isOwnEvent && (
+        <div
+          className="fixed inset-x-0 z-[60] px-3 sm:px-4 lg:hidden pointer-events-none"
+          style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
+        >
+          <div className="pointer-events-auto mx-auto w-full max-w-xl max-h-[calc(100dvh-7.5rem)] overflow-y-auto overscroll-contain rounded-[2rem] border border-[#2E2E2F]/15 bg-[#F2F2F2]/98 backdrop-blur px-6 py-6 shadow-[0_18px_38px_-18px_rgba(46,46,47,0.35)]">
+            <p className="text-xl font-black text-[#2E2E2F] tracking-tight">
+              Get Tickets
+            </p>
+            <div className="mt-5 border-t border-[#2E2E2F]/10" />
+            <Button
+              className="w-full mt-5"
+              disabled={totalQuantity === 0}
+              onClick={handleRegister}
+            >
+              {ctaLabel}
+            </Button>
+            <div className="mt-4 flex items-center justify-center gap-2 opacity-40">
+              <ICONS.CreditCard className="w-4 h-4" />
+              <p className="text-[9px] text-center font-black uppercase tracking-[0.3em] text-[#2E2E2F]">
+                SECURE HITPAY CHECKOUT
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

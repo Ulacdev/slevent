@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
-import { Event, UserRole } from '../../types';
+import { Event, UserRole, OrganizerProfile } from '../../types';
 import { Card, Button, PageLoader } from '../../components/Shared';
 import { BrowseEventsNavigator, BrowseTabKey, ONLINE_LOCATION_VALUE } from '../../components/BrowseEventsNavigator';
 import { ICONS } from '../../constants';
@@ -9,6 +9,7 @@ import { EVENT_CATEGORIES } from '../../utils/eventCategories';
 import { useUser } from '../../context/UserContext';
 import { useEngagement } from '../../context/EngagementContext';
 import { PricingSection } from '../../components/PricingSection';
+
 
 // Helper to handle JSONB image format
 const getImageUrl = (img: any): string => {
@@ -278,6 +279,18 @@ export const EventCard: React.FC<{
                 </div>
                 <button
                   type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpen(false);
+                    navigate(`/organizer/${organizerId}`);
+                  }}
+                  className="w-full text-left px-4 py-3 text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors disabled:text-[#2E2E2F]/40 disabled:cursor-not-allowed"
+                  disabled={!organizerId}
+                >
+                  View Profile
+                </button>
+                <button
+                  type="button"
                   onClick={handleFollow}
                   className="w-full text-left px-4 py-3 text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors disabled:text-[#2E2E2F]/40 disabled:cursor-not-allowed"
                   disabled={!organizerId}
@@ -443,6 +456,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
     const timeoutId = window.setTimeout(() => setInteractionNotice(''), 2200);
     return () => window.clearTimeout(timeoutId);
   }, [interactionNotice]);
+
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -817,8 +831,86 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
         </div>
       )}
 
-      {/* Pricing Section - Visible only in landing mode */}
       {isLanding && <PricingSection />}
+      {isLanding && <FeaturedOrganizers />}
     </div>
+  );
+};
+
+const FeaturedOrganizers: React.FC = () => {
+  const [organizers, setOrganizers] = useState<OrganizerProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { followedOrganizerIds, toggleFollowing, canLikeFollow } = useEngagement();
+  const { isAuthenticated } = useUser();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchOrgs = async () => {
+      try {
+        const data = await apiService.getOrganizers();
+        setOrganizers(data);
+      } catch (error) {
+        console.error('Failed to fetch organizers:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrgs();
+  }, []);
+
+  if (loading || organizers.length === 0) return null;
+
+  return (
+    <section className="mt-20 mb-20 rounded-[1.8rem] bg-[#F2F2F2] px-4 sm:px-6 lg:px-10 py-12 border border-[#2E2E2F]/5">
+      <div className="flex flex-col mb-10">
+        <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tighter mb-2">Featured Organisers</h2>
+        <p className="text-[#2E2E2F]/60 text-lg font-medium leading-tight">Follow the organisers from these events and get notified when they create new ones.</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        {organizers.map((org) => {
+          const isFollowing = (followedOrganizerIds || []).includes(org.organizerId);
+          return (
+            <div
+              key={org.organizerId}
+              className="bg-[#F2F2F2] rounded-[2.5rem] p-8 border border-[#2E2E2F]/5 shadow-sm hover:shadow-2xl hover:shadow-[#38BDF2]/10 transition-all duration-300 group flex flex-col items-center text-center cursor-pointer"
+              onClick={() => navigate(`/organizer/${org.organizerId}`)}
+            >
+              <div className="relative mb-6">
+                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-md group-hover:border-[#38BDF2]/40 transition-all duration-300">
+                  <img
+                    src={getImageUrl(org.profileImageUrl)}
+                    alt={org.organizerName}
+                    className="w-full h-full object-cover transition-all duration-300"
+                  />
+                </div>
+              </div>
+
+              <h3 className="text-lg font-black text-[#2E2E2F] mb-1 line-clamp-1 group-hover:text-[#38BDF2] transition-colors">{org.organizerName}</h3>
+              <p className="text-[#2E2E2F]/50 text-xs font-bold uppercase tracking-widest mb-8">{org.followersCount || 0} followers</p>
+
+              <Button
+                variant={isFollowing ? 'outline' : 'primary'}
+                className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] h-auto transition-all ${isFollowing
+                  ? 'border-[#2E2E2F]/10 text-[#2E2E2F] hover:bg-[#2E2E2F] hover:text-white'
+                  : 'bg-[#38BDF2] text-white hover:bg-[#2E2E2F] shadow-lg shadow-[#38BDF2]/10 hover:shadow-[#2E2E2F]/10'
+                  }`}
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (!isAuthenticated) {
+                    navigate('/signup');
+                    return;
+                  }
+                  if (!canLikeFollow) return;
+                  await toggleFollowing(org.organizerId);
+                }}
+              >
+                {isFollowing ? 'Following' : 'Follow'}
+              </Button>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 };

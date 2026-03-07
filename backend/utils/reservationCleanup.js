@@ -1,12 +1,61 @@
-import supabase from '../database/db.js';
+import supabase, { supabaseConfig } from '../database/db.js';
 
 const DEFAULT_CLEANUP_INTERVAL_MS = 60_000; // 1 minute
+const MAX_CLEANUP_BACKOFF_MS = 15 * 60_000;
 
 const getNumberEnv = (key, fallback) => {
   const raw = process.env[key];
   if (!raw) return fallback;
   const parsed = Number(raw);
   return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const getErrorText = (error) => {
+  if (!error) return '';
+  if (typeof error === 'string') return error;
+
+  return [
+    error.message,
+    error.details,
+    error.hint,
+    error.code,
+    error.cause?.message,
+    error.cause?.code,
+  ]
+    .filter(Boolean)
+    .join('\n');
+};
+
+const isConnectivityError = (error) => {
+  const text = getErrorText(error);
+  if (!text) return false;
+
+  return [
+    'fetch failed',
+    'enotfound',
+    'eai_again',
+    'econnreset',
+    'etimedout',
+    'econnrefused',
+    'network',
+  ].some(pattern => text.toLowerCase().includes(pattern));
+};
+
+const summarizeConnectivityError = (error) => {
+  const text = getErrorText(error);
+  if (!text) return 'Unknown connectivity error';
+
+  const firstLine = text
+    .split('\n')
+    .map(line => line.trim())
+    .find(Boolean);
+
+  return firstLine || 'Unknown connectivity error';
+};
+
+const getBackoffDelayMs = (intervalMs, consecutiveFailures) => {
+  const multiplier = 2 ** Math.min(consecutiveFailures, 4);
+  return Math.min(intervalMs * multiplier, MAX_CLEANUP_BACKOFF_MS);
 };
 
 export const runReservationCleanup = async () => {
@@ -20,8 +69,22 @@ export const runReservationCleanup = async () => {
     .lt('expiresAt', now.toISOString());
 
   if (error) {
-    console.error('Reservation cleanup failed to load orders', error);
-    return { cleaned: 0, error: error.message };
+    const retryable = isConnectivityError(error);
+
+    if (retryable) {
+      console.error(
+        `[ReservationCleanup] Failed to reach Supabase (${supabaseConfig.host}) while loading expired orders: ${summarizeConnectivityError(error)}`
+      );
+    } else {
+      console.error('Reservation cleanup failed to load orders', error);
+    }
+
+    return {
+      cleaned: 0,
+      error: error.message,
+      retryable,
+      reason: summarizeConnectivityError(error),
+    };
   }
 
   if (!expiredOrders || expiredOrders.length === 0) {
@@ -98,9 +161,42 @@ export const startReservationCleanup = () => {
   const intervalMs = getNumberEnv('RESERVATION_CLEANUP_INTERVAL_MS', DEFAULT_CLEANUP_INTERVAL_MS);
   if (intervalMs <= 0) return;
 
-  runReservationCleanup().catch(err => console.error('Reservation cleanup initial run failed', err));
+  let consecutiveFailures = 0;
 
-  setInterval(() => {
-    runReservationCleanup().catch(err => console.error('Reservation cleanup run failed', err));
-  }, intervalMs);
+  const scheduleNextRun = (delayMs) => {
+    setTimeout(async () => {
+      try {
+        const result = await runReservationCleanup();
+
+        if (result?.retryable) {
+          consecutiveFailures += 1;
+          const nextDelay = getBackoffDelayMs(intervalMs, consecutiveFailures);
+          console.warn(
+            `[ReservationCleanup] Connectivity issue detected. Retrying in ${nextDelay}ms. Reason: ${result.reason}`
+          );
+          scheduleNextRun(nextDelay);
+          return;
+        }
+
+        consecutiveFailures = 0;
+        scheduleNextRun(intervalMs);
+      } catch (error) {
+        if (isConnectivityError(error)) {
+          consecutiveFailures += 1;
+          const nextDelay = getBackoffDelayMs(intervalMs, consecutiveFailures);
+          console.warn(
+            `[ReservationCleanup] Connectivity issue detected. Retrying in ${nextDelay}ms. Reason: ${summarizeConnectivityError(error)}`
+          );
+          scheduleNextRun(nextDelay);
+          return;
+        }
+
+        consecutiveFailures = 0;
+        console.error('Reservation cleanup run failed', error);
+        scheduleNextRun(intervalMs);
+      }
+    }, delayMs);
+  };
+
+  scheduleNextRun(0);
 };

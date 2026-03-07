@@ -68,7 +68,8 @@ export const SettingsView: React.FC = () => {
 
   type SettingsTab = 'team' | 'plans' | 'email' | 'payments' | 'profile';
 
-  const activeTab = (searchParams.get('tab') as SettingsTab) || 'team';
+  const requestedTab = searchParams.get('tab');
+  const activeTab = (TABS.some((tab) => tab.id === requestedTab) ? requestedTab : 'team') as SettingsTab;
   const setActiveTab = (tab: SettingsTab) => {
     setSearchParams({ tab });
   };

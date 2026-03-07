@@ -203,6 +203,14 @@ export const apiService = {
     return Array.isArray(data?.organizerIds) ? data.organizerIds : [];
   },
 
+  getOrganizers: async (): Promise<OrganizerProfile[]> => {
+    const res = await fetch(`${API_BASE}/api/organizers/all`, {
+      cache: 'no-store'
+    });
+    if (!res.ok) throw new Error(`Failed to load organizers: ${res.status}`);
+    return await res.json();
+  },
+
   getMyLikedEventIds: async (): Promise<string[]> => {
     const res = await fetch(`${API_BASE}/api/events/likes/me`, {
       credentials: 'include',
@@ -286,10 +294,11 @@ export const apiService = {
   // --- Public APIs ---
 
   // GET /api/events
-  getEvents: async (page = 1, limit = 10, search = '', location = ''): Promise<{ events: Event[], pagination: any }> => {
+  getEvents: async (page = 1, limit = 10, search = '', location = '', organizerId = ''): Promise<{ events: Event[], pagination: any }> => {
     const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
     const locParam = location ? `&location=${encodeURIComponent(location)}` : '';
-    const res = await fetch(`${API_BASE}/api/events?status=PUBLISHED&page=${page}&limit=${limit}${searchParam}${locParam}`, {
+    const orgParam = organizerId ? `&organizerId=${encodeURIComponent(organizerId)}` : '';
+    const res = await fetch(`${API_BASE}/api/events?status=PUBLISHED&page=${page}&limit=${limit}${searchParam}${locParam}${orgParam}`, {
       headers: { 'Content-Type': 'application/json' }
     });
     if (!res.ok) throw new Error(`Failed to load events: ${res.status}`);

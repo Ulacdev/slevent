@@ -655,3 +655,21 @@ export const unfollowOrganizer = async (req, res) => {
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }
 };
+
+export const getAllOrganizers = async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('organizers')
+      .select('*')
+      .order('followersCount', { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    const counts = await getEventsHostedCounts((data || []).map(o => o.organizerId));
+    const serialized = (data || []).map(o => serializeOrganizerRecord(o, counts.get(o.organizerId) || 0));
+
+    return res.json(serialized);
+  } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
