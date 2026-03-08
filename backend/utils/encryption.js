@@ -4,7 +4,9 @@ const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 const ALGORITHM = 'aes-256-cbc';
 
 if (!ENCRYPTION_KEY) {
-    console.warn('⚠️ [Encryption] No ENCRYPTION_KEY found in process.env. Using a temporary random key. Data will not persist across restarts!');
+    console.warn('\n⚠️ [ENCRYPTION ERROR] NO ENCRYPTION_KEY found in process.env!');
+    console.warn('⚠️ A temporary random key is being used. DATA WILL NOT PERSIST ACROSS RESTARTS.');
+    console.warn('⚠️ If you are on hosting (Vercel, Railway, etc.), you MUST set an ENCRYPTION_KEY in your hosting dashboard.\n');
 } else {
     const keyInfo = ENCRYPTION_KEY.startsWith('dead') ? 'Identified stable key' : 'Custom key';
     console.log(`🛡️ [Encryption] Using ENCRYPTION_KEY from environment (${keyInfo}).`);

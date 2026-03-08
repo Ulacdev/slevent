@@ -26,6 +26,8 @@ import { AdminDashboard } from './views/Admin/Dashboard';
 import { EventsManagement } from './views/Admin/EventsManagement';
 import { RegistrationsList } from './views/Admin/RegistrationsList';
 import { CheckIn } from './views/Admin/CheckIn';
+import { ArchiveEvents } from './views/User/ArchiveEvents';
+import { OrganizerReports } from './views/User/OrganizerReports';
 import { SettingsView } from './views/Admin/Settings';
 import { SubscriptionPlans } from './views/Admin/SubscriptionPlans';
 import { LoginPerspective } from './views/Auth/Login';
@@ -375,7 +377,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     if (!role) return;
     const staffAllowed = ['/events', '/attendees', '/checkin', '/settings'];
     const adminAllowed = ['/dashboard', '/events', '/attendees', '/checkin', '/settings'];
-    const userAllowed = ['/user-home', '/my-events', '/user-settings', '/organizer-settings', '/account-settings', '/user/attendees', '/user/checkin', '/dashboard'];
+    const userAllowed = ['/user-home', '/my-events', '/user-settings', '/organizer-settings', '/account-settings', '/user/attendees', '/user/checkin', '/user/archive', '/user/reports', '/dashboard'];
 
     if (role === UserRole.ORGANIZER) {
       if (!userAllowed.includes(location.pathname)) {
@@ -1801,6 +1803,8 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
     { label: 'Home', path: '/user-home', icon: <ICONS.Home className="w-5 h-5" /> },
     { label: 'Dashboard', path: '/dashboard', icon: <ICONS.Layout className="w-5 h-5" /> },
     { label: 'Events', path: '/my-events', icon: <ICONS.Calendar className="w-5 h-5" /> },
+    { label: 'Archive', path: '/user/archive', icon: <ICONS.Archive className="w-5 h-5" /> },
+    { label: 'Reports', path: '/user/reports', icon: <ICONS.BarChart className="w-5 h-5" /> },
     { label: 'Attendees', path: '/user/attendees', icon: <ICONS.Users className="w-5 h-5" /> },
     { label: 'Check-In', path: '/user/checkin', icon: <ICONS.CheckCircle className="w-5 h-5" /> },
     { label: 'Org Profile', path: '/user-settings?tab=organizer', icon: <ICONS.Users className="w-5 h-5" /> },
@@ -2290,6 +2294,8 @@ const App: React.FC = () => (
       <Route path="/account-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><Navigate to="/user-settings?tab=account" replace /></RequireRoleRoute>} />
       <Route path="/user/attendees" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><RegistrationsList /></UserPortalLayout></RequireRoleRoute>} />
       <Route path="/user/checkin" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><CheckIn /></UserPortalLayout></RequireRoleRoute>} />
+      <Route path="/user/archive" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><ArchiveEvents /></UserPortalLayout></RequireRoleRoute>} />
+      <Route path="/user/reports" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerReports /></UserPortalLayout></RequireRoleRoute>} />
 
       {/* Admin Portal Routes */}
       <Route path="/dashboard" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.ORGANIZER]}><DashboardWrapper /></RequireRoleRoute>} />
