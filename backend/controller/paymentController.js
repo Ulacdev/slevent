@@ -32,37 +32,48 @@ const ensureEnv = (res) => {
 }
 
 export const getHitpayCredentials = async (orderId) => {
+  console.log('[HitPay Credentials] Looking up credentials for order:', orderId);
   let ownerUserId = null;
 
   if (orderId) {
     const { data: order } = await supabase.from('orders').select('eventId').eq('orderId', orderId).maybeSingle();
+    console.log('[HitPay Credentials] Order found:', order);
     if (order?.eventId) {
       const { data: event } = await supabase.from('events').select('organizerId, createdBy').eq('eventId', order.eventId).maybeSingle();
+      console.log('[HitPay Credentials] Event found:', event);
       if (event?.organizerId) {
         const { data: org } = await supabase.from('organizers').select('ownerUserId').eq('organizerId', event.organizerId).maybeSingle();
+        console.log('[HitPay Credentials] Organizer found:', org);
         if (org?.ownerUserId) ownerUserId = org.ownerUserId;
       }
       if (!ownerUserId && event?.createdBy) {
         ownerUserId = event.createdBy;
+        console.log('[HitPay Credentials] Using event createdBy:', ownerUserId);
       }
     }
   }
 
   // Fallback to platform-level Admin credentials if no owner is found (e.g. platform subscriptions)
   if (!ownerUserId) {
+    console.log('[HitPay Credentials] No organizer found, looking for admin fallback');
     const { data: admin } = await supabase.from('users').select('userId').eq('role', 'ADMIN').limit(1).maybeSingle();
     if (admin?.userId) {
       ownerUserId = admin.userId;
+      console.log('[HitPay Credentials] Using admin user:', ownerUserId);
     }
   }
 
   if (ownerUserId) {
+    console.log('[HitPay Credentials] Looking for settings for user:', ownerUserId);
     const { data } = await supabase.from('settings').select('key, value').eq('user_id', ownerUserId).in('key', ['hitpay_api_key', 'hitpay_salt', 'hitpay_enabled', 'hitpay_mode']);
+    console.log('[HitPay Credentials] Settings found:', data?.map(d => d.key));
     if (data && data.length > 0) {
       const mapped = {};
       data.forEach(item => mapped[item.key] = item.value);
 
       const enabled = mapped['hitpay_enabled'] === 'true';
+      console.log('[HitPay Credentials] Enabled:', enabled, 'Has API key:', !!mapped['hitpay_api_key'], 'Has salt:', !!mapped['hitpay_salt']);
+      
       if (enabled && mapped['hitpay_api_key'] && mapped['hitpay_salt']) {
         return {
           apiKey: decryptString(mapped['hitpay_api_key']),
@@ -73,6 +84,7 @@ export const getHitpayCredentials = async (orderId) => {
     }
   }
 
+  console.log('[HitPay Credentials] No stored credentials found, using env fallback');
   return {
     apiKey: process.env.HITPAY_API_KEY,
     salt: process.env.HITPAY_SALT,
@@ -85,26 +97,50 @@ export const createHitpayCheckoutSession = async (req, res) => {
     const { orderId } = req.body
     if (!orderId) return res.status(400).json({ error: 'orderId required' })
 
+    console.log('[HitPay Checkout] Starting checkout for order:', orderId);
+
     const { data: order, error: orderErr } = await supabase
       .from('orders')
       .select('orderId, eventId, totalAmount, currency, status, buyerName, buyerEmail, buyerPhone, metadata')
       .eq('orderId', orderId)
       .maybeSingle()
-    if (orderErr) return res.status(500).json({ error: orderErr.message })
-    if (!order) return res.status(404).json({ error: 'Order not found' })
-    if (order.status === 'PAID') return res.status(400).json({ error: 'Order already paid' })
-    if ((order.totalAmount || 0) <= 0) return res.status(400).json({ error: 'Free orders do not require payment' })
+    if (orderErr) {
+      console.error('[HitPay Checkout] Order fetch error:', orderErr);
+      return res.status(500).json({ error: orderErr.message })
+    }
+    if (!order) {
+      console.error('[HitPay Checkout] Order not found:', orderId);
+      return res.status(404).json({ error: 'Order not found' })
+    }
+    if (order.status === 'PAID') {
+      console.warn('[HitPay Checkout] Order already paid:', orderId);
+      return res.status(400).json({ error: 'Order already paid' })
+    }
+    if ((order.totalAmount || 0) <= 0) {
+      console.warn('[HitPay Checkout] Free order, no payment needed:', orderId);
+      return res.status(400).json({ error: 'Free orders do not require payment' })
+    }
 
     if (!HITPAY_ENABLED) {
+      console.warn('[HitPay Checkout] HitPay is disabled');
       return res.status(503).json({ error: 'HitPay is disabled. Set HITPAY_ENABLED=true to enable payments.' })
     }
 
     const credentials = await getHitpayCredentials(order.orderId);
+    console.log('[HitPay Checkout] Credentials found:', {
+      hasApiKey: !!credentials?.apiKey,
+      hasSalt: !!credentials?.salt,
+      mode: credentials?.mode,
+      apiKeyPrefix: credentials?.apiKey?.substring(0, 10) + '...'
+    });
+    
     if (!credentials || !credentials.apiKey || !credentials.salt) {
-      console.error('[HitPay] Missing API keys for order:', order.orderId);
+      console.error('[HitPay Checkout] Missing API keys for order:', order.orderId);
       return res.status(500).json({ error: 'Payment gateway configuration is missing.' });
     }
     const hitpayApiUrl = credentials.mode === 'sandbox' ? 'https://api.sandbox.hit-pay.com' : 'https://api.hit-pay.com';
+    console.log('[HitPay Checkout] Using HitPay URL:', hitpayApiUrl);
+    
     const payload = new URLSearchParams()
     payload.set('amount', String(Number(order.totalAmount)))
     payload.set('currency', order.currency || 'PHP')
@@ -115,18 +151,29 @@ export const createHitpayCheckoutSession = async (req, res) => {
     if (order.buyerEmail) payload.set('email', order.buyerEmail)
     if (order.buyerName) payload.set('name', order.buyerName)
 
+    console.log('[HitPay Checkout] Sending payment request with params:', {
+      amount: order.totalAmount,
+      currency: order.currency || 'PHP',
+      reference_number: order.orderId,
+      purpose: `Order ${order.orderId}`
+    });
+
     const response = await fetch(`${hitpayApiUrl}/v1/payment-requests`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'X-BUSINESS-API-KEY': credentials.apiKey
+        'X-BUSINESS-API-KEY': credentials.apiKey,
+        'X-Requested-With': 'XMLHttpRequest'
       },
       body: payload.toString()
     })
 
     const data = await response.json()
+    console.log('[HitPay Checkout] Response status:', response.status);
+    console.log('[HitPay Checkout] Response data:', JSON.stringify(data));
+    
     if (!response.ok) {
-      console.error('HitPay checkout creation failed', data)
+      console.error('[HitPay Checkout] HitPay API error:', data)
       return res.status(500).json({ error: data?.error || data?.message || 'Failed to create HitPay payment request' })
     }
 

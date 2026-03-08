@@ -153,7 +153,7 @@ export const listEvents = async (req, res) => {
     });
 
     // 3) Apply JS-side filters (Date, Price, Category)
-    let filtered = (events || []).filter(withinRegistrationWindow);
+    let filtered = events || [];
 
     if (startDate) {
       const start = new Date(startDate);

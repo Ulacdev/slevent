@@ -193,13 +193,20 @@ export async function updateHitPaySettings(req, res) {
             { user_id: userId, key: 'hitpay_mode', value: mode === 'sandbox' ? 'sandbox' : 'live' }
         ];
 
-        // Only encrypt and upsert if they provided new string values
+        // Handle API key: if provided and not empty, save it. If disabled and no new value, delete it.
         if (typeof hitpayApiKey === 'string' && hitpayApiKey.trim() !== '') {
             settings.push({ user_id: userId, key: 'hitpay_api_key', value: encryptString(hitpayApiKey.trim()) });
+        } else if (enabled !== true) {
+            // If disabling, delete the API key
+            settings.push({ user_id: userId, key: 'hitpay_api_key', value: null });
         }
 
+        // Handle salt: if provided and not empty, save it. If disabled and no new value, delete it.
         if (typeof hitpaySalt === 'string' && hitpaySalt.trim() !== '') {
             settings.push({ user_id: userId, key: 'hitpay_salt', value: encryptString(hitpaySalt.trim()) });
+        } else if (enabled !== true) {
+            // If disabling, delete the salt
+            settings.push({ user_id: userId, key: 'hitpay_salt', value: null });
         }
 
         const { error } = await supabase

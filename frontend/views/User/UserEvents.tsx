@@ -1267,7 +1267,7 @@ export const UserEvents: React.FC = () => {
                                                 {canPublishByTicketRule ? 'Published' : 'Published (Add ticket first)'}
                                             </option>
                                             <option value="LIVE" disabled={!canPublishByTicketRule}>
-                                                {canPublishByTicketRule ? '🎉 GO LIVE NOW' : 'GO LIVE NOW (Add ticket first)'}
+                                                {canPublishByTicketRule ? 'Live Now' : 'Live Now (Add ticket first)'}
                                             </option>
                                             {isEditMode && <option value="CLOSED">Closed</option>}
                                         </select>

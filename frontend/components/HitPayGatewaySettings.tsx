@@ -156,12 +156,29 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
 
     try {
       setSaving(true);
-      const response = await apiService.updateHitPaySettings(scope, {
+      
+      // Determine if we need to send new API key/salt values
+      // Always send if there's a non-empty value in the form that differs from stored
+      const apiKeyToSave = currentData.hitpayApiKey.trim() || undefined;
+      const saltToSave = currentData.hitpaySalt.trim() || undefined;
+      
+      // Only send the actual values if they have content (new or updated)
+      const payload: any = {
         enabled: currentData.enabled,
         mode: currentData.mode,
-        hitpayApiKey: currentData.enabled && editingApiKey ? currentData.hitpayApiKey.trim() : undefined,
-        hitpaySalt: currentData.enabled && editingSalt ? currentData.hitpaySalt.trim() : undefined,
-      });
+      };
+      
+      // Send API key if user provided one (whether editing or not)
+      if (apiKeyToSave) {
+        payload.hitpayApiKey = apiKeyToSave;
+      }
+      
+      // Send salt if user provided one (whether editing or not)
+      if (saltToSave) {
+        payload.hitpaySalt = saltToSave;
+      }
+      
+      const response = await apiService.updateHitPaySettings(scope, payload);
 
       if (!response.backendReady) {
         setBackendReady(false);
