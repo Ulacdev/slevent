@@ -15,23 +15,23 @@ IF
 
   -- Documentation of Expected Keys (as per SMTP Configuration Documentation):
   -- 'email_provider'      - e.g., 'SMTP'
-  -- 'email_driver'        - e.g., 'smtp'
-  -- 'email_host'          - e.g., 'mail.ribo.com.ph'
-  -- 'email_port'          - e.g., '465'
-  -- 'email_username'      - e.g., 'hello@ribo.com.ph'
-  -- 'email_password'      - The SMTP password (should be treated as sensitive)
-  -- 'email_encryption'    - e.g., 'SSL' or 'TLS'
+  -- 'email_driver'       - e.g., 'smtp'
+  -- 'email_host'         - e.g., 'mail.ribo.com.ph'
+  -- 'email_port'         - e.g., '465'
+  -- 'email_username'     - e.g., 'hello@ribo.com.ph'
+  -- 'email_password'     - The SMTP password (should be treated as sensitive)
+  -- 'email_encryption'   - e.g., 'SSL' or 'TLS'
   -- 'email_from_address' - e.g., 'hello@ribo.com.ph'
-  -- 'email_from_name'    - e.g., 'Ribo Events'
+  -- 'email_from_name'   - e.g., 'Ribo Events'
 
   -- HitPay Payment Gateway Keys (per organizer/admin):
-  -- 'hitpay_enabled'      - 'true' or 'false'
-  -- 'hitpay_mode'        - 'sandbox' or 'live'
-  -- 'hitpay_api_key'     - Encrypted API key
-  -- 'hitpay_salt'        - Encrypted webhook salt
+  -- 'hitpay_enabled'     - 'true' or 'false'
+  -- 'hitpay_mode'       - 'sandbox' or 'live'
+  -- 'hitpay_api_key'    - Encrypted API key
+  -- 'hitpay_salt'       - Encrypted webhook salt
 
   -- Constraint: Link to the platform's user table
-DO $
+DO $ $
 BEGIN
   IF NOT EXISTS (
     SELECT
@@ -46,7 +46,7 @@ BEGIN
     ADD CONSTRAINT settings_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users("userId")
     ON DELETE CASCADE;
   END IF;
-END $;
+END $ $;
 
 -- Indices for rapid lookup during email generation
 CREATE INDEX
