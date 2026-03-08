@@ -6,6 +6,8 @@ import {
   createEvent,
   updateEvent,
   deleteEvent,
+  restoreEvent,
+  listArchivedEvents,
   publishEvent,
   closeEvent,
   uploadEventImage
@@ -19,6 +21,9 @@ router.use(requireRoles(['ADMIN', 'STAFF']));
 
 // GET /api/admin/events
 router.get('/', listAdminEvents);
+
+// GET /api/admin/events/archived - List archived events
+router.get('/archived', listArchivedEvents);
 
 // POST /api/admin/events/image (upload without eventId)
 router.post('/image', upload.single('image'), uploadEventImage);
@@ -38,8 +43,11 @@ router.post('/', createEvent);
 // PUT /api/admin/events/:id
 router.put('/:id', updateEvent);
 
-// DELETE /api/admin/events/:id
+// DELETE /api/admin/events/:id (soft delete/archive)
 router.delete('/:id', deleteEvent);
+
+// POST /api/admin/events/:id/restore - Restore archived event
+router.post('/:id/restore', restoreEvent);
 
 // POST /api/admin/events/:id/publish
 router.post('/:id/publish', publishEvent);

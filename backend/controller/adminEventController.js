@@ -187,6 +187,7 @@ export const listUserEvents = async (req, res) => {
       .from('events')
       .select('*')
       .eq('createdBy', userId)
+      .eq('is_archived', false) // Exclude archived events
       .order('created_at', { ascending: false });
 
     if (search) {
@@ -492,20 +493,132 @@ export const updateEvent = async (req, res) => {
 export const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user?.userId;
+    
+    // Check if event is already archived
+    const { data: existingEvent } = await supabase
+      .from('events')
+      .select('is_archived, deleted_at')
+      .eq('eventId', id)
+      .maybeSingle();
+    
+    // If already archived, do permanent delete
+    if (existingEvent?.is_archived && existingEvent?.deleted_at) {
+      // Permanent delete - remove all related data first
+      await supabase.from('tickets').delete().eq('eventId', id);
+      await supabase.from('ticket_types').delete().eq('eventId', id);
+      await supabase.from('orders').delete().eq('eventId', id);
+      await supabase.from('event_likes').delete().eq('eventId', id);
+      
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('eventId', id);
+
+      if (error) return res.status(500).json({ error: error.message });
+
+      await logAudit({
+        actionType: 'EVENT_PERMANENTLY_DELETED',
+        details: { eventId: id },
+        req
+      });
+
+      return res.status(200).json({ message: 'Event permanently deleted', permanent: true });
+    }
+
+    // Soft delete - archive the event
     const { error } = await supabase
       .from('events')
-      .delete()
+      .update({ 
+        is_archived: true, 
+        deleted_at: new Date().toISOString(),
+        archived_by: userId,
+        updated_at: new Date().toISOString()
+      })
       .eq('eventId', id);
 
     if (error) return res.status(500).json({ error: error.message });
 
     await logAudit({
-      actionType: 'EVENT_DELETED',
+      actionType: 'EVENT_ARCHIVED',
       details: { eventId: id },
       req
     });
 
-    return res.status(204).send();
+    return res.status(200).json({ message: 'Event archived successfully', archived: true });
+  } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
+
+export const restoreEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.userId;
+
+    const { data, error } = await supabase
+      .from('events')
+      .update({ 
+        is_archived: false, 
+        deleted_at: null,
+        archived_by: null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('eventId', id)
+      .select('*')
+      .single();
+
+    if (error) return res.status(500).json({ error: error.message });
+    if (!data) return res.status(404).json({ error: 'Event not found' });
+
+    await logAudit({
+      actionType: 'EVENT_RESTORED',
+      details: { eventId: id, restoredBy: userId },
+      req
+    });
+
+    return res.status(200).json({ message: 'Event restored successfully', event: data });
+  } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
+
+export const listArchivedEvents = async (req, res) => {
+  try {
+    const userId = req.user?.userId;
+    const { page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
+
+    // Get organizer's events that are archived
+    const { data: organizer } = await supabase
+      .from('organizers')
+      .select('organizerId')
+      .eq('ownerUserId', userId)
+      .maybeSingle();
+
+    let query = supabase
+      .from('events')
+      .select('*', { count: 'exact' })
+      .eq('is_archived', true)
+      .not('deleted_at', 'is', null)
+      .order('deleted_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    // If user has organizer profile, filter to their events only
+    if (organizer?.organizerId) {
+      query = query.eq('organizerId', organizer.organizerId);
+    }
+
+    const { data, error, count } = await query;
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    return res.status(200).json({
+      events: data || [],
+      total: count || 0,
+      page: Number(page),
+      limit: Number(limit)
+    });
   } catch (err) {
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }

@@ -669,13 +669,42 @@ export const apiService = {
     return { ...data, ticketTypes: data?.ticketTypes || eventData.ticketTypes || [] } as Event;
   },
 
-  // DELETE /api/admin/events/:id
-  deleteEvent: async (id: string): Promise<void> => {
-    const res = await fetch(`${API_BASE}/api/admin/events/${encodeURIComponent(id)}`, {
+  // DELETE /api/admin/events/:id (Archives event - soft delete)
+  deleteEvent: async (id: string): Promise<{ archived?: boolean; permanent?: boolean; message?: string }> => {
+    const res = await fetch(`${API_BASE}/api/user/events/${encodeURIComponent(id)}`, {
       method: 'DELETE',
       credentials: 'include'
     });
-    if (!res.ok) throw new Error(`Failed to delete event: ${res.status}`);
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error?.error || `Failed to delete event: ${res.status}`);
+    }
+    return res.json();
+  },
+
+  // GET /api/user/events/archived - Get archived events
+  getArchivedEvents: async (page = 1, limit = 20): Promise<{ events: any[]; total: number; page: number; limit: number }> => {
+    const res = await fetch(`${API_BASE}/api/user/events/archived?page=${page}&limit=${limit}`, {
+      credentials: 'include'
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(text || `Failed to load archived events: ${res.status}`);
+    }
+    return res.json();
+  },
+
+  // POST /api/user/events/:id/restore - Restore archived event
+  restoreEvent: async (id: string): Promise<{ message: string; event: any }> => {
+    const res = await fetch(`${API_BASE}/api/user/events/${encodeURIComponent(id)}/restore`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error?.error || `Failed to restore event: ${res.status}`);
+    }
+    return res.json();
   },
 
   uploadEventImage: async (file: File, eventId?: string): Promise<{ publicUrl: string }> => {

@@ -444,11 +444,11 @@ export const UserEvents: React.FC = () => {
         setSubmitting(true);
         try {
             await apiService.deleteUserEvent(deleteConfirm.eventId);
-            setNotification({ message: 'Event successfully deleted.', type: 'success' });
+            setNotification({ message: 'Event archived successfully. You can restore it from the Archive page.', type: 'success' });
             setDeleteConfirm(null);
             fetchEvents();
         } catch (err) {
-            setNotification({ message: 'Failed to delete event.', type: 'error' });
+            setNotification({ message: 'Failed to archive event.', type: 'error' });
         } finally {
             setSubmitting(false);
         }
@@ -748,6 +748,13 @@ export const UserEvents: React.FC = () => {
                                         >
                                             <ICONS.Edit className="w-5 h-5" />
                                         </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); setDeleteConfirm(event); }}
+                                            className="p-3 text-[#2E2E2F]/60 hover:text-red-500 transition-colors"
+                                            title="Archive"
+                                        >
+                                            <ICONS.Trash className="w-5 h-5" />
+                                        </button>
                                     </div>
                                 </Card>
                             ))}
@@ -831,6 +838,13 @@ export const UserEvents: React.FC = () => {
                                                             title="Edit Session"
                                                         >
                                                             <svg className="w-[1.2rem] h-[1.2rem]" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); setDeleteConfirm(event); }}
+                                                            className="text-[#2E2E2F] hover:text-red-500 transition-colors p-1"
+                                                            title="Archive Event"
+                                                        >
+                                                            <ICONS.Trash className="w-[1.2rem] h-[1.2rem]" strokeWidth={2.2} />
                                                         </button>
                                                     </div>
                                                 </td>
@@ -1578,16 +1592,16 @@ export const UserEvents: React.FC = () => {
                 title="Delete Event"
             >
                 <div className="space-y-6">
-                    <div className="flex items-start gap-5 p-6 bg-red-50 border border-red-200 rounded-[1.75rem]">
-                        <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center shrink-0">
-                            <ICONS.Trash className="w-6 h-6 text-red-500" strokeWidth={2} />
+                    <div className="flex items-start gap-5 p-6 bg-amber-50 border border-amber-200 rounded-[1.75rem]">
+                        <div className="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center shrink-0">
+                            <ICONS.Trash className="w-6 h-6 text-amber-500" strokeWidth={2} />
                         </div>
                         <div>
                             <p className="font-bold text-[#2E2E2F] text-[16px] tracking-tight">
-                                Are you sure you want to delete this event?
+                                Are you sure you want to archive this event?
                             </p>
                             <p className="text-[13px] text-[#2E2E2F]/60 font-medium mt-2 leading-relaxed">
-                                This will permanently remove <strong>"{deleteConfirm?.eventName}"</strong> and all associated data including ticket types, registrations, and attendee records. This action cannot be undone.
+                                This will move <strong>"{deleteConfirm?.eventName}"</strong> to the archive. The event will be hidden from public pages but can be restored later from the Archive page. This action can be undone.
                             </p>
                         </div>
                     </div>
@@ -1601,11 +1615,11 @@ export const UserEvents: React.FC = () => {
                             Cancel
                         </Button>
                         <Button
-                            className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 transition-colors min-h-[32px]"
+                            className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-amber-500 text-white hover:bg-amber-600 transition-colors min-h-[32px]"
                             onClick={handleDeleteEvent}
                             disabled={submitting}
                         >
-                            {submitting ? 'Deleting...' : 'Yes, Delete Event'}
+                            {submitting ? 'Archiving...' : 'Yes, Archive Event'}
                         </Button>
                     </div>
                 </div>

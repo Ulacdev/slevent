@@ -6,7 +6,10 @@ import {
   listUserEvents,
   createUserEvent,
   updateUserEvent,
-  uploadUserEventImage
+  uploadUserEventImage,
+  deleteEvent,
+  restoreEvent,
+  listArchivedEvents
 } from "../controller/adminEventController.js";
 
 const router = express.Router();
@@ -32,5 +35,15 @@ router.post('/user/events/:id/image', authMiddleware, upload.single('image'), (r
   req.body.eventId = req.params.id;
   next();
 }, uploadUserEventImage);
+
+// ─── Archive system for organizers ───
+// DELETE /user/events/:id - Archive (soft delete) event
+router.delete('/user/events/:id', authMiddleware, deleteEvent);
+
+// GET /user/events/archived - List archived events
+router.get('/user/events/archived', authMiddleware, listArchivedEvents);
+
+// POST /user/events/:id/restore - Restore archived event
+router.post('/user/events/:id/restore', authMiddleware, restoreEvent);
 
 export default router;

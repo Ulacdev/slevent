@@ -36,6 +36,8 @@ import { ResetPassword } from './views/Auth/ResetPassword';
 import { UserSettings } from './views/User/UserSettings';
 import { UserEvents } from './views/User/UserEvents';
 import { UserHome } from './views/User/UserHome';
+import { OrganizerReports } from './views/User/OrganizerReports';
+import { ArchiveEvents } from './views/User/ArchiveEvents';
 import { ONLINE_LOCATION_VALUE } from './components/BrowseEventsNavigator';
 import { ICONS } from './constants';
 import { Button, Input, Modal, PageLoader } from './components/Shared';
@@ -840,7 +842,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   </svg>
                 </button>
               </div>
-              <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto pb-24">
+              <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-[#2E2E2F]/20 scrollbar-track-transparent pb-24">
                 {menuItems.map((item) => {
                   const isActive = checkIsActiveAdmin(item.path);
                   return (
@@ -1835,16 +1837,23 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   };
 
   const menuItems = [
-    { label: 'Home', path: '/user-home', icon: <ICONS.Home className="w-5 h-5" /> },
-    { label: 'Dashboard', path: '/dashboard', icon: <ICONS.Layout className="w-5 h-5" /> },
-    { label: 'Events', path: '/my-events', icon: <ICONS.Calendar className="w-5 h-5" /> },
-    { label: 'Attendees', path: '/user/attendees', icon: <ICONS.Users className="w-5 h-5" /> },
-    { label: 'Check-In', path: '/user/checkin', icon: <ICONS.CheckCircle className="w-5 h-5" /> },
-    { label: 'Org Profile', path: '/user-settings?tab=organizer', icon: <ICONS.Users className="w-5 h-5" /> },
-    { label: 'Teams & Access', path: '/user-settings?tab=team', icon: <ICONS.Shield className="w-5 h-5" /> },
-    { label: 'Email Setup', path: '/user-settings?tab=email', icon: <ICONS.Mail className="w-5 h-5" /> },
-    { label: 'Payment Gateway', path: '/user-settings?tab=payments', icon: <ICONS.CreditCard className="w-5 h-5" /> },
-    { label: 'Account', path: '/user-settings?tab=account', icon: <ICONS.Settings className="w-5 h-5" /> },
+    // MAIN
+    { label: 'Home', path: '/user-home', icon: <ICONS.Home className="w-5 h-5" />, group: 'MAIN' },
+    { label: 'Dashboard', path: '/dashboard', icon: <ICONS.Layout className="w-5 h-5" />, group: 'MAIN' },
+    
+    // EVENTS RECORDS
+    { label: 'Events', path: '/my-events', icon: <ICONS.Calendar className="w-5 h-5" />, group: 'EVENTS RECORDS' },
+    { label: 'Reports', path: '/user/reports', icon: <ICONS.TrendingUp className="w-5 h-5" />, group: 'EVENTS RECORDS' },
+    { label: 'Archive', path: '/user/archive', icon: <ICONS.Trash className="w-5 h-5" />, group: 'EVENTS RECORDS' },
+    { label: 'Attendees', path: '/user/attendees', icon: <ICONS.Users className="w-5 h-5" />, group: 'EVENTS RECORDS' },
+    { label: 'Check-In', path: '/user/checkin', icon: <ICONS.CheckCircle className="w-5 h-5" />, group: 'EVENTS RECORDS' },
+    
+    // SETTINGS
+    { label: 'Org Profile', path: '/user-settings?tab=organizer', icon: <ICONS.Users className="w-5 h-5" />, group: 'SETTINGS' },
+    { label: 'Teams & Access', path: '/user-settings?tab=team', icon: <ICONS.Shield className="w-5 h-5" />, group: 'SETTINGS' },
+    { label: 'Email Setup', path: '/user-settings?tab=email', icon: <ICONS.Mail className="w-5 h-5" />, group: 'SETTINGS' },
+    { label: 'Payment Gateway', path: '/user-settings?tab=payments', icon: <ICONS.CreditCard className="w-5 h-5" />, group: 'SETTINGS' },
+    { label: 'Account', path: '/user-settings?tab=account', icon: <ICONS.Settings className="w-5 h-5" />, group: 'SETTINGS' },
   ];
 
   const checkIsActive = (itemPath: string) => {
@@ -1896,25 +1905,62 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             )}
           </Link>
         </div>
-        <nav className={`flex-1 ${desktopSidebarOpen ? 'px-4' : 'px-2'} py-4 space-y-1`}>
-          {menuItems.map((item) => {
-            const isActive = checkIsActive(item.path);
+        <nav className={`flex-1 ${desktopSidebarOpen ? 'px-4' : 'px-2'} py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-[#2E2E2F]/20 scrollbar-track-transparent`}>
+          {(() => {
+            // Group menu items by group
+            const grouped = menuItems.reduce((acc, item) => {
+              const group = item.group || 'OTHER';
+              if (!acc[group]) acc[group] = [];
+              acc[group].push(item);
+              return acc;
+            }, {} as Record<string, typeof menuItems>);
 
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors group ${isActive
-                  ? 'bg-[#38BDF2] text-[#F2F2F2]'
-                  : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
-                  } ${!desktopSidebarOpen ? 'justify-center border-none' : ''}`}
-                title={!desktopSidebarOpen ? item.label : undefined}
-              >
-                {item.icon}
-                {desktopSidebarOpen && <span className="font-bold text-sm tracking-tight">{item.label}</span>}
-              </Link>
-            );
-          })}
+            return Object.entries(grouped).map(([groupName, items]) => (
+              <div key={groupName} className="mb-6">
+                {desktopSidebarOpen && (
+                  <p className="px-4 mb-2 text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest flex items-center gap-2">
+                    {groupName === 'MAIN' && (
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                      </svg>
+                    )}
+                    {groupName === 'EVENTS RECORDS' && (
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    )}
+                    {groupName === 'SETTINGS' && (
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    )}
+                    {groupName}
+                  </p>
+                )}
+                <div className="space-y-1">
+                  {items.map((item) => {
+                    const isActive = checkIsActive(item.path);
+
+                    return (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors group ${isActive
+                          ? 'bg-[#38BDF2] text-[#F2F2F2]'
+                          : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
+                          } ${!desktopSidebarOpen ? 'justify-center border-none' : ''} ml-2`}
+                        title={!desktopSidebarOpen ? item.label : undefined}
+                      >
+                        {item.icon}
+                        {desktopSidebarOpen && <span className="font-bold text-sm tracking-tight">{item.label}</span>}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ));
+          })()}
         </nav>
       </aside>
 
@@ -2330,6 +2376,8 @@ const App: React.FC = () => (
       <Route path="/account-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><Navigate to="/user-settings?tab=account" replace /></RequireRoleRoute>} />
       <Route path="/user/attendees" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><RegistrationsList /></UserPortalLayout></RequireRoleRoute>} />
       <Route path="/user/checkin" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><CheckIn /></UserPortalLayout></RequireRoleRoute>} />
+      <Route path="/user/reports" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerReports /></UserPortalLayout></RequireRoleRoute>} />
+      <Route path="/user/archive" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><ArchiveEvents /></UserPortalLayout></RequireRoleRoute>} />
 
       {/* Admin Portal Routes */}
       <Route path="/dashboard" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.ORGANIZER]}><DashboardWrapper /></RequireRoleRoute>} />
