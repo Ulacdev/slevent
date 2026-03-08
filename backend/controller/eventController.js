@@ -63,7 +63,7 @@ export const listLiveEvents = async (req, res) => {
     const { data: events, error: eventsError } = await supabase
       .from('events')
       .select('*')
-      .in('status', ['LIVE', 'PUBLISHED'])
+      .eq('status', 'PUBLISHED')
       .order('startAt', { ascending: false });
 
     if (eventsError) return res.status(500).json({ error: eventsError.message });

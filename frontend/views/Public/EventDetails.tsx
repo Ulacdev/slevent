@@ -52,7 +52,7 @@ const StreamStatusBanner: React.FC<{ event: Event; isOwner?: boolean }> = ({ eve
   const startAt = event.startAt ? new Date(event.startAt) : null;
   const endAt = event.endAt ? new Date(event.endAt) : null;
   const isLiveByTime = startAt && now >= startAt && (!endAt || now <= endAt);
-  const isLiveStatus = event.status === 'LIVE' || isLiveByTime;
+  const isLiveStatus = isLiveByTime;
   const isOnline = event.locationType === 'ONLINE' || event.locationType === 'HYBRID' || isLiveStatus;
   const url = event.streaming_url || event.locationText || '';
   const normalizedUrl = url && !url.startsWith('http') ? `https://${url}` : url;
@@ -612,7 +612,7 @@ export const EventDetails: React.FC = () => {
                   const startAt = event.startAt ? new Date(event.startAt) : null;
                   const endAt = event.endAt ? new Date(event.endAt) : null;
                   const isLiveByTime = startAt && now >= startAt && (!endAt || now <= endAt);
-                  const isEventLive = event.status === 'LIVE' || isLiveByTime;
+                  const isEventLive = isLiveByTime;
                   return (event.locationType === 'ONLINE' || event.locationType === 'HYBRID' || isEventLive);
                 })() && (
                     <div className="mt-8 pt-8 border-t border-[#2E2E2F]/10">

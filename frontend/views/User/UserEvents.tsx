@@ -123,7 +123,7 @@ export const UserEvents: React.FC = () => {
     const isPersonalProfileReady = !!name?.trim();
     const isOrganizerProfileReady = !!organizerProfile?.organizerId && !!organizerProfile?.organizerName?.trim();
     const canStartCreation = isPersonalProfileReady && isOrganizerProfileReady;
-    const canPublishByTicketRule = initialEventStatus === 'PUBLISHED' || initialEventStatus === 'LIVE' || activeEventTicketCount > 0;
+    const canPublishByTicketRule = initialEventStatus === 'PUBLISHED' || activeEventTicketCount > 0;
     const hasExistingEvents = events.length > 0;
     const hasPublishedEvent = events.some((event) => event.status === 'PUBLISHED');
     const workflowCompletedCount = [
@@ -546,7 +546,7 @@ export const UserEvents: React.FC = () => {
             return;
         }
 
-        const isPublishingTransition = (formData.status === 'PUBLISHED' || formData.status === 'LIVE') && (initialEventStatus !== 'PUBLISHED' && initialEventStatus !== 'LIVE');
+        const isPublishingTransition = (formData.status === 'PUBLISHED') && (initialEventStatus !== 'PUBLISHED');
         if (isPublishingTransition && !canPublishByTicketRule) {
             setWizardStep(4);
             setNotification({ message: 'Add at least one ticket type before publishing this event.', type: 'error' });
@@ -1266,9 +1266,7 @@ export const UserEvents: React.FC = () => {
                                             <option value="PUBLISHED" disabled={!canPublishByTicketRule}>
                                                 {canPublishByTicketRule ? 'Published' : 'Published (Add ticket first)'}
                                             </option>
-                                            <option value="LIVE" disabled={!canPublishByTicketRule}>
-                                                {canPublishByTicketRule ? 'Live Now' : 'Live Now (Add ticket first)'}
-                                            </option>
+                                            
                                             {isEditMode && <option value="CLOSED">Closed</option>}
                                         </select>
                                     </div>
