@@ -2324,8 +2324,26 @@ const RequireRoleRoute: React.FC<{ allow: UserRole[]; children: React.ReactEleme
   return children;
 };
 
+const HashBypassBridge: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // If the browser lands on a non-hash path that matches our success route
+    // (This happens when HitPay/Browsers strip the # part or misinterpret the redirect)
+    if (window.location.pathname === '/subscription/success') {
+      console.log('🔀 [App] Redirecting clean URL to Hash route...');
+      const search = window.location.search;
+      navigate(`/#/subscription/success${search}`, { replace: true });
+    }
+  }, [navigate, location]);
+
+  return null;
+};
+
 const App: React.FC = () => (
   <Router>
+    <HashBypassBridge />
     <Routes>
       <Route path="/login" element={<LoginPerspective />} />
       <Route path="/signup" element={<SignUpView />} />

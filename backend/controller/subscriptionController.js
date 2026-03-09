@@ -112,15 +112,20 @@ const createHitPayPayment = async (amount, currency, organizerName, planName, su
     ? 'https://api.hit-pay.com/v1'
     : 'https://api.sandbox.hit-pay.com/v1';
 
-  const baseUrl = process.env.BACKEND_URL || process.env.SERVER_BASE_URL || 'http://localhost:5000';
-  const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-  const webhookUrl = `${cleanBaseUrl}/api/subscriptions/webhook`;
+  // Determine the base URL dynamically from the request to ensure webhooks return to the right server
+  const proto = req.headers['x-forwarded-proto'] || 'http';
+  const host = req.get('host');
+  const dynamicBaseUrl = `${proto}://${host}`;
 
-  // Use a cleaner redirect URL without the hash for HitPay (we will handle routing in the frontend)
+  const webhookUrl = `${dynamicBaseUrl}/api/subscriptions/webhook`;
+
+  // For the redirect, we need to ensure the HashRouter gets the right path
+  // HitPay sometimes strips hashes, so we'll provide a clean URL and handle it in App.tsx
   const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
-  const redirectUrl = `${frontendUrl}/subscription/success`;
+  const redirectUrl = `${frontendUrl}/#/subscription/success`;
 
-  console.log('📍 [Subscription] Webhook URL for HitPay dashboard:', webhookUrl);
+  console.log('📍 [Subscription] Dynamic Webhook URL:', webhookUrl);
+  console.log('📍 [Subscription] Redirect URL:', redirectUrl);
 
   const payload = {
     amount: amount,
