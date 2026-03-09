@@ -62,7 +62,7 @@ app.use(morgan("dev"));
 
 app.use(cookieParser());
 app.use(
-  "/api/payments/hitpay/webhook",
+  ["/api/payments/hitpay/webhook", "/api/subscriptions/webhook"],
   express.raw({
     type: ["application/json", "application/x-www-form-urlencoded", "*/*"],
     limit: "1mb",

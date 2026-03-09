@@ -390,15 +390,33 @@ export const handleSubscriptionWebhook = async (req, res) => {
     }
 
     // Find subscription
-    const { data: subscription, error } = await supabase
+    // Fallback: Use individual fetch if join fails
+    let { data: subscription, error } = await supabase
       .from('organizersubscriptions')
-      .select('*, plans!inner(*)')
+      .select('*, plans(*)')
       .eq('subscriptionId', reference_id)
-      .single();
+      .maybeSingle();
 
     if (error || !subscription) {
-      console.error('❌ Subscription not found:', reference_id);
-      return res.status(404).json({ error: 'Subscription not found' });
+      // Retry without join
+      const { data: rawSub, error: rawErr } = await supabase
+        .from('organizersubscriptions')
+        .select('*')
+        .eq('subscriptionId', reference_id)
+        .maybeSingle();
+
+      if (rawErr || !rawSub) {
+        console.error('❌ [Subscription Webhook] Subscription not found:', reference_id);
+        return res.status(404).json({ error: 'Subscription not found' });
+      }
+
+      const { data: planData } = await supabase
+        .from('plans')
+        .select('*')
+        .eq('planId', rawSub.planId)
+        .maybeSingle();
+
+      subscription = { ...rawSub, plans: planData };
     }
 
     console.log('📋 [Subscription Webhook] Found subscription:', subscription.subscriptionId, 'Current status:', subscription.status, 'Webhook status:', status);
@@ -412,23 +430,34 @@ export const handleSubscriptionWebhook = async (req, res) => {
         : new Date(now.setMonth(now.getMonth() + 1));
 
       // Update subscription status
-      await supabase
+      const { error: subErr } = await supabase
         .from('organizersubscriptions')
         .update({
           status: 'active',
           endDate: endDate.toISOString(),
+          updated_at: new Date().toISOString()
         })
         .eq('subscriptionId', subscription.subscriptionId);
 
+      if (subErr) {
+        console.error('❌ [Subscription Webhook] DB Error updating subscription:', subErr);
+        return res.status(500).json({ error: 'Failed to update subscription' });
+      }
+
       // Update organizer
-      await supabase
+      const { error: orgErr } = await supabase
         .from('organizers')
         .update({
           currentPlanId: subscription.planId,
           subscriptionStatus: 'active',
           planExpiresAt: endDate.toISOString(),
+          updated_at: new Date().toISOString()
         })
         .eq('organizerId', subscription.organizerId);
+
+      if (orgErr) {
+        console.error('❌ [Subscription Webhook] DB Error updating organizer:', orgErr);
+      }
 
       // Get organizer details for email
       const { data: organizer } = await supabase
@@ -562,13 +591,37 @@ export const verifySubscription = async (req, res) => {
     console.log(`🔍 [Subscription] Verifying status for ${subscriptionId}, userId: ${userId || 'none'}`);
 
     // 1. Get the subscription record
-    const { data: subscription, error: subError } = await supabase
+    // Fallback: If join fails due to relationship issues, we'll fetch manually
+    let { data: subscription, error: subError } = await supabase
       .from('organizersubscriptions')
       .select('*, plan:plans(*)')
       .eq('subscriptionId', subscriptionId)
-      .single();
+      .maybeSingle();
 
-    if (subError || !subscription) {
+    if (subError) {
+      console.error('❌ [Subscription] Primary fetch error:', subError);
+      // Fallback fetch
+      const { data: rawSub, error: rawError } = await supabase
+        .from('organizersubscriptions')
+        .select('*')
+        .eq('subscriptionId', subscriptionId)
+        .maybeSingle();
+
+      if (rawError || !rawSub) {
+        console.error('❌ [Subscription] Fallback fetch failed:', rawError);
+        return res.status(404).json({ error: 'Subscription not found' });
+      }
+
+      const { data: planData } = await supabase
+        .from('plans')
+        .select('*')
+        .eq('planId', rawSub.planId)
+        .maybeSingle();
+
+      subscription = { ...rawSub, plan: planData };
+    }
+
+    if (!subscription) {
       return res.status(404).json({ error: 'Subscription not found' });
     }
 
@@ -622,7 +675,7 @@ export const verifySubscription = async (req, res) => {
       }
 
       // Update subscription
-      await supabase
+      const { error: subUpdateErr } = await supabase
         .from('organizersubscriptions')
         .update({
           status: 'active',
@@ -632,8 +685,13 @@ export const verifySubscription = async (req, res) => {
         })
         .eq('subscriptionId', subscriptionId);
 
+      if (subUpdateErr) {
+        console.error('❌ [Subscription] Failed to update subscription status:', subUpdateErr);
+        throw new Error('Database update failed for subscription');
+      }
+
       // Update organizer
-      await supabase
+      const { error: orgUpdateErr } = await supabase
         .from('organizers')
         .update({
           currentPlanId: subscription.planId,
@@ -642,6 +700,11 @@ export const verifySubscription = async (req, res) => {
           updated_at: new Date().toISOString()
         })
         .eq('organizerId', subscription.organizerId);
+
+      if (orgUpdateErr) {
+        console.error('❌ [Subscription] Failed to update organizer plan:', orgUpdateErr);
+        // We don't throw here to ensure email potentially still goes out if sub is active
+      }
 
       // Get organizer details for email
       const { data: organizer } = await supabase
