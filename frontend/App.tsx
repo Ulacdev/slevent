@@ -2404,9 +2404,9 @@ const HashBypassBridge: React.FC = () => {
     if (window.location.pathname === '/subscription/success') {
       console.log('🔀 [App] Redirecting clean URL to Hash route...');
       const search = window.location.search;
-      navigate(`/#/subscription/success${search}`, { replace: true });
+      navigate(`/subscription/success${search}`, { replace: true });
     }
-  }, [navigate, location]);
+  }, [navigate]);
 
   return null;
 };
