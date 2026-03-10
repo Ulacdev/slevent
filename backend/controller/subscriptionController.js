@@ -1,4 +1,5 @@
 import supabase from '../database/db.js';
+import { randomUUID } from 'crypto';
 import { logAudit } from '../utils/auditLogger.js';
 import { decryptString } from '../utils/encryption.js';
 import { sendSmtpEmail } from '../utils/smtpMailer.js';
@@ -142,6 +143,57 @@ const computeSubscriptionEndDate = (billingInterval) => {
   return endDate;
 };
 
+/**
+ * Helper to record plan purchase in orders, transactions, and audit logs.
+ * This makes it visible to the Admin in their central logs.
+ */
+const recordPlanPurchase = async (subscription, plan, organizer) => {
+  try {
+    const { data: owner } = await supabase
+      .from('users')
+      .select('email')
+      .eq('userId', organizer.ownerUserId)
+      .maybeSingle();
+
+    const orderId = randomUUID();
+    const isPaid = subscription.status === 'active';
+
+    // 1. Record in Orders table
+    await supabase.from('orders').insert({
+      orderId,
+      userId: organizer.ownerUserId,
+      eventId: null,
+      buyerName: organizer.organizerName || 'Organizer',
+      buyerEmail: owner?.email || 'unknown@organizer.com',
+      totalAmount: subscription.priceAmount || 0,
+      currency: subscription.currency || 'PHP',
+      status: isPaid ? 'PAID' : 'PENDING',
+      metadata: {
+        type: 'PLAN_SUBSCRIPTION',
+        subscriptionId: subscription.subscriptionId,
+        planId: plan.planId,
+        planName: plan.name,
+        billingInterval: subscription.billingInterval,
+        isFree: (subscription.priceAmount || 0) === 0
+      }
+    });
+
+    // 2. Record in Transactions table
+    await supabase.from('paymentTransactions').insert({
+      orderId,
+      gateway: { name: 'HITPAY' },
+      amount: subscription.priceAmount || 0,
+      currency: subscription.currency || 'PHP',
+      status: isPaid ? 'SUCCEEDED' : 'PENDING',
+      hitpayReferenceId: subscription.hitPayPaymentId || `PLAN-${subscription.subscriptionId}`
+    });
+
+    console.log(`✅ [Subscription] Recorded plan purchase logic for Admin logs: ${orderId}`);
+  } catch (err) {
+    console.error('❌ [Subscription] Error recording plan purchase logs:', err);
+  }
+};
+
 const fetchSubscriptionWithPlan = async (column, value) => {
   let { data: subscription, error } = await supabase
     .from('organizersubscriptions')
@@ -262,6 +314,9 @@ const activateSubscription = async (subscription) => {
     },
     req: { user: { id: subscription.organizerId } }
   });
+
+  // Record for Admin central logs (Orders & Transactions)
+  await recordPlanPurchase(subscription, planData, organizer);
 
   return endDate;
 };
@@ -633,11 +688,46 @@ export const createSubscription = async (req, res) => {
         })
         .eq('organizerId', organizer.organizerId);
 
-      return res.status(201).json({
-        subscription,
-        plan,
-        free: true
-      });
+      // --- NEW: Send Notifications for Free Plan ---
+      try {
+        const subForNotify = { ...subscription, plans: plan };
+        await sendSubscriptionConfirmationEmail(subForNotify, plan, organizer);
+        await sendAdminSubscriptionNotification(subForNotify, plan, organizer);
+
+        if (organizer.ownerUserId) {
+          await notifyUserByPreference({
+            recipientUserId: organizer.ownerUserId,
+            actorUserId: organizer.ownerUserId,
+            title: 'Free Plan Activated 🎁',
+            message: `Your ${plan.name} plan is now active. Enjoy your free features!`,
+            metadata: { subscriptionId: subscription.subscriptionId, planId: plan.planId, status: 'active', isFree: true }
+          });
+        }
+
+        const { data: adminUser } = await supabase.from('users').select('userId').eq('role', 'ADMIN').limit(1).maybeSingle();
+        if (adminUser?.userId) {
+          await notifyUserByPreference({
+            recipientUserId: adminUser.userId,
+            actorUserId: organizer.ownerUserId || adminUser.userId,
+            title: 'New Free Subscription',
+            message: `${organizer.organizerName || 'An organizer'} signed up for the ${plan.name} (Free).`,
+            metadata: { subscriptionId: subscription.subscriptionId, planId: plan.planId, organizerId: subscription.organizerId, status: 'active' }
+          });
+        }
+
+        await logAudit({
+          actionType: 'FREE_SUBSCRIPTION_ACTIVATED',
+          details: { subscriptionId: subscription.subscriptionId, planId },
+          req
+        });
+
+        // Record for Admin central logs (Orders & Transactions)
+        await recordPlanPurchase(subscription, plan, organizer);
+      } catch (notifyErr) {
+        console.error('⚠️ [Subscription] Error sending free plan notifications:', notifyErr);
+      }
+
+      return res.status(201).json({ subscription, plan, free: true });
     }
 
     // Create pending subscription

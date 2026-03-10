@@ -163,6 +163,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         n.notificationId === notificationId ? { ...n, isRead: true } : n
       ));
       setUnreadCount(prev => Math.max(0, prev - 1));
+      showToast('success', 'Notification marked as read');
     } catch (err) {
       console.error('Failed to mark notification as read:', err);
     }
@@ -174,6 +175,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       await apiService.markAllNotificationsRead();
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
+      showToast('success', 'All notifications marked as read');
     } catch (err) {
       console.error('Failed to mark all notifications as read:', err);
     }
@@ -1721,6 +1723,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
         n.notificationId === notificationId ? { ...n, isRead: true } : n
       ));
       setUnreadCount(prev => Math.max(0, prev - 1));
+      showToast('success', 'Notification marked as read');
     } catch (err) {
       console.error('Failed to mark notification as read:', err);
     }
@@ -1732,6 +1735,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
       await apiService.markAllNotificationsRead();
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
+      showToast('success', 'All notifications marked as read');
     } catch (err) {
       console.error('Failed to mark all notifications as read:', err);
     }

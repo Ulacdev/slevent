@@ -3,6 +3,7 @@ import supabase from '../database/db.js';
 import { sendSmtpEmail } from '../utils/smtpMailer.js'; // Import existing mailer
 import { encryptString, decryptString, maskString } from '../utils/encryption.js';
 import { logAudit } from '../utils/auditLogger.js';
+import { notifyUserByPreference } from '../utils/notificationService.js';
 
 /**
  * Save or Update SMTP settings for the current user (Organizer or Admin)
@@ -43,13 +44,43 @@ export async function updateSmtpSettings(req, res) {
 
         if (error) throw error;
 
-        return res.json({ message: 'Settings updated successfully' });
+        // --- NEW: Notify Admin if an Organizer updates SMTP ---
+        try {
+            const { data: userProfile } = await supabase
+                .from('users')
+                .select('role, email, name')
+                .eq('userId', userId)
+                .maybeSingle();
+
+            if (userProfile && userProfile.role !== 'ADMIN') {
+                const { data: adminUser } = await supabase
+                    .from('users')
+                    .select('userId')
+                    .eq('role', 'ADMIN')
+                    .limit(1)
+                    .maybeSingle();
+
+                if (adminUser?.userId) {
+                    await notifyUserByPreference({
+                        recipientUserId: adminUser.userId,
+                        actorUserId: userId,
+                        title: 'Organizer Updated SMTP 📧',
+                        message: `${userProfile.name || userProfile.email || 'An organizer'} has updated their professional SMTP configuration.`,
+                        metadata: { organizerUserId: userId, type: 'SMTP_UPDATE' }
+                    });
+                }
+            }
+        } catch (nErr) {
+            console.error('Notification failed:', nErr);
+        }
 
         await logAudit({
             actionType: 'SMTP_SETTINGS_UPDATED',
-            details: { userId: req.user?.id },
+            details: { userId },
             req
         });
+
+        return res.json({ message: 'Settings updated successfully' });
     } catch (error) {
         console.error('[Settings] Update failed:', error.message);
         return res.status(500).json({ error: 'Failed to update settings' });
@@ -222,8 +253,9 @@ export async function updateHitPaySettings(req, res) {
 
         if (error) throw error;
 
-        // Return updated masked keys to UI so they know it worked
-        // We need to fetch the newly saved keys
+        // Notification removed as per user request
+
+
         const { data: updatedData } = await supabase.from('settings').select('key, value').eq('user_id', userId).in('key', ['hitpay_api_key', 'hitpay_salt', 'hitpay_enabled', 'hitpay_mode']);
 
         const mapped = {};
@@ -233,6 +265,12 @@ export async function updateHitPaySettings(req, res) {
         const rawSalt = mapped['hitpay_salt'];
         const decryptedApiKey = decryptString(rawApiKey);
         const decryptedSalt = decryptString(rawSalt);
+
+        await logAudit({
+            actionType: 'HITPAY_SETTINGS_UPDATED',
+            details: { userId },
+            req
+        });
 
         return res.json({
             backendReady: true,

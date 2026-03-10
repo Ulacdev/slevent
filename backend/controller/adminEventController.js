@@ -58,6 +58,7 @@ async function resolveOrganizerReadinessForUser(userId) {
       };
     }
 
+    console.log(`🔍 [AdminEvent] Organizer readiness for ${userId}:`, organizer ? 'Found' : 'Missing');
     return { ok: true, organizer };
   } catch (error) {
     return {
@@ -225,40 +226,10 @@ export const createUserEvent = async (req, res) => {
     });
   }
 
-  // 1. Check Max Events Limit (Active)
-  const eventLimit = await checkPlanLimits(organizerCheck.organizer.organizerId, 'max_events');
-  if (!eventLimit.allowed) {
-    return res.status(403).json({
-      error: eventLimit.message,
-      code: 'PLAN_LIMIT_REACHED',
-      limit: eventLimit.limit,
-      current: eventLimit.current
-    });
-  }
+  // Limit checks are bypassed on creation to allow drafting. 
+  // Limits will be enforced when attempting to PUBLISH the event.
+  console.log(`✅ [Event Create] Bypassing plan limits for initial creation for organizer: ${organizerCheck.organizer.organizerId}`);
 
-  // 1b. Check Max Total Events Limit (Lifetime)
-  const totalEventLimit = await checkPlanLimits(organizerCheck.organizer.organizerId, 'max_total_events');
-  if (!totalEventLimit.allowed) {
-    return res.status(403).json({
-      error: totalEventLimit.message,
-      code: 'PLAN_LIMIT_REACHED',
-      limit: totalEventLimit.limit,
-      current: totalEventLimit.current
-    });
-  }
-
-  // 2. Check Capacity Limit
-  const capacityTotal = req.body?.capacityTotal ? Number(req.body.capacityTotal) : 0;
-  if (capacityTotal > 0) {
-    const capacityLimit = await checkPlanLimits(organizerCheck.organizer.organizerId, 'max_attendees_per_event', capacityTotal);
-    if (!capacityLimit.allowed) {
-      return res.status(403).json({
-        error: capacityLimit.message,
-        code: 'PLAN_LIMIT_REACHED',
-        limit: capacityLimit.limit
-      });
-    }
-  }
 
   req.enforceExistingOrganizer = true;
   return createEvent(req, res);
@@ -317,6 +288,29 @@ export const updateUserEvent = async (req, res) => {
       }
 
       try {
+        // --- Plan Limit Enforcement ---
+        // 1. Check Max Events Limit (Active)
+        const eventLimit = await checkPlanLimits(organizerCheck.organizer.organizerId, 'max_events');
+        if (!eventLimit.allowed) {
+          return res.status(403).json({
+            error: eventLimit.message,
+            code: 'PLAN_LIMIT_REACHED',
+            limit: eventLimit.limit,
+            current: eventLimit.current
+          });
+        }
+
+        // 1b. Check Max Total Events Limit (Lifetime)
+        const totalEventLimit = await checkPlanLimits(organizerCheck.organizer.organizerId, 'max_total_events');
+        if (!totalEventLimit.allowed) {
+          return res.status(403).json({
+            error: totalEventLimit.message,
+            code: 'PLAN_LIMIT_REACHED',
+            limit: totalEventLimit.limit,
+            current: totalEventLimit.current
+          });
+        }
+
         const hasTickets = await hasTicketTypesConfigured(id);
         if (!hasTickets) {
           return res.status(422).json({
@@ -325,7 +319,7 @@ export const updateUserEvent = async (req, res) => {
           });
         }
       } catch (ticketError) {
-        return res.status(500).json({ error: ticketError?.message || 'Failed to verify ticket setup' });
+        return res.status(500).json({ error: ticketError?.message || 'Failed to verify setup' });
       }
     }
 
@@ -499,13 +493,17 @@ export const createEvent = async (req, res) => {
       updated_at: new Date().toISOString()
     };
 
+    console.log('🚀 [Event Create] Payload:', JSON.stringify(payload, null, 2));
     const { data, error } = await supabase
       .from('events')
       .insert(payload)
       .select('*')
       .single();
 
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) {
+      console.error('❌ [Event Create] Database error:', error);
+      return res.status(500).json({ error: error.message });
+    }
 
     await logAudit({
       actionType: 'EVENT_CREATED',
@@ -697,6 +695,17 @@ export const listArchivedEvents = async (req, res) => {
 export const publishEvent = async (req, res) => {
   try {
     const { id } = req.params;
+    const { data: event } = await supabase.from('events').select('organizerId, eventName').eq('eventId', id).single();
+    if (event?.organizerId) {
+      const eventLimit = await checkPlanLimits(event.organizerId, 'max_events');
+      if (!eventLimit.allowed) {
+        return res.status(403).json({
+          error: eventLimit.message,
+          code: 'PLAN_LIMIT_REACHED'
+        });
+      }
+    }
+
     const { data, error } = await supabase
       .from('events')
       .update({ status: 'PUBLISHED', updated_at: new Date().toISOString() })

@@ -136,6 +136,15 @@ app.get("/api/cron/cleanup", async (req, res) => {
   }
 });
 
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('🔥 [Global Error]:', err);
+  res.status(500).json({
+    error: err.message || 'Internal Server Error',
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
+});
+
 if (process.env.VERCEL !== "1") {
   const PORT = process.env.BACKEND_PORT || 5000;
   app.listen(PORT, () => {

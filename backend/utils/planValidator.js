@@ -61,7 +61,8 @@ export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 
         const { plan, subscriptionStatus, planExpiresAt } = organizer;
 
         // 1.8. Strict block for new users without a plan selection
-        if (subscriptionStatus === 'pending' || !organizer.currentPlanId) {
+        // 1.8. Relaxed block: Allow creation/drafting even if pending, but block other high-value actions
+        if ((subscriptionStatus === 'pending' || !organizer.currentPlanId) && featureKey !== 'max_events' && featureKey !== 'max_total_events') {
             return {
                 allowed: false,
                 message: "You must choose a plan (free or paid) before you can perform this action. Redirecting to plans page...",
@@ -78,13 +79,13 @@ export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 
 
         // Base defaults
         const defaultLimits = {
-            max_events: 1,
-            max_active_events: 1,
-            max_total_events: 3,
-            max_staff_accounts: 0,
-            monthly_attendees: 100,
-            max_tickets_per_event: 3,
-            max_attendees_per_event: 100
+            max_events: 5,
+            max_active_events: 5,
+            max_total_events: 10,
+            max_staff_accounts: 2,
+            monthly_attendees: 500,
+            max_tickets_per_event: 5,
+            max_attendees_per_event: 500
         };
 
         const defaultFeatures = {
@@ -104,7 +105,7 @@ export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 
             case 'max_events': {
                 const { count, error } = await supabase
                     .from('events')
-                    .select('*', { count: 'exact', head: true })
+                    .select('eventId', { count: 'exact', head: true })
                     .eq('organizerId', organizerId)
                     .eq('is_archived', false);
 
@@ -124,7 +125,7 @@ export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 
             case 'max_total_events': {
                 const { count, error } = await supabase
                     .from('events')
-                    .select('*', { count: 'exact', head: true })
+                    .select('eventId', { count: 'exact', head: true })
                     .eq('organizerId', organizerId);
 
                 if (error) throw error;

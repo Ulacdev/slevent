@@ -251,9 +251,17 @@ export const getEventBySlug = async (req, res) => {
     const identifier = req.params.slug || req.params.id || req.params.identifier;
 
     // 1) Fetch event by slug first, then by eventId if identifier looks like UUID.
+    console.log(`🔍 [Event Slug] Fetching identifier: ${identifier}`);
     const { event, error: eventError } = await fetchEventByIdentifier(identifier);
-    if (eventError) return res.status(500).json({ error: eventError.message });
-    if (!event) return res.status(404).json({ error: 'Event not found' });
+    if (eventError) {
+      console.error('❌ [Event Slug] Fetch identifier error:', eventError);
+      return res.status(500).json({ error: eventError.message });
+    }
+    if (!event) {
+      console.log(`⚠️ [Event Slug] Event not found: ${identifier}`);
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    console.log(`✅ [Event Slug] Found event: ${event.eventId} (${event.eventName})`);
 
     // 2) Fetch ticket types for this event
     const { data: ticketTypes, error: ttError } = await supabase
@@ -262,22 +270,32 @@ export const getEventBySlug = async (req, res) => {
       .eq('status', true)
       .eq('eventId', event.eventId);
 
-    if (ttError) return res.status(500).json({ error: ttError.message });
+    if (ttError) {
+      console.error('❌ [Event Slug] Ticket types error:', ttError);
+      return res.status(500).json({ error: ttError.message });
+    }
 
     // 3) Filter by sales window, attach and return
     const usableTicketTypes = (ticketTypes || []).filter(withinSalesWindow);
+    
+    console.log(`🔍 [Event Slug] Fetching like counts...`);
     const likeCounts = await getEventLikeCountsMap([event.eventId]);
+    
+    console.log(`🔍 [Event Slug] Enriching with organizer...`);
     const [enrichedEvent] = await enrichEventsWithOrganizer([{
       ...event,
       ticketTypes: usableTicketTypes,
       likesCount: likeCounts.get(event.eventId) || 0,
     }]);
+    
+    console.log(`✅ [Event Slug] Success: ${identifier}`);
     return res.json(enrichedEvent || {
       ...event,
       ticketTypes: usableTicketTypes,
       likesCount: likeCounts.get(event.eventId) || 0,
     });
   } catch (err) {
+    console.error('❌ [Event Slug] Error:', err);
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }
 };
