@@ -122,14 +122,14 @@ export const SubscriptionSuccess: React.FC = () => {
 
                         <div className="pt-4 space-y-3">
                             <Button
-                                onClick={() => { window.location.href = '#/user-home'; }}
+                                onClick={() => navigate('/user-home')}
                                 className="w-full py-4 rounded-2xl font-black tracking-widest text-xs"
                             >
                                 GO TO DASHBOARD
                             </Button>
                             <Button
                                 variant="outline"
-                                onClick={() => { window.location.href = '#/subscription'; }}
+                                onClick={() => navigate('/subscription')}
                                 className="w-full py-4 rounded-2xl font-black tracking-widest text-xs border-[#2E2E2F]/10"
                             >
                                 VIEW BILLING

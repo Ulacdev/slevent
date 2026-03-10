@@ -3,6 +3,37 @@ import { logAudit } from '../utils/auditLogger.js';
 import { decryptString } from '../utils/encryption.js';
 import { sendSmtpEmail } from '../utils/smtpMailer.js';
 
+const fetchEmailConfig = async (userId) => {
+  const { data } = await supabase
+    .from('settings')
+    .select('key, value')
+    .eq('user_id', userId)
+    .in('key', [
+      'email_host',
+      'email_port',
+      'email_username',
+      'email_password',
+      'email_encryption',
+      'email_from_address',
+      'email_from_name'
+    ]);
+
+  if (!data || data.length === 0) return null;
+
+  const map = {};
+  data.forEach(item => map[item.key] = item.value);
+
+  return {
+    smtpHost: map['email_host'] || null,
+    smtpPort: map['email_port'] ? Number(map['email_port']) : undefined,
+    smtpUser: map['email_username'] || null,
+    smtpPass: map['email_password'] || null,
+    mailEncryption: map['email_encryption'] || undefined,
+    fromAddress: map['email_from_address'] || map['email_username'] || null,
+    fromName: map['email_from_name'] || 'StartupLab'
+  };
+};
+
 const SUCCESS_PAYMENT_STATUSES = new Set([
   'completed',
   'paid',
@@ -245,10 +276,18 @@ const sendSubscriptionConfirmationEmail = async (subscription, plan, organizer) 
       </div>
     `;
 
+    // Use admin SMTP settings if available
+    const { data: adminUser } = await supabase.from('users').select('userId').eq('role', 'ADMIN').limit(1).maybeSingle();
+    const emailConfig = adminUser?.userId ? await fetchEmailConfig(adminUser.userId) : null;
+    const fromAddress = emailConfig?.fromAddress;
+    const fromName = emailConfig?.fromName || 'StartupLab';
+
     const result = await sendSmtpEmail({
       to: owner.email,
       subject,
-      html
+      html,
+      from: fromAddress ? `${fromName} <${fromAddress}>` : undefined,
+      config: emailConfig || undefined
     });
 
     if (result.ok) {
@@ -274,25 +313,14 @@ const sendAdminSubscriptionNotification = async (subscription, plan, organizer) 
 
     if (!adminUser?.userId) return;
 
-    // Try to use admin email_from settings if present
-    const { data: emailSettings } = await supabase
-      .from('settings')
-      .select('key, value')
-      .eq('user_id', adminUser.userId)
-      .in('key', ['email_from_address', 'email_from_name'])
-      .maybeSingle();
+    const emailConfig = await fetchEmailConfig(adminUser.userId);
 
-    let toEmail = adminUser.email;
-    let fromName = 'StartupLab';
-
-    if (emailSettings) {
-      const map = {};
-      (Array.isArray(emailSettings) ? emailSettings : [emailSettings]).forEach(item => map[item.key] = item.value);
-      toEmail = map['email_from_address'] || toEmail;
-      fromName = map['email_from_name'] || fromName;
-    }
-
+    // Send to admin's primary email; fallback to email_from_address if admin email missing
+    const toEmail = adminUser.email || emailConfig?.fromAddress;
     if (!toEmail) return;
+
+    const fromAddress = emailConfig?.fromAddress || toEmail;
+    const fromName = emailConfig?.fromName || 'StartupLab';
 
     const planName = plan?.name || 'Unknown Plan';
     const amount = subscription.billingInterval === 'yearly'
@@ -319,7 +347,8 @@ const sendAdminSubscriptionNotification = async (subscription, plan, organizer) 
       to: toEmail,
       subject,
       html,
-      fromName
+      from: fromAddress ? `${fromName} <${fromAddress}>` : undefined,
+      config: emailConfig || undefined
     });
   } catch (error) {
     console.error('[Subscription] Error sending admin notification email:', error.message);
