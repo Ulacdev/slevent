@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ICONS } from '../../constants';
 import { apiService } from '../../services/apiService';
 import { AdminPlan } from '../../types';
@@ -115,6 +116,7 @@ export const SubscriptionPlans: React.FC = () => {
   const [editingPlan, setEditingPlan] = useState<AdminPlan | null>(null);
   const [draft, setDraft] = useState<PlanDraft>(defaultDraft);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const loadPlans = async (showLoader = true) => {
     try {
@@ -131,6 +133,18 @@ export const SubscriptionPlans: React.FC = () => {
   useEffect(() => {
     void loadPlans(true);
   }, []);
+
+  // Open the plan modal automatically when ?openPlanModal=1 is present
+  useEffect(() => {
+    const shouldOpen = searchParams.get('openPlanModal');
+    if (shouldOpen) {
+      openAddModal();
+      const cleaned = new URLSearchParams(searchParams);
+      cleaned.delete('openPlanModal');
+      setSearchParams(cleaned, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   useEffect(() => {
     if (!notification) return;

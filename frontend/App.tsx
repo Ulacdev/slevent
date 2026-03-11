@@ -390,7 +390,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     if (!isAuthenticated) return;
     if (!role) return;
     const staffAllowed = ['/events', '/attendees', '/checkin', '/settings'];
-    const adminAllowed = ['/dashboard', '/events', '/attendees', '/checkin', '/settings', '/admin/support'];
+    const adminAllowed = ['/dashboard', '/settings', '/admin/support'];
     const userAllowed = ['/user-home', '/my-events', '/user-settings', '/organizer-settings', '/account-settings', '/user/attendees', '/user/checkin', '/user/archive', '/user/reports', '/user/support', '/dashboard', '/subscription'];
 
     if (role === UserRole.ORGANIZER) {
@@ -434,9 +434,6 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           ]
           : [
             { label: 'Dashboard', path: '/dashboard', icon: <ICONS.Layout className="w-5 h-5" /> },
-            { label: 'Events', path: '/events', icon: <ICONS.Calendar className="w-5 h-5" /> },
-            { label: 'Attendees', path: '/attendees', icon: <ICONS.Users className="w-5 h-5" /> },
-            { label: 'Check-In', path: '/checkin', icon: <ICONS.CheckCircle className="w-5 h-5" /> },
             { label: 'Teams & Access', path: '/settings?tab=team', icon: <ICONS.Users className="w-5 h-5" /> },
             { label: 'Subscription Plans', path: '/settings?tab=plans', icon: <ICONS.Layout className="w-5 h-5" /> },
             { label: 'Email Config', path: '/settings?tab=email', icon: <ICONS.Mail className="w-5 h-5" /> },

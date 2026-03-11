@@ -11,6 +11,8 @@ type Tx = {
   orderId: string;
   eventId?: string;
   eventName?: string;
+  planName?: string;
+  billingInterval?: string;
   buyerName?: string;
   customerName?: string;
   customerEmail?: string;
@@ -21,6 +23,7 @@ type Tx = {
   paymentStatus?: string;
   created_at?: string;
   createdAt?: string;
+  kind?: 'order' | 'subscription';
 };
 
 type OrderSummary = {
@@ -126,6 +129,7 @@ export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [role, setRole] = React.useState<UserRole | null>(null);
   const isStaff = role === UserRole.STAFF;
+  const isAdmin = role === UserRole.ADMIN;
   const basePath = isStaff ? '/staff' : '/admin';
 
 
@@ -788,27 +792,35 @@ export const AdminDashboard: React.FC = () => {
             <div className="text-[#2E2E2F] text-sm">No transactions yet.</div>
           ) : (
             <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1" onScroll={handleTxScroll}>
-              {transactions.map((tx) => (
-                <div
-                  key={tx.orderId}
-                  className="flex gap-3 items-start pb-4 border-b border-[#2E2E2F]/20 last:border-0 cursor-pointer rounded-xl p-2 -m-2 hover:bg-[#38BDF2]/10 transition-colors"
-                  onClick={() => openDetail('transaction', tx.orderId)}
-                >
-                  <div className="w-10 h-10 rounded-full bg-[#F2F2F2] border border-[#2E2E2F]/20 flex items-center justify-center text-[#2E2E2F] flex-shrink-0">
-                    <ICONS.Users className="w-5 h-5" />
+              {transactions.map((tx) => {
+                const isSubscription = tx.kind === 'subscription';
+                const createdLabel = (tx.createdAt || tx.created_at) ? new Date(tx.createdAt || tx.created_at).toLocaleString() : '';
+                return (
+                  <div
+                    key={tx.orderId}
+                    className={`flex gap-3 items-start pb-4 border-b border-[#2E2E2F]/20 last:border-0 rounded-xl p-2 -m-2 hover:bg-[#38BDF2]/10 transition-colors ${isSubscription ? 'cursor-default' : 'cursor-pointer'}`}
+                    onClick={isSubscription ? undefined : () => openDetail('transaction', tx.orderId)}
+                  >
+                    <div className="w-10 h-10 rounded-full bg-[#F2F2F2] border border-[#2E2E2F]/20 flex items-center justify-center text-[#2E2E2F] flex-shrink-0">
+                      {isSubscription ? <ICONS.Layout className="w-5 h-5" /> : <ICONS.Users className="w-5 h-5" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-[#2E2E2F] truncate">
+                        {isSubscription ? (tx.customerName || 'Organizer Plan') : (tx.customerName || tx.buyerName || 'Paid Registration')}
+                      </p>
+                      <p className="text-xs text-[#2E2E2F] truncate">
+                        {isSubscription ? (tx.eventName || 'Plan Purchase') : (tx.eventName || 'Event')} • {createdLabel}
+                      </p>
+                      <span className={`inline-flex text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded mt-2 ${ (tx.paymentStatus || tx.status || '').toUpperCase() === 'PAID' ? 'bg-[#38BDF2]/10 text-[#2E2E2F]' : 'bg-[#F2F2F2] text-[#2E2E2F] border border-[#2E2E2F]/20'}`}>
+                        {isSubscription ? 'PLAN' : (tx.paymentStatus || tx.status || 'PENDING')}
+                      </span>
+                    </div>
+                    <div className="ml-auto text-sm font-bold text-[#2E2E2F] whitespace-nowrap">
+                      {tx.currency || 'PHP'} {Number(tx.amount ?? tx.totalAmount ?? 0).toLocaleString()}
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-[#2E2E2F] hover:text-[#2E2E2F] truncate">{tx.customerName || tx.buyerName || 'Paid Registration'}</p>
-                    <p className="text-xs text-[#2E2E2F] truncate">{tx.eventName || 'Event'} • {(tx.createdAt || tx.created_at) ? new Date(tx.createdAt || tx.created_at).toLocaleString() : ''}</p>
-                    <span className={`inline-flex text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded mt-2 ${(tx.paymentStatus || tx.status) === 'PAID' ? 'bg-[#38BDF2]/10 text-[#2E2E2F]' : 'bg-[#F2F2F2] text-[#2E2E2F] border border-[#2E2E2F]/20'}`}>
-                      {tx.paymentStatus || tx.status || 'PENDING'}
-                    </span>
-                  </div>
-                  <div className="ml-auto text-sm font-bold text-[#2E2E2F] whitespace-nowrap">
-                    {tx.currency || 'PHP'} {Number(tx.amount ?? tx.totalAmount ?? 0).toLocaleString()}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
               {txFetching && !txLoading && (
                 <div className="text-xs text-[#2E2E2F]">Loading more...</div>
               )}
@@ -915,15 +927,17 @@ export const AdminDashboard: React.FC = () => {
 
         <Card className="p-8 flex flex-col items-center justify-center text-center border-dashed border-2 bg-[#F2F2F2] border-[#2E2E2F]/30">
           <div className="w-20 h-20 bg-[#F2F2F2] border border-[#2E2E2F]/20 text-[#2E2E2F] rounded-3xl flex items-center justify-center mb-6">
-            <ICONS.Calendar className="w-10 h-10" />
+            {isAdmin ? <ICONS.Layout className="w-10 h-10" /> : <ICONS.Calendar className="w-10 h-10" />}
           </div>
-          <h3 className="text-xl font-black text-[#2E2E2F] mb-2">New Event?</h3>
-          <p className="text-[#2E2E2F] text-sm max-w-xs mb-8 font-medium">Launch a new workshop or conference to drive organization revenue.</p>
+          <h3 className="text-xl font-black text-[#2E2E2F] mb-2">{isAdmin ? 'New Plan?' : 'New Event?'}</h3>
+          <p className="text-[#2E2E2F] text-sm max-w-xs mb-8 font-medium">
+            {isAdmin ? 'Create or update subscription plans for organizers.' : 'Launch a new workshop or conference to drive organization revenue.'}
+          </p>
           <button
-            onClick={() => navigate(`/events?openModal=true`)}
+            onClick={() => isAdmin ? navigate('/settings?tab=plans&openPlanModal=1') : navigate(`/events?openModal=true`)}
             className="bg-[#38BDF2] text-[#F2F2F2] px-8 py-3 rounded-2xl font-bold hover:bg-[#38BDF2] transition-colors"
           >
-            Create Event
+            {isAdmin ? 'Create Plan' : 'Create Event'}
           </button>
         </Card>
       </div>

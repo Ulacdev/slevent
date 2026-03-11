@@ -353,26 +353,42 @@ export const getRecentTransactions = async (req, res) => {
     console.log(`[Analytics] getRecentTransactions build=${ANALYTICS_BUILD} user=${req.user?.id || 'unknown'} page=${req.query?.page || 1}`);
     const { page, limit, from, to } = resolvePagination(req);
     const filteredEventIds = await getFilteredEventIds(req);
+    const requesterId = req.user?.id || null;
 
-    if (!Array.isArray(filteredEventIds) || filteredEventIds.length === 0) {
+    // Resolve role (default organizer)
+    let userRole = 'ORGANIZER';
+    if (requesterId) {
+      const { data: userRow } = await supabase
+        .from('users')
+        .select('role')
+        .eq('userId', requesterId)
+        .maybeSingle();
+      userRole = normalizeRole(userRow?.role);
+    }
+
+    // For non-admin users, no events means no transactions.
+    if (userRole !== 'ADMIN' && (!Array.isArray(filteredEventIds) || filteredEventIds.length === 0)) {
       return res.json({
-        items: [],
+        transactions: [],
+        total: 0,
         pagination: buildPagination(page, limit, 0)
       });
     }
 
-    const { data, error, count } = await supabase
+    const { data, error, count } = Array.isArray(filteredEventIds) && filteredEventIds.length
+      ? await supabase
       .from('orders')
       .select('orderId, eventId, buyerName, buyerEmail, totalAmount, currency, status, created_at', { count: 'exact' })
       .in('eventId', filteredEventIds)
       .order('created_at', { ascending: false })
-      .range(from, to);
+      .range(from, to)
+      : { data: [], error: null, count: 0 };
 
     if (error) {
       logAnalyticsError('getRecentTransactions.query', error, { requesterId: req.user?.id, page, limit });
       return res.status(500).json({ error: error.message, build: ANALYTICS_BUILD });
     }
-    const total = typeof count === 'number' ? count : 0;
+    const ordersTotal = typeof count === 'number' ? count : 0;
     const items = data || [];
     const eventIds = sanitizeUuidList(items.map(item => item.eventId));
     let eventMap = new Map();
@@ -389,7 +405,7 @@ export const getRecentTransactions = async (req, res) => {
       eventMap = new Map((eventRows || []).map(row => [row.eventId, row.eventName]));
     }
 
-    const enrichedItems = items.map(item => ({
+    const enrichedOrderItems = items.map(item => ({
       orderId: item.orderId,
       eventId: item.eventId,
       customerName: item.buyerName,
@@ -398,11 +414,62 @@ export const getRecentTransactions = async (req, res) => {
       currency: item.currency,
       paymentStatus: item.status,
       createdAt: item.created_at,
-      eventName: eventMap.get(item.eventId) || null
+      eventName: eventMap.get(item.eventId) || null,
+      kind: 'order'
     }));
 
+    // Include organizer subscription purchases for Admin view
+    let subscriptionItems = [];
+    let subscriptionTotal = 0;
+    if (userRole === 'ADMIN') {
+      const { data: subs, error: subsErr, count: subsCount } = await supabase
+        .from('organizersubscriptions')
+        .select('subscriptionId, organizerId, planId, priceAmount, currency, status, billingInterval, created_at, plan:plans(name), organizers:organizers(organizerName, ownerUserId)', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      if (subsErr) {
+        logAnalyticsError('getRecentTransactions.subscriptions', subsErr, { requesterId });
+      } else {
+        subscriptionTotal = typeof subsCount === 'number' ? subsCount : 0;
+        const ownerIds = sanitizeUuidList((subs || []).map(s => s.organizers?.ownerUserId).filter(Boolean));
+        let ownerEmailMap = new Map();
+        if (ownerIds.length) {
+          const { data: owners, error: ownersErr } = await supabase
+            .from('users')
+            .select('userId, email')
+            .in('userId', ownerIds);
+          if (ownersErr) {
+            logAnalyticsError('getRecentTransactions.subscriptions.ownerEmails', ownersErr, { requesterId, ownerCount: ownerIds.length });
+          } else {
+            ownerEmailMap = new Map((owners || []).map(o => [o.userId, o.email]));
+          }
+        }
+
+        subscriptionItems = (subs || []).map(sub => ({
+          orderId: sub.subscriptionId,
+          eventId: null,
+          customerName: sub.organizers?.organizerName || 'Organizer Plan',
+          customerEmail: ownerEmailMap.get(sub.organizers?.ownerUserId) || null,
+          amount: Number(sub.priceAmount || 0),
+          currency: sub.currency || 'PHP',
+          paymentStatus: (sub.status || '').toUpperCase() === 'ACTIVE' ? 'PAID' : (sub.status || '').toUpperCase(),
+          createdAt: sub.created_at,
+          eventName: `Plan: ${sub.plan?.name || 'Subscription'} (${sub.billingInterval || 'interval'})`,
+          kind: 'subscription'
+        }));
+      }
+    }
+
+    // Merge and sort by createdAt desc, then slice to requested page size
+    const combined = [...enrichedOrderItems, ...subscriptionItems].sort((a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    const paged = combined.slice(0, limit);
+    const total = ordersTotal + (subscriptionTotal || 0);
+
     return res.json({
-      transactions: enrichedItems,
+      transactions: paged,
       total: total,
       pagination: buildPagination(page, limit, total)
     });
