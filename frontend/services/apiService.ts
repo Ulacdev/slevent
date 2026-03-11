@@ -899,6 +899,14 @@ export const apiService = {
     return res.json();
   },
 
+  exportEventReport: async (eventId: string): Promise<void> => {
+    window.open(`${API_BASE}/api/analytics/events/${encodeURIComponent(eventId)}/export`, '_blank');
+  },
+
+  exportAllReports: async (): Promise<void> => {
+    window.open(`${API_BASE}/api/analytics/all-events/export`, '_blank');
+  },
+
   // GET /api/tickets/registrations?eventId=...
   getEventRegistrations: async (eventId: string, search = ''): Promise<RegistrationView[]> => {
     const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
@@ -1073,5 +1081,77 @@ export const apiService = {
       credentials: 'include'
     });
     if (!res.ok) throw new Error(`Failed to delete promotion: ${res.status}`);
+  },
+
+  // --- Support API ---
+  submitSupportTicket: async (payload: { subject: string, message: string }): Promise<any> => {
+    const res = await fetch(`${API_BASE}/api/user/support`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.error || `Failed to submit ticket: ${res.status}`);
+    }
+    return await res.json();
+  },
+
+  getAdminSupportTickets: async (): Promise<any[]> => {
+    const res = await fetch(`${API_BASE}/api/admin/support/messages`, {
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error(`Failed to load support tickets: ${res.status}`);
+    return await res.json();
+  },
+
+  resolveSupportTicket: async (ticketId: string): Promise<any> => {
+    const res = await fetch(`${API_BASE}/api/admin/support/${encodeURIComponent(ticketId)}/resolve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error(`Failed to resolve support ticket: ${res.status}`);
+    return await res.json();
+  },
+
+  getMySupportTickets: async (): Promise<any[]> => {
+    const res = await fetch(`${API_BASE}/api/user/support/history`, {
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error(`Failed to load support history: ${res.status}`);
+    return await res.json();
+  },
+
+  getAllSupportMessages: async (): Promise<any[]> => {
+    const res = await fetch(`${API_BASE}/api/admin/support/all-messages`, {
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error(`Failed to load support message logs: ${res.status}`);
+    return await res.json();
+  },
+
+  replyToSupportTicket: async (ticketId: string, message: string): Promise<any> => {
+    const res = await fetch(`${API_BASE}/api/admin/support/${encodeURIComponent(ticketId)}/reply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ message })
+    });
+    if (!res.ok) throw new Error(`Failed to send reply: ${res.status}`);
+    return await res.json();
+  },
+
+  getSupportMessages: async (ticketId: string): Promise<any[]> => {
+    const res = await fetch(`${API_BASE}/api/support/${encodeURIComponent(ticketId)}/messages`, {
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error(`Failed to load support messages: ${res.status}`);
+    return await res.json();
   }
 };

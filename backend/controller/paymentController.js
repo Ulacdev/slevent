@@ -842,6 +842,15 @@ export const hitpayWebhook = async (req, res) => {
 
       if (!existingTickets || existingTickets === 0) {
         let issuedCount = 0
+        const notificationPromises = []
+
+        // 1. Fetch event details ONCE outside the loops
+        const { data: event } = await supabase
+          .from('events')
+          .select('eventName, description, startAt, endAt, locationText, locationType, imageUrl, streamingPlatform, organizerId')
+          .eq('eventId', order.eventId)
+          .maybeSingle()
+
         for (const item of orderItems || []) {
           const { ticketTypeId, quantity } = item
           for (let i = 0; i < quantity; i++) {
@@ -867,7 +876,7 @@ export const hitpayWebhook = async (req, res) => {
                 eventId: order.eventId,
                 ticketTypeId,
                 orderId: order.orderId,
-                attendeeId: attendee.attendeeId,
+                attendeeId: attendee?.attendeeId,
                 ticketCode,
                 qrPayload: ticketCode,
                 status: 'ISSUED'
@@ -880,71 +889,46 @@ export const hitpayWebhook = async (req, res) => {
               actionType: 'TICKET_ISSUED',
               orderId: order.orderId,
               ticketId: ticketData?.ticketId || null,
-              details: {
-                ticketTypeId,
-                source: 'PAID_ORDER'
-              },
+              details: { ticketTypeId, source: 'PAID_ORDER' },
               req
             })
 
             issuedCount += 1
 
-            // fetch event details
-            const { data: event } = await supabase
-              .from('events')
-              .select('eventName, description, startAt, endAt, locationText, locationType, imageUrl, streamingPlatform, organizerId')
-              .eq('eventId', order.eventId)
-              .maybeSingle()
-            // LEGACY: The following Make webhook formerly sent tickets via "robiemail". 
-            // It has been disabled so ONLY the organizer's SMTP config is used.
-            // sendMakeNotification({
-            //   type: 'ticket',
-            //   email: order.buyerEmail,
-            //   name: order.buyerName,
-            //   meta: {
-            //     eventId: order.eventId,
-            //     orderId: order.orderId,
-            //     eventName: event?.eventName || '',
-            //     eventDescription: event?.description || '',
-            //     eventStartAt: event?.startAt ? new Date(event.startAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '',
-            //     eventEndAt: event?.endAt ? new Date(event.endAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '',
-            //     eventLocation: event?.locationText || '',
-            //     locationType: event?.locationType || '',
-            //     eventImageUrl: event?.imageUrl || '',
-            //     streamingPlatform: event?.streamingPlatform || '',
-            //     ticket: { ticketCode, qrPayload: ticketCode, status: 'ISSUED' }
-            //   }
-            // }).catch(() => { })
-
-            // Send direct "Thank You" email and exact Ticket Delivery for EACH purchased ticket
-            try {
-              await notifyUserByPreference({
-                name: order.buyerName,
-                recipientFallbackEmail: order.buyerEmail,
+            // 2. Queue notifications to be sent in parallel
+            const deliveryPromise = notifyUserByPreference({
+              name: order.buyerName,
+              recipientFallbackEmail: order.buyerEmail,
+              eventId: order.eventId,
+              organizerId: event?.organizerId,
+              type: 'TICKET_DELIVERY',
+              title: `Your Ticket Confirmed: ${event?.eventName || 'the event'}!`,
+              message: `Thank you for your order! Your tickets for "${event?.eventName}" are attached below.`,
+              metadata: {
                 eventId: order.eventId,
-                organizerId: event?.organizerId,
-                type: 'TICKET_DELIVERY',
-                title: `Your Ticket Confirmed: ${event?.eventName || 'the event'}!`,
-                message: `Thank you for your order! Your tickets for "${event?.eventName}" are attached below.`,
-                metadata: {
-                  eventId: order.eventId,
-                  orderId: order.orderId,
-                  eventName: event?.eventName || '',
-                  eventDescription: event?.description || '',
-                  eventStartAt: event?.startAt ? new Date(event.startAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '',
-                  eventEndAt: event?.endAt ? new Date(event.endAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '',
-                  eventLocation: event?.locationText || '',
-                  locationType: event?.locationType || '',
-                  eventImageUrl: event?.imageUrl || '',
-                  streamingPlatform: event?.streamingPlatform || '',
-                  ticket: { ticketCode, qrPayload: ticketCode, status: 'ISSUED' }
-                }
-              });
-            } catch (err) {
+                orderId: order.orderId,
+                eventName: event?.eventName || '',
+                eventDescription: event?.description || '',
+                eventStartAt: event?.startAt ? new Date(event.startAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '',
+                eventEndAt: event?.endAt ? new Date(event.endAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '',
+                eventLocation: event?.locationText || '',
+                locationType: event?.locationType || '',
+                eventImageUrl: event?.imageUrl || '',
+                streamingPlatform: event?.streamingPlatform || '',
+                ticket: { ticketCode, qrPayload: ticketCode, status: 'ISSUED' }
+              }
+            }).catch(err => {
               console.error('[Payments] Attendee notification failed:', err.message);
-            }
+            });
+            notificationPromises.push(deliveryPromise);
           }
         }
+
+        // Wait for all notifications to complete (or fail) before responding, or fire-and-forget
+        // Recommending waiting for a few seconds max or fire-and-forget for better UX.
+        // Let's fire-and-forget to keep the webhook response FAST, but we can also wait with Promise.all
+        // Using Promise.all here but since we caught the errors, it won't crash.
+        await Promise.all(notificationPromises);
 
         if (issuedCount > 0) {
           console.log('[Tickets] Issued after payment', { orderId: order.orderId, count: issuedCount })

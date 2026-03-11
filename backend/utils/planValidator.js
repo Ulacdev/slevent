@@ -4,8 +4,9 @@ import supabase from '../database/db.js';
  * Plan Validator Utility
  * Checks organizer's current plan against requested actions (event creation, etc.)
  */
-export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 1) => {
+export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 1, options = {}) => {
     try {
+        const { excludeId } = options;
         let organizerRecord = null;
 
         if (organizerId) {
@@ -103,11 +104,15 @@ export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 
         // 3. Validate specific feature/limit
         switch (featureKey) {
             case 'max_events': {
-                const { count, error } = await supabase
+                let query = supabase
                     .from('events')
                     .select('eventId', { count: 'exact', head: true })
                     .eq('organizerId', organizerId)
                     .eq('is_archived', false);
+                
+                if (excludeId) query = query.neq('eventId', excludeId);
+
+                const { count, error } = await query;
 
                 if (error) throw error;
                 const limitValue = limits.max_active_events ?? limits.max_events ?? 1;
@@ -123,10 +128,14 @@ export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 
             }
 
             case 'max_total_events': {
-                const { count, error } = await supabase
+                let query = supabase
                     .from('events')
                     .select('eventId', { count: 'exact', head: true })
                     .eq('organizerId', organizerId);
+
+                if (excludeId) query = query.neq('eventId', excludeId);
+
+                const { count, error } = await query;
 
                 if (error) throw error;
                 const limitValue = limits.max_total_events ?? 3;

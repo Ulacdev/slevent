@@ -174,22 +174,7 @@ export async function getSmtpConfig(organizerId = null, triggerUserId = null, re
     }
   }
 
-  // Fetch Settings from general settings table if owner resolved
-  if (targetUserId) {
-    const config = await fetchSmtpFromSettingsTable(targetUserId);
-    if (config) {
-      debugLog('✅ [SMTP] Custom general settings loaded.');
-      return config;
-    }
-
-    if (organizerId && String(recipientUserId) === String(targetUserId)) {
-      debugLog(`🚫 [SMTP] Organizer (${targetUserId}) has NO custom settings.`);
-      return null;
-    }
-  }
-
   // 3. FALLBACK: Use the Superadmin SMTP settings (role = 'ADMIN')
-  // This is used for system emails like forgot password, account creation, etc.
   const { data: adminUser } = await supabase
     .from('users')
     .select('userId')
@@ -205,7 +190,6 @@ export async function getSmtpConfig(organizerId = null, triggerUserId = null, re
     }
   }
 
-  // 4. NO SYSTEM FALLBACK - Admin must configure SMTP for system emails
   debugLog('🔍 [SMTP] No admin SMTP config found. System emails require admin SMTP setup.');
   return null;
 }
@@ -217,7 +201,6 @@ export async function getSmtpConfig(organizerId = null, triggerUserId = null, re
 export async function getAdminSmtpConfig() {
   debugLog('🔍 [SMTP] Getting Admin SMTP config for system emails...');
 
-  // Look for any user with ADMIN role
   const { data: adminUser } = await supabase
     .from('users')
     .select('userId')
@@ -267,7 +250,6 @@ async function fetchSmtpFromOrganizerSettings(organizerId) {
  * Helper to fetch from general settings table (legacy/fallback)
  */
 async function fetchSmtpFromSettingsTable(userId) {
-  // Exact keys from the documentation provided
   const keys = [
     'email_provider',
     'email_driver',
@@ -290,7 +272,6 @@ async function fetchSmtpFromSettingsTable(userId) {
 
   const map = new Map(data.map(item => [item.key, item.value]));
 
-  // Ensure minimum keys exist (host and user are required to send)
   if (!map.get('email_host') || !map.get('email_username')) return null;
 
   return {
@@ -376,7 +357,6 @@ async function renderEmailHtml(payload) {
       };
 
       Object.entries(ticketReplacements).forEach(([key, value]) => {
-        // Need to escape the dots in key for regex as it has literal dots like 1.meta.eventName
         const regex = new RegExp(`{{${key.replace(/\./g, '\\.')}}}`, 'g');
         html = html.replace(regex, String(value || ''));
       });
@@ -416,7 +396,6 @@ async function renderEmailHtml(payload) {
       eventName: metadata.eventName || 'the platform',
     };
 
-    // Simple replacement loop
     Object.entries(replacements).forEach(([key, value]) => {
       const regex = new RegExp(`{{${key}}}`, 'g');
       html = html.replace(regex, String(value || ''));
@@ -466,17 +445,14 @@ export async function notifyUserByPreference({
   replyTo,
   fromName,
   fromEmail,
-  smtpConfigOverride, // New parameter to force a specific SMTP config
+  smtpConfigOverride,
 }) {
   if (!recipientUserId && !recipientFallbackEmail) return { inApp: false, email: false };
 
-  // Fetch SMTP config based on professional hierarchy (Organizer -> Superadmin Fallback)
-  // OR use the override if provided (for system emails like password reset)
   let smtpConfig = smtpConfigOverride || null;
 
   if (!smtpConfig) {
     try {
-      // Resolve context using both organizerId and actorUserId (for staff detection)
       smtpConfig = await getSmtpConfig(organizerId, actorUserId, recipientUserId);
       debugLog(`🔍 [Notifications] SMTP Config Resolved: ${smtpConfig ? 'YES' : 'NO'}`);
     } catch (err) {
@@ -486,16 +462,14 @@ export async function notifyUserByPreference({
     debugLog(`🔍 [Notifications] Using SMTP Config Override (Admin SMTP for system emails)`);
   }
 
-  // Auto-generate HTML if not provided but we have a type
   let finalHtml = emailHtml;
   if (!finalHtml && type) {
-    finalHtml = await renderEmailHtml({ type, title, message, metadata });
+    finalHtml = await renderEmailHtml({ type, title, message, metadata, name: recipientFallbackEmail });
   }
 
   let inAppDelivered = false;
   let emailDelivered = false;
 
-  // DELIVER IN-APP (Default Enable)
   if (recipientUserId) {
     try {
       await createInAppNotification({
@@ -515,7 +489,6 @@ export async function notifyUserByPreference({
     }
   }
 
-  // RESOLVE RECIPIENT EMAIL + PREFERENCES
   let finalRecipientEmail = normalizeEmail(recipientFallbackEmail || '');
   let emailEnabled = true;
 
@@ -541,7 +514,6 @@ export async function notifyUserByPreference({
     console.warn('[Notifications] Preferences lookup failed:', prefErr.message);
   }
 
-  // DELIVER EMAIL (If enabled and email resolved)
   if (emailEnabled && finalRecipientEmail) {
     if (organizerId && !smtpConfig) {
       debugLog('🚫 [Notifications] Request explicitly requires organizer email config (no system config fallback for tickets). Email SKIPPED.');
@@ -627,7 +599,6 @@ export async function notifyTeamByPreference(params) {
   // Add staff with specific notifications enabled
   if (staffBatch && !staffErr) {
     for (const member of staffBatch) {
-      // If notification permission is true OR default NULL staff logic
       const canReceive = member.canreceivenotifications === undefined || member.canreceivenotifications === null ? true : !!member.canreceivenotifications;
       if (canReceive) {
         team.push({ userId: member.userId, email: member.email });
@@ -635,8 +606,7 @@ export async function notifyTeamByPreference(params) {
     }
   }
 
-  let results = [];
-  // Ensure unique members logic (no double messaging if owner somehow duplicated in staff array)
+  // Ensure unique members logic
   const uniqueTeam = team.filter((v, i, a) => a.findIndex(t => t.userId === v.userId) === i);
 
   // If the actor is the owner testing the attendee mode, skip notifying the team entirely!
@@ -650,23 +620,22 @@ export async function notifyTeamByPreference(params) {
     return { deliveredTo: 0, success: true };
   }
 
+  // Send notifications to all team members in parallel for performance
+  const teamPromises = [];
   for (const recipient of uniqueTeam) {
-    // Skip notifying the person who triggered the action
-    if (params.actorUserId && String(recipient.userId) === String(params.actorUserId)) {
-      continue;
-    }
-    if (params.actorEmail && recipient.email && String(recipient.email) === String(params.actorEmail)) {
-      continue;
-    }
+    if (params.actorUserId && String(recipient.userId) === String(params.actorUserId)) continue;
+    if (params.actorEmail && recipient.email && String(recipient.email) === String(params.actorEmail)) continue;
 
-    debugLog(`[TeamNotify] Sending to team member: ${recipient.userId}`);
-    const res = await notifyUserByPreference({
-      ...params,
-      recipientUserId: recipient.userId,
-      recipientFallbackEmail: recipient.email,
-    });
-    results.push(res);
+    debugLog(`[TeamNotify] Queueing notification for team member: ${recipient.userId}`);
+    teamPromises.push(
+      notifyUserByPreference({
+        ...params,
+        recipientUserId: recipient.userId,
+        recipientFallbackEmail: recipient.email,
+      })
+    );
   }
 
+  const results = await Promise.all(teamPromises);
   return { deliveredTo: results.length, success: results.some(r => r.inApp || r.email) };
 }

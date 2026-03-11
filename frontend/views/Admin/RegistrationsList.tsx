@@ -130,15 +130,15 @@ export const RegistrationsList: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h1 className="text-4xl font-black text-[#2E2E2F] tracking-tighter">Attendee List</h1>
           <p className="text-[#2E2E2F]/70 font-medium text-sm mt-1">
             Full visibility of confirmed registrations and financial transactions.
           </p>
         </div>
-        <div className="w-full md:w-80">
-          <div className="relative group">
+        <div className="flex w-full md:w-auto gap-3 items-center">
+          <div className="w-full md:w-80 relative group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#2E2E2F]/60">
               <ICONS.Search className="h-4 w-4" strokeWidth={3} />
             </div>
@@ -153,6 +153,16 @@ export const RegistrationsList: React.FC = () => {
               {isFetching && <div className="w-4 h-4 border-2 border-[#2E2E2F]/30 border-t-transparent rounded-full animate-spin" />}
             </div>
           </div>
+          {eventId && (
+            <Button
+              variant="outline"
+              onClick={() => apiService.exportEventReport(eventId)}
+              className="px-4 py-3 rounded-xl font-black text-[10px] whitespace-nowrap hidden sm:flex items-center gap-2"
+            >
+              <ICONS.CreditCard className="w-4 h-4" />
+              Export CSV
+            </Button>
+          )}
         </div>
       </div>
 

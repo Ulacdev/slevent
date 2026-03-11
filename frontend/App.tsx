@@ -28,6 +28,8 @@ import { RegistrationsList } from './views/Admin/RegistrationsList';
 import { CheckIn } from './views/Admin/CheckIn';
 import { ArchiveEvents } from './views/User/ArchiveEvents';
 import { OrganizerReports } from './views/User/OrganizerReports';
+import { OrganizerSupport } from './views/User/OrganizerSupport';
+import { SupportTickets } from './views/Admin/SupportTickets';
 import { SettingsView } from './views/Admin/Settings';
 import { SubscriptionPlans } from './views/Admin/SubscriptionPlans';
 import { LoginPerspective } from './views/Auth/Login';
@@ -349,7 +351,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     const syncSession = async () => {
-      const isPortalRoute = ['/dashboard', '/events', '/attendees', '/checkin', '/settings'].includes(location.pathname);
+      const isPortalRoute = ['/dashboard', '/events', '/attendees', '/checkin', '/settings', '/admin/support'].includes(location.pathname);
       if (!isPortalRoute) return;
 
       try {
@@ -388,8 +390,8 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     if (!isAuthenticated) return;
     if (!role) return;
     const staffAllowed = ['/events', '/attendees', '/checkin', '/settings'];
-    const adminAllowed = ['/dashboard', '/events', '/attendees', '/checkin', '/settings'];
-    const userAllowed = ['/user-home', '/my-events', '/user-settings', '/organizer-settings', '/account-settings', '/user/attendees', '/user/checkin', '/user/archive', '/user/reports', '/dashboard'];
+    const adminAllowed = ['/dashboard', '/events', '/attendees', '/checkin', '/settings', '/admin/support'];
+    const userAllowed = ['/user-home', '/my-events', '/user-settings', '/organizer-settings', '/account-settings', '/user/attendees', '/user/checkin', '/user/archive', '/user/reports', '/user/support', '/dashboard', '/subscription'];
 
     if (role === UserRole.ORGANIZER) {
       if (!userAllowed.includes(location.pathname)) {
@@ -440,6 +442,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             { label: 'Email Config', path: '/settings?tab=email', icon: <ICONS.Mail className="w-5 h-5" /> },
             { label: 'Payment Gateway', path: '/settings?tab=payments', icon: <ICONS.CreditCard className="w-5 h-5" /> },
             { label: 'Profile & Security', path: '/settings?tab=profile', icon: <ICONS.Settings className="w-5 h-5" /> },
+            { label: 'Support Messages', path: '/admin/support', icon: <ICONS.MessageSquare className="w-5 h-5" /> },
           ]
   );
 
@@ -553,14 +556,16 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors group ${isActive
-                  ? 'bg-[#38BDF2] text-[#F2F2F2]'
+                className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group ${isActive
+                  ? 'bg-[#38BDF2] text-[#F2F2F2] shadow-sm'
                   : 'text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
                   } ${!desktopSidebarOpen ? 'justify-center border-none' : ''}`}
                 title={!desktopSidebarOpen ? item.label : undefined}
               >
-                {item.icon}
-                {desktopSidebarOpen && <span className="font-bold text-sm tracking-tight">{item.label}</span>}
+                <div className={`${isActive ? 'scale-110' : 'group-hover:scale-110'} transition-transform duration-200`}>
+                  {item.icon}
+                </div>
+                {desktopSidebarOpen && <span className="font-semibold text-sm tracking-tight">{item.label}</span>}
               </Link>
             );
           })}
@@ -1767,6 +1772,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   }, [location.pathname]);
   const [organizerSidebarLogoUrl, setOrganizerSidebarLogoUrl] = React.useState('');
   const [organizerSidebarName, setOrganizerSidebarName] = React.useState('');
+  const [hasPlanFeature, setHasPlanFeature] = React.useState(false);
 
   const displayName = email?.trim() || name?.trim() || 'User';
   const roleLabel = getRoleLabel(role);
@@ -1832,6 +1838,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
         if (!isMounted) return;
         setOrganizerSidebarLogoUrl(organizer?.profileImageUrl || '');
         setOrganizerSidebarName((organizer?.organizerName || '').trim());
+        setHasPlanFeature(Boolean(organizer?.plan)); // Enable support if they have a plan
       } catch {
         if (isMounted) {
           setOrganizerSidebarLogoUrl('');
@@ -1889,7 +1896,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
     }
   };
 
-  const [expandedSections, setExpandedSections] = React.useState<string[]>(['Main', 'Events Records', 'Settings']);
+  const [expandedSections, setExpandedSections] = React.useState<string[]>(['Main', 'Events Records', 'Settings', 'Communication']);
 
   const toggleSection = (title: string) => {
     setExpandedSections(prev =>
@@ -1918,6 +1925,13 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
       ]
     },
     {
+      title: 'Communication',
+      icon: <ICONS.MessageSquare className="w-5 h-5" />,
+      items: [
+        { label: 'Support center', path: '/user/support', icon: <ICONS.Zap className="w-5 h-5" /> },
+      ]
+    },
+    {
       title: 'Settings',
       icon: <ICONS.Settings className="w-5 h-5" />,
       items: [
@@ -1926,7 +1940,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
         { label: 'Email Setup', path: '/user-settings?tab=email', icon: <ICONS.Mail className="w-5 h-5" /> },
         { label: 'Payment Gateway', path: '/user-settings?tab=payments', icon: <ICONS.CreditCard className="w-5 h-5" /> },
         { label: 'Subscription', path: '/subscription', icon: <ICONS.CreditCard className="w-5 h-5" /> },
-        { label: 'Account', path: '/user-settings?tab=account', icon: <ICONS.Settings className="w-5 h-5" /> },
+        { label: 'Account Settings', path: '/user-settings?tab=account', icon: <ICONS.Settings className="w-5 h-5" /> },
       ]
     }
   ];
@@ -2485,6 +2499,7 @@ const App: React.FC = () => (
       <Route path="/user/checkin" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><CheckIn /></UserPortalLayout></RequireRoleRoute>} />
       <Route path="/user/archive" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><ArchiveEvents /></UserPortalLayout></RequireRoleRoute>} />
       <Route path="/user/reports" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerReports /></UserPortalLayout></RequireRoleRoute>} />
+      <Route path="/user/support" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerSupport /></UserPortalLayout></RequireRoleRoute>} />
       <Route path="/subscription" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerSubscription /></UserPortalLayout></RequireRoleRoute>} />
       <Route path="/subscription/success" element={<PublicLayout><SubscriptionSuccess /></PublicLayout>} />
 
@@ -2493,6 +2508,7 @@ const App: React.FC = () => (
       <Route path="/events" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><EventsManagement /></PortalLayout></RequireRoleRoute>} />
       <Route path="/attendees" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><RegistrationsList /></PortalLayout></RequireRoleRoute>} />
       <Route path="/checkin" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><CheckIn /></PortalLayout></RequireRoleRoute>} />
+      <Route path="/admin/support" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><SupportTickets /></PortalLayout></RequireRoleRoute>} />
       <Route path="/settings" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><SettingsView /></PortalLayout></RequireRoleRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />

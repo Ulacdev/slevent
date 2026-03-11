@@ -11,6 +11,15 @@ import {
   restoreEvent,
   listArchivedEvents
 } from "../controller/adminEventController.js";
+import { 
+  submitSupportTicket, 
+  getAdminSupportTickets, 
+  getMySupportTickets,
+  resolveSupportTicket,
+  replyToSupportTicket,
+  getSupportMessages,
+  getAllSupportMessages
+} from "../controller/supportController.js";
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -45,5 +54,14 @@ router.get('/user/events/archived', authMiddleware, listArchivedEvents);
 
 // POST /user/events/:id/restore - Restore archived event
 router.post('/user/events/:id/restore', authMiddleware, restoreEvent);
+
+// ─── Support System ───
+router.post('/user/support', authMiddleware, submitSupportTicket);
+router.get('/user/support/history', authMiddleware, getMySupportTickets);
+router.get('/admin/support/messages', authMiddleware, getAdminSupportTickets);
+router.get('/admin/support/all-messages', authMiddleware, getAllSupportMessages);
+router.post('/admin/support/:id/resolve', authMiddleware, resolveSupportTicket);
+router.post('/admin/support/:id/reply', authMiddleware, replyToSupportTicket);
+router.get('/support/:id/messages', authMiddleware, getSupportMessages);
 
 export default router;

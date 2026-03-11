@@ -147,7 +147,7 @@ const computeSubscriptionEndDate = (billingInterval) => {
  * Helper to record plan purchase in orders, transactions, and audit logs.
  * This makes it visible to the Admin in their central logs.
  */
-const recordPlanPurchase = async (subscription, plan, organizer) => {
+const recordPlanPurchase = async (subscription, plan, organizer, req = null) => {
   try {
     const { data: owner } = await supabase
       .from('users')
@@ -188,6 +188,22 @@ const recordPlanPurchase = async (subscription, plan, organizer) => {
       hitpayReferenceId: subscription.hitPayPaymentId || `PLAN-${subscription.subscriptionId}`
     });
 
+    // 3. Add to Audit Logs specifically for Plan Purchase
+    await logAudit({
+      actionType: 'PLAN_PURCHASE_RECORDED',
+      actorUserId: organizer.ownerUserId,
+      orderId,
+      details: {
+        planName: plan.name,
+        amount: subscription.priceAmount || 0,
+        currency: subscription.currency || 'PHP',
+        isFree: (subscription.priceAmount || 0) === 0,
+        billingInterval: subscription.billingInterval,
+        organizerId: organizer.organizerId
+      },
+      req
+    });
+
     console.log(`✅ [Subscription] Recorded plan purchase logic for Admin logs: ${orderId}`);
   } catch (err) {
     console.error('❌ [Subscription] Error recording plan purchase logs:', err);
@@ -220,7 +236,7 @@ const fetchSubscriptionWithPlan = async (column, value) => {
   return { ...rawSub, plans: planData };
 };
 
-const activateSubscription = async (subscription) => {
+const activateSubscription = async (subscription, req = null) => {
   const endDate = computeSubscriptionEndDate(subscription.billingInterval);
 
   const { error: subErr } = await supabase
@@ -312,11 +328,12 @@ const activateSubscription = async (subscription) => {
       subscriptionId: subscription.subscriptionId,
       planId: subscription.planId,
     },
-    req: { user: { id: subscription.organizerId } }
+    actorUserId: organizer?.ownerUserId,
+    req
   });
 
   // Record for Admin central logs (Orders & Transactions)
-  await recordPlanPurchase(subscription, planData, organizer);
+  await recordPlanPurchase(subscription, planData, organizer, req);
 
   return endDate;
 };
@@ -722,7 +739,7 @@ export const createSubscription = async (req, res) => {
         });
 
         // Record for Admin central logs (Orders & Transactions)
-        await recordPlanPurchase(subscription, plan, organizer);
+        await recordPlanPurchase(subscription, plan, organizer, req);
       } catch (notifyErr) {
         console.error('⚠️ [Subscription] Error sending free plan notifications:', notifyErr);
       }
@@ -855,7 +872,7 @@ export const handleSubscriptionWebhook = async (req, res) => {
     if (isSuccessfulPaymentStatus(status)) {
       if (subscription.status !== 'active') {
         console.log('✅ [Subscription Webhook] Payment completed, activating subscription...');
-        await activateSubscription(subscription);
+        await activateSubscription(subscription, req);
       }
       return res.json({ success: true, status: 'active' });
     }
@@ -1085,7 +1102,7 @@ export const verifySubscription = async (req, res) => {
 
     if (isSuccessfulPaymentStatus(hitPayStatus)) {
       console.log('✅ [Subscription] Valid payment detected, activating...');
-      await activateSubscription(subscription);
+      await activateSubscription(subscription, req);
       return res.json({ success: true, status: 'active', message: 'Subscription activated' });
     }
 

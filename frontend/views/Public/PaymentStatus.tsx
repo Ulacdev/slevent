@@ -57,7 +57,7 @@ export const PaymentStatusView: React.FC = () => {
     };
 
     checkStatus();
-    pollId = window.setInterval(checkStatus, 5000);
+    pollId = window.setInterval(checkStatus, 2000);
 
     return () => {
       isMounted = false;

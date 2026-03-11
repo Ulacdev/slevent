@@ -636,7 +636,8 @@ export const EventDetails: React.FC = () => {
                         href={organizerWebsite}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-8 py-3 rounded-xl border border-[#2E2E2F]/20 text-[#2E2E2F] font-black text-sm hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors"
+                        className="px-8 py-3 rounded-xl border font-black text-sm transition-colors text-white hover:opacity-90 shadow-md"
+                        style={{ backgroundColor: brandColor, borderColor: brandColor }}
                       >
                         Contact
                       </a>
@@ -653,12 +654,13 @@ export const EventDetails: React.FC = () => {
                       type="button"
                       onClick={handleFollow}
                       disabled={!organizerId}
-                      className={`px-8 py-3 rounded-xl font-black text-sm transition-colors ${following
-                        ? 'bg-[#00E6FF] text-white shadow-[0_0_0_1px_rgba(0,230,255,0.75),0_0_24px_rgba(0,230,255,0.55)]'
-                        : organizerId
-                          ? 'bg-[#00D4FF] text-white shadow-[0_0_0_1px_rgba(0,212,255,0.65),0_0_18px_rgba(0,212,255,0.4)] hover:bg-[#00E6FF]'
-                          : 'bg-[#F2F2F2] text-[#2E2E2F]/40 border border-[#2E2E2F]/20 cursor-not-allowed'
+                      className={`px-8 py-3 rounded-xl font-black text-sm transition-all duration-300 shadow-md ${following
+                        ? 'bg-[#2E2E2F] !text-white opacity-40 cursor-default border-none shadow-none'
+                        : !organizerId 
+                          ? 'bg-[#F2F2F2] !text-[#2E2E2F]/40 border border-[#2E2E2F]/20 cursor-not-allowed shadow-none'
+                          : '!text-white hover:opacity-90 border-none'
                         }`}
+                      style={organizerId && !following ? { backgroundColor: brandColor } : {}}
                     >
                       {following ? 'Following' : 'Follow'}
                     </button>
@@ -871,7 +873,8 @@ export const EventDetails: React.FC = () => {
                 <Button
                   variant="outline"
                   onClick={() => navigate('/browse-events')}
-                  className="rounded-full px-10 border-[#2E2E2F]/10 text-[#2E2E2F] font-black uppercase tracking-widest text-[11px] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]"
+                  className="rounded-full px-10 font-black uppercase tracking-widest text-[11px] hover:opacity-90 !text-white border-none shadow-md"
+                  style={{ backgroundColor: brandColor }}
                 >
                   Explore All Events
                 </Button>

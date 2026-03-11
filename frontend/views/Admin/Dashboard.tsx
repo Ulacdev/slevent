@@ -12,10 +12,15 @@ type Tx = {
   eventId?: string;
   eventName?: string;
   buyerName?: string;
+  customerName?: string;
+  customerEmail?: string;
+  amount?: number;
   totalAmount?: number;
   currency?: string;
   status?: string;
+  paymentStatus?: string;
   created_at?: string;
+  createdAt?: string;
 };
 
 type OrderSummary = {
@@ -153,7 +158,7 @@ export const AdminDashboard: React.FC = () => {
     if (pageToLoad === 1) setTxLoading(true);
     try {
       const data = await apiService.getRecentTransactions(pageToLoad, PAGE_SIZE);
-      const items = data?.items || [];
+      const items = data?.transactions || data?.items || [];
       const pagination = data?.pagination;
       setTransactions(prev => (pageToLoad === 1 ? items : [...prev, ...items]));
       setTxHasMore(Boolean(pagination?.hasMore));
@@ -793,14 +798,14 @@ export const AdminDashboard: React.FC = () => {
                     <ICONS.Users className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-[#2E2E2F] hover:text-[#2E2E2F] truncate">{tx.buyerName || 'Paid Registration'}</p>
-                    <p className="text-xs text-[#2E2E2F] truncate">{tx.eventName || 'Event'} • {tx.created_at ? new Date(tx.created_at).toLocaleString() : ''}</p>
-                    <span className={`inline-flex text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded mt-2 ${tx.status === 'PAID' ? 'bg-[#38BDF2]/10 text-[#2E2E2F]' : 'bg-[#F2F2F2] text-[#2E2E2F] border border-[#2E2E2F]/20'}`}>
-                      {tx.status || 'PENDING'}
+                    <p className="text-sm font-bold text-[#2E2E2F] hover:text-[#2E2E2F] truncate">{tx.customerName || tx.buyerName || 'Paid Registration'}</p>
+                    <p className="text-xs text-[#2E2E2F] truncate">{tx.eventName || 'Event'} • {(tx.createdAt || tx.created_at) ? new Date(tx.createdAt || tx.created_at).toLocaleString() : ''}</p>
+                    <span className={`inline-flex text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded mt-2 ${(tx.paymentStatus || tx.status) === 'PAID' ? 'bg-[#38BDF2]/10 text-[#2E2E2F]' : 'bg-[#F2F2F2] text-[#2E2E2F] border border-[#2E2E2F]/20'}`}>
+                      {tx.paymentStatus || tx.status || 'PENDING'}
                     </span>
                   </div>
                   <div className="ml-auto text-sm font-bold text-[#2E2E2F] whitespace-nowrap">
-                    {tx.currency || 'PHP'} {Number(tx.totalAmount || 0).toLocaleString()}
+                    {tx.currency || 'PHP'} {Number(tx.amount ?? tx.totalAmount ?? 0).toLocaleString()}
                   </div>
                 </div>
               ))}

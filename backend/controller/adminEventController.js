@@ -290,7 +290,7 @@ export const updateUserEvent = async (req, res) => {
       try {
         // --- Plan Limit Enforcement ---
         // 1. Check Max Events Limit (Active)
-        const eventLimit = await checkPlanLimits(organizerCheck.organizer.organizerId, 'max_events');
+        const eventLimit = await checkPlanLimits(organizerCheck.organizer.organizerId, 'max_events', 1, { excludeId: id });
         if (!eventLimit.allowed) {
           return res.status(403).json({
             error: eventLimit.message,
@@ -301,7 +301,7 @@ export const updateUserEvent = async (req, res) => {
         }
 
         // 1b. Check Max Total Events Limit (Lifetime)
-        const totalEventLimit = await checkPlanLimits(organizerCheck.organizer.organizerId, 'max_total_events');
+        const totalEventLimit = await checkPlanLimits(organizerCheck.organizer.organizerId, 'max_total_events', 1, { excludeId: id });
         if (!totalEventLimit.allowed) {
           return res.status(403).json({
             error: totalEventLimit.message,
@@ -718,7 +718,7 @@ export const publishEvent = async (req, res) => {
     const { id } = req.params;
     const { data: event } = await supabase.from('events').select('organizerId, eventName').eq('eventId', id).single();
     if (event?.organizerId) {
-      const eventLimit = await checkPlanLimits(event.organizerId, 'max_events');
+      const eventLimit = await checkPlanLimits(event.organizerId, 'max_events', 1, { excludeId: id });
       if (!eventLimit.allowed) {
         return res.status(403).json({
           error: eventLimit.message,

@@ -363,7 +363,7 @@ export const getRecentTransactions = async (req, res) => {
 
     const { data, error, count } = await supabase
       .from('orders')
-      .select('orderId, eventId, buyerName, totalAmount, currency, status, created_at', { count: 'exact' })
+      .select('orderId, eventId, buyerName, buyerEmail, totalAmount, currency, status, created_at', { count: 'exact' })
       .in('eventId', filteredEventIds)
       .order('created_at', { ascending: false })
       .range(from, to);
@@ -390,12 +390,20 @@ export const getRecentTransactions = async (req, res) => {
     }
 
     const enrichedItems = items.map(item => ({
-      ...item,
+      orderId: item.orderId,
+      eventId: item.eventId,
+      customerName: item.buyerName,
+      customerEmail: item.buyerEmail || null,
+      amount: item.totalAmount,
+      currency: item.currency,
+      paymentStatus: item.status,
+      createdAt: item.created_at,
       eventName: eventMap.get(item.eventId) || null
     }));
 
     return res.json({
-      items: enrichedItems,
+      transactions: enrichedItems,
+      total: total,
       pagination: buildPagination(page, limit, total)
     });
   } catch (err) {
@@ -563,26 +571,34 @@ export const getRecentOrders = async (req, res) => {
 
 export const getAuditLogs = async (req, res) => {
   try {
-    console.log('[getAuditLogs] req.user:', req.user);
-    console.log('[getAuditLogs] req.user?.role:', req.user?.role);
-
     const { page, limit, from, to } = resolvePagination(req);
-    const filteredEventIds = await getFilteredEventIds(req);
-    console.log('[getAuditLogs] filteredEventIds:', filteredEventIds);
+    const requesterId = req.user?.id || null;
+    const requesterEmail = String(req.user?.email || '').toLowerCase().trim();
+
+    // 1. Resolve true role from DB
+    let userProfile = null;
+    if (isUuid(requesterId)) {
+      const { data } = await supabase.from('users').select('userId, role').eq('userId', requesterId).maybeSingle();
+      userProfile = data;
+    }
+    if (!userProfile && requesterEmail) {
+      const { data } = await supabase.from('users').select('userId, role').eq('email', requesterEmail).maybeSingle();
+      userProfile = data;
+    }
+
+    const role = normalizeRole(userProfile?.role);
+    const effectiveUserId = userProfile?.userId || requesterId;
+    const allowedEventIds = (role !== 'ADMIN') ? await getFilteredEventIds(req) : [];
 
     let query = supabase
       .from('auditLogs')
       .select('auditLogId, actionType, orderId, ticketId, paymentTransactionId, webhookEventsId, actorUserId, createdAt', { count: 'exact' });
-    const role = normalizeRole(req.user?.role);
-    console.log('[getAuditLogs] normalized role:', role);
-    const allowedEventIds = filteredEventIds;
 
     // ADMIN role sees ALL audit logs
     if (role === 'ADMIN') {
       const { data, error, count } = await query
         .order('createdAt', { ascending: false })
         .range(from, to);
-      console.log('[getAuditLogs] admin query result:', { data, error, count });
       if (error) return res.status(500).json({ error: error.message });
       const total = typeof count === 'number' ? count : 0;
       return res.json({
@@ -598,9 +614,9 @@ export const getAuditLogs = async (req, res) => {
     const orderIds = (eventOrders || []).map(o => o.orderId);
 
     if (orderIds.length > 0) {
-      query = query.or(`actorUserId.eq.${req.user.id},orderId.in.(${orderIds.join(',')})`);
+      query = query.or(`actorUserId.eq.${effectiveUserId},orderId.in.(${orderIds.join(',')})`);
     } else {
-      query = query.eq('actorUserId', req.user.id);
+      query = query.eq('actorUserId', effectiveUserId);
     }
 
     const { data, error, count } = await query
@@ -615,6 +631,192 @@ export const getAuditLogs = async (req, res) => {
     });
   } catch (err) {
     console.error('[getAuditLogs] error:', err);
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
+
+export const exportEventReport = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    if (!eventId) return res.status(400).json({ error: 'eventId required' });
+
+    // Ensure authorized access to this event
+    const filteredEventIds = await getFilteredEventIds(req);
+    if (!filteredEventIds.includes(eventId)) {
+      return res.status(403).json({ error: 'Not authorized to export this event' });
+    }
+
+    // Load orders
+    const { data: orders, error: orderErr } = await supabase
+      .from('orders')
+      .select('orderId, buyerName, buyerEmail, totalAmount, status, created_at')
+      .eq('eventId', eventId)
+      .eq('status', 'PAID');
+
+    if (orderErr) return res.status(500).json({ error: orderErr.message });
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ error: 'No data to export for this event' });
+    }
+
+    const orderIds = orders.map(o => o.orderId);
+
+    // Load attendees for those orders
+    const { data: attendees, error: attErr } = await supabase
+      .from('attendees')
+      .select('attendeeId, orderId, name, email, company')
+      .in('orderId', orderIds);
+
+    if (attErr) return res.status(500).json({ error: attErr.message });
+
+    // Load ticket info for the attendees
+    const { data: tickets, error: ticketErr } = await supabase
+      .from('tickets')
+      .select('ticketCode, attendeeId, status, issuedAt, ticketTypeId')
+      .in('orderId', orderIds);
+      
+    if (ticketErr) return res.status(500).json({ error: ticketErr.message });
+
+    // Load ticket types
+    const { data: ticketTypes, error: ttErr } = await supabase
+      .from('ticketTypes')
+      .select('ticketTypeId, name, priceAmount')
+      .eq('eventId', eventId);
+
+    if (ttErr) return res.status(500).json({ error: ttErr.message });
+
+    const ticketTypeMap = new Map((ticketTypes || []).map(tt => [tt.ticketTypeId, tt]));
+    const orderMap = new Map((orders || []).map(o => [o.orderId, o]));
+    const ticketMap = new Map((tickets || []).map(t => [t.attendeeId, t]));
+
+    // Construct CSV Data
+    const csvHeaders = ['Attendee Name', 'Attendee Email', 'Company', 'Ticket Code', 'Ticket Type', 'Ticket Price', 'Ticket Status', 'Order Purchase Date'];
+    let csvRows = [csvHeaders.join(',')];
+
+    for (const attendee of (attendees || [])) {
+      const order = orderMap.get(attendee.orderId);
+      const ticket = ticketMap.get(attendee.attendeeId);
+      const ticketType = ticket ? ticketTypeMap.get(ticket.ticketTypeId) : null;
+      
+      const row = [
+        `"${(attendee.name || '').replace(/"/g, '""')}"`,
+        `"${(attendee.email || '').replace(/"/g, '""')}"`,
+        `"${(attendee.company || '').replace(/"/g, '""')}"`,
+        `"${(ticket?.ticketCode || '')}"`,
+        `"${(ticketType?.name || 'Unknown').replace(/"/g, '""')}"`,
+        ticketType?.priceAmount || 0,
+        `"${(ticket?.status || 'UNKNOWN')}"`,
+        `"${order?.created_at ? new Date(order.created_at).toISOString() : ''}"`
+      ];
+      csvRows.push(row.join(','));
+    }
+
+    const csvContent = csvRows.join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="event_report_${eventId}.csv"`);
+    return res.status(200).send(csvContent);
+
+  } catch (err) {
+    console.error('[exportEventReport] error:', err);
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
+
+export const exportAllReports = async (req, res) => {
+  try {
+    // Ensure authorized access
+    const filteredEventIds = await getFilteredEventIds(req);
+    
+    if (!filteredEventIds || filteredEventIds.length === 0) {
+      return res.status(404).json({ error: 'No data to export' });
+    }
+
+    // Load orders
+    const { data: orders, error: orderErr } = await supabase
+      .from('orders')
+      .select('orderId, buyerName, buyerEmail, totalAmount, status, created_at, eventId')
+      .in('eventId', filteredEventIds)
+      .eq('status', 'PAID');
+
+    if (orderErr) return res.status(500).json({ error: orderErr.message });
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ error: 'No data to export' });
+    }
+
+    const orderIds = orders.map(o => o.orderId);
+
+    // Load events for names
+    const { data: events, error: evErr } = await supabase
+      .from('events')
+      .select('eventId, eventName')
+      .in('eventId', filteredEventIds);
+
+    if (evErr) return res.status(500).json({ error: evErr.message });
+
+    const eventMap = new Map((events || []).map(e => [e.eventId, e.eventName]));
+
+    // Load attendees for those orders
+    const { data: attendees, error: attErr } = await supabase
+      .from('attendees')
+      .select('attendeeId, orderId, name, email, company')
+      .in('orderId', orderIds);
+
+    if (attErr) return res.status(500).json({ error: attErr.message });
+
+    // Load ticket info for the attendees
+    const { data: tickets, error: ticketErr } = await supabase
+      .from('tickets')
+      .select('ticketCode, attendeeId, status, issuedAt, ticketTypeId')
+      .in('orderId', orderIds);
+      
+    if (ticketErr) return res.status(500).json({ error: ticketErr.message });
+
+    // Load ticket types
+    const { data: ticketTypes, error: ttErr } = await supabase
+      .from('ticketTypes')
+      .select('ticketTypeId, name, priceAmount')
+      .in('eventId', filteredEventIds);
+
+    if (ttErr) return res.status(500).json({ error: ttErr.message });
+
+    const ticketTypeMap = new Map((ticketTypes || []).map(tt => [tt.ticketTypeId, tt]));
+    const orderMap = new Map((orders || []).map(o => [o.orderId, o]));
+    const ticketMap = new Map((tickets || []).map(t => [t.attendeeId, t]));
+
+    // Construct CSV Data
+    const csvHeaders = ['Event', 'Attendee Name', 'Attendee Email', 'Company', 'Ticket Code', 'Ticket Type', 'Ticket Price', 'Ticket Status', 'Order Purchase Date'];
+    let csvRows = [csvHeaders.join(',')];
+
+    for (const attendee of (attendees || [])) {
+      const order = orderMap.get(attendee.orderId);
+      const ticket = ticketMap.get(attendee.attendeeId);
+      const ticketType = ticket ? ticketTypeMap.get(ticket.ticketTypeId) : null;
+      const eventName = order ? eventMap.get(order.eventId) : 'Unknown';
+      
+      const row = [
+        `"${(eventName || 'Unknown').replace(/"/g, '""')}"`,
+        `"${(attendee.name || '').replace(/"/g, '""')}"`,
+        `"${(attendee.email || '').replace(/"/g, '""')}"`,
+        `"${(attendee.company || '').replace(/"/g, '""')}"`,
+        `"${(ticket?.ticketCode || '')}"`,
+        `"${(ticketType?.name || 'Unknown').replace(/"/g, '""')}"`,
+        ticketType?.priceAmount || 0,
+        `"${(ticket?.status || 'UNKNOWN')}"`,
+        `"${order?.created_at ? new Date(order.created_at).toISOString() : ''}"`
+      ];
+      csvRows.push(row.join(','));
+    }
+
+    const csvContent = csvRows.join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="all_events_report.csv"`);
+    return res.status(200).send(csvContent);
+
+  } catch (err) {
+    console.error('[exportAllReports] error:', err);
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }
 };

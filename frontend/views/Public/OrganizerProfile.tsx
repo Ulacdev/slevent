@@ -238,12 +238,12 @@ export const OrganizerProfilePage: React.FC = () => {
                                 {/* Social Connectivity */}
                                 <div className="flex items-center gap-3 pt-4">
                                     {organizer.facebookId && (
-                                        <a href={`https://facebook.com/${organizer.facebookId}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F] flex items-center justify-center hover:bg-[#38BDF2] hover:text-white transition-all">
+                                        <a href={`https://facebook.com/${organizer.facebookId}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl flex items-center justify-center text-white transition-all hover:opacity-80 shadow-sm" style={{ backgroundColor: brandColor }}>
                                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
                                         </a>
                                     )}
                                     {organizer.twitterHandle && (
-                                        <a href={`https://twitter.com/${organizer.twitterHandle}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F] flex items-center justify-center hover:bg-[#38BDF2] hover:text-white transition-all">
+                                        <a href={`https://twitter.com/${organizer.twitterHandle}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl flex items-center justify-center text-white transition-all hover:opacity-80 shadow-sm" style={{ backgroundColor: brandColor }}>
                                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
                                         </a>
                                     )}
@@ -254,10 +254,11 @@ export const OrganizerProfilePage: React.FC = () => {
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={handleFollow}
-                                    className={`flex items-center gap-2 px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-300 shadow-xl ${following
-                                        ? 'bg-[#2E2E2F] text-white opacity-40 cursor-default border-none shadow-none'
-                                        : 'bg-[#38BDF2] text-white hover:bg-black hover:shadow-2xl hover:shadow-[#38BDF2]/20 border-none'
+                                    className={`flex items-center gap-2 px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-300 shadow-md ${following
+                                        ? 'bg-[#2E2E2F] !text-white opacity-40 cursor-default border-none shadow-none'
+                                        : '!text-white hover:opacity-90 border-none hover:shadow-lg'
                                         }`}
+                                    style={!following ? { backgroundColor: brandColor } : {}}
                                 >
                                     {following ? <ICONS.CheckCircle className="w-4 h-4" /> : <ICONS.Users className="w-4 h-4" />}
                                     {following ? 'Following' : 'Follow Organizer'}
@@ -267,7 +268,8 @@ export const OrganizerProfilePage: React.FC = () => {
                                         if (organizer.websiteUrl) window.open(organizer.websiteUrl, '_blank');
                                         else setInteractionNotice('No contact method specified.');
                                     }}
-                                    className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-[#F2F2F2] border border-[#2E2E2F]/10 text-[#2E2E2F] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-[#2E2E2F] hover:text-white transition-all shadow-md active:scale-95"
+                                    className="flex items-center gap-2 px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-md active:scale-95 text-white hover:opacity-90"
+                                    style={{ backgroundColor: brandColor }}
                                 >
                                     <ICONS.Mail className="w-4 h-4" />
                                     Contact

@@ -6,7 +6,9 @@ import {
   getAuditLogs,
   getTransactionDetail,
   getOrderDetail,
-  getAuditLogDetail
+  getAuditLogDetail,
+  exportEventReport,
+  exportAllReports
 } from '../controller/analyticsController.js';
 import {authMiddleware} from '../middleware/auth.js';
 const router = express.Router();
@@ -18,5 +20,7 @@ router.get('/analytics/orders', authMiddleware, getRecentOrders);
 router.get('/analytics/orders/:orderId', authMiddleware, getOrderDetail);
 router.get('/analytics/audit-logs', authMiddleware, getAuditLogs);
 router.get('/analytics/audit-logs/:auditLogId', authMiddleware, getAuditLogDetail);
+router.get('/analytics/events/:eventId/export', authMiddleware, exportEventReport);
+router.get('/analytics/all-events/export', authMiddleware, exportAllReports);
 
 export default router;

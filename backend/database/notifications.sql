@@ -13,7 +13,13 @@ create table if not exists public.notifications (
   metadata jsonb not null default '{}'::jsonb,
   is_read boolean not null default false,
   created_at timestamptz not null default now(),
-  read_at timestamptz null
+  read_at timestamptz null,
+  constraint notifications_recipient_user_id_fkey
+    foreign key (recipient_user_id) references public.users("userId") on delete cascade,
+  constraint notifications_actor_user_id_fkey
+    foreign key (actor_user_id) references public.users("userId") on delete set null,
+  constraint notifications_organizer_id_fkey
+    foreign key (organizer_id) references public.organizers("organizerId") on delete set null
 );
 
 create index if not exists idx_notifications_recipient_created

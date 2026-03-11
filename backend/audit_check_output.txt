@@ -1,0 +1,13 @@
+﻿[dotenv@17.2.3] injecting env (17) from .env -- tip: ≡ƒöæ add access controls to secrets: https://dotenvx.com/ops
+Total Audit Logs: 598
+Recent Audit Logs:
+[2026-03-11T02:25:19.878894+00:00] FREE_SUBSCRIPTION_ACTIVATED: {"planId":"233b814d-1dec-4592-9953-5d8fd26f965d","subscriptionId":"e771725b-111f-4bb6-96ad-d2cf3966a1ca"}
+[2026-03-11T02:25:04.069825+00:00] SUBSCRIPTION_CANCELLED_IMMEDIATE: {"subscriptionId":"49594b41-0168-4520-9f42-f05b4c401da7"}
+[2026-03-11T02:15:31.504459+00:00] SUBSCRIPTION_ACTIVATED: {"planId":"93c3cfb1-2fa8-4bf0-932e-64978a3372f0","subscriptionId":"49594b41-0168-4520-9f42-f05b4c401da7"}
+[2026-03-11T02:14:25.288827+00:00] SUBSCRIPTION_INITIATED: {"planId":"93c3cfb1-2fa8-4bf0-932e-64978a3372f0","organizerId":"b91d0a85-8d37-42be-96b4-8a92a1da2f75","subscriptionId":"49594b41-0168-4520-9f42-f05b4c401da7","billingInterval":"monthly"}
+[2026-03-11T02:14:25.20564+00:00] SUBSCRIPTION_INITIATED: {"planId":"93c3cfb1-2fa8-4bf0-932e-64978a3372f0","organizerId":"b91d0a85-8d37-42be-96b4-8a92a1da2f75","subscriptionId":"10b25ab8-fec7-4be7-a458-5d9ef3b17a5f","billingInterval":"monthly"}
+[2026-03-11T02:14:14.73777+00:00] HITPAY_SETTINGS_UPDATED: {"userId":"d6e6eeaa-c793-44bd-8698-c42044cb0fb1"}
+[2026-03-11T02:14:02.535604+00:00] SUBSCRIPTION_CANCELLED_IMMEDIATE: {"subscriptionId":"bff0ff5f-4f2f-41a8-afc9-74470489d10f"}
+[2026-03-11T02:13:42.090858+00:00] SUBSCRIPTION_ACTIVATED: {"planId":"93c3cfb1-2fa8-4bf0-932e-64978a3372f0","subscriptionId":"bff0ff5f-4f2f-41a8-afc9-74470489d10f"}
+[2026-03-11T02:12:32.404064+00:00] HITPAY_SETTINGS_UPDATED: {"userId":"d6e6eeaa-c793-44bd-8698-c42044cb0fb1"}
+[2026-03-11T02:11:03.996602+00:00] SUBSCRIPTION_INITIATED: {"planId":"93c3cfb1-2fa8-4bf0-932e-64978a3372f0","organizerId":"b91d0a85-8d37-42be-96b4-8a92a1da2f75","subscriptionId":"bff0ff5f-4f2f-41a8-afc9-74470489d10f","billingInterval":"monthly"}

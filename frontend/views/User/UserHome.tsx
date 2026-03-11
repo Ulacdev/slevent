@@ -6,6 +6,7 @@ import { apiService } from '../../services/apiService';
 import { Event, TicketType, EventStatus } from '../../types';
 import { Card, Button, Modal, Input } from '../../components/Shared';
 import { OnsiteLocationAssistant } from '../../components/OnsiteLocationAssistant';
+import { PlanUpgradeModal } from '../../components/PlanUpgradeModal';
 import { ICONS } from '../../constants';
 
 const getImageUrl = (img: any): string => {
@@ -47,6 +48,7 @@ export const UserHome: React.FC = () => {
     const [stats, setStats] = useState({ liveEventsCount: 0, ticketsSold: 0 });
     const [loadingStats, setLoadingStats] = useState(true);
     const [organizerProfile, setOrganizerProfile] = useState<any>(null);
+    const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
     React.useEffect(() => {
         const fetchData = async () => {
@@ -62,6 +64,11 @@ export const UserHome: React.FC = () => {
                     ticketsSold: analytics.totalRegistrations || 0
                 });
                 setOrganizerProfile(organizer);
+
+                const hideModal = localStorage.getItem('hideUpgradeModal');
+                if (!hideModal) {
+                    setIsUpgradeModalOpen(true);
+                }
             } catch (err) {
                 console.error('Failed to fetch stats:', err);
             } finally {
@@ -368,6 +375,16 @@ export const UserHome: React.FC = () => {
                     </div>
                 </form>
             </Modal>
+            <PlanUpgradeModal
+                isOpen={isUpgradeModalOpen}
+                onClose={() => setIsUpgradeModalOpen(false)}
+                organizerName={organizerProfile?.organizerName || ''}
+                onSubscribeSuccess={() => {
+                    setNotification({ message: 'Plan upgraded successfully!', type: 'success' });
+                    // Refresh data after upgrade
+                    setTimeout(() => window.location.reload(), 1500);
+                }}
+            />
         </div>
     );
 };

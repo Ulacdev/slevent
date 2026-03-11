@@ -300,7 +300,8 @@ export const createOrder = async (req, res) => {
         .select('eventName, description, startAt, endAt, locationText, locationType, imageUrl, streamingPlatform, organizerId')
         .eq('eventId', eventId)
         .maybeSingle();
-      for (const t of issuedTickets) {
+      // Send all ticket notifications in parallel for speed
+      const ticketNotifyPromises = issuedTickets.map(t => {
         const notificationPayload = {
           type: 'ticket',
           email: buyerEmail,
@@ -319,28 +320,25 @@ export const createOrder = async (req, res) => {
             ticket: t
           }
         };
-        // LEGACY: The Maker webhook formerly sent tickets via "robiemail". Disabled.
-        console.log('[MakeWebhook] Skipping Send - only using Organizer SMTP:', notificationPayload.type);
-        // sendMakeNotification(notificationPayload).catch(() => { });
 
-        // NEW: Notify Attendee directly via SMTP with ACTUAL TICKET format
-        try {
-          await notifyUserByPreference({
-            name: buyerName, // Needed for ticket templating
-            recipientFallbackEmail: buyerEmail,
-            eventId,
-            organizerId: event?.organizerId,
-            type: 'TICKET_DELIVERY',
-            title: `Your Ticket Confirmed: ${event?.eventName || 'the event'}!`,
-            message: `Thank you for registering! Your tickets for "${event?.eventName}" are attached below.`,
-            metadata: {
-              ...notificationPayload.meta // Injects all the make.com properties to match the ticket template variables
-            }
-          });
-        } catch (err) {
+        return notifyUserByPreference({
+          name: buyerName,
+          recipientFallbackEmail: buyerEmail,
+          eventId,
+          organizerId: event?.organizerId,
+          type: 'TICKET_DELIVERY',
+          title: `Your Ticket Confirmed: ${event?.eventName || 'the event'}!`,
+          message: `Thank you for registering! Your tickets for "${event?.eventName}" are attached below.`,
+          metadata: {
+            ...notificationPayload.meta
+          }
+        }).catch(err => {
           console.error('[Orders] Attendee notification failed:', err.message);
-        }
-      }
+        });
+      });
+
+      await Promise.all(ticketNotifyPromises);
+
 
       // Notify Organizer about New Free Order
       try {
