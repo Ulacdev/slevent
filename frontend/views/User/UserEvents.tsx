@@ -38,11 +38,26 @@ const MobilePreviewIcon: React.FC<any> = (props) => (
     </svg>
 );
 
+const LaptopPreviewIcon: React.FC<any> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <rect x="4" y="4" width="16" height="11" rx="2" />
+        <path d="M2 19h20l-2-4H4l-2 4z" />
+    </svg>
+);
+
 const DesktopPreviewIcon: React.FC<any> = (props) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-        <rect x="3" y="4" width="18" height="12" rx="2" />
-        <line x1="12" y1="16" x2="12" y2="20" />
-        <line x1="8" y1="20" x2="16" y2="20" />
+        <rect x="2" y="3" width="20" height="14" rx="2" />
+        <path d="M8 21h8" />
+        <path d="M12 17v4" />
+    </svg>
+);
+
+const MoreVerticalIcon: React.FC<any> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+        <circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none" />
+        <circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none" />
     </svg>
 );
 
@@ -88,6 +103,8 @@ export const UserEvents: React.FC = () => {
     const [attendees, setAttendees] = useState<RegistrationView[]>([]);
     const [organizerProfile, setOrganizerProfile] = useState<OrganizerProfile | null>(null);
     const [organizerLoading, setOrganizerLoading] = useState(true);
+    const [hitpaySettings, setHitpaySettings] = useState<any>(null);
+    const [hitpayLoading, setHitpayLoading] = useState(true);
     const [deleteConfirm, setDeleteConfirm] = useState<Event | null>(null);
     const [wizardStep, setWizardStep] = useState<EventSetupStep>(1);
     const [initialEventStatus, setInitialEventStatus] = useState<EventStatus>('DRAFT');
@@ -114,6 +131,13 @@ export const UserEvents: React.FC = () => {
     const [promotedEventsMap, setPromotedEventsMap] = useState<Record<string, { promoted: boolean; remainingDays?: number }>>({});
     const [promotionQuota, setPromotionQuota] = useState<{ used: number; limit: number; canPromote: boolean } | null>(null);
     const [togglingPromotionId, setTogglingPromotionId] = useState<string | null>(null);
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const handleGlobalClick = () => setOpenDropdownId(null);
+        window.addEventListener('click', handleGlobalClick);
+        return () => window.removeEventListener('click', handleGlobalClick);
+    }, []);
 
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -144,6 +168,7 @@ export const UserEvents: React.FC = () => {
     const [formData, setFormData] = useState(initialFormData);
     const isPersonalProfileReady = !!name?.trim();
     const isOrganizerProfileReady = !!organizerProfile?.organizerId && !!organizerProfile?.organizerName?.trim();
+    const isPaymentReady = !!hitpaySettings?.settings?.isConfigured;
     const isSubscriptionReady = !!organizerProfile?.currentPlanId && organizerProfile?.subscriptionStatus !== 'pending';
     const canStartCreation = isPersonalProfileReady && isOrganizerProfileReady;
     const canPublishByTicketRule = initialEventStatus === 'PUBLISHED' || activeEventTicketCount > 0;
@@ -152,6 +177,7 @@ export const UserEvents: React.FC = () => {
     const workflowCompletedCount = [
         isPersonalProfileReady,
         isOrganizerProfileReady,
+        isPaymentReady,
         hasExistingEvents,
         hasPublishedEvent,
     ].filter(Boolean).length;
@@ -188,14 +214,14 @@ export const UserEvents: React.FC = () => {
         });
     })();
     const previewAccentColor = (organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) ? formData.brandColor || '#38BDF2' : '#38BDF2';
-    const hasPreviewPhysicalLocation = !!formData.location.trim();
-    const previewMapEmbedUrl = hasPreviewPhysicalLocation
-        ? `https://maps.google.com/maps?q=${encodeURIComponent(formData.location.trim())}&z=15&output=embed`
-        : '';
-    const previewOpenMapUrl = hasPreviewPhysicalLocation
+    const hasPreviewPhysicalLocation = formData.locationType !== 'ONLINE' && !!formData.location?.trim();
+    const previewMapEmbedUrl = (formData.location && import.meta.env.VITE_GOOGLE_MAPS_API_KEY)
+        ? `https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(formData.location)}`
+        : formData.location ? `https://maps.google.com/maps?q=${encodeURIComponent(formData.location.trim())}&z=15&output=embed` : '';
+    const previewOpenMapUrl = formData.location
         ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(formData.location.trim())}`
         : '';
-    const organizerPreviewInitial = (organizerProfile?.organizerName || 'O').charAt(0).toUpperCase();
+    const organizerPreviewInitial = (organizerProfile?.organizerName || name || 'O').charAt(0).toUpperCase();
 
     const fetchEvents = async (searchValue = debouncedSearch) => {
         const requestId = ++requestIdRef.current;
@@ -431,7 +457,20 @@ export const UserEvents: React.FC = () => {
             }
         };
 
+        const fetchHitpaySettings = async () => {
+            try {
+                setHitpayLoading(true);
+                const data = await apiService.getHitPaySettings('organizer');
+                if (isMounted) setHitpaySettings(data);
+            } catch {
+                if (isMounted) setHitpaySettings(null);
+            } finally {
+                if (isMounted) setHitpayLoading(false);
+            }
+        };
+
         fetchOrganizerProfile();
+        fetchHitpaySettings();
         return () => {
             isMounted = false;
         };
@@ -737,6 +776,7 @@ export const UserEvents: React.FC = () => {
         setFormData(nextData);
     };
 
+
     return (
         <div className="space-y-0">
             {notification && (
@@ -889,12 +929,12 @@ export const UserEvents: React.FC = () => {
                                     className="p-5 border-[#2E2E2F]/10 hover:border-[#38BDF2]/40 transition-colors cursor-pointer"
                                     onClick={() => handleOpenEdit(event)}
                                 >
-                                    <div className="flex items-start gap-4">
+                                    <div className="flex items-center gap-4">
                                         <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-[#2E2E2F]/10">
                                             <img src={getImageUrl(event.imageUrl)} alt="" className="w-full h-full object-cover" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex flex-wrap items-center gap-2 mb-2">
                                                 {(() => {
                                                     const now = new Date();
                                                     const eventEnd = event.endAt ? new Date(event.endAt) : new Date(new Date(event.startAt).getTime() + 2 * 60 * 60 * 1000);
@@ -918,90 +958,81 @@ export const UserEvents: React.FC = () => {
                                                     </Badge>
                                                 )}
                                             </div>
-                                            <span className="text-[10px] font-medium text-[#2E2E2F]/40 truncate">
-                                                ID: {event.eventId.split('-')[0]}
-                                            </span>
-                                            <h3 className="font-bold text-[#2E2E2F] text-base truncate mb-2 mt-2">
-                                                {event.eventName}
-                                            </h3>
-                                            <div className="space-y-1.5">
-                                                <div className="flex items-center gap-2 text-[12px] text-[#2E2E2F]/60 font-medium">
-                                                    <ICONS.Calendar className="w-3.5 h-3.5 text-[#38BDF2]" />
+                                            <div className="mb-2">
+                                                <span className="text-[10px] font-medium text-[#2E2E2F]/40 truncate group-hover:text-[#2E2E2F]/60 transition-colors">
+                                                    ID: {event.eventId.split('-')[0]}
+                                                </span>
+                                                <h3 className="font-bold text-[#2E2E2F] text-base truncate mt-0.5 group-hover:text-[#38BDF2] transition-colors">
+                                                    {event.eventName}
+                                                </h3>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2 text-[11px] text-[#2E2E2F]/60 font-medium">
+                                                    <ICONS.Calendar className="w-3 h-3 text-[#38BDF2]" />
                                                     {new Date(event.startAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                                 </div>
-                                                <div className="flex items-center gap-2 text-[12px] text-[#2E2E2F]/60 font-medium">
-                                                    <ICONS.MapPin className="w-3.5 h-3.5 text-[#38BDF2]" />
+                                                <div className="flex items-center gap-2 text-[11px] text-[#2E2E2F]/60 font-medium">
+                                                    <ICONS.MapPin className="w-3 h-3 text-[#38BDF2]" />
                                                     <span className="truncate">{event.locationText}</span>
                                                 </div>
                                             </div>
                                         </div>
+                                        <div className="relative group/more shrink-0">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === event.eventId ? null : event.eventId); }}
+                                                className={`p-1.5 rounded-xl transition-all duration-300 ${openDropdownId === event.eventId ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'hover:bg-[#2E2E2F]/5 text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                                            >
+                                                <MoreVerticalIcon className="w-5 h-5" />
+                                            </button>
+                                            
+                                            <div 
+                                                className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${openDropdownId === event.eventId ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible group-hover/more:opacity-100 group-hover/more:scale-100 group-hover/more:visible'}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                                                    <EyeIcon className="w-4 h-4" /> View
+                                                </button>
+                                                <button onClick={(e) => { e.stopPropagation(); handleOpenTickets(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                                                    <ICONS.CreditCard className="w-4 h-4" /> Tickets
+                                                </button>
+                                                <button onClick={(e) => { e.stopPropagation(); handleOpenAttendeePop(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                                                    <ICONS.Users className="w-4 h-4" /> Guests
+                                                </button>
+                                                <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                                                    <ICONS.Edit className="w-4 h-4" /> Edit
+                                                </button>
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        const isPromoted = promotedEventsMap[event.eventId]?.promoted;
+                                                        if (promotionQuota && !isPromoted && !promotionQuota.canPromote) {
+                                                            setNotification({ message: 'You have reached your promotion limit.', type: 'error' });
+                                                        } else {
+                                                            handleToggleEventPromotion(event.eventId, isPromoted || false);
+                                                        }
+                                                    }}
+                                                    className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors"
+                                                >
+                                                    <ICONS.Zap className="w-4 h-4" fill={promotedEventsMap[event.eventId]?.promoted ? "currentColor" : "none"} /> Promote
+                                                </button>
+                                                <div className="my-1 border-t border-[#2E2E2F]/5" />
+                                                <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-600 flex items-center gap-3 transition-colors">
+                                                    <ICONS.Trash className="w-4 h-4" /> Archive
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
-
-                                    <div className="mt-5 pt-4 border-t border-[#2E2E2F]/5 flex items-center justify-around">
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }}
-                                            className="p-3 text-[#2E2E2F]/60 hover:text-[#38BDF2] transition-colors"
-                                            title="View"
-                                        >
-                                            <EyeIcon className="w-5 h-5" />
-                                        </button>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); handleOpenTickets(event); }}
-                                            className="p-3 text-[#2E2E2F]/60 hover:text-[#38BDF2] transition-colors"
-                                            title="Tickets"
-                                        >
-                                            <ICONS.CreditCard className="w-5 h-5" />
-                                        </button>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); handleOpenAttendeePop(event); }}
-                                            className="p-3 text-[#2E2E2F]/60 hover:text-[#38BDF2] transition-colors"
-                                            title="Attendees"
-                                        >
-                                            <ICONS.Users className="w-5 h-5" />
-                                        </button>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); handleOpenEdit(event); }}
-                                            className="p-3 text-[#2E2E2F]/60 hover:text-[#38BDF2] transition-colors"
-                                            title="Edit"
-                                        >
-                                            <ICONS.Edit className="w-5 h-5" />
-                                        </button>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                const isPromoted = promotedEventsMap[event.eventId]?.promoted;
-                                                if (promotionQuota && !isPromoted && !promotionQuota.canPromote) {
-                                                    setNotification({ message: 'You have reached your promotion limit.', type: 'error' });
-                                                } else {
-                                                    handleToggleEventPromotion(event.eventId, isPromoted || false);
-                                                }
-                                            }}
-                                            disabled={togglingPromotionId === event.eventId}
-                                            className={`p-3 transition-all ${togglingPromotionId === event.eventId
-                                                ? 'opacity-50 cursor-not-allowed text-[#2E2E2F]/30'
-                                                : promotedEventsMap[event.eventId]?.promoted
-                                                    ? 'text-[#38BDF2]'
-                                                    : 'text-[#2E2E2F]/60 hover:text-[#38BDF2]'
-                                                }`}
-                                            title={`${promotedEventsMap[event.eventId]?.promoted ? 'Demote Event' : 'Promote Event'}`}
-                                        >
-                                            <ICONS.Zap className="w-5 h-5" fill={promotedEventsMap[event.eventId]?.promoted ? "currentColor" : "none"} />
-                                        </button>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); setDeleteConfirm(event); }}
-                                            className="p-3 text-[#2E2E2F]/60 hover:text-red-500 transition-colors"
-                                            title="Archive"
-                                        >
-                                            <ICONS.Trash className="w-5 h-5" />
-                                        </button>
+                                    <div className="mt-5 pt-4 border-t border-[#2E2E2F]/5 flex items-center justify-between text-[11px] font-bold text-[#2E2E2F]/40 uppercase tracking-widest">
+                                        <span>Inventory</span>
+                                        <span className="text-[#38BDF2]">{event.capacityTotal} Slots</span>
                                     </div>
                                 </Card>
                             ))}
                         </div>
 
                         {/* Desktop Table View */}
-                        <Card className="hidden md:block overflow-hidden border-[#2E2E2F]/10 rounded-[2.5rem] bg-[#F2F2F2]">
-                            <div className="overflow-x-auto">
+                        <Card className="hidden md:block !overflow-visible border-[#2E2E2F]/10 rounded-[2.5rem] bg-[#F2F2F2]">
+                            <div className="!overflow-visible">
                                 <table className="w-full text-left">
                                     <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
                                         <tr>
@@ -1066,65 +1097,50 @@ export const UserEvents: React.FC = () => {
                                                         );
                                                     })()}
                                                 </td>
-                                                <td className="px-8 py-7 text-center">
-                                                    <div className="flex justify-center items-center gap-6 opacity-70 group-hover:opacity-100 transition-colors">
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }}
-                                                            className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
-                                                            title="View Public Page"
+                                                <td className="px-8 py-7 !overflow-visible align-middle">
+                                                    <div className="flex justify-center items-center relative group/more h-full">
+                                                        <button 
+                                                            onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === event.eventId ? null : event.eventId); }}
+                                                            className={`p-1.5 rounded-xl transition-all duration-300 ${openDropdownId === event.eventId ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'hover:bg-[#2E2E2F]/5 text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
                                                         >
-                                                            <svg className="w-[1.2rem] h-[1.2rem]" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                            <MoreVerticalIcon className="w-5 h-5" />
                                                         </button>
-
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); handleOpenTickets(event); }}
-                                                            className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
-                                                            title="Manage Tickets"
+                                                        
+                                                        <div 
+                                                            className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${openDropdownId === event.eventId ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible group-hover/more:opacity-100 group-hover/more:scale-100 group-hover/more:visible'}`}
+                                                            onClick={(e) => e.stopPropagation()}
                                                         >
-                                                            <ICONS.CreditCard className="w-[1.2rem] h-[1.2rem]" strokeWidth={2.2} />
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); handleOpenAttendeePop(event); }}
-                                                            className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
-                                                            title="View Confirmed Guests"
-                                                        >
-                                                            <ICONS.Users className="w-[1.2rem] h-[1.2rem]" strokeWidth={2.2} />
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); handleOpenEdit(event); }}
-                                                            className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
-                                                            title="Edit Session"
-                                                        >
-                                                            <svg className="w-[1.2rem] h-[1.2rem]" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                const isPromoted = promotedEventsMap[event.eventId]?.promoted;
-                                                                if (promotionQuota && !isPromoted && !promotionQuota.canPromote) {
-                                                                    setNotification({ message: 'You have reached your promotion limit.', type: 'error' });
-                                                                } else {
-                                                                    handleToggleEventPromotion(event.eventId, isPromoted || false);
-                                                                }
-                                                            }}
-                                                            disabled={togglingPromotionId === event.eventId}
-                                                            className={`transition-all p-1 ${togglingPromotionId === event.eventId
-                                                                ? 'opacity-50 cursor-not-allowed text-[#2E2E2F]/30'
-                                                                : promotedEventsMap[event.eventId]?.promoted
-                                                                    ? 'text-[#38BDF2]'
-                                                                    : 'text-[#2E2E2F] hover:text-[#38BDF2] cursor-pointer'
-                                                                }`}
-                                                            title={`${promotedEventsMap[event.eventId]?.promoted ? 'Demote Event' : 'Promote Event'}`}
-                                                        >
-                                                            <ICONS.Zap className="w-[1.2rem] h-[1.2rem]" fill={promotedEventsMap[event.eventId]?.promoted ? "currentColor" : "none"} />
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); setDeleteConfirm(event); }}
-                                                            className="text-[#2E2E2F] hover:text-red-500 transition-colors p-1"
-                                                            title="Archive Event"
-                                                        >
-                                                            <ICONS.Trash className="w-[1.2rem] h-[1.2rem]" strokeWidth={2.2} />
-                                                        </button>
+                                                            <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                                                                <EyeIcon className="w-4 h-4" /> View
+                                                            </button>
+                                                            <button onClick={(e) => { e.stopPropagation(); handleOpenTickets(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                                                                <ICONS.CreditCard className="w-4 h-4" /> Tickets
+                                                            </button>
+                                                            <button onClick={(e) => { e.stopPropagation(); handleOpenAttendeePop(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                                                                <ICONS.Users className="w-4 h-4" /> Guests
+                                                            </button>
+                                                            <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                                                                <ICONS.Edit className="w-4 h-4" /> Edit
+                                                            </button>
+                                                            <button 
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    const isPromoted = promotedEventsMap[event.eventId]?.promoted;
+                                                                    if (promotionQuota && !isPromoted && !promotionQuota.canPromote) {
+                                                                        setNotification({ message: 'You have reached your promotion limit.', type: 'error' });
+                                                                    } else {
+                                                                        handleToggleEventPromotion(event.eventId, isPromoted || false);
+                                                                    }
+                                                                }}
+                                                                className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors"
+                                                            >
+                                                                <ICONS.Zap className="w-4 h-4" fill={promotedEventsMap[event.eventId]?.promoted ? "currentColor" : "none"} /> Promote
+                                                            </button>
+                                                            <div className="my-1 border-t border-[#2E2E2F]/5" />
+                                                            <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-600 flex items-center gap-3 transition-colors">
+                                                                <ICONS.Trash className="w-4 h-4" /> Archive
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -1211,14 +1227,20 @@ export const UserEvents: React.FC = () => {
                             <p className="text-[11px] text-[#2E2E2F]/60 mt-1">Configure organizer name and branding details.</p>
                         </div>
 
-                        <div className={`rounded-2xl border px-4 py-4 ${hasExistingEvents ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 bg-[#F2F2F2]'}`}>
+                        <div className={`rounded-2xl border px-4 py-4 ${isPaymentReady ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 bg-[#F2F2F2]'}`}>
                             <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 3</p>
+                            <p className="text-sm font-bold text-[#2E2E2F] mt-2">Payment Gateway</p>
+                            <p className="text-[11px] text-[#2E2E2F]/60 mt-1">Connect your HitPay account to receive payouts for paid events.</p>
+                        </div>
+
+                        <div className={`rounded-2xl border px-4 py-4 ${hasExistingEvents ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 bg-[#F2F2F2]'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 4</p>
                             <p className="text-sm font-bold text-[#2E2E2F] mt-2">Create Draft</p>
                             <p className="text-[11px] text-[#2E2E2F]/60 mt-1">Build your event details and save as draft.</p>
                         </div>
 
                         <div className={`rounded-2xl border px-4 py-4 ${hasPublishedEvent ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 4</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 5</p>
                             <p className="text-sm font-bold text-[#2E2E2F] mt-2">Tickets then Publish</p>
                             <p className="text-[11px] text-[#2E2E2F]/60 mt-1">Add at least one ticket type before going live.</p>
                         </div>
@@ -1234,7 +1256,7 @@ export const UserEvents: React.FC = () => {
                 size="xl"
                 className="max-w-[96vw]"
             >
-                <div className={`grid grid-cols-1 gap-6 ${!isPreviewMode ? 'xl:grid-cols-[300px_minmax(0,1fr)]' : previewDevice === 'desktop' ? 'xl:grid-cols-[300px_minmax(0,1fr)_minmax(450px,650px)]' : 'xl:grid-cols-[300px_minmax(0,1fr)_380px]'}`}>
+                <div className={`grid grid-cols-1 gap-6 ${!isPreviewMode ? 'xl:grid-cols-[300px_minmax(0,1fr)]' : previewDevice === 'desktop' ? 'xl:grid-cols-[300px_minmax(0,1fr)_minmax(800px,1100px)]' : 'xl:grid-cols-[300px_minmax(0,1fr)_380px]'}`}>
                     <div className="space-y-5 xl:sticky xl:top-0 self-start xl:max-h-[calc(70vh-1rem)] xl:overflow-y-auto xl:pr-1">
                         <div className="bg-[#F2F2F2] rounded-[2rem] border border-[#2E2E2F]/10 overflow-hidden">
                             <div className="h-16 bg-gradient-to-r from-[#BAF3FF] via-[#67E8F9] to-[#38BDF2]" />
@@ -1333,7 +1355,7 @@ export const UserEvents: React.FC = () => {
                                                     <p className="text-[10px] text-[#2E2E2F]/50">Used for buttons, links, and highlights on your event page.</p>
                                                 </div>
                                                 {!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) && (
-                                                    <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] flex items-center justify-center">
+                                                    <div className="absolute inset-0 bg-[#F2F2F2]/40 backdrop-blur-[1px] flex items-center justify-center">
                                                         <Button variant="outline" className="text-[8px] py-1 px-3 border-[#2E2E2F]/20" onClick={() => navigate('/subscription')}>Upgrade to Unlock</Button>
                                                     </div>
                                                 )}
@@ -1435,7 +1457,7 @@ export const UserEvents: React.FC = () => {
                                             </div>
 
                                             {formData.streamingUrl && formData.streamingUrl.startsWith('http') && (
-                                                <div className="mt-6 p-6 bg-black rounded-3xl border border-white/10 overflow-hidden shadow-xl">
+                                                <div className="mt-6 p-6 bg-black rounded-3xl border border-[#F2F2F2]/10 overflow-hidden shadow-xl">
                                                     <div className="flex items-center justify-between mb-4">
                                                         <h4 className="text-[12px] font-black text-white uppercase tracking-widest">Stream Preview</h4>
                                                         <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-red-500/30 bg-red-500/20">
@@ -1445,7 +1467,7 @@ export const UserEvents: React.FC = () => {
                                                     </div>
 
                                                     {(formData.streamingUrl.includes('youtube.com') || formData.streamingUrl.includes('youtu.be')) ? (
-                                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-white/5 border border-white/5">
+                                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#F2F2F2]/5 border border-[#F2F2F2]/5">
                                                             {(() => {
                                                                 const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/|live\/)([^#\&\?]*).*/;
                                                                 const match = formData.streamingUrl.match(regExp);
@@ -1460,11 +1482,11 @@ export const UserEvents: React.FC = () => {
                                                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                                                         allowFullScreen
                                                                     />
-                                                                ) : <div className="flex items-center justify-center w-full h-full text-white/30 text-xs">Invalid YouTube Link</div>;
+                                                                ) : <div className="flex items-center justify-center w-full h-full text-[#F2F2F2]/30 text-xs">Invalid YouTube Link</div>;
                                                             })()}
                                                         </div>
                                                     ) : (formData.streamingUrl.includes('facebook.com') || formData.streamingUrl.includes('fb.watch')) ? (
-                                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-white/5 border border-white/5">
+                                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#F2F2F2]/5 border border-[#F2F2F2]/5">
                                                             <iframe
                                                                 className="absolute inset-0 w-full h-full"
                                                                 src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(formData.streamingUrl)}&show_text=0&width=560&t=0`}
@@ -1472,12 +1494,12 @@ export const UserEvents: React.FC = () => {
                                                                 frameBorder="0"
                                                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                                                 allowFullScreen
-                                                            />
+                                                                />
                                                         </div>
                                                     ) : (
-                                                        <div className="flex flex-col items-center justify-center p-10 rounded-2xl bg-white/5 border border-white/5 border-dashed">
-                                                            <ICONS.Monitor className="w-8 h-8 text-white/20 mb-3" />
-                                                            <p className="text-white/40 text-[11px] text-center font-medium">This platform doesn't support direct previews, but the link will be provided to attendees.</p>
+                                                        <div className="flex flex-col items-center justify-center p-10 rounded-2xl bg-[#F2F2F2]/5 border border-[#F2F2F2]/5 border-dashed">
+                                                            <ICONS.Monitor className="w-8 h-8 text-[#F2F2F2]/20 mb-3" />
+                                                            <p className="text-[#F2F2F2]/40 text-[11px] text-center font-medium">This platform doesn't support direct previews, but the link will be provided to attendees.</p>
                                                         </div>
                                                     )}
                                                 </div>
@@ -1551,8 +1573,8 @@ export const UserEvents: React.FC = () => {
                                                 />
                                             </div>
                                             {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) && (
-                                                <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <Button variant="outline" className="text-[8px] py-1 px-3 border-[#2E2E2F]/20 bg-white" onClick={() => navigate('/subscription')}>Upgrade to Unlock</Button>
+                                                <div className="absolute inset-0 bg-[#F2F2F2]/40 backdrop-blur-[1px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button variant="outline" className="text-[8px] py-1 px-3 border-[#2E2E2F]/20 bg-[#F2F2F2]" onClick={() => navigate('/subscription')}>Upgrade to Unlock</Button>
                                                 </div>
                                             )}
                                         </div>
@@ -1818,8 +1840,21 @@ export const UserEvents: React.FC = () => {
 
                         <div className="rounded-[1.5rem] border border-[#2E2E2F]/12 bg-[#F2F2F2] p-4 md:p-5">
                             <div className={`${previewDevice === 'mobile' ? 'max-w-[360px] mx-auto' : 'max-w-none'}`}>
-                                <div className="rounded-[2.1rem] overflow-hidden border border-[#2E2E2F]/12 bg-[#F2F2F2]">
-                                    <div className="h-14 border-b border-[#2E2E2F]/10 px-5 flex items-center justify-between">
+                                <div className="rounded-[2.1rem] overflow-hidden border border-[#2E2E2F]/12 bg-[#F2F2F2] shadow-2xl">
+                                    {/* Browser Chrome for Laptop/Desktop */}
+                                    {previewDevice !== 'mobile' && (
+                                        <div className="bg-[#E5E7EB] h-10 flex items-center px-4 gap-4 border-b border-[#2E2E2F]/10">
+                                            <div className="flex gap-1.5">
+                                                <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
+                                                <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
+                                                <div className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
+                                            </div>
+                                            <div className="flex-1 bg-[#F2F2F2]/60 rounded-md h-6 flex items-center px-3 text-[10px] text-[#2E2E2F]/40 font-medium truncate">
+                                                startuplab.io/events/{formData.eventName.toLowerCase().replace(/\s+/g, '-')}
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className="h-14 border-b border-[#2E2E2F]/10 px-5 flex items-center justify-between bg-[#F2F2F2]">
                                         <img
                                             src={(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) && organizerProfile?.profileImageUrl ? getImageUrl(organizerProfile.profileImageUrl) : BRAND_LOGO_URL}
                                             alt="Event Logo"
@@ -1831,154 +1866,181 @@ export const UserEvents: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    <div className={`p-5 ${previewDevice === 'mobile' ? 'space-y-4' : 'space-y-6'}`}>
-                                        <div>
-                                            <div className="flex items-start justify-between gap-4 mb-4">
-                                                <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tighter leading-tight">
-                                                    {formData.eventName || 'Event title'}
-                                                </h2>
-                                                <div className="flex items-center gap-2 shrink-0">
-                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/10 flex items-center justify-center">
-                                                        <ICONS.Heart className="w-4 h-4 text-[#2E2E2F]/40" />
-                                                    </div>
-                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/10 flex items-center justify-center">
-                                                        <ICONS.Download className="w-4 h-4 text-[#2E2E2F]/40" />
-                                                    </div>
+                                    <div className={`bg-[#F2F2F2] p-5 ${previewDevice === 'desktop' ? 'flex gap-8 items-start' : 'space-y-6'}`}>
+                                        <div className={`flex-1 ${previewDevice === 'desktop' ? 'max-w-[calc(100%-350px)]' : 'w-full'} space-y-6`}>
+                                            <div className="mb-4">
+                                                <div className="flex items-center gap-2 text-[8px] font-black tracking-widest uppercase mb-6" style={{ color: previewAccentColor }}>
+                                                    <svg className="w-2.5 h-2.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
+                                                    BACK TO EVENTS
                                                 </div>
-                                            </div>
-                                            <div className="rounded-[2.5rem] overflow-hidden border border-[#2E2E2F]/10 mb-6 group">
-                                                <img
-                                                    src={getImageUrl(formData.imageUrl)}
-                                                    alt="Event Preview"
-                                                    className="w-full aspect-video object-cover"
-                                                />
-                                            </div>
 
-                                            <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F]/70">
-                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border border-[#2E2E2F]/10 text-[10px] font-bold">
-                                                    <ICONS.Calendar className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
-                                                    {previewDateLabel}
-                                                </div>
-                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border border-[#2E2E2F]/10 text-[10px] font-bold">
-                                                    <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
-                                                    {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
-                                                </div>
-                                                {formData.streamingPlatform && (
-                                                    <div className="flex items-center bg-[#F2F2F2] px-3 py-1.5 rounded-xl border text-[10px] font-black tracking-wide" style={{ color: previewAccentColor, borderColor: `${previewAccentColor}33`, backgroundColor: `${previewAccentColor}0D` }}>
-                                                        VIA {formData.streamingPlatform.toUpperCase()}
-                                                    </div>
-                                                )}
-                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border border-[#2E2E2F]/10 text-[10px] font-bold">
-                                                    CAPACITY: {formData.capacityTotal}
-                                                </div>
-                                                {promotedEventsMap[selectedEvent?.eventId || '']?.promoted && (
-                                                    <span className="text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 bg-[#38BDF2]/20 text-[#38BDF2] border border-[#38BDF2]/30 rounded-full whitespace-nowrap flex items-center gap-1">
-                                                        <ICONS.Zap className="w-2 h-2" />
-                                                        Promoted
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/10">
-                                        <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
-                                        <p className="text-[#2E2E2F]/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
-                                            {formData.description || 'Provide an executive summary of this event session...'}
-                                        </p>
-                                    </div>
-
-                                    <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/10">
-                                        <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
-                                        <div className="rounded-[1.2rem] border border-[#2E2E2F]/10 bg-[#F2F2F2] p-4 flex flex-col gap-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-full overflow-hidden bg-[#2E2E2F] text-[#F2F2F2] flex items-center justify-center text-lg font-bold shrink-0">
-                                                    {organizerProfile?.profileImageUrl ? (
-                                                        <img src={getImageUrl(organizerProfile.profileImageUrl)} alt={organizerProfile.organizerName || 'Organizer'} className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        organizerPreviewInitial
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-lg font-black text-[#2E2E2F] tracking-tight truncate">
-                                                        {organizerProfile?.organizerName || 'Organizer Profile'}
-                                                    </p>
-                                                    <div className="flex items-center gap-4 mt-1">
-                                                        <div>
-                                                            <p className="text-[8px] uppercase tracking-widest font-black text-[#2E2E2F]/40">Followers</p>
-                                                            <p className="text-sm font-black">{organizerProfile?.followersCount || 0}</p>
+                                                <div className="flex items-start justify-between gap-4 mb-4">
+                                                    <h2 className={`${previewDevice === 'mobile' ? 'text-2xl' : 'text-3xl'} font-black text-[#2E2E2F] tracking-tighter leading-tight`}>
+                                                        {formData.eventName || 'Event title'}
+                                                    </h2>
+                                                    <div className="flex items-center gap-2 shrink-0">
+                                                        <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/10 flex items-center justify-center">
+                                                            <ICONS.Heart className="w-4 h-4 text-[#2E2E2F]/40" />
                                                         </div>
-                                                        <div>
-                                                            <p className="text-sm font-black">1</p>
+                                                        <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/10 flex items-center justify-center">
+                                                            <ICONS.Download className="w-4 h-4 text-[#2E2E2F]/40" />
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <button type="button" className="flex-1 py-2 rounded-xl border border-[#2E2E2F]/20 text-[#2E2E2F] font-black text-[10px] uppercase tracking-widest">
-                                                    Contact
-                                                </button>
-                                                <button type="button" className="flex-1 py-2 rounded-xl bg-[#00D4FF] text-white font-black text-[10px] uppercase tracking-widest shadow-[0_0_12px_rgba(0,212,255,0.3)]">
-                                                    Follow
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* Live Stream Section in Preview */}
-                                        {((formData.locationType === 'ONLINE' || formData.locationType === 'HYBRID')) && (
-                                            <div className="mt-6 pt-6 border-t border-[#2E2E2F]/10">
-                                                <div className="overflow-hidden rounded-[1.5rem] border border-[#2E2E2F]/10 shadow-lg">
-                                                    <div className="bg-[#00AEEF] px-4 py-3 text-white flex justify-between items-center">
-                                                        <span className="text-[10px] font-black tracking-tight uppercase">BROADCAST PREVIEW</span>
-                                                        <div className="flex items-center gap-1.5 bg-red-600 px-2.5 py-1 rounded-full border border-red-500 animate-pulse">
-                                                            <div className="w-1.5 h-1.5 bg-white rounded-full" />
-                                                            <span className="text-[8px] font-black uppercase tracking-widest">LIVE</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="aspect-video bg-[#2E2E2F]/5 flex items-center justify-center border-t border-[#2E2E2F]/10">
-                                                        {formData.streamingUrl ? (
-                                                            <div className="text-center p-4">
-                                                                <ICONS.Monitor className="w-8 h-8 text-[#2E2E2F]/20 mx-auto mb-2" />
-                                                                <p className="text-[10px] font-bold text-[#2E2E2F]/40 uppercase tracking-widest">Connection Detected</p>
-                                                                <p className="text-[9px] text-[#2E2E2F]/30 mt-1 truncate max-w-[200px]">{formData.streamingUrl}</p>
-                                                            </div>
-                                                        ) : (
-                                                            <p className="text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-tighter">Enter URL to preview stream</p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {hasPreviewPhysicalLocation && (
-                                            <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/10">
-                                                <div className="flex items-center justify-between gap-3 mb-4">
-                                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
-                                                    <span className="text-[9px] font-black uppercase tracking-widest text-[#38BDF2]">
-                                                        Open in Maps
-                                                    </span>
-                                                </div>
-                                                <p className="text-[12px] text-[#2E2E2F]/70 font-medium mb-4">{formData.location}</p>
-                                                <div className="rounded-xl overflow-hidden border border-[#2E2E2F]/10 bg-[#F2F2F2]">
-                                                    <iframe
-                                                        src={previewMapEmbedUrl}
-                                                        title="Preview map"
-                                                        className={`w-full ${previewDevice === 'mobile' ? 'h-40' : 'h-56'}`}
-                                                        loading="lazy"
+                                                <div className="rounded-[2rem] overflow-hidden border border-[#2E2E2F]/10 mb-6 group">
+                                                    <img
+                                                        src={getImageUrl(formData.imageUrl)}
+                                                        alt="Event Preview"
+                                                        className="w-full aspect-video object-cover"
                                                     />
                                                 </div>
+
+                                                <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F]/70">
+                                                    <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border border-[#2E2E2F]/10 text-[10px] font-bold">
+                                                        <ICONS.Calendar className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
+                                                        {previewDateLabel}
+                                                    </div>
+                                                    <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border border-[#2E2E2F]/10 text-[10px] font-bold">
+                                                        <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
+                                                        {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
+                                                    </div>
+                                                    {formData.streamingPlatform && (
+                                                        <div className="flex items-center bg-[#F2F2F2] px-3 py-1.5 rounded-xl border text-[10px] font-black tracking-wide" style={{ color: previewAccentColor, borderColor: `${previewAccentColor}33`, backgroundColor: `${previewAccentColor}0D` }}>
+                                                            VIA {formData.streamingPlatform.toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                    <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border border-[#2E2E2F]/10 text-[10px] font-bold">
+                                                        CAPACITY: {formData.capacityTotal}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        )}
-                                    </div>
-                                    <div className="px-5 py-4 border-t border-[#2E2E2F]/10 bg-[#F2F2F2] flex items-center justify-between gap-3">
-                                        <div>
-                                            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#2E2E2F]/45">From</p>
-                                            <p className="text-lg font-black text-[#2E2E2F]">{activeEventTicketCount > 0 ? 'Ticket-ready' : 'Add tickets'}</p>
+
+                                            <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/10">
+                                                <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
+                                                <p className="text-[#2E2E2F]/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
+                                                    {formData.description || 'Provide an executive summary of this event session...'}
+                                                </p>
+                                            </div>
+
+                                            <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/10">
+                                                <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
+                                                <div className="rounded-[1.2rem] border border-[#2E2E2F]/10 bg-[#F2F2F2] p-4 flex flex-col gap-4">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-12 h-12 rounded-full overflow-hidden bg-[#2E2E2F] text-[#F2F2F2] flex items-center justify-center text-lg font-bold shrink-0">
+                                                            {organizerProfile?.profileImageUrl ? (
+                                                                <img src={getImageUrl(organizerProfile.profileImageUrl)} alt={organizerProfile.organizerName || 'Organizer'} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                organizerPreviewInitial
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-lg font-black text-[#2E2E2F] tracking-tight truncate">
+                                                                {organizerProfile?.organizerName || 'Organizer Profile'}
+                                                            </p>
+                                                            <div className="flex items-center gap-4 mt-1">
+                                                                <div>
+                                                                    <p className="text-[8px] uppercase tracking-widest font-black text-[#2E2E2F]/40">Followers</p>
+                                                                    <p className="text-sm font-black">{organizerProfile?.followersCount || 0}</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-[14px] font-black">{events.length}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {hasPreviewPhysicalLocation && (
+                                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/10">
+                                                    <div className="flex items-center justify-between gap-3 mb-4">
+                                                        <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
+                                                        <span className="text-[9px] font-black uppercase tracking-widest text-[#38BDF2]">Open in Maps</span>
+                                                    </div>
+                                                    <p className="text-[12px] text-[#2E2E2F]/70 font-medium mb-4">{formData.location}</p>
+                                                    <div className="rounded-xl overflow-hidden border border-[#2E2E2F]/10 bg-[#F2F2F2]">
+                                                        <iframe
+                                                            src={previewMapEmbedUrl}
+                                                            title="Preview map"
+                                                            className={`w-full ${previewDevice === 'mobile' ? 'h-40' : 'h-56'}`}
+                                                            loading="lazy"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                        <button type="button" className="px-6 py-3 rounded-xl bg-[#2E2E2F]/10 text-[#2E2E2F]/45 text-sm font-black" disabled>
-                                            Get tickets
-                                        </button>
+
+                                        <div className={`${previewDevice === 'desktop' ? 'w-[320px] shrink-0 space-y-6 sticky top-4' : 'w-full flex-col'}`}>
+                                            {/* Tickets Section in Preview */}
+                                            <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/10 shadow-sm">
+                                                <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-6">SECURE ACCESS</h3>
+                                                <div className="space-y-4">
+                                                    {formData.ticketTypes && formData.ticketTypes.length > 0 ? (
+                                                        formData.ticketTypes.map((ticket: any) => (
+                                                            <div key={ticket.ticketTypeId || ticket.name} className="p-5 rounded-2xl border-2 bg-[#F2F2F2]" style={{ borderColor: `${previewAccentColor}1A` }}>
+                                                                <div className="flex justify-between items-start mb-1">
+                                                                    <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-wider">{ticket.name}</p>
+                                                                    <span className="text-[8px] font-black px-2 py-0.5 rounded text-white" style={{ backgroundColor: previewAccentColor }}>AVAILABLE</span>
+                                                                </div>
+                                                                <p className="text-[16px] font-black text-[#2E2E2F]">
+                                                                    {ticket.priceAmount === 0 ? 'FREE' : `PHP ${ticket.priceAmount.toLocaleString()}.00`}
+                                                                </p>
+                                                                <div className="mt-4 pt-4 border-t border-[#2E2E2F]/5 flex items-center justify-between">
+                                                                    <span className="text-[8px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Quantity</span>
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-6 h-6 rounded-lg bg-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F]/20 text-xs">-</div>
+                                                                        <span className="text-xs font-black">1</span>
+                                                                        <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs text-white" style={{ backgroundColor: previewAccentColor }}>+</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <div className="py-12 text-center border-2 border-dashed border-[#2E2E2F]/5 rounded-[2rem]">
+                                                            <p className="text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-widest">No tickets set</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="mt-8 space-y-4">
+                                                    <button 
+                                                        type="button" 
+                                                        disabled
+                                                        className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-white/50 cursor-not-allowed"
+                                                        style={{ backgroundColor: `${previewAccentColor}4D` }}
+                                                    >
+                                                        Secure Checkout
+                                                    </button>
+                                                    <div className="flex items-center justify-center gap-2 opacity-20">
+                                                        <ICONS.CreditCard className="w-3.5 h-3.5" />
+                                                        <p className="text-[8px] font-black uppercase tracking-widest">HITPAY SECURE</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
+
+                                    {previewDevice === 'mobile' && (
+                                        <div className="px-5 py-4 border-t border-[#2E2E2F]/10 bg-[#F2F2F2] flex items-center justify-between gap-3">
+                                            <div>
+                                                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#2E2E2F]/45">Starting from</p>
+                                                <p className="text-lg font-black text-[#2E2E2F]">
+                                                    {formData.ticketTypes && formData.ticketTypes.length > 0 
+                                                        ? formData.ticketTypes.some((t: any) => t.priceAmount === 0) 
+                                                            ? 'FREE' 
+                                                            : `PHP ${Math.min(...formData.ticketTypes.map((t: any) => t.priceAmount)).toLocaleString()}`
+                                                        : 'Add inventory'}
+                                                </p>
+                                            </div>
+                                            <button 
+                                                type="button" 
+                                                className={`px-6 py-3 rounded-xl text-sm font-black transition-all ${formData.ticketTypes && formData.ticketTypes.length > 0 ? 'text-white shadow-lg' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]/45 cursor-not-allowed'}`}
+                                                style={formData.ticketTypes && formData.ticketTypes.length > 0 ? { backgroundColor: previewAccentColor } : {}}
+                                                disabled={!formData.ticketTypes || formData.ticketTypes.length === 0}
+                                            >
+                                                {formData.ticketTypes && formData.ticketTypes.length > 0 ? 'Get Tickets' : 'Locked'}
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -1998,6 +2060,7 @@ export const UserEvents: React.FC = () => {
                     submitting={submitting}
                     setNotification={setNotification}
                     maxEventCapacity={maxEventCapacity}
+                    isPaymentReady={isPaymentReady}
                 />
             </Modal>
 
@@ -2096,11 +2159,14 @@ interface TicketManagerProps {
     submitting: boolean;
     setNotification: (n: { message: string; type: 'success' | 'error' }) => void;
     maxEventCapacity: number;
+    isPaymentReady: boolean;
 }
 
-function TicketManager({ event, onSave, submitting, setNotification, maxEventCapacity }: TicketManagerProps) {
+function TicketManager({ event, onSave, submitting, setNotification, maxEventCapacity, isPaymentReady }: TicketManagerProps) {
+    const navigate = useNavigate();
     const [tickets, setTickets] = useState<TicketType[]>([]);
     const [expandedTicketId, setExpandedTicketId] = useState<string | null>(null);
+    const [isPaymentRestrictionOpen, setIsPaymentRestrictionOpen] = useState(false);
 
     useEffect(() => {
         const fetchTickets = async () => {
@@ -2120,6 +2186,7 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
         name: '',
         description: '',
         priceAmount: 0,
+        saleDiscountPercent: 0,
         currency: 'PHP',
         quantityTotal: 100,
         capacityPerTicket: 1,
@@ -2130,12 +2197,17 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
 
     const addTicket = () => {
         if (!newTicket.name) return;
+        if (newTicket.priceAmount > 0 && !isPaymentReady) {
+            setIsPaymentRestrictionOpen(true);
+            return;
+        }
         const item: TicketType = {
             ticketTypeId: `tk-${Math.random().toString(36).substr(2, 9)}`,
             eventId: event?.eventId || '',
             name: newTicket.name,
             description: newTicket.description || undefined,
             priceAmount: newTicket.priceAmount,
+            saleDiscountPercent: newTicket.saleDiscountPercent,
             currency: newTicket.currency || 'PHP',
             quantityTotal: newTicket.quantityTotal,
             quantitySold: 0,
@@ -2149,6 +2221,7 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
             name: '',
             description: '',
             priceAmount: 0,
+            saleDiscountPercent: 0,
             currency: 'PHP',
             quantityTotal: 100,
             capacityPerTicket: 1,
@@ -2225,12 +2298,33 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
                         </div>
                     </div>
                     {newTicket.priceAmount > 0 && (
-                        <Input
-                            label={`Price (${newTicket.currency})`}
-                            type="number"
-                            value={newTicket.priceAmount}
-                            onChange={(e: any) => setNewTicket({ ...newTicket, priceAmount: parseFloat(e.target.value) })}
-                        />
+                        <>
+                            <Input
+                                label={`Price (${newTicket.currency})`}
+                                type="number"
+                                value={newTicket.priceAmount}
+                                onChange={(e: any) => setNewTicket({ ...newTicket, priceAmount: parseFloat(e.target.value) })}
+                            />
+                            <div className="space-y-1.5">
+                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Sale Discount (%)</label>
+                                <div className="flex gap-2 items-end">
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        max={100}
+                                        value={newTicket.saleDiscountPercent || 0}
+                                        onChange={(e: any) => setNewTicket({ ...newTicket, saleDiscountPercent: Math.max(0, Math.min(100, parseFloat(e.target.value) || 0)) })}
+                                        className="flex-1 px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                        placeholder="0"
+                                    />
+                                    {newTicket.saleDiscountPercent && newTicket.saleDiscountPercent > 0 && (
+                                      <div className="text-[10px] font-bold text-[#38BDF2] whitespace-nowrap pb-3">
+                                        ₱{Math.round((newTicket.priceAmount * (100 - newTicket.saleDiscountPercent)) / 100)}
+                                      </div>
+                                    )}
+                                </div>
+                            </div>
+                        </>
                     )}
                     <div className="grid grid-cols-2 gap-4">
                         <Input
@@ -2301,6 +2395,14 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
                                         <span className="text-[#2E2E2F]">{priceLabel}</span>
                                         <span className="text-[#2E2E2F]/60">{t.status ? 'Active' : 'Inactive'}</span>
                                         <span className="text-[#2E2E2F]/60">Qty {t.quantityTotal}</span>
+                                        {t.priceAmount > 0 && (
+                                          <>
+                                            <span className="text-[#2E2E2F]/40">•</span>
+                                            <span className="text-[#38BDF2] font-bold">
+                                              {Math.round(((t.quantitySold || 0) / (t.quantityTotal || 1)) * 100)}% Sold
+                                            </span>
+                                          </>
+                                        )}
                                         {t.capacityPerTicket && t.capacityPerTicket > 1 && (
                                             <span className="text-[#38BDF2] font-bold">Bundle ({t.capacityPerTicket} Guests)</span>
                                         )}
@@ -2357,6 +2459,11 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
                                             className="w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                             value={t.priceAmount === 0 ? 'FREE' : 'PAID'}
                                             onChange={(e) => {
+                                                const isPaid = e.target.value === 'PAID';
+                                                if (isPaid && !isPaymentReady) {
+                                                    setIsPaymentRestrictionOpen(true);
+                                                    return;
+                                                }
                                                 const isFree = e.target.value === 'FREE';
                                                 const nextPrice = isFree ? 0 : Math.max(t.priceAmount || 0, 100);
                                                 updateTicket(t.ticketTypeId, { priceAmount: nextPrice });
@@ -2377,6 +2484,25 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
                                             onChange={(e) => updateTicket(t.ticketTypeId, { priceAmount: Math.max(0, parseFloat(e.target.value) || 0) })}
                                             className={`w-full px-3 py-2 border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2] ${t.priceAmount === 0 ? 'bg-[#F2F2F2] text-[#2E2E2F]/60' : 'bg-[#F2F2F2]'}`}
                                         />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Sale Discount (%)</label>
+                                        <div className="flex gap-2 items-end">
+                                            <input
+                                                type="number"
+                                                min={0}
+                                                max={100}
+                                                disabled={t.priceAmount === 0}
+                                                value={t.saleDiscountPercent || 0}
+                                                onChange={(e) => updateTicket(t.ticketTypeId, { saleDiscountPercent: Math.max(0, Math.min(100, parseFloat(e.target.value) || 0)) })}
+                                                className={`flex-1 px-3 py-2 border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2] ${t.priceAmount === 0 ? 'bg-[#F2F2F2] text-[#2E2E2F]/60' : 'bg-[#F2F2F2]'}`}
+                                            />
+                                            {t.saleDiscountPercent && t.saleDiscountPercent > 0 && (
+                                              <div className="text-[10px] font-bold text-[#38BDF2] whitespace-nowrap pb-2">
+                                                ₱{Math.round((t.priceAmount * (100 - t.saleDiscountPercent)) / 100)}
+                                              </div>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="space-y-1.5">
                                         <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Quantity Total</label>
@@ -2445,6 +2571,11 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
 
                             <div className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">
                                 Sold: {t.quantitySold || 0}
+                                {t.priceAmount > 0 && (
+                                  <span className="text-[#38BDF2] ml-2">
+                                    ({Math.round(((t.quantitySold || 0) / (t.quantityTotal || 1)) * 100)}%)
+                                  </span>
+                                )}
                             </div>
                         </div>
                     );
@@ -2458,7 +2589,7 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
                         <span>Total Guest Capacity</span>
                         <span>{tickets.reduce((acc, t) => acc + (t.quantityTotal * (t.capacityPerTicket || 1)), 0)} / {maxEventCapacity}</span>
                     </div>
-                    <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-[#F2F2F2]/10 rounded-full overflow-hidden">
                         <div 
                             className={`h-full transition-all ${
                                 tickets.reduce((acc, t) => acc + (t.quantityTotal * (t.capacityPerTicket || 1)), 0) > maxEventCapacity ? 'bg-red-500' : 'bg-[#38BDF2]'
@@ -2468,9 +2599,6 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
                             }}
                         />
                     </div>
-                    {tickets.reduce((acc, t) => acc + (t.quantityTotal * (t.capacityPerTicket || 1)), 0) > maxEventCapacity && (
-                        <p className="text-[9px] font-bold text-red-400 uppercase tracking-tighter">Warning: Allocated guests exceed event capacity limit.</p>
-                    )}
                 </div>
             )}
 
@@ -2481,6 +2609,58 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
             >
                 {submitting ? 'Updating...' : 'Commit Inventory Changes'}
             </Button>
+
+            <Modal
+                isOpen={isPaymentRestrictionOpen}
+                onClose={() => setIsPaymentRestrictionOpen(false)}
+                title="Payment Gateway Required"
+            >
+                <div className="space-y-6">
+                    <div className="flex items-start gap-5 p-6 bg-[#38BDF2]/10 border border-[#38BDF2]/20 rounded-[1.75rem]">
+                        <div className="w-12 h-12 bg-[#38BDF2]/20 rounded-2xl flex items-center justify-center shrink-0">
+                            <ICONS.CreditCard className="w-6 h-6 text-[#38BDF2]" strokeWidth={2.5} />
+                        </div>
+                        <div className="space-y-2">
+                            <p className="font-bold text-[#2E2E2F] text-[16px] tracking-tight">
+                                Setup HitPay to Gain More
+                            </p>
+                            <p className="text-[13px] text-[#2E2E2F]/60 font-medium leading-relaxed">
+                                To create paid tickets and receive payouts, you need to connect your HitPay account first. This ensures all transactions are processed securely and funds are routed directly to you.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3">
+                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl">
+                            <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center font-bold text-xs">1</div>
+                            <p className="text-xs font-semibold text-[#2E2E2F]/70">Go to Payment Gateway settings</p>
+                        </div>
+                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl">
+                            <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center font-bold text-xs">2</div>
+                            <p className="text-xs font-semibold text-[#2E2E2F]/70">Enter your HitPay API Key and Salt</p>
+                        </div>
+                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl">
+                            <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center font-bold text-xs">3</div>
+                            <p className="text-xs font-semibold text-[#2E2E2F]/70">Save and return here to enable paid tickets</p>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4 pt-2">
+                        <Button
+                            className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border border-[#2E2E2F]/20"
+                            onClick={() => setIsPaymentRestrictionOpen(false)}
+                        >
+                            Stay Free
+                        </Button>
+                        <Button
+                            className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-white hover:bg-black transition-colors min-h-[32px]"
+                            onClick={() => navigate('/user-settings?tab=payments')}
+                        >
+                            Set up HitPay now
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

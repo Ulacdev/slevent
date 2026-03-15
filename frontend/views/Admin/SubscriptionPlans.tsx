@@ -116,7 +116,7 @@ const toPayload = (draft: PlanDraft): Partial<AdminPlan> => ({
   },
   promotions: {
     max_promoted_events: Math.max(0, Math.floor(draft.promotions?.max_promoted_events ?? 0)),
-    promotion_duration_days: Math.max(1, Math.floor(draft.promotions?.promotion_duration_days ?? 7)),
+    promotion_duration_days: Math.max(0, Math.floor(draft.promotions?.promotion_duration_days ?? 0)),
   },
 });
 
@@ -361,8 +361,8 @@ export const SubscriptionPlans: React.FC = () => {
                     <label className="block text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em] mb-4 ml-1">Plan Limits & Promotion</label>
                     <div className="grid grid-cols-2 gap-3">
                       {[
-                        { label: 'Promoted Events', val: (plan as any)?.promotions?.max_promoted_events || 0, icon: <ICONS.TrendingUp /> },
-                        { label: 'Promo Duration', val: ((plan as any)?.promotions?.promotion_duration_days || 7) + ' days', icon: <ICONS.Calendar /> },
+                        { label: 'Promoted Event Slots', val: (plan as any)?.promotions?.max_promoted_events || 0, icon: <ICONS.TrendingUp /> },
+                        { label: 'Promoted Event Duration', val: ((plan as any)?.promotions?.promotion_duration_days || 0) + ' days', icon: <ICONS.Calendar /> },
                         { label: 'Paid Events Limit', val: plan.limits?.max_priced_events || 0, icon: <ICONS.Zap /> },
                         { label: 'Staff Accounts', val: plan.limits?.max_staff_accounts || 0, icon: <ICONS.Users /> },
                         { label: 'Monthly Attendees', val: plan.limits?.monthly_attendees || plan.limits?.max_attendees_per_month || 0, icon: <ICONS.Users /> },
@@ -467,8 +467,8 @@ export const SubscriptionPlans: React.FC = () => {
               <div>
                 <label className="block text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-3 ml-1">Plan Limits & Promotions</label>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-6">
-                  <Input label="Max Promoted Events" type="number" value={draft.promotions?.max_promoted_events || 0} onChange={(e: any) => setDraft((prev) => ({ ...prev, promotions: { ...prev.promotions, max_promoted_events: Math.max(0, parseNumeric(e.target.value, 0)) } }))} />
-                  <Input label="Promotion Duration (Days)" type="number" value={draft.promotions?.promotion_duration_days || 7} onChange={(e: any) => setDraft((prev) => ({ ...prev, promotions: { ...prev.promotions, promotion_duration_days: Math.max(1, parseNumeric(e.target.value, 7)) } }))} />
+                  <Input label="Max Promoted Event Slots" type="number" value={draft.promotions?.max_promoted_events ?? 0} onChange={(e: any) => setDraft((prev) => ({ ...prev, promotions: { ...prev.promotions, max_promoted_events: Math.max(0, parseNumeric(e.target.value, 0)) } }))} />
+                  <Input label="Promoted Event Duration (Days)" type="number" value={draft.promotions?.promotion_duration_days ?? 0} onChange={(e: any) => setDraft((prev) => ({ ...prev, promotions: { ...prev.promotions, promotion_duration_days: Math.max(0, parseNumeric(e.target.value, 0)) } }))} />
                   <Input label="Max Staff Accounts" type="number" value={draft.limits.max_staff_accounts} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, max_staff_accounts: parseNumeric(e.target.value, 0) } }))} />
                   <Input label="Max Paid Events" type="number" value={draft.limits.max_priced_events} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, max_priced_events: Math.max(0, parseNumeric(e.target.value, 0)) } }))} />
                   <Input label="Monthly Attendees" type="number" value={draft.limits.max_attendees_per_month} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, max_attendees_per_month: parseNumeric(e.target.value, 0) } }))} />

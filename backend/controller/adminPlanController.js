@@ -96,7 +96,7 @@ const normalizePlanInput = (body = {}) => {
 
   const promotions = {
     max_promoted_events: Math.max(0, Math.floor(toNumber(body?.promotions?.max_promoted_events, DEFAULT_PROMOTIONS.max_promoted_events))),
-    promotion_duration_days: Math.max(1, Math.floor(toNumber(body?.promotions?.promotion_duration_days, DEFAULT_PROMOTIONS.promotion_duration_days))),
+    promotion_duration_days: Math.max(0, Math.floor(toNumber(body?.promotions?.promotion_duration_days, DEFAULT_PROMOTIONS.promotion_duration_days))),
   };
 
   return {

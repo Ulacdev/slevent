@@ -187,8 +187,8 @@ export const UserHome: React.FC = () => {
             <div className="bg-[#F2F2F2] border-2 border-[#2E2E2F]/5 rounded-[3rem] p-10 md:p-14 mb-4">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
                     <div className="max-w-2xl">
-                        <div className="w-12 h-12 rounded-2xl bg-[#2E2E2F]/5 flex items-center justify-center mb-8">
-                            <ICONS.Home className="w-6 h-6 text-[#2E2E2F]/20" />
+                        <div className="w-12 h-12 rounded-2xl bg-[#2E2E2F]/10 flex items-center justify-center mb-8">
+                            <ICONS.Home className="w-6 h-6 text-[#2E2E2F]" />
                         </div>
                         <h1 className="text-4xl md:text-6xl font-black text-[#2E2E2F] tracking-tighter leading-none mb-6">
                             Oh hello, {displayName}
@@ -219,11 +219,11 @@ export const UserHome: React.FC = () => {
             {organizerProfile && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Current Plan Card */}
-                    <div className="bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-[2rem] p-6 flex flex-col justify-between">
+                    <div className="bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-[2rem] p-6 flex flex-col justify-between min-h-[160px]">
                         <div>
                             <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F]/60 mb-2">Current Plan</p>
-                            <p className="text-2xl font-black text-[#2E2E2F] tracking-tight">{organizerProfile.plan?.name || 'Free'}</p>
-                            <p className="text-[10px] text-[#2E2E2F]/60 font-medium mt-2">{organizerProfile.plan?.description || 'Basic events only'}</p>
+                            <p className="text-2xl font-black text-[#2E2E2F] tracking-tight">{organizerProfile.plan?.name || 'No Active Plan'}</p>
+                            <p className="text-[10px] text-[#2E2E2F]/60 font-medium mt-2">{organizerProfile.plan?.description || (organizerProfile?.currentPlanId ? 'Basic events only' : 'Please select a plan to begin')}</p>
                         </div>
                         {!organizerProfile?.currentPlanId && (
                             <Button 
@@ -236,7 +236,7 @@ export const UserHome: React.FC = () => {
                     </div>
 
                     {/* Paid Events Limit Widget */}
-                    <div className="bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-[2rem] p-6">
+                    <div className="bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-[2rem] p-6 flex flex-col justify-between min-h-[160px]">
                         {organizerProfile && (() => {
                             const pricedLimit = Number(organizerProfile.plan?.limits?.max_priced_events || organizerProfile.plan?.max_priced_events || organizerProfile.plan?.maxPricedEvents || 0);
                             const usedCount = stats.paidEventsCount;
@@ -260,7 +260,7 @@ export const UserHome: React.FC = () => {
                                             <div 
                                                 className={`h-full rounded-full transition-all ${
                                                     usedCount >= pricedLimit
-                                                    ? 'bg-red-500' 
+                                                    ? 'bg-[#2E2E2F]/20' 
                                                     : 'bg-[#38BDF2]'
                                                 }`}
                                                 style={{ width: `${Math.min(100, (usedCount / (pricedLimit || 1)) * 100)}%` }}
@@ -279,14 +279,14 @@ export const UserHome: React.FC = () => {
 
                     {/* Email Quota Widget */}
                     {emailQuota && (
-                        <div className={`${organizerProfile?.currentPlanId ? 'bg-[#F2F2F2] border-[#2E2E2F]/10' : 'bg-red-50 border-red-200'} border-2 rounded-[2rem] p-6 h-fit`}>
+                        <div className="bg-[#F2F2F2] border-[#2E2E2F]/10 border-2 rounded-[2rem] p-6 flex flex-col justify-between min-h-[160px]">
                             <div className="flex items-center gap-3 mb-4">
-                                <div className={`p-2 ${organizerProfile?.currentPlanId ? 'bg-[#2E2E2F]/10' : 'bg-red-200'} rounded-lg`}>
-                                    <ICONS.Mail className={`w-5 h-5 ${organizerProfile?.currentPlanId ? 'text-[#2E2E2F]' : 'text-red-600'}`} strokeWidth={2} />
+                                <div className="p-2 bg-[#2E2E2F]/10 rounded-lg">
+                                    <ICONS.Mail className="w-5 h-5 text-[#2E2E2F]" strokeWidth={2} />
                                 </div>
                                 <div>
                                     <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F]/60">Email Quota</p>
-                                    <p className={`text-lg font-black ${organizerProfile?.currentPlanId ? 'text-[#2E2E2F]' : 'text-red-600'}`}>
+                                    <p className="text-lg font-black text-[#2E2E2F]">
                                         {organizerProfile?.currentPlanId ? emailQuota.remaining : '0'}
                                     </p>
                                 </div>
@@ -299,13 +299,13 @@ export const UserHome: React.FC = () => {
                                 {organizerProfile?.currentPlanId ? (
                                     <div className="w-full h-2 bg-[#2E2E2F]/10 rounded-full overflow-hidden">
                                         <div 
-                                            className={`h-full rounded-full transition-all ${emailQuota.canSend ? 'bg-[#2E2E2F]/40' : 'bg-red-500'}`}
+                                            className={`h-full rounded-full transition-all ${emailQuota.canSend ? 'bg-[#2E2E2F]/40' : 'bg-[#2E2E2F]/20'}`}
                                             style={{ width: `${(emailQuota.sent / emailQuota.limit) * 100}%` }}
                                         />
                                     </div>
                                 ) : (
-                                    <div className="w-full h-2 bg-red-200 rounded-full overflow-hidden">
-                                        <div className="h-full rounded-full bg-red-500 w-full" />
+                                    <div className="w-full h-2 bg-[#2E2E2F]/5 rounded-full overflow-hidden">
+                                        <div className="h-full rounded-full bg-[#2E2E2F]/10 w-full" />
                                     </div>
                                 )}
                             </div>
@@ -315,7 +315,7 @@ export const UserHome: React.FC = () => {
             )}
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Create First Event Card */}
                 <div
                     className="group relative bg-[#F2F2F2] border-2 border-[#2E2E2F]/5 rounded-[2.5rem] p-8 flex flex-col items-start transition-all duration-300 hover:border-[#2E2E2F]/20 hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.05)] hover:-translate-y-1"
@@ -328,7 +328,7 @@ export const UserHome: React.FC = () => {
                     <p className="text-[#2E2E2F]/60 font-medium leading-relaxed mb-8 flex-1">
                         Follow the organizer workflow: complete your identity, set up your organization profile, pick a subscription plan, save your event as a draft, then add tickets before finally publishing.
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] group-hover:text-[#2E2E2F] transition-colors">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F]/40 tracking-[0.2em] group-hover:text-[#2E2E2F] transition-colors">
                         Start Wizard <ICONS.ChevronRight className="w-4 h-4" />
                     </div>
                 </div>
@@ -345,7 +345,7 @@ export const UserHome: React.FC = () => {
                     <p className="text-[#2E2E2F]/60 font-medium leading-relaxed mb-8 flex-1">
                         View, edit, and track the performance of all your existing events. Stay on top of registrations.
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] group-hover:text-[#2E2E2F] transition-colors">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F]/40 tracking-[0.2em] group-hover:text-[#2E2E2F] transition-colors">
                         Open Library <ICONS.ChevronRight className="w-4 h-4" />
                     </div>
                 </div>
@@ -362,7 +362,7 @@ export const UserHome: React.FC = () => {
                     <p className="text-[#2E2E2F]/60 font-medium leading-relaxed mb-8 flex-1">
                         Need assistance? Our support team is here to help you optimize your event operations and resolve any technical issues.
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] group-hover:text-[#2E2E2F] transition-colors">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F]/40 tracking-[0.2em] group-hover:text-[#2E2E2F] transition-colors">
                         Open Support <ICONS.ChevronRight className="w-4 h-4" />
                     </div>
                 </div>

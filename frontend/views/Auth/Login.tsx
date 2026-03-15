@@ -13,19 +13,22 @@ const PasswordInput = ({ value, onChange, placeholder, required }: { value: stri
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="relative">
+    <div className="relative group/input">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
+        <ICONS.Lock className="w-5 h-5" />
+      </div>
       <input
         type={showPassword ? 'text' : 'password'}
         placeholder={placeholder || 'Password'}
         value={value}
         onChange={onChange}
         required={required}
-        className="w-full px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal text-[14px] pr-12"
+        className="w-full pl-12 pr-12 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal text-[14px]"
       />
       <button
         type="button"
         onClick={() => setShowPassword(!showPassword)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2E2E2F]/50 hover:text-[#2E2E2F] transition-colors p-1"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2E2E2F]/50 hover:text-[#2E2E2F] transition-colors p-1 z-10"
       >
         {showPassword ? (
           <ICONS.EyeOff className="w-5 h-5" />
@@ -126,13 +129,19 @@ export const LoginPerspective: React.FC = () => {
           </div>
           <form onSubmit={handleLogin} className="flex flex-col gap-5">
             <div className="space-y-4">
-              <Input
-                placeholder="Email address"
-                value={email}
-                onChange={(e: any) => setEmail(e.target.value)}
-                type="email"
-                required
-              />
+              <div className="relative group/input">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
+                  <ICONS.Mail className="w-5 h-5" />
+                </div>
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full pl-12 pr-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal text-[14px]"
+                />
+              </div>
               <div className="space-y-2">
                 <PasswordInput
                   value={password}

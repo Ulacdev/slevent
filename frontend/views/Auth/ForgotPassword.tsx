@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Input } from '../../components/Shared';
 import { supabase } from "../../supabase/supabaseClient.js";
+import { ICONS } from '../../constants';
 
 export const ForgotPassword: React.FC = () => {
     const navigate = useNavigate();
@@ -56,13 +57,19 @@ export const ForgotPassword: React.FC = () => {
 
                     {!message ? (
                         <form onSubmit={handleResetRequest} className="flex flex-col gap-6">
-                            <Input
-                                placeholder="Email Address"
-                                value={email}
-                                onChange={(e: any) => setEmail(e.target.value)}
-                                type="email"
-                                required
-                            />
+                            <div className="relative group/input">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
+                                    <ICONS.Mail className="w-5 h-5" />
+                                </div>
+                                <input
+                                    type="email"
+                                    placeholder="Email Address"
+                                    value={email}
+                                    onChange={(e: any) => setEmail(e.target.value)}
+                                    required
+                                    className="w-full pl-12 pr-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal text-[14px]"
+                                />
+                            </div>
                             <div className="mt-2">
                                 <Button
                                     className="w-full py-4 text-[13px] font-black uppercase tracking-widest shadow-lg shadow-[#38BDF2]/20"

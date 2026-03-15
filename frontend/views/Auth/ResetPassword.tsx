@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Input } from '../../components/Shared';
 import { supabase } from "../../supabase/supabaseClient.js";
+import { ICONS } from '../../constants';
 
 const parseResetParams = (): URLSearchParams => {
     const merged = new URLSearchParams(window.location.search);
@@ -116,20 +117,32 @@ export const ResetPassword: React.FC = () => {
                     {!message ? (
                         <form onSubmit={handleResetPassword} className="flex flex-col gap-6">
                             <div className="space-y-4">
-                                <Input
-                                    placeholder="New Password"
-                                    value={password}
-                                    onChange={(e: any) => setPassword(e.target.value)}
-                                    type="password"
-                                    required
-                                />
-                                <Input
-                                    placeholder="Confirm New Password"
-                                    value={confirmPassword}
-                                    onChange={(e: any) => setConfirmPassword(e.target.value)}
-                                    type="password"
-                                    required
-                                />
+                                <div className="relative group/input">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
+                                        <ICONS.Lock className="w-5 h-5" />
+                                    </div>
+                                    <input
+                                        type="password"
+                                        placeholder="New Password"
+                                        value={password}
+                                        onChange={(e: any) => setPassword(e.target.value)}
+                                        required
+                                        className="w-full pl-12 pr-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal text-[14px]"
+                                    />
+                                </div>
+                                <div className="relative group/input">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
+                                        <ICONS.Lock className="w-5 h-5" />
+                                    </div>
+                                    <input
+                                        type="password"
+                                        placeholder="Confirm New Password"
+                                        value={confirmPassword}
+                                        onChange={(e: any) => setConfirmPassword(e.target.value)}
+                                        required
+                                        className="w-full pl-12 pr-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal text-[14px]"
+                                    />
+                                </div>
                             </div>
                             <div className="mt-2">
                                 <Button

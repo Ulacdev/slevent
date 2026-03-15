@@ -168,8 +168,8 @@ export const OrganizerSubscription: React.FC = () => {
                   <p className="text-xs font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-4 ml-1">Plan Limits & Promotion</p>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { label: 'Promoted Events', val: (currentSubscription.plan as any)?.promotions?.max_promoted_events || 0, icon: <ICONS.TrendingUp /> },
-                      { label: 'Promo Duration', val: ((currentSubscription.plan as any)?.promotions?.promotion_duration_days || 7) + ' days', icon: <ICONS.Calendar /> },
+                      { label: 'Promoted Event Slots', val: (currentSubscription.plan as any)?.promotions?.max_promoted_events || 0, icon: <ICONS.TrendingUp /> },
+                      { label: 'Promoted Event Duration', val: ((currentSubscription.plan as any)?.promotions?.promotion_duration_days || 0) + ' days', icon: <ICONS.Calendar /> },
                       { label: 'Staff Accounts', val: currentSubscription.plan.limits?.max_staff_accounts || 0, icon: <ICONS.Users /> },
                       { label: 'Monthly Attendees', val: currentSubscription.plan.limits?.monthly_attendees || currentSubscription.plan.limits?.max_attendees_per_month || 0, icon: <ICONS.Users /> },
                       { label: 'Paid Events Limit', val: currentSubscription.plan.limits?.max_priced_events || 0, icon: <ICONS.Zap /> },

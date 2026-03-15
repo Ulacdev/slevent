@@ -82,18 +82,71 @@ export const createOrder = async (req, res) => {
     }
     */
 
+    // 0) Validate registration window
+    const { data: event, error: eventErr } = await supabase
+      .from('events')
+      .select('eventId, regOpenAt, regCloseAt, eventName')
+      .eq('eventId', eventId)
+      .maybeSingle();
+    
+    if (eventErr || !event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    
+    const now = new Date();
+    const regOpen = event.regOpenAt ? new Date(event.regOpenAt) : null;
+    const regClose = event.regCloseAt ? new Date(event.regCloseAt) : null;
+    
+    if (regOpen && now < regOpen) {
+      return res.status(400).json({ 
+        error: 'Registration has not started yet', 
+        message: `Registration opens on ${regOpen.toISOString()}`,
+        nextOpenDate: regOpen.toISOString()
+      });
+    }
+    
+    if (regClose && now > regClose) {
+      return res.status(400).json({ 
+        error: 'Registration has closed', 
+        message: `Registration closed on ${regClose.toISOString()}`,
+        closedSince: regClose.toISOString()
+      });
+    }
+
     // 1) Validate inventory and reserve with CAS update
     const ids = items.map(i => i.ticketTypeId);
     const { data: ticketTypes, error: ttErr } = await supabase
       .from('ticketTypes')
-      .select('ticketTypeId, quantityTotal, quantitySold, capacity_per_ticket')
+      .select('ticketTypeId, quantityTotal, quantitySold, capacity_per_ticket, salesStartAt, salesEndAt')
       .in('ticketTypeId', ids);
     if (ttErr) return res.status(500).json({ error: ttErr.message });
     const map = new Map((ticketTypes || []).map(tt => [tt.ticketTypeId, tt]));
 
+    // Validate ticket-level sales windows
     for (const item of items) {
       const tt = map.get(item.ticketTypeId);
       if (!tt) return res.status(400).json({ error: 'Ticket type not found' });
+      
+      const ticketSalesStart = tt.salesStartAt ? new Date(tt.salesStartAt) : null;
+      const ticketSalesEnd = tt.salesEndAt ? new Date(tt.salesEndAt) : null;
+      
+      if (ticketSalesStart && now < ticketSalesStart) {
+        return res.status(400).json({ 
+          error: 'Ticket sales have not started yet',
+          message: `Sales available from ${ticketSalesStart.toISOString()}`
+        });
+      }
+      
+      if (ticketSalesEnd && now > ticketSalesEnd) {
+        return res.status(400).json({ 
+          error: 'Ticket sales have ended',
+          message: `Sales closed on ${ticketSalesEnd.toISOString()}`
+        });
+      }
+    }
+
+    for (const item of items) {
+      const tt = map.get(item.ticketTypeId);
       const currentSold = tt.quantitySold || 0;
       const newSold = currentSold + item.quantity;
       if (newSold > (tt.quantityTotal || 0)) {
@@ -182,7 +235,6 @@ export const createOrder = async (req, res) => {
         status: isFree ? 'PAID' : 'PENDING_PAYMENT',
         expiresAt,
         promotionId,
-        message: req.body.message || null,
         discountAmount,
         promoCode: promoCode ? String(promoCode).trim().toUpperCase() : null
       })

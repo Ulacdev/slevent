@@ -847,20 +847,20 @@ todayEnd.setHours(23, 59, 59, 999);
                   <span className="opacity-80">New: Advanced QR Ticketing & Analytics Launched!</span>
                 </div>
 
-                <h1 className="text-[2.5rem] sm:text-5xl lg:text-[64px] font-[900] text-[#0B1A2E] tracking-tight leading-[1.1] mb-8">
+                <h1 className="text-[2.5rem] sm:text-5xl lg:text-[64px] font-bold text-[#0B1A2E] tracking-tight leading-[1.1] mb-8">
                   Smart Events for<br />
                   Growing Philippine<br />
                   Organizers
                 </h1>
 
-                <p className="text-[#0B1A2E]/75 text-base sm:text-lg font-medium leading-relaxed max-w-[550px] mb-12">
+                <p className="text-[#0B1A2E]/75 text-base sm:text-lg font-normal leading-relaxed max-w-[550px] mb-8">
                   Manage registrations, tickets, attendee check-ins, and performance in one simple, compliance-ready event platform — built for organizers in the Philippines.
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4">
                   <Button
                     onClick={() => navigate('/signup')}
-                    className="px-8 py-3.5 bg-[#38BDF2] border-2 border-[#38BDF2] text-white font-bold tracking-wide text-[15px] h-auto rounded-[14px] shadow-[0_4px_20px_rgba(56,189,242,0.2)] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all flex items-center gap-2 active:scale-95 group"
+                    className="px-8 bg-[#38BDF2] border-2 border-[#38BDF2] text-white font-bold tracking-wide text-[15px] h-[52px] rounded-[14px] shadow-[0_4px_20px_rgba(56,189,242,0.2)] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all flex items-center justify-center gap-2 active:scale-95 group"
                   >
                     Get Started
                     <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -869,7 +869,7 @@ todayEnd.setHours(23, 59, 59, 999);
                   </Button>
                   <Button
                     onClick={() => navigate('/pricing')}
-                    className="px-8 py-3.5 !bg-transparent !border-2 !border-solid !border-[#38BDF2] !text-[#38BDF2] font-bold tracking-wide text-[15px] h-auto rounded-[14px] hover:!bg-[#38BDF2] hover:!text-white transition-colors duration-300 flex items-center gap-2 active:scale-95 group"
+                    className="px-8 !bg-transparent !border-2 !border-solid !border-[#38BDF2] !text-[#38BDF2] font-bold tracking-wide text-[15px] h-[52px] rounded-[14px] hover:!bg-[#38BDF2] hover:!text-white transition-colors duration-300 flex items-center justify-center gap-2 active:scale-95 group"
                   >
                     <ICONS.CreditCard className="w-5 h-5 !text-[#38BDF2] group-hover:!text-white transition-colors duration-300" />
                     Pricing
@@ -878,30 +878,30 @@ todayEnd.setHours(23, 59, 59, 999);
               </div>
 
               {/* Stats Block - Tucked tightly under the buttons */}
-              <div className="mt-16 w-full grid grid-cols-2 sm:grid-cols-3 gap-x-2 gap-y-6 lg:mt-auto pt-4 border-t border-[#2E2E2F]/5">
-                <div className="flex flex-col items-start w-full pr-4">
-                  <h4 className="text-[32px] lg:text-[42px] leading-[1.05] font-[900] text-[#0B1A2E] tracking-tighter text-left mb-2">
+              <div className="mt-10 w-full grid grid-cols-2 sm:grid-cols-3 gap-x-10 gap-y-12">
+                <div className="flex flex-col items-start w-full">
+                  <h4 className="text-[32px] lg:text-[42px] leading-[1.05] font-semibold text-[#0B1A2E] tracking-tighter text-left mb-3">
                     6+ Core<br />Event<br />Modules
                   </h4>
-                  <p className="text-[14px] text-[#0B1A2E]/80 font-medium text-left leading-relaxed">
+                  <p className="text-[14px] text-[#0B1A2E]/80 font-normal text-left leading-relaxed">
                     Ticketing, Registration,<br />Check-in, Analytics,<br />Seats, Reports
                   </p>
                 </div>
 
-                <div className="flex flex-col items-start w-full pr-4">
-                  <h4 className="text-[32px] lg:text-[42px] leading-[1.05] font-[900] text-[#0B1A2E] tracking-tighter text-left mb-2">
+                <div className="flex flex-col items-start w-full">
+                  <h4 className="text-[32px] lg:text-[42px] leading-[1.05] font-semibold text-[#0B1A2E] tracking-tighter text-left mb-3">
                     {organizerCount > 3 ? organizerCount : '3'}+ Active<br />Event<br />Organizers
                   </h4>
-                  <p className="text-[14px] text-[#0B1A2E]/80 font-medium text-left leading-relaxed">
+                  <p className="text-[14px] text-[#0B1A2E]/80 font-normal text-left leading-relaxed">
                     Built with real-world<br />organizer experience
                   </p>
                 </div>
 
-                <div className="flex flex-col items-start w-full col-span-2 sm:col-span-1 pr-4">
-                  <h4 className="text-[32px] lg:text-[42px] leading-[1.05] font-[900] text-[#0B1A2E] tracking-tighter text-left mb-2">
+                <div className="flex flex-col items-start w-full col-span-2 sm:col-span-1">
+                  <h4 className="text-[32px] lg:text-[42px] leading-[1.05] font-semibold text-[#0B1A2E] tracking-tighter text-left mb-3">
                     {(pagination?.total || 0) > 8 ? pagination.total : '8'}+ Hosted<br />Event<br />Workflows
                   </h4>
-                  <p className="text-[14px] text-[#0B1A2E]/80 font-medium text-left leading-relaxed">
+                  <p className="text-[14px] text-[#0B1A2E]/80 font-normal text-left leading-relaxed">
                     From event planning to<br />secure payouts
                   </p>
                 </div>
@@ -1006,7 +1006,7 @@ todayEnd.setHours(23, 59, 59, 999);
           </div>
 
           {/* Category Rail (Top of Available Events) */}
-          <div className="mt-4 mb-10 overflow-visible relative z-10">
+          <div className="mt-24 mb-10 overflow-visible relative z-10">
             <div className="rounded-[1.8rem] border border-[#2E2E2F]/10 bg-[#F2F2F2] px-4 py-6 md:px-7">
               <div className="flex items-center gap-4 mb-6">
                 <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/60">Event Smart Categories.</p>
@@ -1037,7 +1037,7 @@ todayEnd.setHours(23, 59, 59, 999);
               {/* Header Section */}
               <div className="mb-8 text-center flex flex-col items-center">
                 <div className="flex items-center gap-2 mb-2">
-                  <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tighter uppercase leading-none">Promoted Events</h2>
+                  <h2 className="text-2xl font-extrabold text-[#2E2E2F] tracking-tighter uppercase leading-none">Promoted Events</h2>
                   <div className="group/info relative">
                     <ICONS.Info className="w-5 h-5 text-black cursor-help" strokeWidth={1.5} />
                     <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-64 p-4 bg-[#2E2E2F] text-white text-[11px] font-bold rounded-2xl shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover/info:opacity-100 group-hover/info:translate-y-0 transition-all z-50 leading-relaxed text-center">
@@ -1046,7 +1046,7 @@ todayEnd.setHours(23, 59, 59, 999);
                     </div>
                   </div>
                 </div>
-                <p className="text-[#2E2E2F]/40 text-[11px] font-black uppercase tracking-[0.2em]">
+                <p className="text-[#2E2E2F]/40 text-[11px] font-extrabold uppercase tracking-[0.2em]">
                   Discover curated sessions highlighted by organizers as part of their elite plan features.
                 </p>
               </div>
@@ -1129,7 +1129,7 @@ todayEnd.setHours(23, 59, 59, 999);
                                 </div>
                                 <div className="flex flex-col">
                                   <span className="text-[10px] font-black text-white/60 uppercase tracking-[0.2em] leading-none mb-1">Presented by</span>
-                                  <span className="text-sm sm:text-base font-black text-white tracking-tight drop-shadow-md">
+                                  <span className="text-sm sm:text-base font-extrabold text-white tracking-tight drop-shadow-md">
                                     {organizer.organizerName}
                                   </span>
                                 </div>
@@ -1142,7 +1142,7 @@ todayEnd.setHours(23, 59, 59, 999);
                         <div className="flex flex-col gap-6 max-w-md">
                           {/* Event Title */}
                           <div>
-                            <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight mb-2">
+                            <h3 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight mb-2">
                               {promotedEvents[currentPromotedIndex]?.eventName}
                             </h3>
                           </div>
@@ -1193,8 +1193,8 @@ todayEnd.setHours(23, 59, 59, 999);
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />
           <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-5 sm:px-8">
             <div className="max-w-[720px]">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/90 mb-3">Event Marketplace</p>
-              <h1 className="text-[2.1rem] font-black leading-none tracking-tight text-white sm:text-5xl">All Events</h1>
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-white/90 mb-3">Event Marketplace</p>
+              <h1 className="text-[2.1rem] font-extrabold leading-none tracking-tight text-white sm:text-5xl">All Events</h1>
               <p className="mt-4 max-w-[680px] text-base leading-relaxed text-white/95 sm:text-[1.05rem]">
                 Explore all published events and use the sorting controls to narrow by relevance, timing, and location context.
               </p>
@@ -1223,8 +1223,8 @@ todayEnd.setHours(23, 59, 59, 999);
           {/* Events Listing Section Header */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pt-4 mb-2 pb-0 px-0">
             <div className="flex-1 space-y-2">
-              <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tighter uppercase leading-none">{sectionTitle}</h2>
-              <p className="text-[#2E2E2F]/40 text-[11px] font-black uppercase tracking-[0.2em]">{sectionSubtitle}</p>
+              <h2 className="text-2xl font-extrabold text-[#2E2E2F] tracking-tighter uppercase leading-none">{sectionTitle}</h2>
+              <p className="text-[#2E2E2F]/40 text-[11px] font-extrabold uppercase tracking-[0.2em]">{sectionSubtitle}</p>
             </div>
           </div>
         </section>

@@ -1,7 +1,7 @@
-import supabase from './database/db.js';
+    import supabase from './database/db.js';
 
 async function syncPlans() {
-    console.log('🔄 Syncing Plans JSONB columns with planFeatures table...');
+    console.log('🔄 SynMonthly Attendeescing Plans JSONB columns with planFeatures table...');
 
     const { data: plans, error: plansError } = await supabase.from('plans').select('*');
     if (plansError) {

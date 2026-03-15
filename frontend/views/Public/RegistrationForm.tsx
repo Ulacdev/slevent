@@ -87,9 +87,39 @@ export const RegistrationForm: React.FC = () => {
     }
   }, [slug, searchParams]);
 
-  const subtotal = selectedItems.reduce((acc, item) => acc + (item.ticket.priceAmount * item.qty), 0);
+  const now = new Date();
+  
+  // Calculate effective price for each item (applying discount if within sales window)
+  const getEffectivePrice = (ticket: any) => {
+    if (ticket.priceAmount === 0) return 0;
+    
+    if (ticket.saleDiscountPercent && ticket.saleDiscountPercent > 0) {
+      const salesStart = ticket.salesStartAt ? new Date(ticket.salesStartAt) : null;
+      const salesEnd = ticket.salesEndAt ? new Date(ticket.salesEndAt) : null;
+      
+      // Apply discount only if we're within the sales window
+      const isInSalesWindow = (!salesStart || now >= salesStart) && (!salesEnd || now <= salesEnd);
+      if (isInSalesWindow) {
+        return Math.round(ticket.priceAmount * (100 - ticket.saleDiscountPercent) / 100);
+      }
+    }
+    
+    return ticket.priceAmount;
+  };
+
+  const subtotal = selectedItems.reduce((acc, item) => acc + (getEffectivePrice(item.ticket) * item.qty), 0);
   const totalQuantity = selectedItems.reduce((acc, item) => acc + item.qty, 0);
   const totalGuests = selectedItems.reduce((acc, item) => acc + (item.qty * (item.ticket.capacityPerTicket || 1)), 0);
+
+  // Check registration window
+  const regOpen = event?.regOpenAt ? new Date(event.regOpenAt) : null;
+  const regClose = event?.regCloseAt ? new Date(event.regCloseAt) : null;
+  const isRegistrationOpen = (!regOpen || now >= regOpen) && (!regClose || now <= regClose);
+  const registrationStatus = regOpen && now < regOpen 
+    ? `Registration opens on ${regOpen.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+    : regClose && now > regClose
+    ? 'Registration has closed'
+    : null;
 
   // Sync extraGuests array size with totalGuests - 1
   useEffect(() => {
@@ -172,7 +202,7 @@ export const RegistrationForm: React.FC = () => {
         buyerEmail: formData.email,
         buyerPhone: formData.phone,
         company: formData.company,
-        items: selectedItems.map(i => ({ ticketTypeId: i.ticket.ticketTypeId, quantity: i.qty, price: i.ticket.priceAmount })),
+        items: selectedItems.map(i => ({ ticketTypeId: i.ticket.ticketTypeId, quantity: i.qty, price: getEffectivePrice(i.ticket) })),
         totalAmount: totalPayable,
         currency: selectedItems[0]?.ticket.currency || 'PHP',
         promoCode: appliedPromo?.code || null,
@@ -413,13 +443,15 @@ export const RegistrationForm: React.FC = () => {
                   type="submit"
                   size="md"
                   className="flex-[2]"
-                  disabled={submitting}
+                  disabled={submitting || !isRegistrationOpen}
                 >
                   {submitting ? (
                     <span className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-t-[#F2F2F2] rounded-full animate-spin" style={{ borderColor: `${brandColor}4D` }}></div>
                       Processing...
                     </span>
+                  ) : !isRegistrationOpen ? (
+                    registrationStatus || 'Registration is closed'
                   ) : totalPayable === 0 ? 'Confirm Registration' : `Checkout PHP ${formatCurrency(totalPayable)}`}
                 </Button>
                 <Button
@@ -478,10 +510,10 @@ export const RegistrationForm: React.FC = () => {
                         </div>
                         <div className="text-right">
                           <span className="text-sm sm:text-base font-bold tracking-tight block" style={{ color: brandColor }}>
-                            PHP {(item.ticket.priceAmount * item.qty).toLocaleString()}
+                            PHP {(getEffectivePrice(item.ticket) * item.qty).toLocaleString()}
                           </span>
                           <span className="text-[10px] text-[#2E2E2F]/50 font-medium uppercase tracking-wide block mt-0.5">
-                            {item.ticket.priceAmount > 0 ? `PHP ${item.ticket.priceAmount.toLocaleString()} ea` : 'Complimentary'}
+                            {item.ticket.priceAmount > 0 ? `PHP ${getEffectivePrice(item.ticket).toLocaleString()} ea` : 'Complimentary'}
                           </span>
                         </div>
                       </div>

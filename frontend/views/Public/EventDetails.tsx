@@ -300,6 +300,7 @@ export const EventDetails: React.FC = () => {
   const [isOwnEvent, setIsOwnEvent] = useState(false);
   const [organizerEvents, setOrganizerEvents] = useState<Event[]>([]);
   const [recommendedEvents, setRecommendedEvents] = useState<Event[]>([]);
+  const [timeRemaining, setTimeRemaining] = useState<Record<string, string>>({});
 
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
@@ -392,6 +393,76 @@ export const EventDetails: React.FC = () => {
     return () => window.clearTimeout(timeoutId);
   }, [interactionNotice]);
 
+  // Real-time countdown timer for sales start/end times
+  useEffect(() => {
+    if (!event?.ticketTypes) return;
+
+    const updateCountdown = () => {
+      const newRemaining: Record<string, string> = {};
+      const now = new Date();
+
+      event.ticketTypes.forEach(ticket => {
+        // Sales END countdown
+        if (ticket.salesEndAt) {
+          const endTime = new Date(ticket.salesEndAt);
+          const diff = endTime.getTime() - now.getTime();
+
+          if (diff > 0) {
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            if (days > 0) {
+              newRemaining[ticket.ticketTypeId] = `${days}d ${hours}h ${minutes}m`;
+            } else if (hours > 0) {
+              newRemaining[ticket.ticketTypeId] = `${hours}h ${minutes}m ${seconds}s`;
+            } else if (minutes > 0) {
+              newRemaining[ticket.ticketTypeId] = `${minutes}m ${seconds}s`;
+            } else {
+              newRemaining[ticket.ticketTypeId] = `${seconds}s`;
+            }
+          } else {
+            newRemaining[ticket.ticketTypeId] = 'Expired';
+          }
+        }
+
+        // Sales START countdown
+        if (ticket.salesStartAt) {
+          const startTime = new Date(ticket.salesStartAt);
+          const diff = startTime.getTime() - now.getTime();
+
+          if (diff > 0) {
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            if (days > 0) {
+              newRemaining[`${ticket.ticketTypeId}_start`] = `${days}d ${hours}h ${minutes}m`;
+            } else if (hours > 0) {
+              newRemaining[`${ticket.ticketTypeId}_start`] = `${hours}h ${minutes}m ${seconds}s`;
+            } else if (minutes > 0) {
+              newRemaining[`${ticket.ticketTypeId}_start`] = `${minutes}m ${seconds}s`;
+            } else {
+              newRemaining[`${ticket.ticketTypeId}_start`] = `${seconds}s`;
+            }
+          }
+        }
+      });
+
+      setTimeRemaining(newRemaining);
+    };
+
+    // Update immediately
+    updateCountdown();
+
+    // Update every second
+    const intervalId = window.setInterval(updateCountdown, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [event?.ticketTypes]);
+
   if (loading) return <PageLoader label="Loading event details..." />;
   if (!event) return <div className="p-20 text-center text-[#2E2E2F]/60">Session not found.</div>;
 
@@ -416,6 +487,7 @@ export const EventDetails: React.FC = () => {
   // Registration window
   const regOpen = event.regOpenAt ? new Date(event.regOpenAt) : null;
   const regClose = event.regCloseAt ? new Date(event.regCloseAt) : null;
+  const isRegistrationOpen = (!regOpen || now >= regOpen) && (!regClose || now <= regClose);
   let regState = '';
   if (regOpen && now < regOpen) {
     regState = `Opens ${formatDate(regOpen.toISOString(), event.timezone, { year: 'numeric', month: 'short', day: 'numeric' })}`;
@@ -676,9 +748,9 @@ export const EventDetails: React.FC = () => {
               </div>
 
               {/* Event Description */}
-              <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border border-[#2E2E2F]/10 mb-10">
+              <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border border-[#2E2E2F]/10 mb-10 w-full">
                 <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.4em] mb-6">EVENT DETAILS</h3>
-                <p className="text-[#2E2E2F]/70 leading-relaxed text-base font-medium whitespace-pre-wrap">
+                <p className="text-[#2E2E2F]/70 leading-relaxed text-base font-medium whitespace-pre-wrap break-all max-w-full">
                   {event.description}
                 </p>
               </div>
@@ -868,6 +940,8 @@ export const EventDetails: React.FC = () => {
                       const qty = quantities[ticket.ticketTypeId] || 0;
                       const available = ticket.quantityTotal - ticket.quantitySold;
                       const isSoldOut = available <= 0;
+                      const salesEnded = ticket.salesEndAt && new Date() > new Date(ticket.salesEndAt);
+                      const salesNotStarted = ticket.salesStartAt && new Date() < new Date(ticket.salesStartAt);
 
                       return (
                         <div
@@ -886,9 +960,9 @@ export const EventDetails: React.FC = () => {
                             </div>
                             <span
                               className="text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest text-[#F2F2F2]"
-                              style={{ backgroundColor: isSoldOut ? '#2E2E2F' : brandColor }}
+                              style={{ backgroundColor: salesEnded ? '#2E2E2F' : (isSoldOut ? '#2E2E2F' : brandColor) }}
                             >
-                              {isSoldOut ? 'SOLD OUT' : 'AVAILABLE'}
+                              {salesEnded ? 'SALES ENDED' : (isSoldOut ? 'SOLD OUT' : 'AVAILABLE')}
                             </span>
                           </div>
                           
@@ -899,17 +973,61 @@ export const EventDetails: React.FC = () => {
                           )}
 
                           <div className="text-xl font-black text-[#2E2E2F] mb-6 tracking-tighter">
-                            {ticket.priceAmount === 0 ? 'FREE' : <><span className="">PHP</span> <span className="font-black">{ticket.priceAmount.toLocaleString()}.00</span></>}
+                            {ticket.priceAmount === 0 ? 'FREE' : (
+                              ticket.saleDiscountPercent && ticket.saleDiscountPercent > 0 && !salesNotStarted && !salesEnded ? (
+                                <div>
+                                  <div className="flex items-baseline gap-3 mb-2">
+                                    <span className="line-through text-sm text-[#2E2E2F]/50">
+                                      PHP {ticket.priceAmount.toLocaleString()}.00
+                                    </span>
+                                    <span className="text-[#38BDF2] font-black">
+                                      PHP {Math.round(ticket.priceAmount * (100 - ticket.saleDiscountPercent) / 100).toLocaleString()}.00
+                                    </span>
+                                    <span className="text-xs bg-[#38BDF2] text-white px-2 py-0.5 rounded font-bold">
+                                      {ticket.saleDiscountPercent}% OFF
+                                    </span>
+                                  </div>
+                                  {timeRemaining[ticket.ticketTypeId] && (
+                                    <div className="text-xs text-[#38BDF2] font-semibold mt-1">
+                                      Sales end in: {timeRemaining[ticket.ticketTypeId]}
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <><span className="">PHP</span> <span className="font-black">{ticket.priceAmount.toLocaleString()}.00</span></>
+                              )
+                            )}
                           </div>
+
+                          {salesNotStarted && ticket.salesStartAt && (
+                            <div className="mb-4 p-3 rounded-lg bg-[#38BDF2]/10 border border-[#38BDF2]/30">
+                              <div className="text-xs font-semibold text-[#38BDF2]">
+                                Sale begins soon
+                              </div>
+                              {timeRemaining[`${ticket.ticketTypeId}_start`] && (
+                                <div className="text-xs text-[#38BDF2] font-semibold mt-1">
+                                  Sale begins in: {timeRemaining[`${ticket.ticketTypeId}_start`]}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {salesEnded && ticket.saleDiscountPercent && ticket.saleDiscountPercent > 0 && (
+                            <div className="mb-4 p-3 rounded-lg bg-[#2E2E2F]/5 border border-[#2E2E2F]/10">
+                              <div className="text-xs font-semibold text-[#2E2E2F]/70">
+                                Sale ended - regular price restored
+                              </div>
+                            </div>
+                          )}
 
                           <div className="pt-6 border-t border-[#2E2E2F]/10 flex items-center justify-between">
                             <span className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">QUANTITY</span>
                             <div className="flex items-center gap-5">
                               <button
                                 onClick={() => updateQuantity(ticket.ticketTypeId, -1, available)}
-                                disabled={qty === 0}
+                                disabled={qty === 0 || isSoldOut}
                                 className="w-8 h-8 flex items-center justify-center rounded-xl transition-colors disabled:opacity-20 disabled:cursor-not-allowed border border-[#2E2E2F]/10"
-                                style={qty > 0 ? { backgroundColor: brandColor, color: '#F2F2F2' } : {}}
+                                style={qty > 0 && !isSoldOut ? { backgroundColor: brandColor, color: '#F2F2F2' } : {}}
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M20 12H4" /></svg>
                               </button>
@@ -932,11 +1050,11 @@ export const EventDetails: React.FC = () => {
                   <div className="space-y-6 lg:pt-6 lg:border-t lg:border-[#2E2E2F]/10 lg:shrink-0">
                     <Button
                       className="w-full"
-                      disabled={totalQuantity === 0 || isOwnEvent}
+                      disabled={totalQuantity === 0 || isOwnEvent || !isRegistrationOpen}
                       onClick={handleRegister}
-                      style={{ backgroundColor: isOwnEvent ? '#2E2E2F20' : brandColor }}
+                      style={{ backgroundColor: (isOwnEvent || !isRegistrationOpen) ? '#2E2E2F20' : brandColor }}
                     >
-                      {isOwnEvent ? 'Checkout Disabled' : ctaLabel}
+                      {isOwnEvent ? 'Checkout Disabled' : !isRegistrationOpen ? (regState || 'Registration Closed') : ctaLabel}
                     </Button>
                     <div className="flex items-center justify-center gap-3 opacity-30">
                       <ICONS.CreditCard className="w-4 h-4" />

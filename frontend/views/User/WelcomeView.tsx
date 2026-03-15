@@ -120,28 +120,28 @@ const WelcomeView: React.FC = () => {
                     <div className="max-w-[88rem] w-full mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-14">
                         {/* Left Column: Content */}
                         <div className="flex-1 min-w-0 flex flex-col items-start text-left">
-                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FAFAFA] border border-[#2E2E2F]/5 text-[10px] font-bold text-[#2E2E2F] mb-5 shadow-sm">
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FAFAFA] border border-[#2E2E2F]/5 text-[10px] font-bold text-[#2E2E2F] mb-10 shadow-sm">
                                 <span role="img" aria-label="wave">👋</span>
                                 <span className="opacity-80">Let's get you started</span>
                             </div>
 
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#2E2E2F] tracking-tighter leading-[1.05] mb-5">
-                                Welcome to<br />StartupLab!
+                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#2E2E2F] tracking-tighter leading-[1.1] mb-12">
+                                Welcome to<br /><span className="text-[#38BDF2]">Startup</span>Lab!
                             </h1>
-                            <p className="text-[#2E2E2F]/60 text-base lg:text-lg font-medium leading-relaxed mb-6 max-w-xl">
-                                Thanks for being here. What can we help you with first?
+                            <p className="text-[#2E2E2F]/60 text-base lg:text-lg font-medium leading-relaxed mb-16 max-w-xl">
+                                We're absolutely thrilled to have you here! StartupLab is your all-in-one partner for creating unforgettable event experiences in the Philippines and beyond. From intimate workshops to large-scale conferences and summits, we provide the cutting-edge tools you need to manage everything with ease. Your journey to hosting world-class events starts right here. What can we help you with first?
                             </p>
 
-                            <div className="flex flex-wrap gap-3">
+                            <div className="flex flex-wrap gap-4 mt-8 py-2">
                                 <button
                                     onClick={() => setStep('setup')}
-                                    className="px-6 py-3 rounded-full border border-[#2E2E2F]/15 text-sm font-bold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/40 transition-colors"
+                                    className="px-8 py-4 rounded-full border border-[#2E2E2F]/15 text-sm font-bold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/40 transition-colors shadow-sm"
                                 >
                                     Set up my organizer profile
                                 </button>
                                 <button
                                     onClick={() => navigate('/')}
-                                    className="px-6 py-3 rounded-full border border-[#2E2E2F]/15 text-sm font-bold text-[#2E2E2F] hover:bg-[#2E2E2F]/5 transition-colors"
+                                    className="px-8 py-4 rounded-full border border-[#2E2E2F]/15 text-sm font-bold text-[#2E2E2F] hover:bg-[#2E2E2F]/5 transition-colors shadow-sm"
                                 >
                                     Browse events
                                 </button>

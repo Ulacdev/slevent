@@ -75,8 +75,8 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
           ];
 
           const limits = [
-            { label: 'Promoted Events', val: (plan as any)?.promotions?.max_promoted_events || 0, icon: <ICONS.TrendingUp /> },
-            { label: 'Promo Duration', val: ((plan as any)?.promotions?.promotion_duration_days || 7) + ' days', icon: <ICONS.Calendar /> },
+            { label: 'Promoted Event Slots', val: (plan as any)?.promotions?.max_promoted_events || 0, icon: <ICONS.TrendingUp /> },
+            { label: 'Promoted Event Duration', val: ((plan as any)?.promotions?.promotion_duration_days || 0) + ' days', icon: <ICONS.Calendar /> },
             { label: 'Staff Accounts', val: plan.limits?.max_staff_accounts || 0, icon: <ICONS.Users /> },
             { label: 'Monthly Attendees', val: plan.limits?.monthly_attendees || plan.limits?.max_attendees_per_month || 0, icon: <ICONS.Users /> },
             { label: 'Paid Events Limit', val: plan.limits?.max_priced_events || 0, icon: <ICONS.Zap /> },

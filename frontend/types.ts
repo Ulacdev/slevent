@@ -160,6 +160,7 @@ export interface TicketType {
   name: string;
   description?: string;
   priceAmount: number;
+  saleDiscountPercent?: number; // Discount percentage (0-100)
   currency: string;
   quantityTotal: number;
   quantitySold: number;
