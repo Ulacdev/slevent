@@ -117,49 +117,21 @@ export const createOrder = async (req, res) => {
     const ids = items.map(i => i.ticketTypeId);
     const { data: ticketTypes, error: ttErr } = await supabase
       .from('ticketTypes')
-      .select('ticketTypeId, quantityTotal, quantitySold, capacity_per_ticket, salesStartAt, salesEndAt')
+      .select('ticketTypeId, quantityTotal, quantitySold, capacity_per_ticket, salesStartAt, salesEndAt, saleDiscountPercent')
       .in('ticketTypeId', ids);
     if (ttErr) return res.status(500).json({ error: ttErr.message });
     const map = new Map((ticketTypes || []).map(tt => [tt.ticketTypeId, tt]));
 
-    // Validate ticket-level sales windows
+    // NOTE: Sales windows (salesStartAt/salesEndAt) only affect pricing/discounts, NOT ticket availability
+    // Tickets can be sold anytime during the registration window, regardless of sales window
+
+
     for (const item of items) {
       const tt = map.get(item.ticketTypeId);
       if (!tt) return res.status(400).json({ error: 'Ticket type not found' });
       
-      const ticketSalesStart = tt.salesStartAt ? new Date(tt.salesStartAt) : null;
-      
-      // Add a small grace period (e.g., 5 minutes) to account for clock skew between servers/clients
-      // and prevent frustrating "too early" errors when it's just a matter of seconds.
-      const GRACE_PERIOD_MS = 5 * 60 * 1000;
-      const isTooEarly = ticketSalesStart && (now.getTime() + GRACE_PERIOD_MS) < ticketSalesStart.getTime();
-
-      // Log comparison for debugging
-      console.log(`[Orders] Checking ticket sales start for ${tt.ticketTypeId}:`, {
-        now: now.toISOString(),
-        ticketSalesStart: ticketSalesStart ? ticketSalesStart.toISOString() : 'None',
-        isStarted: !ticketSalesStart || !isTooEarly,
-        eventTimezone: event.timezone,
-        gracePeriodMs: GRACE_PERIOD_MS
-      });
-
-      // Only reject if sales HAVEN'T STARTED yet (past the grace period)
-      if (isTooEarly) {
-        return res.status(400).json({ 
-          error: 'Ticket sales have not started yet',
-          message: `Sales available from ${ticketSalesStart.toLocaleString()} (Current server time: ${now.toLocaleString()})`,
-          debug: {
-            serverTime: now.toISOString(),
-            startTime: ticketSalesStart.toISOString(),
-            timezone: event.timezone
-          }
-        });
-      }
-    }
-
-    for (const item of items) {
-      const tt = map.get(item.ticketTypeId);
       const currentSold = tt.quantitySold || 0;
+
       const newSold = currentSold + item.quantity;
       if (newSold > (tt.quantityTotal || 0)) {
         return res.status(400).json({ error: 'Insufficient ticket inventory' });
