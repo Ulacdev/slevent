@@ -128,19 +128,13 @@ export const createOrder = async (req, res) => {
       if (!tt) return res.status(400).json({ error: 'Ticket type not found' });
       
       const ticketSalesStart = tt.salesStartAt ? new Date(tt.salesStartAt) : null;
-      const ticketSalesEnd = tt.salesEndAt ? new Date(tt.salesEndAt) : null;
       
+      // Only reject if sales HAVEN'T STARTED yet
+      // Sales ending just reverts price to full amount, doesn't block purchase
       if (ticketSalesStart && now < ticketSalesStart) {
         return res.status(400).json({ 
           error: 'Ticket sales have not started yet',
           message: `Sales available from ${ticketSalesStart.toISOString()}`
-        });
-      }
-      
-      if (ticketSalesEnd && now > ticketSalesEnd) {
-        return res.status(400).json({ 
-          error: 'Ticket sales have ended',
-          message: `Sales closed on ${ticketSalesEnd.toISOString()}`
         });
       }
     }

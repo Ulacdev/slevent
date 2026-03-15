@@ -121,9 +121,44 @@ export const EventCard: React.FC<EventCardProps> = ({
   }, [event.eventId, event.likesCount]);
 
   // Safe calculation for minPrice if ticketTypes exist
-  const minPrice = event.ticketTypes?.length
-    ? Math.min(...event.ticketTypes.map(t => t.priceAmount))
-    : 0;
+  const discountInfo = useMemo(() => {
+    if (!event.ticketTypes?.length) return null;
+    
+    const now = new Date();
+    const activeDiscounts = event.ticketTypes.filter(t => {
+      const salesStart = t.salesStartAt ? new Date(t.salesStartAt) : null;
+      const salesEnd = t.salesEndAt ? new Date(t.salesEndAt) : null;
+      const isLiveByTime = (!salesStart || now >= salesStart) && (!salesEnd || now <= salesEnd);
+      return isLiveByTime && t.saleDiscountPercent && t.saleDiscountPercent > 0;
+    });
+
+    if (activeDiscounts.length === 0) return null;
+
+    const maxDiscount = Math.max(...activeDiscounts.map(t => t.saleDiscountPercent || 0));
+    
+    return { maxDiscount };
+  }, [event.ticketTypes]);
+
+  const minPrice = useMemo(() => {
+    if (!event.ticketTypes?.length) return 0;
+    const now = new Date();
+    
+    return Math.min(...event.ticketTypes.map(t => {
+      const salesStart = t.salesStartAt ? new Date(t.salesStartAt) : null;
+      const salesEnd = t.salesEndAt ? new Date(t.salesEndAt) : null;
+      const isLiveByTime = (!salesStart || now >= salesStart) && (!salesEnd || now <= salesEnd);
+      
+      if (isLiveByTime && t.saleDiscountPercent && t.saleDiscountPercent > 0) {
+        return Math.round(t.priceAmount * (100 - t.saleDiscountPercent) / 100);
+      }
+      return t.priceAmount;
+    }));
+  }, [event.ticketTypes]);
+
+  const originalMinPrice = useMemo(() => {
+    if (!event.ticketTypes?.length) return 0;
+    return Math.min(...event.ticketTypes.map(t => t.priceAmount));
+  }, [event.ticketTypes]);
 
   const organizerId = event.organizerId || event.organizer?.organizerId || '';
 
@@ -294,6 +329,15 @@ export const EventCard: React.FC<EventCardProps> = ({
               #{trendingRank} Trending
             </div>
           ) : null}
+
+          {discountInfo && (
+            <div 
+              className="rounded-full px-2.5 py-1 text-white text-[10px] font-black uppercase tracking-[0.15em] shadow-lg shadow-black/10 transition-transform active:scale-95"
+              style={{ background: '#38BDF2' }}
+            >
+              SALE {discountInfo.maxDiscount}% OFF
+            </div>
+          )}
       </div>
       <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity pointer-events-none">
         <button
@@ -445,13 +489,20 @@ export const EventCard: React.FC<EventCardProps> = ({
       ) : (
         <div className="pt-5 flex flex-col items-start">
           <p className="text-[12px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-1">Tickets From</p>
-          <p className="text-2xl font-black text-[#2E2E2F]">
-            {minPrice > 0 
-              ? `₱${minPrice.toLocaleString()}` 
-              : (event.ticketTypes && event.ticketTypes.length > 0) || (minPrice === 0 && event.ticketTypes?.length) 
-                ? 'Free' 
-                : 'TBA'}
-          </p>
+          <div className="flex flex-col">
+            {discountInfo && originalMinPrice > minPrice && (
+              <span className="text-[12px] font-bold text-[#2E2E2F]/40 line-through leading-none mb-1">
+                ₱{originalMinPrice.toLocaleString()}
+              </span>
+            )}
+            <p className="text-2xl font-black text-[#2E2E2F] leading-none">
+              {minPrice > 0 
+                ? `₱${minPrice.toLocaleString()}` 
+                : (event.ticketTypes && event.ticketTypes.length > 0) || (minPrice === 0 && event.ticketTypes?.length) 
+                  ? 'Free' 
+                  : 'TBA'}
+            </p>
+          </div>
         </div>
       )}
     </div>

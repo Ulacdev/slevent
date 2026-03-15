@@ -233,7 +233,20 @@ const StreamStatusBanner: React.FC<{ event: Event; isOwner?: boolean }> = ({ eve
 
 const CompactEventRow: React.FC<{ event: Event; brandColor: string }> = ({ event, brandColor }) => {
   const navigate = useNavigate();
-  const minPrice = event.ticketTypes?.length
+  const now = new Date();
+  const discountedMinPrice = event.ticketTypes?.length
+    ? Math.min(...event.ticketTypes.map(t => {
+        const salesStart = t.salesStartAt ? new Date(t.salesStartAt) : null;
+        const salesEnd = t.salesEndAt ? new Date(t.salesEndAt) : null;
+        const isLiveByTime = (!salesStart || now >= salesStart) && (!salesEnd || now <= salesEnd);
+        if (isLiveByTime && t.saleDiscountPercent && t.saleDiscountPercent > 0) {
+          return Math.round(t.priceAmount * (100 - t.saleDiscountPercent) / 100);
+        }
+        return t.priceAmount;
+      }))
+    : 0;
+
+  const originalMinPrice = event.ticketTypes?.length
     ? Math.min(...event.ticketTypes.map(t => t.priceAmount))
     : 0;
 
@@ -258,9 +271,16 @@ const CompactEventRow: React.FC<{ event: Event; brandColor: string }> = ({ event
               {event.locationText}
             </p>
           )}
-          <p className="text-[12px] font-bold text-[#2E2E2F]/60">
-            {minPrice > 0 ? `Starts at ${minPrice.toFixed(2)} PHP` : 'Free'}
-          </p>
+          <div className="text-[12px] font-bold text-[#2E2E2F]/60">
+            {discountedMinPrice > 0 ? (
+              <span className="flex items-center gap-2">
+                {originalMinPrice > discountedMinPrice && (
+                  <span className="line-through text-[#2E2E2F]/30 italic">₱{originalMinPrice.toLocaleString()}</span>
+                )}
+                <span>Starts at ₱{discountedMinPrice.toLocaleString()}</span>
+              </span>
+            ) : 'Free'}
+          </div>
         </div>
         {(event.is_promoted || (event as any).isPromoted) && (
           <div className="mt-2 flex items-center gap-1.5 opacity-80">

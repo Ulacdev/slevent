@@ -353,23 +353,23 @@ const sendSubscriptionConfirmationEmail = async (subscription, plan, organizer) 
 
     const subject = `🎉 Subscription Activated: ${planName} Plan`;
     const html = `
-      <div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\">
-        <div style=\"background: linear-gradient(135deg, #38BDF8, #0EA5E9); padding: 30px; border-radius: 12px 12px 0 0;\">
-          <h1 style=\"color: white; margin: 0;\">Subscription Activated! ✅</h1>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #38BDF8, #0EA5E9); padding: 30px; border-radius: 12px 12px 0 0;">
+          <h1 style="color: white; margin: 0;">Subscription Activated! ✅</h1>
         </div>
-        <div style=\"background: #f9fafb; padding: 30px; border-radius: 0 0 12px 12px; border: 1px solid #e5e7eb;\">
-          <p>Hi \${owner.name || 'there'},</p>
+        <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 12px 12px; border: 1px solid #e5e7eb;">
+          <p>Hi ${owner.name || 'there'},</p>
           <p>Great news! Your subscription has been successfully activated.</p>
-          <div style=\"background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e5e7eb;\">
-            <h3 style=\"margin-top: 0; color: #374151;\">Subscription Details</h3>
-            <p><strong>Plan:</strong> \${planName}</p>
-            <p><strong>Billing:</strong> \${subscription.billingInterval === 'yearly' ? 'Yearly' : 'Monthly'}</p>
-            <p><strong>Amount:</strong> ₱\${Number(price).toLocaleString()} \${currency}</p>
-            <p><strong>Status:</strong> <span style=\"color: green; font-weight: bold;\">Active</span></p>
-            <p><strong>Renews On:</strong> \${endDate}</p>
+          <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e5e7eb;">
+            <h3 style="margin-top: 0; color: #374151;">Subscription Details</h3>
+            <p><strong>Plan:</strong> ${planName}</p>
+            <p><strong>Billing:</strong> ${subscription.billingInterval === 'yearly' ? 'Yearly' : 'Monthly'}</p>
+            <p><strong>Amount:</strong> ₱${Number(price).toLocaleString()} ${currency}</p>
+            <p><strong>Status:</strong> <span style="color: green; font-weight: bold;">Active</span></p>
+            <p><strong>Renews On:</strong> ${endDate}</p>
           </div>
-          <p>You now have access to all features included in your \${planName} plan.</p>
-          <p style=\"color: #6b7280; font-size: 14px; margin-top: 30px;\">
+          <p>You now have access to all features included in your ${planName} plan.</p>
+          <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
             If you have any questions, please contact our support team.
           </p>
         </div>
@@ -385,14 +385,14 @@ const sendSubscriptionConfirmationEmail = async (subscription, plan, organizer) 
       to: owner.email,
       subject,
       html,
-      from: fromAddress ? `\${fromName} <\${fromAddress}>` : undefined,
+      from: fromAddress ? `${fromName} <${fromAddress}>` : undefined,
       config: emailConfig || undefined
     });
 
     if (result.ok) {
-      console.log(`[Subscription] Confirmation email sent to \${owner.email}`);
+      console.log(`[Subscription] Confirmation email sent to ${owner.email}`);
     } else {
-      console.log(`[Subscription] Email skipped: \${result.reason}`);
+      console.log(`[Subscription] Email skipped: ${result.reason}`);
     }
   } catch (error) {
     console.error('[Subscription] Error sending confirmation email:', error.message);
@@ -422,18 +422,18 @@ const sendAdminSubscriptionNotification = async (subscription, plan, organizer) 
       ? plan?.yearlyPrice
       : plan?.monthlyPrice;
 
-    const subject = `Organizer purchased \${planName}`;
+    const subject = `Organizer purchased ${planName}`;
     const html = `
-      <div style=\"font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; padding: 24px;\">
-        <h2 style=\"margin: 0 0 12px; color: #111;\">New subscription purchase</h2>
-        <p style=\"margin: 0 0 16px; color: #444;\">An organizer just completed a plan purchase.</p>
-        <ul style=\"padding-left: 16px; color: #333; line-height: 1.5;\">
-          <li><strong>Organizer:</strong> \${organizer?.organizerName || organizer?.organizerId}</li>
-          <li><strong>Plan:</strong> \${planName}</li>
-          <li><strong>Billing:</strong> \${subscription.billingInterval}</li>
-          <li><strong>Amount:</strong> ₱\${Number(amount || 0).toLocaleString()} \${subscription.currency || 'PHP'}</li>
-          <li><strong>Subscription ID:</strong> \${subscription.subscriptionId}</li>
-          <li><strong>Status:</strong> \${subscription.status}</li>
+      <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; padding: 24px;">
+        <h2 style="margin: 0 0 12px; color: #111;">New subscription purchase</h2>
+        <p style="margin: 0 0 16px; color: #444;">An organizer just completed a plan purchase.</p>
+        <ul style="padding-left: 16px; color: #333; line-height: 1.5;">
+          <li><strong>Organizer:</strong> ${organizer?.organizerName || organizer?.organizerId}</li>
+          <li><strong>Plan:</strong> ${planName}</li>
+          <li><strong>Billing:</strong> ${subscription.billingInterval}</li>
+          <li><strong>Amount:</strong> ₱${Number(amount || 0).toLocaleString()} ${subscription.currency || 'PHP'}</li>
+          <li><strong>Subscription ID:</strong> ${subscription.subscriptionId}</li>
+          <li><strong>Status:</strong> ${subscription.status}</li>
         </ul>
       </div>
     `;
@@ -442,7 +442,7 @@ const sendAdminSubscriptionNotification = async (subscription, plan, organizer) 
       to: toEmail,
       subject,
       html,
-      from: fromAddress ? `\${fromName} <\${fromAddress}>` : undefined,
+      from: fromAddress ? `${fromName} <${fromAddress}>` : undefined,
       config: emailConfig || undefined
     });
   } catch (error) {
@@ -451,39 +451,43 @@ const sendAdminSubscriptionNotification = async (subscription, plan, organizer) 
 };
 
 const createHitPayPayment = async (req, amount, currency, organizerName, planName, subscriptionId) => {
-  const { data: adminUser, error: adminError } = await supabase
+  console.log('[HitPay Credentials] Looking up Admin HitPay for platform subscription...');
+  
+  // Always use Admin credentials for platform subscriptions
+  const { data: adminUser } = await supabase
     .from('users')
     .select('userId')
     .eq('role', 'ADMIN')
     .limit(1)
     .maybeSingle();
 
-  if (adminError || !adminUser) {
-    throw new Error('Platform admin not found. Cannot process payment.');
+  if (!adminUser?.userId) {
+    throw new Error('Platform Admin account not found. Cannot process subscription.');
   }
 
   const { data: settings, error: settingsError } = await supabase
     .from('settings')
     .select('key, value')
     .eq('user_id', adminUser.userId)
-    .in('key', ['hitpay_api_key', 'hitpay_enabled', 'hitpay_mode']);
+    .in('key', ['hitpay_api_key', 'hitpay_salt', 'hitpay_enabled', 'hitpay_mode']);
 
-  if (settingsError || !settings) {
-    throw new Error('Failed to fetch platform payment settings');
+  if (settingsError || !settings || settings.length === 0) {
+    throw new Error('Platform payment settings (HitPay) are not configured by the Admin.');
   }
 
   const mapped = {};
   settings.forEach(s => mapped[s.key] = s.value);
 
   if (mapped['hitpay_enabled'] === 'false') {
-    throw new Error('Platform payments are currently disabled by admin');
+    throw new Error('Platform payments are currently disabled by the administrator.');
   }
 
   const encryptedApiKey = mapped['hitpay_api_key'];
+  const encryptedSalt = mapped['hitpay_salt'];
   const mode = mapped['hitpay_mode'] || 'sandbox';
 
-  if (!encryptedApiKey) {
-    throw new Error('Platform HitPay API Key is not configured in settings');
+  if (!encryptedApiKey || !encryptedSalt) {
+    throw new Error('Platform HitPay credentials are incomplete. Please contact support.');
   }
 
   const hitPayApiKey = decryptString(encryptedApiKey);
@@ -493,17 +497,17 @@ const createHitPayPayment = async (req, amount, currency, organizerName, planNam
 
   const proto = req.headers['x-forwarded-proto'] || 'http';
   const host = req.get('host');
-  const dynamicBaseUrl = `\${proto}://\${host}`;
+  const dynamicBaseUrl = `${proto}://${host}`;
   const serverBaseUrl = (process.env.SERVER_BASE_URL || dynamicBaseUrl).replace(/\/$/, '');
-  const webhookUrl = `\${serverBaseUrl}/api/subscriptions/webhook`;
+  const webhookUrl = `${serverBaseUrl}/api/subscriptions/webhook`;
 
   const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
-  const redirectUrl = `\${frontendUrl}/subscription/success?reference_id=\${encodeURIComponent(subscriptionId)}`;
+  const redirectUrl = `${frontendUrl}/subscription/success?reference_id=${encodeURIComponent(subscriptionId)}`;
 
   const payload = new URLSearchParams();
   payload.set('amount', String(Number(amount || 0)));
   payload.set('currency', currency || 'PHP');
-  payload.set('purpose', `Subscription to \${planName} plan`);
+  payload.set('purpose', `Subscription to ${planName} plan`);
   payload.set('reference_number', subscriptionId);
   payload.set('reference_id', subscriptionId);
   payload.set('redirect_url', redirectUrl);
@@ -518,7 +522,7 @@ const createHitPayPayment = async (req, amount, currency, organizerName, planNam
   );
   if (organizerName) payload.set('name', organizerName);
 
-  const response = await fetch(`\${hitPayUrl}/payment-requests`, {
+  const response = await fetch(`${hitPayUrl}/payment-requests`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -531,7 +535,7 @@ const createHitPayPayment = async (req, amount, currency, organizerName, planNam
   const data = await response.json().catch(() => null);
   if (!response.ok) {
     const errorMessage = data?.error || data?.message || 'Unknown HitPay error';
-    throw new Error(`HitPay payment creation failed: \${errorMessage}`);
+    throw new Error(`HitPay payment creation failed: ${errorMessage}`);
   }
 
   return data || {};
@@ -693,13 +697,19 @@ export const createSubscription = async (req, res) => {
 
     const payment = await createHitPayPayment(req, priceAmount, plan.currency, organizer.organizerName, plan.name, subscription.subscriptionId);
 
-    await supabase
+    // Track that this was processed by admin settings
+    const { error: updateErr } = await supabase
       .from('organizersubscriptions')
       .update({
+        paymentprocessedby: 'admin',
         paymentReference: payment?.url || payment?.payment_url || payment?.checkout_url || payment?.payment_request_url || null,
         hitPayPaymentId: payment?.id || payment?.payment_request_id || payment?.paymentRequestId || null,
       })
       .eq('subscriptionId', subscription.subscriptionId);
+
+    if (updateErr) {
+      console.error('[Subscription] Failed to update post-payment metadata:', updateErr);
+    }
 
     return res.status(201).json({ subscription, paymentUrl: payment?.url || payment?.payment_url || payment?.checkout_url || payment?.payment_request_url });
   } catch (error) {
@@ -813,7 +823,7 @@ export const verifySubscription = async (req, res) => {
     const mode = mapped['hitpay_mode'] || 'sandbox';
     const hitPayUrl = mode === 'live' ? 'https://api.hit-pay.com/v1' : 'https://api.sandbox.hit-pay.com/v1';
 
-    const response = await fetch(`\${hitPayUrl}/payment-requests/\${subscription.hitPayPaymentId}`, {
+    const response = await fetch(`${hitPayUrl}/payment-requests/${subscription.hitPayPaymentId}`, {
       headers: { 'X-Business-Api-Key': apiKey }
     });
 
