@@ -1823,7 +1823,8 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
           canViewEvents: me.canViewEvents ?? true,
           canEditEvents: me.canEditEvents ?? true,
           canManualCheckIn: me.canManualCheckIn ?? true,
-          canReceiveNotifications: me.canReceiveNotifications ?? true
+          canReceiveNotifications: me.canReceiveNotifications ?? true,
+          isOnboarded: !!me.isOnboarded
         });
       } catch {
         clearUser();
@@ -1864,33 +1865,13 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
     };
   }, [role, location.pathname]);
 
-  // NEW: Onboarding Redirect Logic
+  // No longer needed as handled by RequireRoleRoute
+  /*
   React.useEffect(() => {
-    const checkOnboarding = async () => {
-      // Only check if they are trying to access organizer-specific routes
-      const isOrganizerRoute = [
-        '/user-home', '/my-events', '/user-settings', '/organizer-settings',
-        '/account-settings', '/user/attendees', '/user/checkin', '/user/archive',
-        '/user/reports', '/dashboard', '/subscription'
-      ].includes(location.pathname);
-
-      if (!isOrganizerRoute) return;
-      if (role !== UserRole.ORGANIZER && role !== UserRole.STAFF) return;
-      if (location.pathname === '/onboarding') return;
-
-      try {
-        const organizer = await apiService.getMyOrganizer();
-        // If they haven't finished the welcome page, send them there
-        if (organizer && !organizer.isOnboarded) {
-          navigate('/onboarding', { replace: true });
-        }
-      } catch (err) {
-        console.error('Onboarding check failed:', err);
-      }
-    };
-
+    const checkOnboarding = async () => { ... }
     checkOnboarding();
   }, [role, location.pathname, navigate]);
+  */
 
   const handleLogout = async () => {
     try {
@@ -2363,6 +2344,8 @@ const RequireRoleRoute: React.FC<{ allow: UserRole[]; children: React.ReactEleme
   const { setUser, clearUser } = useUser();
   const [checking, setChecking] = React.useState(true);
   const [resolvedRole, setResolvedRole] = React.useState<UserRole | null>(null);
+  const [shouldRedirectToOnboarding, setShouldRedirectToOnboarding] = React.useState(false);
+  const location = useLocation();
 
   React.useEffect(() => {
     let cancelled = false;
@@ -2375,19 +2358,30 @@ const RequireRoleRoute: React.FC<{ allow: UserRole[]; children: React.ReactEleme
         const me = await res.json().catch(() => null);
         const role = normalizeUserRole(me?.role);
         if (!role || !me?.email) throw new Error('Invalid session');
+        
+        const isOnboarded = !!me.isOnboarded;
+        
         setUser({
           role,
           email: me.email,
           name: me.name ?? null,
           imageUrl: me.imageUrl ?? null,
-          canViewEvents: me.canViewEvents,
-          canEditEvents: me.canEditEvents,
-          canManualCheckIn: me.canManualCheckIn,
-          canReceiveNotifications: me.canReceiveNotifications,
+          canViewEvents: me.canViewEvents ?? true,
+          canEditEvents: me.canEditEvents ?? true,
+          canManualCheckIn: me.canManualCheckIn ?? true,
+          canReceiveNotifications: me.canReceiveNotifications ?? true,
+          isOnboarded
         });
 
-        if (!cancelled) setResolvedRole(role);
-      } catch {
+        if (!cancelled) {
+          setResolvedRole(role);
+          // Only redirect if organizer is NOT onboarded AND NOT currently on the onboarding page
+          if (role === UserRole.ORGANIZER && !isOnboarded && location.pathname !== '/onboarding') {
+            setShouldRedirectToOnboarding(true);
+          }
+        }
+      } catch (err) {
+        console.error('Access check error:', err);
         clearUser();
         if (!cancelled) setResolvedRole(null);
       } finally {
@@ -2397,10 +2391,11 @@ const RequireRoleRoute: React.FC<{ allow: UserRole[]; children: React.ReactEleme
 
     checkAccess();
     return () => { cancelled = true; };
-  }, [setUser, clearUser]);
+  }, [setUser, clearUser, location.pathname]);
 
   if (checking) return <PageLoader label="Checking access..." variant="page" />;
   if (!resolvedRole) return <Navigate to="/login" replace />;
+  if (shouldRedirectToOnboarding) return <Navigate to="/onboarding" replace />;
   if (!allow.includes(resolvedRole)) return <Navigate to={roleHomePath(resolvedRole)} replace />;
   return children;
 };

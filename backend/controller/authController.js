@@ -1,5 +1,5 @@
 import db from "../database/db.js";
-import supabase, { createAuthClient } from '../database/db.js';
+import supabase, { createAuthClient, supabaseConfig } from '../database/db.js';
 import { sendMakeNotification } from '../utils/makeWebhook.js';
 
 import { notifyUserByPreference, getAdminSmtpConfig } from "../utils/notificationService.js";
@@ -40,7 +40,9 @@ export const register = async (req, res) => {
       .maybeSingle();
 
     // Create signup verification link in Supabase Auth
-    const frontendUrl = (process.env.FRONTEND_URL || '').replace(/\/$/, '');
+    // Use the custom domain if available, otherwise fallback.
+    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+    
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: 'signup',
       email: email.toLowerCase().trim(),
@@ -79,7 +81,13 @@ export const register = async (req, res) => {
       return res.status(500).json({ message: "Failed to create auth user or generate verification link" });
     }
 
-    const verificationLink = linkData.properties?.action_link;
+    // Supabase generateLink defaults to the "Site URL" in dashboard for the action_link.
+    // If that dashboard setting is wrong (pointing to localhost), the link will be broken.
+    // We manually construct it here using FRONTEND_URL to guarantee it works.
+    const tokenHash = linkData.properties?.hashed_token;
+    const verificationLink = tokenHash
+      ? `${supabaseConfig.url}/auth/v1/verify?token=${encodeURIComponent(tokenHash)}&type=signup&redirect_to=${encodeURIComponent(frontendUrl + '/#/login')}`
+      : linkData.properties?.action_link;
 
     // Insert into users table with role ORGANIZER
     let { data: userData, error: dbError } = await db
