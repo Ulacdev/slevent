@@ -1,29 +1,31 @@
 /* ========================================
    TYPOGRAPHY - PREMIUM UI FONTS
    ======================================== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+/* Using system fonts only (Helvetica). */
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: Helvetica;
 }
 
 html,
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: Helvetica;
+  font-size: 18.5px; /* Increased by ~2.5px for better readability */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Ensure all text elements inherit Inter/Outfit */
+/* Ensure all text elements inherit Helvetica */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-family: 'Outfit', sans-serif;
+  font-family: inherit;
 }
 
 p,
@@ -35,7 +37,7 @@ input,
 textarea,
 select,
 label {
-  font-family: 'Inter', sans-serif;
+  font-family: inherit;
 }
 
 /* ========================================

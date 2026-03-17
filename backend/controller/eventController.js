@@ -410,11 +410,24 @@ export const getEventsFeed = async (req, res) => {
     const enrichedWithOrganizer = await enrichEventsWithOrganizer(paginatedEvents);
 
     // Get likes count
-    const likeCountsMap = await getEventLikeCountsMap((paginatedEvents || []).map(e => e.eventId));
+    const paginatedEventIds = (paginatedEvents || []).map(e => e.eventId);
+    const likeCountsMap = await getEventLikeCountsMap(paginatedEventIds);
+
+    // Fetch registration counts
+    let regCountMap = new Map();
+    const { data: attendees } = await supabase
+      .from('attendees')
+      .select('eventId')
+      .in('eventId', paginatedEventIds);
+    (attendees || []).forEach(att => {
+      regCountMap.set(att.eventId, (regCountMap.get(att.eventId) || 0) + 1);
+    });
+
     const finalEvents = enrichedWithOrganizer.map(e => ({
       ...e,
       ticketTypes: ttMapForFeed.get(e.eventId) || [],
       likesCount: likeCountsMap.get(e.eventId) || 0,
+      registrationCount: regCountMap.get(e.eventId) || 0,
     }));
 
     return res.json({

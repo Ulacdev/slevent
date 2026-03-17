@@ -9,6 +9,8 @@ import { useUser } from '../../context/UserContext';
 import { useEngagement } from '../../context/EngagementContext';
 import { getEventCategoryKeys } from '../../utils/eventCategories';
 
+const BRAND_LOGO_URL = 'https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg';
+
 // Helper to handle JSONB image format
 const getImageUrl = (img: any): string => {
   if (!img) return 'https://via.placeholder.com/800x400';
@@ -779,11 +781,13 @@ export const EventDetails: React.FC = () => {
               <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border border-[#2E2E2F]/10 mb-10">
                 <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.4em] mb-6">ORGANIZED BY</h3>
                 <div className="rounded-[1.5rem] border border-[#2E2E2F]/10 bg-[#F2F2F2] p-5 flex flex-col md:flex-row md:items-center gap-5">
-                  <div className="w-16 h-16 rounded-full overflow-hidden bg-[#2E2E2F] text-[#F2F2F2] flex items-center justify-center text-xl font-bold shrink-0">
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-md bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] flex items-center justify-center shrink-0">
                     {organizer?.profileImageUrl ? (
                       <img src={organizerImage} alt={organizer?.organizerName || 'Organizer'} className="w-full h-full object-cover" />
                     ) : (
-                      organizerInitial
+                      <span className="text-2xl font-black text-white drop-shadow-lg">
+                        {(organizer?.organizerName || 'O').charAt(0).toUpperCase()}
+                      </span>
                     )}
                   </div>
 

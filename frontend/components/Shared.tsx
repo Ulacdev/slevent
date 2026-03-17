@@ -14,7 +14,7 @@ export const Badge: React.FC<{
     neutral: 'bg-[#F2F2F2] text-[#2E2E2F]',
   };
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${styles[type]} ${className}`}>
+    <span className={`px-2 py-0.5 rounded-full text-[13px] font-medium ${styles[type]} ${className}`}>
       {children}
     </span>
   );
@@ -67,9 +67,9 @@ export const Button: React.FC<{
     };
 
     const sizes = {
-      sm: 'px-4 py-2 text-[10px]',
-      md: 'px-4 py-2 text-[11px]',
-      lg: 'px-4 py-2 text-[12px]',
+      sm: 'px-4 py-2 text-[13px]',
+      md: 'px-4 py-2 text-[14px]',
+      lg: 'px-4 py-2 text-[15px]',
     };
 
     return (
@@ -103,6 +103,50 @@ export const Input: React.FC<{
         {...inputProps}
       />
       {error && <p className="text-xs text-[#2E2E2F] mt-1">{error}</p>}
+    </div>
+  );
+};
+
+export const PasswordInput: React.FC<{
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  required?: boolean;
+  className?: string;
+  icon?: React.ReactNode;
+}> = ({ value, onChange, placeholder, required, className = '', icon }) => {
+  const [showPassword, setShowPassword] = React.useState(false);
+  
+  // Use a local copy of ICONS since it's not exported from Shared.tsx
+  const EyeIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+  );
+  const EyeOffIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+  );
+
+  return (
+    <div className={`relative group/input ${className}`}>
+      {icon && (
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10 w-5 h-5 flex items-center justify-center">
+          {icon}
+        </div>
+      )}
+      <input
+        type={showPassword ? 'text' : 'password'}
+        placeholder={placeholder || 'Password'}
+        value={value}
+        onChange={onChange}
+        required={required}
+        className={`w-full ${icon ? 'pl-12' : 'pl-4'} pr-12 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal text-[14px]`}
+      />
+      <button
+        type="button"
+        onClick={() => setShowPassword(!showPassword)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2E2E2F]/50 hover:text-[#2E2E2F] transition-colors p-1 z-10"
+      >
+        {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+      </button>
     </div>
   );
 };
@@ -163,7 +207,7 @@ export const Modal: React.FC<{
                 {title}
               </h2>
               {subtitle && (
-                <p className="mt-1 text-[11px] uppercase tracking-[0.15em] font-medium text-[#2E2E2F]/60">
+                <p className="mt-1 text-[14px] uppercase tracking-[0.15em] font-medium text-[#2E2E2F]/60">
                   {subtitle}
                 </p>
               )}
@@ -221,7 +265,7 @@ export const PageLoader: React.FC<{
           <div className="absolute inset-2 rounded-full bg-[#38BDF2]/10" />
         </div>
         {label && (
-          <p className="mt-4 text-[#2E2E2F] font-semibold uppercase tracking-wide text-[10px]">
+          <p className="mt-4 text-[#2E2E2F] font-semibold uppercase tracking-wide text-[13px]">
             {label}
           </p>
         )}

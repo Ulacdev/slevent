@@ -1,5 +1,6 @@
 import supabase from '../database/db.js';
 import { logAudit } from '../utils/auditLogger.js';
+import { getEventLikeCountsMap } from './eventLikeController.js';
 
 /**
  * Toggle event promotion on/off
@@ -224,9 +225,27 @@ export const getPromotedEvents = async (req, res) => {
       ttMap.set(tt.eventId, list);
     });
 
+    // Get likes count
+    const likeCountsMap = await getEventLikeCountsMap(eventIds);
+
+    // Fetch registration counts
+    let regCountMap = new Map();
+    const { data: attendees } = await supabase
+      .from('attendees')
+      .select('eventId')
+      .in('eventId', eventIds);
+    (attendees || []).forEach(att => {
+      regCountMap.set(att.eventId, (regCountMap.get(att.eventId) || 0) + 1);
+    });
+
     // Get organizer data for each event
     const eventsWithOrganizers = await Promise.all((events || []).map(async (event) => {
-      const eventWithData = { ...event, ticketTypes: ttMap.get(event.eventId) || [] };
+      const eventWithData = { 
+        ...event, 
+        ticketTypes: ttMap.get(event.eventId) || [],
+        likesCount: likeCountsMap.get(event.eventId) || 0,
+        registrationCount: regCountMap.get(event.eventId) || 0
+      };
       if (event.organizerId) {
         const { data: organizer, error: orgErr } = await supabase
           .from('organizers')

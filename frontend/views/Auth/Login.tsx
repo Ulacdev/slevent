@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Input } from '../../components/Shared';
+import { Card, Button, Input, PasswordInput } from '../../components/Shared';
 import { ICONS } from '../../constants';
 import { supabase } from "../../supabase/supabaseClient.js";
 import { useUser } from '../../context/UserContext';
@@ -8,37 +8,6 @@ import { useToast } from '../../context/ToastContext';
 import { UserRole, normalizeUserRole } from '../../types';
 
 const API = import.meta.env.VITE_API_BASE;
-
-const PasswordInput = ({ value, onChange, placeholder, required }: { value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; placeholder?: string; required?: boolean }) => {
-  const [showPassword, setShowPassword] = useState(false);
-
-  return (
-    <div className="relative group/input">
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
-        <ICONS.Lock className="w-5 h-5" />
-      </div>
-      <input
-        type={showPassword ? 'text' : 'password'}
-        placeholder={placeholder || 'Password'}
-        value={value}
-        onChange={onChange}
-        required={required}
-        className="w-full pl-12 pr-12 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal text-[14px]"
-      />
-      <button
-        type="button"
-        onClick={() => setShowPassword(!showPassword)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2E2E2F]/50 hover:text-[#2E2E2F] transition-colors p-1 z-10"
-      >
-        {showPassword ? (
-          <ICONS.EyeOff className="w-5 h-5" />
-        ) : (
-          <ICONS.Eye className="w-5 h-5" />
-        )}
-      </button>
-    </div>
-  );
-};
 
 export const LoginPerspective: React.FC = () => {
   const navigate = useNavigate();
@@ -147,6 +116,7 @@ export const LoginPerspective: React.FC = () => {
                   value={password}
                   onChange={(e: any) => setPassword(e.target.value)}
                   required
+                  icon={<ICONS.Lock className="w-5 h-5" />}
                 />
                 <div className="flex justify-end pr-1">
                   <button

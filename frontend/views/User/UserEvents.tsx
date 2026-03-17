@@ -248,7 +248,7 @@ export const UserEvents: React.FC = () => {
                 apiService.listMyPromotedEvents(),
                 apiService.getPromotionQuota()
             ]);
-            
+
             const map: Record<string, { promoted: boolean; remainingDays?: number }> = {};
             promoted.forEach((p: any) => {
                 map[p.eventId] = { promoted: true, remainingDays: p.remainingDays };
@@ -809,21 +809,19 @@ export const UserEvents: React.FC = () => {
                     <div className="flex flex-wrap items-center gap-3 justify-end">
 
                         {promotionQuota && (
-                            <div className={`flex items-center gap-2 px-3 py-1.5 border rounded-xl shadow-sm whitespace-nowrap ${
-                                promotionQuota.canPromote
+                            <div className={`flex items-center gap-2 px-3 py-1.5 border rounded-xl shadow-sm whitespace-nowrap ${promotionQuota.canPromote
                                     ? 'border-[#38BDF2]/30 bg-[#38BDF2]/10'
                                     : 'border-[#2E2E2F]/10 bg-[#2E2E2F]/5'
-                            }`}>
+                                }`}>
                                 <ICONS.Zap className={`w-3.5 h-3.5 ${promotionQuota.canPromote ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/20'}`} />
                                 <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/60">
                                     Promotions
                                 </span>
                                 <span className="text-[10px] font-bold text-[#2E2E2F]/30">|</span>
-                                <span className={`text-[10px] font-bold ${
-                                    promotionQuota.used < promotionQuota.limit
+                                <span className={`text-[10px] font-bold ${promotionQuota.used < promotionQuota.limit
                                         ? 'text-[#38BDF2]'
                                         : 'text-red-500'
-                                }`}>
+                                    }`}>
                                     {promotionQuota.used}/{promotionQuota.limit}
                                 </span>
                             </div>
@@ -832,7 +830,7 @@ export const UserEvents: React.FC = () => {
                         {organizerProfile && (() => {
                             const pricedLimit = Number(organizerProfile?.plan?.limits?.max_priced_events || organizerProfile?.plan?.max_priced_events || organizerProfile?.plan?.maxPricedEvents || 0);
                             const currentPaidCount = events.filter(e => (e.ticketTypes || []).some((t: any) => (t.priceAmount || 0) > 0)).length;
-                            
+
                             return (
                                 <div className={`flex items-center gap-2 px-3 py-1.5 bg-[#F2F2F2] border rounded-xl shadow-sm whitespace-nowrap border-[#2E2E2F]/10`}>
                                     <ICONS.CreditCard className="w-3.5 h-3.5 text-[#2E2E2F]/40" />
@@ -852,59 +850,59 @@ export const UserEvents: React.FC = () => {
 
                     <div className="flex flex-wrap items-center gap-3 w-full">
 
-                    <div className="relative w-full sm:w-64">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#2E2E2F]/60">
-                            <ICONS.Search className="h-4 w-4" strokeWidth={3} />
+                        <div className="relative w-full sm:w-64">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#2E2E2F]/60">
+                                <ICONS.Search className="h-4 w-4" strokeWidth={3} />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Search events..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="block w-full pl-10 pr-10 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors"
+                            />
                         </div>
-                        <input
-                            type="text"
-                            placeholder="Search events..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="block w-full pl-10 pr-10 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors"
-                        />
-                    </div>
-                    <select
-                        className="px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[11px] font-bold uppercase tracking-widest outline-none transition-colors"
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                        <option value="ALL">All Status</option>
-                        <option value="PUBLISHED">Published</option>
-                        <option value="DRAFT">Draft</option>
-                        <option value="CLOSED">Closed</option>
-                    </select>
+                        <select
+                            className="px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[11px] font-bold uppercase tracking-widest outline-none transition-colors"
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                        >
+                            <option value="ALL">All Status</option>
+                            <option value="PUBLISHED">Published</option>
+                            <option value="DRAFT">Draft</option>
+                            <option value="CLOSED">Closed</option>
+                        </select>
 
-                    <div className="flex items-center bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl p-1">
-                        <button
-                            className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${viewMode === 'list' ? 'bg-[#38BDF2] text-white shadow-sm' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
-                            onClick={() => setViewMode('list')}
-                        >
-                            List
-                        </button>
-                        <button
-                            className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${viewMode === 'calendar' ? 'bg-[#38BDF2] text-white shadow-sm' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
-                            onClick={() => setViewMode('calendar')}
-                        >
-                            Calendar
-                        </button>
-                    </div>
+                        <div className="flex items-center bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl p-1">
+                            <button
+                                className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${viewMode === 'list' ? 'bg-[#38BDF2] text-white shadow-sm' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                                onClick={() => setViewMode('list')}
+                            >
+                                List
+                            </button>
+                            <button
+                                className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${viewMode === 'calendar' ? 'bg-[#38BDF2] text-white shadow-sm' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                                onClick={() => setViewMode('calendar')}
+                            >
+                                Calendar
+                            </button>
+                        </div>
 
-                    <div className="flex flex-col items-end">
-                        <Button
-                            onClick={handleOpenCreate}
-                            className="rounded-xl px-6 py-3 bg-[#38BDF2] text-[#F2F2F2] hover:text-[#F2F2F2] font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={!canStartCreation || organizerLoading || isAtTotalLimit}
-                        >
-                            <span className="flex items-center gap-2 font-bold text-sm">
-                                <ICONS.Calendar className="w-4 h-4" />
-                                {isAtTotalLimit ? 'Limit Reached' : 'Create Event'}
-                            </span>
-                        </Button>
-                        {isAtTotalLimit && (
-                            <p className="mt-1.5 text-[10px] text-[#2E2E2F]/50 font-bold uppercase tracking-tight">Upgrade for more events</p>
-                        )}
-                    </div>
+                        <div className="flex flex-col items-end">
+                            <Button
+                                onClick={handleOpenCreate}
+                                className="rounded-xl px-6 py-3 bg-[#38BDF2] text-[#F2F2F2] hover:text-[#F2F2F2] font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={!canStartCreation || organizerLoading || isAtTotalLimit}
+                            >
+                                <span className="flex items-center gap-2 font-bold text-sm">
+                                    <ICONS.Calendar className="w-4 h-4" />
+                                    {isAtTotalLimit ? 'Limit Reached' : 'Create Event'}
+                                </span>
+                            </Button>
+                            {isAtTotalLimit && (
+                                <p className="mt-1.5 text-[10px] text-[#2E2E2F]/50 font-bold uppercase tracking-tight">Upgrade for more events</p>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -984,8 +982,8 @@ export const UserEvents: React.FC = () => {
                                             >
                                                 <MoreVerticalIcon className="w-5 h-5" />
                                             </button>
-                                            
-                                            <div 
+
+                                            <div
                                                 className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${openDropdownId === event.eventId ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible group-hover/more:opacity-100 group-hover/more:scale-100 group-hover/more:visible'}`}
                                                 onClick={(e) => e.stopPropagation()}
                                             >
@@ -1001,7 +999,7 @@ export const UserEvents: React.FC = () => {
                                                 <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                                                     <ICONS.Edit className="w-4 h-4" /> Edit
                                                 </button>
-                                                <button 
+                                                <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         const isPromoted = promotedEventsMap[event.eventId]?.promoted;
@@ -1099,14 +1097,14 @@ export const UserEvents: React.FC = () => {
                                                 </td>
                                                 <td className="px-8 py-7 !overflow-visible align-middle">
                                                     <div className="flex justify-center items-center relative group/more h-full">
-                                                        <button 
+                                                        <button
                                                             onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === event.eventId ? null : event.eventId); }}
                                                             className={`p-1.5 rounded-xl transition-all duration-300 ${openDropdownId === event.eventId ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'hover:bg-[#2E2E2F]/5 text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
                                                         >
                                                             <MoreVerticalIcon className="w-5 h-5" />
                                                         </button>
-                                                        
-                                                        <div 
+
+                                                        <div
                                                             className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${openDropdownId === event.eventId ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible group-hover/more:opacity-100 group-hover/more:scale-100 group-hover/more:visible'}`}
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
@@ -1122,7 +1120,7 @@ export const UserEvents: React.FC = () => {
                                                             <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                                                                 <ICONS.Edit className="w-4 h-4" /> Edit
                                                             </button>
-                                                            <button 
+                                                            <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     const isPromoted = promotedEventsMap[event.eventId]?.promoted;
@@ -1494,7 +1492,7 @@ export const UserEvents: React.FC = () => {
                                                                 frameBorder="0"
                                                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                                                 allowFullScreen
-                                                                />
+                                                            />
                                                         </div>
                                                     ) : (
                                                         <div className="flex flex-col items-center justify-center p-10 rounded-2xl bg-[#F2F2F2]/5 border border-[#F2F2F2]/5 border-dashed">
@@ -2002,8 +2000,8 @@ export const UserEvents: React.FC = () => {
                                                     )}
                                                 </div>
                                                 <div className="mt-8 space-y-4">
-                                                    <button 
-                                                        type="button" 
+                                                    <button
+                                                        type="button"
                                                         disabled
                                                         className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-white/50 cursor-not-allowed"
                                                         style={{ backgroundColor: `${previewAccentColor}4D` }}
@@ -2024,15 +2022,15 @@ export const UserEvents: React.FC = () => {
                                             <div>
                                                 <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#2E2E2F]/45">Starting from</p>
                                                 <p className="text-lg font-black text-[#2E2E2F]">
-                                                    {formData.ticketTypes && formData.ticketTypes.length > 0 
-                                                        ? formData.ticketTypes.some((t: any) => t.priceAmount === 0) 
-                                                            ? 'FREE' 
+                                                    {formData.ticketTypes && formData.ticketTypes.length > 0
+                                                        ? formData.ticketTypes.some((t: any) => t.priceAmount === 0)
+                                                            ? 'FREE'
                                                             : `PHP ${Math.min(...formData.ticketTypes.map((t: any) => t.priceAmount)).toLocaleString()}`
                                                         : 'Add inventory'}
                                                 </p>
                                             </div>
-                                            <button 
-                                                type="button" 
+                                            <button
+                                                type="button"
                                                 className={`px-6 py-3 rounded-xl text-sm font-black transition-all ${formData.ticketTypes && formData.ticketTypes.length > 0 ? 'text-white shadow-lg' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]/45 cursor-not-allowed'}`}
                                                 style={formData.ticketTypes && formData.ticketTypes.length > 0 ? { backgroundColor: previewAccentColor } : {}}
                                                 disabled={!formData.ticketTypes || formData.ticketTypes.length === 0}
@@ -2318,9 +2316,9 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
                                         placeholder="0"
                                     />
                                     {newTicket.saleDiscountPercent && newTicket.saleDiscountPercent > 0 && (
-                                      <div className="text-[10px] font-bold text-[#38BDF2] whitespace-nowrap pb-3">
-                                        ₱{Math.round((newTicket.priceAmount * (100 - newTicket.saleDiscountPercent)) / 100)}
-                                      </div>
+                                        <div className="text-[10px] font-bold text-[#38BDF2] whitespace-nowrap pb-3">
+                                            ₱{Math.round((newTicket.priceAmount * (100 - newTicket.saleDiscountPercent)) / 100)}
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -2396,12 +2394,12 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
                                         <span className="text-[#2E2E2F]/60">{t.status ? 'Active' : 'Inactive'}</span>
                                         <span className="text-[#2E2E2F]/60">Qty {t.quantityTotal}</span>
                                         {t.priceAmount > 0 && (
-                                          <>
-                                            <span className="text-[#2E2E2F]/40">•</span>
-                                            <span className="text-[#38BDF2] font-bold">
-                                              {Math.round(((t.quantitySold || 0) / (t.quantityTotal || 1)) * 100)}% Sold
-                                            </span>
-                                          </>
+                                            <>
+                                                <span className="text-[#2E2E2F]/40">•</span>
+                                                <span className="text-[#38BDF2] font-bold">
+                                                    {Math.round(((t.quantitySold || 0) / (t.quantityTotal || 1)) * 100)}% Sold
+                                                </span>
+                                            </>
                                         )}
                                         {t.capacityPerTicket && t.capacityPerTicket > 1 && (
                                             <span className="text-[#38BDF2] font-bold">Bundle ({t.capacityPerTicket} Guests)</span>
@@ -2498,9 +2496,9 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
                                                 className={`flex-1 px-3 py-2 border border-[#2E2E2F]/20 rounded-xl text-sm outline-none focus:border-[#38BDF2] ${t.priceAmount === 0 ? 'bg-[#F2F2F2] text-[#2E2E2F]/60' : 'bg-[#F2F2F2]'}`}
                                             />
                                             {t.saleDiscountPercent && t.saleDiscountPercent > 0 && (
-                                              <div className="text-[10px] font-bold text-[#38BDF2] whitespace-nowrap pb-2">
-                                                ₱{Math.round((t.priceAmount * (100 - t.saleDiscountPercent)) / 100)}
-                                              </div>
+                                                <div className="text-[10px] font-bold text-[#38BDF2] whitespace-nowrap pb-2">
+                                                    ₱{Math.round((t.priceAmount * (100 - t.saleDiscountPercent)) / 100)}
+                                                </div>
                                             )}
                                         </div>
                                     </div>
@@ -2572,9 +2570,9 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
                             <div className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">
                                 Sold: {t.quantitySold || 0}
                                 {t.priceAmount > 0 && (
-                                  <span className="text-[#38BDF2] ml-2">
-                                    ({Math.round(((t.quantitySold || 0) / (t.quantityTotal || 1)) * 100)}%)
-                                  </span>
+                                    <span className="text-[#38BDF2] ml-2">
+                                        ({Math.round(((t.quantitySold || 0) / (t.quantityTotal || 1)) * 100)}%)
+                                    </span>
                                 )}
                             </div>
                         </div>
@@ -2590,12 +2588,11 @@ function TicketManager({ event, onSave, submitting, setNotification, maxEventCap
                         <span>{tickets.reduce((acc, t) => acc + (t.quantityTotal * (t.capacityPerTicket || 1)), 0)} / {maxEventCapacity}</span>
                     </div>
                     <div className="w-full h-1.5 bg-[#F2F2F2]/10 rounded-full overflow-hidden">
-                        <div 
-                            className={`h-full transition-all ${
-                                tickets.reduce((acc, t) => acc + (t.quantityTotal * (t.capacityPerTicket || 1)), 0) > maxEventCapacity ? 'bg-red-500' : 'bg-[#38BDF2]'
-                            }`}
-                            style={{ 
-                                width: `${Math.min(100, (tickets.reduce((acc, t) => acc + (t.quantityTotal * (t.capacityPerTicket || 1)), 0) / maxEventCapacity) * 100)}%` 
+                        <div
+                            className={`h-full transition-all ${tickets.reduce((acc, t) => acc + (t.quantityTotal * (t.capacityPerTicket || 1)), 0) > maxEventCapacity ? 'bg-red-500' : 'bg-[#38BDF2]'
+                                }`}
+                            style={{
+                                width: `${Math.min(100, (tickets.reduce((acc, t) => acc + (t.quantityTotal * (t.capacityPerTicket || 1)), 0) / maxEventCapacity) * 100)}%`
                             }}
                         />
                     </div>

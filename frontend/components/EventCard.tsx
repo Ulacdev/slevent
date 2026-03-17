@@ -71,7 +71,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
         {/* Promoted Badge - Top Right */}
         {event.is_promoted && (
           <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-black text-[#2E2E2F] flex items-center gap-1.5 shadow-md animate-in fade-in slide-in-from-top-2 duration-500">
-            <span className="text-base">🔥</span>
+            <ICONS.Info className="w-4 h-4 text-[#38BDF2]" strokeWidth={2.5} />
             <span>PROMOTED</span>
           </div>
         )}
@@ -158,7 +158,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
         {event.is_promoted && event.promotionEndDate && (
           <div className="pt-2">
             <p className="text-[8px] text-[#38BDF2] font-black uppercase tracking-widest flex items-center gap-1">
-              <span>🔥</span>
+              <ICONS.Info className="w-3 h-3" strokeWidth={2.5} />
               {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(
                 new Date(event.promotionEndDate)
               )}

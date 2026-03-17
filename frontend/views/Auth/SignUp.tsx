@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Input } from '../../components/Shared';
+import { Card, Button, Input, PasswordInput } from '../../components/Shared';
 import { useToast } from '../../context/ToastContext';
 import { ICONS } from '../../constants';
 
@@ -128,36 +128,24 @@ export const SignUpView: React.FC = () => {
 
               <div className="space-y-1.5 w-full">
                 <label className="block text-sm font-medium text-[#2E2E2F]/70">Password</label>
-                <div className="relative group/input">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
-                    <ICONS.Lock className="w-5 h-5" />
-                  </div>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    required
-                    value={formData.password}
-                    onChange={(e: any) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal text-[14px]"
-                  />
-                </div>
+                <PasswordInput
+                  placeholder="••••••••"
+                  required
+                  value={formData.password}
+                  onChange={(e: any) => setFormData({ ...formData, password: e.target.value })}
+                  icon={<ICONS.Lock className="w-5 h-5" />}
+                />
               </div>
 
               <div className="space-y-1.5 w-full">
                 <label className="block text-sm font-medium text-[#2E2E2F]/70">Confirm Password</label>
-                <div className="relative group/input">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
-                    <ICONS.Lock className="w-5 h-5" />
-                  </div>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={(e: any) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal text-[14px]"
-                  />
-                </div>
+                <PasswordInput
+                  placeholder="••••••••"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={(e: any) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  icon={<ICONS.Lock className="w-5 h-5" />}
+                />
               </div>
             </div>
 

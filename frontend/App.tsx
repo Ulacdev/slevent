@@ -2428,6 +2428,21 @@ const RequireRoleRoute: React.FC<{ allow: UserRole[]; children: React.ReactEleme
   return children;
 };
 
+const ScrollToTop: React.FC = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Scroll to top whenever the path changes
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  }, [location.pathname]);
+
+  return null;
+};
+
 const HashBypassBridge: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -2499,6 +2514,7 @@ const App: React.FC = () => (
   <ToastProvider>
     <ToastContainer />
     <Router>
+    <ScrollToTop />
     <HashBypassBridge />
     <GlobalOnboardingGuard>
     <Routes>

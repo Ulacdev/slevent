@@ -1003,7 +1003,14 @@ export const apiService = {
       cache: 'no-store'
     });
     if (!res.ok) throw new Error(`Failed to load promoted events: ${res.status}`);
-    return await res.json();
+    const data = await res.json();
+    if (data.events) {
+      data.events = data.events.map((ev: any) => ({
+        ...ev,
+        ticketTypes: ev.ticketTypes?.map(apiService._mapTicketType) || []
+      }));
+    }
+    return data;
   },
 
   getAnalytics: async (): Promise<AnalyticsSummary> => {

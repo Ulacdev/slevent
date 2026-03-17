@@ -96,14 +96,14 @@ export const OrganizerProfilePage: React.FC = () => {
                 const matchingLive = allLiveEvents.find(e => {
                     const isOurOrg = e.organizerId === orgData.organizerId;
                     const hasVideo = isEmbeddableVideo(e.streaming_url || '');
-                    
+
                     // Ensure the event is actually happening NOW
                     const eventNow = new Date();
                     const eventStart = new Date(e.startAt);
                     const eventEnd = e.endAt ? new Date(e.endAt) : new Date(eventStart.getTime() + 2 * 60 * 60 * 1000);
-                    
+
                     const isOngoing = eventNow >= eventStart && eventNow < eventEnd;
-                    
+
                     return isOurOrg && hasVideo && isOngoing;
                 });
                 setLiveEvent(matchingLive || null);
@@ -164,12 +164,12 @@ export const OrganizerProfilePage: React.FC = () => {
     const upcomingEvents = events.filter(e => {
         const end = e.endAt ? new Date(e.endAt) : new Date(new Date(e.startAt).getTime() + 2 * 60 * 60 * 1000);
         return end >= now;
-    }).sort((a,b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
+    }).sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
 
     const pastEvents = events.filter(e => {
         const end = e.endAt ? new Date(e.endAt) : new Date(new Date(e.startAt).getTime() + 2 * 60 * 60 * 1000);
         return end < now;
-    }).sort((a,b) => new Date(b.startAt).getTime() - new Date(a.startAt).getTime());
+    }).sort((a, b) => new Date(b.startAt).getTime() - new Date(a.startAt).getTime());
 
     const displayEvents = activeTab === 'upcoming' ? upcomingEvents : pastEvents;
 
@@ -313,14 +313,14 @@ export const OrganizerProfilePage: React.FC = () => {
 
                     {/* Navigation Bar */}
                     <div className="flex items-center gap-8 border-t border-[#2E2E2F]/5">
-                        <button 
+                        <button
                             onClick={() => setActiveTab('upcoming')}
                             className="relative pt-6 pb-4 px-2 group"
                         >
                             <span className={`font-black text-[10px] uppercase tracking-[0.3em] transition-colors ${activeTab === 'upcoming' ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40'}`}>Upcoming Events</span>
                             {activeTab === 'upcoming' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#38BDF2] rounded-full" />}
                         </button>
-                        <button 
+                        <button
                             onClick={() => setActiveTab('past')}
                             className="relative pt-6 pb-4 px-2 group"
                         >
@@ -452,7 +452,7 @@ const EventMiniCard: React.FC<{ event: Event; brandColor: string; isPast?: boole
                     alt={event.eventName}
                     className="w-full h-full object-cover"
                 />
-                
+
                 {/* Status Badge */}
                 <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
                     {isPast ? (
@@ -469,11 +469,11 @@ const EventMiniCard: React.FC<{ event: Event; brandColor: string; isPast?: boole
                 {/* Promoted Badge - Upper Left (Offset if status badge exists) */}
                 {(event.is_promoted || (event as any).isPromoted) && (
                     <div className="absolute top-12 left-4 z-10 group/promoted">
-                        <div 
+                        <div
                             className="flex items-center gap-1.5 px-3 py-1 rounded-full shadow-lg border border-white/20 animate-in fade-in zoom-in duration-500 cursor-help"
-                            style={{ 
-                                background: brandColor 
-                                    ? `linear-gradient(135deg, ${brandColor}, ${brandColor}DD)` 
+                            style={{
+                                background: brandColor
+                                    ? `linear-gradient(135deg, ${brandColor}, ${brandColor}DD)`
                                     : 'linear-gradient(135deg, #38BDF2, #00AEEF)',
                                 boxShadow: `0 0 15px ${brandColor ? brandColor + '66' : 'rgba(56,189,242,0.4)'}`
                             }}

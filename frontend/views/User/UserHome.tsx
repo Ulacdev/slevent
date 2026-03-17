@@ -54,8 +54,8 @@ export const UserHome: React.FC = () => {
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
     // Check if organizer's plan has priority support
-    const hasPrioritySupport = organizerProfile?.plan?.features?.enable_priority_support || 
-                               organizerProfile?.plan?.features?.priority_support;
+    const hasPrioritySupport = organizerProfile?.plan?.features?.enable_priority_support ||
+        organizerProfile?.plan?.features?.priority_support;
 
     React.useEffect(() => {
         const fetchData = async () => {
@@ -70,9 +70,9 @@ export const UserHome: React.FC = () => {
                     }),
                 ]);
                 const liveCount = events.filter(e => e.status === 'PUBLISHED').length;
-                
+
                 // Calculate paid events (all events with at least one paid ticket)
-                const paidCount = events.filter(e => 
+                const paidCount = events.filter(e =>
                     (e.ticketTypes || []).some((t: any) => (t.priceAmount || 0) > 0)
                 ).length;
 
@@ -226,7 +226,7 @@ export const UserHome: React.FC = () => {
                             <p className="text-[10px] text-[#2E2E2F]/60 font-medium mt-2">{organizerProfile.plan?.description || (organizerProfile?.currentPlanId ? 'Basic events only' : 'Please select a plan to begin')}</p>
                         </div>
                         {!organizerProfile?.currentPlanId && (
-                            <Button 
+                            <Button
                                 onClick={() => setIsUpgradeModalOpen(true)}
                                 className="mt-4 w-full bg-[#38BDF2] text-white font-black text-[10px] uppercase tracking-wider"
                             >
@@ -240,7 +240,7 @@ export const UserHome: React.FC = () => {
                         {organizerProfile && (() => {
                             const pricedLimit = Number(organizerProfile.plan?.limits?.max_priced_events || organizerProfile.plan?.max_priced_events || organizerProfile.plan?.maxPricedEvents || 0);
                             const usedCount = stats.paidEventsCount;
-                            
+
                             return (
                                 <>
                                     <div className="flex items-center gap-4 mb-4">
@@ -257,18 +257,17 @@ export const UserHome: React.FC = () => {
 
                                     <div>
                                         <div className="w-full h-2 bg-[#2E2E2F]/10 rounded-full overflow-hidden">
-                                            <div 
-                                                className={`h-full rounded-full transition-all ${
-                                                    usedCount >= pricedLimit
-                                                    ? 'bg-[#2E2E2F]/20' 
-                                                    : 'bg-[#38BDF2]'
-                                                }`}
+                                            <div
+                                                className={`h-full rounded-full transition-all ${usedCount >= pricedLimit
+                                                        ? 'bg-[#2E2E2F]/20'
+                                                        : 'bg-[#38BDF2]'
+                                                    }`}
                                                 style={{ width: `${Math.min(100, (usedCount / (pricedLimit || 1)) * 100)}%` }}
                                             />
                                         </div>
                                         <p className="text-[9px] font-bold text-[#2E2E2F]/40 mt-2 uppercase tracking-tight">
-                                            {pricedLimit === 0 
-                                                ? 'No paid events allowed on current plan' 
+                                            {pricedLimit === 0
+                                                ? 'No paid events allowed on current plan'
                                                 : `${Math.max(0, pricedLimit - usedCount)} paid events remaining`}
                                         </p>
                                     </div>
@@ -298,7 +297,7 @@ export const UserHome: React.FC = () => {
                                 </p>
                                 {organizerProfile?.currentPlanId ? (
                                     <div className="w-full h-2 bg-[#2E2E2F]/10 rounded-full overflow-hidden">
-                                        <div 
+                                        <div
                                             className={`h-full rounded-full transition-all ${emailQuota.canSend ? 'bg-[#2E2E2F]/40' : 'bg-[#2E2E2F]/20'}`}
                                             style={{ width: `${(emailQuota.sent / emailQuota.limit) * 100}%` }}
                                         />
