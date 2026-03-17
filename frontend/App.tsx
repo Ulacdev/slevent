@@ -558,7 +558,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             )}
           </Link>
         </div>
-        <nav className={`flex-1 py-6 ${desktopSidebarOpen ? 'px-4' : 'px-2'} flex flex-col gap-1 overflow-y-auto overflow-x-visible scrollbar-none scroll-smooth`}
+        <nav className={`flex-1 py-6 pb-0 ${desktopSidebarOpen ? 'px-4' : 'px-2'} flex flex-col space-y-1 overflow-y-auto overflow-x-visible scrollbar-none scroll-smooth`}
           style={{ width: desktopSidebarOpen ? '100%' : '260px', paddingRight: desktopSidebarOpen ? '0' : '180px' }}>
           {menuItems.map((item: any, idx) => {
             const isActive = checkIsActiveAdmin(item.path);
@@ -2240,7 +2240,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             )}
           </Link>
         </div>
-        <nav className={`flex-1 py-6 ${desktopSidebarOpen ? 'px-4' : 'px-2'} flex flex-col gap-1 overflow-y-auto overflow-x-visible ${desktopSidebarOpen ? 'custom-scrollbar' : 'scrollbar-none'} scroll-smooth`}
+        <nav className={`flex-1 py-6 pb-0 ${desktopSidebarOpen ? 'px-4' : 'px-2'} flex flex-col space-y-1 overflow-y-auto overflow-x-visible ${desktopSidebarOpen ? 'custom-scrollbar' : 'scrollbar-none'} scroll-smooth`}
           style={{ width: desktopSidebarOpen ? '100%' : '260px', paddingRight: desktopSidebarOpen ? '0' : '180px' }}>
           {menuItems.map((item: any, idx) => {
             const isActive = checkIsActive(item.path);
