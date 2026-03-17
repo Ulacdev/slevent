@@ -255,7 +255,7 @@ export const TeamSettings: React.FC = () => {
                                 variant={staffLimit?.allowed === false ? 'outline' : 'primary'}
                                 className={staffLimit?.allowed === false ? 'opacity-50 cursor-not-allowed border-[#2E2E2F]/10' : ''}
                             >
-                                <span className="text-[9px] font-black uppercase tracking-widest flex items-center gap-2 text-[#2E2E2F]">
+                                <span className={`text-[9px] font-black uppercase tracking-widest flex items-center gap-2 ${staffLimit?.allowed === false ? 'text-[#2E2E2F]' : 'text-white'}`}>
                                     {staffLimit?.allowed === false ? (
                                         <ICONS.Lock className="w-3.5 h-3.5" />
                                     ) : (

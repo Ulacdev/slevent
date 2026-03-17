@@ -123,12 +123,7 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
                         Billed annually (₱{Number(plan.yearlyPrice).toLocaleString()} per year)
                       </p>
                     )}
-                    {plan.trialDays > 0 && (
-                      <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-[#38BDF2]/10 rounded-full">
-                        <ICONS.Zap className="w-3 h-3 text-[#38BDF2]" />
-                        <span className="text-[9px] font-black text-[#38BDF2] uppercase tracking-widest">{plan.trialDays} Day Free Trial</span>
-                      </div>
-                    )}
+                    {/* Trial days badge removed */}
                   </div>
 
                   {/* Consolidated Features & Limits - Dynamic Grid for compactness */}

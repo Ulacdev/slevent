@@ -56,7 +56,7 @@ export const Button: React.FC<{
   style,
   onClick
 }) => {
-    const base = 'inline-flex items-center justify-center font-semibold tracking-wide rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[32px]';
+    const base = 'inline-flex items-center justify-center font-semibold tracking-wide rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]';
 
     const variants = {
       primary: 'bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] active:bg-[#2E2E2F] focus:ring-[#38BDF2]',
@@ -67,9 +67,9 @@ export const Button: React.FC<{
     };
 
     const sizes = {
-      sm: 'px-4 py-2 text-[13px]',
-      md: 'px-4 py-2 text-[14px]',
-      lg: 'px-4 py-2 text-[15px]',
+      sm: 'px-3 py-2 text-[13px] min-h-[36px]',
+      md: 'px-4 py-2.5 text-[14px] min-h-[44px]',
+      lg: 'px-6 py-3 text-[15px] min-h-[48px]',
     };
 
     return (
@@ -89,7 +89,7 @@ export const Input: React.FC<{
   label?: string;
   error?: string;
   [key: string]: any;
-}> = ({ label, error, ...props }) => {
+}> = ({ label, error, className = '', ...props }) => {
   const inputProps = { ...props };
   if (Object.prototype.hasOwnProperty.call(inputProps, 'value') && inputProps.value === null) {
     inputProps.value = '';
@@ -97,9 +97,9 @@ export const Input: React.FC<{
 
   return (
     <div className="space-y-1.5 w-full">
-      {label && <label className="block text-sm font-medium text-[#2E2E2F]/70">{label}</label>}
+      {label && <label className="block text-sm font-medium text-[#2E2E2F]/70 mb-1">{label}</label>}
       <input
-        className={`block w-full px-3 py-2 bg-[#F2F2F2] border ${error ? 'border-[#2E2E2F]' : 'border-[#2E2E2F]/20'} rounded-lg focus:outline-none focus:ring-2 ${error ? 'focus:ring-[#2E2E2F]/40' : 'focus:ring-[#38BDF2]/40'} transition-colors font-normal`}
+        className={`block w-full px-3 py-3 sm:py-2 bg-[#F2F2F2] border text-base sm:text-sm min-h-[44px] sm:min-h-auto ${error ? 'border-[#2E2E2F]' : 'border-[#2E2E2F]/20'} rounded-lg focus:outline-none focus:ring-2 ${error ? 'focus:ring-[#2E2E2F]/40' : 'focus:ring-[#38BDF2]/40'} transition-colors font-normal ${className}`}
         {...inputProps}
       />
       {error && <p className="text-xs text-[#2E2E2F] mt-1">{error}</p>}
@@ -138,12 +138,12 @@ export const PasswordInput: React.FC<{
         value={value}
         onChange={onChange}
         required={required}
-        className={`w-full ${icon ? 'pl-12' : 'pl-4'} pr-12 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal text-[14px]`}
+        className={`w-full min-h-[44px] sm:min-h-auto text-base sm:text-[14px] ${icon ? 'pl-12' : 'pl-4'} pr-12 py-3 sm:py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal`}
       />
       <button
         type="button"
         onClick={() => setShowPassword(!showPassword)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2E2E2F]/50 hover:text-[#2E2E2F] transition-colors p-1 z-10"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2E2E2F]/50 hover:text-[#2E2E2F] transition-colors p-2 z-10 min-h-[44px] w-auto flex items-center justify-center"
       >
         {showPassword ? <EyeOffIcon /> : <EyeIcon />}
       </button>
@@ -179,14 +179,14 @@ export const Modal: React.FC<{
     if (!isOpen) return null;
 
     const sizes = {
-      sm: 'max-w-md',
-      md: 'max-w-xl',
-      lg: 'max-w-3xl',
-      xl: 'max-w-4xl'
+      sm: 'sm:max-w-md',
+      md: 'sm:max-w-xl',
+      lg: 'sm:max-w-3xl',
+      xl: 'sm:max-w-4xl'
     };
 
     return (
-      <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4">
+      <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 p-0">
         {/* Backdrop */}
         <div
           className="fixed inset-0 z-[90] bg-[#2E2E2F]/60 transition-opacity"
@@ -198,16 +198,16 @@ export const Modal: React.FC<{
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-title"
-          className={`relative z-[110] bg-[#F2F2F2] sm:rounded-3xl rounded-none border-x-0 sm:border-x sm:rounded-3xl border-[#2E2E2F]/10 w-full ${sizes[size]
+          className={`relative z-[110] bg-[#F2F2F2] sm:rounded-3xl rounded-t-3xl border-x-0 sm:border-x border-b-0 sm:border-b border-[#2E2E2F]/10 w-full ${sizes[size]
             } h-full sm:h-auto sm:max-h-[90vh] overflow-hidden ${className}`}
         >
-          <div className="px-6 py-5 border-b border-[#2E2E2F]/10 flex items-start justify-between gap-4 sticky top-0 bg-[#F2F2F2] z-10">
-            <div>
-              <h2 id="modal-title" className="text-lg sm:text-xl font-bold text-[#2E2E2F]">
+          <div className="px-4 sm:px-6 py-5 border-b border-[#2E2E2F]/10 flex items-start justify-between gap-4 sticky top-0 bg-[#F2F2F2] z-10">
+            <div className="min-w-0">
+              <h2 id="modal-title" className="text-lg sm:text-xl font-bold text-[#2E2E2F] break-words">
                 {title}
               </h2>
               {subtitle && (
-                <p className="mt-1 text-[14px] uppercase tracking-[0.15em] font-medium text-[#2E2E2F]/60">
+                <p className="mt-1 text-[12px] sm:text-[14px] uppercase tracking-[0.15em] font-medium text-[#2E2E2F]/60">
                   {subtitle}
                 </p>
               )}
@@ -215,18 +215,18 @@ export const Modal: React.FC<{
             {showClose && (
               <button
                 onClick={onClose}
-                className="min-h-[32px] min-w-[32px] px-2 py-2 rounded-xl bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors"
+                className="min-h-[44px] min-w-[44px] px-2 py-2 rounded-xl bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors shrink-0"
                 aria-label="Close modal"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             )}
           </div>
-          <div className={`p-6 overflow-y-auto max-h-[calc(100vh-140px)] sm:max-h-[70vh] ${contentClassName}`}>
+          <div className={`p-4 sm:p-6 overflow-y-auto max-h-[calc(100vh-140px)] sm:max-h-[70vh] ${contentClassName}`}>
             {children}
           </div>
           {footer && (
-            <div className="px-6 py-5 border-t border-[#2E2E2F]/10 bg-[#F2F2F2]">
+            <div className="px-4 sm:px-6 py-5 border-t border-[#2E2E2F]/10 bg-[#F2F2F2]">
               {footer}
             </div>
           )}

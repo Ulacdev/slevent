@@ -14,6 +14,16 @@ export const SubscriptionSuccess: React.FC = () => {
     const [message, setMessage] = useState('Processing your subscription...');
     const { showToast } = useToast();
 
+    const statusParam = (
+        searchParams.get('status') ||
+        new URLSearchParams((window.location.hash.split('?')[1] || '')).get('status') ||
+        new URLSearchParams(window.location.search).get('status') ||
+        ''
+    ).toLowerCase();
+
+    const isCancelled = ['canceled', 'cancelled'].includes(statusParam);
+    const isFailed = ['failed', 'expired', 'error', 'declined'].includes(statusParam);
+
     // HitPay passes the reference_id in the redirect URL
     // We try multiple ways to get it, because HashRouter can be tricky on localhost
     const referenceId = searchParams.get('reference_id') ||
@@ -27,6 +37,18 @@ export const SubscriptionSuccess: React.FC = () => {
     useEffect(() => {
         const verify = async () => {
             console.log('🔍 [SubscriptionSuccess] Reference ID detected:', referenceId);
+            if (isCancelled || isFailed) {
+                const messageText = isCancelled
+                    ? 'Payment was canceled. Redirecting back to your subscription page...'
+                    : 'Payment did not complete. Please try again or check your subscription page.';
+                setStatus('error');
+                setMessage(messageText);
+                showToast('error', isCancelled ? 'Payment canceled.' : 'Payment failed.');
+                if (isCancelled) {
+                    setTimeout(() => navigate('/subscription', { replace: true }), 1200);
+                }
+                return;
+            }
             if (!referenceId) {
                 // If it's still missing, try one last check on the current subscription
                 try {
@@ -110,13 +132,15 @@ export const SubscriptionSuccess: React.FC = () => {
         };
 
         // If parameters are in the URL, move them to storage and clean the hash URL
-        if (searchParams.has('reference_id') || searchParams.has('reference_number')) {
+        if (searchParams.has('reference_id') || searchParams.has('reference_number') || searchParams.has('status')) {
             const rid = searchParams.get('reference_id') || searchParams.get('reference_number');
             if (rid) {
                 sessionStorage.setItem(SUBSCRIPTION_REF_STORAGE_KEY, rid);
-                // Clean the hash by navigating to the same route without search params
-                navigate('/subscription/success', { replace: true });
-                return;
+                // Clean the hash only for non-cancelled/failed flows
+                if (!isCancelled && !isFailed) {
+                    navigate('/subscription/success', { replace: true });
+                    return;
+                }
             }
         }
 

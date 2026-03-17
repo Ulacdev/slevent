@@ -13,9 +13,20 @@
 html,
 body {
   font-family: Helvetica;
-  font-size: 18.5px; /* Increased by ~2.5px for better readability */
+  font-size: 16px; /* Base font size optimized for mobile and desktop */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 640px) {
+  html,
+  body {
+    font-size: 15px;
+  }
 }
 
 /* Ensure all text elements inherit Helvetica */
@@ -131,6 +142,22 @@ img {
 /* ========================================
    UTILITY CLASSES
    ======================================== */
+
+/* ========================================
+   PORTAL SPEED-UP (Admin/Organizer)
+   ======================================== */
+.portal-fast *,
+.portal-fast *::before,
+.portal-fast *::after {
+  transition-duration: 120ms !important;
+  transition-delay: 0ms !important;
+}
+
+.portal-fast .animate-in,
+.portal-fast .animate-out {
+  animation-duration: 120ms !important;
+  animation-delay: 0ms !important;
+}
 
 /* Hide scrollbar but maintain functionality */
 .scrollbar-none::-webkit-scrollbar {
@@ -263,16 +290,16 @@ img {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(46, 46, 47, 0.1);
+  background: rgba(0, 0, 0, 0.5);
   border-radius: 20px;
   transition: background 0.3s;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(46, 46, 47, 0.25);
+  background: rgba(0, 0, 0, 0.7);
 }
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(46, 46, 47, 0.1) transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.5) transparent;
 }
 
 /* ========================================
@@ -354,3 +381,161 @@ img {
     page-break-inside: avoid;
   }
 }
+
+/* ========================================
+   MOBILE-FIRST UTILITIES
+   ======================================== */
+
+/* Ensure proper touch targets (44px minimum) */
+@media (max-width: 640px) {
+  button,
+  a[role="button"],
+  input[type="button"],
+  input[type="submit"],
+  [role="button"] {
+    min-width: 44px;
+    min-height: 44px;
+    padding: max(0.5rem, calc((44px - 1em) / 2)) max(0.75rem, calc((44px - 1em) / 2));
+  }
+
+  /* Improve form inputs on mobile */
+  input,
+  textarea,
+  select {
+    min-height: 44px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  /* Improve checkbox and radio accessibility */
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-width: 44px;
+    min-height: 44px;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+  }
+
+  /* Safe area insets for notched devices */
+  body {
+    padding-left: max(0.5rem, env(safe-area-inset-left));
+    padding-right: max(0.5rem, env(safe-area-inset-right));
+  }
+
+  /* Reduce animation on smaller screens */
+  .no-animate-on-mobile {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Optimize spacing for mobile */
+  .mobile-px-3 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .mobile-py-2 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  /* Improve readability of small text */
+  .text-xs,
+  .text-[10px] {
+    font-size: 0.875rem; /* Slightly larger than default */
+    line-height: 1.5;
+  }
+
+  /* Prevent text selection on interactive elements on mobile */
+  button,
+  a,
+  [role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* ========================================
+   RESPONSIVE UTILITIES
+   ======================================== */
+
+/* Ensure tables are scrollable on mobile */
+@media (max-width: 768px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  thead {
+    display: none; /* Hide headers on mobile, show info differently */
+  }
+
+  tbody tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(46, 46, 47, 0.1);
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  tbody td {
+    display: block;
+    text-align: right;
+    padding-left: 50%;
+    padding-right: 0.75rem;
+    position: relative;
+  }
+
+  tbody td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0.75rem;
+    text-align: left;
+    font-weight: bold;
+    color: rgba(46, 46, 47, 0.6);
+  }
+}
+
+/* Grid layout improvements for mobile */
+@media (max-width: 640px) {
+  .grid-auto-fit {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 641px) {
+  .grid-auto-fit {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+/* Sidebar handling on mobile */
+@media (max-width: 768px) {
+  .sidebar-desktop {
+    display: none;
+  }
+
+  .main-content-with-sidebar {
+    margin-left: 0;
+  }
+}
+
+/* ========================================
+   PREVENTION: ZOOM ON FOCUS
+   ======================================== */
+
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    font-size: 16px;
+  }
+}
+

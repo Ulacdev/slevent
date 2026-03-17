@@ -80,7 +80,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
       {/* Content */}
       <div className="p-5 space-y-3">
         {/* Title */}
-        <h3 className="font-black text-[#2E2E2F] text-lg line-clamp-2 group-hover:text-[#38BDF2] transition-colors">
+        <h3 className="font-black text-[#2E2E2F] text-xl line-clamp-2 group-hover:text-[#38BDF2] transition-colors">
           {event.eventName}
         </h3>
 

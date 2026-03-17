@@ -321,12 +321,7 @@ export const SubscriptionPlans: React.FC = () => {
                       Billed annually (₱{Number(plan.yearlyPrice).toLocaleString()} per year)
                     </p>
                   )}
-                  {plan.trialDays > 0 && (
-                    <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-[#38BDF2]/10 rounded-full">
-                      <ICONS.Zap className="w-3 h-3 text-[#38BDF2]" />
-                      <span className="text-[9px] font-black text-[#38BDF2] uppercase tracking-widest">{plan.trialDays} Day Free Trial</span>
-                    </div>
-                  )}
+                  {/* Trial days badge removed */}
                 </div>
 
                 {/* Features & Limits Consolidated - Dynamic Grid for compactness */}
@@ -443,7 +438,7 @@ export const SubscriptionPlans: React.FC = () => {
                   <Input label="Max Staff Accounts" type="number" value={draft.limits.max_staff_accounts} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, max_staff_accounts: parseNumeric(e.target.value, 0) } }))} />
                   <Input label="Max Paid Events" type="number" value={draft.limits.max_priced_events} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, max_priced_events: Math.max(0, parseNumeric(e.target.value, 0)) } }))} />
                   <Input label="Monthly Attendees" type="number" value={draft.limits.max_attendees_per_month} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, max_attendees_per_month: parseNumeric(e.target.value, 0) } }))} />
-                  <Input label="Free Trial Days" type="number" value={draft.trialDays} onChange={(e: any) => setDraft((prev) => ({ ...prev, trialDays: Math.max(0, Math.floor(parseNumeric(e.target.value, 0))) }))} />
+                  {/* Free Trial Days input removed */}
                   <Input label="Daily Email Quota" type="number" value={(draft.limits.email_quota_per_day as any) || 500} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, email_quota_per_day: Math.max(0, parseNumeric(e.target.value, 500)) } }))} />
                 </div>
               </div>

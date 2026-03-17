@@ -77,6 +77,15 @@ export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 
         const isSubscriptionLive = (subscriptionStatus === 'active' || subscriptionStatus === 'trial' || subscriptionStatus === 'free');
         const isActive = isSubscriptionLive && isNotExpired;
 
+        if (!isActive) {
+            return {
+                allowed: false,
+                message: 'Your plan has expired. Please renew your subscription to continue.',
+                code: 'SUBSCRIPTION_EXPIRED',
+                requiresSubscription: true
+            };
+        }
+
 
         // Base defaults
         const defaultLimits = {

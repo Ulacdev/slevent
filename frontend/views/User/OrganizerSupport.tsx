@@ -130,12 +130,6 @@ export const OrganizerSupport: React.FC = () => {
           >
             Upgrade Plan
           </button>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="px-12 py-5 bg-transparent border-2 border-[#2E2E2F]/10 text-[#2E2E2F]/40 hover:text-[#2E2E2F] hover:border-[#2E2E2F] rounded-[2rem] font-black uppercase tracking-widest text-[11px] transition-all"
-          >
-            Return Home
-          </button>
         </div>
       </div>
     );

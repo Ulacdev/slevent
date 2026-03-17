@@ -743,27 +743,27 @@ export const EventDetails: React.FC = () => {
               )}
 
               <div id="event-schedule-info" className="flex flex-wrap gap-4 mt-10 mb-12">
-                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-4 py-2 rounded-2xl border border-[#2E2E2F]/10 text-[12px]">
-                  <ICONS.Calendar className="w-4 h-4 mr-3" style={{ color: brandColor }} />
+                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-4 py-2 rounded-2xl border border-[#2E2E2F]/10 text-[14px]">
+                  <ICONS.Calendar className="w-5 h-5 mr-3" strokeWidth={3} style={{ color: brandColor }} />
                   {formatRange(event.startAt, event.endAt, event.timezone)}{event.timezone ? ` TZ: ${event.timezone}` : ''}
                 </div>
-                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-4 py-2 rounded-2xl border border-[#2E2E2F]/10 text-[11px] font-bold">
-                  <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: brandColor }} />
+                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-4 py-2 rounded-2xl border border-[#2E2E2F]/10 text-[13px] font-bold">
+                  <ICONS.Monitor className="w-5 h-5 mr-2" strokeWidth={3} style={{ color: brandColor }} />
                   {event.locationType === 'ONLINE' ? 'DIGITAL SESSION' : event.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
                 </div>
                 {event.streamingPlatform && (event.locationType === 'ONLINE' || event.locationType === 'HYBRID') && (
                   <div
-                    className="flex items-center px-4 py-2 rounded-2xl border text-[11px] font-black tracking-wide"
+                    className="flex items-center px-4 py-2 rounded-2xl border text-[13px] font-black tracking-wide"
                     style={{ color: brandColor, backgroundColor: `${brandColor}10`, borderColor: `${brandColor}20` }}
                   >
                     VIA {event.streamingPlatform.toUpperCase()}
                   </div>
                 )}
-                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-4 py-2 rounded-2xl border border-[#2E2E2F]/10 text-[11px] font-bold">
+                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-4 py-2 rounded-2xl border border-[#2E2E2F]/10 text-[13px] font-bold">
                   CAPACITY: {(event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0)}
                 </div>
                 {regState && (
-                  <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-4 py-2 rounded-2xl border border-[#2E2E2F]/10 text-[11px] font-black uppercase">
+                  <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-4 py-2 rounded-2xl border border-[#2E2E2F]/10 text-[13px] font-black uppercase">
                     {regState}
                   </div>
                 )}

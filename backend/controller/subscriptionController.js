@@ -143,6 +143,40 @@ const computeSubscriptionEndDate = (billingInterval) => {
   return endDate;
 };
 
+const isSubscriptionExpired = (subscription) => {
+  if (!subscription?.endDate) return false;
+  const expiry = new Date(subscription.endDate);
+  if (Number.isNaN(expiry.getTime())) return false;
+  return expiry <= new Date();
+};
+
+const expireSubscription = async (subscription, organizerId) => {
+  const nowIso = new Date().toISOString();
+
+  try {
+    await supabase
+      .from('organizersubscriptions')
+      .update({ status: 'expired', updated_at: nowIso })
+      .eq('subscriptionId', subscription.subscriptionId);
+  } catch (err) {
+    console.error('❌ [Subscription] Failed to mark subscription expired:', err);
+  }
+
+  try {
+    await supabase
+      .from('organizers')
+      .update({
+        subscriptionStatus: 'expired',
+        currentPlanId: null,
+        planExpiresAt: subscription.endDate || null,
+        updated_at: nowIso
+      })
+      .eq('organizerId', organizerId);
+  } catch (err) {
+    console.error('❌ [Subscription] Failed to update organizer expiration:', err);
+  }
+};
+
 const recordPlanPurchase = async (subscription, plan, organizer, req = null) => {
   try {
     const { data: owner } = await supabase
@@ -498,7 +532,7 @@ const createHitPayPayment = async (req, amount, currency, organizerName, planNam
   const webhookUrl = `${serverBaseUrl}/api/subscriptions/webhook`;
 
   const frontendUrl = (process.env.FRONTEND_URL || 'https://startuplab-event-creation.vercel.app').replace(/\/$/, '');
-  const redirectUrl = `${frontendUrl}/subscription/success?reference_id=${encodeURIComponent(subscriptionId)}`;
+  const redirectUrl = `${frontendUrl}/#/subscription/success?reference_id=${encodeURIComponent(subscriptionId)}`;
 
   const payload = new URLSearchParams();
   payload.set('amount', String(Number(amount || 0)));
@@ -570,6 +604,19 @@ export const getOrganizerSubscription = async (req, res) => {
 
     if (error) throw error;
 
+    if (subscription && isSubscriptionExpired(subscription)) {
+      await expireSubscription(subscription, organizer.organizerId);
+      return res.json({
+        subscription: null,
+        organizer: {
+          ...organizer,
+          subscriptionStatus: 'expired',
+          currentPlanId: null,
+          planExpiresAt: subscription.endDate || organizer.planExpiresAt || null
+        }
+      });
+    }
+
     return res.json({
       subscription: subscription || null,
       organizer: organizer || null
@@ -628,11 +675,6 @@ export const createSubscription = async (req, res) => {
       ? Number(plan.yearlyPrice || 0)
       : Number(plan.monthlyPrice || 0);
 
-    const trialDays = Number(plan.trialDays || 0);
-    const trialEndDate = trialDays > 0
-      ? new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000).toISOString()
-      : null;
-
     if (priceAmount === 0) {
       const now = new Date();
       const endDate = billingInterval === 'yearly'
@@ -650,7 +692,6 @@ export const createSubscription = async (req, res) => {
           currency: plan.currency || 'PHP',
           startDate: new Date().toISOString(),
           endDate: endDate.toISOString(),
-          trialEndDate: trialEndDate,
         })
         .select()
         .single();
@@ -680,11 +721,10 @@ export const createSubscription = async (req, res) => {
         organizerId: organizer.organizerId,
         planId: planId,
         billingInterval,
-        status: trialDays > 0 ? 'trial' : 'pending',
+        status: 'pending',
         priceAmount,
         currency: plan.currency || 'PHP',
         startDate: new Date().toISOString(),
-        trialEndDate: trialEndDate,
       })
       .select()
       .single();

@@ -809,17 +809,14 @@ export const UserEvents: React.FC = () => {
                     <div className="flex flex-wrap items-center gap-3 justify-end">
 
                         {promotionQuota && (
-                            <div className={`flex items-center gap-2 px-3 py-1.5 border rounded-xl shadow-sm whitespace-nowrap ${promotionQuota.canPromote
-                                    ? 'border-[#38BDF2]/30 bg-[#38BDF2]/10'
-                                    : 'border-[#2E2E2F]/10 bg-[#2E2E2F]/5'
-                                }`}>
-                                <ICONS.Zap className={`w-3.5 h-3.5 ${promotionQuota.canPromote ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/20'}`} />
+                            <div className="flex items-center gap-2 px-3 py-1.5 border rounded-xl shadow-sm whitespace-nowrap border-[#2E2E2F]/10 bg-[#2E2E2F]/5">
+                                <ICONS.Zap className="w-3.5 h-3.5 text-[#2E2E2F]/40" />
                                 <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/60">
                                     Promotions
                                 </span>
                                 <span className="text-[10px] font-bold text-[#2E2E2F]/30">|</span>
                                 <span className={`text-[10px] font-bold ${promotionQuota.used < promotionQuota.limit
-                                        ? 'text-[#38BDF2]'
+                                        ? 'text-[#2E2E2F]/50'
                                         : 'text-red-500'
                                     }`}>
                                     {promotionQuota.used}/{promotionQuota.limit}

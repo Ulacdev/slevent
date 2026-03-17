@@ -121,16 +121,8 @@ export const register = async (req, res) => {
 
     if (defaultPlan) {
       currentPlanId = defaultPlan.planId;
-      const trialDays = Number(defaultPlan.trialDays || 0);
-      const monthlyPrice = Number(defaultPlan.monthlyPrice || 0);
-
-      // If its a trial plan, mark as trial
-      if (trialDays > 0) {
-        subscriptionStatus = 'trial';
-        planExpiresAt = new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000).toISOString();
-      }
-      // If its a 0-price plan, mark as active
-      else if (monthlyPrice === 0) {
+      // Trial logic removed - organizations default to free or pending status
+      if (monthlyPrice === 0) {
         subscriptionStatus = 'active';
         // Permanent free plans have no natural expiry, or we can set it to 10 years out.
         const longFuture = new Date();
@@ -167,7 +159,6 @@ export const register = async (req, res) => {
           currency: defaultPlan.currency || 'PHP',
           startDate: new Date().toISOString(),
           endDate: planExpiresAt,
-          trialEndDate: subscriptionStatus === 'trial' ? planExpiresAt : null,
         });
 
       if (subErr) {

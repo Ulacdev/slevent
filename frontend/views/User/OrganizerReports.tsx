@@ -127,30 +127,10 @@ export const OrganizerReports: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Create Event Card */}
-      <div 
-        className="group relative bg-[#F2F2F2] border-2 border-[#2E2E2F]/5 rounded-[2rem] p-8 flex flex-col items-start transition-all duration-300 hover:border-[#38BDF2] hover:shadow-lg cursor-pointer"
-        onClick={() => window.location.hash = '/#/my-events?openModal=true'}
-      >
-        <div className="w-14 h-14 rounded-2xl bg-[#38BDF2] text-white flex items-center justify-center mb-8 shadow-lg shadow-[#38BDF2]/30 group-hover:scale-110 transition-transform">
-          <ICONS.Plus className="w-8 h-8 stroke-[3]" />
-        </div>
-        <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tight mb-3">Create New Event</h2>
-        <p className="text-[#2E2E2F]/60 font-medium leading-relaxed mb-8 flex-1">
-          Launch a new event, set up tickets, configure pricing, and start accepting registrations.
-        </p>
-        <div className="flex items-center gap-2 text-[10px] font-black text-[#38BDF2] uppercase tracking-[0.2em]">
-          Start Creating <ICONS.ChevronRight className="w-4 h-4" />
-        </div>
-      </div>
-
       {/* Page Header */}
       <div className="bg-transparent border border-[#2E2E2F]/5 rounded-2xl p-6 md:p-8 mb-4">
         <div className="flex flex-col md:flex-row justify-between gap-6">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#38BDF2]/10 border border-[#38BDF2]/20 text-[#38BDF2] text-[10px] font-bold uppercase tracking-widest mb-4 w-fit">
-              Financial Intelligence
-            </div>
             <h1 className="text-2xl md:text-3xl font-bold text-[#2E2E2F] tracking-tight mb-2">
               Transaction Reports
             </h1>

@@ -82,6 +82,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
       className="!max-w-[1200px] w-[95vw]"
       title=""
       contentClassName="!p-0 !overflow-hidden flex flex-col"
+      showClose={false}
       footer={
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-3 hover:opacity-70 cursor-pointer transition-opacity" onClick={() => setDontShowAgain(!dontShowAgain)}>
@@ -97,7 +98,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
               {dontShowAgain ? "Won't show again until next login" : 'Don\'t show again'}
             </span>
           </div>
-          <Button variant="outline" onClick={handleClose} className="border-[#2E2E2F]/20 text-[#2E2E2F]/80">
+          <Button variant="outline" onClick={handleClose} className="border-[#2E2E2F]/20 text-white">
             Cancel / Close
           </Button>
         </div>
@@ -106,7 +107,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
       <div className="flex flex-col h-[75vh] sm:max-h-[70vh]">
         {/* Header */}
         <div className="p-6 pb-4 shrink-0 flex flex-col gap-4 relative z-20 bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start gap-4">
             <div>
               <h2 className="text-2xl font-black tracking-tighter text-[#2E2E2F] mb-1">
                 Upgrade Plan for {organizerName || 'Company'}
@@ -117,6 +118,15 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
                   : "Select a new plan to unlock more features for your business."}
               </p>
             </div>
+            <button
+              onClick={handleClose}
+              className="min-h-[44px] min-w-[44px] px-2 py-2 rounded-xl bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors shrink-0"
+              aria-label="Close modal"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
           
           <div className="flex justify-center w-full">

@@ -59,7 +59,7 @@ const Branding: React.FC<{ className?: string, light?: boolean }> = ({ className
   <img
     src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
     alt="StartupLab Business Ticketing Logo"
-    className={`h-20 sm:h-32 w-auto drop-shadow-xl transform transition-all duration-300 hover:scale-[1.03] cursor-pointer ${className}`}
+    className={`w-40 h-auto drop-shadow-md transform transition-all duration-300 hover:scale-[1.03] cursor-pointer ${className}`}
     style={{ filter: light ? 'invert(1) grayscale(1) brightness(2)' : undefined }}
   />
 );
@@ -526,7 +526,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   );
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#F2F2F2] font-sans selection:bg-[#38BDF2]/30">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#F2F2F2] font-sans selection:bg-[#38BDF2]/30 portal-fast">
       {/* Sidebar for desktop */}
       <aside
         className={`bg-[#F2F2F2] border-r border-[#2E2E2F]/10 hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-64' : 'w-20'}`}
@@ -541,7 +541,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 className={desktopSidebarOpen ? "h-14 w-auto max-w-full object-contain" : "h-10 w-10 object-contain rounded-lg shadow-sm border border-[#2E2E2F]/10"}
               />
             ) : desktopSidebarOpen ? (
-              <Branding className="h-14 w-auto" />
+              <Branding className={role === UserRole.ADMIN ? "h-16 w-auto" : "h-14 w-auto"} />
             ) : (
               <img src="/lgo.webp" alt="Logo" className="h-10 w-10 object-contain" />
             )}
@@ -564,7 +564,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     : 'flex-col items-center justify-center gap-1 py-4 px-1 rounded-xl'
                     } ${isActive
                       ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20'
-                      : 'text-[#2E2E2F]/60 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
+                      : 'text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
                     }`}
                   title={!desktopSidebarOpen ? item.label : undefined}
                 >
@@ -576,7 +576,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   </div>
 
                   {desktopSidebarOpen ? (
-                    <span className="font-bold text-sm tracking-tight truncate">
+                    <span className="text-sm font-medium tracking-tight truncate">
                       {item.label}
                     </span>
                   ) : (
@@ -597,12 +597,24 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       >
         <header className="h-20 bg-[#F2F2F2] border-b border-[#2E2E2F]/10 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20 w-full">
           <div className="flex items-center gap-3">
+            {/* Desktop Sidebar Toggle */}
             <button
               onClick={() => setDesktopSidebarOpen(!desktopSidebarOpen)}
-              className="p-2.5 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-all group active:scale-95"
+              className="hidden md:flex p-2.5 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-all group active:scale-95"
               aria-label="Toggle Sidebar"
             >
               <svg className={`w-5 h-5 transition-transform duration-500 ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            {/* Mobile Menu Toggle */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="md:hidden p-2.5 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-all group active:scale-95 lg:hidden"
+              aria-label="Toggle Navigation Menu"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
@@ -819,43 +831,21 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             </div>
           </div>
         </header>
-        {/* Mobile Bottom Navigation Bar */}
-        {bottomNavItems.length > 0 && (
-          <nav className="fixed bottom-0 left-0 right-0 z-[60] bg-white border-t border-[#2E2E2F]/10 md:hidden flex items-center justify-around h-20 px-4 pb-safe shadow-[0_-4px_20px_-5px_rgba(46,46,47,0.1)]">
-            {bottomNavItems.map((item) => {
-              const isActive = checkIsActiveAdmin(item.path);
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex flex-col items-center justify-center gap-1.5 min-w-[64px] transition-all duration-300 ${isActive
-                    ? 'text-[#38BDF2]'
-                    : 'text-[#2E2E2F]/40 hover:text-[#38BDF2]/70'
-                    }`}
-                >
-                  <div className={`p-1.5 rounded-xl transition-colors ${isActive ? 'bg-[#38BDF2]/10' : ''}`}>
-                    <div className={`w-5 h-5 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full ${isActive ? '[&>svg]:stroke-[2.5px]' : '[&>svg]:stroke-2'}`}>
-                      {item.icon}
-                    </div>
-                  </div>
-                  <span className={`text-[9px] font-black uppercase tracking-widest transition-opacity ${isActive ? 'opacity-100' : 'opacity-60'}`}>
-                    {item.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </nav>
-        )}
-
-        {/* Sidebar overlay for mobile */}
+        {/* Mobile Navigation Drawer - Hamburger Menu Items */}
         {sidebarOpen && (
           <div className="fixed inset-0 z-[100] flex md:hidden">
             <div className="fixed inset-0 bg-[#2E2E2F]/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-            <aside className="relative w-72 bg-[#38BDF2] flex flex-col h-full z-[110] animate-in slide-in-from-left duration-300">
-              <div className="p-8 flex items-center justify-between border-b border-white/10">
-                <Branding className="h-12 sm:h-auto" light />
+            <aside className="relative w-72 bg-[#F2F2F2] flex flex-col h-full z-[110] animate-in slide-in-from-left duration-300 border-r border-[#2E2E2F]/10">
+              <div className="p-6 flex items-center justify-between border-b border-[#2E2E2F]/5">
+                <Link to="/dashboard" className="flex items-center justify-center group transition-all duration-500">
+                  {organizerSidebarLogoUrl ? (
+                    <img src={organizerSidebarLogoUrl} alt={organizerSidebarName || 'Logo'} className="h-10 w-auto max-w-full object-contain" />
+                  ) : (
+                    <img src="/lgo.webp" alt="Logo" className="h-10 w-10 object-contain" />
+                  )}
+                </Link>
                 <button
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F] hover:bg-[#2E2E2F]/10 transition-colors"
                   onClick={() => setSidebarOpen(false)}
                   aria-label="Close navigation"
                 >
@@ -864,42 +854,34 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   </svg>
                 </button>
               </div>
-              <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto pb-24">
+              <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
                 {menuItems.map((item) => {
                   const isActive = checkIsActiveAdmin(item.path);
                   return (
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 group ${isActive
-                        ? 'bg-white text-[#38BDF2] shadow-xl shadow-black/10'
-                        : 'text-white/70 hover:bg-white/10 hover:text-white'
+                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive
+                        ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20'
+                        : 'text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
                         }`}
                       onClick={() => setSidebarOpen(false)}
                     >
-                      <div className={isActive ? 'text-[#38BDF2]' : 'text-white/60 group-hover:text-white'}>
-                        {item.icon}
+                      <div className={isActive ? 'text-white' : 'text-[#2E2E2F]'}>
+                        {React.cloneElement(item.icon as React.ReactElement<any>, {
+                          className: `w-5 h-5 transition-transform duration-300 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`
+                        })}
                       </div>
-                      <span className="font-bold text-sm tracking-tight">{item.label}</span>
+                      <span className="text-sm font-medium tracking-tight">{item.label}</span>
                     </Link>
                   );
                 })}
-
-                <div className="mt-8 pt-8 border-t border-white/10">
-                  <button
-                    onClick={() => { handleLogout(); setSidebarOpen(false); }}
-                    className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-white/70 hover:bg-red-500 hover:text-white transition-all duration-300 group"
-                  >
-                    <svg className="w-5 h-5 opacity-60 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    <span className="font-bold text-sm tracking-tight">Logout</span>
-                  </button>
-                </div>
               </nav>
             </aside>
           </div>
         )}
+
+        {/* Removed: Mobile Bottom Navigation Bar - Now using drawer instead */}
 
         <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
@@ -976,6 +958,8 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   } = useEngagement();
   const location = useLocation();
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = React.useState(false);
   const [headerSearchTerm, setHeaderSearchTerm] = React.useState('');
   const [animatedPlaceholder, setAnimatedPlaceholder] = React.useState('');
   const fullPlaceholder = 'Find your events';
@@ -1059,7 +1043,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   const displayName = email?.trim() || name?.trim() || 'User';
   const roleLabel = isOrganizer && isAttendingView ? 'Attending' : getRoleLabel(role);
-  const publicUserMenuActionClass = 'w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group';
+  const publicUserMenuActionClass = 'w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group';
   const landingLoginButtonClass = 'px-4 text-[11px] font-black uppercase tracking-widest !bg-transparent !text-[#2E2E2F] hover:!text-[#38BDF2] transition-colors';
   const landingGetStartedButtonClass = 'px-6 text-[11px] font-black uppercase tracking-widest border border-[#66DBFF] bg-[#00AEEF] text-white shadow-[0_0_16px_rgba(0,174,239,0.45)] hover:bg-black hover:border-black hover:text-white hover:shadow-[0_0_22px_rgba(0,174,239,0.5)] focus-visible:bg-black focus-visible:border-black focus-visible:shadow-[0_0_22px_rgba(0,174,239,0.5)] transition-all duration-300 ease-out active:scale-95';
   const initials = (email?.split('@')[0] || name?.trim() || displayName || 'U')
@@ -1230,13 +1214,8 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     );
   };
 
-  const navLinks: any[] = [];
-  const secondaryLinks = [
-    { label: 'About Us', path: '/about-us' },
-    { label: 'Events', path: '/browse-events' },
-    { label: 'Pricing', path: '/pricing' },
-    { label: 'Contact Us', path: '/contact-us' },
-  ];
+  const secondaryLinks: any[] = [];
+  const navLinks = secondaryLinks;
   const trimmedHeaderSearch = headerSearchTerm.trim();
   const trimmedHeaderLocation = headerLocationTerm.trim();
   const hasHeaderExplicitLocation = Boolean(
@@ -1247,20 +1226,33 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F2F2F2]">
-      <header className={`sticky top-0 z-50 transition-all duration-300 bg-[#F2F2F2] ${
+      <header className={`sticky top-0 z-50 transition-all duration-300 ${
         scrolled 
-          ? 'shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] border-b border-[#2E2E2F]/5' 
-          : 'border-b border-[#2E2E2F]/10'
+          ? 'bg-[#F2F2F2] shadow-[0_10px_30px_-10px_rgba(46,46,47,0.1)] border-b border-[#2E2E2F]/5' 
+          : 'bg-transparent border-b border-transparent'
       }`}>
-        <div className="max-w-[88rem] mx-auto h-20 w-full px-6 flex items-center gap-4">
-          <Link to="/" className="shrink-0">
-            <Branding className="text-xl lg:text-2xl" />
-          </Link>
+        <div className="max-w-[88rem] mx-auto h-20 w-full px-2 sm:px-6 flex items-center gap-2 sm:gap-4">
+          {/* Left: Branding Segment - Logo on mobile, hidden on lg */}
+          <div className="flex lg:hidden flex-none items-center">
+            <Link to="/" className="shrink-0 flex items-center gap-2">
+              {/* Mobile logo - shown only on mobile */}
+              <img src="/lgo-clean.png" alt="Logo" className="h-8 w-8 object-contain" />
+            </Link>
+          </div>
+          <div className="hidden lg:flex flex-none items-center flex-none">
+            <Link to="/" className="shrink-0 flex items-center gap-3">
+              {/* Desktop logo - shown only on desktop */}
+              <span className="hidden lg:block">
+                <Branding />
+              </span>
+            </Link>
+          </div>
 
-          <nav className="hidden lg:flex flex-1 min-w-0 items-center justify-center gap-8">
+          {/* Center Segment: Search bar centered */}
+          <div className="flex flex-1 min-w-0 justify-center px-1 sm:px-4">
             {showHeaderSearchBar && (
-              <form onSubmit={handleHeaderSearchSubmit} className="flex-1 max-w-[750px]">
-                <div className="flex items-center h-13 rounded-2xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.1)] focus-within:border-[#38BDF2]/50 focus-within:shadow-[0_15px_35px_-12px_rgba(56,189,242,0.15)] transition-all duration-300">
+              <form onSubmit={handleHeaderSearchSubmit} className="w-full">
+                <div className="flex items-center h-12 rounded-2xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.1)] focus-within:border-[#38BDF2]/50 focus-within:shadow-[0_15px_35px_-12px_rgba(56,189,242,0.15)] transition-all duration-300">
                   <label className="flex items-center gap-3 px-5 py-3 min-w-0 flex-1 border-r border-[#2E2E2F]/5 hover:bg-[#38BDF2]/5 transition-colors">
                     <ICONS.Search className="w-4 h-4 text-[#2E2E2F] shrink-0" />
                     <input
@@ -1318,6 +1310,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         )}
                       </button>
                     </div>
+
                     {headerLocationMenuOpen && (
                       <div className="absolute left-0 right-0 top-[calc(100%+12px)] z-50 w-[320px] rounded-2xl border border-[#2E2E2F]/10 bg-white shadow-[0_24px_48px_-20px_rgba(46,46,47,0.35)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                         <button
@@ -1399,9 +1392,12 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 </div>
               </form>
             )}
+          </div>
 
+          {/* Right Segment: Nav Links and Auth Actions */}
+          <div className="flex items-center justify-end gap-10 ml-auto min-w-fit">
             {/* Nav Links */}
-            <div className="flex items-center gap-8 ml-8">
+            <div className="hidden lg:flex items-center gap-8">
               {navLinks.map((link: any) => (
                 <Link
                   key={link.path}
@@ -1419,12 +1415,28 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 </Link>
               ))}
             </div>
-          </nav>
 
-          <div className="flex items-center gap-1 shrink-0 ml-auto">
+            {/* Mobile Menu Button - Shown only on mobile */}
+            <button
+              className="lg:hidden p-2 rounded-lg text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+
+            <div className="flex items-center gap-1 shrink-0">
             {isAuthenticated ? (
               <>
-                <Link to="/live" className="hidden sm:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
+                <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
                   Watch Live
                   {hasLiveEvents && (
                     <span className="relative flex h-2 w-2 ml-0.5">
@@ -1436,19 +1448,19 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
                 <div className="relative">
                   <button
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 transition-colors"
+                    className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 transition-colors"
                     onClick={() => setUserMenuOpen((v) => !v)}
                   >
                     <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center">
                       {imageUrl ? (
                         <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
                       ) : (
-                        <span className="font-semibold text-xs text-[#2E2E2F]">{initials}</span>
+                        <span className="text-xs font-medium tracking-tight text-[#2E2E2F]">{initials}</span>
                       )}
                     </div>
                     <div className="hidden sm:block text-left leading-tight">
-                      <p className="text-xs font-semibold text-[#2E2E2F] truncate max-w-[120px]">{displayName}</p>
-                      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-0.5">{roleLabel}</p>
+                      <p className="text-xs font-medium tracking-tight text-[#2E2E2F] truncate max-w-[120px]">{displayName}</p>
+                      <p className="text-[10px] font-medium tracking-tight text-[#2E2E2F]/45 mt-0.5">{roleLabel}</p>
                     </div>
                     <svg className="w-4 h-4 text-[#2E2E2F]/50" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -1459,9 +1471,9 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                       <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
                       <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl shadow-xl z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
                         <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
-                          <p className="text-[10px] font-medium text-[#2E2E2F]/40 uppercase tracking-widest mb-0.5">Account</p>
-                          <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
-                          <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-1">{roleLabel}</p>
+                          <p className="text-[10px] font-medium tracking-tight text-[#2E2E2F]/40 mb-0.5">Account</p>
+                          <p className="text-xs font-medium tracking-tight text-[#2E2E2F] truncate">{displayName}</p>
+                          <p className="text-[10px] font-medium tracking-tight text-[#2E2E2F]/45 mt-1">{roleLabel}</p>
                         </div>
                         {isOrganizer ? (
                           isAttendingView ? (
@@ -1615,7 +1627,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         )}
                         <div className="border-t border-[#2E2E2F]/5 mt-1 pt-1">
                           <button
-                            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
+                            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
                             onClick={() => {
                               setUserMenuOpen(false);
                               handleLogout();
@@ -1634,10 +1646,10 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               </>
             ) : (
               <>
-                <Link to="/login" className={landingLoginButtonClass}>
+                <Link to="/login" className={`hidden lg:flex ${landingLoginButtonClass}`}>
                   Login
                 </Link>
-                <Link to="/live" className="hidden sm:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
+                <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
                   Watch Live
                   {hasLiveEvents && (
                     <span className="relative flex h-2 w-2 ml-0.5">
@@ -1648,9 +1660,165 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 </Link>
               </>
             )}
+            </div>
           </div>
         </div>
       </header>
+      {/* Mobile Menu Dropdown */}
+      {mobileMenuOpen && (
+        <>
+          <div className="lg:hidden fixed inset-0 bg-black/30 z-[95]" onClick={() => setMobileMenuOpen(false)} />
+          <div className="lg:hidden fixed top-20 right-0 w-64 bg-[#F2F2F2] border-none shadow-sm z-[100] animate-in slide-in-from-top-2 duration-200 max-h-[calc(100vh-80px)] overflow-y-auto">
+            
+            {/* Mobile Search Bar - Hidden */}
+            {showHeaderSearchBar && (
+              <form onSubmit={handleHeaderSearchSubmit} className="w-full hidden">
+              <div className="flex items-center h-12 rounded-xl border border-[#2E2E2F]/10 bg-white overflow-hidden">
+                <label className="flex items-center gap-2 px-3 min-w-0 flex-1">
+                  <ICONS.Search className="w-4 h-4 text-[#2E2E2F]/50 shrink-0" />
+                  <input
+                    type="text"
+                    value={headerSearchTerm}
+                    onChange={(event) => setHeaderSearchTerm(event.target.value)}
+                    placeholder="Find your events"
+                    className="w-full bg-transparent text-sm text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 outline-none"
+                  />
+                </label>
+                <button
+                  type="submit"
+                  className="w-10 h-10 flex items-center justify-center text-[#2E2E2F]/50 hover:text-[#38BDF2] transition-colors"
+                  aria-label="Search"
+                >
+                  <ICONS.Search className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
+            )}
+
+            {/* Mobile Nav Links - Hidden */}
+            <nav className="hidden flex flex-col gap-1">
+            {navLinks.map((link: any) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="px-4 py-3 text-sm font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] rounded-xl transition-colors flex items-center justify-between"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {link.label}
+                {link.isLive && (
+                  <span className="flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  </span>
+                )}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Mobile Auth Buttons Dropdown */}
+          <div className="flex flex-col gap-0 py-0 px-0 bg-transparent overflow-hidden">
+            {!isAuthenticated ? (
+              <>
+                <Link 
+                  to="/live" 
+                  className="flex items-center gap-3 px-4 py-3 text-[#38BDF2] hover:bg-white transition-colors text-xs font-semibold w-full"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span>▶</span>
+                  <span>Watch Live</span>
+                  {hasLiveEvents && (
+                    <span className="relative flex h-2 w-2 ml-auto">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                    </span>
+                  )}
+                </Link>
+                <Link 
+                  to="/login" 
+                  className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white transition-colors text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Login</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <div className="px-4 py-3 border-b border-[#2E2E2F]/5">
+                  <p className="text-[9px] font-medium text-[#2E2E2F]/40 uppercase tracking-wider mb-0.5">Account</p>
+                  <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-1">Attending</p>
+                </div>
+                
+                <Link 
+                  to="/browse-events"
+                  className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <ICONS.Calendar className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" />
+                  <span>Browse Events</span>
+                </Link>
+                <Link 
+                  to="/my-tickets"
+                  className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <ICONS.Ticket className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" />
+                  <span>My Tickets</span>
+                </Link>
+                
+                {isOrganizer && (
+                  <Link 
+                    to="/user-settings?tab=events"
+                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
+                    onClick={() => {
+                      setPublicMode('organizer');
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <ICONS.Zap className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" />
+                    <span>Organize Events</span>
+                  </Link>
+                )}
+                
+                <Link 
+                  to="/liked"
+                  className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <ICONS.Heart className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" />
+                  <span>Liked</span>
+                </Link>
+                
+                <Link 
+                  to="/followings"
+                  className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" />
+                  <span>Followings</span>
+                </Link>
+                
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group text-xs font-semibold border-t border-[#2E2E2F]/5"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                >
+                  <svg className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Logout</span>
+                </button>
+              </>
+            )}
+          </div>
+          </div>
+        </>
+      )}
       <main className="flex-1">{children}</main>
       <footer className="bg-[#F2F2F2] text-[#2E2E2F]/70 py-16 px-8 border-t border-[#2E2E2F]/10">
         <div className="max-w-7xl mx-auto">
@@ -1966,7 +2134,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F2F2F2]">
+    <div className="min-h-screen flex bg-[#F2F2F2] portal-fast">
       {/* Sidebar for desktop */}
       <aside
         className={`bg-[#F2F2F2] border-r border-[#2E2E2F]/10 hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-64' : 'w-20'}`}
@@ -1989,7 +2157,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             )}
           </Link>
         </div>
-        <nav className={`flex-1 py-6 ${desktopSidebarOpen ? 'px-4' : 'px-2'} flex flex-col gap-1 overflow-y-auto overflow-x-visible scrollbar-none scroll-smooth`}
+        <nav className={`flex-1 py-6 ${desktopSidebarOpen ? 'px-4' : 'px-2'} flex flex-col gap-1 overflow-y-auto overflow-x-visible ${desktopSidebarOpen ? 'custom-scrollbar' : 'scrollbar-none'} scroll-smooth`}
           style={{ width: desktopSidebarOpen ? '100%' : '260px', paddingRight: desktopSidebarOpen ? '0' : '180px' }}>
           {menuItems.map((item: any, idx) => {
             const isActive = checkIsActive(item.path);
@@ -2001,12 +2169,12 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 )}
                 <Link
                   to={item.path}
-                  className={`flex transition-all duration-300 group relative shrink-0 ${desktopSidebarOpen
-                    ? 'flex-row items-center gap-3 px-4 py-3 rounded-2xl'
-                    : 'flex-col items-center justify-center gap-1 py-4 px-1 rounded-xl'
+                  className={`flex items-center transition-all duration-300 group relative shrink-0 ${desktopSidebarOpen
+                    ? 'flex-row gap-3 px-4 py-3 rounded-2xl mx-1'
+                    : 'flex-row justify-center p-3 rounded-xl mx-2'
                     } ${isActive
                       ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20'
-                      : 'text-[#2E2E2F]/60 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
+                      : 'text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
                     }`}
                   title={!desktopSidebarOpen ? item.label : undefined}
                 >
@@ -2017,11 +2185,12 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     {item.premium && <CrownBadge />}
                   </div>
 
-                  {desktopSidebarOpen ? (
-                    <span className="font-bold text-sm tracking-tight truncate">
+                  {desktopSidebarOpen && (
+                    <span className="text-sm font-medium tracking-tight truncate">
                       {item.label}
                     </span>
-                  ) : (
+                  )}
+                  {!desktopSidebarOpen && (
                     <div className="absolute left-full ml-5 px-3.5 py-2.5 bg-[#38BDF2] text-white text-[10px] font-black uppercase tracking-widest rounded-xl opacity-0 translate-x-[-10px] pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 z-[999] whitespace-nowrap shadow-[10px_0_30px_-10px_rgba(56,189,242,0.5)] flex items-center">
                       <div className="absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 border-[6px] border-transparent border-r-[#38BDF2]" />
                       {item.label}
@@ -2040,7 +2209,13 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
         <header className="h-20 bg-[#F2F2F2] border-b border-[#2E2E2F]/10 px-4 sm:px-8 flex items-center justify-between gap-4 sm:gap-6 sticky top-0 z-40 w-full">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setDesktopSidebarOpen(!desktopSidebarOpen)}
+              onClick={() => {
+                if (window.innerWidth < 1024) {
+                  setSidebarOpen(true);
+                } else {
+                  setDesktopSidebarOpen(!desktopSidebarOpen);
+                }
+              }}
               className="p-2.5 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-all group active:scale-95"
               aria-label="Toggle Sidebar"
             >
@@ -2048,8 +2223,8 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <div className="hidden sm:block">
-              <p className="text-[10px] uppercase font-black text-[#2E2E2F]/50 tracking-[0.2em]">
+            <div className="ml-1 hidden sm:block">
+              <p className="text-base font-medium tracking-tight text-[#2E2E2F]/50">
                 Organizer Portal
               </p>
             </div>
@@ -2175,8 +2350,8 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 )}
               </div>
               <div className="hidden sm:block text-left leading-tight">
-                <p className="text-xs font-semibold text-[#2E2E2F] truncate max-w-[120px]">{displayName}</p>
-                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-0.5">{roleLabel}</p>
+                <p className="text-xs font-medium tracking-tight text-[#2E2E2F] truncate max-w-[120px]">{displayName}</p>
+                <p className="text-xs font-medium tracking-tight text-[#2E2E2F]/45 mt-0.5">{roleLabel}</p>
               </div>
               <svg className="w-4 h-4 text-[#2E2E2F]/50" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -2187,12 +2362,12 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
                 <div className="absolute right-0 top-[calc(100%+8px)] w-60 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl shadow-xl z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
                   <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
-                    <p className="text-[10px] font-medium text-[#2E2E2F]/40 uppercase tracking-widest mb-0.5">Account</p>
-                    <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
-                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-1">{roleLabel}</p>
+                    <p className="text-[10px] font-medium tracking-tight text-[#2E2E2F]/40 mb-0.5">Account</p>
+                    <p className="text-xs font-medium tracking-tight text-[#2E2E2F] truncate">{displayName}</p>
+                    <p className="text-xs font-medium tracking-tight text-[#2E2E2F]/45 mt-1">{roleLabel}</p>
                   </div>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       setPublicMode('organizer');
                       navigate('/my-events');
@@ -2204,7 +2379,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   </button>
                   {role === UserRole.ORGANIZER && (
                     <button
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                       onClick={handleToggleAttendingMode}
                     >
                       <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
@@ -2212,7 +2387,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     </button>
                   )}
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=organizer');
                       setUserMenuOpen(false);
@@ -2222,7 +2397,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Org Profile</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=team');
                       setUserMenuOpen(false);
@@ -2232,7 +2407,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Teams & Access</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=email');
                       setUserMenuOpen(false);
@@ -2242,7 +2417,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Email Setup</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=payments');
                       setUserMenuOpen(false);
@@ -2252,7 +2427,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Payment Gateway</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=account');
                       setUserMenuOpen(false);
@@ -2263,7 +2438,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   </button>
                   {hasPrioritySupport === true && (
                     <button
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                       onClick={() => {
                         navigate('/organizer-support');
                         setUserMenuOpen(false);
@@ -2274,7 +2449,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     </button>
                   )}
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
                     onClick={() => {
                       setUserMenuOpen(false);
                       handleLogout();
@@ -2291,53 +2466,60 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
           </div>
         </header>
 
-        {/* Sidebar overlay for mobile */}
-        <button
-          className="lg:hidden fixed bottom-6 right-6 w-14 h-14 bg-[#38BDF2] text-white rounded-full shadow-2xl z-50 flex items-center justify-center focus:outline-none"
-          onClick={() => setSidebarOpen(true)}
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-        </button>
+
 
         {sidebarOpen && (
           <div className="fixed inset-0 z-[100] flex lg:hidden">
             <div className="fixed inset-0 bg-[#2E2E2F]/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-            <aside className="relative w-64 bg-[#38BDF2] flex flex-col h-full z-50 animate-in slide-in-from-left duration-300">
-              <div className="p-8 flex items-center justify-between">
-                {hasOrganizerSidebarLogo ? (
-                  <img
-                    src={organizerSidebarLogoUrl}
-                    alt={organizerSidebarLogoAlt}
-                    className="h-10 w-auto max-w-[140px] object-contain brightness-0 invert"
-                  />
-                ) : (
-                  <Branding className="h-10 w-auto" light />
-                )}
+            <aside className="relative w-72 bg-[#F2F2F2] border-r border-[#2E2E2F]/10 flex flex-col h-full z-50 animate-in slide-in-from-left duration-300">
+              <div className="p-8 pb-4 flex items-center justify-between">
+                <Link to="/user-home" onClick={() => setSidebarOpen(false)} className="flex flex-col items-start gap-2 group transition-all duration-500">
+                  {organizerSidebarLogoUrl ? (
+                    <img
+                      src={organizerSidebarLogoUrl}
+                      alt={organizerSidebarLogoAlt}
+                      className="h-12 w-auto max-w-[140px] object-contain"
+                    />
+                  ) : (
+                    <img
+                      src="/lgo.webp"
+                      alt="Logo"
+                      className="h-10 w-10 object-contain"
+                    />
+                  )}
+                  {organizerSidebarName && (
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 ml-0.5">
+                      {organizerSidebarName}
+                    </span>
+                  )}
+                </Link>
                 <button
-                  className="min-h-[32px] min-w-[32px] px-2 py-2 rounded-xl bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F] hover:bg-[#2E2E2F]/10 transition-colors"
                   onClick={() => setSidebarOpen(false)}
                   aria-label="Close navigation"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
-              <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto pb-24">
+              <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
                 {menuItems.map((item: any) => {
                   const isActive = checkIsActive(item.path);
                   return (
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 group ${isActive
-                        ? 'bg-white text-[#38BDF2] shadow-xl shadow-black/10'
-                        : 'text-white/70 hover:bg-white/10 hover:text-white'
+                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive
+                        ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20'
+                        : 'text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
                         }`}
                       onClick={() => setSidebarOpen(false)}
                     >
-                      <div className={isActive ? 'text-[#38BDF2]' : 'text-white/60 group-hover:text-white'}>
-                        {item.icon}
+                      <div className={isActive ? 'text-white' : 'text-[#2E2E2F]'}>
+                        {React.cloneElement(item.icon as React.ReactElement<any>, {
+                          className: `w-5 h-5 transition-transform duration-300 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`
+                        })}
                       </div>
-                      <span className="font-bold text-sm tracking-tight">{item.label}</span>
+                      <span className="text-sm font-medium tracking-tight">{item.label}</span>
                     </Link>
                   );
                 })}

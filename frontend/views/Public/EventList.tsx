@@ -260,8 +260,8 @@ export const EventCard: React.FC<EventCardProps> = ({
       onMouseLeave={(e: any) => e.currentTarget.style.borderColor = menuOpen ? `${effectiveBrandColor}40` : 'transparent'}
       onClick={() => navigate(`/events/${event.slug}`)}
     >
-      {/* Image Section - Increased Height per User Request */}
-      <div className="relative h-64 overflow-hidden">
+      {/* Image Section - Responsive Height: Mobile 40, SM 48, MD 64 */}
+      <div className="relative h-40 sm:h-48 md:h-64 overflow-hidden">
         {event.imageUrl ? (
           <img
             src={getImageUrl(event.imageUrl)}
@@ -392,7 +392,7 @@ export const EventCard: React.FC<EventCardProps> = ({
         </div>
       </div>
       {/* Content Section */}
-      <div className="p-5 flex-1 flex flex-col">
+      <div className="p-4 sm:p-5 flex-1 flex flex-col">
 
 
         {/* Organizer Profile Summary - Hidden in Trending Landing & All Events page */}
@@ -404,11 +404,11 @@ export const EventCard: React.FC<EventCardProps> = ({
               if (organizerId) navigate(`/organizers/${organizerId}`);
             }}
           >
-            <div className="w-8 h-8 rounded-full overflow-hidden bg-[#2E2E2F]/10 shrink-0 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 flex items-center justify-center border-2 border-white shadow-sm bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF]">
               {resolvedOrganizer?.profileImageUrl ? (
                 <img src={getImageUrl(resolvedOrganizer.profileImageUrl)} alt={organizerName} className="w-full h-full object-cover" />
               ) : (
-                <span className="text-[#2E2E2F] font-black text-xs">
+                <span className="text-white font-black text-xs drop-shadow-sm">
                   {organizerName.charAt(0).toUpperCase()}
                 </span>
               )}
@@ -419,16 +419,16 @@ export const EventCard: React.FC<EventCardProps> = ({
           </div>
         )}
 
-        <h4 className="text-[#2E2E2F] text-xl font-bold tracking-tight leading-tight mb-3 line-clamp-2">
+        <h4 className="text-[#2E2E2F] text-lg sm:text-xl font-bold tracking-tight leading-tight mb-3 line-clamp-2">
           {event.eventName}
         </h4>
-        <div className="flex items-center gap-2 text-[13px] font-semibold text-[#2E2E2F]/70 mb-3">
+        <div className="flex items-center gap-2 text-[12px] sm:text-[13px] font-semibold text-[#2E2E2F]/70 mb-3">
           <span className={`w-6 h-6 rounded-full flex items-center justify-center ${liked ? 'bg-[#38BDF2] text-white' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]/65'}`}>
             <ICONS.Heart className="w-3.5 h-3.5" />
           </span>
           <span>{likeLabel}</span>
         </div>
-        <div className="flex flex-col gap-1.5 text-[13px] font-medium text-[#2E2E2F]/70 mb-4">
+        <div className="flex flex-col gap-1.5 text-[12px] sm:text-[13px] font-medium text-[#2E2E2F]/70 mb-4">
           <div className="flex items-center gap-2">
             <ICONS.Users className="w-4 h-4 text-[#2E2E2F]" />
             <span className="text-[#2E2E2F]">
@@ -450,13 +450,13 @@ export const EventCard: React.FC<EventCardProps> = ({
           <div className="h-[1px] w-full bg-[#2E2E2F]/10 invisible group-hover:visible group-hover:opacity-100 transition-all duration-300" />
           {isDone ? (
             <div className="pt-5 flex flex-col items-start">
-              <p className="text-[12px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-1">Status</p>
-              <p className="text-2xl font-black text-[#2E2E2F]">Event Ended</p>
+              <p className="text-[10px] sm:text-[12px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-1">Status</p>
+              <p className="text-xl sm:text-2xl font-black text-[#2E2E2F]">Event Ended</p>
             </div>
           ) : (
             <div className="pt-5 flex flex-col items-start">
-              <p className="text-[12px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-1">Tickets From</p>
-              <p className="text-2xl font-black text-[#2E2E2F]">
+              <p className="text-[10px] sm:text-[12px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-1">Tickets From</p>
+              <p className="text-xl sm:text-2xl font-black text-[#2E2E2F]">
                 {minPrice > 0
                   ? `₱${minPrice.toLocaleString()}`
                   : (event.ticketTypes && event.ticketTypes.length > 0) || (minPrice === 0 && event.ticketTypes?.length)
@@ -864,14 +864,14 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   Organizers
                 </h1>
 
-                <p className="text-[#0B1A2E]/75 text-base sm:text-lg font-normal leading-relaxed max-w-[550px] mb-8">
+                <p className="text-sm sm:text-base lg:text-lg font-normal text-[#0B1A2E]/75 leading-relaxed max-w-[550px] mb-8">
                   Manage registrations, tickets, attendee check-ins, and performance in one simple, compliance-ready event platform — built for organizers in the Philippines.
                 </p>
 
-                <div className="flex flex-wrap items-center gap-4">
+                <div className="flex flex-col sm:flex-row flex-wrap items-center gap-4">
                   <Button
                     onClick={() => navigate('/signup')}
-                    className="px-8 bg-[#38BDF2] border-2 border-[#38BDF2] text-white font-bold tracking-wide text-[15px] h-[52px] rounded-[14px] shadow-[0_4px_20px_rgba(56,189,242,0.2)] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all flex items-center justify-center gap-2 active:scale-95 group"
+                    className="w-full sm:w-auto px-8 bg-[#38BDF2] border-2 border-[#38BDF2] text-white font-bold tracking-wide text-[15px] h-[52px] rounded-[14px] shadow-[0_4px_20px_rgba(56,189,242,0.2)] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all flex items-center justify-center gap-2 active:scale-95 group"
                   >
                     Get Started
                     <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -880,7 +880,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   </Button>
                   <Button
                     onClick={() => navigate('/pricing')}
-                    className="px-8 !bg-transparent !border-2 !border-solid !border-[#38BDF2] !text-[#38BDF2] font-bold tracking-wide text-[15px] h-[52px] rounded-[14px] hover:!bg-[#38BDF2] hover:!text-white transition-colors duration-300 flex items-center justify-center gap-2 active:scale-95 group"
+                    className="w-full sm:w-auto px-8 !bg-transparent !border-2 !border-solid !border-[#38BDF2] !text-[#38BDF2] font-bold tracking-wide text-[15px] h-[52px] rounded-[14px] hover:!bg-[#38BDF2] hover:!text-white transition-colors duration-300 flex items-center justify-center gap-2 active:scale-95 group"
                   >
                     <ICONS.CreditCard className="w-5 h-5 !text-[#38BDF2] group-hover:!text-white transition-colors duration-300" />
                     Pricing
@@ -889,30 +889,30 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               </div>
 
               {/* Stats Block - Tucked tightly under the buttons */}
-              <div className="mt-10 w-full grid grid-cols-2 sm:grid-cols-3 gap-x-10 gap-y-12">
+              <div className="mt-10 w-full grid grid-cols-2 sm:grid-cols-3 gap-x-6 sm:gap-x-10 gap-y-8 sm:gap-y-12">
                 <div className="flex flex-col items-start w-full">
-                  <h4 className="text-[32px] lg:text-[42px] leading-[1.05] font-semibold text-[#0B1A2E] tracking-tighter text-left mb-3">
+                  <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.05] font-semibold text-[#0B1A2E] tracking-tighter text-left mb-2 sm:mb-3">
                     6+ Core<br />Event<br />Modules
                   </h4>
-                  <p className="text-[14px] text-[#0B1A2E]/80 font-normal text-left leading-relaxed">
+                  <p className="text-[11px] sm:text-[14px] text-[#0B1A2E]/80 font-normal text-left leading-relaxed">
                     Ticketing, Registration,<br />Check-in, Analytics,<br />Seats, Reports
                   </p>
                 </div>
 
                 <div className="flex flex-col items-start w-full">
-                  <h4 className="text-[32px] lg:text-[42px] leading-[1.05] font-semibold text-[#0B1A2E] tracking-tighter text-left mb-3">
+                  <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.05] font-semibold text-[#0B1A2E] tracking-tighter text-left mb-2 sm:mb-3">
                     {organizerCount > 3 ? organizerCount : '3'}+ Active<br />Event<br />Organizers
                   </h4>
-                  <p className="text-[14px] text-[#0B1A2E]/80 font-normal text-left leading-relaxed">
+                  <p className="text-[11px] sm:text-[14px] text-[#0B1A2E]/80 font-normal text-left leading-relaxed">
                     Built with real-world<br />organizer experience
                   </p>
                 </div>
 
                 <div className="flex flex-col items-start w-full col-span-2 sm:col-span-1">
-                  <h4 className="text-[32px] lg:text-[42px] leading-[1.05] font-semibold text-[#0B1A2E] tracking-tighter text-left mb-3">
+                  <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.05] font-semibold text-[#0B1A2E] tracking-tighter text-left mb-2 sm:mb-3">
                     {(pagination?.total || 0) > 8 ? pagination.total : '8'}+ Hosted<br />Event<br />Workflows
                   </h4>
-                  <p className="text-[14px] text-[#0B1A2E]/80 font-normal text-left leading-relaxed">
+                  <p className="text-[11px] sm:text-[14px] text-[#0B1A2E]/80 font-normal text-left leading-relaxed">
                     From event planning to<br />secure payouts
                   </p>
                 </div>
@@ -932,7 +932,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               {/* Floating badge */}
               {/* Floating badge: Organizer Tally */}
               <div
-                className="absolute -bottom-8 -left-8 bg-[#F2F2F2] p-4 rounded-[1.8rem] border border-[#2E2E2F]/10 shadow-[0_20px_40px_-15px_rgba(46,46,47,0.15)] flex flex-col items-start gap-3 animate-float group/badge cursor-pointer z-40"
+                className="absolute -bottom-6 sm:-bottom-8 -left-4 sm:-left-8 bg-[#F2F2F2] p-3 sm:p-4 rounded-[1.8rem] border border-[#2E2E2F]/10 shadow-[0_20px_40px_-15px_rgba(46,46,47,0.15)] flex flex-col items-start gap-3 animate-float group/badge cursor-pointer z-40"
                 onMouseEnter={() => setShowOrgDropdown(true)}
                 onMouseLeave={() => setShowOrgDropdown(false)}
               >
@@ -1041,7 +1041,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
           {/* Promoted Events Carousel Section */}
           {promotedEvents.length > 0 && (
-            <div className="mt-28 mb-32 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="w-full mt-28 mb-32 animate-in fade-in slide-in-from-bottom-4 duration-700">
               {/* Header Section */}
               <div className="mb-8 text-center flex flex-col items-center">
                 <div className="flex items-center gap-2 mb-2">
@@ -1080,6 +1080,83 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                                 alt={event.eventName}
                                 className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.02] z-10"
                               />
+
+                              {/* Info Overlay Panel */}
+                              <div className="absolute inset-0 z-20 flex flex-col justify-end">
+                                {/* Subtle Bottom Gradient for Legibility */}
+                                <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                                
+                                {/* Content Area Overflowing with Image */}
+                                <div className="relative z-30 p-8 sm:p-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                                  {(() => {
+                                    const totalSlots = (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0);
+                                    const soldSlots = (event as any).registrationCount ?? (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantitySold || 0), 0);
+                                    const isDone = new Date(event.endAt) < new Date();
+                                    const minPrice = (event?.ticketTypes || []).length > 0
+                                      ? Math.min(...event!.ticketTypes!.map((t: any) => Number(t.priceAmount || 0)))
+                                      : 0;
+                                    const org = event.organizer || organizers.find((o: any) => o.organizerId === event.organizerId);
+
+                                    return (
+                                      <div className="flex flex-col gap-4 text-white">
+                                        <div className="space-y-4">
+                                          {/* Organizer Branding */}
+                                          <div className="flex items-center gap-3 mb-6 opacity-90 animate-in fade-in slide-in-from-left-4 duration-1000">
+                                            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] flex items-center justify-center shrink-0 shadow-lg">
+                                              {org?.profileImageUrl ? (
+                                                <img src={getImageUrl(org.profileImageUrl)} alt={org.organizerName} className="w-full h-full object-cover" />
+                                              ) : (
+                                                <span className="text-white font-black text-sm drop-shadow-sm">
+                                                  {(org?.organizerName || 'O').charAt(0).toUpperCase()}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <span className="text-sm font-black tracking-widest uppercase truncate max-w-[200px] border-b border-white/20 pb-1 text-white">
+                                              {org?.organizerName || 'Organization'}
+                                            </span>
+                                          </div>
+
+                                          <h3 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tighter leading-none mb-4 drop-shadow-lg">
+                                            {event.eventName}
+                                          </h3>
+                                          
+                                          <div className="flex flex-col items-start gap-y-3">
+                                            <div className="flex items-center gap-2 text-sm sm:text-base font-medium opacity-90">
+                                              <ICONS.Heart className="w-4 h-4 text-white" strokeWidth={3} />
+                                              <span>{(event as any).likesCount || 0} likes</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm sm:text-base font-medium opacity-90">
+                                              <ICONS.Users className="w-5 h-5 opacity-70 text-white" strokeWidth={3} />
+                                              <span>{soldSlots} registered / {totalSlots} slots</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm sm:text-base font-medium opacity-90 text-white">
+                                              <ICONS.MapPin className="w-5 h-5" strokeWidth={3} />
+                                              <span className="line-clamp-1">{event.locationText || 'Location TBA'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm sm:text-base font-medium opacity-90 text-white">
+                                              <ICONS.Calendar className="w-5 h-5" strokeWidth={3} />
+                                              <span>{formatStartForCard(event.startAt || '', event.timezone)}</span>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-start gap-6 pt-6 mt-2 border-t border-white/10">
+                                          <div className="flex flex-col items-start">
+                                            <p className="text-[12px] sm:text-[13px] font-medium opacity-60 uppercase tracking-[0.2em] mb-1">
+                                              {isDone ? 'Status' : 'Tickets From'}
+                                            </p>
+                                            <p className="text-2xl sm:text-3xl font-black">
+                                              {isDone 
+                                                ? 'Event Ended' 
+                                                : minPrice === 0 ? 'FREE' : `₱${minPrice.toLocaleString()}`}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                              </div>
                             </div>
                           );
                         })}
@@ -1108,77 +1185,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                         </button>
                       </div>
 
-                      {/* Content Area at Bottom - Scaked-up EventCard Style */}
-                      <div className="px-6 py-5 sm:px-10 sm:py-6 border-t border-[#2E2E2F]/5 bg-[#F2F2F2]">
-                        {(() => {
-                          const event = promotedEvents[currentPromotedIndex];
-                          if (!event) return null;
 
-                          const totalSlots = (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0);
-                          const soldSlots = (event as any).registrationCount ?? (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantitySold || 0), 0);
-                          const isDone = new Date(event.endAt) < new Date();
-                          const minPrice = (event?.ticketTypes || []).length > 0
-                            ? Math.min(...event!.ticketTypes!.map((t: any) => Number(t.priceAmount || 0)))
-                            : 0;
-
-                          return (
-                            <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                              <div className="space-y-4">
-                                <h3 className="text-2xl sm:text-4xl font-black text-[#2E2E2F] tracking-tighter leading-none mb-2">
-                                  {event.eventName}
-                                </h3>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
-                                  <div className="space-y-4">
-                                    <div className="flex items-center gap-3 text-base font-bold text-[#2E2E2F]/70">
-                                      <span className="w-8 h-8 rounded-full bg-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F]/60">
-                                        <ICONS.Heart className="w-4 h-4" />
-                                      </span>
-                                      <span>{(event as any).likesCount || 0} likes</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-base font-bold text-[#2E2E2F]/70">
-                                      <ICONS.Users className="w-5 h-5 text-[#2E2E2F]/40" />
-                                      <span>{soldSlots} registered / {totalSlots} slots</span>
-                                    </div>
-                                  </div>
-
-                                  <div className="space-y-4">
-                                    <div className="flex items-center gap-3 text-base font-bold text-[#2E2E2F]/70">
-                                      <ICONS.MapPin className="w-5 h-5 text-[#38BDF2]" />
-                                      <span className="line-clamp-1">{event.locationText || 'Location TBA'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-base font-bold text-[#2E2E2F]/70">
-                                      <ICONS.Calendar className="w-5 h-5 text-[#38BDF2]" />
-                                      <span>{formatStartForCard(event.startAt || '', event.timezone)}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="flex flex-wrap items-end justify-between gap-8 pt-8 border-t border-[#2E2E2F]/5">
-                                <div className="flex flex-col items-start">
-                                  <p className="text-[12px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-2">
-                                    {isDone ? 'Status' : 'Tickets From'}
-                                  </p>
-                                  <p className="text-3xl sm:text-4xl font-black text-[#2E2E2F]">
-                                    {isDone 
-                                      ? 'Event Ended' 
-                                      : minPrice === 0 ? 'FREE' : `₱${minPrice.toLocaleString()}`}
-                                  </p>
-                                </div>
-
-                                <Button
-                                  onClick={() => navigate(`/events/${event.slug || event.eventId}`)}
-                                  className="px-12 py-4 bg-[#38BDF2] border-2 border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-2xl font-black text-sm uppercase tracking-[0.2em] transition-all shadow-xl shadow-[#38BDF2]/20 active:scale-95 group flex items-center gap-3"
-                                >
-                                  Browse Sessions
-                                  <ICONS.ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                                </Button>
-                              </div>
-                            </div>
-                          );
-                        })()}
-                      </div>
                     </div>
                   </div>
               ) : null}
@@ -1475,7 +1482,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
             <div className="pt-4 flex justify-center">
               <Button
                 variant="outline"
-                className="px-10 py-4 rounded-2xl border-2 border-[#2E2E2F]/5 text-[#2E2E2F] font-black uppercase tracking-widest text-[11px] hover:bg-[#2E2E2F] hover:text-white transition-all group"
+                className="px-10 py-4 rounded-2xl border-2 border-[#2E2E2F]/5 text-[#2E2E2F] font-black tracking-wide text-[11px] hover:bg-[#2E2E2F] hover:text-white transition-all group"
                 onClick={() => navigate('/browse-events')}
               >
                 <span>Explore Full Catalog</span>
@@ -1546,9 +1553,9 @@ const FAQSection: React.FC = () => {
           >
             <button
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
-              className="w-full px-8 py-7 flex items-center justify-between text-left focus:outline-none"
+              className="w-full px-4 sm:px-8 py-5 sm:py-7 flex items-center justify-between text-left focus:outline-none"
             >
-              <span className={`text-lg font-black tracking-tight transition-colors duration-300 ${openIndex === index ? 'text-[#38BDF2]' : 'text-[#2E2E2F]'}`}>
+              <span className={`text-sm sm:text-lg font-black tracking-tight transition-colors duration-300 ${openIndex === index ? 'text-[#38BDF2]' : 'text-[#2E2E2F]'}`}>
                 {faq.question}
               </span>
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${openIndex === index ? 'bg-[#38BDF2] text-white rotate-180' : 'bg-[#2E2E2F]/5 text-[#2E2E2F]/30'
@@ -1606,17 +1613,17 @@ const FeaturedOrganizers: React.FC = () => {
       </div>
 
       <div className={organizers.length > 5 ? "overflow-x-auto pb-10 custom-scrollbar -mx-2 px-2 scroll-smooth" : ""}>
-        <div className={organizers.length > 5 ? "flex gap-6 flex-nowrap" : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"}>
+        <div className={organizers.length > 5 ? "flex gap-4 sm:gap-6 flex-nowrap" : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6"}>
           {organizers.map((org) => {
             const isFollowing = (followedOrganizerIds || []).includes(org.organizerId);
             return (
               <div
                 key={org.organizerId}
-                className={`bg-[#F2F2F2] rounded-[3rem] p-8 border border-[#2E2E2F]/5 shadow-sm hover:shadow-2xl hover:shadow-[#38BDF2]/10 transition-all duration-500 group flex flex-col items-center text-center cursor-pointer ${organizers.length > 5 ? 'w-[280px] shrink-0' : 'w-full'}`}
+                className={`bg-[#F2F2F2] rounded-[3rem] p-5 sm:p-8 border border-[#2E2E2F]/5 shadow-sm hover:shadow-2xl hover:shadow-[#38BDF2]/10 transition-all duration-500 group flex flex-col items-center text-center cursor-pointer ${organizers.length > 5 ? 'w-[250px] sm:w-[280px] shrink-0' : 'w-full'}`}
                 onClick={() => navigate(`/organizer/${org.organizerId}`)}
               >
-                <div className="relative mb-8">
-                  <div className="w-28 h-28 rounded-full overflow-hidden border-[6px] border-white shadow-xl group-hover:border-[#38BDF2]/40 transition-all duration-500 bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF]">
+                <div className="relative mb-5 sm:mb-8">
+                  <div className="w-20 sm:w-28 h-20 sm:h-28 rounded-full overflow-hidden border-[4px] sm:border-[6px] border-white shadow-xl group-hover:border-[#38BDF2]/40 transition-all duration-500 bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF]">
                     {org.profileImageUrl ? (
                       <img
                         src={getImageUrl(org.profileImageUrl)}
@@ -1624,19 +1631,19 @@ const FeaturedOrganizers: React.FC = () => {
                         className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
                       />
                     ) : (
-                      <span className="flex h-full w-full items-center justify-center text-4xl font-black text-white drop-shadow-lg">
+                      <span className="flex h-full w-full items-center justify-center text-2xl sm:text-4xl font-black text-white drop-shadow-lg">
                         {(org.organizerName || 'O').charAt(0).toUpperCase()}
                       </span>
                     )}
                   </div>
                 </div>
 
-                <h3 className="text-lg font-black text-[#2E2E2F] mb-1 line-clamp-1 group-hover:text-[#38BDF2] transition-colors">{org.organizerName}</h3>
-                <p className="text-[#2E2E2F]/50 text-xs font-bold uppercase tracking-widest mb-8">{org.followersCount || 0} followers</p>
+                <h3 className="text-sm sm:text-lg font-black text-[#2E2E2F] mb-1 line-clamp-1 group-hover:text-[#38BDF2] transition-colors">{org.organizerName}</h3>
+                <p className="text-[#2E2E2F]/50 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-5 sm:mb-8">{org.followersCount || 0} followers</p>
 
                 <Button
                   variant={isFollowing ? 'outline' : 'primary'}
-                  className={`w-full rounded-2xl py-3.5 font-black text-[11px] uppercase tracking-[0.2em] transition-all duration-300 ${isFollowing
+                  className={`w-full rounded-2xl py-2.5 sm:py-3.5 font-black text-[9px] sm:text-[11px] uppercase tracking-[0.2em] transition-all duration-300 ${isFollowing
                     ? 'bg-[#38BDF2] border-2 border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F]'
                     : 'bg-[#38BDF2] border-2 border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] shadow-lg shadow-[#38BDF2]/10 hover:shadow-xl active:scale-95'
                     }`}

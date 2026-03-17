@@ -75,7 +75,7 @@ const normalizePlanInput = (body = {}) => {
   const normalizedDescription = String(body.description || '').trim();
   const normalizedMonthlyPrice = Math.max(0, toNumber(body.monthlyPrice, 0));
   const normalizedYearlyPrice = Math.max(0, toNumber(body.yearlyPrice, 0));
-  const normalizedTrialDays = Math.max(0, Math.floor(toNumber(body.trialDays, 0)));
+  const normalizedTrialDays = 0; // Trial functionality disabled
   const normalizedCurrency = String(body.currency || 'PHP').trim().toUpperCase() || 'PHP';
   const normalizedBillingInterval =
     String(body.billingInterval || 'monthly').trim().toLowerCase() === 'yearly' ? 'yearly' : 'monthly';
