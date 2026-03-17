@@ -110,25 +110,31 @@ export const OrganizerSupport: React.FC = () => {
   if (loading) return <PageLoader label="Loading support center..." />;
 
   // Check if user has priority support feature
-  const hasPrioritySupport = Boolean(profile?.plan?.features?.priority_support) || Boolean(profile?.plan?.features?.enable_advanced_reports);
+  const hasPrioritySupport = Boolean(profile?.plan?.features?.priority_support) || Boolean(profile?.plan?.features?.enable_priority_support);
   
-  // Only lock if they have NO plan at all (they must choose a plan first)
-  if (!profile?.plan) {
+  // Hard block: Access restricted if feature not in plan
+  if (!hasPrioritySupport) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center">
-        <div className="w-20 h-20 bg-[#2E2E2F]/5 rounded-full flex items-center justify-center mb-8 text-[#2E2E2F]/20">
-          <ICONS.Lock className="w-10 h-10" />
+      <div className="flex flex-col items-center justify-center min-h-[80vh] p-8 text-center animate-in fade-in zoom-in duration-500">
+        <div className="w-24 h-24 bg-[#38BDF2]/10 rounded-[2.5rem] flex items-center justify-center mb-10 text-[#38BDF2] shadow-xl shadow-[#38BDF2]/10 border border-[#38BDF2]/20">
+          <ICONS.Lock className="w-10 h-10" strokeWidth={3} />
         </div>
-        <h2 className="text-3xl font-black text-[#2E2E2F] mb-3 uppercase tracking-tight">Support Restricted</h2>
-        <p className="text-[#2E2E2F]/60 max-w-[320px] mx-auto mb-10 text-base font-medium leading-relaxed">
-          Access to the Support Center requires an active subscription. Please choose a plan to continue.
+        <h2 className="text-3xl font-black text-[#2E2E2F] mb-4 uppercase tracking-tighter">Support Restricted</h2>
+        <p className="text-[#2E2E2F]/50 max-w-[360px] mx-auto mb-12 text-sm font-bold uppercase tracking-widest leading-relaxed">
+          The Support Center is exclusive to organizations with Priority Support enabled in their current plan.
         </p>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-5">
           <button
             onClick={() => navigate('/subscription')}
-            className="px-10 py-4 bg-[#38BDF2] text-white rounded-[20px] font-black uppercase tracking-widest text-[10px] shadow-lg hover:bg-[#2E2E2F] transition-all"
+            className="px-12 py-5 bg-[#38BDF2] text-white rounded-[2rem] font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-[#38BDF2]/30 hover:scale-105 active:scale-95 transition-all"
           >
-            View Plans
+            Upgrade Plan
+          </button>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="px-12 py-5 bg-transparent border-2 border-[#2E2E2F]/10 text-[#2E2E2F]/40 hover:text-[#2E2E2F] hover:border-[#2E2E2F] rounded-[2rem] font-black uppercase tracking-widest text-[11px] transition-all"
+          >
+            Return Home
           </button>
         </div>
       </div>

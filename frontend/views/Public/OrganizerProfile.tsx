@@ -93,9 +93,19 @@ export const OrganizerProfilePage: React.FC = () => {
                     const n = url.startsWith('http') ? url : `https://${url}`;
                     return /youtube\.com|youtu\.be/.test(n) || /facebook\.com|fb\.watch|fb\.com/.test(n) || /vimeo\.com/.test(n);
                 };
-                const matchingLive = allLiveEvents.find(e => 
-                    e.organizerId === orgData.organizerId && isEmbeddableVideo(e.streaming_url || '')
-                );
+                const matchingLive = allLiveEvents.find(e => {
+                    const isOurOrg = e.organizerId === orgData.organizerId;
+                    const hasVideo = isEmbeddableVideo(e.streaming_url || '');
+                    
+                    // Ensure the event is actually happening NOW
+                    const eventNow = new Date();
+                    const eventStart = new Date(e.startAt);
+                    const eventEnd = e.endAt ? new Date(e.endAt) : new Date(eventStart.getTime() + 2 * 60 * 60 * 1000);
+                    
+                    const isOngoing = eventNow >= eventStart && eventNow < eventEnd;
+                    
+                    return isOurOrg && hasVideo && isOngoing;
+                });
                 setLiveEvent(matchingLive || null);
             } catch (error) {
                 console.error('Failed to load organizer profile:', error);
@@ -105,6 +115,9 @@ export const OrganizerProfilePage: React.FC = () => {
         };
         loadData();
     }, [id]);
+
+    const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
+    const now = new Date();
 
     useEffect(() => {
         if (!interactionNotice) return;
@@ -146,6 +159,19 @@ export const OrganizerProfilePage: React.FC = () => {
             setInteractionNotice(error.message || 'Failed to update follow status.');
         }
     };
+
+
+    const upcomingEvents = events.filter(e => {
+        const end = e.endAt ? new Date(e.endAt) : new Date(new Date(e.startAt).getTime() + 2 * 60 * 60 * 1000);
+        return end >= now;
+    }).sort((a,b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
+
+    const pastEvents = events.filter(e => {
+        const end = e.endAt ? new Date(e.endAt) : new Date(new Date(e.startAt).getTime() + 2 * 60 * 60 * 1000);
+        return end < now;
+    }).sort((a,b) => new Date(b.startAt).getTime() - new Date(a.startAt).getTime());
+
+    const displayEvents = activeTab === 'upcoming' ? upcomingEvents : pastEvents;
 
     const organizerImage = getImageUrl(organizer.profileImageUrl);
     const coverImage = getImageUrl(organizer.coverImageUrl);
@@ -205,11 +231,11 @@ export const OrganizerProfilePage: React.FC = () => {
                     <div className="relative flex flex-col md:flex-row gap-6 md:gap-10 pb-10">
                         {/* Profile Pic overlap - positioned relatively to clear cover */}
                         <div className="relative -mt-16 md:-mt-24 shrink-0 z-10">
-                            <div className="w-32 h-32 md:w-56 md:h-56 rounded-[2.5rem] border-[8px] border-[#F2F2F2] overflow-hidden bg-[#2E2E2F] shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+                            <div className="w-32 h-32 md:w-56 md:h-56 rounded-[3rem] border-[10px] border-[#F2F2F2] overflow-hidden bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
                                 {organizer.profileImageUrl ? (
                                     <img src={organizerImage} alt={organizer.organizerName} className="w-full h-full object-cover" />
                                 ) : (
-                                    <span className="text-7xl font-black text-white flex h-full w-full items-center justify-center">{organizerInitial}</span>
+                                    <span className="text-7xl font-black text-white flex h-full w-full items-center justify-center drop-shadow-2xl">{organizerInitial}</span>
                                 )}
                             </div>
                             {liveEvent && (
@@ -286,11 +312,21 @@ export const OrganizerProfilePage: React.FC = () => {
                     </div>
 
                     {/* Navigation Bar */}
-                    <div className="flex items-center gap-2 border-t border-[#2E2E2F]/5">
-                        <div className="relative pt-6 pb-4 px-2">
-                            <span className="text-[#38BDF2] font-black text-[10px] uppercase tracking-[0.3em]">Hosted Events</span>
-                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#38BDF2] rounded-full" />
-                        </div>
+                    <div className="flex items-center gap-8 border-t border-[#2E2E2F]/5">
+                        <button 
+                            onClick={() => setActiveTab('upcoming')}
+                            className="relative pt-6 pb-4 px-2 group"
+                        >
+                            <span className={`font-black text-[10px] uppercase tracking-[0.3em] transition-colors ${activeTab === 'upcoming' ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40'}`}>Upcoming Events</span>
+                            {activeTab === 'upcoming' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#38BDF2] rounded-full" />}
+                        </button>
+                        <button 
+                            onClick={() => setActiveTab('past')}
+                            className="relative pt-6 pb-4 px-2 group"
+                        >
+                            <span className={`font-black text-[10px] uppercase tracking-[0.3em] transition-colors ${activeTab === 'past' ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40'}`}>Past Events</span>
+                            {activeTab === 'past' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#38BDF2] rounded-full" />}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -306,23 +342,27 @@ export const OrganizerProfilePage: React.FC = () => {
 
                     <div className="bg-[#F2F2F2] p-8 rounded-[2rem] shadow-sm border border-[#2E2E2F]/10 overflow-hidden">
                         <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tight">Upcoming & Live Events</h2>
+                            <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tight uppercase tracking-wider">
+                                {activeTab === 'upcoming' ? 'Upcoming & Live Events' : 'Past Events Archive'}
+                            </h2>
                             <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full bg-[#38BDF2] animate-pulse" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40">{events.length} Results</span>
+                                <div className={`w-2 h-2 rounded-full ${activeTab === 'upcoming' ? 'bg-[#38BDF2] animate-pulse' : 'bg-[#2E2E2F]/30'}`} />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40">{displayEvents.length} Results</span>
                             </div>
                         </div>
 
-                        {events.length > 0 ? (
+                        {displayEvents.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {events.map(event => (
-                                    <EventMiniCard key={event.eventId} event={event} brandColor={brandColor} />
+                                {displayEvents.map(event => (
+                                    <EventMiniCard key={event.eventId} event={event} brandColor={brandColor} isPast={activeTab === 'past'} />
                                 ))}
                             </div>
                         ) : (
                             <div className="py-20 text-center bg-[#F2F2F2]/50 rounded-[2rem] border-2 border-dashed border-[#2E2E2F]/10">
                                 <ICONS.Calendar className="w-12 h-12 text-[#2E2E2F]/10 mx-auto mb-4" />
-                                <p className="text-[#2E2E2F]/40 font-black uppercase tracking-widest text-sm">No public events scheduled yet.</p>
+                                <p className="text-[#2E2E2F]/40 font-black uppercase tracking-widest text-sm">
+                                    {activeTab === 'upcoming' ? 'No upcoming events scheduled yet.' : 'No past events found.'}
+                                </p>
                             </div>
                         )}
                     </div>
@@ -385,7 +425,7 @@ export const OrganizerProfilePage: React.FC = () => {
     );
 };
 
-const EventMiniCard: React.FC<{ event: Event; brandColor: string }> = ({ event, brandColor }) => {
+const EventMiniCard: React.FC<{ event: Event; brandColor: string; isPast?: boolean }> = ({ event, brandColor, isPast }) => {
     const navigate = useNavigate();
     const { isAuthenticated } = useUser();
     const { isLiked, toggleLike, canLikeFollow } = useEngagement();
@@ -412,9 +452,23 @@ const EventMiniCard: React.FC<{ event: Event; brandColor: string }> = ({ event, 
                     alt={event.eventName}
                     className="w-full h-full object-cover"
                 />
-                {/* Promoted Badge - Upper Left */}
+                
+                {/* Status Badge */}
+                <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+                    {isPast ? (
+                        <div className="rounded-full px-2.5 py-1 bg-[#2E2E2F]/60 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-[0.15em] shadow-lg">
+                            PAST EVENT
+                        </div>
+                    ) : (
+                        <div className="rounded-full px-2.5 py-1 bg-[#38BDF2] text-white text-[9px] font-black uppercase tracking-[0.15em] shadow-lg">
+                            UPCOMING
+                        </div>
+                    )}
+                </div>
+
+                {/* Promoted Badge - Upper Left (Offset if status badge exists) */}
                 {(event.is_promoted || (event as any).isPromoted) && (
-                    <div className="absolute top-4 left-4 z-10 group/promoted">
+                    <div className="absolute top-12 left-4 z-10 group/promoted">
                         <div 
                             className="flex items-center gap-1.5 px-3 py-1 rounded-full shadow-lg border border-white/20 animate-in fade-in zoom-in duration-500 cursor-help"
                             style={{ 

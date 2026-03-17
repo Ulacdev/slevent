@@ -167,10 +167,10 @@ export const BrowseEventsNavigator: React.FC<BrowseEventsNavigatorProps> = ({
             </button>
 
             {isLocationDropdownOpen && (
-              <div className="absolute left-0 top-[calc(100%+0.5rem)] z-30 w-[300px] overflow-hidden rounded-xl border border-[#2E2E2F]/10 bg-white shadow-[0_24px_48px_-20px_rgba(46,46,47,0.35)]">
+              <div className="absolute left-0 top-[calc(100%+0.5rem)] z-30 w-[300px] overflow-hidden rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] shadow-[0_24px_50px_-20px_rgba(0,0,0,0.2)]">
                 <button
                   type="button"
-                  className="w-full px-4 py-3.5 flex items-center gap-3 text-left text-[#2E2E2F] hover:bg-[#F2F2F2] transition-colors border-b border-[#2E2E2F]/10 disabled:opacity-60"
+                  className="w-full px-4 py-3.5 flex items-center gap-3 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors border-b border-[#2E2E2F]/10 disabled:opacity-60"
                   onClick={handleUseCurrentLocation}
                   disabled={locating}
                 >
@@ -187,7 +187,7 @@ export const BrowseEventsNavigator: React.FC<BrowseEventsNavigatorProps> = ({
 
                 <button
                   type="button"
-                  className="w-full px-4 py-3.5 flex items-center gap-3 text-left text-[#2E2E2F] hover:bg-[#F2F2F2] transition-colors border-b border-[#2E2E2F]/10"
+                  className="w-full px-4 py-3.5 flex items-center gap-3 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors border-b border-[#2E2E2F]/10"
                   onClick={handleBrowseOnlineEvents}
                 >
                   <span className="w-6 h-6 rounded-md border border-[#38BDF2]/50 flex items-center justify-center text-[#38BDF2]">
@@ -201,7 +201,7 @@ export const BrowseEventsNavigator: React.FC<BrowseEventsNavigatorProps> = ({
 
                 <button
                   type="button"
-                  className="w-full px-4 py-3.5 flex items-center gap-3 text-left text-red-500 hover:bg-red-50 transition-colors group/reset"
+                  className="w-full px-4 py-3.5 flex items-center gap-3 text-left text-red-500 hover:bg-red-500/5 transition-colors group/reset"
                   onClick={handleClearLocation}
                 >
                   <span className="w-6 h-6 rounded-full border border-red-200 flex items-center justify-center text-red-400 group-hover/reset:text-red-500 group-hover/reset:border-red-400 transition-all">

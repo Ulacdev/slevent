@@ -985,6 +985,15 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const [headerLocationError, setHeaderLocationError] = React.useState('');
   const headerLocationMenuRef = React.useRef<HTMLDivElement | null>(null);
   const [hasLiveEvents, setHasLiveEvents] = React.useState(false);
+  const [scrolled, setScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   React.useEffect(() => {
     const isEmbeddableVideo = (url: string) => {
@@ -995,8 +1004,13 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const checkLive = async () => {
       try {
         const live = await apiService.getLiveEvents();
-        // Only count events with embeddable video URLs (not Google Meet/Zoom)
-        const videoLive = (live || []).filter(e => isEmbeddableVideo(e.streaming_url || ''));
+        const now = new Date();
+        const videoLive = (live || []).filter(e => {
+          if (!isEmbeddableVideo(e.streaming_url || '')) return false;
+          const start = new Date(e.startAt);
+          const end = e.endAt ? new Date(e.endAt) : new Date(start.getTime() + 2 * 60 * 60 * 1000);
+          return now >= start && now <= end;
+        });
         setHasLiveEvents(videoLive.length > 0);
       } catch (err) {
         console.error('Failed to check live status:', err);
@@ -1233,7 +1247,11 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F2F2F2]">
-      <header className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10 sticky top-0 z-50">
+      <header className={`sticky top-0 z-50 transition-all duration-300 bg-[#F2F2F2] ${
+        scrolled 
+          ? 'shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] border-b border-[#2E2E2F]/5' 
+          : 'border-b border-[#2E2E2F]/10'
+      }`}>
         <div className="max-w-[88rem] mx-auto h-20 w-full px-6 flex items-center gap-4">
           <Link to="/" className="shrink-0">
             <Branding className="text-xl lg:text-2xl" />
@@ -1243,7 +1261,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             {showHeaderSearchBar && (
               <form onSubmit={handleHeaderSearchSubmit} className="flex-1 max-w-[750px]">
                 <div className="flex items-center h-13 rounded-2xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.1)] focus-within:border-[#38BDF2]/50 focus-within:shadow-[0_15px_35px_-12px_rgba(56,189,242,0.15)] transition-all duration-300">
-                  <label className="flex items-center gap-3 px-5 py-3 min-w-0 flex-1 border-r border-[#2E2E2F]/5 hover:bg-white/40 transition-colors">
+                  <label className="flex items-center gap-3 px-5 py-3 min-w-0 flex-1 border-r border-[#2E2E2F]/5 hover:bg-[#38BDF2]/5 transition-colors">
                     <ICONS.Search className="w-4 h-4 text-[#2E2E2F] shrink-0" />
                     <input
                       type="text"
@@ -1254,7 +1272,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     />
                   </label>
                   <div
-                    className="relative min-w-0 flex-1 border-r border-[#2E2E2F]/5 bg-[#F2F2F2] hover:bg-white/40 transition-colors"
+                    className="relative min-w-0 flex-1 border-r border-[#2E2E2F]/5 bg-[#F2F2F2] hover:bg-[#38BDF2]/5 transition-colors"
                     ref={headerLocationMenuRef}
                   >
                     <div className="w-full h-full flex items-center">
@@ -1311,7 +1329,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           }}
                           disabled={headerLocating}
                         >
-                          <div className={`w-10 h-10 rounded-full border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/btn:bg-[#38BDF2] group-hover/btn:text-white transition-all shadow-sm ${headerLocating ? 'animate-pulse' : ''}`}>
+                          <div className={`w-10 h-10 rounded-full border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/btn:bg-[#38BDF2] group-hover/btn:text-[#F2F2F2] transition-all shadow-sm ${headerLocating ? 'animate-pulse' : ''}`}>
                             {headerLocating ? (
                               <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full inline-block animate-spin" />
                             ) : (
@@ -1332,7 +1350,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           className="w-full px-5 py-4 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/5 transition-colors group/online border-b border-[#2E2E2F]/5"
                           onClick={() => handleSelectHeaderLocation(ONLINE_LOCATION_VALUE)}
                         >
-                          <div className="w-10 h-10 rounded-xl border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/online:bg-[#38BDF2] group-hover/online:text-white transition-all shadow-sm">
+                          <div className="w-10 h-10 rounded-xl border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/online:bg-[#38BDF2] group-hover/online:text-[#F2F2F2] transition-all shadow-sm">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16v12H4z" />
                               <path strokeLinecap="round" strokeLinejoin="round" d="M10 9l5 3-5 3V9z" />
@@ -1701,7 +1719,7 @@ const DashboardWrapper: React.FC = () => {
 const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canReceiveNotifications } = useUser();
+  const { role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canViewEvents, canEditEvents, canManualCheckIn, canReceiveNotifications } = useUser();
   const { isAttendingView, setPublicMode } = useEngagement();
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
@@ -1785,6 +1803,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   }, [location.pathname]);
   const [organizerSidebarLogoUrl, setOrganizerSidebarLogoUrl] = React.useState('');
   const [organizerSidebarName, setOrganizerSidebarName] = React.useState('');
+  const [hasPrioritySupport, setHasPrioritySupport] = React.useState<boolean | null>(null);
 
   const displayName = email?.trim() || name?.trim() || 'User';
   const roleLabel = getRoleLabel(role);
@@ -1827,8 +1846,8 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
           isOnboarded: !!me.isOnboarded
         });
       } catch {
-        clearUser();
-        navigate('/login', { replace: true });
+        // clearUser(); // Don't clear on every error to avoid flashes
+        // navigate('/login', { replace: true });
       }
     };
     syncSession();
@@ -1851,10 +1870,12 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
         if (!isMounted) return;
         setOrganizerSidebarLogoUrl(organizer?.profileImageUrl || '');
         setOrganizerSidebarName((organizer?.organizerName || '').trim());
+        setHasPrioritySupport(!!(organizer?.plan?.features?.priority_support || organizer?.plan?.features?.enable_priority_support));
       } catch {
         if (isMounted) {
           setOrganizerSidebarLogoUrl('');
           setOrganizerSidebarName('');
+          setHasPrioritySupport(null);
         }
       }
     };
@@ -1892,15 +1913,15 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   const menuItems = (
     !isAuthenticated || !role
       ? []
-      : role === UserRole.STAFF && (setUser as any).canViewEvents === false && (setUser as any).canManualCheckIn === false
+      : role === UserRole.STAFF && canViewEvents === false && canManualCheckIn === false
         ? [
           { label: 'Users', path: '/user/attendees', icon: <ICONS.Users className="w-6 h-6" /> },
         ]
         : role === UserRole.STAFF
           ? [
-            ...((setUser as any).canViewEvents !== false ? [{ label: 'Events', path: '/my-events', icon: <ICONS.Calendar className="w-6 h-6" /> }] : []),
+            ...(canViewEvents !== false ? [{ label: 'Events', path: '/my-events', icon: <ICONS.Calendar className="w-6 h-6" /> }] : []),
             { label: 'Users', path: '/user/attendees', icon: <ICONS.Users className="w-6 h-6" /> },
-            ...((setUser as any).canManualCheckIn !== false ? [{ label: 'Scan', path: '/user/checkin', icon: <ICONS.CheckCircle className="w-6 h-6" /> }] : []),
+            ...(canManualCheckIn !== false ? [{ label: 'Scan', path: '/user/checkin', icon: <ICONS.CheckCircle className="w-6 h-6" /> }] : []),
           ]
           : [
             { label: 'Home', path: '/user-home', icon: <ICONS.Home className="w-6 h-6" /> },
@@ -2240,16 +2261,18 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <ICONS.Settings className="w-4 h-4 opacity-70 group-hover:opacity-100" />
                     <span>Account Settings</span>
                   </button>
-                  <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
-                    onClick={() => {
-                      navigate('/organizer-support');
-                      setUserMenuOpen(false);
-                    }}
-                  >
-                    <ICONS.MessageSquare className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                    <span>Support</span>
-                  </button>
+                  {hasPrioritySupport === true && (
+                    <button
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                      onClick={() => {
+                        navigate('/organizer-support');
+                        setUserMenuOpen(false);
+                      }}
+                    >
+                      <ICONS.MessageSquare className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                      <span>Support</span>
+                    </button>
+                  )}
                   <button
                     className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
                     onClick={() => {
@@ -2341,11 +2364,16 @@ const roleHomePath = (role: UserRole): string => {
 };
 
 const RequireRoleRoute: React.FC<{ allow: UserRole[]; children: React.ReactElement }> = ({ allow, children }) => {
-  const { setUser, clearUser } = useUser();
+  const { role: currentRole, isOnboarded: currentOnboarded, setUser, clearUser } = useUser();
   const [checking, setChecking] = React.useState(true);
   const [resolvedRole, setResolvedRole] = React.useState<UserRole | null>(null);
   const [shouldRedirectToOnboarding, setShouldRedirectToOnboarding] = React.useState(false);
   const location = useLocation();
+
+  // Fast-path: If we already have a session and know they need onboarding, redirect immediately
+  if (currentRole === UserRole.ORGANIZER && currentOnboarded === false && location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" replace />;
+  }
 
   React.useEffect(() => {
     let cancelled = false;
@@ -2417,11 +2445,62 @@ const HashBypassBridge: React.FC = () => {
   return null;
 };
 
+const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { role, isOnboarded, isAuthenticated, setUser } = useUser();
+  const location = useLocation();
+  const [synced, setSynced] = React.useState(false);
+
+  React.useEffect(() => {
+    const sync = async () => {
+      // If we already know their onboarded status, we're good
+      if (typeof isOnboarded !== 'undefined') {
+        setSynced(true);
+        return;
+      }
+      try {
+        const res = await fetch(`${API}/api/whoAmI`, { credentials: 'include', cache: 'no-store' });
+        if (res.ok) {
+          const me = await res.json();
+          setUser({
+            role: normalizeUserRole(me.role),
+            email: me.email,
+            name: me.name,
+            imageUrl: me.imageUrl,
+            isOnboarded: !!me.isOnboarded,
+            canViewEvents: me.canViewEvents ?? true,
+            canEditEvents: me.canEditEvents ?? true,
+            canManualCheckIn: me.canManualCheckIn ?? true,
+            canReceiveNotifications: me.canReceiveNotifications ?? true,
+          });
+        }
+      } catch {
+        // Silent fail for guest
+      } finally {
+        setSynced(true);
+      }
+    };
+    sync();
+  }, [setUser, isOnboarded]);
+
+  if (!synced) return <PageLoader label="Initializing..." variant="page" />;
+
+  const isAuthPage = ['/login', '/signup', '/forgot-password', '/reset-password', '/accept-invite'].includes(location.pathname);
+  const isOnboardingPage = location.pathname === '/onboarding';
+
+  // Force redirection if organizer is not onboarded and tries to access anything else
+  if (isAuthenticated && role === UserRole.ORGANIZER && isOnboarded === false && !isOnboardingPage && !isAuthPage) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 const App: React.FC = () => (
   <ToastProvider>
     <ToastContainer />
     <Router>
     <HashBypassBridge />
+    <GlobalOnboardingGuard>
     <Routes>
       <Route path="/login" element={<LoginPerspective />} />
       <Route path="/signup" element={<SignUpView />} />
@@ -2473,6 +2552,7 @@ const App: React.FC = () => (
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </GlobalOnboardingGuard>
   </Router>
   </ToastProvider>
 );

@@ -230,16 +230,7 @@ const WelcomeView: React.FC = () => {
                                     </span>
                                 </button>
                                 
-                                <button
-                                    onClick={() => navigate('/')}
-                                    className="px-10 py-5 rounded-2xl bg-transparent border-2 border-solid border-[#38BDF2] text-[#38BDF2] font-black uppercase tracking-widest text-[11px] hover:bg-[#38BDF2] hover:text-white transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 group/browse"
-                                >
-                                    <ICONS.Search className="w-4 h-4 text-[#38BDF2] group-hover/browse:text-white transition-colors duration-300" />
-                                    Explore Events
-                                </button>
-
-
-                            </div>
+                            </div>    
 
                             <div className="mt-16 flex items-center gap-8 py-6 opacity-60 hover:opacity-100 transition-all duration-500">
                                 <div className="flex -space-x-3">
@@ -343,13 +334,13 @@ const WelcomeView: React.FC = () => {
                                 <div className="space-y-2">
                                     <label className="text-[13px] font-black uppercase tracking-widest text-[#2E2E2F]/40 ml-1">Organizer Name</label>
                                     <Input
-                                        placeholder="BBEK"
+                                        placeholder="e.g. Innovate Philippines"
                                         value={formData.organizerName}
                                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                             handleFormChange('organizerName', stripHtml(e.target.value))
                                         }
                                         required
-                                        className="h-14 !bg-[#F2F2F2] !border-[#2E2E2F]/10 focus:!border-[#38BDF2] rounded-2xl"
+                                        className="h-14 !bg-[#F2F2F2] !border-2 !border-[#E8E8E8] focus:!border-[#38BDF2] rounded-2xl"
                                     />
                                 </div>
 
@@ -363,7 +354,7 @@ const WelcomeView: React.FC = () => {
                                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                                 handleFormChange('websiteUrl', e.target.value)
                                             }
-                                            className="h-14 !bg-[#F2F2F2] !border-[#2E2E2F]/10 focus:!border-[#38BDF2] rounded-2xl"
+                                            className="h-14 !bg-[#F2F2F2] !border-2 !border-[#E8E8E8] focus:!border-[#38BDF2] rounded-2xl"
                                         />
                                     </div>
                                     <div className="flex items-center gap-4 pt-6 group cursor-pointer" onClick={() => handleFormChange('emailOptIn', !formData.emailOptIn)}>
@@ -381,7 +372,7 @@ const WelcomeView: React.FC = () => {
                                 <div className="space-y-2">
                                     <label className="text-[13px] font-black uppercase tracking-widest text-[#2E2E2F]/40 ml-1">Bio / Description (Text only)</label>
                                     <textarea
-                                        className="w-full px-5 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-3xl outline-none focus:ring-4 focus:ring-[#38BDF2]/10 focus:border-[#38BDF2] min-h-[140px] text-sm font-medium leading-relaxed transition-all"
+                                        className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-[#E8E8E8] rounded-3xl outline-none focus:ring-4 focus:ring-[#38BDF2]/10 focus:border-[#38BDF2] min-h-[140px] text-sm font-medium leading-relaxed transition-all"
                                         value={formData.bio}
                                         onChange={(e) => handleFormChange('bio', stripHtml(e.target.value))}
                                         placeholder="Introduce your organization..."
@@ -392,7 +383,7 @@ const WelcomeView: React.FC = () => {
                                 <div className="space-y-2">
                                     <label className="text-[13px] font-black uppercase tracking-widest text-[#2E2E2F]/40 ml-1">Event Page Description (Short)</label>
                                     <textarea
-                                        className="w-full px-5 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-3xl outline-none focus:ring-4 focus:ring-[#38BDF2]/10 focus:border-[#38BDF2] min-h-[90px] text-sm font-medium leading-relaxed transition-all"
+                                        className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-[#E8E8E8] rounded-3xl outline-none focus:ring-4 focus:ring-[#38BDF2]/10 focus:border-[#38BDF2] min-h-[90px] text-sm font-medium leading-relaxed transition-all"
                                         maxLength={280}
                                         value={formData.eventPageDescription}
                                         onChange={(e) => handleFormChange('eventPageDescription', stripHtml(e.target.value))}
@@ -410,7 +401,7 @@ const WelcomeView: React.FC = () => {
                                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                                 handleFormChange('facebookId', e.target.value)
                                             }
-                                            className="h-14 !bg-[#F2F2F2] !border-[#2E2E2F]/10 focus:!border-[#38BDF2] rounded-2xl"
+                                            className="h-14 !bg-[#F2F2F2] !border-2 !border-[#E8E8E8] focus:!border-[#38BDF2] rounded-2xl"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -421,15 +412,15 @@ const WelcomeView: React.FC = () => {
                                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                                 handleFormChange('twitterHandle', e.target.value)
                                             }
-                                            className="h-14 !bg-[#F2F2F2] !border-[#2E2E2F]/10 focus:!border-[#38BDF2] rounded-2xl"
+                                            className="h-14 !bg-[#F2F2F2] !border-2 !border-[#E8E8E8] focus:!border-[#38BDF2] rounded-2xl"
                                         />
                                     </div>
                                 </div>
                                 
-                                <div className="pt-6 flex justify-start">
+                                <div className="pt-6 flex flex-col sm:flex-row gap-4 justify-start">
                                     <Button
                                         type="submit"
-                                        className="px-12 h-16 rounded-2xl font-black tracking-[0.2em] text-[11px] uppercase bg-[#38BDF2] text-white shadow-xl shadow-[#38BDF2]/20 hover:scale-[1.02] active:scale-95 transition-all w-full md:w-auto"
+                                        className="px-12 h-16 rounded-2xl font-black tracking-[0.2em] text-[11px] uppercase bg-[#38BDF2] text-white shadow-xl shadow-[#38BDF2]/20 hover:scale-[1.02] active:scale-95 transition-all w-full sm:w-auto"
                                         disabled={saving}
                                     >
                                         {saving ? 'Synchronizing...' : 'Complete & Launch Profile'}

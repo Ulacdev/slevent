@@ -24,6 +24,8 @@ type EventCardProps = {
   onEventClick?: (eventId: string) => void;
 };
 
+const BRAND_LOGO_URL = 'https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg';
+
 export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => {
   const navigate = useNavigate();
 
@@ -46,10 +48,10 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
   return (
     <div
       onClick={handleClick}
-      className="cursor-pointer group rounded-2xl overflow-hidden border border-transparent hover:border-[#2E2E2F]/10 bg-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+      className="cursor-pointer group rounded-2xl overflow-hidden border border-transparent hover:border-[#2E2E2F]/10 bg-[#F2F2F2] transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
     >
       {/* Image Container */}
-      <div className="relative overflow-hidden h-48 md:h-56 bg-gradient-to-br from-[#F2F2F2] to-[#E0E0E0]">
+      <div className="relative overflow-hidden h-48 md:h-56 bg-[#F2F2F2]">
         {event.image_url ? (
           <img
             src={event.image_url}
@@ -57,8 +59,12 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-[#2E2E2F]/20">
-            <ICONS.Calendar className="w-12 h-12" strokeWidth={1} />
+          <div className="w-full h-full flex flex-col items-center justify-center p-12 bg-gradient-to-br from-[#38BDF2] to-[#2E2E2F]">
+            <img
+              src={BRAND_LOGO_URL}
+              alt="StartupLab"
+              className="w-20 h-20 object-contain opacity-40 brightness-0 invert drop-shadow-2xl"
+            />
           </div>
         )}
 
@@ -119,9 +125,9 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
               const eventStart = event.startAt ? new Date(event.startAt) : null;
               const eventEnd = eventStart ? new Date(eventStart.getTime() + 2 * 60 * 60 * 1000) : null; // Fallback to 2h window
               const isDone = eventEnd && now > eventEnd;
-              
+
               if (isDone) return <span className="text-xs text-[#2E2E2F]/40 uppercase tracking-widest">Event Ended</span>;
-              
+
               return event.price_min === 0 ? (
                 <span className="text-sm">FREE</span>
               ) : typeof event.price_min === 'number' ? (

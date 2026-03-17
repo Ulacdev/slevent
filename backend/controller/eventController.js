@@ -75,9 +75,7 @@ export const listLiveEvents = async (req, res) => {
 
     const filteredEvents = (events || []).filter(e => {
       if (!e.streaming_url || e.streaming_url.trim() === '') return false;
-      const start = new Date(e.startAt);
-      const end = e.endAt ? new Date(e.endAt) : new Date(start.getTime() + 2 * 60 * 60 * 1000); // default to 2hr duration if no end time
-      return now >= start && now <= end;
+      return true;
     });
 
     const enrichedEvents = await enrichEventsWithOrganizer(filteredEvents);

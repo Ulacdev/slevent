@@ -11,11 +11,13 @@ import { useEngagement } from '../../context/EngagementContext';
 import { PricingSection } from '../../components/PricingSection';
 
 
+const BRAND_LOGO_URL = 'https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg';
+
 // Helper to handle JSONB image format
 const getImageUrl = (img: any): string => {
-  if (!img) return 'https://via.placeholder.com/800x400';
+  if (!img) return BRAND_LOGO_URL;
   if (typeof img === 'string') return img;
-  return img.url || img.path || img.publicUrl || 'https://via.placeholder.com/800x400';
+  return img.url || img.path || img.publicUrl || BRAND_LOGO_URL;
 };
 
 // Date/time formatting with event timezone
@@ -82,10 +84,10 @@ interface EventCardProps {
   listing?: string;
 }
 
-export const EventCard: React.FC<EventCardProps> = ({ 
-  event, 
-  onActionNotice, 
-  trendingRank = null, 
+export const EventCard: React.FC<EventCardProps> = ({
+  event,
+  onActionNotice,
+  trendingRank = null,
   organizers = [],
   isLanding = true,
   listing = 'all'
@@ -121,44 +123,9 @@ export const EventCard: React.FC<EventCardProps> = ({
   }, [event.eventId, event.likesCount]);
 
   // Safe calculation for minPrice if ticketTypes exist
-  const discountInfo = useMemo(() => {
-    if (!event.ticketTypes?.length) return null;
-    
-    const now = new Date();
-    const activeDiscounts = event.ticketTypes.filter(t => {
-      const salesStart = t.salesStartAt ? new Date(t.salesStartAt) : null;
-      const salesEnd = t.salesEndAt ? new Date(t.salesEndAt) : null;
-      const isLiveByTime = (!salesStart || now >= salesStart) && (!salesEnd || now <= salesEnd);
-      return isLiveByTime && t.saleDiscountPercent && t.saleDiscountPercent > 0;
-    });
-
-    if (activeDiscounts.length === 0) return null;
-
-    const maxDiscount = Math.max(...activeDiscounts.map(t => t.saleDiscountPercent || 0));
-    
-    return { maxDiscount };
-  }, [event.ticketTypes]);
-
-  const minPrice = useMemo(() => {
-    if (!event.ticketTypes?.length) return 0;
-    const now = new Date();
-    
-    return Math.min(...event.ticketTypes.map(t => {
-      const salesStart = t.salesStartAt ? new Date(t.salesStartAt) : null;
-      const salesEnd = t.salesEndAt ? new Date(t.salesEndAt) : null;
-      const isLiveByTime = (!salesStart || now >= salesStart) && (!salesEnd || now <= salesEnd);
-      
-      if (isLiveByTime && t.saleDiscountPercent && t.saleDiscountPercent > 0) {
-        return Math.round(t.priceAmount * (100 - t.saleDiscountPercent) / 100);
-      }
-      return t.priceAmount;
-    }));
-  }, [event.ticketTypes]);
-
-  const originalMinPrice = useMemo(() => {
-    if (!event.ticketTypes?.length) return 0;
-    return Math.min(...event.ticketTypes.map(t => t.priceAmount));
-  }, [event.ticketTypes]);
+  const minPrice = event.ticketTypes?.length
+    ? Math.min(...event.ticketTypes.map(t => t.priceAmount))
+    : 0;
 
   const organizerId = event.organizerId || event.organizer?.organizerId || '';
 
@@ -295,11 +262,21 @@ export const EventCard: React.FC<EventCardProps> = ({
     >
       {/* Image Section - Increased Height per User Request */}
       <div className="relative h-64 overflow-hidden">
-        <img
-          src={getImageUrl(event.imageUrl)}
-          alt={event.eventName}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
+        {event.imageUrl ? (
+          <img
+            src={getImageUrl(event.imageUrl)}
+            alt={event.eventName}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center p-12 bg-gradient-to-br from-[#38BDF2] to-[#2E2E2F]">
+            <img
+              src={BRAND_LOGO_URL}
+              alt="StartupLab"
+              className="w-24 h-24 object-contain opacity-40 brightness-0 invert drop-shadow-2xl"
+            />
+          </div>
+        )}
         {/* Top Left: Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
           {trendingRank && (isLanding && listing === 'all') ? (
@@ -310,15 +287,15 @@ export const EventCard: React.FC<EventCardProps> = ({
             </div>
           ) : (event.isPromoted || (event as any).is_promoted) ? (
             <div className="group/promoted relative">
-              <div 
-                className="flex items-center gap-1.5 px-3 py-1 rounded-full shadow-lg border border-white/20 animate-in fade-in zoom-in duration-500 cursor-help"
-                style={{ background: `linear-gradient(135deg, ${effectiveBrandColor}, ${isTrendingLanding ? '#4A4A4A' : effectiveBrandColor + 'CC'})` }}
+              <div
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full shadow-lg border border-white/30 backdrop-blur-md animate-in fade-in zoom-in duration-500 cursor-help"
+                style={{ background: `linear-gradient(135deg, ${effectiveBrandColor}E6, ${isTrendingLanding ? '#4A4A4A' : effectiveBrandColor + '99'})` }}
               >
-                <ICONS.Info className="w-3.5 h-3.5 text-white" strokeWidth={3} />
-                <span className="text-[9px] font-black uppercase tracking-widest text-white drop-shadow-sm">Promoted</span>
+                <span className="text-xs">🔥</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.15em] text-white drop-shadow-sm">Promoted</span>
               </div>
-              <div className="absolute left-0 top-full mt-2 w-48 p-3 bg-[#2E2E2F] text-white text-[9px] font-bold rounded-xl shadow-2xl opacity-0 translate-y-1 pointer-events-none group-hover/promoted:opacity-100 group-hover/promoted:translate-y-0 transition-all z-50 leading-relaxed">
-                The organizer has highlighted this event as part of their elite plan features.
+              <div className="absolute left-0 top-full mt-2 w-56 p-4 bg-[#2E2E2F] text-white text-[10px] font-bold rounded-2xl shadow-2xl opacity-0 translate-y-1 pointer-events-none group-hover/promoted:opacity-100 group-hover/promoted:translate-y-0 transition-all z-50 leading-relaxed ring-1 ring-white/10">
+                This event is highlighted by the organizer as a premium featured session on StartupLab.
                 <div className="absolute bottom-full left-4 border-8 border-transparent border-b-[#2E2E2F]"></div>
               </div>
             </div>
@@ -329,186 +306,170 @@ export const EventCard: React.FC<EventCardProps> = ({
               #{trendingRank} Trending
             </div>
           ) : null}
-
-          {discountInfo && (
-            <div 
-              className="rounded-full px-2.5 py-1 text-white text-[10px] font-black uppercase tracking-[0.15em] shadow-lg shadow-black/10 transition-transform active:scale-95"
-              style={{ background: '#38BDF2' }}
-            >
-              SALE {discountInfo.maxDiscount}% OFF
-            </div>
-          )}
-      </div>
-      <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity pointer-events-none">
-        <button
-          type="button"
-          onClick={handleLike}
-          className={`pointer-events-auto w-9 h-9 rounded-xl border backdrop-blur-sm flex items-center justify-center transition-colors ${liked
-            ? 'bg-[#38BDF2] text-white border-[#38BDF2]'
-            : 'bg-white/90 text-[#2E2E2F] border-[#2E2E2F]/20 hover:bg-[#38BDF2]/20'
-            }`}
-          title={organizerRestricted ? 'Switch to Attending to like events' : 'Like event'}
-        >
-          <ICONS.Heart className="w-4 h-4" />
-        </button>
-        <button
-          type="button"
-          onClick={handleShare}
-          className={`pointer-events-auto w-9 h-9 rounded-xl border bg-white/90 text-[#2E2E2F] border-[#2E2E2F]/20 backdrop-blur-sm flex items-center justify-center ${isTrendingLanding ? 'hover:bg-[#2E2E2F]/10' : 'hover:bg-[#38BDF2]/20'} transition-colors`}
-          title="Share event"
-        >
-          <ICONS.Download className="w-4 h-4" />
-        </button>
-        <div className="relative" ref={menuRef}>
+        </div>
+        <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity pointer-events-none">
           <button
             type="button"
-            onClick={(eventClick) => {
-              eventClick.stopPropagation();
-              setMenuOpen((prev) => !prev);
-            }}
-            className={`w-9 h-9 rounded-xl border bg-white/90 text-[#2E2E2F] border-[#2E2E2F]/20 backdrop-blur-sm flex items-center justify-center ${isTrendingLanding ? 'hover:bg-[#2E2E2F]/10' : 'hover:bg-[#38BDF2]/20'} transition-colors`}
-            title="More options"
+            onClick={handleLike}
+            className={`pointer-events-auto w-9 h-9 rounded-xl border backdrop-blur-sm flex items-center justify-center transition-colors ${liked
+              ? 'bg-[#38BDF2] text-white border-[#38BDF2]'
+              : 'bg-white/90 text-[#2E2E2F] border-[#2E2E2F]/20 hover:bg-[#38BDF2]/20'
+              }`}
+            title={organizerRestricted ? 'Switch to Attending to like events' : 'Like event'}
           >
-            <ICONS.MoreHorizontal className="w-4 h-4" />
+            <ICONS.Heart className="w-4 h-4" />
           </button>
-          {menuOpen && (
-            <div
-              className="absolute right-0 mt-2 min-w-[220px] rounded-2xl border border-[#2E2E2F]/10 bg-[#F2F2F2] shadow-xl z-20 overflow-hidden"
-              onClick={(eventClick) => eventClick.stopPropagation()}
+          <button
+            type="button"
+            onClick={handleShare}
+            className={`pointer-events-auto w-9 h-9 rounded-xl border bg-white/90 text-[#2E2E2F] border-[#2E2E2F]/20 backdrop-blur-sm flex items-center justify-center ${isTrendingLanding ? 'hover:bg-[#2E2E2F]/10' : 'hover:bg-[#38BDF2]/20'} transition-colors`}
+            title="Share event"
+          >
+            <ICONS.Download className="w-4 h-4" />
+          </button>
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={(eventClick) => {
+                eventClick.stopPropagation();
+                setMenuOpen((prev) => !prev);
+              }}
+              className={`w-9 h-9 rounded-xl border bg-white/90 text-[#2E2E2F] border-[#2E2E2F]/20 backdrop-blur-sm flex items-center justify-center ${isTrendingLanding ? 'hover:bg-[#2E2E2F]/10' : 'hover:bg-[#38BDF2]/20'} transition-colors`}
+              title="More options"
             >
-              <div className="px-4 py-3 border-b border-[#2E2E2F]/10">
-                <p className="text-[10px] uppercase tracking-widest font-black text-[#2E2E2F]/50">Page</p>
-                <p className="text-xs font-semibold text-[#2E2E2F]">{pageName}</p>
-              </div>
-              <div className="px-4 py-3 border-b border-[#2E2E2F]/10">
-                <p className="text-[10px] uppercase tracking-widest font-black text-[#2E2E2F]/50">Organization</p>
-                <p className="text-xs font-semibold text-[#2E2E2F]">{organizerName}</p>
-              </div>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setMenuOpen(false);
-                  navigate(`/organizer/${organizerId}`);
-                }}
-                className="w-full text-left px-4 py-3 text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors disabled:text-[#2E2E2F]/40 disabled:cursor-not-allowed"
-                disabled={!organizerId}
+              <ICONS.MoreHorizontal className="w-4 h-4" />
+            </button>
+            {menuOpen && (
+              <div
+                className="absolute right-0 mt-2 min-w-[220px] rounded-2xl border border-[#2E2E2F]/10 bg-[#F2F2F2] shadow-xl z-20 overflow-hidden"
+                onClick={(eventClick) => eventClick.stopPropagation()}
               >
-                View Profile
-              </button>
-              <button
-                type="button"
-                onClick={handleFollow}
-                className="w-full text-left px-4 py-3 text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors disabled:text-[#2E2E2F]/40 disabled:cursor-not-allowed"
-                disabled={!organizerId}
-              >
-                {following ? 'Following' : 'Follow organization'}
-              </button>
-              {following && (
+                <div className="px-4 py-3 border-b border-[#2E2E2F]/10">
+                  <p className="text-[10px] uppercase tracking-widest font-black text-[#2E2E2F]/50">Page</p>
+                  <p className="text-xs font-semibold text-[#2E2E2F]">{pageName}</p>
+                </div>
+                <div className="px-4 py-3 border-b border-[#2E2E2F]/10">
+                  <p className="text-[10px] uppercase tracking-widest font-black text-[#2E2E2F]/50">Organization</p>
+                  <p className="text-xs font-semibold text-[#2E2E2F]">{organizerName}</p>
+                </div>
                 <button
                   type="button"
-                  onClick={(eventClick) => {
-                    eventClick.stopPropagation();
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setMenuOpen(false);
-                    navigate('/followings');
+                    navigate(`/organizer/${organizerId}`);
                   }}
-                  className="w-full text-left px-4 py-3 text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors border-t border-[#2E2E2F]/10"
+                  className="w-full text-left px-4 py-3 text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors disabled:text-[#2E2E2F]/40 disabled:cursor-not-allowed"
+                  disabled={!organizerId}
                 >
-                  Following list
+                  View Profile
                 </button>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-    {/* Content Section */ }
-  <div className="p-5 flex-1 flex flex-col">
-
-
-    {/* Organizer Profile Summary - Hidden in Trending Landing & All Events page */}
-    {isLanding && listing !== 'all' && (
-      <div 
-        className="flex items-center gap-3 mb-5 p-1 rounded-2xl transition-colors hover:bg-black/5"
-        onClick={(e) => {
-          e.stopPropagation();
-          if (organizerId) navigate(`/organizers/${organizerId}`);
-        }}
-      >
-        <div className="w-10 h-10 rounded-full overflow-hidden bg-[#2E2E2F] border-2 border-white shadow-md shrink-0">
-          {resolvedOrganizer?.profileImageUrl ? (
-            <img src={getImageUrl(resolvedOrganizer.profileImageUrl)} alt={organizerName} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-white font-black text-xs">
-              {organizerName.charAt(0).toUpperCase()}
-            </div>
-          )}
-        </div>
-        <div className="flex flex-col min-w-0">
-          <span className="text-[12px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.15em] truncate">
-            {organizerName}
-          </span>
-        </div>
-      </div>
-    )}
-
-    <h4 className="text-[#2E2E2F] text-xl font-bold tracking-tight leading-tight mb-3 line-clamp-2">
-      {event.eventName}
-    </h4>
-    <div className="flex items-center gap-2 text-[13px] font-semibold text-[#2E2E2F]/70 mb-3">
-      <span className={`w-6 h-6 rounded-full flex items-center justify-center ${liked ? 'bg-[#38BDF2] text-white' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]/65'}`}>
-        <ICONS.Heart className="w-3.5 h-3.5" />
-      </span>
-      <span>{likeLabel}</span>
-    </div>
-    <div className="flex flex-col gap-1.5 text-[13px] font-medium text-[#2E2E2F]/70 mb-4">
-      <div className="flex items-center gap-2">
-        <ICONS.Users className="w-4 h-4 text-[#2E2E2F]" />
-        <span className="text-[#2E2E2F]">
-          {(event as any).registrationCount ?? (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantitySold || 0), 0)} registered / {(event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0)} slots
-        </span>
-      </div>
-      <div className="flex items-center gap-2">
-        <ICONS.MapPin className="w-4 h-4" />
-        <span className="line-clamp-1">{event.locationText}</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <ICONS.Calendar className="w-4 h-4" />
-        <span>{formatDate(event.startAt, event.timezone, { day: 'numeric', month: 'short', year: 'numeric' })} · {formatTime(event.startAt, event.timezone)}</span>
-      </div>
-    </div>
-
-    {/* Price / Fee section */}
-    <div className="mt-auto w-full">
-      <div className="h-[1px] w-full bg-[#2E2E2F]/10 invisible group-hover:visible group-hover:opacity-100 transition-all duration-300" />
-      {isDone ? (
-        <div className="pt-5 flex flex-col items-start">
-          <p className="text-[12px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-1">Status</p>
-          <p className="text-2xl font-black text-[#2E2E2F]">Event Ended</p>
-        </div>
-      ) : (
-        <div className="pt-5 flex flex-col items-start">
-          <p className="text-[12px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-1">Tickets From</p>
-          <div className="flex flex-col">
-            {discountInfo && originalMinPrice > minPrice && (
-              <span className="text-[12px] font-bold text-[#2E2E2F]/40 line-through leading-none mb-1">
-                ₱{originalMinPrice.toLocaleString()}
-              </span>
+                <button
+                  type="button"
+                  onClick={handleFollow}
+                  className="w-full text-left px-4 py-3 text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors disabled:text-[#2E2E2F]/40 disabled:cursor-not-allowed"
+                  disabled={!organizerId}
+                >
+                  {following ? 'Following' : 'Follow organization'}
+                </button>
+                {following && (
+                  <button
+                    type="button"
+                    onClick={(eventClick) => {
+                      eventClick.stopPropagation();
+                      setMenuOpen(false);
+                      navigate('/followings');
+                    }}
+                    className="w-full text-left px-4 py-3 text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors border-t border-[#2E2E2F]/10"
+                  >
+                    Following list
+                  </button>
+                )}
+              </div>
             )}
-            <p className="text-2xl font-black text-[#2E2E2F] leading-none">
-              {minPrice > 0 
-                ? `₱${minPrice.toLocaleString()}` 
-                : (event.ticketTypes && event.ticketTypes.length > 0) || (minPrice === 0 && event.ticketTypes?.length) 
-                  ? 'Free' 
-                  : 'TBA'}
-            </p>
           </div>
         </div>
-      )}
-    </div>
+      </div>
+      {/* Content Section */}
+      <div className="p-5 flex-1 flex flex-col">
 
 
-  </div>
+        {/* Organizer Profile Summary - Hidden in Trending Landing & All Events page */}
+        {isLanding && listing !== 'all' && (
+          <div
+            className="flex items-center gap-3 mb-5 p-1 rounded-2xl transition-colors hover:bg-black/5"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (organizerId) navigate(`/organizers/${organizerId}`);
+            }}
+          >
+            <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] border-2 border-white shadow-md shrink-0 flex items-center justify-center">
+              {resolvedOrganizer?.profileImageUrl ? (
+                <img src={getImageUrl(resolvedOrganizer.profileImageUrl)} alt={organizerName} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-white font-black text-xs drop-shadow-md">
+                  {organizerName.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[12px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.15em] truncate">
+                {organizerName}
+              </span>
+            </div>
+          </div>
+        )}
+
+        <h4 className="text-[#2E2E2F] text-xl font-bold tracking-tight leading-tight mb-3 line-clamp-2">
+          {event.eventName}
+        </h4>
+        <div className="flex items-center gap-2 text-[13px] font-semibold text-[#2E2E2F]/70 mb-3">
+          <span className={`w-6 h-6 rounded-full flex items-center justify-center ${liked ? 'bg-[#38BDF2] text-white' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]/65'}`}>
+            <ICONS.Heart className="w-3.5 h-3.5" />
+          </span>
+          <span>{likeLabel}</span>
+        </div>
+        <div className="flex flex-col gap-1.5 text-[13px] font-medium text-[#2E2E2F]/70 mb-4">
+          <div className="flex items-center gap-2">
+            <ICONS.Users className="w-4 h-4 text-[#2E2E2F]" />
+            <span className="text-[#2E2E2F]">
+              {(event as any).registrationCount ?? (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantitySold || 0), 0)} registered / {(event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0)} slots
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ICONS.MapPin className="w-4 h-4" />
+            <span className="line-clamp-1">{event.locationText}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ICONS.Calendar className="w-4 h-4" />
+            <span>{formatDate(event.startAt, event.timezone, { day: 'numeric', month: 'short', year: 'numeric' })} · {formatTime(event.startAt, event.timezone)}</span>
+          </div>
+        </div>
+
+        {/* Price / Fee section */}
+        <div className="mt-auto w-full">
+          <div className="h-[1px] w-full bg-[#2E2E2F]/10 invisible group-hover:visible group-hover:opacity-100 transition-all duration-300" />
+          {isDone ? (
+            <div className="pt-5 flex flex-col items-start">
+              <p className="text-[12px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-1">Status</p>
+              <p className="text-2xl font-black text-[#2E2E2F]">Event Ended</p>
+            </div>
+          ) : (
+            <div className="pt-5 flex flex-col items-start">
+              <p className="text-[12px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-1">Tickets From</p>
+              <p className="text-2xl font-black text-[#2E2E2F]">
+                {minPrice > 0
+                  ? `₱${minPrice.toLocaleString()}`
+                  : (event.ticketTypes && event.ticketTypes.length > 0) || (minPrice === 0 && event.ticketTypes?.length)
+                    ? 'Free'
+                    : 'TBA'}
+              </p>
+            </div>
+          )}
+        </div>
+
+
+      </div>
     </Card >
   );
 };
@@ -746,7 +707,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
     const todayStart = new Date(now);
     todayStart.setHours(0, 0, 0, 0);
     const todayEnd = new Date(todayStart);
-todayEnd.setHours(23, 59, 59, 999);
+    todayEnd.setHours(23, 59, 59, 999);
     const weekendRange = getUpcomingWeekendRange(now);
 
     const listingFiltered = events.filter((event) => {
@@ -1002,11 +963,11 @@ todayEnd.setHours(23, 59, 59, 999);
                 </div>
 
                 {/* Dropdown list of organizers */}
-                <div className={`absolute bottom-[calc(100%-10px)] left-0 w-64 bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] rounded-[2rem] overflow-hidden transition-all duration-300 origin-bottom-left pb-4 ${showOrgDropdown ? 'opacity-100 scale-100 translate-y-[-10px]' : 'opacity-0 scale-95 pointer-events-none translate-y-0'}`}>
-                  <div className="p-4 border-b border-[#2E2E2F]/5 bg-[#2E2E2F]/5">
-                    <h5 className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em]">Our Partners</h5>
+                <div className={`absolute bottom-[calc(100%-10px)] left-0 w-64 bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] rounded-[2.5rem] overflow-hidden transition-all duration-300 origin-bottom-left pb-3 ${showOrgDropdown ? 'opacity-100 scale-100 translate-y-[-10px]' : 'opacity-0 scale-95 pointer-events-none translate-y-0'}`}>
+                  <div className="p-5 border-b border-[#2E2E2F]/5 bg-[#2E2E2F]/[0.02]">
+                    <h5 className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.25em]">Our Partners</h5>
                   </div>
-                  <div className="max-h-[320px] overflow-y-auto custom-scrollbar p-2 space-y-1">
+                  <div className="max-h-[238px] overflow-y-auto custom-scrollbar p-2.5 space-y-1">
                     {organizers.map((org) => (
                       <button
                         key={org.organizerId}
@@ -1014,22 +975,22 @@ todayEnd.setHours(23, 59, 59, 999);
                           e.stopPropagation();
                           navigate(`/organizer/${org.organizerId}`);
                         }}
-                        className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-[#38BDF2]/10 transition-colors text-left group/item"
+                        className="w-full flex items-center gap-3.5 p-2.5 rounded-[1.2rem] hover:bg-white hover:shadow-sm transition-all duration-300 text-left group/item border border-transparent hover:border-[#2E2E2F]/5"
                       >
-                        <div className="w-8 h-8 rounded-lg overflow-hidden border border-[#2E2E2F]/5 shadow-sm bg-white">
+                        <div className="w-9 h-9 rounded-xl overflow-hidden border-2 border-white shadow-sm bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] flex items-center justify-center shrink-0">
                           {org.profileImageUrl ? (
                             <img src={getImageUrl(org.profileImageUrl)} alt="" className="w-full h-full object-cover" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-[#2E2E2F] text-white text-[10px] font-black uppercase">
+                            <span className="text-white text-[11px] font-black uppercase drop-shadow-sm">
                               {(org.organizerName || 'O').charAt(0)}
-                            </div>
+                            </span>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-black text-[#2E2E2F] truncate group-hover/item:text-[#38BDF2] transition-colors">
+                          <p className="text-[11px] font-black text-[#2E2E2F] truncate group-hover/item:text-[#38BDF2] transition-colors tracking-tight">
                             {org.organizerName}
                           </p>
-                          <p className="text-[9px] font-bold text-[#2E2E2F]/40 uppercase tracking-wider">
+                          <p className="text-[9px] font-bold text-[#2E2E2F]/30 uppercase tracking-[0.1em]">
                             {org.followersCount || 0} Followers
                           </p>
                         </div>
@@ -1037,19 +998,16 @@ todayEnd.setHours(23, 59, 59, 999);
                       </button>
                     ))}
                     {organizers.length === 0 && (
-                      <p className="p-4 text-center text-xs font-bold text-[#2E2E2F]/40">No organizers yet.</p>
+                      <div className="p-8 text-center bg-[#2E2E2F]/[0.02] rounded-2xl mx-1">
+                        <p className="text-[10px] font-black text-[#2E2E2F]/20 uppercase tracking-[0.1em]">No verified partners yet.</p>
+                      </div>
                     )}
                   </div>
-                  <div className="p-3 bg-[#F2F2F2] border-t border-[#2E2E2F]/5 text-center">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Navigate to a dedicated organizers page if exists, or act as an anchor
-                      }}
-                      className="text-[9px] font-black text-[#38BDF2] uppercase tracking-[0.1em] hover:text-[#003E86] transition-colors"
-                    >
+                  <div className="px-4 py-3 bg-[#F2F2F2] border-t border-[#2E2E2F]/5 text-center">
+                    <div className="flex items-center justify-center gap-2 text-[9px] font-black text-[#38BDF2] uppercase tracking-[0.2em] opacity-40 hover:opacity-100 transition-opacity cursor-default">
+                      <div className="w-1 h-1 rounded-full bg-[#38BDF2] animate-pulse" />
                       Verified Community
-                    </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1187,6 +1145,12 @@ todayEnd.setHours(23, 59, 59, 999);
                               </div>
                             );
                           })()}
+
+                          {/* Top Right: Promoted Badge for Carousel */}
+                          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 animate-in fade-in zoom-in duration-700">
+                            <span className="text-xs">🔥</span>
+                            <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Promoted Session</span>
+                          </div>
                         </div>
 
                         {/* Bottom Left: Event Details */}
@@ -1536,6 +1500,7 @@ todayEnd.setHours(23, 59, 59, 999);
         </div>
       </div>
 
+
       {isLanding && <PricingSection />}
       {isLanding && <FeaturedOrganizers />}
       {isLanding && <FAQSection />}
@@ -1548,28 +1513,28 @@ const FAQSection: React.FC = () => {
 
   const faqs = [
     {
-      question: "How can I maximize visibility for my event listing?",
-      answer: "Utilize our built-in SEO tools, share your event on social media, and leverage our follower notification system to alert your audience as soon as you publish."
+      question: "What is StartupLab Event SaaS?",
+      answer: "StartupLab is a comprehensive event management platform designed for organizers to create, promote, and manage both on-site and digital events with professional tools like QR ticketing, HitPay payments, and real-time analytics."
     },
     {
-      question: "What's included when I use StartupLab?",
-      answer: "StartupLab provides a comprehensive suite of tools including QR-based ticketing, real-time analytics, attendee management, and seamless payment processing via HitPay."
+      question: "How do I get started as an organizer?",
+      answer: "Simply sign up and complete our mandatory organizer onboarding flow. We ensure every organization is properly set up with a profile and contact details before they can start publishing events to our marketplace."
     },
     {
-      question: "Is it free to use StartupLab?",
-      answer: "We offer a flexible pricing structure including a 14-day free trial on most plans, allowing you to explore all premium features before committing."
+      question: "Can I host Live Streams and Archives?",
+      answer: "Absolutely! Our integrated 'Broadcasts' system allows you to host live sessions and automatically archive them as replays. Attendees can watch your live streams directly on the platform or through your linked external providers."
     },
     {
-      question: "How do I track the performance of my event ticket sales?",
-      answer: "Our Advanced Reports module gives you real-time insights into ticket sales, registration trends, and attendee demographics through a clean, intuitive dashboard."
+      question: "What payment methods do you support?",
+      answer: "We integrate directly with HitPay, allowing organizers to accept various local payment methods securely in the Philippines. You can configure your own gateway settings directly within your organizer dashboard."
     },
     {
-      question: "How to sell more event tickets?",
-      answer: "Use our Discount Codes feature to run early-bird promotions and flash sales, and encourage your followers to share event links with their network."
+      question: "What are the benefits of a Pro subscription?",
+      answer: "Upgrading to a Pro plan unlocks premium features such as Custom Branding (using your own logos), Live Stream Priority, and Advanced Analytics Reports to track your audience engagement."
     },
     {
-      question: "What strategy should I use when pricing my event tickets?",
-      answer: "Consider a tiered pricing strategy (Early Bird, Regular, Last Minute) to drive early registrations and maximize revenue based on demand."
+      question: "Is there a Priority Support system?",
+      answer: "Yes, organizations on premium plans get exclusive access to our Priority Support center. Tickets from Pro users are automatically moved to the top of our queue for lightning-fast resolutions."
     }
   ];
 
@@ -1588,9 +1553,9 @@ const FAQSection: React.FC = () => {
         {faqs.map((faq, index) => (
           <div
             key={index}
-            className={`group rounded-[2rem] overflow-hidden transition-all duration-500 border-2 ${openIndex === index
-              ? 'bg-white border-[#38BDF2] shadow-[0_20px_50px_-12px_rgba(56,189,242,0.2)]'
-              : 'bg-[#F2F2F2] border-[#2E2E2F]/5 hover:border-[#38BDF2]/30'
+            className={`group rounded-[2rem] overflow-hidden transition-all duration-300 border-2 ${openIndex === index
+              ? 'bg-[#F2F2F2] border-[#38BDF2] shadow-[0_10px_30px_-10px_rgba(56,189,242,0.1)]'
+              : 'bg-[#F2F2F2] border-[#2E2E2F]/10 shadow-none'
               }`}
           >
             <button
@@ -1600,19 +1565,21 @@ const FAQSection: React.FC = () => {
               <span className={`text-lg font-black tracking-tight transition-colors duration-300 ${openIndex === index ? 'text-[#38BDF2]' : 'text-[#2E2E2F]'}`}>
                 {faq.question}
               </span>
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 ${openIndex === index ? 'bg-[#38BDF2] text-white rotate-180' : 'bg-[#2E2E2F]/5 text-[#2E2E2F]/40 group-hover:bg-[#38BDF2]/10 group-hover:text-[#38BDF2]'
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${openIndex === index ? 'bg-[#38BDF2] text-white rotate-180' : 'bg-[#2E2E2F]/5 text-[#2E2E2F]/30'
                 }`}>
-                <ICONS.ChevronDown className="w-6 h-6" strokeWidth={3} />
+                <ICONS.ChevronDown className="w-5 h-5" strokeWidth={3} />
               </div>
             </button>
             <div
-              className={`px-8 overflow-hidden transition-all duration-500 ease-in-out ${openIndex === index ? 'max-h-[500px] pb-8 opacity-100' : 'max-h-0 opacity-0'
+              className={`grid transition-all duration-300 ease-in-out ${openIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
                 }`}
             >
-              <div className="pt-2 border-t border-[#2E2E2F]/5 mt-2">
-                <p className="text-[#2E2E2F]/60 text-base font-medium leading-relaxed mt-4">
-                  {faq.answer}
-                </p>
+              <div className="overflow-hidden">
+                <div className="px-8 pb-6 border-t border-[#2E2E2F]/5 mt-2">
+                  <p className="text-[#2E2E2F]/60 text-base font-medium leading-relaxed mt-4">
+                    {faq.answer}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -1652,50 +1619,60 @@ const FeaturedOrganizers: React.FC = () => {
         <p className="text-[#2E2E2F]/40 text-[11px] font-black uppercase tracking-[0.2em]">Follow the organisers from these events and get notified when they create new ones.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        {organizers.map((org) => {
-          const isFollowing = (followedOrganizerIds || []).includes(org.organizerId);
-          return (
-            <div
-              key={org.organizerId}
-              className="bg-[#F2F2F2] rounded-[2.5rem] p-8 border border-[#2E2E2F]/5 shadow-sm hover:shadow-2xl hover:shadow-[#38BDF2]/10 transition-all duration-300 group flex flex-col items-center text-center cursor-pointer"
-              onClick={() => navigate(`/organizer/${org.organizerId}`)}
-            >
-              <div className="relative mb-6">
-                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-md group-hover:border-[#38BDF2]/40 transition-all duration-300">
-                  <img
-                    src={getImageUrl(org.profileImageUrl)}
-                    alt={org.organizerName}
-                    className="w-full h-full object-cover transition-all duration-300"
-                  />
-                </div>
-              </div>
-
-              <h3 className="text-lg font-black text-[#2E2E2F] mb-1 line-clamp-1 group-hover:text-[#38BDF2] transition-colors">{org.organizerName}</h3>
-              <p className="text-[#2E2E2F]/50 text-xs font-bold uppercase tracking-widest mb-8">{org.followersCount || 0} followers</p>
-
-              <Button
-                variant={isFollowing ? 'outline' : 'primary'}
-                className={`w-full rounded-2xl py-3.5 font-black text-[11px] uppercase tracking-[0.2em] transition-all duration-300 ${isFollowing
-                  ? 'bg-[#38BDF2] border-2 border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F]'
-                  : 'bg-[#38BDF2] border-2 border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] shadow-lg shadow-[#38BDF2]/10 hover:shadow-xl active:scale-95'
-                  }`}
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  if (!isAuthenticated) {
-                    navigate('/signup');
-                    return;
-                  }
-                  if (!canLikeFollow) return;
-                  await toggleFollowing(org.organizerId);
-                }}
+      <div className={organizers.length > 5 ? "overflow-x-auto pb-10 custom-scrollbar -mx-2 px-2 scroll-smooth" : ""}>
+        <div className={organizers.length > 5 ? "flex gap-6 flex-nowrap" : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"}>
+          {organizers.map((org) => {
+            const isFollowing = (followedOrganizerIds || []).includes(org.organizerId);
+            return (
+              <div
+                key={org.organizerId}
+                className={`bg-[#F2F2F2] rounded-[3rem] p-8 border border-[#2E2E2F]/5 shadow-sm hover:shadow-2xl hover:shadow-[#38BDF2]/10 transition-all duration-500 group flex flex-col items-center text-center cursor-pointer ${organizers.length > 5 ? 'w-[280px] shrink-0' : 'w-full'}`}
+                onClick={() => navigate(`/organizer/${org.organizerId}`)}
               >
-                {isFollowing ? 'Following' : 'Follow'}
-              </Button>
-            </div>
-          );
-        })}
+                <div className="relative mb-8">
+                  <div className="w-28 h-28 rounded-full overflow-hidden border-[6px] border-white shadow-xl group-hover:border-[#38BDF2]/40 transition-all duration-500 bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF]">
+                    {org.profileImageUrl ? (
+                      <img
+                        src={getImageUrl(org.profileImageUrl)}
+                        alt={org.organizerName}
+                        className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <span className="flex h-full w-full items-center justify-center text-4xl font-black text-white drop-shadow-lg">
+                        {(org.organizerName || 'O').charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <h3 className="text-lg font-black text-[#2E2E2F] mb-1 line-clamp-1 group-hover:text-[#38BDF2] transition-colors">{org.organizerName}</h3>
+                <p className="text-[#2E2E2F]/50 text-xs font-bold uppercase tracking-widest mb-8">{org.followersCount || 0} followers</p>
+
+                <Button
+                  variant={isFollowing ? 'outline' : 'primary'}
+                  className={`w-full rounded-2xl py-3.5 font-black text-[11px] uppercase tracking-[0.2em] transition-all duration-300 ${isFollowing
+                    ? 'bg-[#38BDF2] border-2 border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F]'
+                    : 'bg-[#38BDF2] border-2 border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] shadow-lg shadow-[#38BDF2]/10 hover:shadow-xl active:scale-95'
+                    }`}
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    if (!isAuthenticated) {
+                      navigate('/signup');
+                      return;
+                    }
+                    if (!canLikeFollow) return;
+                    await toggleFollowing(org.organizerId);
+                  }}
+                >
+                  {isFollowing ? 'Following' : 'Follow'}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
 };
+
+

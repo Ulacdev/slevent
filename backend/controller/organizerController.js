@@ -742,15 +742,43 @@ export const unfollowOrganizer = async (req, res) => {
 
 export const getAllOrganizers = async (req, res) => {
   try {
-    const { data, error } = await supabase
+    // Fetch with plan join
+    let { data: organizers, error } = await supabase
       .from('organizers')
-      .select('*')
+      .select('*, plan:plans(*)')
       .order('followersCount', { ascending: false });
+
+    if (error && error.code === 'PGRST200') {
+      const fallback = await supabase
+        .from('organizers')
+        .select('*')
+        .order('followersCount', { ascending: false });
+      organizers = fallback.data;
+      error = fallback.error;
+    }
 
     if (error) return res.status(500).json({ error: error.message });
 
-    const counts = await getEventsHostedCounts((data || []).map(o => o.organizerId));
-    const serialized = (data || []).map(o => serializeOrganizerRecord(o, counts.get(o.organizerId) || 0));
+    const organizerIds = (organizers || []).map(o => o.organizerId);
+    const counts = await getEventsHostedCounts(organizerIds);
+
+    // If joins were missing or failed, fetch plans separately for all
+    const planIds = [...new Set((organizers || []).map(o => o.currentPlanId).filter(Boolean))];
+    if (planIds.length > 0 && (organizers || []).some(o => !o.plan)) {
+      const { data: plans } = await supabase
+        .from('plans')
+        .select('*')
+        .in('planId', planIds);
+      
+      const planMap = new Map((plans || []).map(p => [p.planId, p]));
+      organizers.forEach(o => {
+        if (!o.plan && o.currentPlanId) {
+          o.plan = planMap.get(o.currentPlanId);
+        }
+      });
+    }
+
+    const serialized = (organizers || []).map(o => serializeOrganizerRecord(o, counts.get(o.organizerId) || 0));
 
     return res.json(serialized);
   } catch (err) {
