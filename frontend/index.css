@@ -21,6 +21,38 @@ body {
   text-size-adjust: 100%;
 }
 
+/* Desktop-first 125% app feel while keeping smaller devices comfortable */
+:root {
+  --ui-scale: 1.25;
+}
+
+@supports (zoom: 1) {
+  html {
+    zoom: var(--ui-scale);
+  }
+}
+
+@supports not (zoom: 1) {
+  #root {
+    transform: scale(var(--ui-scale));
+    transform-origin: top left;
+    width: calc(100% / var(--ui-scale));
+    min-height: calc(100vh / var(--ui-scale));
+  }
+}
+
+@media (max-width: 1279px) {
+  :root {
+    --ui-scale: 1.12;
+  }
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --ui-scale: 1;
+  }
+}
+
 /* Mobile-specific optimizations */
 @media (max-width: 640px) {
   html,
@@ -142,22 +174,6 @@ img {
 /* ========================================
    UTILITY CLASSES
    ======================================== */
-
-/* ========================================
-   PORTAL SPEED-UP (Admin/Organizer)
-   ======================================== */
-.portal-fast *,
-.portal-fast *::before,
-.portal-fast *::after {
-  transition-duration: 120ms !important;
-  transition-delay: 0ms !important;
-}
-
-.portal-fast .animate-in,
-.portal-fast .animate-out {
-  animation-duration: 120ms !important;
-  animation-delay: 0ms !important;
-}
 
 /* Hide scrollbar but maintain functionality */
 .scrollbar-none::-webkit-scrollbar {
@@ -290,16 +306,16 @@ img {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(46, 46, 47, 0.1);
   border-radius: 20px;
   transition: background 0.3s;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(46, 46, 47, 0.25);
 }
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.5) transparent;
+  scrollbar-color: rgba(46, 46, 47, 0.1) transparent;
 }
 
 /* ========================================

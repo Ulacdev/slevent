@@ -109,9 +109,12 @@ export const ContactUsPage: React.FC = () => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />
 
         <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-5 sm:px-8">
-          <div className="max-w-[640px]">
-            <h1 className="text-[2.1rem] font-black leading-none tracking-tight text-white sm:text-5xl">Contact Support</h1>
-            <p className="mt-4 max-w-[620px] text-base leading-relaxed text-white/95 sm:text-[1.42rem]">
+          <div className="max-w-[740px]">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/90 mb-4">Contact Us</p>
+            <h1 className="text-[2.1rem] font-black leading-none tracking-tight text-white sm:text-5xl">
+              Contact Support
+            </h1>
+            <p className="mt-4 max-w-[700px] text-base leading-relaxed text-white/95 sm:text-[1.1rem]">
               Need help with events? Our support team is here to assist you with questions about registrations, bookings, and event details.
             </p>
           </div>

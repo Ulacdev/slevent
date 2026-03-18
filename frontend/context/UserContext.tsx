@@ -7,6 +7,7 @@ interface UserContextState {
   name: string | null;
   imageUrl: string | null;
   isAuthenticated: boolean;
+  hasResolvedSession: boolean;
   canViewEvents?: boolean;
   canEditEvents?: boolean;
   canManualCheckIn?: boolean;
@@ -28,6 +29,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     name: null,
     imageUrl: null,
     isAuthenticated: false,
+    hasResolvedSession: false,
     canViewEvents: undefined,
     canEditEvents: undefined,
     canManualCheckIn: undefined,
@@ -47,13 +49,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         prev.canManualCheckIn === payload.canManualCheckIn &&
         prev.canReceiveNotifications === payload.canReceiveNotifications &&
         prev.isOnboarded === payload.isOnboarded;
-      if (sameIdentity && samePermissions && sameProfile) return prev;
+      if (sameIdentity && samePermissions && sameProfile && prev.hasResolvedSession) return prev;
       return {
         role: payload.role,
         email: payload.email,
         name: nextName ?? null,
         imageUrl: nextImageUrl ?? null,
         isAuthenticated: true,
+        hasResolvedSession: true,
         canViewEvents: payload.canViewEvents,
         canEditEvents: payload.canEditEvents,
         canManualCheckIn: payload.canManualCheckIn,
@@ -65,8 +68,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearUser = React.useCallback(() => {
     setState((prev) => {
-      if (!prev.isAuthenticated && !prev.role && !prev.email && !prev.name && !prev.imageUrl) return prev;
-      return { role: null, email: null, name: null, imageUrl: null, isAuthenticated: false, canViewEvents: undefined, canEditEvents: undefined, canManualCheckIn: undefined, canReceiveNotifications: undefined, isOnboarded: undefined };
+      if (!prev.isAuthenticated && !prev.role && !prev.email && !prev.name && !prev.imageUrl && prev.hasResolvedSession) return prev;
+      return {
+        role: null,
+        email: null,
+        name: null,
+        imageUrl: null,
+        isAuthenticated: false,
+        hasResolvedSession: true,
+        canViewEvents: undefined,
+        canEditEvents: undefined,
+        canManualCheckIn: undefined,
+        canReceiveNotifications: undefined,
+        isOnboarded: undefined
+      };
     });
   }, []);
 

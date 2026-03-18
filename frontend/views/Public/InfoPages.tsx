@@ -17,6 +17,7 @@ type InfoPageProps = {
   highlights?: string[];
   heroImage?: string;
   heroAlt?: string;
+  articleClassName?: string;
 };
 
 const LEGAL_LINKS: Array<{ label: string; path: string }> = [
@@ -36,14 +37,15 @@ const InfoPageLayout: React.FC<InfoPageProps> = ({
   sections,
   highlights = [],
   heroImage = DEFAULT_HERO_IMAGE,
-  heroAlt = 'Event operations'
+  heroAlt = 'Event operations',
+  articleClassName = 'bg-white'
 }) => {
   const location = useLocation();
   return (
     <div className="bg-[#F2F2F2]">
       <div className="max-w-[88rem] mx-auto px-6 py-12 sm:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8 lg:gap-10">
-          <article className="rounded-[1.8rem] border border-[#2E2E2F]/10 bg-white p-6 sm:p-8 lg:p-10">
+          <article className={`rounded-[1.8rem] border border-[#2E2E2F]/10 p-6 sm:p-8 lg:p-10 ${articleClassName}`}>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#38BDF2] mb-4">{eyebrow}</p>
             <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-[#2E2E2F] mb-4">{title}</h1>
             <p className="text-[#2E2E2F]/70 text-sm sm:text-base leading-relaxed mb-8">{intro}</p>
@@ -292,6 +294,7 @@ export const FaqPage: React.FC = () => (
     title="Frequently Asked Questions"
     intro="Quick guidance for the most common organizer and attendee workflows in StartupLab Ticketing."
     updated="March 3, 2026"
+    articleClassName="bg-[#F2F2F2]"
     highlights={['Event Setup', 'Checkout', 'Check-In', 'Refunds']}
     heroImage="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1400&q=80"
     heroAlt="Frequently asked questions workspace"

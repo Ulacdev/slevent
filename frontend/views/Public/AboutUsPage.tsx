@@ -1,5 +1,6 @@
 import React from 'react';
 import { ICONS } from '../../constants';
+import { PublicPageHero } from '../../components/PublicPageHero';
 
 const ACCENT = '#38BDF2';
 
@@ -76,22 +77,11 @@ const impactStats = [
 export const AboutUsPage: React.FC = () => {
   return (
     <div className="bg-[#F2F2F2]">
-      <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[260px] sm:h-[300px] lg:h-[350px] overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(116deg,#38BDF2_0%,#38BDF2_44%,#F2F2F2_100%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,62,134,0.45)_0%,rgba(0,62,134,0.2)_34%,rgba(0,62,134,0)_72%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />
-        <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-5 sm:px-8">
-          <div className="max-w-[740px]">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/90 mb-4">About Us</p>
-            <h1 className="text-[2.1rem] font-black leading-none tracking-tight text-white sm:text-5xl">
-              Connecting People Through Meaningful Events
-            </h1>
-            <p className="mt-4 max-w-[700px] text-base leading-relaxed text-white/95 sm:text-[1.1rem]">
-              StartupLab Ticketing helps communities discover experiences, organizers launch events confidently, and teams run attendee operations with secure, measurable workflows.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PublicPageHero
+        eyebrow="About Us"
+        title="Connecting People Through Meaningful Events"
+        description="StartupLab Ticketing helps communities discover experiences, organizers launch events confidently, and teams run attendee operations with secure, measurable workflows."
+      />
       <div className="max-w-6xl mx-auto px-5 sm:px-8 py-12 sm:py-16 space-y-10">
 
         <section className="grid grid-cols-1 md:grid-cols-3 gap-5">

@@ -124,7 +124,7 @@ const CrownBadge = () => (
 const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canViewEvents, canEditEvents, canManualCheckIn, canReceiveNotifications } = useUser();
+  const { role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canViewEvents, canEditEvents, canManualCheckIn, canReceiveNotifications, hasResolvedSession } = useUser();
   const isStaff = role === UserRole.STAFF;
   const [organizerSidebarLogoUrl, setOrganizerSidebarLogoUrl] = React.useState('');
   const [organizerSidebarName, setOrganizerSidebarName] = React.useState('');
@@ -359,7 +359,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   useEffect(() => {
     const syncSession = async () => {
       const isPortalRoute = ['/dashboard', '/events', '/attendees', '/checkin', '/settings'].includes(location.pathname);
-      if (!isPortalRoute) return;
+      if (!isPortalRoute || hasResolvedSession) return;
 
       try {
         const res = await fetch(`${API}/api/whoAmI`, { credentials: 'include', cache: 'no-store' });
@@ -391,7 +391,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     };
 
     syncSession();
-  }, [clearUser, location.pathname, navigate, setUser]);
+  }, [clearUser, hasResolvedSession, location.pathname, navigate, setUser]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -484,65 +484,31 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       await fetch(`${API}/api/auth/logout`, {
         method: "POST",
         credentials: "include"
-      }).catch(() => {});
+      });
 
       // 2. Sign out from Supabase
-      await supabase.auth.signOut().catch(() => {});
+      await supabase.auth.signOut();
 
       // 3. Clear any local tokens/storage
-      try {
-        const keysToRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
-            keysToRemove.push(key);
-          }
-        }
-        keysToRemove.forEach(k => localStorage.removeItem(k));
-      } catch (e) {}
-      
+      localStorage.removeItem('sb-ddkkbtijqrgpitncxylx-auth-token');
       clearUser();
 
       // 4. Navigate to login
       navigate('/');
     } catch {
       // Still navigate to login even if there was an error
-      clearUser();
       navigate('/');
     }
   };
 
-  // Bottom Navigation Items for Mobile
-  const bottomNavItems = (
-    !isAuthenticated || !role || !staffPermsLoaded
-      ? []
-      : role === UserRole.STAFF && canViewEvents === false && canManualCheckIn === false
-        ? [
-          { label: 'Attendees', path: '/attendees', icon: <ICONS.Users className="w-5 h-5" /> },
-          { label: 'Settings', path: '/settings?tab=profile', icon: <ICONS.Settings className="w-5 h-5" /> },
-        ]
-        : role === UserRole.STAFF
-          ? [
-            ...(canViewEvents !== false ? [{ label: 'Events', path: '/events', icon: <ICONS.Calendar className="w-5 h-5" /> }] : []),
-            { label: 'Attendees', path: '/attendees', icon: <ICONS.Users className="w-5 h-5" /> },
-            ...(canManualCheckIn !== false ? [{ label: 'Check-In', path: '/checkin', icon: <ICONS.CheckCircle className="w-5 h-5" /> }] : []),
-            { label: 'Settings', path: '/settings?tab=profile', icon: <ICONS.Settings className="w-5 h-5" /> },
-          ]
-          : [
-            { label: 'Home', path: '/dashboard', icon: <ICONS.Layout className="w-5 h-5" /> },
-            { label: 'Events', path: '/events', icon: <ICONS.Calendar className="w-5 h-5" /> },
-            { label: 'Attendees', path: '/attendees', icon: <ICONS.Users className="w-5 h-5" /> },
-            { label: 'Settings', path: '/settings?tab=profile', icon: <ICONS.Settings className="w-5 h-5" /> },
-          ]
-  );
-
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#F2F2F2] font-sans selection:bg-[#38BDF2]/30 portal-fast">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#F2F2F2] font-sans selection:bg-[#38BDF2]/30">
       {/* Sidebar for desktop */}
       <aside
-        className={`bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-64' : 'w-20'}`}
-        style={{ overflow: desktopSidebarOpen ? 'hidden' : 'visible' }}>
-        <div className={`py-6 px-4 flex items-center justify-center border-b-2 border-[#2E2E2F]/15 shrink-0 ${desktopSidebarOpen ? 'h-24' : 'h-20'}`}>
+        className={`bg-[#F2F2F2] border-r-[4px] border-[#2E2E2F]/35 hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-64' : 'w-20'}`}
+        style={{ overflow: desktopSidebarOpen ? 'hidden' : 'visible' }}
+      >
+        <div className={`py-6 px-4 flex items-center justify-center border-b-[3px] border-[#2E2E2F]/30 shrink-0 ${desktopSidebarOpen ? 'h-24' : 'h-20'}`}>
           <Link to="/dashboard" className="flex items-center justify-center group transition-all duration-500 transform hover:scale-[1.05] active:scale-[0.95]">
             {organizerSidebarLogoUrl ? (
               <img
@@ -551,13 +517,13 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 className={desktopSidebarOpen ? "h-14 w-auto max-w-full object-contain" : "h-10 w-10 object-contain rounded-lg shadow-sm border border-[#2E2E2F]/10"}
               />
             ) : desktopSidebarOpen ? (
-              <Branding className={role === UserRole.ADMIN ? "h-16 w-auto" : "h-14 w-auto"} />
+              <Branding className="h-14 w-auto" />
             ) : (
               <img src="/lgo.webp" alt="Logo" className="h-10 w-10 object-contain" />
             )}
           </Link>
         </div>
-        <nav className={`flex-1 py-6 pb-0 ${desktopSidebarOpen ? 'px-4' : 'px-2'} flex flex-col space-y-1 overflow-y-auto overflow-x-visible scrollbar-none scroll-smooth`}
+        <nav className={`flex-1 py-6 ${desktopSidebarOpen ? 'px-4' : 'px-2'} flex flex-col gap-1 overflow-y-auto overflow-x-visible scrollbar-none scroll-smooth`}
           style={{ width: desktopSidebarOpen ? '100%' : '260px', paddingRight: desktopSidebarOpen ? '0' : '180px' }}>
           {menuItems.map((item: any, idx) => {
             const isActive = checkIsActiveAdmin(item.path);
@@ -565,7 +531,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             return (
               <React.Fragment key={item.path || idx}>
                 {item.separator && (
-                  <div className={`mx-4 my-3 h-[2px] bg-[#2E2E2F]/10 shrink-0 ${!desktopSidebarOpen ? 'mx-2' : ''}`} />
+                  <div className={`mx-4 my-3 h-[2px] bg-[#2E2E2F]/20 shrink-0 ${!desktopSidebarOpen ? 'mx-2' : ''}`} />
                 )}
                 <Link
                   to={item.path}
@@ -573,14 +539,14 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     ? 'flex-row items-center gap-3 px-4 py-3 rounded-2xl'
                     : 'flex-col items-center justify-center gap-1 py-4 px-1 rounded-xl'
                     } ${isActive
-                      ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20 border-2 border-[#F2F2F2]/20'
-                      : 'text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] border-2 border-transparent'
+                      ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20'
+                      : 'text-[#111111] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
                     }`}
                   title={!desktopSidebarOpen ? item.label : undefined}
                 >
                   <div className="relative shrink-0">
                     {React.cloneElement(item.icon as React.ReactElement<any>, {
-                      className: `transition-transform duration-300 ${desktopSidebarOpen ? 'w-5 h-5' : 'w-6 h-6 group-hover:scale-110'} ${isActive ? 'stroke-[3px]' : 'stroke-[2.8px]'}`
+                      className: `transition-transform duration-300 ${desktopSidebarOpen ? 'w-5 h-5' : 'w-6 h-6 group-hover:scale-110'} ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`
                     })}
                     {item.premium && <CrownBadge />}
                   </div>
@@ -603,29 +569,23 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       </aside>
 
       <main
-        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out md:pb-0 ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'} ${bottomNavItems.length > 0 ? 'pb-24' : ''}`}
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}
       >
-        <header className="h-20 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20 w-full">
+        <header className="h-20 bg-[#F2F2F2] border-b-[3px] border-[#2E2E2F]/30 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20 w-full">
           <div className="flex items-center gap-3">
-            {/* Desktop Sidebar Toggle */}
             <button
-              onClick={() => setDesktopSidebarOpen(!desktopSidebarOpen)}
-              className="hidden md:flex p-2.5 rounded-xl border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-all group active:scale-95"
+              onClick={() => {
+                if (window.innerWidth < 768) {
+                  setSidebarOpen(true);
+                } else {
+                  setDesktopSidebarOpen(!desktopSidebarOpen);
+                }
+              }}
+              className="p-2.5 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-all group active:scale-95"
               aria-label="Toggle Sidebar"
             >
               <svg className={`w-5 h-5 transition-transform duration-500 ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden p-2.5 rounded-xl border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-all group active:scale-95 lg:hidden"
-              aria-label="Toggle Navigation Menu"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.8" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             <div className="hidden sm:block">
@@ -638,10 +598,10 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             {(!(role === UserRole.STAFF && canReceiveNotifications === false)) && (
               <div className="relative group">
                 <button
-                  className="w-11 h-11 flex items-center justify-center rounded-2xl border-2 border-[#38BDF2]/30 bg-transparent hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/50 hover:scale-105 active:scale-95 transition-all shadow-sm relative"
+                  className="w-11 h-11 flex items-center justify-center rounded-2xl border border-[#38BDF2]/20 bg-transparent hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/40 hover:scale-105 active:scale-95 transition-all shadow-sm relative"
                   onClick={() => setNotificationOpen(!notificationOpen)}
                 >
-                  <ICONS.Bell className="w-5 h-5 text-[#2E2E2F] group-hover:text-[#38BDF2] transition-colors" strokeWidth={2.8} />
+                  <ICONS.Bell className="w-5 h-5 text-[#2E2E2F] group-hover:text-[#38BDF2] transition-colors" />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 min-w-[20px] h-[20px] bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center px-1 border-2 border-[#F2F2F2] shadow-lg animate-in zoom-in duration-300">
                       {unreadCount > 99 ? '99+' : unreadCount}
@@ -651,8 +611,8 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 {notificationOpen && (
                   <>
                     <div className="fixed inset-0 z-[100] bg-[#2E2E2F]/10 backdrop-blur-[2px]" onClick={() => setNotificationOpen(false)} />
-                    <div className="fixed right-6 top-24 bottom-6 w-full max-w-[420px] bg-[#F2F2F2] rounded-[2.5rem] border-2 border-[#2E2E2F]/15 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.15)] z-[101] flex flex-col overflow-hidden animate-in slide-in-from-right-8 fade-in duration-500">
-                      <div className="p-8 border-b-2 border-[#2E2E2F]/10 flex items-start justify-between bg-[#F2F2F2]/80 backdrop-blur-xl sticky top-0 z-10">
+                    <div className="fixed left-3 right-3 top-24 bottom-24 sm:left-auto sm:right-6 sm:bottom-6 w-auto sm:w-full sm:max-w-[420px] bg-[#F2F2F2] rounded-[2rem] sm:rounded-[2.5rem] border border-[#2E2E2F]/5 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.15)] z-[101] flex flex-col overflow-hidden animate-in slide-in-from-right-8 fade-in duration-500">
+                      <div className="p-8 border-b border-[#2E2E2F]/5 flex items-start justify-between bg-[#F2F2F2]/80 backdrop-blur-xl sticky top-0 z-10">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
                             <h2 className="text-2xl font-black tracking-tight text-[#2E2E2F]">Updates</h2>
@@ -742,10 +702,10 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             {/* Profile Dropdown */}
             <div className="relative">
               <button
-                className="flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 transition-colors"
                 onClick={() => setUserMenuOpen((v) => !v)}
               >
-                <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center border-2 border-[#38BDF2]/30">
+                <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center">
                   {imageUrl ? (
                     <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
@@ -756,15 +716,15 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   <p className="text-xs font-semibold text-[#2E2E2F] truncate max-w-[120px]">{displayName}</p>
                   <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-0.5">{roleLabel}</p>
                 </div>
-                <svg className="w-4 h-4 text-[#2E2E2F]/50" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[#2E2E2F]/50" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
               {userMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                  <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl shadow-[0_10px_40px_-10px_rgba(46,46,47,0.1)] z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
-                    <div className="px-4 py-3 border-b-2 border-[#2E2E2F]/10 mb-1">
+                  <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl shadow-[0_10px_40px_-10px_rgba(46,46,47,0.1)] z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
+                    <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
                       <p className="text-[10px] font-medium text-[#2E2E2F]/40 uppercase tracking-widest mb-0.5">Account</p>
                       <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
                       <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-1">{roleLabel}</p>
@@ -841,25 +801,34 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             </div>
           </div>
         </header>
-        {/* Mobile Navigation Drawer - Hamburger Menu Items */}
+        {/* Sidebar overlay for mobile */}
         {sidebarOpen && (
           <div className="fixed inset-0 z-[100] flex md:hidden">
             <div className="fixed inset-0 bg-[#2E2E2F]/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-            <aside className="relative w-72 bg-[#F2F2F2] flex flex-col h-full z-[110] animate-in slide-in-from-left duration-300 border-r-2 border-[#2E2E2F]/15">
-              <div className="p-6 flex items-center justify-between border-b-2 border-[#2E2E2F]/10">
-                <Link to="/dashboard" className="flex items-center justify-center group transition-all duration-500">
+            <aside className="relative w-[min(18.5rem,calc(100vw-1rem))] bg-[#F2F2F2] border-r-[4px] border-[#2E2E2F]/35 flex flex-col h-full z-[110] animate-in slide-in-from-left duration-300 shadow-[12px_0_36px_-24px_rgba(46,46,47,0.3)]">
+              <div className="p-8 pb-4 flex items-center justify-between border-b-[3px] border-[#2E2E2F]/30">
+                <Link to="/dashboard" onClick={() => setSidebarOpen(false)} className="flex flex-col items-start gap-2 group transition-all duration-500">
                   {organizerSidebarLogoUrl ? (
-                    <img src={organizerSidebarLogoUrl} alt={organizerSidebarName || 'Logo'} className="h-10 w-auto max-w-full object-contain" />
+                    <img
+                      src={organizerSidebarLogoUrl}
+                      alt={organizerSidebarName || 'Logo'}
+                      className="h-12 w-auto max-w-[168px] object-contain"
+                    />
                   ) : (
-                    <img src="/lgo.webp" alt="Logo" className="h-10 w-10 object-contain" />
+                    <Branding className="h-12 w-auto" />
+                  )}
+                  {organizerSidebarName && (
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 ml-0.5">
+                      {organizerSidebarName}
+                    </span>
                   )}
                 </Link>
                 <button
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F] hover:bg-[#2E2E2F]/10 transition-colors"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors"
                   onClick={() => setSidebarOpen(false)}
                   aria-label="Close navigation"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.4} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -871,27 +840,35 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive
-                        ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20 border-2 border-[#F2F2F2]/20'
-                        : 'text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] border-2 border-transparent'
+                      className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 group ${isActive
+                        ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20'
+                        : 'text-[#111111] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
                         }`}
                       onClick={() => setSidebarOpen(false)}
                     >
-                      <div className={isActive ? 'text-white' : 'text-[#2E2E2F]'}>
-                        {React.cloneElement(item.icon as React.ReactElement<any>, {
-                          className: `w-5 h-5 transition-transform duration-300 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`
-                        })}
+                      <div className={isActive ? 'text-white' : 'text-[#111111]/75 group-hover:text-[#38BDF2]'}>
+                        {item.icon}
                       </div>
                       <span className="text-sm font-medium tracking-tight">{item.label}</span>
                     </Link>
                   );
                 })}
+
+                <div className="mt-8 pt-8 border-t border-[#2E2E2F]/10">
+                  <button
+                    onClick={() => { handleLogout(); setSidebarOpen(false); }}
+                    className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[#111111]/80 hover:bg-red-50 hover:text-red-500 transition-all duration-300 group"
+                  >
+                    <svg className="w-5 h-5 opacity-60 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span className="font-medium text-sm tracking-tight">Logout</span>
+                  </button>
+                </div>
               </nav>
             </aside>
           </div>
         )}
-
-        {/* Removed: Mobile Bottom Navigation Bar - Now using drawer instead */}
 
         <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
@@ -960,7 +937,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
-  const { role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canReceiveNotifications } = useUser();
+  const { role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canReceiveNotifications, hasResolvedSession } = useUser();
   const {
     publicMode,
     isAttendingView,
@@ -1053,7 +1030,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   const displayName = email?.trim() || name?.trim() || 'User';
   const roleLabel = isOrganizer && isAttendingView ? 'Attending' : getRoleLabel(role);
-  const publicUserMenuActionClass = 'w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group';
+  const publicUserMenuActionClass = 'w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group';
   const landingLoginButtonClass = 'px-4 text-[11px] font-black uppercase tracking-widest !bg-transparent !text-[#2E2E2F] hover:!text-[#38BDF2] transition-colors';
   const landingGetStartedButtonClass = 'px-6 text-[11px] font-black uppercase tracking-widest border border-[#66DBFF] bg-[#00AEEF] text-white shadow-[0_0_16px_rgba(0,174,239,0.45)] hover:bg-black hover:border-black hover:text-white hover:shadow-[0_0_22px_rgba(0,174,239,0.5)] focus-visible:bg-black focus-visible:border-black focus-visible:shadow-[0_0_22px_rgba(0,174,239,0.5)] transition-all duration-300 ease-out active:scale-95';
   const initials = (email?.split('@')[0] || name?.trim() || displayName || 'U')
@@ -1067,6 +1044,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   // Sync session for logged-in users visiting public pages
   React.useEffect(() => {
     const syncPublicSession = async () => {
+      if (hasResolvedSession) return;
       try {
         const res = await fetch(`${API}/api/whoAmI`, { credentials: 'include', cache: 'no-store' });
         if (res.ok) {
@@ -1087,7 +1065,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       } catch { }
     };
     syncPublicSession();
-  }, []);
+  }, [hasResolvedSession, setUser]);
 
   React.useEffect(() => {
   }, [location.pathname]);
@@ -1224,8 +1202,16 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     );
   };
 
-  const secondaryLinks: any[] = [];
-  const navLinks = secondaryLinks;
+  const navLinks: any[] = [];
+  const guestMobileLinks = [
+    { label: 'Home', path: '/', icon: <ICONS.Home className="w-4 h-4" /> },
+    { label: 'Browse Events', path: '/browse-events', icon: <ICONS.Calendar className="w-4 h-4" /> },
+    { label: 'About Us', path: '/about-us', icon: <ICONS.Users className="w-4 h-4" /> },
+    { label: 'Pricing', path: '/pricing', icon: <ICONS.CreditCard className="w-4 h-4" /> },
+    { label: 'Contact Us', path: '/contact-us', icon: <ICONS.Mail className="w-4 h-4" /> },
+    { label: 'FAQ', path: '/faq', icon: <ICONS.MessageSquare className="w-4 h-4" /> },
+    { label: 'Watch Live', path: '/live', icon: <ICONS.Monitor className="w-4 h-4" />, isLive: true },
+  ];
   const trimmedHeaderSearch = headerSearchTerm.trim();
   const trimmedHeaderLocation = headerLocationTerm.trim();
   const hasHeaderExplicitLocation = Boolean(
@@ -1233,6 +1219,9 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     trimmedHeaderLocation.toLowerCase() !== DEFAULT_HEADER_LOCATION.toLowerCase()
   );
   const canSubmitHeaderSearch = Boolean(trimmedHeaderSearch || hasHeaderExplicitLocation);
+  const mobileMenuPanelClass = showHeaderSearchBar
+    ? 'top-[7.85rem] max-h-[calc(100vh-7.85rem)]'
+    : 'top-[4.85rem] max-h-[calc(100vh-4.85rem)]';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F2F2F2]">
@@ -1241,18 +1230,193 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           ? 'bg-[#F2F2F2] shadow-[0_10px_30px_-10px_rgba(46,46,47,0.1)] border-b border-[#2E2E2F]/5' 
           : 'bg-transparent border-b border-transparent'
       }`}>
-        {/* Top Row Container - Logo + Menu Button */}
-        <div className="max-w-[88rem] mx-auto w-full px-2 sm:px-6 flex flex-col lg:flex-row items-center gap-2 sm:gap-4">
-          {/* Mobile Row - Logo (left) + Burger Menu (right) */}
-          <div className="h-16 sm:h-20 lg:hidden w-full flex items-center justify-between">
-            {/* Left: Logo */}
-            <Link to="/" className="shrink-0 flex items-center gap-3">
-              <Branding />
+        <div className="max-w-[88rem] mx-auto w-full px-2 sm:px-6 py-3 lg:py-0 lg:h-20 flex flex-wrap lg:flex-nowrap items-center gap-2 sm:gap-4">
+          {/* Left: Branding Segment - Logo on mobile, hidden on lg */}
+          <div className="flex lg:hidden flex-none items-center">
+            <Link to="/" className="shrink-0 flex items-center gap-2">
+              <Branding className="h-10 sm:h-11 w-auto" />
             </Link>
+          </div>
+          <div className="hidden lg:flex flex-none items-center">
+            <Link to="/" className="shrink-0 flex items-center gap-3">
+              {/* Desktop logo - shown only on desktop */}
+              <span className="hidden lg:block">
+                <Branding />
+              </span>
+            </Link>
+          </div>
 
-            {/* Right: Mobile Menu Button */}
+          {/* Center Segment: Search bar centered */}
+          <div className="hidden lg:flex flex-1 min-w-0 px-1 sm:px-4">
+            {showHeaderSearchBar && (
+              <form onSubmit={handleHeaderSearchSubmit} className="w-full">
+                <div className="flex items-center h-12 rounded-2xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.1)] focus-within:border-[#38BDF2]/50 focus-within:shadow-[0_15px_35px_-12px_rgba(56,189,242,0.15)] transition-all duration-300">
+                  <label className="flex items-center gap-3 px-5 py-3 min-w-0 flex-1 border-r border-[#2E2E2F]/5 hover:bg-[#38BDF2]/5 transition-colors">
+                    <ICONS.Search className="w-4 h-4 text-[#2E2E2F] shrink-0" />
+                    <input
+                      type="text"
+                      value={headerSearchTerm}
+                      onChange={(event) => setHeaderSearchTerm(event.target.value)}
+                      placeholder={animatedPlaceholder || 'Find your events'}
+                      className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 outline-none"
+                    />
+                  </label>
+                  <div
+                    className="relative min-w-0 flex-1 border-r border-[#2E2E2F]/5 bg-[#F2F2F2] hover:bg-[#38BDF2]/5 transition-colors"
+                    ref={headerLocationMenuRef}
+                  >
+                    <div className="w-full h-full flex items-center">
+                      <div className="flex-1 min-w-0 flex items-center gap-3 px-5 py-3 cursor-text" onClick={() => setHeaderLocationMenuOpen(true)}>
+                        <ICONS.MapPin className="w-4 h-4 text-[#2E2E2F] shrink-0" />
+                        <input
+                          type="text"
+                          value={hasHeaderExplicitLocation ? headerLocationTerm : ''}
+                          onChange={(event) => {
+                            const next = event.target.value;
+                            setHeaderLocationTerm(next || DEFAULT_HEADER_LOCATION);
+                            setHeaderLocationError('');
+                          }}
+                          onFocus={() => setHeaderLocationMenuOpen(true)}
+                          placeholder="Your Location"
+                          className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 outline-none"
+                          aria-label="Search location"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        className={`w-11 h-11 flex items-center justify-center transition-all ${headerLocating
+                          ? 'text-[#38BDF2] animate-pulse'
+                          : 'text-[#2E2E2F]/40 hover:text-[#38BDF2] hover:bg-[#38BDF2]/8'
+                          } rounded-xl mr-1 group/gps`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUseCurrentLocationInHeader();
+                        }}
+                        disabled={headerLocating}
+                        title="Search near me"
+                      >
+                        {headerLocating ? (
+                          <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full inline-block animate-spin" />
+                        ) : (
+                          <div className="relative">
+                            <svg fill="none" stroke="currentColor" strokeWidth={2.4} viewBox="0 0 24 24" className="w-5 h-5 group-hover/gps:scale-110 transition-transform">
+                              <circle cx="12" cy="12" r="3" />
+                              <path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+                            </svg>
+                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#38BDF2] rounded-full opacity-0 group-hover/gps:opacity-100 transition-opacity animate-ping" />
+                          </div>
+                        )}
+                      </button>
+                    </div>
+
+                    {headerLocationMenuOpen && (
+                      <div className="absolute left-0 right-0 top-[calc(100%+12px)] z-50 w-[320px] rounded-2xl border border-[#2E2E2F]/10 bg-white shadow-[0_24px_48px_-20px_rgba(46,46,47,0.35)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                        <button
+                          type="button"
+                          className="w-full px-5 py-4 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/5 transition-colors border-b border-[#2E2E2F]/5 disabled:opacity-60 group/btn"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleUseCurrentLocationInHeader();
+                          }}
+                          disabled={headerLocating}
+                        >
+                          <div className={`w-10 h-10 rounded-full border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/btn:bg-[#38BDF2] group-hover/btn:text-[#F2F2F2] transition-all shadow-sm ${headerLocating ? 'animate-pulse' : ''}`}>
+                            {headerLocating ? (
+                              <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full inline-block animate-spin" />
+                            ) : (
+                              <svg fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" className="w-5 h-5">
+                                <circle cx="12" cy="12" r="3" />
+                                <path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+                              </svg>
+                            )}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-black text-[#2E2E2F]">Detect My Location</span>
+                            <span className="text-[10px] text-[#2E2E2F]/40 font-bold uppercase tracking-wider">Fast GPS Search</span>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          className="w-full px-5 py-4 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/5 transition-colors group/online border-b border-[#2E2E2F]/5"
+                          onClick={() => handleSelectHeaderLocation(ONLINE_LOCATION_VALUE)}
+                        >
+                          <div className="w-10 h-10 rounded-xl border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/online:bg-[#38BDF2] group-hover/online:text-[#F2F2F2] transition-all shadow-sm">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16v12H4z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M10 9l5 3-5 3V9z" />
+                            </svg>
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-black text-[#2E2E2F]">Online Events</span>
+                            <span className="text-[10px] text-[#2E2E2F]/40 font-bold uppercase tracking-wider">Virtual Experiences</span>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          className="w-full px-5 py-3 flex items-center gap-4 text-left text-[#2E2E2F]/60 hover:bg-red-50 hover:text-red-500 transition-colors group/reset"
+                          onClick={() => handleSelectHeaderLocation(DEFAULT_HEADER_LOCATION)}
+                        >
+                          <div className="w-10 h-10 rounded-full border border-current opacity-20 flex items-center justify-center transition-opacity group-hover/reset:opacity-100">
+                            <ICONS.Trash className="w-4 h-4" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-[11px] font-black uppercase tracking-widest">Clear Location</span>
+                            <span className="text-[9px] font-bold opacity-70">Reset to all areas</span>
+                          </div>
+                        </button>
+
+                        {headerLocationError && (
+                          <div className="px-5 py-3 text-[11px] font-bold text-red-500 bg-red-50 border-t border-red-100 flex items-center gap-2">
+                            <ICONS.AlertTriangle className="w-3.5 h-3.5" />
+                            {headerLocationError}
+                          </div>
+                        )}
+
+                        <div className="px-5 py-4 bg-[#F8F9FA] border-t border-[#2E2E2F]/5">
+                          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#2E2E2F]/30 italic leading-relaxed">Tip: Type any city name in the input field above for custom filtering.</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-12 h-11 flex items-center justify-center transition-colors text-[#2E2E2F] hover:bg-[#38BDF2]/12 hover:text-[#38BDF2]"
+                    aria-label="Find events"
+                  >
+                    <ICONS.Search className="w-4 h-4" />
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+
+          {/* Right Segment: Nav Links and Auth Actions */}
+          <div className="flex items-center justify-end gap-4 lg:gap-6 ml-auto flex-none">
+            {/* Nav Links */}
+            <div className="hidden lg:flex items-center gap-8">
+              {navLinks.map((link: any) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2E2E2F]/60 hover:text-[#38BDF2] transition-colors relative group whitespace-nowrap"
+                >
+                  {link.label}
+                  {link.isLive && (
+                    <span className="relative flex h-2 w-2 ml-1 inline-block -top-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    </span>
+                  )}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#38BDF2] transition-all group-hover:w-full" />
+                </Link>
+              ))}
+            </div>
+
+            {/* Mobile Menu Button - Shown only on mobile */}
             <button
-              className="p-2 rounded-lg text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors"
+              className="lg:hidden p-2 rounded-lg text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -1266,225 +1430,48 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 </svg>
               )}
             </button>
-          </div>
 
-          {/* Desktop Row - Logo (left) + Search (center) + Auth (right) */}
-          <div className="hidden lg:flex h-20 w-full items-center lg:gap-4">
-            {/* Left: Logo */}
-            <div className="flex flex-none items-center">
-              <Link to="/" className="shrink-0 flex items-center gap-3">
-                <span>
-                  <Branding />
-                </span>
-              </Link>
-            </div>
+            <div className="flex items-center gap-1 shrink-0">
+            {isAuthenticated ? (
+              <>
+                <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
+                  Watch Live
+                  {hasLiveEvents && (
+                    <span className="relative flex h-2 w-2 ml-0.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                    </span>
+                  )}
+                </Link>
 
-            {/* Center: Search bar (hidden on mobile, shown on lg) - Expands to push login right */}
-            <div className="hidden lg:flex flex-1 min-w-0 px-1 sm:px-4">
-              {showHeaderSearchBar && (
-                <form onSubmit={handleHeaderSearchSubmit} className="w-full">
-                  <div className="flex items-center h-12 rounded-2xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.1)] focus-within:border-[#38BDF2]/50 focus-within:shadow-[0_15px_35px_-12px_rgba(56,189,242,0.15)] transition-all duration-300">
-                    <label className="flex items-center gap-3 px-5 py-3 min-w-0 flex-1 border-r border-[#2E2E2F]/5 hover:bg-[#38BDF2]/5 transition-colors">
-                      <ICONS.Search className="w-4 h-4 text-[#2E2E2F] shrink-0" />
-                      <input
-                        type="text"
-                        value={headerSearchTerm}
-                        onChange={(event) => setHeaderSearchTerm(event.target.value)}
-                        placeholder={animatedPlaceholder || 'Find your events'}
-                        className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 outline-none"
-                      />
-                    </label>
-                    <div
-                      className="relative min-w-0 flex-1 border-r border-[#2E2E2F]/5 bg-[#F2F2F2] hover:bg-[#38BDF2]/5 transition-colors"
-                      ref={headerLocationMenuRef}
-                    >
-                      <div className="w-full h-full flex items-center">
-                        <div className="flex-1 min-w-0 flex items-center gap-3 px-5 py-3 cursor-text" onClick={() => setHeaderLocationMenuOpen(true)}>
-                          <ICONS.MapPin className="w-4 h-4 text-[#2E2E2F] shrink-0" />
-                          <input
-                            type="text"
-                            value={hasHeaderExplicitLocation ? headerLocationTerm : ''}
-                            onChange={(event) => {
-                              const next = event.target.value;
-                              setHeaderLocationTerm(next || DEFAULT_HEADER_LOCATION);
-                              setHeaderLocationError('');
-                            }}
-                            onFocus={() => setHeaderLocationMenuOpen(true)}
-                            placeholder="Your Location"
-                            className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 outline-none"
-                            aria-label="Search location"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          className={`w-11 h-11 flex items-center justify-center transition-all ${headerLocating
-                            ? 'text-[#38BDF2] animate-pulse'
-                            : 'text-[#2E2E2F]/40 hover:text-[#38BDF2] hover:bg-[#38BDF2]/8'
-                            } rounded-xl mr-1 group/gps`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleUseCurrentLocationInHeader();
-                          }}
-                          disabled={headerLocating}
-                          title="Search near me"
-                        >
-                          {headerLocating ? (
-                            <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full inline-block animate-spin" />
-                          ) : (
-                            <div className="relative">
-                              <svg fill="none" stroke="currentColor" strokeWidth={2.4} viewBox="0 0 24 24" className="w-5 h-5 group-hover/gps:scale-110 transition-transform">
-                                <circle cx="12" cy="12" r="3" />
-                                <path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
-                              </svg>
-                              <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#38BDF2] rounded-full opacity-0 group-hover/gps:opacity-100 transition-opacity animate-ping" />
-                            </div>
-                          )}
-                        </button>
-                      </div>
-
-                      {headerLocationMenuOpen && (
-                        <div className="absolute left-0 right-0 top-[calc(100%+12px)] z-50 w-[320px] rounded-2xl border border-[#2E2E2F]/10 bg-white shadow-[0_24px_48px_-20px_rgba(46,46,47,0.35)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                          <button
-                            type="button"
-                            className="w-full px-5 py-4 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/5 transition-colors border-b border-[#2E2E2F]/5 disabled:opacity-60 group/btn"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleUseCurrentLocationInHeader();
-                            }}
-                            disabled={headerLocating}
-                          >
-                            <div className={`w-10 h-10 rounded-full border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/btn:bg-[#38BDF2] group-hover/btn:text-[#F2F2F2] transition-all shadow-sm ${headerLocating ? 'animate-pulse' : ''}`}>
-                              {headerLocating ? (
-                                <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full inline-block animate-spin" />
-                              ) : (
-                                <svg fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" className="w-5 h-5">
-                                  <circle cx="12" cy="12" r="3" />
-                                  <path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
-                                </svg>
-                              )}
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-sm font-black text-[#2E2E2F]">Detect My Location</span>
-                              <span className="text-[10px] text-[#2E2E2F]/40 font-bold uppercase tracking-wider">Fast GPS Search</span>
-                            </div>
-                          </button>
-
-                          <button
-                            type="button"
-                            className="w-full px-5 py-3 flex items-center gap-4 text-left text-[#2E2E2F]/60 hover:bg-[#38BDF2]/5 transition-colors border-b border-[#2E2E2F]/5"
-                            onClick={() => handleSelectHeaderLocation('online')}
-                          >
-                            <div className="w-10 h-10 rounded-full border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2]">
-                              <ICONS.Globe className="w-4 h-4" />
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-sm font-black text-[#2E2E2F]">Online Events</span>
-                              <span className="text-[10px] text-[#2E2E2F]/40 font-bold uppercase tracking-wider">Virtual Experiences</span>
-                            </div>
-                          </button>
-
-                          <button
-                            type="button"
-                            className="w-full px-5 py-3 flex items-center gap-4 text-left text-[#2E2E2F]/60 hover:bg-red-50 hover:text-red-500 transition-colors group/reset"
-                            onClick={() => handleSelectHeaderLocation(DEFAULT_HEADER_LOCATION)}
-                          >
-                            <div className="w-10 h-10 rounded-full border border-current opacity-20 flex items-center justify-center transition-opacity group-hover/reset:opacity-100">
-                              <ICONS.Trash className="w-4 h-4" />
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-[11px] font-black uppercase tracking-widest">Clear Location</span>
-                              <span className="text-[9px] font-bold opacity-70">Reset to all areas</span>
-                            </div>
-                          </button>
-
-                          {headerLocationError && (
-                            <div className="px-5 py-3 text-[11px] font-bold text-red-500 bg-red-50 border-t border-red-100 flex items-center gap-2">
-                              <ICONS.AlertTriangle className="w-3.5 h-3.5" />
-                              {headerLocationError}
-                            </div>
-                          )}
-
-                          <div className="px-5 py-4 bg-[#F8F9FA] border-t border-[#2E2E2F]/5">
-                            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#2E2E2F]/30 italic leading-relaxed">Tip: Type any city name in the input field above for custom filtering.</p>
-                          </div>
-                        </div>
+                <div className="relative">
+                  <button
+                    className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 transition-colors"
+                    onClick={() => setUserMenuOpen((v) => !v)}
+                  >
+                    <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center">
+                      {imageUrl ? (
+                        <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="font-semibold text-xs text-[#2E2E2F]">{initials}</span>
                       )}
                     </div>
-                    <button
-                      type="submit"
-                      className="w-12 h-11 flex items-center justify-center transition-colors text-[#2E2E2F] hover:bg-[#38BDF2]/12 hover:text-[#38BDF2]"
-                      aria-label="Find events"
-                    >
-                      <ICONS.Search className="w-4 h-4" />
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-
-            {/* Right Segment: Nav Links, Mobile Menu Button, and Auth Actions - Top Row */}
-            <div className="flex items-center justify-end gap-4 lg:gap-6 ml-auto flex-none">
-              {/* Nav Links */}
-              <div className="hidden lg:flex items-center gap-8">
-                {navLinks.map((link: any) => (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2E2E2F]/60 hover:text-[#38BDF2] transition-colors relative group whitespace-nowrap"
-                  >
-                    {link.label}
-                    {link.isLive && (
-                      <span className="relative flex h-2 w-2 ml-1 inline-block -top-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                      </span>
-                    )}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#38BDF2] transition-all group-hover:w-full" />
-                  </Link>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-1 shrink-0">
-              {isAuthenticated ? (
-                <>
-                  <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
-                    Watch Live
-                    {hasLiveEvents && (
-                      <span className="relative flex h-2 w-2 ml-0.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
-                      </span>
-                    )}
-                  </Link>
-
-                  <div className="relative">
-                    <button
-                      className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 transition-colors"
-                      onClick={() => setUserMenuOpen((v) => !v)}
-                    >
-                      <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center">
-                        {imageUrl ? (
-                          <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-xs font-medium tracking-tight text-[#2E2E2F]">{initials}</span>
-                        )}
-                      </div>
-                      <div className="hidden sm:block text-left leading-tight">
-                        <p className="text-xs font-medium tracking-tight text-[#2E2E2F] truncate max-w-[120px]">{displayName}</p>
-                        <p className="text-[10px] font-medium tracking-tight text-[#2E2E2F]/45 mt-0.5">{roleLabel}</p>
-                      </div>
-                      <svg className="w-4 h-4 text-[#2E2E2F]/50" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    {userMenuOpen && (
-                      <>
+                    <div className="hidden sm:block text-left leading-tight">
+                      <p className="text-xs font-semibold text-[#2E2E2F] truncate max-w-[120px]">{displayName}</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-0.5">{roleLabel}</p>
+                    </div>
+                    <svg className="w-4 h-4 text-[#2E2E2F]/50" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {userMenuOpen && (
+                    <>
                       <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
                       <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl shadow-xl z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
                         <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
-                          <p className="text-[10px] font-medium tracking-tight text-[#2E2E2F]/40 mb-0.5">Account</p>
-                          <p className="text-xs font-medium tracking-tight text-[#2E2E2F] truncate">{displayName}</p>
-                          <p className="text-[10px] font-medium tracking-tight text-[#2E2E2F]/45 mt-1">{roleLabel}</p>
+                          <p className="text-[10px] font-medium text-[#2E2E2F]/40 uppercase tracking-widest mb-0.5">Account</p>
+                          <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
+                          <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-1">{roleLabel}</p>
                         </div>
                         {isOrganizer ? (
                           isAttendingView ? (
@@ -1638,7 +1625,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         )}
                         <div className="border-t border-[#2E2E2F]/5 mt-1 pt-1">
                           <button
-                            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
+                            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
                             onClick={() => {
                               setUserMenuOpen(false);
                               handleLogout();
@@ -1673,104 +1660,182 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             )}
             </div>
           </div>
-        </div>
 
-          {/* Bottom Row: Mobile Search (only visible on mobile) */}
-          <div className="lg:hidden w-full px-2 sm:px-6 py-3 border-t border-[#2E2E2F]/5">
-            {showHeaderSearchBar && (
-              <form onSubmit={handleHeaderSearchSubmit} className="w-full">
-                <div className="flex items-center h-12 rounded-full border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-sm focus-within:border-[#38BDF2]/50 focus-within:shadow-[0_0_0_3px_rgba(56,189,242,0.1)] transition-all">
-                  <label className="flex items-center gap-3 px-4 py-3 min-w-0 flex-1">
-                    <ICONS.Search className="w-4 h-4 text-[#2E2E2F] shrink-0" />
+          {showHeaderSearchBar && (
+            <div className="w-full lg:hidden">
+              <form onSubmit={handleHeaderSearchSubmit} className="space-y-2">
+                <div className="flex items-center h-12 rounded-2xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.12)] focus-within:border-[#38BDF2]/50 transition-all">
+                  <label className="flex items-center gap-3 px-4 min-w-0 flex-1">
+                    <ICONS.Search className="w-4 h-4 text-[#2E2E2F]/50 shrink-0" />
                     <input
                       type="text"
                       value={headerSearchTerm}
                       onChange={(event) => setHeaderSearchTerm(event.target.value)}
                       placeholder={animatedPlaceholder || 'Find your events'}
-                      className="w-full bg-transparent text-sm font-semibold text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 outline-none"
+                      className="w-full bg-transparent text-[13px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 outline-none"
                     />
                   </label>
                   <button
                     type="submit"
-                    className="px-3 py-3 flex items-center justify-center transition-colors text-[#2E2E2F] hover:text-[#38BDF2]"
-                    aria-label="Search"
+                    className="w-12 h-12 flex items-center justify-center text-[#2E2E2F] hover:bg-[#38BDF2]/12 hover:text-[#38BDF2] transition-colors"
+                    aria-label="Find events"
                   >
                     <ICONS.Search className="w-4 h-4" />
                   </button>
                 </div>
+
+                <div className="relative" ref={headerLocationMenuRef}>
+                  <div className="flex items-center h-12 rounded-2xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.12)]">
+                    <button
+                      type="button"
+                      className="flex min-w-0 flex-1 items-center gap-3 px-4 text-left text-[13px] font-bold text-[#2E2E2F] hover:bg-[#38BDF2]/5 transition-colors"
+                      onClick={() => {
+                        setHeaderLocationMenuOpen((prev) => !prev);
+                        setHeaderLocationError('');
+                      }}
+                    >
+                      <ICONS.MapPin className="w-4 h-4 shrink-0 text-[#2E2E2F]/50" />
+                      <span className={`truncate ${hasHeaderExplicitLocation ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]/40'}`}>
+                        {hasHeaderExplicitLocation ? headerLocationTerm : DEFAULT_HEADER_LOCATION}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`mr-1 flex h-10 w-10 items-center justify-center rounded-xl transition-all ${headerLocating
+                        ? 'text-[#38BDF2] animate-pulse'
+                        : 'text-[#2E2E2F]/45 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
+                        }`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleUseCurrentLocationInHeader();
+                      }}
+                      disabled={headerLocating}
+                      title="Search near me"
+                    >
+                      {headerLocating ? (
+                        <span className="inline-block h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                      ) : (
+                        <svg fill="none" stroke="currentColor" strokeWidth={2.4} viewBox="0 0 24 24" className="h-5 w-5">
+                          <circle cx="12" cy="12" r="3" />
+                          <path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+
+                  {headerLocationMenuOpen && (
+                    <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-50 overflow-hidden rounded-2xl border border-[#2E2E2F]/10 bg-white shadow-[0_24px_48px_-20px_rgba(46,46,47,0.35)] animate-in fade-in slide-in-from-top-2 duration-200">
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-4 border-b border-[#2E2E2F]/5 px-5 py-4 text-left text-[#2E2E2F] transition-colors hover:bg-[#38BDF2]/5 disabled:opacity-60"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          handleUseCurrentLocationInHeader();
+                        }}
+                        disabled={headerLocating}
+                      >
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-full border border-[#38BDF2]/30 text-[#38BDF2] ${headerLocating ? 'animate-pulse' : ''}`}>
+                          {headerLocating ? (
+                            <span className="inline-block h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                          ) : (
+                            <svg fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" className="h-5 w-5">
+                              <circle cx="12" cy="12" r="3" />
+                              <path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+                            </svg>
+                          )}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-black text-[#2E2E2F]">Detect My Location</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#2E2E2F]/40">Fast GPS Search</span>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-4 border-b border-[#2E2E2F]/5 px-5 py-4 text-left text-[#2E2E2F] transition-colors hover:bg-[#38BDF2]/5"
+                        onClick={() => handleSelectHeaderLocation(ONLINE_LOCATION_VALUE)}
+                      >
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#38BDF2]/30 text-[#38BDF2]">
+                          <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16v12H4z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M10 9l5 3-5 3V9z" />
+                          </svg>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-black text-[#2E2E2F]">Online Events</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#2E2E2F]/40">Virtual Experiences</span>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-4 px-5 py-3 text-left text-[#2E2E2F]/60 transition-colors hover:bg-red-50 hover:text-red-500"
+                        onClick={() => handleSelectHeaderLocation(DEFAULT_HEADER_LOCATION)}
+                      >
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-current opacity-20">
+                          <ICONS.Trash className="w-4 h-4" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[11px] font-black uppercase tracking-widest">Clear Location</span>
+                          <span className="text-[9px] font-bold opacity-70">Reset to all areas</span>
+                        </div>
+                      </button>
+
+                      {headerLocationError && (
+                        <div className="flex items-center gap-2 border-t border-red-100 bg-red-50 px-5 py-3 text-[11px] font-bold text-red-500">
+                          <ICONS.AlertTriangle className="w-3.5 h-3.5" />
+                          {headerLocationError}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </form>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </header>
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <>
           <div className="lg:hidden fixed inset-0 bg-black/30 z-[95]" onClick={() => setMobileMenuOpen(false)} />
-          <div className="lg:hidden fixed top-20 right-0 w-64 bg-[#F2F2F2] border-none shadow-sm z-[100] animate-in slide-in-from-top-2 duration-200 max-h-[calc(100vh-80px)] overflow-y-auto">
-            
-            {/* Mobile Search Bar - Hidden */}
-            {showHeaderSearchBar && (
-              <form onSubmit={handleHeaderSearchSubmit} className="w-full hidden">
-              <div className="flex items-center h-12 rounded-xl border border-[#2E2E2F]/10 bg-white overflow-hidden">
-                <label className="flex items-center gap-2 px-3 min-w-0 flex-1">
-                  <ICONS.Search className="w-4 h-4 text-[#2E2E2F]/50 shrink-0" />
-                  <input
-                    type="text"
-                    value={headerSearchTerm}
-                    onChange={(event) => setHeaderSearchTerm(event.target.value)}
-                    placeholder="Find your events"
-                    className="w-full bg-transparent text-sm text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 outline-none"
-                  />
-                </label>
-                <button
-                  type="submit"
-                  className="w-10 h-10 flex items-center justify-center text-[#2E2E2F]/50 hover:text-[#38BDF2] transition-colors"
-                  aria-label="Search"
-                >
-                  <ICONS.Search className="w-4 h-4" />
-                </button>
+          <div className={`lg:hidden fixed right-0 z-[100] w-[min(21rem,calc(100vw-0.75rem))] overflow-y-auto rounded-l-[1.75rem] border border-[#2E2E2F]/10 bg-[#F2F2F2] shadow-[0_24px_60px_-22px_rgba(46,46,47,0.35)] animate-in slide-in-from-right-3 duration-200 ${mobileMenuPanelClass}`}>
+            {!isAuthenticated && (
+              <div className="border-b border-[#2E2E2F]/8 px-3 pt-3 pb-2">
+                <p className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/35">Explore StartupLab</p>
+                <nav className="mt-2 flex flex-col gap-1">
+                  {guestMobileLinks.map((link) => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      className="flex items-center gap-3 rounded-2xl px-4 py-3 text-xs font-semibold text-[#2E2E2F]/75 transition-colors hover:bg-white hover:text-[#38BDF2]"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <span className="shrink-0 opacity-70">{link.icon}</span>
+                      <span>{link.label}</span>
+                      {link.isLive && hasLiveEvents && (
+                        <span className="relative ml-auto flex h-2 w-2">
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75"></span>
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-red-600"></span>
+                        </span>
+                      )}
+                    </Link>
+                  ))}
+                </nav>
               </div>
-            </form>
             )}
-
-            {/* Mobile Nav Links - Hidden */}
-            <nav className="hidden flex flex-col gap-1">
-            {navLinks.map((link: any) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className="px-4 py-3 text-sm font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] rounded-xl transition-colors flex items-center justify-between"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {link.label}
-                {link.isLive && (
-                  <span className="flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                  </span>
-                )}
-              </Link>
-            ))}
-          </nav>
 
           {/* Mobile Auth Buttons Dropdown */}
           <div className="flex flex-col gap-0 py-0 px-0 bg-transparent overflow-hidden">
             {!isAuthenticated ? (
               <>
                 <Link 
-                  to="/live" 
-                  className="flex items-center gap-3 px-4 py-3 text-[#38BDF2] hover:bg-white transition-colors text-xs font-semibold w-full"
+                  to="/signup" 
+                  className="flex items-center gap-3 px-4 py-3 text-[#38BDF2] hover:bg-white transition-colors text-xs font-semibold w-full [&>span:first-child]:hidden"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span>▶</span>
-                  <span>Watch Live</span>
-                  {hasLiveEvents && (
-                    <span className="relative flex h-2 w-2 ml-auto">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
-                    </span>
-                  )}
+                  <span>Get Started</span>
                 </Link>
                 <Link 
                   to="/login" 
@@ -1785,7 +1850,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               </>
             ) : (
               <>
-                <div className="px-4 py-3 border-b-2 border-[#2E2E2F]/10">
+                <div className="px-4 py-3 border-b border-[#2E2E2F]/5">
                   <p className="text-[9px] font-medium text-[#2E2E2F]/40 uppercase tracking-wider mb-0.5">Account</p>
                   <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
                   <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-1">Attending</p>
@@ -1841,7 +1906,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 </Link>
                 
                 <button
-                  className="w-full flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group text-xs font-semibold border-t-2 border-[#2E2E2F]/10"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group text-xs font-semibold border-t border-[#2E2E2F]/5"
                   onClick={() => {
                     setMobileMenuOpen(false);
                     handleLogout();
@@ -1852,49 +1917,6 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   </svg>
                   <span>Logout</span>
                 </button>
-
-                {/* Mobile Search at Bottom */}
-                {showHeaderSearchBar && (
-                  <div className="border-t-2 border-[#2E2E2F]/10 mt-2">
-                    <button
-                      onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left text-xs font-semibold"
-                    >
-                      <ICONS.Search className="w-4 h-4 opacity-70" />
-                      <span>Search Events</span>
-                      <svg className={`w-3 h-3 ml-auto transition-transform ${mobileSearchOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                      </svg>
-                    </button>
-                    {mobileSearchOpen && (
-                      <div className="p-3 bg-[#F2F2F2] border-t border-[#2E2E2F]/5">
-                        <form onSubmit={handleHeaderSearchSubmit} className="w-full">
-                          <div className="flex items-center h-10 rounded-xl border border-[#2E2E2F]/10 bg-white overflow-hidden">
-                            <label className="flex items-center gap-2 px-3 min-w-0 flex-1">
-                              <ICONS.Search className="w-4 h-4 text-[#2E2E2F]/50 shrink-0" />
-                              <input
-                                type="text"
-                                value={headerSearchTerm}
-                                onChange={(event) => setHeaderSearchTerm(event.target.value)}
-                                placeholder="Find your events"
-                                className="w-full bg-transparent text-sm text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 outline-none"
-                              />
-                            </label>
-                            <button
-                              type="submit"
-                              className="w-10 h-10 flex items-center justify-center text-[#2E2E2F]/50 hover:text-[#38BDF2] transition-colors"
-                              aria-label="Search"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                              </svg>
-                            </button>
-                          </div>
-                        </form>
-                      </div>
-                    )}
-                  </div>
-                )}
               </>
             )}
           </div>
@@ -1969,7 +1991,7 @@ const DashboardWrapper: React.FC = () => {
 const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canViewEvents, canEditEvents, canManualCheckIn, canReceiveNotifications } = useUser();
+  const { role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canViewEvents, canEditEvents, canManualCheckIn, canReceiveNotifications, hasResolvedSession } = useUser();
   const { isAttendingView, setPublicMode } = useEngagement();
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
@@ -2068,7 +2090,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
         '/account-settings', '/user/attendees', '/user/checkin', '/user/archive',
         '/user/reports', '/dashboard', '/subscription'
       ].includes(location.pathname);
-      if (!isUserPortalRoute) return;
+      if (!isUserPortalRoute || hasResolvedSession) return;
 
       try {
         const res = await fetch(`${API}/api/whoAmI`, { credentials: 'include', cache: 'no-store' });
@@ -2101,7 +2123,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
       }
     };
     syncSession();
-  }, [clearUser, location.pathname, navigate, setUser]);
+  }, [clearUser, hasResolvedSession, location.pathname, navigate, setUser]);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -2216,30 +2238,30 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F2F2F2] portal-fast">
+    <div className="min-h-screen flex bg-[#F2F2F2]">
       {/* Sidebar for desktop */}
       <aside
-        className={`bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-64' : 'w-20'}`}
+        className={`bg-[#F2F2F2] border-r-[3px] border-[#2E2E2F]/30 hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-64' : 'w-20'}`}
         style={{ overflow: desktopSidebarOpen ? 'hidden' : 'visible' }}
       >
-        <div className={`py-6 px-4 flex items-center justify-center border-b-2 border-[#2E2E2F]/15 shrink-0 ${desktopSidebarOpen ? 'min-h-[160px]' : 'min-h-[120px]'}`}>
+        <div className={`py-6 px-4 flex items-center justify-center border-b-[3px] border-[#2E2E2F]/30 shrink-0 ${desktopSidebarOpen ? 'min-h-[152px]' : 'min-h-[108px]'}`}>
           <Link to="/user-home" className="flex items-center justify-center group transition-all duration-500 transform hover:scale-[1.05] active:scale-[0.95]">
             {organizerSidebarLogoUrl ? (
               <img
                 src={organizerSidebarLogoUrl}
                 alt={organizerSidebarLogoAlt}
-                className={desktopSidebarOpen ? "h-20 w-auto max-w-full object-contain group-hover:rotate-1 transition-transform" : "h-14 w-14 object-contain group-hover:rotate-6 transition-transform rounded-xl border-2 border-[#38BDF2]/20"}
+                className={desktopSidebarOpen ? "h-20 w-auto max-w-full object-contain group-hover:rotate-1 transition-transform" : "h-12 w-12 object-contain group-hover:rotate-6 transition-transform rounded-xl shadow-lg border-2 border-[#38BDF2]/20"}
               />
             ) : (
               desktopSidebarOpen ? (
-                <Branding className="h-16 w-auto" />
+                <Branding className="h-20 w-auto" />
               ) : (
-                <img src="/lgo.webp" alt="Logo" className="h-12 w-12 object-contain group-hover:rotate-6 transition-transform" />
+                <img src="/lgo.webp" alt="Logo" className="h-11 w-11 object-contain group-hover:rotate-6 transition-transform" />
               )
             )}
           </Link>
         </div>
-        <nav className={`flex-1 py-6 pb-0 ${desktopSidebarOpen ? 'px-4' : 'px-2'} flex flex-col space-y-1 overflow-y-auto overflow-x-visible ${desktopSidebarOpen ? 'custom-scrollbar' : 'scrollbar-none'} scroll-smooth`}
+        <nav className={`flex-1 pt-1 pb-6 ${desktopSidebarOpen ? 'px-4' : 'px-2'} flex flex-col gap-0 overflow-y-auto overflow-x-visible scrollbar-none scroll-smooth`}
           style={{ width: desktopSidebarOpen ? '100%' : '260px', paddingRight: desktopSidebarOpen ? '0' : '180px' }}>
           {menuItems.map((item: any, idx) => {
             const isActive = checkIsActive(item.path);
@@ -2247,16 +2269,16 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             return (
               <React.Fragment key={item.path || idx}>
                 {item.separator && (
-                  <div className={`mx-4 my-3 h-[2px] bg-[#2E2E2F]/10 shrink-0 ${!desktopSidebarOpen ? 'mx-2' : ''}`} />
+                  <div className={`mx-4 my-3 h-[2px] bg-[#2E2E2F]/20 shrink-0 ${!desktopSidebarOpen ? 'mx-2' : ''}`} />
                 )}
                 <Link
                   to={item.path}
                   className={`flex items-center transition-all duration-300 group relative shrink-0 ${desktopSidebarOpen
-                    ? 'flex-row gap-3 px-4 py-3 rounded-2xl mx-1'
-                    : 'flex-row justify-center p-3 rounded-xl mx-2'
+                    ? 'flex-row gap-3 px-4 py-3 rounded-2xl mx-0'
+                    : 'flex-row justify-center p-3 rounded-xl mx-1'
                     } ${isActive
-                      ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20 border-2 border-[#F2F2F2]/20'
-                      : 'text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] border-2 border-transparent'
+                      ? 'bg-[#38BDF2]/10 text-[#38BDF2]'
+                      : 'text-[#111111] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
                     }`}
                   title={!desktopSidebarOpen ? item.label : undefined}
                 >
@@ -2288,7 +2310,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
       <main
         className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}
       >
-        <header className="h-20 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 px-4 sm:px-8 flex items-center justify-between gap-4 sm:gap-6 sticky top-0 z-40 w-full">
+        <header className="h-20 bg-[#F2F2F2] border-b-[3px] border-[#2E2E2F]/30 px-4 sm:px-8 flex items-center justify-between gap-4 sm:gap-6 sticky top-0 z-40 w-full">
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
@@ -2298,7 +2320,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   setDesktopSidebarOpen(!desktopSidebarOpen);
                 }
               }}
-              className="p-2.5 rounded-xl border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-all group active:scale-95"
+              className="p-2.5 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-all group active:scale-95"
               aria-label="Toggle Sidebar"
             >
               <svg className={`w-5 h-5 transition-transform duration-500 ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2306,7 +2328,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
               </svg>
             </button>
             <div className="ml-1 hidden sm:block">
-              <p className="text-base font-medium tracking-tight text-[#2E2E2F]/50">
+              <p className="text-[10px] uppercase font-black text-[#2E2E2F]/50 tracking-[0.2em]">
                 Organizer Portal
               </p>
             </div>
@@ -2316,7 +2338,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             {(!(role === UserRole.STAFF && canReceiveNotifications === false)) && (
               <div className="relative group">
                 <button
-                  className="w-11 h-11 flex items-center justify-center rounded-2xl border-2 border-[#38BDF2]/30 bg-transparent hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/50 hover:scale-105 active:scale-95 transition-all shadow-sm relative"
+                  className="w-11 h-11 flex items-center justify-center rounded-2xl border border-[#38BDF2]/20 bg-transparent hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/40 hover:scale-105 active:scale-95 transition-all shadow-sm relative"
                   onClick={() => setNotificationOpen(!notificationOpen)}
                 >
                   <ICONS.Bell className="w-5 h-5 text-[#2E2E2F] group-hover:text-[#38BDF2] transition-colors" />
@@ -2329,8 +2351,8 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 {notificationOpen && (
                   <>
                     <div className="fixed inset-0 z-[100] bg-[#2E2E2F]/10 backdrop-blur-[2px]" onClick={() => setNotificationOpen(false)} />
-                    <div className="fixed right-6 top-24 bottom-6 w-full max-w-[420px] bg-[#F2F2F2] rounded-[2.5rem] border-2 border-[#2E2E2F]/15 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.15)] z-[101] flex flex-col overflow-hidden animate-in slide-in-from-right-8 fade-in duration-500">
-                      <div className="p-8 border-b-2 border-[#2E2E2F]/15 flex items-start justify-between bg-[#F2F2F2]/80 backdrop-blur-xl sticky top-0 z-10">
+                    <div className="fixed left-3 right-3 top-24 bottom-24 sm:left-auto sm:right-6 sm:bottom-6 w-auto sm:w-full sm:max-w-[420px] bg-[#F2F2F2] rounded-[2rem] sm:rounded-[2.5rem] border border-[#2E2E2F]/5 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.15)] z-[101] flex flex-col overflow-hidden animate-in slide-in-from-right-8 fade-in duration-500">
+                      <div className="p-8 border-b border-[#2E2E2F]/5 flex items-start justify-between bg-[#F2F2F2]/80 backdrop-blur-xl sticky top-0 z-10">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
                             <h2 className="text-2xl font-black tracking-tight text-[#2E2E2F]">Notifications</h2>
@@ -2417,10 +2439,11 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 )}
               </div>
             )}
+          </div>
 
           <div className="relative">
             <button
-              className="flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 transition-colors"
               onClick={() => setUserMenuOpen((v) => !v)}
             >
               <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center">
@@ -2431,8 +2454,8 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 )}
               </div>
               <div className="hidden sm:block text-left leading-tight">
-                <p className="text-xs font-medium tracking-tight text-[#2E2E2F] truncate max-w-[120px]">{displayName}</p>
-                <p className="text-xs font-medium tracking-tight text-[#2E2E2F]/45 mt-0.5">{roleLabel}</p>
+                <p className="text-xs font-semibold text-[#2E2E2F] truncate max-w-[120px]">{displayName}</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-0.5">{roleLabel}</p>
               </div>
               <svg className="w-4 h-4 text-[#2E2E2F]/50" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -2441,14 +2464,14 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             {userMenuOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                <div className="absolute right-0 top-[calc(100%+8px)] w-60 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl shadow-xl z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
-                  <div className="px-4 py-3 border-b-2 border-[#2E2E2F]/15 mb-1">
-                    <p className="text-[10px] font-medium tracking-tight text-[#2E2E2F]/40 mb-0.5">Account</p>
-                    <p className="text-xs font-medium tracking-tight text-[#2E2E2F] truncate">{displayName}</p>
-                    <p className="text-xs font-medium tracking-tight text-[#2E2E2F]/45 mt-1">{roleLabel}</p>
+                <div className="absolute right-0 top-[calc(100%+8px)] w-60 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl shadow-xl z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
+                  <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
+                    <p className="text-[10px] font-medium text-[#2E2E2F]/40 uppercase tracking-widest mb-0.5">Account</p>
+                    <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-1">{roleLabel}</p>
                   </div>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       setPublicMode('organizer');
                       navigate('/my-events');
@@ -2460,7 +2483,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   </button>
                   {role === UserRole.ORGANIZER && (
                     <button
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                       onClick={handleToggleAttendingMode}
                     >
                       <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
@@ -2468,7 +2491,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     </button>
                   )}
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=organizer');
                       setUserMenuOpen(false);
@@ -2478,7 +2501,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Org Profile</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=team');
                       setUserMenuOpen(false);
@@ -2488,7 +2511,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Teams & Access</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=email');
                       setUserMenuOpen(false);
@@ -2498,7 +2521,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Email Setup</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=payments');
                       setUserMenuOpen(false);
@@ -2508,7 +2531,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Payment Gateway</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=account');
                       setUserMenuOpen(false);
@@ -2519,7 +2542,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   </button>
                   {hasPrioritySupport === true && (
                     <button
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                       onClick={() => {
                         navigate('/organizer-support');
                         setUserMenuOpen(false);
@@ -2530,7 +2553,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     </button>
                   )}
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium tracking-tight text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
                     onClick={() => {
                       setUserMenuOpen(false);
                       handleLogout();
@@ -2545,26 +2568,27 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
               </>
             )}
           </div>
-        </div>
-      </header>
+        </header>
+
+
 
         {sidebarOpen && (
           <div className="fixed inset-0 z-[100] flex lg:hidden">
             <div className="fixed inset-0 bg-[#2E2E2F]/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-            <aside className="relative w-72 bg-[#F2F2F2] border-r-2 border-[#2E2E2F]/15 flex flex-col h-full z-50 animate-in slide-in-from-left duration-300">
-              <div className="p-8 pb-4 flex items-center justify-between">
+            <aside className="relative w-[min(18.5rem,calc(100vw-1rem))] bg-[#F2F2F2] border-r-[3px] border-[#2E2E2F]/30 flex flex-col h-full z-50 animate-in slide-in-from-left duration-300 shadow-[12px_0_36px_-24px_rgba(46,46,47,0.3)]">
+              <div className="p-8 pb-3 flex items-center justify-between border-b-[3px] border-[#2E2E2F]/30">
                 <Link to="/user-home" onClick={() => setSidebarOpen(false)} className="flex flex-col items-start gap-2 group transition-all duration-500">
                   {organizerSidebarLogoUrl ? (
                     <img
                       src={organizerSidebarLogoUrl}
                       alt={organizerSidebarLogoAlt}
-                      className="h-12 w-auto max-w-[140px] object-contain"
+                      className="h-14 w-auto max-w-[168px] object-contain"
                     />
                   ) : (
                     <img
                       src="/lgo.webp"
                       alt="Logo"
-                      className="h-10 w-10 object-contain"
+                      className="h-12 w-12 object-contain"
                     />
                   )}
                   {organizerSidebarName && (
@@ -2574,30 +2598,28 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   )}
                 </Link>
                 <button
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F] hover:bg-[#2E2E2F]/10 transition-colors"
+                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors"
                   onClick={() => setSidebarOpen(false)}
                   aria-label="Close navigation"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M4 6h16M4 12h16M4 18h16" /></svg>
                 </button>
               </div>
-              <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
+              <nav className="flex-1 px-4 pt-1 pb-24 space-y-0 overflow-y-auto">
                 {menuItems.map((item: any) => {
                   const isActive = checkIsActive(item.path);
                   return (
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive
-                        ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20 border-2 border-[#F2F2F2]/20'
-                        : 'text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] border-2 border-transparent'
+                      className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 group ${isActive
+                        ? 'bg-[#38BDF2]/10 text-[#38BDF2]'
+                        : 'text-[#111111]/90 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
                         }`}
                       onClick={() => setSidebarOpen(false)}
                     >
-                      <div className={isActive ? 'text-white' : 'text-[#2E2E2F]'}>
-                        {React.cloneElement(item.icon as React.ReactElement<any>, {
-                          className: `w-5 h-5 transition-transform duration-300 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`
-                        })}
+                      <div className={isActive ? 'text-[#38BDF2]' : 'text-[#111111]/75 group-hover:text-[#38BDF2]'}>
+                        {item.icon}
                       </div>
                       <span className="text-sm font-medium tracking-tight">{item.label}</span>
                     </Link>
@@ -2608,7 +2630,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
           </div>
         )}
 
-        <div className="flex-1 p-6 lg:p-8 overflow-y-auto">
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           <div className="max-w-7xl mx-auto w-full">
             {children}
           </div>
@@ -2626,67 +2648,17 @@ const roleHomePath = (role: UserRole): string => {
 };
 
 const RequireRoleRoute: React.FC<{ allow: UserRole[]; children: React.ReactElement }> = ({ allow, children }) => {
-  const { role: currentRole, isOnboarded: currentOnboarded, setUser, clearUser } = useUser();
-  const [checking, setChecking] = React.useState(true);
-  const [resolvedRole, setResolvedRole] = React.useState<UserRole | null>(null);
-  const [shouldRedirectToOnboarding, setShouldRedirectToOnboarding] = React.useState(false);
+  const { role: currentRole, isOnboarded: currentOnboarded, hasResolvedSession } = useUser();
   const location = useLocation();
 
-  // Fast-path: If we already have a session and know they need onboarding, redirect immediately
+  if (!hasResolvedSession) return null;
+
   if (currentRole === UserRole.ORGANIZER && currentOnboarded === false && location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />;
   }
 
-  React.useEffect(() => {
-    let cancelled = false;
-
-    const checkAccess = async () => {
-      setChecking(true);
-      try {
-        const res = await fetch(`${API}/api/whoAmI`, { credentials: 'include', cache: 'no-store' });
-        if (!res.ok) throw new Error('Unauthorized');
-        const me = await res.json().catch(() => null);
-        const role = normalizeUserRole(me?.role);
-        if (!role || !me?.email) throw new Error('Invalid session');
-        
-        const isOnboarded = !!me.isOnboarded;
-        
-        setUser({
-          role,
-          email: me.email,
-          name: me.name ?? null,
-          imageUrl: me.imageUrl ?? null,
-          canViewEvents: me.canViewEvents ?? true,
-          canEditEvents: me.canEditEvents ?? true,
-          canManualCheckIn: me.canManualCheckIn ?? true,
-          canReceiveNotifications: me.canReceiveNotifications ?? true,
-          isOnboarded
-        });
-
-        if (!cancelled) {
-          setResolvedRole(role);
-          // Only redirect if organizer is NOT onboarded AND NOT currently on the onboarding page
-          if (role === UserRole.ORGANIZER && !isOnboarded && location.pathname !== '/onboarding') {
-            setShouldRedirectToOnboarding(true);
-          }
-        }
-      } catch (err) {
-        console.error('Access check error:', err);
-        clearUser();
-        if (!cancelled) setResolvedRole(null);
-      } finally {
-        if (!cancelled) setChecking(false);
-      }
-    };
-
-    checkAccess();
-    return () => { cancelled = true; };
-  }, [setUser, clearUser, location.pathname]);
-
-  if (checking) return <PageLoader label="Checking access..." variant="page" />;
-  if (!resolvedRole) return <Navigate to="/login" replace />;
-  if (shouldRedirectToOnboarding) return <Navigate to="/onboarding" replace />;
-  if (!allow.includes(resolvedRole)) return <Navigate to={roleHomePath(resolvedRole)} replace />;
+  if (!currentRole) return <Navigate to="/login" replace />;
+  if (!allow.includes(currentRole)) return <Navigate to={roleHomePath(currentRole)} replace />;
   return children;
 };
 
@@ -2723,43 +2695,50 @@ const HashBypassBridge: React.FC = () => {
 };
 
 const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { role, isOnboarded, isAuthenticated, setUser } = useUser();
+  const { role, isOnboarded, isAuthenticated, setUser, clearUser, hasResolvedSession } = useUser();
   const location = useLocation();
-  const [synced, setSynced] = React.useState(false);
 
   React.useEffect(() => {
+    if (hasResolvedSession) return;
+
+    let cancelled = false;
+
     const sync = async () => {
-      // If we already know their onboarded status, we're good
-      if (typeof isOnboarded !== 'undefined') {
-        setSynced(true);
-        return;
-      }
       try {
         const res = await fetch(`${API}/api/whoAmI`, { credentials: 'include', cache: 'no-store' });
         if (res.ok) {
           const me = await res.json();
-          setUser({
-            role: normalizeUserRole(me.role),
-            email: me.email,
-            name: me.name,
-            imageUrl: me.imageUrl,
-            isOnboarded: !!me.isOnboarded,
-            canViewEvents: me.canViewEvents ?? true,
-            canEditEvents: me.canEditEvents ?? true,
-            canManualCheckIn: me.canManualCheckIn ?? true,
-            canReceiveNotifications: me.canReceiveNotifications ?? true,
-          });
+          const normalizedRole = normalizeUserRole(me?.role);
+          if (!cancelled && normalizedRole && me?.email) {
+            setUser({
+              role: normalizedRole,
+              email: me.email,
+              name: me.name,
+              imageUrl: me.imageUrl,
+              isOnboarded: !!me.isOnboarded,
+              canViewEvents: me.canViewEvents ?? true,
+              canEditEvents: me.canEditEvents ?? true,
+              canManualCheckIn: me.canManualCheckIn ?? true,
+              canReceiveNotifications: me.canReceiveNotifications ?? true,
+            });
+            return;
+          }
         }
       } catch {
         // Silent fail for guest
-      } finally {
-        setSynced(true);
+      }
+
+      if (!cancelled) {
+        clearUser();
       }
     };
     sync();
-  }, [setUser, isOnboarded]);
+    return () => {
+      cancelled = true;
+    };
+  }, [clearUser, hasResolvedSession, setUser]);
 
-  if (!synced) return <PageLoader label="Initializing..." variant="page" />;
+  if (!hasResolvedSession) return <PageLoader label="Loading StartupLab..." variant="page" />;
 
   const isAuthPage = ['/login', '/signup', '/forgot-password', '/reset-password', '/accept-invite'].includes(location.pathname);
   const isOnboardingPage = location.pathname === '/onboarding';

@@ -152,7 +152,7 @@ export const BrowseEventsNavigator: React.FC<BrowseEventsNavigatorProps> = ({
           <span className="relative inline-block" ref={dropdownRef}>
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 text-[#38BDF2] hover:text-[#2E2E2F] transition-colors duration-200 ease-in-out"
+              className="inline-flex max-w-full items-center gap-1.5 text-left text-[#38BDF2] transition-colors duration-200 ease-in-out hover:text-[#2E2E2F]"
               onClick={() => {
                 setIsLocationDropdownOpen((prev) => !prev);
                 setLocationError('');
@@ -160,14 +160,14 @@ export const BrowseEventsNavigator: React.FC<BrowseEventsNavigatorProps> = ({
               aria-label="Choose location"
               aria-expanded={isLocationDropdownOpen}
             >
-              <span>{selectedLocation || 'Your Location'}</span>
+              <span className="truncate">{selectedLocation || 'Your Location'}</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
 
             {isLocationDropdownOpen && (
-              <div className="absolute left-0 top-[calc(100%+0.5rem)] z-30 w-[300px] overflow-hidden rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] shadow-[0_24px_50px_-20px_rgba(0,0,0,0.2)]">
+              <div className="absolute left-0 top-[calc(100%+0.5rem)] z-30 w-[300px] max-w-[calc(100vw-2.5rem)] overflow-hidden rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] shadow-[0_24px_50px_-20px_rgba(0,0,0,0.2)]">
                 <button
                   type="button"
                   className="w-full px-4 py-3.5 flex items-center gap-3 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors border-b border-[#2E2E2F]/10 disabled:opacity-60"

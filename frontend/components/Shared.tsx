@@ -247,8 +247,8 @@ export const PageLoader: React.FC<{
   className = ''
 }) => {
     const variants = {
-      page: 'min-h-screen bg-[#F2F2F2]',
-      section: 'min-h-[60vh] bg-transparent'
+      page: 'min-h-[100dvh] bg-[#F2F2F2]',
+      section: 'min-h-[40vh] sm:min-h-[60vh] bg-transparent'
     };
 
     const sizes = {

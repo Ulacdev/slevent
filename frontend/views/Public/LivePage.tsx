@@ -117,12 +117,13 @@ export const LivePage: React.FC = () => {
                 <div className="absolute inset-0 bg-[linear-gradient(116deg,#38BDF2_0%,#38BDF2_44%,#F2F2F2_100%)]" />
                 <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,62,134,0.45)_0%,rgba(0,62,134,0.2)_34%,rgba(0,62,134,0)_72%)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />
-                <div className="relative z-10 mx-auto flex h-full w-full max-w-[88rem] items-center px-6 sm:px-12">
+                <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-5 sm:px-8">
                     <div className="max-w-[740px]">
-                        <h1 className="text-[2.5rem] font-black leading-none tracking-tight text-white sm:text-7xl uppercase">
-                            Broadcasts
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/90 mb-4">Broadcasts</p>
+                        <h1 className="text-[2.1rem] font-black leading-none tracking-tight text-white sm:text-5xl">
+                            Watch Events Live
                         </h1>
-                        <p className="mt-6 max-w-[600px] text-base leading-relaxed text-white/95 sm:text-[1.1rem] font-medium uppercase tracking-[0.3em]">
+                        <p className="mt-4 max-w-[700px] text-base leading-relaxed text-white/95 sm:text-[1.1rem]">
                             {liveItems.length > 0 ? 'Streaming live from StartupLab' : 'Archived Broadcasts & Replays'}
                         </p>
                     </div>

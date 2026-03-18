@@ -286,25 +286,22 @@ export const EventDiscoveryPage: React.FC = () => {
 
             {/* Main Content Area */}
             <main className="flex-1 min-w-0 h-screen overflow-y-auto scrollbar-hide">
-                {/* Modern Banner */}
-                <section className="relative w-full h-[400px] overflow-hidden">
-                    <div className="absolute inset-0 bg-[#2E2E2F]" />
-                    {/* Animated Gradient Background */}
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,#38BDF2_0%,transparent_50%),radial-gradient(circle_at_0%_100%,#38BDF2_0%,transparent_50%)] opacity-30 animate-pulse" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#2E2E2F]/50 to-[#F2F2F2]" />
-
-                    <div className="relative z-10 h-full flex flex-col justify-center px-8 sm:px-16 max-w-[1400px]">
-                        <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 w-fit mb-8 animate-in slide-in-from-left duration-700">
-                            <span className="w-2 h-2 rounded-full bg-[#38BDF2] animate-ping" />
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Live Discovery Mode</p>
+                {/* Hero Section */}
+                <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[260px] sm:h-[300px] lg:h-[350px] overflow-hidden">
+                    <div className="absolute inset-0 bg-[linear-gradient(116deg,#38BDF2_0%,#38BDF2_44%,#F2F2F2_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,62,134,0.45)_0%,rgba(0,62,134,0.2)_34%,rgba(0,62,134,0)_72%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />
+                    
+                    <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-5 sm:px-8">
+                        <div className="max-w-[840px]">
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/90 mb-4">All Events</p>
+                            <h1 className="text-[2.1rem] font-black leading-none tracking-tight text-white sm:text-5xl">
+                                Event Marketplace
+                            </h1>
+                            <p className="mt-4 max-w-[700px] text-base leading-relaxed text-white/95 sm:text-[1.1rem]">
+                                Explore all published events and use the sorting controls to narrow by relevance, timing, and location context.
+                            </p>
                         </div>
-                        <h1 className="text-6xl sm:text-8xl font-black text-white tracking-tighter leading-[0.85] uppercase mb-8 animate-in slide-in-from-left duration-1000">
-                            Find Your <br />
-                            <span className="text-[#38BDF2]">Perspective.</span>
-                        </h1>
-                        <p className="max-w-[580px] text-lg font-medium text-white/60 leading-relaxed mb-10 animate-in slide-in-from-left duration-700 delay-200">
-                            Explore hundreds of professional sessions curated for the next generation of industry leaders. Use the edge filters to narrow down your search.
-                        </p>
                     </div>
                 </section>
 
