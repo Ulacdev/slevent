@@ -97,7 +97,7 @@ export const ContactUsPage: React.FC = () => {
   };
 
   const fieldClassName =
-    'block w-full px-3 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-lg text-sm font-normal text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 transition-colors';
+    'block w-full px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm font-normal text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 transition-colors min-h-[48px] sm:min-h-auto';
 
   const labelClassName = 'mb-2 block text-sm font-semibold text-[#2E2E2F]';
 

@@ -510,9 +510,9 @@ export const EventsManagement: React.FC = () => {
         title={isEditMode ? 'Edit Event' : 'Add New Event'}
         size="lg"
       >
-        <div className="space-y-12">
-          {/* HIGH-FIDELITY LIVE PREVIEW SECTION */}
-          <div className="bg-[#F2F2F2] rounded-[2.5rem] p-4">
+        <div>
+          {/* HIGH-FIDELITY LIVE PREVIEW SECTION - Edge-to-Edge Coverage & Highlight */}
+          <div className="bg-[#F2F2F2] -mx-4 sm:-mx-6 -mt-4 sm:-mt-6 mb-12 p-8 sm:p-12 border-b-[5px] border-[#38BDF2] shadow-xl transition-all duration-700 select-none">
             <div className="space-y-8">
               {/* Event Identity Group */}
               <div className="space-y-4">
@@ -564,7 +564,7 @@ export const EventsManagement: React.FC = () => {
               </div>
 
               {/* Description Block */}
-              <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border border-[#2E2E2F]/20">
+              <div className="p-8 bg-white/40 backdrop-blur-sm rounded-[2rem] border border-[#2E2E2F]/10">
                 <h4 className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide mb-4">Event Overview</h4>
                 <p className="text-[#2E2E2F]/70 text-[15px] font-medium leading-relaxed line-clamp-4">
                   {formData.description || 'Provide an executive summary of this event session...'}
@@ -574,7 +574,7 @@ export const EventsManagement: React.FC = () => {
           </div>
 
           {/* CONFIGURATION FORM SECTION */}
-          <form onSubmit={handleSubmit} className="space-y-10 px-4">
+          <form onSubmit={handleSubmit} className="space-y-10 px-4 sm:px-6 pb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="md:col-span-2">
                 <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-3 ml-1">Event Details</label>
@@ -692,10 +692,10 @@ export const EventsManagement: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex gap-4 pt-8 border-t border-[#2E2E2F]/20">
-              <Button className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors min-h-[32px]" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-              <Button type="submit" className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors min-h-[32px]" disabled={submitting}>
-                {submitting ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Event')}
+            <div className="flex gap-4 pt-10 border-t border-[#2E2E2F]/10">
+              <Button className="flex-1 py-1 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-transparent border-2 border-[#2E2E2F]/10 text-[#2E2E2F] hover:bg-[#2E2E2F]/5 transition-all min-h-[48px]" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+              <Button type="submit" className="flex-[2] py-1 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] transition-all min-h-[48px] shadow-lg shadow-[#38BDF2]/20" disabled={submitting}>
+                {submitting ? 'Propagating...' : (isEditMode ? 'Sync Changes' : 'Launch Session')}
               </Button>
             </div>
           </form>

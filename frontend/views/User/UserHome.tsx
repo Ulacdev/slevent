@@ -184,7 +184,7 @@ export const UserHome: React.FC = () => {
             )}
 
             {/* Welcome Section */}
-            <div className="bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-[3rem] p-10 md:p-14 mb-4">
+            <div className="bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-[5px] p-10 md:p-14 mb-4">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
                     <div className="max-w-2xl">
                         <div className="w-12 h-12 rounded-2xl bg-[#2E2E2F]/10 flex items-center justify-center mb-8">
@@ -219,7 +219,7 @@ export const UserHome: React.FC = () => {
             {organizerProfile && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Current Plan Card */}
-                    <div className="bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-[2rem] p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
+                    <div className="bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-[5px] p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
                         <div>
                             <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F]/60 mb-2">Current Plan</p>
                             <p className="text-2xl font-black text-[#2E2E2F] tracking-tight">{organizerProfile.plan?.name || 'No Active Plan'}</p>
@@ -236,7 +236,7 @@ export const UserHome: React.FC = () => {
                     </div>
 
                     {/* Paid Events Limit Widget */}
-                    <div className="bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-[2rem] p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
+                    <div className="bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-[5px] p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
                         {organizerProfile && (() => {
                             const pricedLimit = Number(organizerProfile.plan?.limits?.max_priced_events || organizerProfile.plan?.max_priced_events || organizerProfile.plan?.maxPricedEvents || 0);
                             const usedCount = stats.paidEventsCount;
@@ -278,7 +278,7 @@ export const UserHome: React.FC = () => {
 
                     {/* Email Quota Widget */}
                     {emailQuota && (
-                        <div className="bg-[#F2F2F2] border-[#2E2E2F]/15 border-2 rounded-[2rem] p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
+                        <div className="bg-[#F2F2F2] border-[#2E2E2F]/15 border-2 rounded-[5px] p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="p-2 bg-[#2E2E2F]/10 rounded-lg">
                                     <ICONS.Mail className="w-5 h-5 text-[#2E2E2F]" strokeWidth={2} />
@@ -317,7 +317,7 @@ export const UserHome: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Create First Event Card */}
                 <div
-                    className="group relative bg-[#F2F2F2] border-2 border-[#2E2E2F]/5 rounded-[2.5rem] p-8 flex flex-col items-start transition-all duration-300 hover:border-[#2E2E2F]/20 hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.05)] hover:-translate-y-1"
+                    className="group relative bg-[#F2F2F2] border-2 border-[#2E2E2F]/5 rounded-[5px] p-8 flex flex-col items-start transition-all duration-300 hover:border-[#2E2E2F]/20 hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.05)] hover:-translate-y-1"
                     onClick={() => navigate('/my-events?openModal=true')}
                 >
                     <div className="w-14 h-14 rounded-2xl bg-[#2E2E2F]/10 text-[#2E2E2F] flex items-center justify-center mb-8 group-hover:bg-[#2E2E2F] group-hover:text-white transition-all">
@@ -334,7 +334,7 @@ export const UserHome: React.FC = () => {
 
                 {/* Manage Events Card */}
                 <div
-                    className="group relative bg-[#F2F2F2] border-2 border-[#2E2E2F]/5 rounded-[2.5rem] p-8 flex flex-col items-start transition-all duration-300 hover:border-[#2E2E2F]/20 hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.05)] hover:-translate-y-1"
+                    className="group relative bg-[#F2F2F2] border-2 border-[#2E2E2F]/5 rounded-[5px] p-8 flex flex-col items-start transition-all duration-300 hover:border-[#2E2E2F]/20 hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.05)] hover:-translate-y-1"
                     onClick={() => navigate('/my-events')}
                 >
                     <div className="w-14 h-14 rounded-2xl bg-[#2E2E2F]/10 text-[#2E2E2F] flex items-center justify-center mb-8 group-hover:bg-[#2E2E2F] group-hover:text-white transition-all">
@@ -351,7 +351,7 @@ export const UserHome: React.FC = () => {
 
                 {/* Help & Support Card */}
                 <div
-                    className="group relative bg-[#F2F2F2] border-2 border-[#2E2E2F]/5 rounded-[2.5rem] p-8 flex flex-col items-start transition-all duration-300 hover:border-[#2E2E2F]/20 hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.05)] hover:-translate-y-1"
+                    className="group relative bg-[#F2F2F2] border-2 border-[#2E2E2F]/5 rounded-[5px] p-8 flex flex-col items-start transition-all duration-300 hover:border-[#2E2E2F]/20 hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.05)] hover:-translate-y-1"
                     onClick={() => navigate('/organizer-support')}
                 >
                     <div className="w-14 h-14 rounded-2xl bg-[#2E2E2F]/10 text-[#2E2E2F] flex items-center justify-center mb-8 group-hover:bg-[#2E2E2F] group-hover:text-white transition-all">
@@ -375,11 +375,11 @@ export const UserHome: React.FC = () => {
                 title="Initialize Event"
                 size="lg"
             >
-                <form onSubmit={handleSubmit} className="space-y-12">
-                    {/* Live Preview / Hero Section */}
-                    <div className="relative aspect-video rounded-3xl overflow-hidden border-2 border-[#2E2E2F]/10 bg-[#2E2E2F] group">
+                <form onSubmit={handleSubmit}>
+                    {/* Live Preview / Hero Section - Edge-to-Edge Cover Highlight */}
+                    <div className="relative aspect-video -mx-4 sm:-mx-6 -mt-4 sm:-mt-6 mb-10 overflow-hidden border-b-[5px] border-[#38BDF2] bg-[#2E2E2F] group shadow-2xl transition-all duration-700 select-none">
                         {formData.imageUrl ? (
-                            <img src={getImageUrl(formData.imageUrl)} alt="Event preview" className="w-full h-full object-cover opacity-60" />
+                            <img src={getImageUrl(formData.imageUrl)} alt="Event preview" className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#2E2E2F] to-[#2E2E2F]/90">
                                 <ICONS.Image className="w-16 h-16 text-white/10" />
@@ -409,99 +409,101 @@ export const UserHome: React.FC = () => {
                         </button>
                     </div>
 
-                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
+                    <div className="px-4 sm:px-6 pb-6 space-y-10">
+                        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="md:col-span-2 space-y-4">
-                            <div className="flex items-center gap-4">
-                                <div className="flex-1">
-                                    <Input
-                                        label="What's the name of this session?"
-                                        placeholder="e.g. Founders Workshop 2026"
-                                        value={formData.eventName}
-                                        onChange={(e: any) => setFormData({ ...formData, eventName: e.target.value })}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="md:col-span-2 space-y-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex-1">
+                                        <Input
+                                            label="What's the name of this session?"
+                                            placeholder="e.g. Founders Workshop 2026"
+                                            value={formData.eventName}
+                                            onChange={(e: any) => setFormData({ ...formData, eventName: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="w-1/3">
+                                        <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/40 mb-2.5">Status</label>
+                                        <select
+                                            className="w-full px-4 py-[13.5px] bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-2xl text-[11px] font-black uppercase tracking-widest outline-none focus:border-[#38BDF2] transition-colors appearance-none"
+                                            value={formData.status}
+                                            onChange={(e) => setFormData({ ...formData, status: e.target.value as EventStatus })}
+                                        >
+                                            <option value="PUBLISHED">Go Live</option>
+                                            <option value="DRAFT">Dev Only</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/40 mb-2.5">The Narrative</label>
+                                    <textarea
+                                        className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-3xl text-sm min-h-[140px] focus:border-[#38BDF2] transition-colors outline-none resize-none"
+                                        placeholder="Tell the story of your event..."
+                                        value={formData.description}
+                                        onChange={e => setFormData({ ...formData, description: e.target.value })}
                                     />
                                 </div>
-                                <div className="w-1/3">
-                                    <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/40 mb-2.5">Status</label>
-                                    <select
-                                        className="w-full px-4 py-[13.5px] bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-2xl text-[11px] font-black uppercase tracking-widest outline-none focus:border-[#38BDF2] transition-colors appearance-none"
-                                        value={formData.status}
-                                        onChange={(e) => setFormData({ ...formData, status: e.target.value as EventStatus })}
-                                    >
-                                        <option value="PUBLISHED">Go Live</option>
-                                        <option value="DRAFT">Dev Only</option>
-                                    </select>
+                            </div>
+
+                            <div className="space-y-6">
+                                <Input label="Kickoff Date" type="date" value={formData.eventDate} onChange={(e: any) => setFormData({ ...formData, eventDate: e.target.value })} />
+                                <Input label="Kickoff Time" type="time" value={formData.eventTime} onChange={(e: any) => setFormData({ ...formData, eventTime: e.target.value })} />
+                            </div>
+                            <div className="space-y-6">
+                                <Input label="Wrap Up Date" type="date" value={formData.endDate} onChange={(e: any) => setFormData({ ...formData, endDate: e.target.value })} />
+                                <Input label="Wrap Up Time" type="time" value={formData.endTime} onChange={(e: any) => setFormData({ ...formData, endTime: e.target.value })} />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/40 mb-2.5">Operational Presence</label>
+                                <div className="flex gap-4">
+                                    {['ONSITE', 'ONLINE', 'HYBRID'].map((type) => (
+                                        <button
+                                            key={type}
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, locationType: type as any })}
+                                            className={`flex-1 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${formData.locationType === type
+                                                ? 'bg-[#2E2E2F] border-[#2E2E2F] text-white shadow-lg'
+                                                : 'bg-[#F2F2F2] border-[#2E2E2F]/5 text-[#2E2E2F]/40 hover:bg-[#2E2E2F]/5'}`}
+                                        >
+                                            {type}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
-                            <div>
-                                <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/40 mb-2.5">The Narrative</label>
-                                <textarea
-                                    className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-3xl text-sm min-h-[140px] focus:border-[#38BDF2] transition-colors outline-none resize-none"
-                                    placeholder="Tell the story of your event..."
-                                    value={formData.description}
-                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+
+                            <div className="md:col-span-2">
+                                <Input
+                                    label="Venue Identity / Digital Access Point"
+                                    placeholder="Where is the action happening?"
+                                    value={formData.location}
+                                    onChange={(e: any) => applyLocationValue(e.target.value)}
                                 />
                             </div>
+
+                            {formData.locationType === 'ONSITE' && (
+                                <div className="md:col-span-2">
+                                    <OnsiteLocationAssistant value={formData.location} onChange={applyLocationValue} />
+                                </div>
+                            )}
                         </div>
 
-                        <div className="space-y-6">
-                            <Input label="Kickoff Date" type="date" value={formData.eventDate} onChange={(e: any) => setFormData({ ...formData, eventDate: e.target.value })} />
-                            <Input label="Kickoff Time" type="time" value={formData.eventTime} onChange={(e: any) => setFormData({ ...formData, eventTime: e.target.value })} />
+                        <div className="flex gap-6 pt-10 border-t-2 border-[#2E2E2F]/5">
+                            <Button
+                                className="flex-1 min-h-[56px] text-[#2E2E2F] bg-transparent border-2 border-[#2E2E2F]/10 hover:bg-[#2E2E2F]/5 hover:border-[#2E2E2F]/20"
+                                onClick={() => setIsModalOpen(false)}
+                            >
+                                Abort
+                            </Button>
+                            <Button
+                                type="submit"
+                                className="flex-[2] min-h-[56px] bg-[#38BDF2] text-white shadow-[0_20px_40px_-10px_rgba(56,189,242,0.4)] hover:bg-[#2E2E2F] transition-all"
+                                disabled={submitting}
+                            >
+                                {submitting ? 'Propagating...' : 'Initialize Session'}
+                            </Button>
                         </div>
-                        <div className="space-y-6">
-                            <Input label="Wrap Up Date" type="date" value={formData.endDate} onChange={(e: any) => setFormData({ ...formData, endDate: e.target.value })} />
-                            <Input label="Wrap Up Time" type="time" value={formData.endTime} onChange={(e: any) => setFormData({ ...formData, endTime: e.target.value })} />
-                        </div>
-
-                        <div className="md:col-span-2">
-                            <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/40 mb-2.5">Operational Presence</label>
-                            <div className="flex gap-4">
-                                {['ONSITE', 'ONLINE', 'HYBRID'].map((type) => (
-                                    <button
-                                        key={type}
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, locationType: type as any })}
-                                        className={`flex-1 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${formData.locationType === type
-                                            ? 'bg-[#2E2E2F] border-[#2E2E2F] text-white shadow-lg'
-                                            : 'bg-[#F2F2F2] border-[#2E2E2F]/5 text-[#2E2E2F]/40 hover:bg-[#2E2E2F]/5'}`}
-                                    >
-                                        {type}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="md:col-span-2">
-                            <Input
-                                label="Venue Identity / Digital Access Point"
-                                placeholder="Where is the action happening?"
-                                value={formData.location}
-                                onChange={(e: any) => applyLocationValue(e.target.value)}
-                            />
-                        </div>
-
-                        {formData.locationType === 'ONSITE' && (
-                            <div className="md:col-span-2">
-                                <OnsiteLocationAssistant value={formData.location} onChange={applyLocationValue} />
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="flex gap-6 pt-10 border-t-2 border-[#2E2E2F]/5">
-                        <Button
-                            className="flex-1 min-h-[56px] text-[#2E2E2F] bg-transparent border-2 border-[#2E2E2F]/10 hover:bg-[#2E2E2F]/5 hover:border-[#2E2E2F]/20"
-                            onClick={() => setIsModalOpen(false)}
-                        >
-                            Abort
-                        </Button>
-                        <Button
-                            type="submit"
-                            className="flex-[2] min-h-[56px] bg-[#38BDF2] text-white shadow-[0_20px_40px_-10px_rgba(56,189,242,0.4)] hover:bg-[#2E2E2F] transition-all"
-                            disabled={submitting}
-                        >
-                            {submitting ? 'Propagating...' : 'Initialize Session'}
-                        </Button>
                     </div>
                 </form>
             </Modal>

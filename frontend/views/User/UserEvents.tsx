@@ -113,6 +113,8 @@ export const UserEvents: React.FC = () => {
     const [resumeStatusAfterTicketSetup, setResumeStatusAfterTicketSetup] = useState(false);
     const [isWorkflowNoticeOpen, setIsWorkflowNoticeOpen] = useState(false);
     const [isPreviewMode, setIsPreviewMode] = useState(false);
+    const [isSidebarHidden, setIsSidebarHidden] = useState(false);
+
     const [previewDevice, setPreviewDevice] = useState<'mobile' | 'desktop'>('mobile');
     const [finalStatusDecision, setFinalStatusDecision] = useState<EventStatus | ''>('');
     const [promotions, setPromotions] = useState<any[]>([]);
@@ -356,6 +358,8 @@ export const UserEvents: React.FC = () => {
         setTicketReadinessLoading(false);
         setResumeStatusAfterTicketSetup(false);
         setIsPreviewMode(false);
+        setIsSidebarHidden(false);
+
         setPreviewDevice('mobile');
         setFinalStatusDecision('');
     };
@@ -1251,8 +1255,9 @@ export const UserEvents: React.FC = () => {
                 size="xl"
                 className="max-w-[96vw]"
             >
-                <div className={`grid grid-cols-1 gap-6 ${!isPreviewMode ? 'xl:grid-cols-[300px_minmax(0,1fr)]' : previewDevice === 'desktop' ? 'xl:grid-cols-[300px_minmax(0,1fr)_minmax(800px,1100px)]' : 'xl:grid-cols-[300px_minmax(0,1fr)_380px]'}`}>
-                    <div className="space-y-5 xl:sticky xl:top-0 self-start xl:max-h-[calc(70vh-1rem)] xl:overflow-y-auto xl:pr-1">
+                <div className={`grid grid-cols-1 gap-6 ${isSidebarHidden ? 'xl:grid-cols-1' : !isPreviewMode ? 'xl:grid-cols-[300px_minmax(0,1fr)]' : previewDevice === 'desktop' ? 'xl:grid-cols-[300px_minmax(0,1fr)_minmax(800px,1100px)]' : 'xl:grid-cols-[300px_minmax(0,1fr)_380px]'}`}>
+                    {!isSidebarHidden && (
+                        <div className="space-y-5 xl:sticky xl:top-0 self-start xl:max-h-[calc(70vh-1rem)] xl:overflow-y-auto xl:pr-1">
                         <div className="bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15 overflow-hidden">
                             <div className="h-16 bg-gradient-to-r from-[#BAF3FF] via-[#67E8F9] to-[#38BDF2]" />
                             <div className="p-4 space-y-4">
@@ -1294,6 +1299,7 @@ export const UserEvents: React.FC = () => {
                             ))}
                         </div>
                     </div>
+                )}
 
                     <div className="space-y-4">
                         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1301,8 +1307,17 @@ export const UserEvents: React.FC = () => {
                                 <h3 className="text-2xl font-black text-[#2E2E2F] tracking-tight">{activeStepMeta.title}</h3>
                                 <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#2E2E2F]/55 mt-1">{EVENT_SETUP_STEP_DETAIL[wizardStep]}</p>
                             </div>
-                            {!isPreviewMode && (
+                            <div className="flex items-center gap-2">
                                 <button
+                                    type="button"
+                                    onClick={() => setIsSidebarHidden(!isSidebarHidden)}
+                                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-all text-[13px] font-bold ${isSidebarHidden ? 'bg-[#38BDF2] text-white border-[#38BDF2]' : 'bg-[#F2F2F2] border-[#2E2E2F]/15 text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/35'}`}
+                                >
+                                    {isSidebarHidden ? <ICONS.Plus className="w-4 h-4" /> : <ICONS.Info className="w-4 h-4" />}
+                                    {isSidebarHidden ? 'Show Steps' : 'Hide Steps'}
+                                </button>
+                                {!isPreviewMode && (
+                                    <button
                                     type="button"
                                     onClick={() => setIsPreviewMode(true)}
                                     className="inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/35 transition-colors text-[13px] font-bold"
@@ -1310,7 +1325,7 @@ export const UserEvents: React.FC = () => {
                                     <EyeIcon className="w-4 h-4" />
                                     Show Preview
                                 </button>
-                            )}
+                            )}</div>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-8 px-1">

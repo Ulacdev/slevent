@@ -179,17 +179,17 @@ export const Modal: React.FC<{
     if (!isOpen) return null;
 
     const sizes = {
-      sm: 'sm:max-w-md',
-      md: 'sm:max-w-xl',
-      lg: 'sm:max-w-3xl',
-      xl: 'sm:max-w-4xl'
+      sm: 'max-w-xs sm:max-w-md',
+      md: 'max-w-sm sm:max-w-xl',
+      lg: 'max-w-md sm:max-w-3xl',
+      xl: 'max-w-lg sm:max-w-4xl'
     };
 
     return (
-      <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 p-0">
+      <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-3 sm:p-4">
         {/* Backdrop */}
         <div
-          className="fixed inset-0 z-[90] bg-[#2E2E2F]/60 transition-opacity"
+          className="fixed inset-0 z-[90] bg-[#2E2E2F]/60 backdrop-blur-sm transition-opacity"
           onClick={closeOnBackdrop ? onClose : undefined}
         />
 
@@ -199,15 +199,15 @@ export const Modal: React.FC<{
           aria-modal="true"
           aria-labelledby="modal-title"
           className={`relative z-[110] bg-[#F2F2F2] sm:rounded-3xl rounded-t-3xl border-x-0 sm:border-x border-b-0 sm:border-b border-[#2E2E2F]/10 w-full ${sizes[size]
-            } h-full sm:h-auto sm:max-h-[90vh] overflow-hidden ${className}`}
+            } max-h-[90vh] sm:max-h-[85vh] overflow-hidden ${className}`}
         >
-          <div className="px-4 sm:px-6 py-5 border-b border-[#2E2E2F]/10 flex items-start justify-between gap-4 sticky top-0 bg-[#F2F2F2] z-10">
+          <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-[#2E2E2F]/10 flex items-start justify-between gap-3 sticky top-0 bg-[#F2F2F2] z-10">
             <div className="min-w-0">
-              <h2 id="modal-title" className="text-lg sm:text-xl font-bold text-[#2E2E2F] break-words">
+              <h2 id="modal-title" className="text-base sm:text-xl font-black text-[#2E2E2F] break-words tracking-tight">
                 {title}
               </h2>
               {subtitle && (
-                <p className="mt-1 text-[12px] sm:text-[14px] uppercase tracking-[0.15em] font-medium text-[#2E2E2F]/60">
+                <p className="mt-1 text-[11px] sm:text-[13px] uppercase tracking-[0.15em] font-bold text-[#2E2E2F]/50">
                   {subtitle}
                 </p>
               )}
@@ -215,18 +215,18 @@ export const Modal: React.FC<{
             {showClose && (
               <button
                 onClick={onClose}
-                className="min-h-[44px] min-w-[44px] px-2 py-2 rounded-xl bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors shrink-0"
+                className="min-h-[44px] min-w-[44px] p-2 rounded-xl bg-[#38BDF2]/10 text-[#38BDF2] hover:bg-[#38BDF2] hover:text-[#F2F2F2] transition-all shrink-0 active:scale-95"
                 aria-label="Close modal"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             )}
           </div>
-          <div className={`p-4 sm:p-6 overflow-y-auto max-h-[calc(100vh-140px)] sm:max-h-[70vh] ${contentClassName}`}>
+          <div className={`p-4 sm:p-6 overflow-y-auto max-h-[calc(100vh-120px)] sm:max-h-[calc(85vh-100px)] ${contentClassName}`}>
             {children}
           </div>
           {footer && (
-            <div className="px-4 sm:px-6 py-5 border-t border-[#2E2E2F]/10 bg-[#F2F2F2]">
+            <div className="px-4 sm:px-6 py-4 sm:py-5 border-t border-[#2E2E2F]/10 bg-[#F2F2F2]">
               {footer}
             </div>
           )}
@@ -248,13 +248,13 @@ export const PageLoader: React.FC<{
 }) => {
     const variants = {
       page: 'min-h-[100dvh] bg-[#F2F2F2]',
-      section: 'min-h-[40vh] sm:min-h-[60vh] bg-transparent'
+      section: 'min-h-[30vh] sm:min-h-[60vh] bg-transparent'
     };
 
     const sizes = {
-      sm: 'w-6 h-6',
-      md: 'w-8 h-8',
-      lg: 'w-10 h-10'
+      sm: 'w-5 h-5 sm:w-6 sm:h-6',
+      md: 'w-7 h-7 sm:w-8 sm:h-8',
+      lg: 'w-8 h-8 sm:w-10 sm:h-10'
     };
 
     return (
@@ -265,7 +265,7 @@ export const PageLoader: React.FC<{
           <div className="absolute inset-2 rounded-full bg-[#38BDF2]/10" />
         </div>
         {label && (
-          <p className="mt-4 text-[#2E2E2F] font-semibold uppercase tracking-wide text-[13px]">
+          <p className="mt-4 text-[#2E2E2F] font-bold uppercase tracking-wide text-[12px] sm:text-[13px] px-4">
             {label}
           </p>
         )}

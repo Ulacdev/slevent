@@ -300,7 +300,7 @@ export const RegistrationForm: React.FC = () => {
                       <label className="text-[13px] font-medium text-[#2E2E2F]/70 ml-1">Full Name *</label>
                       <Input
                         placeholder="Full name as per identification"
-                        className="py-3 sm:py-4 px-4 sm:px-5 rounded-[1rem] font-normal bg-[#F2F2F2] border border-[#2E2E2F]/20 focus:bg-[#F2F2F2] text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 transition-colors text-[14px]"
+                        className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-[1rem] text-[14px]"
                         style={{ '--tw-ring-color': brandColor } as any}
                         value={formData.name}
                         onChange={(e: any) => setFormData({ ...formData, name: e.target.value })}
@@ -312,7 +312,7 @@ export const RegistrationForm: React.FC = () => {
                       <Input
                         type="email"
                         placeholder="name@organization.com"
-                        className="py-3 sm:py-4 px-4 sm:px-5 rounded-[1rem] font-normal bg-[#F2F2F2] border border-[#2E2E2F]/20 focus:bg-[#F2F2F2] text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 transition-colors text-[14px]"
+                        className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-[1rem] text-[14px]"
                         style={{ '--tw-ring-color': brandColor } as any}
                         value={formData.email}
                         onChange={(e: any) => setFormData({ ...formData, email: e.target.value })}
@@ -323,7 +323,7 @@ export const RegistrationForm: React.FC = () => {
                       <label className="text-[13px] font-medium text-[#2E2E2F]/70 ml-1">Contact Number</label>
                       <Input
                         placeholder="+63 ...."
-                        className="py-3 sm:py-4 px-4 sm:px-5 rounded-[1rem] font-normal bg-[#F2F2F2] border border-[#2E2E2F]/20 focus:bg-[#F2F2F2] focus:border-[#38BDF2]/40 text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 transition-colors text-[14px]"
+                        className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-[1rem] text-[14px]"
                         value={formData.phone}
                         onChange={(e: any) => setFormData({ ...formData, phone: e.target.value })}
                       />
@@ -332,7 +332,7 @@ export const RegistrationForm: React.FC = () => {
                       <label className="text-[13px] font-medium text-[#2E2E2F]/70 ml-1">Company</label>
                       <Input
                         placeholder="Organization / Entity"
-                        className="py-3 sm:py-4 px-4 sm:px-5 rounded-[1rem] font-normal bg-[#F2F2F2] border border-[#2E2E2F]/20 focus:bg-[#F2F2F2] focus:border-[#38BDF2]/40 text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 transition-colors text-[14px]"
+                        className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-[1rem] text-[14px]"
                         value={formData.company}
                         onChange={(e: any) => setFormData({ ...formData, company: e.target.value })}
                       />
@@ -362,7 +362,7 @@ export const RegistrationForm: React.FC = () => {
                                     <label className="text-[11px] font-medium text-[#2E2E2F]/70 ml-1">Guest Full Name</label>
                                     <Input
                                       placeholder="Full name as per identification"
-                                      className="py-3 sm:py-4 px-4 sm:px-5 rounded-[1rem] font-normal bg-[#F2F2F2] border border-[#2E2E2F]/20 focus:bg-[#F2F2F2] text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 transition-colors text-[14px]"
+                                      className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-[1rem] text-[14px]"
                                       style={{ '--tw-ring-color': brandColor } as any}
                                       value={guest.name}
                                       onChange={(e: any) => {
@@ -377,7 +377,7 @@ export const RegistrationForm: React.FC = () => {
                                     <Input
                                       type="email"
                                       placeholder="name@organization.com"
-                                      className="py-3 sm:py-4 px-4 sm:px-5 rounded-[1rem] font-normal bg-[#F2F2F2] border border-[#2E2E2F]/20 focus:bg-[#F2F2F2] text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 transition-colors text-[14px]"
+                                      className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-[1rem] text-[14px]"
                                       style={{ '--tw-ring-color': brandColor } as any}
                                       value={guest.email}
                                       onChange={(e: any) => {

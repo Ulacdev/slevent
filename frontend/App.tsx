@@ -540,7 +540,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     : 'flex-col items-center justify-center gap-1 py-4 px-1 rounded-xl'
                     } ${isActive
                       ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20'
-                      : 'text-[#111111] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
+                      : 'text-[#111111] hover:bg-[#38BDF2] hover:text-white hover:shadow-lg hover:shadow-[#38BDF2]/20'
                     }`}
                   title={!desktopSidebarOpen ? item.label : undefined}
                 >
@@ -842,11 +842,11 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                       to={item.path}
                       className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 group ${isActive
                         ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20'
-                        : 'text-[#111111] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
+                        : 'text-[#111111] hover:bg-[#38BDF2] hover:text-white hover:shadow-lg hover:shadow-[#38BDF2]/20'
                         }`}
                       onClick={() => setSidebarOpen(false)}
                     >
-                      <div className={isActive ? 'text-white' : 'text-[#111111]/75 group-hover:text-[#38BDF2]'}>
+                      <div className={isActive ? 'text-white' : 'text-[#111111]/75 group-hover:text-white'}>
                         {item.icon}
                       </div>
                       <span className="text-sm font-medium tracking-tight">{item.label}</span>
@@ -2274,17 +2274,17 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 <Link
                   to={item.path}
                   className={`flex items-center transition-all duration-300 group relative shrink-0 ${desktopSidebarOpen
-                    ? 'flex-row gap-3 px-4 py-3 rounded-2xl mx-0'
-                    : 'flex-row justify-center p-3 rounded-xl mx-1'
+                    ? 'flex-row gap-3 px-4 py-3 rounded-[5px] mx-0'
+                    : 'flex-row justify-center p-3 rounded-[5px] mx-1'
                     } ${isActive
-                      ? 'bg-[#38BDF2]/10 text-[#38BDF2]'
-                      : 'text-[#111111] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
+                      ? 'bg-[#38BDF2] text-[#F2F2F2] shadow-lg shadow-[#38BDF2]/20'
+                      : 'text-[#111111] hover:bg-[#38BDF2] hover:text-white hover:shadow-lg hover:shadow-[#38BDF2]/20'
                     }`}
                   title={!desktopSidebarOpen ? item.label : undefined}
                 >
                   <div className="relative shrink-0">
                     {React.cloneElement(item.icon as React.ReactElement<any>, {
-                      className: `transition-transform duration-300 ${desktopSidebarOpen ? 'w-5 h-5' : 'w-6 h-6 group-hover:scale-110'} ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`
+                      className: `transition-transform duration-300 ${desktopSidebarOpen ? 'w-5 h-5' : 'w-6 h-6 group-hover:scale-110'} ${isActive ? 'stroke-[2.5px]' : 'stroke-2 group-hover:text-white'}`
                     })}
                     {item.premium && <CrownBadge />}
                   </div>
@@ -2613,12 +2613,12 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                       key={item.path}
                       to={item.path}
                       className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 group ${isActive
-                        ? 'bg-[#38BDF2]/10 text-[#38BDF2]'
-                        : 'text-[#111111]/90 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
+                        ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20'
+                        : 'text-[#111111]/90 hover:bg-[#38BDF2] hover:text-white hover:shadow-lg hover:shadow-[#38BDF2]/20'
                         }`}
                       onClick={() => setSidebarOpen(false)}
                     >
-                      <div className={isActive ? 'text-[#38BDF2]' : 'text-[#111111]/75 group-hover:text-[#38BDF2]'}>
+                      <div className={isActive ? 'text-white' : 'text-[#111111]/75 group-hover:text-white'}>
                         {item.icon}
                       </div>
                       <span className="text-sm font-medium tracking-tight">{item.label}</span>
