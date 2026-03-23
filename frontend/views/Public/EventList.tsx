@@ -1655,7 +1655,7 @@ const FeaturedOrganizers: React.FC = () => {
       <div
         ref={carouselRef}
         onScroll={handleScroll}
-        className="flex gap-6 overflow-x-auto pb-8 pt-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth snap-x snap-mandatory flex-nowrap"
+        className="flex gap-6 overflow-x-auto pb-8 pt-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth snap-x snap-mandatory flex-nowrap w-fit max-w-full mx-auto px-2"
       >
         {organizers.map((org) => {
           const isFollowing = (followedOrganizerIds || []).includes(org.organizerId);
