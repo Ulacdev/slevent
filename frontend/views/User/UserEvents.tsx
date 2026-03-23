@@ -172,12 +172,11 @@ export const UserEvents: React.FC = () => {
     const isOrganizerProfileReady = !!organizerProfile?.organizerId && !!organizerProfile?.organizerName?.trim();
     const isPaymentReady = !!hitpaySettings?.settings?.isConfigured;
     const isSubscriptionReady = !!organizerProfile?.currentPlanId && organizerProfile?.subscriptionStatus !== 'pending';
-    const canStartCreation = isPersonalProfileReady && isOrganizerProfileReady;
+    const canStartCreation = isOrganizerProfileReady;
     const canPublishByTicketRule = initialEventStatus === 'PUBLISHED' || activeEventTicketCount > 0;
     const hasExistingEvents = events.length > 0;
     const hasPublishedEvent = events.some((event) => event.status === 'PUBLISHED');
     const workflowCompletedCount = [
-        isPersonalProfileReady,
         isOrganizerProfileReady,
         isPaymentReady,
         hasExistingEvents,
@@ -397,11 +396,6 @@ export const UserEvents: React.FC = () => {
     };
 
     const handleOpenCreate = () => {
-        if (!isPersonalProfileReady) {
-            setNotification({ message: 'Complete your account profile first before creating events.', type: 'error' });
-            navigate('/user-settings?tab=account');
-            return;
-        }
         if (!isOrganizerProfileReady) {
             setNotification({ message: 'Set up your organization profile first before creating events.', type: 'error' });
             navigate('/user-settings?tab=organizer');
@@ -1230,32 +1224,26 @@ export const UserEvents: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-1 gap-3">
-                        <div className={`rounded-2xl border px-4 py-4 ${isPersonalProfileReady ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 1</p>
-                            <p className="text-sm font-bold text-[#2E2E2F] mt-2">Complete Profile</p>
-                            <p className="text-[11px] text-[#2E2E2F]/60 mt-1">Set your account name in Account settings.</p>
-                        </div>
-
                         <div className={`rounded-2xl border px-4 py-4 ${isOrganizerProfileReady ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 2</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 1</p>
                             <p className="text-sm font-bold text-[#2E2E2F] mt-2">Set Org Profile</p>
                             <p className="text-[11px] text-[#2E2E2F]/60 mt-1">Configure organizer name and branding details.</p>
                         </div>
 
                         <div className={`rounded-2xl border px-4 py-4 ${isPaymentReady ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 3</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 2</p>
                             <p className="text-sm font-bold text-[#2E2E2F] mt-2">Payment Gateway</p>
                             <p className="text-[11px] text-[#2E2E2F]/60 mt-1">Connect your HitPay account to receive payouts for paid events.</p>
                         </div>
 
                         <div className={`rounded-2xl border px-4 py-4 ${hasExistingEvents ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 4</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 3</p>
                             <p className="text-sm font-bold text-[#2E2E2F] mt-2">Create Draft</p>
                             <p className="text-[11px] text-[#2E2E2F]/60 mt-1">Build your event details and save as draft.</p>
                         </div>
 
                         <div className={`rounded-2xl border px-4 py-4 ${hasPublishedEvent ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 5</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 4</p>
                             <p className="text-sm font-bold text-[#2E2E2F] mt-2">Tickets then Publish</p>
                             <p className="text-[11px] text-[#2E2E2F]/60 mt-1">Add at least one ticket type before going live.</p>
                         </div>
