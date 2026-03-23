@@ -114,7 +114,8 @@ export const PasswordInput: React.FC<{
   required?: boolean;
   className?: string;
   icon?: React.ReactNode;
-}> = ({ value, onChange, placeholder, required, className = '', icon }) => {
+  hideEye?: boolean;
+}> = ({ value, onChange, placeholder, required, className = '', icon, hideEye }) => {
   const [showPassword, setShowPassword] = React.useState(false);
 
   // Use a local copy of ICONS since it's not exported from Shared.tsx
@@ -138,15 +139,45 @@ export const PasswordInput: React.FC<{
         value={value}
         onChange={onChange}
         required={required}
-        className={`w-full min-h-[48px] sm:min-h-[44px] text-base sm:text-[14px] ${icon ? 'pl-12' : 'pl-4'} pr-12 py-3 sm:py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal`}
+        className={`w-full min-h-[48px] sm:min-h-[44px] text-base sm:text-[14px] ${icon ? 'pl-12' : 'pl-4'} ${hideEye ? 'pr-4' : 'pr-12'} py-3 sm:py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal`}
       />
-      <button
-        type="button"
-        onClick={() => setShowPassword(!showPassword)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2E2E2F]/50 hover:text-[#2E2E2F] transition-colors p-2 z-10 min-h-[48px] sm:min-h-[44px] w-auto flex items-center justify-center active:scale-95"
-      >
-        {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-      </button>
+      {!hideEye && (
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2E2E2F]/50 hover:text-[#2E2E2F] transition-colors p-2 z-10 min-h-[48px] sm:min-h-[44px] w-auto flex items-center justify-center active:scale-95"
+        >
+          {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+        </button>
+      )}
+    </div>
+  );
+};
+
+export const PasswordRequirements: React.FC<{ password: string }> = ({ password }) => {
+  const requirements = [
+    { label: 'At least 8 characters', test: password.length >= 8 },
+    { label: 'At least 1 uppercase letter (A-Z)', test: /[A-Z]/.test(password) },
+    { label: 'At least 1 lowercase letter (a-z)', test: /[a-z]/.test(password) },
+    { label: 'At least 1 number (0-9)', test: /[0-9]/.test(password) },
+    { label: 'At least 1 special character (!@#$%^&*)', test: /[!@#$%^&*]/.test(password) },
+  ];
+
+  const hasPassword = password.length > 0;
+
+  return (
+    <div className={`mt-2 space-y-1.5 p-3 bg-[#F2F2F2] rounded-[5px] border border-[#2E2E2F]/5 transition-all duration-300 ${hasPassword ? 'opacity-100 translate-y-0 max-h-[300px]' : 'opacity-0 -translate-y-2 pointer-events-none max-h-0 !mt-0 !p-0 border-0 overflow-hidden'}`}>
+      <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/30 mb-2">Password Requirements</p>
+      <div className="grid grid-cols-1 gap-y-1.5">
+        {requirements.map((req, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <div className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${req.test ? 'bg-[#38BDF2] shadow-[0_0_8px_rgba(56,189,242,0.6)] scale-110' : 'bg-[#2E2E2F]/10'}`} />
+            <span className={`text-[10.5px] font-bold tracking-tight transition-colors duration-300 ${req.test ? 'text-[#38BDF2]' : 'text-white'}`}>
+              {req.label}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
@@ -303,3 +334,35 @@ export const Branding: React.FC<{ className?: string, light?: boolean }> = ({ cl
   />
 );
 
+export const PortalHeader: React.FC<{
+  title: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  actions?: React.ReactNode;
+  className?: string;
+}> = ({ title, subtitle, icon, actions, className = '' }) => {
+  return (
+    <div className={`bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl p-8 md:p-12 mb-8 ${className}`}>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
+        <div className="max-w-2xl">
+          <div className="w-12 h-12 rounded-xl bg-[#2E2E2F]/10 flex items-center justify-center mb-6">
+            <div className="w-6 h-6 text-[#2E2E2F]">
+              {icon}
+            </div>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-black text-[#2E2E2F] tracking-tighter leading-tight mb-4 uppercase">
+            {title}
+          </h1>
+          <p className="text-[#2E2E2F]/50 text-base md:text-lg font-bold leading-relaxed max-w-xl italic">
+            {subtitle}
+          </p>
+        </div>
+        {actions && (
+          <div className="flex gap-4 shrink-0">
+            {actions}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};

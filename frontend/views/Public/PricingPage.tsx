@@ -14,7 +14,7 @@ export const PricingPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [billingCycle, setBillingCycle] = useState<PlanBillingCycle>('monthly');
     const navigate = useNavigate();
-    const { isAuthenticated } = useUser();
+    const { isAuthenticated, openAuthModal } = useUser();
 
     useEffect(() => {
         let active = true;
@@ -79,7 +79,7 @@ export const PricingPage: React.FC = () => {
                         showBillingToggle
                         onPlanAction={() => {
                             if (!isAuthenticated) {
-                                navigate('/signup');
+                                openAuthModal('signup');
                             } else {
                                 navigate('/subscription');
                             }

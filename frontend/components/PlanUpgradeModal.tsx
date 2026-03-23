@@ -79,7 +79,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
       isOpen={isOpen}
       onClose={handleClose}
       size="xl"
-      className="!max-w-[1200px] w-[70vw]"
+      className="!max-w-[1100px] w-full origin-center scale-[0.8]"
       title=""
       contentClassName="!p-0 !overflow-hidden flex flex-col"
       showClose={false}
@@ -104,7 +104,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
         </div>
       }
     >
-      <div className="flex flex-col h-[70vh]">
+      <div className="flex flex-col h-full min-h-0 max-h-[85vh]">
         {/* Header */}
         <div className="p-6 pb-4 shrink-0 flex flex-col gap-4 relative z-20 bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
           <div className="flex justify-between items-start gap-4">
@@ -157,13 +157,13 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
         </div>
 
         {/* Content Body */}
-        <div className="px-6 py-6 overflow-y-auto flex-1 scrollbar-thin bg-transparent">
+        <div className="px-6 py-6 overflow-y-auto flex-1 min-h-0 scrollbar-thin bg-transparent">
           {loading ? (
             <div className="py-20 flex justify-center">
               <PageLoader variant="section" label="Loading plans..." />
             </div>
           ) : (
-            <div className="pt-2">
+            <div className="pt-2 pb-12">
               <PricingPlansGrid
                 plans={plans}
                 billingCycle={billingCycle}

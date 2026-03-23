@@ -434,7 +434,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   const isLandingAllListing = isLanding && listing === 'all';
   const navigate = useNavigate();
   const location = useLocation();
-  const { role, isAuthenticated, isOnboarded } = useUser();
+  const { role, isAuthenticated, isOnboarded, openAuthModal } = useUser();
   const { likedEventIds, followedOrganizerIds } = useEngagement();
   const [events, setEvents] = useState<Event[]>([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 6, total: 0, totalPages: 1 });
@@ -465,6 +465,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   const [loadingPromoted, setLoadingPromoted] = useState(true);
   const [currentPromotedIndex, setCurrentPromotedIndex] = useState(0);
   const [promotedCarouselInterval, setPromotedCarouselInterval] = useState<NodeJS.Timeout | null>(null);
+  const [isMarqueePaused, setIsMarqueePaused] = useState(false);
 
   const categoriesScrollRef = useRef<HTMLDivElement>(null);
 
@@ -472,9 +473,9 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
     if (!isLanding) return;
     let animationFrameId: number;
     const step = () => {
-      if (categoriesScrollRef.current) {
+      if (categoriesScrollRef.current && !isMarqueePaused) {
         const el = categoriesScrollRef.current;
-        if (el.scrollLeft >= (el.scrollWidth - el.clientWidth - 1)) {
+        if (el.scrollLeft >= (el.scrollWidth / 2)) {
           el.scrollLeft = 0;
         } else {
           el.scrollLeft += 0.5;
@@ -484,7 +485,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
     };
     animationFrameId = requestAnimationFrame(step);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [isLanding]);
+  }, [isLanding, isMarqueePaused]);
 
   const likedSet = useMemo(() => new Set(likedEventIds), [likedEventIds]);
   const followedSet = useMemo(() => new Set(followedOrganizerIds), [followedOrganizerIds]);
@@ -871,7 +872,13 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                     </Button>
                   ) : (
                     <Button
-                      onClick={() => navigate(isAuthenticated ? (role === UserRole.ORGANIZER ? '/user-home' : '/browse-events') : '/signup')}
+                      onClick={() => {
+                        if (isAuthenticated) {
+                          navigate(role === UserRole.ORGANIZER ? '/user-home' : '/browse-events');
+                        } else {
+                          openAuthModal('signup');
+                        }
+                      }}
                       className="w-full sm:w-auto px-8 bg-[#38BDF2] border-2 border-[#38BDF2] text-white font-bold tracking-wide text-[15px] h-[52px] rounded-xl shadow-[0_4px_20px_rgba(56,189,242,0.2)] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all flex items-center justify-center gap-2 active:scale-95 group"
                     >
                       {isAuthenticated ? 'Go to Dashboard' : 'Get Started'}
@@ -1017,10 +1024,44 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           {/* Category Rail (Top of Available Events) */}
           <div className="mt-44 mb-28 overflow-visible relative z-10">
             <div className="rounded-2xl border border-[#2E2E2F]/10 bg-[#F2F2F2] px-6 py-8 md:px-8 shadow-sm">
-              <div className="flex items-center gap-4 mb-8">
+              <div className="flex items-center justify-between gap-4 mb-8">
                 <p className="text-[11px] font-bold tracking-tight text-[#2E2E2F]/60">Event smart categories</p>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => {
+                        if (categoriesScrollRef.current) {
+                            categoriesScrollRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+                        }
+                    }}
+                    className="p-2 rounded-full bg-[#2E2E2F]/5 hover:bg-[#38BDF2]/10 text-[#2E2E2F]/40 hover:text-[#38BDF2] transition-colors"
+                  >
+                    <ICONS.ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button 
+                    onClick={() => {
+                        if (categoriesScrollRef.current) {
+                            categoriesScrollRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+                        }
+                    }}
+                    className="p-2 rounded-full bg-[#2E2E2F]/5 hover:bg-[#38BDF2]/10 text-[#2E2E2F]/40 hover:text-[#38BDF2] transition-colors"
+                  >
+                    <ICONS.ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
-              <div className="py-2">
+              <div 
+                className="py-2 relative group-categories outline-none"
+                tabIndex={0}
+                onMouseEnter={() => setIsMarqueePaused(true)}
+                onMouseLeave={() => setIsMarqueePaused(false)}
+                onKeyDown={(e) => {
+                    if (e.key === 'ArrowLeft') {
+                        categoriesScrollRef.current?.scrollBy({ left: -200, behavior: 'smooth' });
+                    } else if (e.key === 'ArrowRight') {
+                        categoriesScrollRef.current?.scrollBy({ left: 200, behavior: 'smooth' });
+                    }
+                }}
+              >
                 <div
                   ref={categoriesScrollRef}
                   className="flex items-center gap-6 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"

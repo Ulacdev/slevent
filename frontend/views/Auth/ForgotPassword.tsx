@@ -47,8 +47,8 @@ export const ForgotPassword: React.FC = () => {
                 <ICONS.Home className="w-6 h-6" />
             </button>
 
-            <div className="max-w-md w-full relative z-10 scale-90 sm:scale-100 origin-center flex flex-col items-center">
-                <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-3xl overflow-hidden">
+            <div className="max-w-md w-full relative z-10 scale-90 origin-center flex flex-col items-center">
+                <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[1.5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-none overflow-hidden">
                     <div className="text-center flex flex-col items-center mb-6">
                         <img
                             src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
@@ -65,18 +65,21 @@ export const ForgotPassword: React.FC = () => {
                             <p className="text-[#2E2E2F]/60 text-[13px] font-medium text-center mb-1 leading-relaxed">
                                 Enter your email and we'll send you a link to reset your password.
                             </p>
-                            <div className="relative group/input">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-all z-10">
-                                    <ICONS.Mail className="w-5 h-5" />
+                            <div className="space-y-1.5 w-full">
+                                <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
+                                <div className="relative group/input">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-all z-10">
+                                        <ICONS.Mail className="w-5 h-5" />
+                                    </div>
+                                    <input
+                                        type="email"
+                                        placeholder="you@example.com"
+                                        value={email}
+                                        onChange={(e: any) => setEmail(e.target.value)}
+                                        required
+                                        className="w-full pl-12 pr-4 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[14px]"
+                                    />
                                 </div>
-                                <input
-                                    type="email"
-                                    placeholder="Email Address"
-                                    value={email}
-                                    onChange={(e: any) => setEmail(e.target.value)}
-                                    required
-                                    className="w-full pl-12 pr-4 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[14px]"
-                                />
                             </div>
                             <div className="mt-1">
                                 <Button

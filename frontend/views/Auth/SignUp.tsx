@@ -82,7 +82,7 @@ export const SignUpView: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center px-4 overflow-hidden bg-[#F2F2F2]">
+    <div className="fixed inset-0 flex flex-col items-center justify-start py-4 px-[5px] overflow-y-auto bg-[#F2F2F2]">
       <button
         onClick={() => navigate('/')}
         className="absolute top-6 left-6 p-2 rounded-full text-[#2E2E2F]/40 hover:text-[#38BDF2] hover:bg-white shadow-sm transition-all group"
@@ -91,13 +91,13 @@ export const SignUpView: React.FC = () => {
         <ICONS.Home className="w-6 h-6" />
       </button>
 
-      <div className="max-w-md w-full relative z-10 scale-[0.75] sm:scale-90 md:scale-100 origin-center flex flex-col items-center">
-        <Card className="p-6 sm:p-10 border-[#2E2E2F]/10 border-[5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-3xl overflow-hidden">
-          <div className="text-center flex flex-col items-center mb-5">
+      <div className="max-w-md w-full relative z-10 scale-[0.85] sm:scale-90 md:scale-95 origin-center flex flex-col items-center">
+        <Card className="p-6 sm:p-10 border-[#2E2E2F]/10 border-[1.5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-none overflow-hidden">
+          <div className="text-center flex flex-col items-center mb-2">
             <img
               src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
               alt="StartupLab Business Center Logo"
-              className="mx-auto mb-3 w-[150px] lg:w-[180px] max-w-full h-auto"
+              className="mx-auto mb-2 w-[140px] lg:w-[160px] max-w-full h-auto"
               style={{ objectFit: 'contain' }}
             />
             <p className="text-[#2E2E2F]/70 text-[14px] font-medium">Create your account</p>
@@ -107,7 +107,7 @@ export const SignUpView: React.FC = () => {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="space-y-3">
               <div className="space-y-1 w-full">
-                <label className="block text-[11px] font-bold text-[#2E2E2F]/70 uppercase tracking-wider ml-1">Full Name</label>
+                <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Full Name <span className="text-red-500">*</span></label>
                 <div className="relative group/input">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
                     <ICONS.Users className="w-4 h-4" />
@@ -123,7 +123,7 @@ export const SignUpView: React.FC = () => {
               </div>
 
               <div className="space-y-1 w-full">
-                <label className="block text-[11px] font-bold text-[#2E2E2F]/70 uppercase tracking-wider ml-1">Email</label>
+                <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Email <span className="text-red-500">*</span></label>
                 <div className="relative group/input">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
                     <ICONS.Mail className="w-4 h-4" />
@@ -139,9 +139,9 @@ export const SignUpView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3">
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-[#2E2E2F]/70 uppercase tracking-wider ml-1">Password</label>
+              <div className="space-y-1">
+                <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
+                <div className="space-y-2">
                   <PasswordInput
                     placeholder="••••••••"
                     required
@@ -151,17 +151,18 @@ export const SignUpView: React.FC = () => {
                     className="!rounded-2xl"
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-bold text-[#2E2E2F]/70 uppercase tracking-wider ml-1">Confirm Password</label>
-                  <PasswordInput
-                    placeholder="••••••••"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={(e: any) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    icon={<ICONS.Lock className="w-4 h-4" />}
-                    className="!rounded-2xl"
-                  />
-                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Confirm Password <span className="text-red-500">*</span></label>
+                <PasswordInput
+                  placeholder="••••••••"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={(e: any) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  icon={<ICONS.Lock className="w-4 h-4" />}
+                  className="!rounded-2xl"
+                />
               </div>
             </div>
 

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StartupLab | User Manual</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38BDF2;
+            --text: #1E293B;
+            --light-text: #64748B;
+            --border: #E2E8F0;
+            --bg: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F1F5F9;
+            color: var(--text);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .document {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--bg);
+            padding: 60px 80px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            min-height: 297mm;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 30px;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            background: #F8FAFC;
+            padding: 10px 15px;
+            border-left: 5px solid var(--primary);
+            margin: 35px 0 15px;
+            color: #0F172A;
+            text-transform: uppercase;
+        }
+
+        h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin: 25px 0 12px;
+            color: var(--primary);
+        }
+
+        .page-list {
+            margin-bottom: 30px;
+        }
+
+        .page-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid #F1F5F9;
+            padding: 12px 0;
+            gap: 20px;
+        }
+
+        .page-name {
+            font-weight: 700;
+            color: #1E293B;
+            flex-basis: 30%;
+            flex-shrink: 0;
+        }
+
+        .page-desc {
+            font-size: 0.95rem;
+            color: var(--light-text);
+            flex-grow: 1;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--light-text);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+
+        @media screen and (max-width: 600px) {
+            .page-item {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .document {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="document">
+        <header>
+            <h1>StartupLab User Manual</h1>
+            <p>Official Role Pages & Functions | Version 1.0</p>
+        </header>
+
+        <p>This document explains what each page in the system does for each user role.</p>
+
+        <h2>1. ADMIN PAGES</h2>
+        <p>These pages are for overall platform management and control.</p>
+        
+        <div class="page-list">
+            <div class="page-item">
+                <span class="page-name">Admin Dashboard</span>
+                <span class="page-desc">Complete overview of all events, total site earnings, and recent platform activity.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Events Management</span>
+                <span class="page-desc">A central list where admins can oversee and moderate every event on the system.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Users Management</span>
+                <span class="page-desc">Manage all user accounts including Organizers, Attendees, and Staff members.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Subscription Plans</span>
+                <span class="page-desc">Manage and create the pricing plans that organizers pay for to use the platform.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Support Tickets</span>
+                <span class="page-desc">Handle bug reports and technical help requests from all users.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Payment Settings</span>
+                <span class="page-desc">Configure the platform’s payout methods and global commission settings.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Email Templates</span>
+                <span class="page-desc">Manage the automatic emails that get sent to users across the platform.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Audit Logs</span>
+                <span class="page-desc">History for security purposes to see who did what on the system.</span>
+            </div>
+        </div>
+
+        <h2>2. ORGANIZER PAGES</h2>
+        <p>Pages for event creators to manage their events and business.</p>
+
+        <div class="page-list">
+            <div class="page-item">
+                <span class="page-name">Welcome Home</span>
+                <span class="page-desc">The landing page after login with quick actions to start creating your first event.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Organizer Dashboard</span>
+                <span class="page-desc">Real-time statistics for your events including daily sales and revenue charts.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">My Events</span>
+                <span class="page-desc">Your personal list of events where you can edit details or see check-in status.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Create Event</span>
+                <span class="page-desc">The main page where you input event names, dates, locations, and descriptions.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Attendees List</span>
+                <span class="page-desc">View and manage the directory of everyone who has registered for your events.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Check-In Scanner</span>
+                <span class="page-desc">A mobile-ready tool to scan guest QR codes for fast entry at the venue.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Sales Reports</span>
+                <span class="page-desc">Downloadable data and detailed reports about your event performance.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Subscription Plans</span>
+                <span class="page-desc">Choose or upgrade your plan to increase your attendee and feature limits.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Team & Access</span>
+                <span class="page-desc">Invite helpers (Staff) to your team and set what tasks they are allowed to do.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Organization Info</span>
+                <span class="page-desc">Set your organization's logo and public name for your events.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Organizer Support</span>
+                <span class="page-desc">Dedicated channel for Organizers to contact platform admins.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Account Settings</span>
+                <span class="page-desc">Change your password and other personal login details.</span>
+            </div>
+        </div>
+
+        <h2>3. STAFF PAGES</h2>
+        <p>Simplified dashboard for assistants at the event location.</p>
+
+        <div class="page-list">
+            <div class="page-item">
+                <span class="page-name">My Events</span>
+                <span class="page-desc">See the list of events where you are helping with check-ins.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Guest List</span>
+                <span class="page-desc">Search for guests by name or email if they do not have their ticket ready.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Scanner Tool</span>
+                <span class="page-desc">Scan attendee QR codes to mark them as "checked-in" instantly.</span>
+            </div>
+        </div>
+
+        <h2>4. ATTENDEE PAGES</h2>
+        <p>Pages used by the public to find events and get tickets.</p>
+
+        <div class="page-list">
+            <div class="page-item">
+                <span class="page-name">Event Discovery</span>
+                <span class="page-desc">The search page for finding events by category or location.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Event Details</span>
+                <span class="page-desc">Read about the event, its date, and view the different ticket prices.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Registration</span>
+                <span class="page-desc">Buy your ticket by filling in your information and checking out.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">My Tickets</span>
+                <span class="page-desc">A personal dashboard where you can see all your active and past tickets.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Ticket View</span>
+                <span class="page-desc">The page showing your unique QR code for entry.</span>
+            </div>
+            <div class="page-item">
+                <span class="page-name">Liked Events</span>
+                <span class="page-desc">The events you have saved for later.</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 StartupLab Business Ticketing System | Manual Document</p>
+        </div>
+    </div>
+
+</body>
+</html>

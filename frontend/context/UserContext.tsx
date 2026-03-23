@@ -19,6 +19,9 @@ interface UserContextState {
 interface UserContextValue extends UserContextState {
   setUser: (payload: { userId: string; role: UserRole; email: string; name?: string | null; imageUrl?: string | null; canViewEvents?: boolean; canEditEvents?: boolean; canManualCheckIn?: boolean; canReceiveNotifications?: boolean; isOnboarded?: boolean }) => void;
   clearUser: () => void;
+  authModal: { isOpen: boolean; view: 'login' | 'signup' | 'forgot-password' };
+  openAuthModal: (view?: 'login' | 'signup' | 'forgot-password') => void;
+  closeAuthModal: () => void;
 }
 
 const UserContext = React.createContext<UserContextValue | undefined>(undefined);
@@ -96,7 +99,27 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
-  const value = React.useMemo(() => ({ ...state, setUser, clearUser }), [state, setUser, clearUser]);
+  const [authModal, setAuthModal] = React.useState<{ isOpen: boolean; view: 'login' | 'signup' | 'forgot-password' }>({
+    isOpen: false,
+    view: 'login'
+  });
+
+  const openAuthModal = React.useCallback((view: 'login' | 'signup' | 'forgot-password' = 'login') => {
+    setAuthModal({ isOpen: true, view });
+  }, []);
+
+  const closeAuthModal = React.useCallback(() => {
+    setAuthModal((prev) => ({ ...prev, isOpen: false }));
+  }, []);
+
+  const value = React.useMemo(() => ({ 
+    ...state, 
+    setUser, 
+    clearUser,
+    authModal,
+    openAuthModal,
+    closeAuthModal
+  }), [state, setUser, clearUser, authModal, openAuthModal, closeAuthModal]);
 
   return (
     <UserContext.Provider value={value}>

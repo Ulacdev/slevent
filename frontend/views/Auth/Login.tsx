@@ -95,7 +95,7 @@ export const LoginPerspective: React.FC = () => {
 
   return (
     <div 
-      className="fixed inset-0 flex flex-col items-center justify-center px-4 overflow-hidden bg-[#F2F2F2]"
+      className="fixed inset-0 flex flex-col items-center justify-start py-4 px-[5px] overflow-y-auto bg-[#F2F2F2]"
     >
       <button
         onClick={() => navigate('/')}
@@ -105,8 +105,8 @@ export const LoginPerspective: React.FC = () => {
         <ICONS.Home className="w-6 h-6" />
       </button>
 
-      <div className="max-w-md w-full relative z-10 scale-[0.8] sm:scale-90 md:scale-100 origin-center flex flex-col items-center">
-        <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-3xl overflow-hidden">
+      <div className="max-w-md w-full relative z-10 scale-90 origin-center flex flex-col items-center">
+        <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[1.5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-none overflow-hidden">
           <div className="text-center flex flex-col items-center mb-6">
             <img
               src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
@@ -119,49 +119,56 @@ export const LoginPerspective: React.FC = () => {
           </div>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            <div className="space-y-4">
-              <div className="relative group/input">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
-                  <ICONS.Mail className="w-5 h-5" />
+              <div className="space-y-4">
+                <div className="space-y-1.5 w-full">
+                  <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
+                  <div className="relative group/input">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
+                      <ICONS.Mail className="w-5 h-5" />
+                    </div>
+                    <input
+                      type="email"
+                      placeholder="e.g. you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="w-full pl-12 pr-4 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[14px]"
+                    />
+                  </div>
                 </div>
-                <input
-                  type="email"
-                  placeholder="Email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full pl-12 pr-4 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[14px]"
-                />
-              </div>
-              <div className="space-y-2">
-                <PasswordInput
-                  value={password}
-                  onChange={(e: any) => setPassword(e.target.value)}
-                  required
-                  icon={<ICONS.Lock className="w-5 h-5" />}
-                  className="!rounded-2xl"
-                />
-                <div className="flex justify-end pr-1">
-                  <button
-                    type="button"
-                    onClick={() => navigate('/forgot-password')}
-                    className="text-[11px] font-bold text-[#38BDF2] hover:text-[#2E2E2F] transition-colors"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-              </div>
-            </div>
 
-            <div className="mt-1">
-              <Button
-                className="w-full py-4 text-[13px] font-black uppercase tracking-[0.2em] rounded-2xl"
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? 'Signing you in...' : 'Sign In'}
-              </Button>
-            </div>
+                <div className="space-y-1.5">
+                  <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
+                  <div className="space-y-2">
+                    <PasswordInput
+                      value={password}
+                      onChange={(e: any) => setPassword(e.target.value)}
+                      required
+                      icon={<ICONS.Lock className="w-5 h-5" />}
+                      className="!rounded-2xl"
+                    />
+                    <div className="flex justify-end pr-1">
+                      <button
+                        type="button"
+                        onClick={() => navigate('/forgot-password')}
+                        className="text-[11px] font-bold text-[#38BDF2] hover:text-[#2E2E2F] transition-colors"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-1">
+                <Button
+                  className="w-full py-4 text-[13px] font-black uppercase tracking-[0.2em] rounded-2xl"
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? 'Signing you in...' : 'Sign In'}
+                </Button>
+              </div>
 
             {error && (
               <div className="mt-1 p-3 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-[11px] font-bold text-center">

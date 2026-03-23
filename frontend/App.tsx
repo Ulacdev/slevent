@@ -31,6 +31,7 @@ import { ArchiveEvents } from './views/User/ArchiveEvents';
 import { OrganizerReports } from './views/User/OrganizerReports';
 import { SettingsView } from './views/Admin/Settings';
 import { SubscriptionPlans } from './views/Admin/SubscriptionPlans';
+import { AuthModal } from './components/AuthModal';
 import { LoginPerspective } from './views/Auth/Login';
 import { SignUpView } from './views/Auth/SignUp';
 import { AcceptInvite } from './views/Auth/AcceptInvite';
@@ -948,7 +949,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
-  const { userId, role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canReceiveNotifications, hasResolvedSession } = useUser();
+  const { userId, role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canReceiveNotifications, hasResolvedSession, authModal, openAuthModal, closeAuthModal } = useUser();
   const {
     publicMode,
     isAttendingView,
@@ -1653,9 +1654,12 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 </>
               ) : (
                 <>
-                  <Link to="/login" className={`hidden lg:flex ${landingLoginButtonClass}`}>
-                    Login
-                  </Link>
+                   <button
+                     onClick={() => openAuthModal('login')}
+                     className={`hidden lg:flex ${landingLoginButtonClass}`}
+                   >
+                     Login
+                   </button>
                   <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
                     Watch Live
                     {hasLiveEvents && (
@@ -1838,24 +1842,23 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             <div className="flex flex-col gap-0 py-0 px-0 bg-transparent overflow-hidden">
               {!isAuthenticated ? (
                 <>
-                  <Link
-                    to="/signup"
-                    className="flex items-center gap-3 px-4 py-3 text-[#38BDF2] hover:bg-white transition-colors text-xs font-semibold w-full [&>span:first-child]:hidden"
-                    onClick={() => setMobileMenuOpen(false)}
+                   <button
+                    onClick={() => { setMobileMenuOpen(false); openAuthModal('signup'); }}
+                    className="flex items-center gap-3 px-4 py-3 text-[#38BDF2] hover:bg-white transition-colors text-xs font-semibold w-full [&>span:first-child]:hidden text-left"
                   >
                     <span>▶</span>
                     <span>Get Started</span>
-                  </Link>
-                  <Link
-                    to="/login"
-                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white transition-colors text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
-                    onClick={() => setMobileMenuOpen(false)}
+                  </button>
+                   <button
+                    onClick={() => { setMobileMenuOpen(false); openAuthModal('login'); }}
+                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white transition-colors text-xs font-semibold w-full border-t border-[#2E2E2F]/5 text-left"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
                     <span>Login</span>
-                  </Link>
+                  </button>
+
                 </>
               ) : (
                 <>
@@ -2792,7 +2795,18 @@ const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ childr
     return <Navigate to="/onboarding" replace />;
   }
 
-  return <>{children}</>;
+  const { authModal, closeAuthModal } = useUser();
+
+  return (
+    <>
+      {children}
+      <AuthModal 
+        isOpen={authModal.isOpen} 
+        onClose={closeAuthModal} 
+        initialView={authModal.view}
+      />
+    </>
+  );
 };
 
 const App: React.FC = () => (
@@ -2801,10 +2815,10 @@ const App: React.FC = () => (
     <HashBypassBridge />
     <GlobalOnboardingGuard>
       <Routes>
-        <Route path="/login" element={<LoginPerspective />} />
-        <Route path="/signup" element={<SignUpView />} />
+        <Route path="/login" element={<Navigate to="/" replace />} />
+        <Route path="/signup" element={<Navigate to="/" replace />} />
+        <Route path="/forgot-password" element={<Navigate to="/" replace />} />
         <Route path="/welcome" element={<WelcomeView />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/accept-invite" element={<AcceptInvite />} />
         <Route path="/" element={<PublicLayout><EventList /></PublicLayout>} />

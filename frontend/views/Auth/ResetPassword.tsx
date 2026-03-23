@@ -1,8 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, PasswordInput } from '../../components/Shared';
+import { Card, Button, PasswordInput, PasswordRequirements } from '../../components/Shared';
 import { supabase } from "../../supabase/supabaseClient.js";
 import { ICONS } from '../../constants';
+import { useToast } from '../../context/ToastContext';
+import { validatePassword } from '../../utils/passwordValidation';
 
 const parseResetParams = (): URLSearchParams => {
     const merged = new URLSearchParams(window.location.search);
@@ -29,6 +31,7 @@ const clearResetUrlTokens = () => {
 
 export const ResetPassword: React.FC = () => {
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const resetParams = useMemo(() => parseResetParams(), []);
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -43,9 +46,11 @@ export const ResetPassword: React.FC = () => {
             setError("Passwords do not match.");
             return;
         }
-        if (password.length < 6) {
-            setError("Password must be at least 6 characters.");
-            return;
+        const passError = validatePassword(password);
+        if (passError) {
+          setError(passError);
+          showToast('error', passError);
+          return;
         }
 
         setLoading(true);
@@ -87,12 +92,16 @@ export const ResetPassword: React.FC = () => {
             if (resetError) throw resetError;
 
             clearResetUrlTokens();
-            setMessage('Your password has been successfully updated.');
+            const msg = 'Your password has been successfully updated.';
+            setMessage(msg);
+            showToast('success', msg);
             setTimeout(() => {
-                navigate('/login');
+                navigate('/');
             }, 3000);
         } catch (err: any) {
-            setError(err.message || "Failed to update password. Link may be expired.");
+            const errMsg = err.message || "Failed to update password. Link may be expired.";
+            setError(errMsg);
+            showToast('error', errMsg);
         } finally {
             setLoading(false);
         }
@@ -108,8 +117,8 @@ export const ResetPassword: React.FC = () => {
                 <ICONS.Home className="w-6 h-6" />
             </button>
 
-            <div className="max-w-md w-full relative z-10 scale-90 sm:scale-100 origin-center flex flex-col items-center">
-                <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-3xl overflow-hidden">
+            <div className="max-w-md w-full relative z-10 scale-90 origin-center flex flex-col items-center">
+                <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[1.5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-none overflow-hidden">
                     <div className="text-center flex flex-col items-center mb-6">
                         <img
                             src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
@@ -123,22 +132,32 @@ export const ResetPassword: React.FC = () => {
 
                     {!message ? (
                         <form onSubmit={handleResetPassword} className="flex flex-col gap-5">
-                            <div className="space-y-4">
-                                <PasswordInput
-                                    placeholder="New Password"
-                                    value={password}
-                                    onChange={(e: any) => setPassword(e.target.value)}
-                                    required
-                                    icon={<ICONS.Lock className="w-5 h-5" />}
-                                />
-                                <PasswordInput
-                                    placeholder="Confirm New Password"
-                                    value={confirmPassword}
-                                    onChange={(e: any) => setConfirmPassword(e.target.value)}
-                                    required
-                                    icon={<ICONS.Lock className="w-5 h-5" />}
-                                />
-                            </div>
+                             <div className="space-y-4">
+                                 <div className="space-y-1.5 w-full">
+                                     <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">New Password <span className="text-red-500">*</span></label>
+                                     <PasswordInput
+                                         placeholder="••••••••"
+                                         value={password}
+                                         onChange={(e: any) => setPassword(e.target.value)}
+                                         required
+                                         icon={<ICONS.Lock className="w-5 h-5" />}
+                                         className="!rounded-2xl"
+                                     />
+                                 </div>
+                                 <PasswordRequirements password={password} />
+                                 <div className="space-y-1.5 w-full">
+                                     <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Confirm New Password <span className="text-red-500">*</span></label>
+                                     <PasswordInput
+                                         placeholder="••••••••"
+                                         value={confirmPassword}
+                                         onChange={(e: any) => setConfirmPassword(e.target.value)}
+                                         required
+                                         icon={<ICONS.Lock className="w-5 h-5" />}
+                                         className="!rounded-2xl"
+                                         hideEye
+                                     />
+                                 </div>
+                             </div>
                             <div className="mt-1">
                                 <Button
                                     className="w-full py-4 text-[13px] font-black uppercase tracking-[0.2em] rounded-2xl"
