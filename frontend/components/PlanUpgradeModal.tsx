@@ -67,7 +67,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
 
   const handleClose = () => {
     if (dontShowAgain) {
-      localStorage.setItem('hideUpgradeModal', 'true');
+      sessionStorage.setItem('hideUpgradeModal', 'true');
     }
     onClose();
   };
@@ -79,7 +79,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
       isOpen={isOpen}
       onClose={handleClose}
       size="xl"
-      className="!max-w-[1200px] w-[95vw]"
+      className="!max-w-[1200px] w-[70vw]"
       title=""
       contentClassName="!p-0 !overflow-hidden flex flex-col"
       showClose={false}
@@ -104,7 +104,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
         </div>
       }
     >
-      <div className="flex flex-col h-[75vh] sm:max-h-[70vh]">
+      <div className="flex flex-col h-[70vh]">
         {/* Header */}
         <div className="p-6 pb-4 shrink-0 flex flex-col gap-4 relative z-20 bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
           <div className="flex justify-between items-start gap-4">

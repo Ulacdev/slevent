@@ -84,7 +84,7 @@ export const UserHome: React.FC = () => {
                 setOrganizerProfile(organizer);
                 if (quota) setEmailQuota(quota);
 
-                const hideModal = localStorage.getItem('hideUpgradeModal');
+                const hideModal = sessionStorage.getItem('hideUpgradeModal');
                 if (!hideModal) {
                     setIsUpgradeModalOpen(true);
                 }

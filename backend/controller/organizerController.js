@@ -212,8 +212,8 @@ export const upsertOrganizer = async (req, res) => {
         .eq('organizerId', existing.organizerId)
         .select('*')
         .single();
-
-      if (data.organizerId) {
+      if (error) return res.status(500).json({ error: error.message });
+      if (data && data.organizerId) {
         // Sync to users table if name/image is missing or we just onboarded
         // Safe check for userId vs id column in users table
         let userSelect = await supabase.from('users').select('name, imageUrl').eq('userId', ownerUserId).maybeSingle();
@@ -240,6 +240,7 @@ export const upsertOrganizer = async (req, res) => {
         req
       });
 
+      const counts = await getEventsHostedCounts([data.organizerId]);
       return res.json(serializeOrganizerRecord(data, counts.get(data.organizerId) || 0));
     }
 

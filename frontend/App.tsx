@@ -499,6 +499,8 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
       // 3. Clear any local tokens/storage
       localStorage.removeItem('sb-ddkkbtijqrgpitncxylx-auth-token');
+      localStorage.removeItem('hideUpgradeModal');
+      sessionStorage.removeItem('hideUpgradeModal');
       clearUser();
 
       // 4. Navigate to login

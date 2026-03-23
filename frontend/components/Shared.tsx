@@ -203,10 +203,10 @@ export const Modal: React.FC<{
     };
 
     return (
-      <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-3 sm:p-4">
+      <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-3 sm:p-4">
         {/* Backdrop */}
         <div
-          className="fixed inset-0 z-[90] bg-[#2E2E2F]/60 backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 z-[990] bg-[#2E2E2F]/60 backdrop-blur-sm transition-opacity"
           onClick={closeOnBackdrop ? onClose : undefined}
         />
 
@@ -215,30 +215,34 @@ export const Modal: React.FC<{
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-title"
-          className={`relative z-[110] bg-[#F2F2F2] sm:rounded-xl rounded-t-3xl border-x-0 sm:border-x border-b-0 sm:border-b border-[#2E2E2F]/10 w-full ${sizes[size]
+          className={`relative z-[1010] bg-[#F2F2F2] sm:rounded-xl rounded-t-3xl border-x-0 sm:border-x border-b-0 sm:border-b border-[#2E2E2F]/10 w-full ${sizes[size]
             } max-h-[90vh] sm:max-h-[85vh] overflow-hidden ${className}`}
         >
-          <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-[#2E2E2F]/10 flex items-start justify-between gap-3 sticky top-0 bg-[#F2F2F2] z-10">
-            <div className="min-w-0">
-              <h2 id="modal-title" className="text-base sm:text-xl font-black text-[#2E2E2F] break-words tracking-tight">
-                {title}
-              </h2>
-              {subtitle && (
-                <p className="mt-1 text-[11px] sm:text-[13px] uppercase tracking-[0.15em] font-bold text-[#2E2E2F]/50">
-                  {subtitle}
-                </p>
+          {(title || showClose) && (
+            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-[#2E2E2F]/10 flex items-start justify-between gap-3 sticky top-0 bg-[#F2F2F2] z-10">
+              <div className="min-w-0">
+                {title && (
+                  <h2 id="modal-title" className="text-base sm:text-xl font-black text-[#2E2E2F] break-words tracking-tight">
+                    {title}
+                  </h2>
+                )}
+                {subtitle && (
+                  <p className="mt-1 text-[11px] sm:text-[13px] uppercase tracking-[0.15em] font-bold text-[#2E2E2F]/50">
+                    {subtitle}
+                  </p>
+                )}
+              </div>
+              {showClose && (
+                <button
+                  onClick={onClose}
+                  className="min-h-[44px] min-w-[44px] p-2 rounded-xl bg-[#38BDF2]/10 text-[#38BDF2] hover:bg-[#38BDF2] hover:text-[#F2F2F2] transition-all shrink-0 active:scale-95"
+                  aria-label="Close modal"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
               )}
             </div>
-            {showClose && (
-              <button
-                onClick={onClose}
-                className="min-h-[44px] min-w-[44px] p-2 rounded-xl bg-[#38BDF2]/10 text-[#38BDF2] hover:bg-[#38BDF2] hover:text-[#F2F2F2] transition-all shrink-0 active:scale-95"
-                aria-label="Close modal"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
-            )}
-          </div>
+          )}
           <div className={`p-4 sm:p-6 overflow-y-auto max-h-[calc(100vh-120px)] sm:max-h-[calc(85vh-100px)] ${contentClassName}`}>
             {children}
           </div>
