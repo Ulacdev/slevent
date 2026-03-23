@@ -225,10 +225,8 @@ export const SupportTickets: React.FC = () => {
       )}
 
       {selectedTicket && (
-        <>
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[100] transition-opacity animate-in fade-in duration-300" onClick={() => setSelectedTicket(null)} />
-          
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-[#F2F2F2]/95 backdrop-blur-xl shadow-[0_32px_128px_-16px_rgba(0,0,0,0.3)] z-[101] rounded-xl border border-[#2E2E2F]/5 overflow-hidden flex flex-col animate-in zoom-in-95 duration-400 ease-out h-[90vh]">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[9999] flex items-center justify-center p-4 sm:p-6 transition-opacity animate-in fade-in duration-300" onClick={() => setSelectedTicket(null)}>
+          <div className="relative w-full max-w-2xl max-h-full bg-[#F2F2F2] shadow-2xl rounded-xl border border-[#2E2E2F]/10 overflow-hidden flex flex-col h-[90vh]" onClick={e => e.stopPropagation()} style={{ zoom: 0.85 }}>
              {/* RiBOT Style Header */}
              <div className="px-8 py-5 border-b border-[#2E2E2F]/5 flex items-center justify-between bg-transparent sticky top-0 z-10 transition-colors">
                <button onClick={() => setSelectedTicket(null)} className="p-3 hover:bg-[#F2F2F2] rounded-full text-[#2E2E2F] transition-all">
@@ -264,7 +262,7 @@ export const SupportTickets: React.FC = () => {
                            <ICONS.MessageSquare className="w-5 h-5 text-[#38BDF2]" />
                          )}
                       </div>
-                      <div className="bg-[#2E2E2F]/5 p-6 rounded-xl rounded-bl-none border border-[#2E2E2F]/5 shadow-sm">
+                      <div className="bg-[#2E2E2F]/5 px-4 py-3 rounded-xl rounded-bl-none border border-[#2E2E2F]/5 shadow-sm">
                          <p className="text-sm font-bold text-[#2E2E2F] mb-1.5">{selectedTicket.title}</p>
                          <p className="text-sm font-medium text-[#2E2E2F]/60 whitespace-pre-wrap leading-relaxed">
                            {selectedTicket.message}
@@ -292,7 +290,7 @@ export const SupportTickets: React.FC = () => {
                               )
                             )}
                          </div>
-                         <div className={`p-6 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ${
+                         <div className={`px-4 py-3 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ${
                            m.is_admin_reply 
                              ? 'bg-[#38BDF2] text-white rounded-br-none border-0' 
                              : 'bg-[#2E2E2F]/5 text-[#2E2E2F] rounded-bl-none border border-[#2E2E2F]/5'
@@ -347,7 +345,7 @@ export const SupportTickets: React.FC = () => {
                </div>
              )}
           </div>
-        </>
+        </div>
       )}
     </div>
   );

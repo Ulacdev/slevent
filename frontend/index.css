@@ -374,6 +374,25 @@ img {
   animation-fill-mode: backwards;
 }
 
+/* Modal entrance animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoom-in {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-in.fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+.animate-in.zoom-in-95 {
+  animation: zoom-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
 /* ========================================
    PRINT STYLES
    ======================================== */
@@ -459,7 +478,7 @@ img {
 
   /* Improve readability of small text */
   .text-xs,
-  .text-[10px] {
+  .text-\[10px\] {
     font-size: 0.875rem; /* Slightly larger than default */
     line-height: 1.5;
   }

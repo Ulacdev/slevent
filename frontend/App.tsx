@@ -41,6 +41,7 @@ import { UserEvents } from './views/User/UserEvents';
 import { UserHome } from './views/User/UserHome';
 import { OrganizerSubscription } from './views/User/OrganizerSubscription';
 import { OrganizerSupport } from './views/User/OrganizerSupport';
+import { FloatingSupportModal } from './components/FloatingSupportModal';
 import WelcomeView from './views/User/WelcomeView';
 import { SubscriptionSuccess } from './views/User/SubscriptionSuccess';
 import { ONLINE_LOCATION_VALUE } from './components/BrowseEventsNavigator';
@@ -1078,6 +1079,8 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     syncPublicSession();
   }, [hasResolvedSession, setUser]);
 
+  const [isSupportModalOpen, setIsSupportModalOpen] = React.useState(false);
+
   React.useEffect(() => {
   }, [location.pathname]);
 
@@ -1970,6 +1973,12 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 <Link to="/pricing" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">Pricing</Link>
                 <Link to="/contact-us" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">Contact Us</Link>
                 <Link to="/faq" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">FAQ</Link>
+                <button 
+                  onClick={() => setIsSupportModalOpen(true)}
+                  className="block text-[#2E2E2F]/70 hover:text-[#38BDF2] w-full lg:text-right"
+                >
+                  Submit Report / Bug
+                </button>
               </div>
             </div>
           </div>
@@ -1983,6 +1992,11 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           </div>
         </div>
       </footer>
+      <FloatingSupportModal 
+        isOpen={isSupportModalOpen} 
+        onClose={() => setIsSupportModalOpen(false)} 
+        userEmail={email || ''}
+      />
     </div>
   );
 };
