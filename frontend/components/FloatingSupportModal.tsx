@@ -61,19 +61,24 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
       <div 
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-300"
+        className="relative bg-[#F2F2F2] rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-300 border border-[#2E2E2F]/10"
+        style={{ zoom: 0.8 }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left Side: Form */}
         <div className="flex-1 p-8 md:p-12 overflow-y-auto max-h-[90vh]">
+          <button 
+            onClick={onClose}
+            className="absolute top-6 right-6 p-2 text-[#2E2E2F]/30 hover:text-[#38BDF2] hover:bg-white shadow-sm rounded-xl transition-all z-50 group"
+          >
+            <ICONS.X className="w-6 h-6" />
+          </button>
+
           <div className="flex justify-between items-start mb-8">
-            <h2 className="text-3xl font-bold text-[#2E2E2F]">Submit a ticket</h2>
-            <button 
-              onClick={onClose}
-              className="p-2 hover:bg-[#F2F2F2] rounded-full transition-colors md:hidden"
-            >
-              <ICONS.X className="w-6 h-6 text-[#2E2E2F]" />
-            </button>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tight">Submit Feedback</h2>
+              <p className="text-[11px] font-bold text-[#2E2E2F]/40 uppercase tracking-[0.2em]">Our team will review your report.</p>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -85,7 +90,7 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full px-5 py-3 bg-[#F2F2F2] border-2 border-transparent focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium"
+                className="w-full px-5 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium"
               />
             </div>
 
@@ -97,7 +102,7 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="Subject of your ticket"
-                className="w-full px-5 py-3 bg-[#F2F2F2] border-2 border-transparent focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium"
+                className="w-full px-5 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium"
               />
             </div>
 
@@ -110,7 +115,7 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Describe your issue or question..."
                   rows={6}
-                  className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-transparent focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium resize-none pb-14"
+                  className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium resize-none pb-14"
                 />
                 <div className="absolute bottom-4 left-5 flex items-center gap-4 text-[#2E2E2F]/30">
                   <button type="button" className="hover:text-[#38BDF2] transition-colors"><ICONS.Smile className="w-5 h-5" /></button>
@@ -126,7 +131,7 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
                 required
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-5 py-3 bg-[#F2F2F2] border-2 border-transparent focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium appearance-none cursor-pointer"
+                className="w-full px-5 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium appearance-none cursor-pointer"
               >
                 <option value="" disabled>Select an option...</option>
                 <option value="Technical Issue">Technical Issue</option>
@@ -158,15 +163,7 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
         </div>
 
         {/* Right Side: Info Sidebar */}
-        <div className="w-full md:w-[320px] bg-[#F8F9FA] p-8 md:p-12 border-l border-[#2E2E2F]/5 space-y-8 overflow-y-auto">
-          <div className="flex justify-end hidden md:block">
-            <button 
-              onClick={onClose}
-              className="p-2 hover:bg-[#F2F2F2] rounded-full transition-colors"
-            >
-              <ICONS.X className="w-6 h-6 text-[#2E2E2F]/40" />
-            </button>
-          </div>
+        <div className="w-full md:w-[320px] bg-[#2E2E2F]/5 p-8 md:p-12 border-l border-[#2E2E2F]/10 space-y-8 overflow-y-auto">
           
           <h3 className="text-xl font-bold text-[#2E2E2F]">Before you submit:</h3>
           

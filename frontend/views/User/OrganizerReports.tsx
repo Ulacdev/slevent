@@ -126,15 +126,15 @@ export const OrganizerReports: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="pb-16 space-y-6">
       {/* Page Header */}
-      <div className="bg-transparent border-2 border-[#2E2E2F]/10 rounded-xl p-6 md:p-8 mb-4">
+      <div className="px-2 bg-transparent border-2 border-[#2E2E2F]/10 rounded-xl p-6 md:p-8 mb-4">
         <div className="flex flex-col md:flex-row justify-between gap-6">
           <div className="max-w-2xl">
-            <h1 className="text-2xl md:text-3xl font-bold text-[#2E2E2F] tracking-tight mb-2">
+            <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">
               Transaction Reports
             </h1>
-            <p className="text-[#2E2E2F]/60 text-sm font-medium">
+            <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">
               Analyze revenue flow, monitor audience conversions, and export operational datasets.
             </p>
           </div>

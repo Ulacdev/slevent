@@ -39,6 +39,13 @@ export const ForgotPassword: React.FC = () => {
 
     return (
         <div className="fixed inset-0 flex flex-col items-center justify-center px-4 overflow-hidden bg-[#F2F2F2]">
+            {/* Decorative side elements */}
+            <div className="hidden lg:block absolute left-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
+                <ICONS.Zap className="w-64 h-64 text-[#2E2E2F]" />
+            </div>
+            <div className="hidden lg:block absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
+                <ICONS.Calendar className="w-64 h-64 text-[#2E2E2F]" />
+            </div>
             <button
                 onClick={() => navigate('/')}
                 className="absolute top-6 left-6 p-2 rounded-full text-[#2E2E2F]/40 hover:text-[#38BDF2] hover:bg-white shadow-sm transition-all group"
@@ -47,13 +54,13 @@ export const ForgotPassword: React.FC = () => {
                 <ICONS.Home className="w-6 h-6" />
             </button>
 
-            <div className="max-w-md w-full relative z-10 scale-90 origin-center flex flex-col items-center">
-                <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[1.5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-none overflow-hidden">
+            <div className="max-w-[540px] w-full relative z-10 origin-center flex flex-col items-center" style={{ zoom: 0.8 }}>
+                <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[1.5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-xl overflow-hidden">
                     <div className="text-center flex flex-col items-center mb-6">
                         <img
                             src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
                             alt="StartupLab Business Center Logo"
-                            className="mx-auto mb-4 w-[160px] lg:w-[200px] max-w-full h-auto"
+                            className="mx-auto mb-3 w-[180px] h-auto"
                             style={{ objectFit: 'contain' }}
                         />
                         <p className="text-[#2E2E2F]/70 text-base font-medium">Forgot Password?</p>

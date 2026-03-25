@@ -169,7 +169,7 @@ export const UserHome: React.FC = () => {
     };
 
     return (
-        <div className="space-y-12 max-w-6xl mx-auto pt-10">
+        <div className="space-y-12 max-w-6xl mx-auto pt-10 -mt-4">
             {notification && (
                 <div className="fixed top-8 right-8 z-[120] animate-in slide-in-from-top-4 duration-300">
                     <Card className={`flex items-center gap-4 px-6 py-4 rounded-xl border-2 shadow-xl ${notification.type === 'success'
@@ -190,10 +190,10 @@ export const UserHome: React.FC = () => {
                         <div className="w-12 h-12 rounded-xl bg-[#2E2E2F]/10 flex items-center justify-center mb-8">
                             <ICONS.Home className="w-6 h-6 text-[#2E2E2F]" />
                         </div>
-                        <h1 className="text-4xl md:text-6xl font-black text-[#2E2E2F] tracking-tighter leading-none mb-6">
+                        <h1 className="text-3xl md:text-[2rem] font-black text-[#2E2E2F] tracking-tight">
                             Oh hello, {displayName}
                         </h1>
-                        <p className="text-[#2E2E2F]/60 text-lg font-medium leading-relaxed">
+                        <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">
                             Welcome back to your event nerve center. Craft new experiences, engage your audience, and scale your influence with StartupLab.
                         </p>
                     </div>

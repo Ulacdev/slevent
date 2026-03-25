@@ -172,7 +172,7 @@ export const PasswordRequirements: React.FC<{ password: string }> = ({ password 
         {requirements.map((req, i) => (
           <div key={i} className="flex items-center gap-2">
             <div className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${req.test ? 'bg-[#38BDF2] shadow-[0_0_8px_rgba(56,189,242,0.6)] scale-110' : 'bg-[#2E2E2F]/10'}`} />
-            <span className={`text-[10.5px] font-bold tracking-tight transition-colors duration-300 ${req.test ? 'text-[#38BDF2]' : 'text-white'}`}>
+            <span className={`text-[10.5px] font-bold tracking-tight transition-colors duration-300 ${req.test ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40'}`}>
               {req.label}
             </span>
           </div>

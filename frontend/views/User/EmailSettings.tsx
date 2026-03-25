@@ -165,7 +165,7 @@ export const EmailSettings: React.FC = () => {
     }
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="pb-16 space-y-6 animate-in fade-in duration-500 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {notification && (
                 <div className="fixed top-24 right-8 z-[120] animate-in slide-in-from-right-10 duration-500">
                     <Card className={`flex items-center gap-4 px-6 py-4 rounded-xl shadow-xl border ${notification.type === 'success' ? 'bg-[#F2F2F2] border-[#38BDF2]/20 text-[#2E2E2F]' : 'bg-[#F2F2F2] border-red-200 text-[#2E2E2F]'}`}>
@@ -180,14 +180,7 @@ export const EmailSettings: React.FC = () => {
 
             {/* Header Area */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6">
-                <div>
-                    <h1 className="text-xl font-bold text-[#2E2E2F] tracking-tight">
-                        Email Settings
-                    </h1>
-                    <p className="text-[#2E2E2F]/40 text-[11px] mt-1.5 font-bold uppercase tracking-wider">
-                        Configure server parameters for system-wide mail transmission and verification
-                    </p>
-                </div>
+                <div></div>
                 <Button
                     onClick={handleSave}
                     className="bg-[#38BDF2] hover:bg-[#2E2E2F] text-white px-8 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm active:scale-95"

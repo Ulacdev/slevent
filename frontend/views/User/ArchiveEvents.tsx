@@ -111,12 +111,12 @@ export const ArchiveEvents: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8 pb-20">
+    <div className="pb-16 space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="px-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-[#2E2E2F] tracking-tight">Archive</h1>
-          <p className="text-[#2E2E2F]/60 font-medium mt-1">
+          <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">Archive</h1>
+          <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">
             Manage your deleted events
           </p>
         </div>

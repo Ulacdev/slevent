@@ -724,10 +724,10 @@ export const AdminDashboard: React.FC = () => {
   if (!stats) return null;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-[#2E2E2F] tracking-tight">Dashboard Overview</h1>
-        <p className="text-[#2E2E2F] font-medium">See your latest registrations, tickets, and revenue at a glance.</p>
+    <div className="pb-16 space-y-6">
+      <div className="px-2">
+        <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">Dashboard Overview</h1>
+        <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">See your latest registrations, tickets, and revenue at a glance.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -212,14 +212,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
 
   return (
     <div 
-      className="fixed inset-0 z-[10000] flex flex-col items-center justify-start py-8 px-[5px] overflow-y-auto bg-black/40 backdrop-blur-sm animate-in fade-in duration-300"
+      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center py-8 px-[5px] overflow-y-auto bg-black/40 backdrop-blur-sm animate-in fade-in duration-300"
       onClick={onClose}
     >
+      {/* Decorative side elements */}
+      <div className="hidden lg:block absolute left-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
+        <ICONS.Zap className="w-64 h-64 text-[#2E2E2F]" />
+      </div>
+      <div className="hidden lg:block absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
+        <ICONS.Calendar className="w-64 h-64 text-[#2E2E2F]" />
+      </div>
+
       <div 
-        className="max-w-md w-full relative scale-90 origin-center animate-in zoom-in-95 duration-300"
+        className="max-w-[540px] w-full relative origin-center animate-in zoom-in-95 duration-300"
+        style={{ zoom: 0.8 }}
         onClick={(e) => e.stopPropagation()}
       >
-        <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[1.5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-none overflow-hidden relative">
+        <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[1.5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-xl overflow-hidden relative">
           <button 
             onClick={onClose}
             className="absolute top-6 right-6 p-2 rounded-full text-[#2E2E2F]/20 hover:text-[#38BDF2] hover:bg-white shadow-sm transition-all"
@@ -231,7 +240,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
             <img
               src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
               alt="Logo"
-              className="mx-auto mb-6 w-[240px] max-w-full h-auto"
+              className="mx-auto mb-4 w-[180px] max-w-full h-auto"
               style={{ objectFit: 'contain' }}
             />
             <p className="text-[#2E2E2F]/70 text-base font-medium">
@@ -375,8 +384,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
                   className="w-4 h-4 rounded border-2 border-[#2E2E2F]/20 text-[#38BDF2] accent-[#38BDF2] mt-1"
                 />
-                <span className="text-[11px] text-[#2E2E2F]/60 font-medium">
-                  I agree to the Terms of Service and Privacy Policy.
+                <span className="text-[11px] text-[#2E2E2F]/60 font-medium leading-relaxed">
+                  I agree to the{' '}
+                  <a href="/terms" target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="text-[#38BDF2] font-bold hover:underline">Terms of Service</a>
+                  {' '}and{' '}
+                  <a href="/privacy" target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="text-[#38BDF2] font-bold hover:underline">Privacy Policy</a>.
                 </span>
               </label>
 

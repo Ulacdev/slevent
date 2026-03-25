@@ -129,11 +129,11 @@ export const RegistrationsList: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+    <div className="pb-16 space-y-6">
+      <div className="px-2 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-4xl font-black text-[#2E2E2F] tracking-tighter">Attendee List</h1>
-          <p className="text-[#2E2E2F]/70 font-medium text-sm mt-1">
+          <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">Attendee List</h1>
+          <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">
             Full visibility of confirmed registrations and financial transactions.
           </p>
         </div>

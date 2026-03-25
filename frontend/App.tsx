@@ -145,7 +145,17 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const [unreadCount, setUnreadCount] = React.useState(0);
   const [notificationsLoading, setNotificationsLoading] = React.useState(false);
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const [desktopSidebarOpen, setDesktopSidebarOpen] = React.useState(true);
+
+  // Use localStorage to persist the desktop sidebar toggle status
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = React.useState(() => {
+    const saved = localStorage.getItem('desktopSidebarOpen');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  // Sync state to localStorage whenever it changes
+  React.useEffect(() => {
+    localStorage.setItem('desktopSidebarOpen', JSON.stringify(desktopSidebarOpen));
+  }, [desktopSidebarOpen]);
 
   // Fetch notifications for the notification bell
   const fetchNotifications = React.useCallback(async () => {
@@ -556,9 +566,9 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     }`}
                   title={!desktopSidebarOpen ? item.label : undefined}
                 >
-                  <div className="relative shrink-0">
+                  <div className="relative shrink-0 flex items-center justify-center">
                     {React.cloneElement(item.icon as React.ReactElement<any>, {
-                      className: `transition-colors duration-200 ${desktopSidebarOpen ? 'w-[18px] h-[18px]' : 'w-6 h-6 group-hover:scale-105'} ${isActive ? 'stroke-[2px] text-white' : 'stroke-[1.5px] text-[#000000]/90 group-hover:text-[#000000]'}`
+                      className: `transition-colors duration-200 ${desktopSidebarOpen ? 'w-[18px] h-[18px]' : 'w-5 h-5 group-hover:scale-105'} ${isActive ? 'stroke-[2px] text-white' : 'stroke-[1.5px] text-[#000000]/90 group-hover:text-[#000000]'}`
                     })}
                     {item.premium && <CrownBadge />}
                   </div>
@@ -859,7 +869,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                       onClick={() => setSidebarOpen(false)}
                     >
                       <div className={isActive ? 'text-white' : 'text-[#000000]/90 group-hover:text-[#000000]'}>
-                        {React.cloneElement(item.icon as React.ReactElement<any>, { className: 'w-5 h-5 ' + (isActive ? 'stroke-[2px]' : 'stroke-[1.5px]') })}
+                        {React.cloneElement(item.icon as React.ReactElement<any>, { className: (desktopSidebarOpen ? 'w-5 h-5' : 'w-4 h-4') + ' ' + (isActive ? 'stroke-[2px]' : 'stroke-[1.5px]') })}
                       </div>
                       <span className={`text-sm tracking-tight ${isActive ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
                     </Link>
@@ -1654,12 +1664,12 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 </>
               ) : (
                 <>
-                   <button
-                     onClick={() => openAuthModal('login')}
-                     className={`hidden lg:flex ${landingLoginButtonClass}`}
-                   >
-                     Login
-                   </button>
+                  <button
+                    onClick={() => openAuthModal('login')}
+                    className={`hidden lg:flex ${landingLoginButtonClass}`}
+                  >
+                    Login
+                  </button>
                   <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
                     Watch Live
                     {hasLiveEvents && (
@@ -1842,14 +1852,14 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             <div className="flex flex-col gap-0 py-0 px-0 bg-transparent overflow-hidden">
               {!isAuthenticated ? (
                 <>
-                   <button
+                  <button
                     onClick={() => { setMobileMenuOpen(false); openAuthModal('signup'); }}
                     className="flex items-center gap-3 px-4 py-3 text-[#38BDF2] hover:bg-white transition-colors text-xs font-semibold w-full [&>span:first-child]:hidden text-left"
                   >
                     <span>▶</span>
                     <span>Get Started</span>
                   </button>
-                   <button
+                  <button
                     onClick={() => { setMobileMenuOpen(false); openAuthModal('login'); }}
                     className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white transition-colors text-xs font-semibold w-full border-t border-[#2E2E2F]/5 text-left"
                   >
@@ -1935,8 +1945,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           </div>
         </>
       )}
-      <main className="flex-1">{children}</main>
-      <footer className="bg-[#F2F2F2] text-[#2E2E2F]/70 py-24 px-8 border-t border-[#2E2E2F]/10">
+      <main className="flex-1">{children}</main>      <footer className="bg-[#F2F2F2] text-[#2E2E2F]/70 py-24 px-8 border-t border-[#2E2E2F]/10">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
             <div>
@@ -1976,10 +1985,11 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 <Link to="/pricing" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">Pricing</Link>
                 <Link to="/contact-us" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">Contact Us</Link>
                 <Link to="/faq" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">FAQ</Link>
-                <button 
+                <button
                   onClick={() => setIsSupportModalOpen(true)}
-                  className="block text-[#2E2E2F]/70 hover:text-[#38BDF2] w-full lg:text-right"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 !bg-transparent !border-2 !border-solid !border-[#38BDF2] !text-[#38BDF2] font-black uppercase tracking-[0.2em] text-[10px] rounded-xl hover:!bg-[#38BDF2] hover:!text-white transition-all duration-300 active:scale-95 group w-full lg:w-fit"
                 >
+                  <ICONS.AlertTriangle className="w-4 h-4 !text-[#38BDF2] group-hover:!text-white transition-colors duration-300" />
                   Submit Report / Bug
                 </button>
               </div>
@@ -1995,9 +2005,10 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           </div>
         </div>
       </footer>
-      <FloatingSupportModal 
-        isOpen={isSupportModalOpen} 
-        onClose={() => setIsSupportModalOpen(false)} 
+
+      <FloatingSupportModal
+        isOpen={isSupportModalOpen}
+        onClose={() => setIsSupportModalOpen(false)}
         userEmail={email || ''}
       />
     </div>
@@ -2020,7 +2031,17 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   const { isAttendingView, setPublicMode } = useEngagement();
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const [desktopSidebarOpen, setDesktopSidebarOpen] = React.useState(true);
+  
+  // Use localStorage to persist the desktop sidebar toggle status
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = React.useState(() => {
+    const saved = localStorage.getItem('desktopSidebarOpen');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  // Sync state to localStorage whenever it changes
+  React.useEffect(() => {
+    localStorage.setItem('desktopSidebarOpen', JSON.stringify(desktopSidebarOpen));
+  }, [desktopSidebarOpen]);
   const [settingsOpen, setSettingsOpen] = React.useState(location.pathname === '/user-settings');
   const [notificationOpen, setNotificationOpen] = React.useState(false);
   const [notifications, setNotifications] = React.useState<any[]>([]);
@@ -2302,16 +2323,16 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   to={item.path}
                   className={`flex transition-all duration-200 group relative shrink-0 ${desktopSidebarOpen
                     ? 'flex-row items-center gap-3 px-3 py-2.5 mx-2 rounded-lg'
-                    : 'flex-col items-center justify-center gap-1 py-4 px-1 rounded-lg'
+                    : 'flex-col items-center justify-center w-12 h-12 mx-auto rounded-xl'
                     } ${isActive
                       ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20'
                       : 'text-[#000000]/90 hover:bg-[#D1D5DB]/50 hover:text-[#000000]'
                     }`}
                   title={!desktopSidebarOpen ? item.label : undefined}
                 >
-                  <div className="relative shrink-0">
+                  <div className="relative shrink-0 flex items-center justify-center">
                     {React.cloneElement(item.icon as React.ReactElement<any>, {
-                      className: `transition-colors duration-200 ${desktopSidebarOpen ? 'w-[18px] h-[18px]' : 'w-6 h-6 group-hover:scale-105'} ${isActive ? 'stroke-[2px] text-white' : 'stroke-[1.5px] text-[#000000]/90 group-hover:text-[#000000]'}`
+                      className: `transition-colors duration-200 ${desktopSidebarOpen ? 'w-[18px] h-[18px]' : 'w-5 h-5 group-hover:scale-105'} ${isActive ? 'stroke-[2px] text-white' : 'stroke-[1.5px] text-[#000000]/90 group-hover:text-[#000000]'}`
                     })}
                     {item.premium && <CrownBadge />}
                   </div>
@@ -2800,9 +2821,9 @@ const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ childr
   return (
     <>
       {children}
-      <AuthModal 
-        isOpen={authModal.isOpen} 
-        onClose={closeAuthModal} 
+      <AuthModal
+        isOpen={authModal.isOpen}
+        onClose={closeAuthModal}
         initialView={authModal.view}
       />
     </>

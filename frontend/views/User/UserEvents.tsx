@@ -788,7 +788,7 @@ export const UserEvents: React.FC = () => {
 
 
     return (
-        <div className="space-y-0">
+        <div className="space-y-0 -mt-4">
             {notification && (
                 <div className="fixed top-20 right-8 z-[120]">
                     <Card className={`flex items-center gap-4 px-6 py-4 rounded-2xl border ${notification.type === 'success' ? 'bg-[#38BDF2]/20 border-[#38BDF2]/40 text-[#2E2E2F]' : 'bg-[#2E2E2F]/10 border-[#2E2E2F]/30 text-[#2E2E2F]'}`}>
@@ -800,10 +800,10 @@ export const UserEvents: React.FC = () => {
             {!isModalOpen && (
                 <>
                     {/* Header section - Refined with Title/Subtitle aligned to Controls */}
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 mb-8 pt-6 border-b border-[#2E2E2F]/15 pb-8">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2">
                         <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-2">
-                                <h1 className="text-3xl font-black text-[#2E2E2F] tracking-tight">Events</h1>
+                            <div className="flex items-center gap-3">
+                                <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">Events</h1>
                                 <button
                                     type="button"
                                     onClick={() => setIsWorkflowNoticeOpen(true)}
@@ -813,7 +813,7 @@ export const UserEvents: React.FC = () => {
                                     <ICONS.Info className="w-4 h-4" />
                                 </button>
                             </div>
-                            <p className="text-[#2E2E2F]/50 font-bold text-sm">Configure and manage your session lifecycle.</p>
+                            <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">Configure and manage your session lifecycle.</p>
                         </div>
 
                         <div className="flex flex-col gap-3 w-full lg:w-auto lg:items-end">

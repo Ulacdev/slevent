@@ -136,7 +136,7 @@ export const OrganizerSupport: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 pb-20 max-w-7xl mx-auto">
+    <div className="pb-16 space-y-6 max-w-7xl mx-auto">
       {/* Navigation Toggle */}
       <div className="flex items-center justify-end gap-3 mb-2">
         <button 
@@ -163,10 +163,10 @@ export const OrganizerSupport: React.FC = () => {
             <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-widest mb-4 flex-shrink-0 w-fit ${hasPrioritySupport ? 'bg-[#38BDF2]/10 border-[#38BDF2]/20 text-[#38BDF2]' : 'bg-[#2E2E2F]/5 border-[#2E2E2F]/10 text-[#2E2E2F]/60'}`}>
               {hasPrioritySupport ? 'Pro Support Active' : 'Standard Support'}
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-[#2E2E2F] tracking-tight mb-2">
+            <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">
               {showHistory ? 'Support History' : 'Organizer Support'}
             </h1>
-            <p className="text-[#2E2E2F]/60 text-sm font-medium leading-relaxed">
+            <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">
               {showHistory 
                 ? 'Review your previous conversations and admin responses.'
                 : hasPrioritySupport

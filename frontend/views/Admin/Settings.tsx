@@ -231,7 +231,7 @@ export const SettingsView: React.FC = () => {
   );
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="pb-16 space-y-6">
       {notification && (
         <div className="fixed top-24 right-8 z-[120] animate-in slide-in-from-right-10 duration-500">
           <Card className={`flex items-center gap-4 px-6 py-4 rounded-xl shadow-xl border ${notification.type === 'success' ? 'bg-[#F2F2F2] border-[#38BDF2]/20 text-[#2E2E2F]' : 'bg-[#F2F2F2] border-red-200 text-[#2E2E2F]'}`}>
@@ -243,10 +243,10 @@ export const SettingsView: React.FC = () => {
           </Card>
         </div>
       )}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="px-2 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-black text-[#2E2E2F] tracking-tighter">Settings</h1>
-          <p className="text-[#2E2E2F]/70 font-medium text-sm mt-1 text-balance">Configure organizational parameters and visualize system architecture.</p>
+          <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">{activeTabMeta.label}</h1>
+          <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">{activeTabMeta.description}</p>
         </div>
       </div>
 
