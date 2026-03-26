@@ -246,8 +246,7 @@ export const likeEvent = async (req, res) => {
               actionUrl: process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL.replace(/\/$/, '')}${context.eventPath}` : null,
             },
             emailSubject: 'Your event was liked',
-            emailText: `${message}${context.eventPath ? `\nEvent: ${context.eventPath}` : ''}`,
-            emailEnabledOverride: !!orgData?.emailOptIn,
+            emailText: `${message}${context.eventPath ? `\nEvent: ${context.eventPath}` : ''}`
           });
 
           // 2. Notify Follower (Attendee - Confirmation Email)

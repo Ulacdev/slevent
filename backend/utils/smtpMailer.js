@@ -43,7 +43,26 @@ export async function sendSmtpEmail({ to, subject, text, html, replyTo, from, co
     return { ok: false, skipped: true, reason: 'Missing recipient/subject/from' };
   }
 
-  const transporter = getTransporter();
+  let transporter;
+  if (config && config.smtpUser) {
+    if (!config.smtpPass) {
+      console.warn('⚠️ [SMTP] Config provided but missing password. Delivery may fail.');
+    }
+    transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // TLS
+      auth: {
+        user: config.smtpUser,
+        pass: config.smtpPass, // Handle empty password if allowed by server
+      },
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+  } else {
+    transporter = getTransporter();
+  }
 
   if (!transporter) {
     return { ok: false, skipped: true, reason: 'SMTP not configured' };

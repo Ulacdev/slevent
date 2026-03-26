@@ -683,7 +683,7 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
                 value={formData.smtpUsername}
                 onChange={handleChange}
                 placeholder="youraccount@gmail.com"
-                className="bg-white border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
+                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
               />
             </div>
 
@@ -695,7 +695,7 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
                 value={formData.smtpPassword}
                 onChange={handleChange}
                 placeholder="••••••••••••"
-                className="bg-white border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
+                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
               />
             </div>
 
@@ -713,7 +713,7 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
                 value={formData.fromAddress}
                 onChange={handleChange}
                 placeholder="hello@yourdomain.com"
-                className="bg-white border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
+                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
               />
             </div>
 
@@ -724,7 +724,7 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
                 value={formData.fromName}
                 onChange={handleChange}
                 placeholder="StartupLab Ticketing"
-                className="bg-white border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
+                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
               />
             </div>
 

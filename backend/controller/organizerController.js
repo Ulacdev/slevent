@@ -602,8 +602,7 @@ export const followOrganizer = async (req, res) => {
               eventName: organizerLabel,
             },
             emailSubject: 'Your organization has a new follower',
-            emailText: message,
-            emailEnabledOverride: !!organizer?.emailOptIn,
+            emailText: message
           });
 
           // 2. Notify Follower (Attendee - Confirmation Email)
@@ -672,8 +671,7 @@ export const followOrganizer = async (req, res) => {
             eventName: organizerLabel,
           },
           emailSubject: 'Your organization has a new follower',
-          emailText: message,
-          emailEnabledOverride: !!organizer?.emailOptIn,
+          emailText: message
         });
 
         // 2. Notify Follower (Attendee - Confirmation Email)

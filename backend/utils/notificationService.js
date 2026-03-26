@@ -227,16 +227,16 @@ async function fetchSmtpFromOrganizerSettings(organizerId) {
     .eq('organizerId', organizerId)
     .maybeSingle();
 
-  if (error || !data || !data.smtpHost || !data.smtpUsername) return null;
+  if (error || !data || !data.smtpUsername) return null;
 
   return {
-    emailProvider: data.emailProvider || 'SMTP',
-    mailDriver: data.mailDriver || 'smtp',
-    smtpHost: data.smtpHost,
-    smtpPort: parseInt(data.smtpPort, 10) || 587,
+    emailProvider: 'SMTP',
+    mailDriver: 'smtp',
+    smtpHost: 'smtp.gmail.com',
+    smtpPort: 587,
     smtpUser: data.smtpUsername,
-    smtpPass: decryptString(data.smtpPassword),
-    mailEncryption: data.mailEncryption || 'TLS',
+    smtpPass: decryptString(data.smtpPassword || ''),
+    mailEncryption: 'TLS',
     fromAddress: data.fromAddress || data.smtpUsername,
     fromName: data.fromName || 'Organizer',
     organizerId,
@@ -269,16 +269,17 @@ async function fetchSmtpFromSettingsTable(userId) {
 
   const map = new Map(data.map(item => [item.key, item.value]));
 
-  if (!map.get('email_host') || !map.get('email_username')) return null;
+  // Since we enforce Gmail globally, we only truly need the username/email.
+  if (!map.get('email_username')) return null;
 
   return {
-    emailProvider: map.get('email_provider') || 'SMTP',
-    mailDriver: map.get('email_driver') || 'smtp',
-    smtpHost: map.get('email_host'),
-    smtpPort: parseInt(map.get('email_port'), 10) || 587,
+    emailProvider: 'SMTP',
+    mailDriver: 'smtp',
+    smtpHost: 'smtp.gmail.com',
+    smtpPort: 587,
     smtpUser: map.get('email_username'),
-    smtpPass: decryptString(map.get('email_password')),
-    mailEncryption: map.get('email_encryption') || 'TLS',
+    smtpPass: decryptString(map.get('email_password') || ''),
+    mailEncryption: 'TLS',
     fromAddress: map.get('email_from_address') || map.get('email_username'),
     fromName: map.get('email_from_name') || 'Organizer',
     userId,
@@ -659,23 +660,12 @@ export async function notifyTeamByPreference(params) {
   // Ensure unique members logic
   const uniqueTeam = team.filter((v, i, a) => a.findIndex(t => t.userId === v.userId) === i);
 
-  // If the actor is the owner testing the attendee mode, skip notifying the team entirely!
-  if (params.actorUserId && String(params.actorUserId) === String(ownerUserId)) {
-    debugLog(`[TeamNotify] Actor is the Owner testing attendee mode. Skipping team notifications.`);
-    return { deliveredTo: 0, success: true };
-  }
+  // Allow organizers to test notifications by interacting with their own events
+  // We no longer skip team notifications if the actor is the owner.
 
-  if (params.actorEmail && ownerDetails?.email && String(params.actorEmail) === String(ownerDetails.email)) {
-    debugLog(`[TeamNotify] Actor Email matches the Owner testing attendee mode. Skipping team notifications.`);
-    return { deliveredTo: 0, success: true };
-  }
-
-  // Send notifications to all team members in parallel for performance
   const teamPromises = [];
   for (const recipient of uniqueTeam) {
-    if (params.actorUserId && String(recipient.userId) === String(params.actorUserId)) continue;
-    if (params.actorEmail && recipient.email && String(recipient.email) === String(params.actorEmail)) continue;
-
+    // We no longer skip if the actor is the recipient (so organizers can test by interacting with their own events)
     debugLog(`[TeamNotify] Queueing notification for team member: ${recipient.userId}`);
     teamPromises.push(
       notifyUserByPreference({

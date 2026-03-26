@@ -27,13 +27,13 @@ export async function updateSmtpSettings(req, res) {
 
         // Map UI fields to database keys
         const settings = [
-            { user_id: userId, key: 'email_provider', value: emailProvider },
-            { user_id: userId, key: 'email_driver', value: mailDriver },
-            { user_id: userId, key: 'email_host', value: smtpHost },
-            { user_id: userId, key: 'email_port', value: String(smtpPort || '') },
+            { user_id: userId, key: 'email_provider', value: 'SMTP' },
+            { user_id: userId, key: 'email_driver', value: 'smtp' },
+            { user_id: userId, key: 'email_host', value: 'smtp.gmail.com' },
+            { user_id: userId, key: 'email_port', value: '587' },
             { user_id: userId, key: 'email_username', value: smtpUsername },
             { user_id: userId, key: 'email_password', value: encryptString(smtpPassword || '') },
-            { user_id: userId, key: 'email_encryption', value: mailEncryption },
+            { user_id: userId, key: 'email_encryption', value: 'TLS' },
             { user_id: userId, key: 'email_from_address', value: fromAddress },
             { user_id: userId, key: 'email_from_name', value: fromName },
         ].filter(s => s.value !== undefined);
