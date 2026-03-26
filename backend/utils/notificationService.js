@@ -448,12 +448,46 @@ export async function notifyUserByPreference({
 }) {
   if (!recipientUserId && !recipientFallbackEmail) return { inApp: false, email: false };
 
+  // 1. Quota Check (Early evaluation)
+  let quotaExceeded = false;
+  let quotaErrorMessage = '';
+  
+  if (organizerId) {
+    try {
+      // Check quota status without incrementing
+      const quotaCheck = await emailQuotaManager.canSendEmails(organizerId, 1);
+      if (!quotaCheck.canSend) {
+        const quotaParts = quotaCheck.quotaStatus.split('/');
+        const sent = quotaParts[0];
+        const limit = quotaParts[1];
+        quotaErrorMessage = `Daily email limit reached (${sent}/${limit}). Upgrade your plan for more emails.`;
+        quotaExceeded = true;
+      }
+    } catch (quotaError) {
+      console.warn('[Notifications] Email quota check failed:', quotaError.message);
+    }
+  }
+
+  const ATTENDEE_CRITICAL_TYPES = ['TICKET_DELIVERY', 'LIKE_CONFIRMATION', 'FOLLOW_CONFIRMATION', 'EVENT_UPDATE'];
+  const isAttendeeCritical = ATTENDEE_CRITICAL_TYPES.includes(type);
+
+  if (quotaExceeded && !isAttendeeCritical) {
+    debugLog(`⚠️ [Notifications] EMAIL QUOTA EXCEEDED for Organizer. Skipping in-app and email alerts.`);
+    return { inApp: false, email: false, quotaExceeded: true, message: quotaErrorMessage };
+  }
+
+  // 2. Fetch/resolve SMTP configuration
   let smtpConfig = smtpConfigOverride || null;
 
   if (!smtpConfig) {
     try {
-      smtpConfig = await getSmtpConfig(organizerId, actorUserId, recipientUserId);
-      debugLog(`🔍 [Notifications] SMTP Config Resolved: ${smtpConfig ? 'YES' : 'NO'}`);
+      if (quotaExceeded && isAttendeeCritical) {
+         debugLog(`🛡️ [Quota Bypass] Critical attendee email (${type}). Forcing system Admin SMTP and bypassing quota block.`);
+         smtpConfig = await getAdminSmtpConfig();
+      } else {
+         smtpConfig = await getSmtpConfig(organizerId, actorUserId, recipientUserId);
+         debugLog(`🔍 [Notifications] SMTP Config Resolved: ${smtpConfig ? 'YES' : 'NO'}`);
+      }
     } catch (err) {
       debugLog(`🚫 [Notifications] Failed to resolve SMTP config: ${err.message}`);
     }
@@ -469,6 +503,7 @@ export async function notifyUserByPreference({
   let inAppDelivered = false;
   let emailDelivered = false;
 
+  // 3. Deliver In-App UI Notification
   if (recipientUserId) {
     try {
       await createInAppNotification({
@@ -513,30 +548,11 @@ export async function notifyUserByPreference({
     console.warn('[Notifications] Preferences lookup failed:', prefErr.message);
   }
 
+  // 4. Deliver Email Notification
   if (emailEnabled && finalRecipientEmail) {
-    // Check email quota before sending
-    if (organizerId) {
-      // If we made it here but still don't have a config (unlikely with admin fallback enabled), skip sending
-      if (!smtpConfig) {
-        debugLog('🚫 [Notifications] No SMTP config resolved (even after admin fallback). Email SKIPPED.');
-        return { inApp: inAppDelivered, email: false };
-      }
-
-      try {
-        const quotaCheck = await emailQuotaManager.canSendEmails(organizerId, 1);
-        if (!quotaCheck.canSend) {
-          const quotaParts = quotaCheck.quotaStatus.split('/');
-          const sent = quotaParts[0];
-          const limit = quotaParts[1];
-          const errorMessage = `Daily email limit reached (${sent}/${limit}). Upgrade your plan for more emails.`;
-          debugLog(`⚠️ [Notifications] EMAIL QUOTA EXCEEDED: ${errorMessage}`);
-          return { inApp: inAppDelivered, email: false, quotaExceeded: true, message: errorMessage };
-        }
-        debugLog(`✅ [Notifications] Email quota check passed: ${quotaCheck.quotaStatus}`);
-      } catch (quotaError) {
-        console.warn('[Notifications] Email quota check failed:', quotaError.message);
-        // Continue to send if quota check fails (fail open)
-      }
+    if (organizerId && !smtpConfig) {
+      debugLog('🚫 [Notifications] No SMTP config resolved (even after admin fallback). Email SKIPPED.');
+      return { inApp: inAppDelivered, email: false };
     }
 
     const to = finalRecipientEmail;
@@ -561,14 +577,9 @@ export async function notifyUserByPreference({
     });
     emailDelivered = !!result?.ok;
     
-    // Record email sent if successful (only if using system SMTP and is an OUTBOUND CUSTOMER email)
     if (emailDelivered && organizerId) {
       try {
         const isCustom = !!(smtpConfig && smtpConfig.organizerId);
-        
-        // --- FAIRNESS LOGIC ---
-        // We deduct quota for outbound communications to customers and engagement alerts.
-        // Internal system alerts (ADMIN_ALERT) remain FREE.
         const OUTBOUND_CUSTOMER_TYPES = [
           'TICKET_DELIVERY',
           'ORDER_PLACED',
@@ -581,9 +592,11 @@ export async function notifyUserByPreference({
         ];
         const isOutboundOutreach = OUTBOUND_CUSTOMER_TYPES.includes(type);
 
-        if (isOutboundOutreach && !isCustom) {
+        if (isOutboundOutreach && !isCustom && !quotaExceeded) {
           debugLog(`📉 [Quota] Deducting quota for email type: ${type}`);
           await emailQuotaManager.recordEmailSent(organizerId, 1, false);
+        } else if (quotaExceeded) {
+          debugLog(`💎 [Quota] Free/Bypassed notification tier for critical attendee type: ${type}. No quota deduction to prevent overflow.`);
         } else {
           debugLog(`💎 [Quota] Free/Bypassed notification tier: ${type}. No quota deduction.`);
         }

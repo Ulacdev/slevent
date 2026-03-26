@@ -296,11 +296,21 @@ export const UserHome: React.FC = () => {
                                     {organizerProfile?.currentPlanId ? `${emailQuota.sent}/${emailQuota.limit}` : 'No Active Plan'}
                                 </p>
                                 {organizerProfile?.currentPlanId ? (
-                                    <div className="w-full h-2 bg-[#2E2E2F]/10 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full rounded-full transition-all ${emailQuota.canSend ? 'bg-[#2E2E2F]/40' : 'bg-[#2E2E2F]/20'}`}
-                                            style={{ width: `${(emailQuota.sent / emailQuota.limit) * 100}%` }}
-                                        />
+                                    <div className="space-y-3">
+                                        <div className="w-full h-2 bg-[#2E2E2F]/10 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full rounded-full transition-all ${emailQuota.canSend ? 'bg-[#2E2E2F]/40' : 'bg-red-500'}`}
+                                                style={{ width: `${Math.min(100, (emailQuota.sent / emailQuota.limit) * 100)}%` }}
+                                            />
+                                        </div>
+                                        {!emailQuota.canSend && (
+                                            <button 
+                                                onClick={() => setIsUpgradeModalOpen(true)}
+                                                className="w-full py-2 bg-red-500 hover:bg-red-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-colors"
+                                            >
+                                                Upgrade Plan
+                                            </button>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="w-full h-2 bg-[#2E2E2F]/5 rounded-full overflow-hidden">
