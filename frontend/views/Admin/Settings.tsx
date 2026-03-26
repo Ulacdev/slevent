@@ -648,89 +648,62 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
         {/* Main Form */}
         <Card className="lg:col-span-2 p-8 rounded-xl bg-[#F2F2F2] border-[#2E2E2F]/10 shadow-sm space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 opacity-60">
               <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">Email Provider</label>
-              <select
-                name="emailProvider"
-                value={formData.emailProvider}
-                onChange={handleChange}
-                className="w-full px-6 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-full outline-none focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] font-medium text-[#2E2E2F] transition-all hover:bg-[#F2F2F2]/80 px-6 py-3"
-              >
-                <option value="SMTP">SMTP Server</option>
-                <option value="SES">Amazon SES</option>
-                <option value="Mailgun">Mailgun</option>
-                <option value="SendGrid">SendGrid</option>
-              </select>
+              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+                Gmail (SMTP Server)
+              </div>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 opacity-60">
               <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">Mail Driver</label>
-              <Input
-                name="mailDriver"
-                value={formData.mailDriver}
-                onChange={handleChange}
-                placeholder="smtp"
-                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
-              />
+              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+                smtp
+              </div>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 opacity-60">
               <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">SMTP Host</label>
-              <Input
-                name="smtpHost"
-                value={formData.smtpHost}
-                onChange={handleChange}
-                placeholder="mail.yourserver.com"
-                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
-              />
+              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+                smtp.gmail.com
+              </div>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 opacity-60">
               <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">SMTP Port</label>
-              <Input
-                name="smtpPort"
-                value={formData.smtpPort}
-                onChange={handleChange}
-                placeholder="587"
-                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
-              />
+              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+                587
+              </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">SMTP Username</label>
+              <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">SMTP Username (Gmail Account)</label>
               <Input
                 name="smtpUsername"
                 value={formData.smtpUsername}
                 onChange={handleChange}
-                placeholder="hello@example.com"
-                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
+                placeholder="youraccount@gmail.com"
+                className="bg-white border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">SMTP Password</label>
+              <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">SMTP App Password</label>
               <Input
                 type="password"
                 name="smtpPassword"
                 value={formData.smtpPassword}
                 onChange={handleChange}
                 placeholder="••••••••••••"
-                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
+                className="bg-white border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 opacity-60">
               <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">Mail Encryption</label>
-              <select
-                name="mailEncryption"
-                value={formData.mailEncryption}
-                onChange={handleChange}
-                className="w-full px-6 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-full outline-none focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] font-medium text-[#2E2E2F] transition-all hover:bg-[#F2F2F2]/80 px-6 py-3"
-              >
-                <option value="TLS">TLS</option>
-                <option value="SSL">SSL</option>
-                <option value="NONE">None</option>
-              </select>
+              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+                STARTTLS (Standard Secure)
+              </div>
             </div>
 
             <div className="space-y-1.5">
@@ -739,8 +712,8 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
                 name="fromAddress"
                 value={formData.fromAddress}
                 onChange={handleChange}
-                placeholder="no-reply@example.com"
-                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
+                placeholder="hello@yourdomain.com"
+                className="bg-white border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
               />
             </div>
 
@@ -750,10 +723,11 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
                 name="fromName"
                 value={formData.fromName}
                 onChange={handleChange}
-                placeholder="Your Organization Name"
-                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
+                placeholder="StartupLab Ticketing"
+                className="bg-white border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
               />
             </div>
+
           </div>
         </Card>
 
