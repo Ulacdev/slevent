@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, PasswordInput, PasswordRequirements, Checkbox } from './Shared';
+import { Card, Button, PasswordInput, PasswordRequirements, Checkbox, Modal } from './Shared';
 import { ICONS } from '../constants';
 import { supabase } from "../supabase/supabaseClient.js";
 import { useUser } from '../context/UserContext';
@@ -36,6 +36,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
     confirmPassword: ''
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   // Forgot Password States
   const [forgotEmail, setForgotEmail] = useState('');
@@ -56,7 +58,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
     setError('');
     setLoading(true);
     const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
-    
+
     if (loginError || !data.session) {
       setLoading(false);
       const msg = loginError?.message || "Incorrect email or password.";
@@ -86,7 +88,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
 
     const isOnboarded = !!userData?.isOnboarded;
     setUser({ userId: data.user.id, role: normalizedRole, email, isOnboarded });
-    
+
     const { access_token, refresh_token } = data.session;
     const response = await fetch(`${API}/api/auth/login`, {
       method: "POST",
@@ -105,7 +107,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
     }
 
     localStorage.removeItem("sb-ddkkbtijqrgpitncxylx-auth-token");
-    
+
     if (!data.user?.email_confirmed_at) {
       setLoading(false);
       showToast('info', 'Please confirm your email address if you haven\'t already.');
@@ -211,9 +213,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center py-8 px-[5px] overflow-y-auto bg-black/40 backdrop-blur-sm animate-in fade-in duration-300"
-      onClick={onClose}
+    <div
+      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center py-4 px-4 sm:px-6 overflow-y-auto bg-black/40 backdrop-blur-sm animate-in fade-in duration-300"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       {/* Decorative side elements */}
       <div className="hidden lg:block absolute left-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
@@ -223,13 +227,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
         <ICONS.Calendar className="w-64 h-64 text-[#2E2E2F]" />
       </div>
 
-      <div 
-        className="max-w-[540px] w-full relative origin-center animate-in zoom-in-95 duration-300"
-        style={{ zoom: 0.8 }}
+      <div
+        className="max-w-[540px] w-full relative origin-center animate-in duration-300 transform"
+        style={{ transform: 'scale(0.8)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[1.5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-xl overflow-hidden relative">
-          <button 
+          <button
             onClick={onClose}
             className="absolute top-6 right-6 p-2 rounded-full text-[#2E2E2F]/20 hover:text-[#38BDF2] hover:bg-white shadow-sm transition-all"
           >
@@ -376,19 +380,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                 </div>
               </div>
 
-              <Checkbox
-                checked={agreedToTerms}
-                onChange={setAgreedToTerms}
-                className="px-1"
-                label={
-                  <span className="text-[11px] text-[#2E2E2F]/60 font-medium leading-relaxed">
-                    I agree to the{' '}
-                    <a href="/terms" target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="text-[#38BDF2] font-bold hover:underline">Terms of Service</a>
-                    {' '}and{' '}
-                    <a href="/privacy" target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="text-[#38BDF2] font-bold hover:underline">Privacy Policy</a>.
-                  </span>
-                }
-              />
+              <div className="flex items-start gap-3 px-1 group">
+                <Checkbox
+                  checked={agreedToTerms}
+                  onChange={setAgreedToTerms}
+                />
+                <span className="text-[11px] text-[#2E2E2F]/60 font-medium leading-relaxed mt-0.5">
+                  I agree to the{' '}
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsModal(true)}
+                    className="text-[#38BDF2] font-bold hover:underline"
+                  >
+                    Terms of Service
+                  </button>
+                  {' '}and{' '}
+                  <button
+                    type="button"
+                    onClick={() => setShowPrivacyModal(true)}
+                    className="text-[#38BDF2] font-bold hover:underline"
+                  >
+                    Privacy Policy
+                  </button>.
+                </span>
+              </div>
 
               <Button
                 type="submit"
@@ -443,7 +458,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                   >
                     {loading ? 'Wait...' : 'Send Link'}
                   </Button>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setView('login')}
                     className="text-[11px] font-bold text-[#2E2E2F]/40 hover:text-[#38BDF2] transition-colors"
@@ -472,6 +487,82 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
           )}
         </Card>
       </div>
+
+      {/* Terms of Service Modal */}
+      <Modal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        title="Terms of Service"
+        subtitle="Last updated: March 2026"
+        size="lg"
+        zIndex={20000}
+        zoom
+      >
+        <div className="space-y-6 text-[#2E2E2F]/80 text-[13px] leading-relaxed max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">1. Acceptance of Terms</h4>
+            <p>By creating an account on StartupLab Business Center, you agree to abide by these terms. Our platform provides event ticketing and management services for organizers and attendees.</p>
+          </section>
+
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">2. Organizer Responsibilities</h4>
+            <p>Organizers are responsible for the accuracy of event details, ticket pricing, and fulfillment of event promises. StartupLab acts as a facilitator and is not liable for event cancellations or modifications.</p>
+          </section>
+
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">3. Fees and Payments</h4>
+            <p>Our platform may charge service fees per ticket sold. These fees are non-refundable unless otherwise stated in specific event policies. Payment processing is handled by secure third-party gateways.</p>
+          </section>
+
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">4. Prohibited Content</h4>
+            <p>Users may not post illegal, fraudulent, or harmful content. We reserve the right to suspend accounts that violate our community standards or engage in suspicious activity.</p>
+          </section>
+
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">5. Limitation of Liability</h4>
+            <p>StartupLab shall not be held liable for any indirect, incidental, or consequential damages resulting from the use of our ticketing services or platform downtime.</p>
+          </section>
+        </div>
+      </Modal>
+
+      {/* Privacy Policy Modal */}
+      <Modal
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+        title="Privacy Policy"
+        subtitle="How we protect your data"
+        size="lg"
+        zIndex={20000}
+        zoom
+      >
+        <div className="space-y-6 text-[#2E2E2F]/80 text-[13px] leading-relaxed max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">1. Data Collection</h4>
+            <p>We collect personal information such as name, email, and billing details to process registrations and maintain your organizer profile. We also collect usage data to improve our platform experience.</p>
+          </section>
+
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">2. How We Use Data</h4>
+            <p>Your information is used to facilitate ticket sales, send transactional emails, and provide customer support. We do not sell your personal data to third-party advertisers.</p>
+          </section>
+
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">3. Data Sharing</h4>
+            <p>Attendee data is shared with the specific event organizer for check-in and event communication purposes. Metadata may be shared with our payment processors to ensure secure transactions.</p>
+          </section>
+
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">4. Security Measures</h4>
+            <p>We implement industry-standard encryption and security protocols to protect your data from unauthorized access. However, no internet transmission is 100% secure.</p>
+          </section>
+
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">5. Your Rights</h4>
+            <p>You have the right to access, update, or delete your personal information at any time through your account settings or by contacting our support team.</p>
+          </section>
+        </div>
+      </Modal>
     </div>
   );
 };

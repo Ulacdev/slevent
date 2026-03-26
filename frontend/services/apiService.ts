@@ -40,9 +40,9 @@ const getApiBase = () => {
   if (!envBase) return '';
   // If we're on a hosted site (not localhost) and the env says localhost,
   // we should probably use relative URLs to avoid "Failed to fetch"
-  if (typeof window !== 'undefined' && 
-      window.location.hostname !== 'localhost' && 
-      envBase.includes('localhost')) {
+  if (typeof window !== 'undefined' &&
+    window.location.hostname !== 'localhost' &&
+    envBase.includes('localhost')) {
     console.warn(`[API] Deployment mismatch: VITE_API_BASE is set to localhost but site is hosted at ${window.location.hostname}. Falling back to relative paths.`);
     return '';
   }
@@ -65,7 +65,7 @@ export const apiService = {
     ...t,
     capacityPerTicket: t.capacity_per_ticket || t.capacityPerTicket || 1
   }),
-  
+
   // Wrapper for fetch with better error logging and automatic session injection
   _fetch: async (url: string, options: RequestInit = {}) => {
     try {
@@ -964,7 +964,7 @@ export const apiService = {
   },
 
   // --- Event Promotion APIs ---
-  
+
   toggleEventPromotion: async (eventId: string): Promise<{ promoted: boolean; promotionId?: string; expiresAt?: string; message: string }> => {
     const res = await fetch(`${API_BASE}/api/events/${encodeURIComponent(eventId)}/toggle-promotion`, {
       method: 'POST',
@@ -1063,6 +1063,32 @@ export const apiService = {
     if (!res.ok) {
       const text = await res.text().catch(() => '');
       throw new Error(text || `Failed to restore transaction: ${res.status}`);
+    }
+  },
+
+  bulkArchiveTransactions: async (orderIds: string[]): Promise<void> => {
+    const res = await fetch(`${API_BASE}/api/analytics/transactions/bulk-archive`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ orderIds })
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(text || `Failed to archive transactions: ${res.status}`);
+    }
+  },
+
+  bulkRestoreTransactions: async (orderIds: string[]): Promise<void> => {
+    const res = await fetch(`${API_BASE}/api/analytics/transactions/bulk-restore`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ orderIds })
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(text || `Failed to restore transactions: ${res.status}`);
     }
   },
 
@@ -1441,7 +1467,7 @@ export const apiService = {
     if (!res.ok) throw new Error(`Failed to upload support image: ${res.status}`);
     return await res.json();
   },
-  
+
   bulkRestoreSupportTickets: async (ids: string[]): Promise<any> => {
     const res = await fetch(`${API_BASE}/api/user/support/bulk-restore`, {
       method: 'POST',
@@ -1452,7 +1478,7 @@ export const apiService = {
     if (!res.ok) throw new Error(`Failed to restore tickets: ${res.status}`);
     return await res.json();
   },
-  
+
   getPlanMetrics: async () => {
     const res = await fetch(`${API_BASE}/api/analytics/plan-metrics`, {
       credentials: 'include'

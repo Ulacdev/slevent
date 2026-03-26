@@ -506,13 +506,13 @@ export const createEvent = async (req, res) => {
         // Retry with a unique suffix if it's a slug collision
         const uniqueSuffix = Math.random().toString(36).substring(2, 6);
         payload.slug = `${payload.slug}-${uniqueSuffix}`;
-        
+
         const retry = await supabase
           .from('events')
           .insert(payload)
           .select('*')
           .single();
-          
+
         if (!retry.error) return res.status(201).json(retry.data);
       }
       return res.status(500).json({ error: error.message });
@@ -558,7 +558,7 @@ export const updateEvent = async (req, res) => {
 
     if (error) {
       if (error.code === '23505' && error.message?.includes('events_slug_key')) {
-        return res.status(409).json({ 
+        return res.status(409).json({
           error: 'An event with this name already creates a conflicting web address (slug). Please try a slightly different name.',
           code: 'SLUG_ALREADY_EXISTS'
         });

@@ -113,7 +113,7 @@ export const LoginPerspective: React.FC = () => {
         <ICONS.Home className="w-6 h-6" />
       </button>
 
-      <div className="max-w-[540px] w-full relative z-10 origin-center flex flex-col items-center" style={{ zoom: 0.8 }}>
+      <div className="max-w-[540px] w-full relative z-10 origin-center flex flex-col items-center" style={{ transform: 'scale(0.8)', transformOrigin: 'center' }}>
         <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[1.5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-xl overflow-hidden">
           <div className="text-center flex flex-col items-center mb-6">
             <img

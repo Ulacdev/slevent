@@ -11,9 +11,9 @@ import {
   restoreEvent,
   listArchivedEvents
 } from "../controller/adminEventController.js";
-import { 
-  submitSupportTicket, 
-  getAdminSupportTickets, 
+import {
+  submitSupportTicket,
+  getAdminSupportTickets,
   getMySupportTickets,
   getArchivedSupportTickets,
   resolveSupportTicket,

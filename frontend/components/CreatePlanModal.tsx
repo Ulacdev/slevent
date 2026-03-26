@@ -191,7 +191,7 @@ export const CreatePlanModal: React.FC<CreatePlanModalProps> = ({ isOpen, onClos
       onClose={handleClose}
       title="Create New Pricing Plan"
       subtitle="Set up a new subscription plan for organizers"
-      size="xl"
+      size="lg"
       zoom
     >
       <div className="space-y-10 py-4">

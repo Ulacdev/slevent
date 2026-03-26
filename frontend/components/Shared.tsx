@@ -196,6 +196,7 @@ export const Modal: React.FC<{
   contentClassName?: string;
   variant?: 'dialog' | 'page';
   zoom?: boolean;
+  zIndex?: number;
 }> = ({
   isOpen,
   onClose,
@@ -209,7 +210,8 @@ export const Modal: React.FC<{
   className = '',
   contentClassName = '',
   variant = 'dialog',
-  zoom = false
+  zoom = false,
+  zIndex = 1000
 }) => {
     if (!isOpen) return null;
 
@@ -236,10 +238,15 @@ export const Modal: React.FC<{
     };
 
     return (
-      <div className="fixed inset-0 z-[1000] flex items-center justify-center p-3 sm:p-4">
+      <div
+        className="fixed inset-0 flex items-center justify-center p-3 sm:p-4"
+        style={{ zIndex: zIndex }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Backdrop */}
         <div
-          className="fixed inset-0 z-[990] bg-[#2E2E2F]/60 backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 bg-[#2E2E2F]/60 backdrop-blur-sm transition-opacity"
+          style={{ zIndex: zIndex - 10 }}
           onClick={closeOnBackdrop ? onClose : undefined}
         />
 
@@ -248,8 +255,11 @@ export const Modal: React.FC<{
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-title"
-          className={`relative z-[1010] bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 w-full ${sizes[size]
-            } max-h-[90vh] sm:max-h-[85vh] overflow-hidden transition-all duration-300 ${zoom ? 'scale-[0.85] sm:scale-[0.9] shadow-2xl' : ''} ${className}`}
+          className={`relative w-full overflow-hidden bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-2xl shadow-2xl animate-in ${zoom ? '' : 'zoom-in-95'} duration-300 flex flex-col ${sizes[size]} max-h-[90vh] sm:max-h-[85vh] origin-center ${className}`}
+          style={{ 
+            zIndex: zIndex,
+            transform: zoom ? 'scale(0.8)' : undefined
+          }}
         >
           {(title || showClose) && (
             <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-[#2E2E2F]/10 flex items-start justify-between gap-3 sticky top-0 bg-[#F2F2F2] z-10">

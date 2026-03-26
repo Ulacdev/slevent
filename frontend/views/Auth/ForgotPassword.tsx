@@ -38,7 +38,10 @@ export const ForgotPassword: React.FC = () => {
     };
 
     return (
-        <div className="fixed inset-0 flex flex-col items-center justify-center px-4 overflow-hidden bg-[#F2F2F2]">
+        <div 
+            className="fixed inset-0 flex flex-col items-center justify-center px-4 overflow-hidden bg-[#F2F2F2]"
+            style={{ zoom: 0.8 }}
+        >
             {/* Decorative side elements */}
             <div className="hidden lg:block absolute left-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
                 <ICONS.Zap className="w-64 h-64 text-[#2E2E2F]" />
@@ -54,7 +57,7 @@ export const ForgotPassword: React.FC = () => {
                 <ICONS.Home className="w-6 h-6" />
             </button>
 
-            <div className="max-w-[540px] w-full relative z-10 origin-center flex flex-col items-center" style={{ zoom: 0.8 }}>
+            <div className="max-w-[540px] w-full relative z-10 origin-center flex flex-col items-center">
                 <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[1.5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-xl overflow-hidden">
                     <div className="text-center flex flex-col items-center mb-6">
                         <img

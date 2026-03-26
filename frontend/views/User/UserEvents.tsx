@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { Event, TicketType, EventStatus, RegistrationView, OrganizerProfile } from '../../types';
-import { Card, Badge, Button, Modal, Input, PageLoader } from '../../components/Shared';
+import { Card, Badge, Button, Modal, Input, PageLoader, Checkbox } from '../../components/Shared';
 import { OnsiteLocationAssistant } from '../../components/OnsiteLocationAssistant';
 import { ICONS } from '../../constants';
 import { useUser } from '../../context/UserContext';
@@ -71,6 +71,238 @@ export const EVENT_SETUP_STEPS: { id: EventSetupStep; title: string }[] = [
     { id: 4, title: 'Promotions' },
     { id: 5, title: 'Publish' },
 ];
+
+const EventMobileCard = React.memo<{
+    event: Event;
+    isPromoted: boolean;
+    onOpenEdit: () => void;
+    onOpenTickets: () => void;
+    onOpenAttendeePop: () => void;
+    onTogglePromotion: (e: React.MouseEvent) => void;
+    onArchive: () => void;
+    openDropdownId: string | null;
+    setOpenDropdownId: (id: string | null) => void;
+    navigate: any;
+}>(({ event, isPromoted, onOpenEdit, onOpenTickets, onOpenAttendeePop, onTogglePromotion, onArchive, openDropdownId, setOpenDropdownId, navigate }) => {
+    const isDropdownOpen = openDropdownId === event.eventId;
+
+    return (
+        <Card
+            className="p-5 border-2 border-[#2E2E2F]/15 hover:border-[#38BDF2]/40 transition-colors cursor-pointer group"
+            onClick={onOpenEdit}
+        >
+            <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 border-[#2E2E2F]/15">
+                    <img src={getImageUrl(event.imageUrl)} alt="" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                        {(() => {
+                            const now = new Date();
+                            const eventEnd = event.endAt ? new Date(event.endAt) : new Date(new Date(event.startAt).getTime() + 2 * 60 * 60 * 1000);
+                            const isCompleted = now > eventEnd;
+                            return (
+                                <Badge
+                                    type={isCompleted ? 'neutral' : (event.status === 'PUBLISHED' ? 'success' : 'neutral')}
+                                    className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5"
+                                >
+                                    {isCompleted ? 'COMPLETED' : event.status}
+                                </Badge>
+                            );
+                        })()}
+                        {isPromoted && (
+                            <Badge
+                                type="success"
+                                className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 bg-[#38BDF2]/20 text-[#38BDF2] border border-[#38BDF2]/30 flex items-center gap-1"
+                            >
+                                <ICONS.Zap className="w-2.5 h-2.5" />
+                                Promoted
+                            </Badge>
+                        )}
+                    </div>
+                    <div className="mb-2">
+                        <span className="text-[10px] font-medium text-[#2E2E2F]/40 truncate">
+                            ID: {event.eventId.split('-')[0]}
+                        </span>
+                        <h3 className="font-bold text-[#2E2E2F] text-base truncate mt-0.5">
+                            {event.eventName}
+                        </h3>
+                    </div>
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-[11px] text-[#2E2E2F]/60 font-medium">
+                            <ICONS.Calendar className="w-3 h-3 text-[#38BDF2]" />
+                            {new Date(event.startAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </div>
+                        <div className="flex items-center gap-2 text-[11px] text-[#2E2E2F]/60 font-medium">
+                            <ICONS.MapPin className="w-3 h-3 text-[#38BDF2]" />
+                            <span className="truncate">{event.locationText}</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="relative shrink-0">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setOpenDropdownId(isDropdownOpen ? null : event.eventId); }}
+                        className={`p-1.5 rounded-xl transition-all duration-300 ${isDropdownOpen ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'hover:bg-[#2E2E2F]/5 text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                    >
+                        <MoreVerticalIcon className="w-5 h-5" />
+                    </button>
+
+                    <div
+                        className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${isDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}`}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <EyeIcon className="w-4 h-4" /> View
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); onOpenTickets(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <ICONS.CreditCard className="w-4 h-4" /> Tickets
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); onOpenAttendeePop(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <ICONS.Users className="w-4 h-4" /> Guests
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); onOpenEdit(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <ICONS.Edit className="w-4 h-4" /> Edit
+                        </button>
+                        <button onClick={onTogglePromotion} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <ICONS.Zap className="w-4 h-4" fill={isPromoted ? "currentColor" : "none"} /> Promote
+                        </button>
+                        <div className="my-1 border-t border-[#2E2E2F]/5" />
+                        <button onClick={(e) => { e.stopPropagation(); onArchive(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-600 flex items-center gap-3 transition-colors">
+                            <ICONS.Trash className="w-4 h-4" /> Archive
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div className="mt-5 pt-4 border-t border-[#2E2E2F]/15 flex items-center justify-between text-[11px] font-bold text-[#2E2E2F]/40 uppercase tracking-widest">
+                <span>Inventory</span>
+                <span className="text-[#38BDF2]">{event.capacityTotal} Slots</span>
+            </div>
+        </Card>
+    );
+});
+
+const EventTableRow = React.memo<{
+    event: Event;
+    isSelected: boolean;
+    onToggle: () => void;
+    onOpenEdit: () => void;
+    onOpenTickets: () => void;
+    onOpenAttendeePop: () => void;
+    onTogglePromotion: (e: React.MouseEvent) => void;
+    onArchive: () => void;
+    isPromoted: boolean;
+    openDropdownId: string | null;
+    setOpenDropdownId: (id: string | null) => void;
+}>(({ event, isSelected, onToggle, onOpenEdit, onOpenTickets, onOpenAttendeePop, onTogglePromotion, onArchive, isPromoted, openDropdownId, setOpenDropdownId }) => {
+    const navigate = useNavigate();
+    const isDropdownOpen = openDropdownId === event.eventId;
+
+    return (
+        <tr className={`hover:bg-[#38BDF2]/10 transition-colors group cursor-pointer ${isSelected ? 'bg-[#38BDF2]/10' : ''}`} onClick={onOpenEdit}>
+            <td className="px-4 py-7 align-middle" onClick={(e) => e.stopPropagation()}>
+                <div className="flex justify-center">
+                    <Checkbox
+                        checked={isSelected}
+                        onChange={onToggle}
+                        size="sm"
+                    />
+                </div>
+            </td>
+            <td className="px-8 py-7">
+                <div className="flex items-center gap-5">
+                    <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border-2 border-[#2E2E2F]/15 relative">
+                        <img src={getImageUrl(event.imageUrl)} alt="" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                            <div className="font-bold text-[#2E2E2F] text-[16px] tracking-tight transition-colors">{event.eventName}</div>
+                            {isPromoted && (
+                                <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 bg-[#38BDF2]/20 text-[#38BDF2] border border-[#38BDF2]/30 rounded-full whitespace-nowrap flex items-center gap-1">
+                                    <ICONS.Zap className="w-2 h-2" />
+                                    Promoted
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[11px] font-medium text-[#2E2E2F]/40 uppercase tracking-widest">{event.eventId.split('-')[0]}</span>
+                            <span className="w-1 h-1 rounded-full bg-[#2E2E2F]/10"></span>
+                            <span className="text-[11px] font-medium text-[#2E2E2F]/60 tracking-tight">/{event.slug}</span>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td className="px-8 py-7">
+                <div className="text-[14px] font-semibold text-[#2E2E2F] tracking-tight">
+                    {new Date(event.startAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                </div>
+                <div className="text-[12px] text-[#2E2E2F]/60 font-medium mt-1.5 flex items-center gap-2">
+                    <ICONS.MapPin className="w-3 h-3 text-[#2E2E2F]/50" />
+                    <span className="truncate max-w-[200px]">{event.locationText}</span>
+                </div>
+            </td>
+            <td className="px-8 py-7">
+                {(() => {
+                    const now = new Date();
+                    const eventEnd = event.endAt ? new Date(event.endAt) : new Date(new Date(event.startAt).getTime() + 2 * 60 * 60 * 1000);
+                    const isCompleted = now > eventEnd;
+                    return (
+                        <div className={`inline-flex px-3.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${isCompleted
+                            ? 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
+                            : event.status === 'PUBLISHED'
+                                ? 'bg-[#38BDF2]/20 text-[#2E2E2F]'
+                                : event.status === 'DRAFT'
+                                    ? 'bg-[#F2F2F2] text-[#2E2E2F]/60 border-2 border-[#2E2E2F]/15'
+                                    : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
+                            }`}>
+                            {isCompleted ? 'COMPLETED' : event.status}
+                        </div>
+                    );
+                })()}
+            </td>
+            <td className="px-8 py-7">
+                <div className="flex items-center gap-2">
+                    <span className="text-[14px] font-bold text-[#2E2E2F]">{event.capacityTotal}</span>
+                    <span className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Slots</span>
+                </div>
+            </td>
+            <td className="px-8 py-7 !overflow-visible align-middle">
+                <div className="flex justify-center items-center relative h-full">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setOpenDropdownId(isDropdownOpen ? null : event.eventId); }}
+                        className={`p-1.5 rounded-xl transition-all duration-300 ${isDropdownOpen ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'hover:bg-[#2E2E2F]/5 text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                    >
+                        <MoreVerticalIcon className="w-5 h-5" />
+                    </button>
+
+                    <div
+                        className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${isDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}`}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <EyeIcon className="w-4 h-4" /> View
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); onOpenTickets(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <ICONS.CreditCard className="w-4 h-4" /> Tickets
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); onOpenAttendeePop(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <ICONS.Users className="w-4 h-4" /> Guests
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); onOpenEdit(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <ICONS.Edit className="w-4 h-4" /> Edit
+                        </button>
+                        <button onClick={onTogglePromotion} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <ICONS.Zap className="w-4 h-4" fill={isPromoted ? "currentColor" : "none"} /> Promote
+                        </button>
+                        <div className="my-1 border-t border-[#2E2E2F]/5" />
+                        <button onClick={(e) => { e.stopPropagation(); onArchive(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-600 flex items-center gap-3 transition-colors">
+                            <ICONS.Trash className="w-4 h-4" /> Archive
+                        </button>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    );
+});
 
 export const EVENT_SETUP_STEP_DETAIL: Record<EventSetupStep, string> = {
     1: 'Name, story, and visual',
@@ -147,10 +379,10 @@ export const UserEvents: React.FC = () => {
     };
 
     const toggleAll = () => {
-        if (selectedRows.size === events.length) {
+        if (selectedRows.size === filteredEvents.length) {
             setSelectedRows(new Set());
         } else {
-            setSelectedRows(new Set(events.map(e => e.eventId)));
+            setSelectedRows(new Set(filteredEvents.map(e => e.eventId)));
         }
     };
 
@@ -169,9 +401,9 @@ export const UserEvents: React.FC = () => {
                 </style></head><body>
                 <h1>Events Export</h1>
                 <table>
-                    <thead><tr><th>Event</th><th>Date</th><th>Location</th><th>Status</th></tr></thead>
+                    <thead><tr><th>Event</th><th>Date</th><th>Location</th><th>Status</th><th>Size</th></tr></thead>
                     <tbody>
-                        ${printContent.map(e => `<tr><td>${e.eventName || ''}</td><td>${new Date(e.startAt).toLocaleDateString() || ''}</td><td>${e.locationType || ''}</td><td>${e.status || ''}</td></tr>`).join('')}
+                        ${printContent.map(e => `<tr><td>${e.eventName || ''}</td><td>${new Date(e.startAt).toLocaleDateString() || ''}</td><td>${e.locationType || ''}</td><td>${e.status || ''}</td><td>${e.capacityTotal || 0}</td></tr>`).join('')}
                     </tbody>
                 </table></body></html>`);
             printWindow.document.close();
@@ -182,7 +414,7 @@ export const UserEvents: React.FC = () => {
     const handleExportEvents = () => {
         const selectedData = events.filter(e => selectedRows.has(e.eventId));
         const exportData = selectedData.length > 0 ? selectedData : events;
-        const csvContent = `Event Name,Date,Location,Status\n${exportData.map(e => `${e.eventName || ''},${new Date(e.startAt).toLocaleDateString()},${e.locationType || ''},${e.status || ''}`).join('\n')}`;
+        const csvContent = `Event Name,Date,Location,Status,Size\n${exportData.map(e => `${e.eventName || ''},${new Date(e.startAt).toLocaleDateString()},${e.locationType || ''},${e.status || ''},${e.capacityTotal || 0}`).join('\n')}`;
         const blob = new Blob([csvContent], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -191,6 +423,45 @@ export const UserEvents: React.FC = () => {
         a.click();
         window.URL.revokeObjectURL(url);
     };
+    const handleBulkArchive = async () => {
+        if (selectedRows.size === 0) return;
+        if (!confirm(`Are you sure you want to archive ${selectedRows.size} events?`)) return;
+        setSubmitting(true);
+        try {
+            const selectedIds = Array.from(selectedRows);
+            await Promise.all(selectedIds.map(id => apiService.deleteUserEvent(id)));
+            showToast('success', `${selectedRows.size} events archived successfully.`);
+            setSelectedRows(new Set());
+            fetchEvents();
+        } catch (err) {
+            showToast('error', 'Failed to archive some events.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleBulkPromote = async () => {
+        if (selectedRows.size === 0) return;
+        const available = (promotionQuota?.limit || 0) - (promotionQuota?.used || 0);
+        if (selectedRows.size > available) {
+            showToast('error', `You only have ${available} promotion slots left.`);
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            const selectedIds = Array.from(selectedRows);
+            await Promise.all(selectedIds.map(id => apiService.promoteEvent(id)));
+            showToast('success', `${selectedRows.size} events promoted successfully.`);
+            setSelectedRows(new Set());
+            await loadPromotionMetadata();
+        } catch (err: any) {
+            showToast('error', err.message || 'Bulk promotion failed.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     const [promotionQuota, setPromotionQuota] = useState<{ used: number; limit: number; canPromote: boolean } | null>(null);
     const [togglingPromotionId, setTogglingPromotionId] = useState<string | null>(null);
     const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -308,7 +579,21 @@ export const UserEvents: React.FC = () => {
         }
     };
 
-    const loadPromotionMetadata = async () => {
+    const handleCloseEventModal = React.useCallback(() => {
+        setIsModalOpen(false);
+        setWizardStep(1);
+        setInitialEventStatus('DRAFT');
+        setActiveEventTicketCount(0);
+        setTicketReadinessLoading(false);
+        setResumeStatusAfterTicketSetup(false);
+        setIsPreviewMode(false);
+        setIsSidebarHidden(false);
+
+        setPreviewDevice('mobile');
+        setFinalStatusDecision('');
+    }, []);
+
+    const loadPromotionMetadata = React.useCallback(async () => {
         try {
             const [promoted, quota] = await Promise.all([
                 apiService.listMyPromotedEvents(),
@@ -324,13 +609,13 @@ export const UserEvents: React.FC = () => {
         } catch {
             console.error('Failed to load promotion metadata');
         }
-    };
+    }, []);
 
     useEffect(() => {
         loadPromotionMetadata();
     }, []);
 
-    const handleToggleEventPromotion = async (eventId: string, currentStatus: boolean) => {
+    const handleToggleEventPromotion = React.useCallback(async (eventId: string, currentStatus: boolean) => {
         setTogglingPromotionId(eventId);
         try {
             if (currentStatus) {
@@ -346,9 +631,9 @@ export const UserEvents: React.FC = () => {
         } finally {
             setTogglingPromotionId(null);
         }
-    };
+    }, [loadPromotionMetadata]);
 
-    const loadEventPromotions = async (eventId: string) => {
+    const loadEventPromotions = React.useCallback(async (eventId: string) => {
         setPromotionsLoading(true);
         try {
             const data = await apiService.listPromotions(eventId);
@@ -358,9 +643,9 @@ export const UserEvents: React.FC = () => {
         } finally {
             setPromotionsLoading(false);
         }
-    };
+    }, []);
 
-    const handleSavePromotion = async (e: React.FormEvent) => {
+    const handleSavePromotion = React.useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         if (!currentEventId) return;
         setSubmitting(true);
@@ -387,9 +672,9 @@ export const UserEvents: React.FC = () => {
         } finally {
             setSubmitting(false);
         }
-    };
+    }, [currentEventId, promoForm, editingPromotion, showToast, loadEventPromotions]);
 
-    const handleDeletePromotion = async (promotionId: string) => {
+    const handleDeletePromotion = React.useCallback(async (promotionId: string) => {
         if (!confirm('Are you sure you want to delete this promotion?')) return;
         try {
             await apiService.deletePromotion(promotionId);
@@ -398,9 +683,9 @@ export const UserEvents: React.FC = () => {
         } catch {
             showToast('error', 'Failed to delete promotion.');
         }
-    };
+    }, [currentEventId, showToast, loadEventPromotions]);
 
-    const loadEventTicketReadiness = async (eventId: string) => {
+    const loadEventTicketReadiness = React.useCallback(async (eventId: string) => {
         setTicketReadinessLoading(true);
         try {
             const ticketTypes = await apiService.getTicketTypes(eventId);
@@ -412,21 +697,120 @@ export const UserEvents: React.FC = () => {
         } finally {
             setTicketReadinessLoading(false);
         }
-    };
+    }, []);
 
-    const handleCloseEventModal = () => {
-        setIsModalOpen(false);
-        setWizardStep(1);
-        setInitialEventStatus('DRAFT');
-        setActiveEventTicketCount(0);
-        setTicketReadinessLoading(false);
-        setResumeStatusAfterTicketSetup(false);
-        setIsPreviewMode(false);
-        setIsSidebarHidden(false);
+    const buildEventPayload = React.useCallback((statusOverride?: EventStatus) => {
+        const mergeDateTime = (date: string, time: string) => {
+            if (!date) return null;
+            return `${date}T${time || '09:00'}:00`;
+        };
 
-        setPreviewDevice('mobile');
-        setFinalStatusDecision('');
-    };
+        return {
+            eventName: formData.eventName,
+            description: formData.description,
+            startAt: mergeDateTime(formData.eventDate, formData.eventTime),
+            endAt: formData.endDate ? mergeDateTime(formData.endDate, formData.endTime) : null,
+            timezone: formData.timezone,
+            locationType: formData.locationType,
+            locationText: formData.location,
+            capacityTotal: formData.capacityTotal,
+            imageUrl: formData.imageUrl,
+            status: statusOverride || formData.status,
+            regOpenAt: formData.regOpenDate ? mergeDateTime(formData.regOpenDate, formData.regOpenTime || '00:01') : null,
+            regCloseAt: formData.regCloseDate ? mergeDateTime(formData.regCloseDate, formData.regCloseTime || '23:59') : null,
+            brandColor: formData.brandColor || null,
+            enableDiscountCodes: formData.enableDiscountCodes || false,
+            streamingPlatform: formData.streamingPlatform,
+            streaming_url: formData.streamingUrl || null,
+            organizerId: organizerProfile?.organizerId || null,
+        };
+    }, [formData, organizerProfile]);
+
+
+    const saveDraftAndContinueToTickets = React.useCallback(async () => {
+        setSubmitting(true);
+        try {
+            const draftPayload = buildEventPayload('DRAFT');
+            let savedEvent: Event;
+
+            if (isEditMode && currentEventId) {
+                savedEvent = await apiService.updateUserEvent(currentEventId, draftPayload);
+            } else {
+                savedEvent = await apiService.createUserEvent(draftPayload);
+            }
+
+            setIsEditMode(true);
+            setCurrentEventId(savedEvent.eventId);
+            setInitialEventStatus(savedEvent.status || 'DRAFT');
+            setFormData((prev) => ({
+                ...prev,
+                status: savedEvent.status || 'DRAFT',
+                ticketTypes: savedEvent.ticketTypes || prev.ticketTypes
+            }));
+
+            const eventForTickets = { ...savedEvent, ticketTypes: savedEvent.ticketTypes || [] };
+            setSelectedEvent(eventForTickets);
+            setResumeStatusAfterTicketSetup(true);
+            setWizardStep(5);
+            setIsPreviewMode(false);
+            setFinalStatusDecision('');
+            setIsModalOpen(false);
+            setIsTicketModalOpen(true);
+            showToast('success', 'Draft saved. Continue by setting up tickets.');
+            fetchEvents();
+        } catch (error: any) {
+            showToast('error', error?.message || 'Failed to save draft before ticket setup.');
+        } finally {
+            setSubmitting(false);
+        }
+    }, [isEditMode, currentEventId, buildEventPayload, fetchEvents, showToast]);
+
+    const handleSubmit = React.useCallback(async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formData.eventName.trim()) {
+            setWizardStep(1);
+            showToast('error', 'Event name is required.');
+            return;
+        }
+        if (!formData.eventDate || !formData.location.trim()) {
+            setWizardStep(2);
+            showToast('error', 'Set the event schedule and location before saving.');
+            return;
+        }
+        const isQuickUpdate = e && (e.target as any)?.dataset?.quickUpdate === 'true';
+
+        if (!finalStatusDecision && !isQuickUpdate) {
+            setWizardStep(5);
+            showToast('error', 'Step 5: choose if this event should stay Draft or be Published.');
+            return;
+        }
+
+        const isPublishingTransition = (formData.status === 'PUBLISHED') && (initialEventStatus !== 'PUBLISHED');
+        if (isPublishingTransition && !canPublishByTicketRule) {
+            setWizardStep(5);
+            showToast('error', 'Add at least one ticket type before publishing this event.');
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            const payload = buildEventPayload();
+            if (isEditMode && currentEventId) {
+                await apiService.updateUserEvent(currentEventId, payload);
+                showToast('success', 'Event updated successfully.');
+            } else {
+                await apiService.createUserEvent(payload);
+                showToast('success', 'Event created successfully!');
+            }
+            handleCloseEventModal();
+            fetchEvents();
+        } catch (error: any) {
+            showToast('error', error?.message || 'Failed to save event.');
+        } finally {
+            setSubmitting(false);
+        }
+    }, [formData, finalStatusDecision, initialEventStatus, canPublishByTicketRule, isEditMode, currentEventId, buildEventPayload, handleCloseEventModal, fetchEvents, showToast]);
+
 
     const validateStepBeforeAdvance = (step: EventSetupStep): string | null => {
         if (step === 1 && !formData.eventName.trim()) {
@@ -439,7 +823,7 @@ export const UserEvents: React.FC = () => {
         return null;
     };
 
-    const handleNextWizardStep = () => {
+    const handleNextWizardStep = React.useCallback(() => {
         const errorMessage = validateStepBeforeAdvance(wizardStep);
         if (errorMessage) {
             showToast('error', errorMessage);
@@ -453,9 +837,9 @@ export const UserEvents: React.FC = () => {
             void loadEventPromotions(currentEventId);
         }
         setWizardStep((prev) => (prev < 5 ? ((prev + 1) as EventSetupStep) : prev));
-    };
+    }, [wizardStep, formData, isEditMode, currentEventId, showToast, loadEventPromotions, saveDraftAndContinueToTickets]);
 
-    const handleOpenCreate = () => {
+    const handleOpenCreate = React.useCallback(() => {
         if (!isOrganizerProfileReady) {
             showToast('error', 'Set up your organization profile first before creating events.');
             navigate('/user-settings?tab=organizer');
@@ -477,7 +861,7 @@ export const UserEvents: React.FC = () => {
         setPreviewDevice('mobile');
         setFinalStatusDecision('');
         setIsModalOpen(true);
-    };
+    }, [isOrganizerProfileReady, showToast, navigate, initialFormData, organizerProfile, parseLimit]);
 
     useEffect(() => {
         const handler = window.setTimeout(() => setDebouncedSearch(searchTerm.trim()), 350);
@@ -551,15 +935,15 @@ export const UserEvents: React.FC = () => {
         return days;
     }, [calendarMonth]);
 
-    const eventsOnDay = (day: number) => {
+    const eventsOnDay = useMemo(() => (day: number) => {
         return filteredEvents.filter(e => {
             if (!e.startAt) return false;
             const d = new Date(e.startAt);
             return d.getFullYear() === calendarMonth.getFullYear() && d.getMonth() === calendarMonth.getMonth() && d.getDate() === day;
         });
-    };
+    }, [filteredEvents, calendarMonth]);
 
-    if (loading) return <PageLoader label="Loading your events..." variant="section" />;
+
 
     const formatDateForInput = (value: string) => {
         if (!value) return { date: '', time: '' };
@@ -568,7 +952,7 @@ export const UserEvents: React.FC = () => {
         return { date: datePart, time: timePart ? timePart.substring(0, 5) : '' };
     };
 
-    const handleOpenEdit = (event: Event) => {
+    const handleOpenEdit = React.useCallback((event: Event) => {
         const mainDT = formatDateForInput(event.startAt);
         const endDT = formatDateForInput(event.endAt || '');
         setFormData({
@@ -605,14 +989,14 @@ export const UserEvents: React.FC = () => {
         void loadEventTicketReadiness(event.eventId);
         void loadEventPromotions(event.eventId);
         setIsModalOpen(true);
-    };
+    }, []);
 
-    const handleOpenTickets = (event: Event) => {
+    const handleOpenTickets = React.useCallback((event: Event) => {
         setSelectedEvent(event);
         setIsTicketModalOpen(true);
-    };
+    }, []);
 
-    const handleOpenAttendeePop = async (event: Event) => {
+    const handleOpenAttendeePop = React.useCallback(async (event: Event) => {
         setSelectedEvent(event);
         setIsAttendeeModalOpen(true);
         try {
@@ -625,7 +1009,7 @@ export const UserEvents: React.FC = () => {
         } catch (err) {
             console.error('Failed to fetch registrations:', err);
         }
-    };
+    }, []);
 
     const handleSaveTickets = async (updatedTickets: TicketType[]) => {
         if (!selectedEvent) return;
@@ -702,70 +1086,7 @@ export const UserEvents: React.FC = () => {
         }
     };
 
-    const buildEventPayload = (statusOverride?: EventStatus) => {
-        const mergeDateTime = (date: string, time: string) => {
-            if (!date) return null;
-            return `${date}T${time || '09:00'}:00`;
-        };
 
-        return {
-            eventName: formData.eventName,
-            description: formData.description,
-            startAt: mergeDateTime(formData.eventDate, formData.eventTime),
-            endAt: formData.endDate ? mergeDateTime(formData.endDate, formData.endTime) : null,
-            timezone: formData.timezone,
-            locationType: formData.locationType,
-            locationText: formData.location,
-            capacityTotal: formData.capacityTotal,
-            imageUrl: formData.imageUrl,
-            status: statusOverride || formData.status,
-            regOpenAt: formData.regOpenDate ? mergeDateTime(formData.regOpenDate, formData.regOpenTime || '00:01') : null,
-            regCloseAt: formData.regCloseDate ? mergeDateTime(formData.regCloseDate, formData.regCloseTime || '23:59') : null,
-            brandColor: formData.brandColor || null,
-            enableDiscountCodes: formData.enableDiscountCodes || false,
-            streamingPlatform: formData.streamingPlatform,
-            streaming_url: formData.streamingUrl || null,
-            organizerId: organizerProfile?.organizerId || null,
-        };
-    };
-
-    const saveDraftAndContinueToTickets = async () => {
-        setSubmitting(true);
-        try {
-            const draftPayload = buildEventPayload('DRAFT');
-            let savedEvent: Event;
-
-            if (isEditMode && currentEventId) {
-                savedEvent = await apiService.updateUserEvent(currentEventId, draftPayload);
-            } else {
-                savedEvent = await apiService.createUserEvent(draftPayload);
-            }
-
-            setIsEditMode(true);
-            setCurrentEventId(savedEvent.eventId);
-            setInitialEventStatus(savedEvent.status || 'DRAFT');
-            setFormData((prev) => ({
-                ...prev,
-                status: savedEvent.status || 'DRAFT',
-                ticketTypes: savedEvent.ticketTypes || prev.ticketTypes
-            }));
-
-            const eventForTickets = { ...savedEvent, ticketTypes: savedEvent.ticketTypes || [] };
-            setSelectedEvent(eventForTickets);
-            setResumeStatusAfterTicketSetup(true);
-            setWizardStep(5);
-            setIsPreviewMode(false);
-            setFinalStatusDecision('');
-            setIsModalOpen(false);
-            setIsTicketModalOpen(true);
-            showToast('success', 'Draft saved. Continue by setting up tickets.');
-            fetchEvents();
-        } catch (error: any) {
-            showToast('error', error?.message || 'Failed to save draft before ticket setup.');
-        } finally {
-            setSubmitting(false);
-        }
-    };
 
     const handleCloseTicketModal = () => {
         setIsTicketModalOpen(false);
@@ -777,51 +1098,6 @@ export const UserEvents: React.FC = () => {
         showToast('error', 'Ticket setup cancelled. Complete tickets to continue to Event Status.');
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!formData.eventName.trim()) {
-            setWizardStep(1);
-            showToast('error', 'Event name is required.');
-            return;
-        }
-        if (!formData.eventDate || !formData.location.trim()) {
-            setWizardStep(2);
-            showToast('error', 'Set the event schedule and location before saving.');
-            return;
-        }
-        const isQuickUpdate = e && (e.target as any)?.dataset?.quickUpdate === 'true';
-
-        if (!finalStatusDecision && !isQuickUpdate) {
-            setWizardStep(5);
-            showToast('error', 'Step 5: choose if this event should stay Draft or be Published.');
-            return;
-        }
-
-        const isPublishingTransition = (formData.status === 'PUBLISHED') && (initialEventStatus !== 'PUBLISHED');
-        if (isPublishingTransition && !canPublishByTicketRule) {
-            setWizardStep(5);
-            showToast('error', 'Add at least one ticket type before publishing this event.');
-            return;
-        }
-
-        setSubmitting(true);
-        try {
-            const payload = buildEventPayload();
-            if (isEditMode && currentEventId) {
-                await apiService.updateUserEvent(currentEventId, payload);
-                showToast('success', 'Event updated successfully.');
-            } else {
-                await apiService.createUserEvent(payload);
-                showToast('success', 'Event created successfully!');
-            }
-            handleCloseEventModal();
-            fetchEvents();
-        } catch (error: any) {
-            showToast('error', error?.message || 'Failed to save event.');
-        } finally {
-            setSubmitting(false);
-        }
-    };
 
     const applyLocationValue = (locationValue: string) => {
         const nextData: any = { ...formData, location: locationValue };
@@ -840,6 +1116,8 @@ export const UserEvents: React.FC = () => {
         setFormData(nextData);
     };
 
+
+    if (loading) return <PageLoader label="Loading your events..." variant="section" />;
 
     return (
         <div className="space-y-0 -mt-4">
@@ -978,241 +1256,109 @@ export const UserEvents: React.FC = () => {
                                 {/* Mobile Card View */}
                                 <div className="grid grid-cols-1 gap-4 md:hidden">
                                     {filteredEvents.map(event => (
-                                        <Card
+                                        <EventMobileCard
                                             key={event.eventId}
-                                            className="p-5 border-2 border-[#2E2E2F]/15 hover:border-[#38BDF2]/40 transition-colors cursor-pointer"
-                                            onClick={() => handleOpenEdit(event)}
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 border-[#2E2E2F]/15">
-                                                    <img src={getImageUrl(event.imageUrl)} alt="" className="w-full h-full object-cover" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                                                        {(() => {
-                                                            const now = new Date();
-                                                            const eventEnd = event.endAt ? new Date(event.endAt) : new Date(new Date(event.startAt).getTime() + 2 * 60 * 60 * 1000);
-                                                            const isCompleted = now > eventEnd;
-                                                            return (
-                                                                <Badge
-                                                                    type={isCompleted ? 'neutral' : (event.status === 'PUBLISHED' ? 'success' : 'neutral')}
-                                                                    className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5"
-                                                                >
-                                                                    {isCompleted ? 'COMPLETED' : event.status}
-                                                                </Badge>
-                                                            );
-                                                        })()}
-                                                        {promotedEventsMap[event.eventId]?.promoted && (
-                                                            <Badge
-                                                                type="success"
-                                                                className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 bg-[#38BDF2]/20 text-[#38BDF2] border border-[#38BDF2]/30 flex items-center gap-1"
-                                                            >
-                                                                <ICONS.Zap className="w-2.5 h-2.5" />
-                                                                Promoted
-                                                            </Badge>
-                                                        )}
-                                                    </div>
-                                                    <div className="mb-2">
-                                                        <span className="text-[10px] font-medium text-[#2E2E2F]/40 truncate group-hover:text-[#2E2E2F]/60 transition-colors">
-                                                            ID: {event.eventId.split('-')[0]}
-                                                        </span>
-                                                        <h3 className="font-bold text-[#2E2E2F] text-base truncate mt-0.5 group-hover:text-[#38BDF2] transition-colors">
-                                                            {event.eventName}
-                                                        </h3>
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-2 text-[11px] text-[#2E2E2F]/60 font-medium">
-                                                            <ICONS.Calendar className="w-3 h-3 text-[#38BDF2]" />
-                                                            {new Date(event.startAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                                        </div>
-                                                        <div className="flex items-center gap-2 text-[11px] text-[#2E2E2F]/60 font-medium">
-                                                            <ICONS.MapPin className="w-3 h-3 text-[#38BDF2]" />
-                                                            <span className="truncate">{event.locationText}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="relative group/more shrink-0">
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === event.eventId ? null : event.eventId); }}
-                                                        className={`p-1.5 rounded-xl transition-all duration-300 ${openDropdownId === event.eventId ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'hover:bg-[#2E2E2F]/5 text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
-                                                    >
-                                                        <MoreVerticalIcon className="w-5 h-5" />
-                                                    </button>
-
-                                                    <div
-                                                        className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${openDropdownId === event.eventId ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible group-hover/more:opacity-100 group-hover/more:scale-100 group-hover/more:visible'}`}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                    >
-                                                        <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
-                                                            <EyeIcon className="w-4 h-4" /> View
-                                                        </button>
-                                                        <button onClick={(e) => { e.stopPropagation(); handleOpenTickets(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
-                                                            <ICONS.CreditCard className="w-4 h-4" /> Tickets
-                                                        </button>
-                                                        <button onClick={(e) => { e.stopPropagation(); handleOpenAttendeePop(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
-                                                            <ICONS.Users className="w-4 h-4" /> Guests
-                                                        </button>
-                                                        <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
-                                                            <ICONS.Edit className="w-4 h-4" /> Edit
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                const isPromoted = promotedEventsMap[event.eventId]?.promoted;
-                                                                if (promotionQuota && !isPromoted && !promotionQuota.canPromote) {
-                                                                    showToast('error', 'You have reached your promotion limit.');
-                                                                } else {
-                                                                    handleToggleEventPromotion(event.eventId, isPromoted || false);
-                                                                }
-                                                            }}
-                                                            className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors"
-                                                        >
-                                                            <ICONS.Zap className="w-4 h-4" fill={promotedEventsMap[event.eventId]?.promoted ? "currentColor" : "none"} /> Promote
-                                                        </button>
-                                                        <div className="my-1 border-t border-[#2E2E2F]/5" />
-                                                        <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-600 flex items-center gap-3 transition-colors">
-                                                            <ICONS.Trash className="w-4 h-4" /> Archive
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="mt-5 pt-4 border-t border-[#2E2E2F]/15 flex items-center justify-between text-[11px] font-bold text-[#2E2E2F]/40 uppercase tracking-widest">
-                                                <span>Inventory</span>
-                                                <span className="text-[#38BDF2]">{event.capacityTotal} Slots</span>
-                                            </div>
-                                        </Card>
+                                            event={event}
+                                            isPromoted={promotedEventsMap[event.eventId]?.promoted || false}
+                                            onOpenEdit={() => handleOpenEdit(event)}
+                                            onOpenTickets={() => handleOpenTickets(event)}
+                                            onOpenAttendeePop={() => handleOpenAttendeePop(event)}
+                                            onTogglePromotion={(e) => {
+                                                e.stopPropagation();
+                                                const isPromoted = promotedEventsMap[event.eventId]?.promoted;
+                                                if (promotionQuota && !isPromoted && !promotionQuota.canPromote) {
+                                                    showToast('error', 'You have reached your promotion limit.');
+                                                } else {
+                                                    handleToggleEventPromotion(event.eventId, isPromoted || false);
+                                                }
+                                            }}
+                                            onArchive={() => setDeleteConfirm(event)}
+                                            openDropdownId={openDropdownId}
+                                            setOpenDropdownId={setOpenDropdownId}
+                                            navigate={navigate}
+                                        />
                                     ))}
                                 </div>
 
                                 {/* Desktop Table View */}
+                                <div className="hidden md:flex items-center justify-between mb-6 px-4 gap-3">
+                                    <div className="flex items-center">
+                                        {selectedRows.size > 0 && (
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-2 h-2 rounded-full bg-[#38BDF2] animate-pulse" />
+                                                <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest bg-[#F2F2F2] px-3.5 py-1.5 rounded-lg border border-[#2E2E2F]/10">
+                                                    {selectedRows.size} Selected
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        {selectedRows.size > 0 && (
+                                            <>
+                                                <button onClick={handleBulkArchive} className="flex items-center gap-2 px-5 py-3.5 bg-red-600 border-2 border-red-600 rounded-2xl text-[#F2F2F2] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group" title="Archive Selected">
+                                                    <ICONS.Trash className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                                    <span className="text-[11px] font-black uppercase tracking-widest">Archive</span>
+                                                </button>
+                                                <button onClick={handleBulkPromote} className="flex items-center gap-2 px-5 py-3.5 bg-[#38BDF2] border-2 border-[#38BDF2] rounded-2xl text-[#F2F2F2] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group" title="Promote Selected">
+                                                    <ICONS.Zap className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                                    <span className="text-[11px] font-black uppercase tracking-widest">Promote</span>
+                                                </button>
+                                                <div className="h-8 w-[2px] bg-[#2E2E2F]/10 mx-1" />
+                                            </>
+                                        )}
+                                        <button onClick={handlePrintEvents} className="flex items-center justify-center h-[52px] w-[52px] bg-[#38BDF2] border-2 border-[#38BDF2] rounded-2xl text-[#F2F2F2] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group" title={`Print List (${selectedRows.size > 0 ? selectedRows.size : filteredEvents.length})`}>
+                                            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                                        </button>
+                                        <button onClick={handleExportEvents} className="flex items-center justify-center h-[52px] w-[52px] bg-[#38BDF2] border-2 border-[#38BDF2] rounded-2xl text-[#F2F2F2] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group" title={`Export CSV (${selectedRows.size > 0 ? selectedRows.size : filteredEvents.length})`}>
+                                            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                        </button>
+                                    </div>
+                                </div>
                                 <Card className="hidden md:block !overflow-visible border border-[#2E2E2F]/15 rounded-[2.5rem] bg-[#F2F2F2]">
                                     <div className="!overflow-visible">
                                         <table className="w-full text-left">
                                             <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/15">
                                                 <tr>
-                                                    <th className="px-4 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide w-12">
-                                                        <input type="checkbox" checked={selectedRows.size === events.length && events.length > 0} onChange={toggleAll} className="w-4 h-4 rounded" />
+                                                    <th className="px-4 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide w-12 text-center align-middle">
+                                                        <div className="flex justify-center">
+                                                            <Checkbox
+                                                                checked={selectedRows.size === filteredEvents.length && filteredEvents.length > 0}
+                                                                onChange={toggleAll}
+                                                                size="sm"
+                                                            />
+                                                        </div>
                                                     </th>
                                                     <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Event Identity</th>
                                                     <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Date & Location</th>
                                                     <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Lifecycle</th>
-                                                    <th className="px-4 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide text-right">
-                                                        <div className="flex items-center justify-end gap-2">
-                                                            <button onClick={handlePrintEvents} className="p-2 bg-[#38BDF2] text-white rounded-lg hover:bg-[#2E2E2F] transition-colors" title="Print">
-                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                                                            </button>
-                                                            <button onClick={handleExportEvents} className="p-2 bg-[#38BDF2] text-white rounded-lg hover:bg-[#2E2E2F] transition-colors" title="Export CSV">
-                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                                            </button>
-                                                        </div>
-                                                    </th>
+                                                    <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Size</th>
+                                                    <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide text-right">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y-2 divide-[#2E2E2F]/15">
                                                 {filteredEvents.map(event => (
-                                                    <tr key={event.eventId} className={`hover:bg-[#38BDF2]/10 transition-colors group cursor-pointer ${selectedRows.has(event.eventId) ? 'bg-[#38BDF2]/10' : ''}`} onClick={() => handleOpenEdit(event)}>
-                                                        <td className="px-4 py-7" onClick={(e) => e.stopPropagation()}>
-                                                            <input type="checkbox" checked={selectedRows.has(event.eventId)} onChange={() => toggleRow(event.eventId)} className="w-4 h-4 rounded" />
-                                                        </td>
-                                                        <td className="px-8 py-7">
-                                                            <div className="flex items-center gap-5">
-                                                                <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border-2 border-[#2E2E2F]/15 relative">
-                                                                    <img src={getImageUrl(event.imageUrl)} alt="" className="w-full h-full object-cover" />
-
-                                                                </div>
-                                                                <div className="space-y-1">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <div className="font-bold text-[#2E2E2F] text-[16px] tracking-tight group-hover:text-[#2E2E2F] transition-colors">{event.eventName}</div>
-                                                                        {promotedEventsMap[event.eventId]?.promoted && (
-                                                                            <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 bg-[#38BDF2]/20 text-[#38BDF2] border border-[#38BDF2]/30 rounded-full whitespace-nowrap flex items-center gap-1">
-                                                                                <ICONS.Zap className="w-2 h-2" />
-                                                                                Promoted
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="flex items-center gap-3">
-                                                                        <span className="text-[11px] font-medium text-[#2E2E2F]/40 uppercase tracking-widest">{event.eventId.split('-')[0]}</span>
-                                                                        <span className="w-1 h-1 rounded-full bg-[#2E2E2F]/10"></span>
-                                                                        <span className="text-[11px] font-medium text-[#2E2E2F]/60 tracking-tight">/{event.slug}</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-8 py-7">
-                                                            <div className="text-[14px] font-semibold text-[#2E2E2F] tracking-tight">
-                                                                {new Date(event.startAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                                            </div>
-                                                            <div className="text-[12px] text-[#2E2E2F]/60 font-medium mt-1.5 flex items-center gap-2">
-                                                                <ICONS.MapPin className="w-3 h-3 text-[#2E2E2F]/50" />
-                                                                <span className="truncate max-w-[200px]">{event.locationText}</span>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-8 py-7">
-                                                            {(() => {
-                                                                const now = new Date();
-                                                                const eventEnd = event.endAt ? new Date(event.endAt) : new Date(new Date(event.startAt).getTime() + 2 * 60 * 60 * 1000);
-                                                                const isCompleted = now > eventEnd;
-                                                                return (
-                                                                    <div className={`inline-flex px-3.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${isCompleted
-                                                                        ? 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
-                                                                        : event.status === 'PUBLISHED'
-                                                                            ? 'bg-[#38BDF2]/20 text-[#2E2E2F]'
-                                                                            : event.status === 'DRAFT'
-                                                                                ? 'bg-[#F2F2F2] text-[#2E2E2F]/60 border-2 border-[#2E2E2F]/15'
-                                                                                : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
-                                                                        }`}>
-                                                                        {isCompleted ? 'COMPLETED' : event.status}
-                                                                    </div>
-                                                                );
-                                                            })()}
-                                                        </td>
-                                                        <td className="px-8 py-7 !overflow-visible align-middle">
-                                                            <div className="flex justify-center items-center relative group/more h-full">
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === event.eventId ? null : event.eventId); }}
-                                                                    className={`p-1.5 rounded-xl transition-all duration-300 ${openDropdownId === event.eventId ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'hover:bg-[#2E2E2F]/5 text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
-                                                                >
-                                                                    <MoreVerticalIcon className="w-5 h-5" />
-                                                                </button>
-
-                                                                <div
-                                                                    className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${openDropdownId === event.eventId ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible group-hover/more:opacity-100 group-hover/more:scale-100 group-hover/more:visible'}`}
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                >
-                                                                    <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
-                                                                        <EyeIcon className="w-4 h-4" /> View
-                                                                    </button>
-                                                                    <button onClick={(e) => { e.stopPropagation(); handleOpenTickets(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
-                                                                        <ICONS.CreditCard className="w-4 h-4" /> Tickets
-                                                                    </button>
-                                                                    <button onClick={(e) => { e.stopPropagation(); handleOpenAttendeePop(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
-                                                                        <ICONS.Users className="w-4 h-4" /> Guests
-                                                                    </button>
-                                                                    <button onClick={(e) => { e.stopPropagation(); handleOpenEdit(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
-                                                                        <ICONS.Edit className="w-4 h-4" /> Edit
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            const isPromoted = promotedEventsMap[event.eventId]?.promoted;
-                                                                            if (promotionQuota && !isPromoted && !promotionQuota.canPromote) {
-                                                                                showToast('error', 'You have reached your promotion limit.');
-                                                                            } else {
-                                                                                handleToggleEventPromotion(event.eventId, isPromoted || false);
-                                                                            }
-                                                                        }}
-                                                                        className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors"
-                                                                    >
-                                                                        <ICONS.Zap className="w-4 h-4" fill={promotedEventsMap[event.eventId]?.promoted ? "currentColor" : "none"} /> Promote
-                                                                    </button>
-                                                                    <div className="my-1 border-t border-[#2E2E2F]/5" />
-                                                                    <button onClick={(e) => { e.stopPropagation(); setDeleteConfirm(event); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-600 flex items-center gap-3 transition-colors">
-                                                                        <ICONS.Trash className="w-4 h-4" /> Archive
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
+                                                    <EventTableRow
+                                                        key={event.eventId}
+                                                        event={event}
+                                                        isSelected={selectedRows.has(event.eventId)}
+                                                        onToggle={() => toggleRow(event.eventId)}
+                                                        onOpenEdit={() => handleOpenEdit(event)}
+                                                        onOpenTickets={() => handleOpenTickets(event)}
+                                                        onOpenAttendeePop={() => handleOpenAttendeePop(event)}
+                                                        onTogglePromotion={(e) => {
+                                                            e.stopPropagation();
+                                                            const isPromoted = promotedEventsMap[event.eventId]?.promoted;
+                                                            if (promotionQuota && !isPromoted && !promotionQuota.canPromote) {
+                                                                showToast('error', 'You have reached your promotion limit.');
+                                                            } else {
+                                                                handleToggleEventPromotion(event.eventId, isPromoted || false);
+                                                            }
+                                                        }}
+                                                        onArchive={() => setDeleteConfirm(event)}
+                                                        isPromoted={promotedEventsMap[event.eventId]?.promoted || false}
+                                                        openDropdownId={openDropdownId}
+                                                        setOpenDropdownId={setOpenDropdownId}
+                                                    />
                                                 ))}
                                             </tbody>
                                         </table>
@@ -1315,7 +1461,7 @@ export const UserEvents: React.FC = () => {
 
             {/* ─── Create/Edit Event logic (In-page) ─── */}
             {isModalOpen && (
-                <div style={{ zoom: 0.8 }} className="animate-in fade-in duration-200 min-h-[calc(85vh-80px)] mb-0 px-0 pt-0">
+                <div className="animate-in fade-in duration-200 min-h-[calc(100vh-40px)] md:min-h-[calc(85vh-80px)] mb-0 px-0 pt-0">
                     <div className={`grid grid-cols-1 gap-6 ${isSidebarHidden ? 'xl:grid-cols-1' : (!isPreviewMode || previewDevice === 'desktop') ? 'xl:grid-cols-[300px_minmax(0,1fr)]' : 'xl:grid-cols-[300px_minmax(0,1fr)_380px]'}`}>
                         {!isSidebarHidden && (
                             <div className="space-y-5 xl:sticky xl:top-0 self-start xl:max-h-[calc(70vh-1rem)] xl:overflow-y-auto xl:pr-1">
@@ -1347,24 +1493,34 @@ export const UserEvents: React.FC = () => {
                                 </div>
                                 <div className="hidden md:block bg-[#F2F2F2] rounded-[2rem] border border-[#2E2E2F]/15 overflow-hidden">
                                     <div className="px-5 py-3 border-b border-[#2E2E2F]/15"><p className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Steps</p></div>
-                                    {EVENT_SETUP_STEPS.map((step) => (
-                                        <button
-                                            key={step.id}
-                                            type="button"
-                                            onClick={() => { setWizardStep(step.id); setIsPreviewMode(false); }}
-                                            className={`w-full text-left px-5 py-4 border-b border-[#2E2E2F]/15 last:border-b-0 transition-colors hover:bg-[#38BDF2]/5 ${wizardStep === step.id ? 'bg-[#38BDF2]/10' : ''}`}
-                                        >
-                                            <div className="flex items-start gap-3">
-                                                <span className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center ${wizardStep >= step.id ? 'border-[#2563EB]' : 'border-[#2E2E2F]/20'}`}>
-                                                    {wizardStep >= step.id && <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]" />}
-                                                </span>
-                                                <div>
-                                                    <p className="text-[18px] leading-none font-bold text-[#2E2E2F]">{step.title}</p>
-                                                    <p className="mt-2 text-[13px] leading-5 text-[#2E2E2F]/70">{EVENT_SETUP_STEP_DETAIL[step.id]}</p>
+                                    {EVENT_SETUP_STEPS.map((step) => {
+                                        const isStepReachable = isEditMode || step.id <= wizardStep;
+                                        return (
+                                            <button
+                                                key={step.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    if (isStepReachable || (wizardStep >= step.id)) {
+                                                        setWizardStep(step.id as EventSetupStep);
+                                                        setIsPreviewMode(false);
+                                                    } else {
+                                                        showToast('info', `Please complete the previous steps before proceeding to ${step.title}.`);
+                                                    }
+                                                }}
+                                                className={`w-full text-left px-5 py-4 border-b border-[#2E2E2F]/15 last:border-b-0 transition-colors ${wizardStep === step.id ? 'bg-[#38BDF2]/10' : (isStepReachable ? 'hover:bg-[#38BDF2]/5 cursor-pointer' : 'opacity-40 cursor-not-allowed')}`}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <span className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center ${wizardStep >= step.id ? 'border-[#2563EB]' : 'border-[#2E2E2F]/20'}`}>
+                                                        {wizardStep >= step.id && <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]" />}
+                                                    </span>
+                                                    <div>
+                                                        <p className="text-[18px] leading-none font-bold text-[#2E2E2F]">{step.title}</p>
+                                                        <p className="mt-2 text-[13px] leading-5 text-[#2E2E2F]/70">{EVENT_SETUP_STEP_DETAIL[step.id]}</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </button>
-                                    ))}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}
@@ -1389,441 +1545,38 @@ export const UserEvents: React.FC = () => {
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-8 px-1">
-                                {wizardStep === 1 && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-                                        <div className="md:col-span-2">
-                                            <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Organizer Name</label>
-                                            <select value={organizerProfile?.organizerId || ''} disabled className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[12px] font-semibold tracking-wide outline-none">
-                                                {organizerProfile?.organizerId ? <option value={organizerProfile.organizerId}>{organizerProfile.organizerName}</option> : <option value="">No organizer profile set</option>}
-                                            </select>
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <Input label="Event Name" placeholder="e.g. Founder Growth Summit 2026" value={formData.eventName} onChange={(e: any) => setFormData({ ...formData, eventName: e.target.value })} />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Description</label>
-                                            <textarea className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-[1.5rem] text-sm min-h-[130px] focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors outline-none" value={formData.description} onChange={(e: any) => setFormData({ ...formData, description: e.target.value })} />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <div className="flex flex-col gap-2 mb-1 px-1">
-                                                <div className="flex items-center justify-between">
-                                                    <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Brand Color</label>
-                                                    {!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) && (
-                                                        <Badge type="info" className="text-[8px] px-2 py-0.5 bg-[#2E2E2F] text-white">Premium Feature</Badge>
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-4 p-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl relative overflow-hidden">
-                                                    <input
-                                                        type="color"
-                                                        value={formData.brandColor || '#38BDF2'}
-                                                        onChange={(e) => setFormData({ ...formData, brandColor: e.target.value })}
-                                                        disabled={!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding)}
-                                                        className={`w-12 h-12 rounded-lg cursor-pointer border-none p-0 bg-transparent ${!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) ? 'opacity-30' : ''}`}
-                                                    />
-                                                    <div className="flex-1">
-                                                        <p className="text-xs font-bold text-[#2E2E2F]">Primary Accent Color</p>
-                                                        <p className="text-[10px] text-[#2E2E2F]/50">Used for buttons, links, and highlights on your event page.</p>
-                                                    </div>
-                                                    {!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) && (
-                                                        <div className="absolute inset-0 bg-[#F2F2F2]/40 backdrop-blur-[1px] flex items-center justify-center">
-                                                            <Button variant="outline" className="text-[8px] py-1 px-3 border-[#2E2E2F]/20" onClick={() => navigate('/subscription')}>Upgrade to Unlock</Button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="md:col-span-2">
-                                            <div className="flex flex-col gap-2 mb-1 px-1">
-                                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Visual Media</label>
-                                                <div
-                                                    className="relative group w-full h-44 rounded-[1.5rem] border-2 border-dashed border-[#2E2E2F]/30 bg-[#F2F2F2] flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#38BDF2] hover:bg-[#38BDF2]/10 transition-colors"
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                >
-                                                    {formData.imageUrl ? (
-                                                        <img src={getImageUrl(formData.imageUrl)} alt="Preview" className="w-full h-full object-cover rounded-[1.5rem]" />
-                                                    ) : (
-                                                        <div className="flex flex-col items-center justify-center w-full h-full">
-                                                            <svg className="w-10 h-10 text-[#2E2E2F]/40 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="2.5" /><path d="M21 15l-5-5L5 21" /></svg>
-                                                            <span className="text-[12px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Upload Event Image</span>
-                                                        </div>
-                                                    )}
-                                                    <div className="absolute bottom-3 right-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-lg px-3 py-1 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors pointer-events-none">Browse</div>
-                                                </div>
-                                                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {wizardStep === 2 && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-                                        <Input label="Session Date" type="date" value={formData.eventDate} onChange={(e: any) => setFormData({ ...formData, eventDate: e.target.value })} />
-                                        <Input label="Start Time" type="time" value={formData.eventTime} onChange={(e: any) => setFormData({ ...formData, eventTime: e.target.value })} />
-                                        <Input label="End Date" type="date" value={formData.endDate} onChange={(e: any) => setFormData({ ...formData, endDate: e.target.value })} />
-                                        <Input label="End Time" type="time" value={formData.endTime} onChange={(e: any) => setFormData({ ...formData, endTime: e.target.value })} />
-
-                                        <div>
-                                            <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Location Type</label>
-                                            <select
-                                                className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]"
-                                                value={formData.locationType}
-                                                onChange={(e) => setFormData({ ...formData, locationType: e.target.value as Event['locationType'] })}
-                                            >
-                                                <option value="ONSITE">Onsite</option>
-                                                <option value="ONLINE">Online</option>
-                                                <option value="HYBRID">Hybrid</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Timezone</label>
-                                            <Input value={formData.timezone} onChange={(e: any) => setFormData({ ...formData, timezone: e.target.value })} />
-                                        </div>
-
-                                        <div className="md:col-span-2 space-y-8">
-                                            {/* Physical Venue Section */}
-                                            <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/15">
-                                                <div className="flex items-center gap-3 mb-5">
-                                                    <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]">
-                                                        <ICONS.MapPin className="w-4 h-4" />
-                                                    </div>
-                                                    <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Venue Details</h4>
-                                                </div>
-                                                <Input
-                                                    label={formData.locationType === 'ONLINE' ? 'Physical Hub (Optional)' : 'Venue Address'}
-                                                    placeholder="e.g. Global Tech Center"
-                                                    value={formData.location}
-                                                    onChange={(e: any) => setFormData({ ...formData, location: e.target.value })}
-                                                />
-                                                <div className="mt-4">
-                                                    <OnsiteLocationAssistant
-                                                        value={formData.location}
-                                                        onChange={applyLocationValue}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            {/* Broadcast Section */}
-                                            <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/15">
-                                                <div className="flex items-center gap-3 mb-5">
-                                                    <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]">
-                                                        <ICONS.Monitor className="w-4 h-4" />
-                                                    </div>
-                                                    <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Broadcast Settings</h4>
-                                                </div>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                    <Input
-                                                        label="Platform Name"
-                                                        placeholder="e.g. YouTube, Google Meet"
-                                                        value={formData.streamingPlatform}
-                                                        onChange={(e: any) => setFormData({ ...formData, streamingPlatform: e.target.value })}
-                                                    />
-                                                    <Input
-                                                        label="Connection URL"
-                                                        placeholder="Link to stream or meeting"
-                                                        value={formData.streamingUrl}
-                                                        onChange={(e: any) => applyLocationValue(e.target.value)}
-                                                    />
-                                                </div>
-
-                                                {formData.streamingUrl && formData.streamingUrl.startsWith('http') && (
-                                                    <div className="mt-6 p-6 bg-black rounded-3xl border border-[#F2F2F2]/10 overflow-hidden shadow-xl">
-                                                        <div className="flex items-center justify-between mb-4">
-                                                            <h4 className="text-[12px] font-black text-white uppercase tracking-widest">Stream Preview</h4>
-                                                            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-red-500/30 bg-red-500/20">
-                                                                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                                                                <span className="text-[9px] font-black uppercase tracking-widest text-white">Live</span>
-                                                            </div>
-                                                        </div>
-
-                                                        {(formData.streamingUrl.includes('youtube.com') || formData.streamingUrl.includes('youtu.be')) ? (
-                                                            <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#F2F2F2]/5 border border-[#F2F2F2]/5">
-                                                                {(() => {
-                                                                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/|live\/)([^#\&\?]*).*/;
-                                                                    const match = formData.streamingUrl.match(regExp);
-                                                                    const videoId = (match && match[2].length === 11) ? match[2] : null;
-
-                                                                    return videoId ? (
-                                                                        <iframe
-                                                                            className="absolute inset-0 w-full h-full"
-                                                                            src={`https://www.youtube.com/embed/${videoId}`}
-                                                                            title="YouTube Preview"
-                                                                            frameBorder="0"
-                                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                                                            allowFullScreen
-                                                                        />
-                                                                    ) : <div className="flex items-center justify-center w-full h-full text-[#F2F2F2]/30 text-xs">Invalid YouTube Link</div>;
-                                                                })()}
-                                                            </div>
-                                                        ) : (formData.streamingUrl.includes('facebook.com') || formData.streamingUrl.includes('fb.watch')) ? (
-                                                            <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#F2F2F2]/5 border border-[#F2F2F2]/5">
-                                                                <iframe
-                                                                    className="absolute inset-0 w-full h-full"
-                                                                    src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(formData.streamingUrl)}&show_text=0&width=560&t=0`}
-                                                                    title="Facebook Preview"
-                                                                    frameBorder="0"
-                                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                                                    allowFullScreen
-                                                                />
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex flex-col items-center justify-center p-10 rounded-2xl bg-[#F2F2F2]/5 border border-[#F2F2F2]/5 border-dashed">
-                                                                <ICONS.Monitor className="w-8 h-8 text-[#F2F2F2]/20 mb-3" />
-                                                                <p className="text-[#F2F2F2]/40 text-[11px] text-center font-medium">This platform doesn't support direct previews, but the link will be provided to attendees.</p>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {wizardStep === 3 && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-                                        <Input
-                                            label={`Capacity Total (${formData.capacityTotal}/${maxEventCapacity})`}
-                                            type="number"
-                                            min={1}
-                                            max={maxEventCapacity}
-                                            value={formData.capacityTotal}
-                                            onChange={(e: any) => {
-                                                const val = parseInt(e.target.value, 10) || 1;
-                                                const nextValue = Math.max(1, Math.min(val, maxEventCapacity));
-                                                setFormData({ ...formData, capacityTotal: nextValue });
-                                            }}
-                                            error={formData.capacityTotal > maxEventCapacity ? `Capacity exceeds your plan limit (${maxEventCapacity})` : ''}
-                                        />
-                                        <Input
-                                            label="Registration Open Date"
-                                            type="date"
-                                            value={formData.regOpenDate}
-                                            onChange={(e: any) => setFormData({ ...formData, regOpenDate: e.target.value })}
-                                        />
-                                        <Input
-                                            label="Registration Open Time"
-                                            type="time"
-                                            value={formData.regOpenTime}
-                                            onChange={(e: any) => setFormData({ ...formData, regOpenTime: e.target.value })}
-                                        />
-                                        <Input
-                                            label="Registration Close Date"
-                                            type="date"
-                                            value={formData.regCloseDate}
-                                            onChange={(e: any) => setFormData({ ...formData, regCloseDate: e.target.value })}
-                                        />
-                                        <Input
-                                            label="Registration Close Time"
-                                            type="time"
-                                            value={formData.regCloseTime}
-                                            onChange={(e: any) => setFormData({ ...formData, regCloseTime: e.target.value })}
-                                        />
-
-                                        <div className="md:col-span-2 space-y-4">
-                                            <div className="p-5 rounded-2xl border border-[#2E2E2F]/15 bg-[#F2F2F2] flex items-center justify-between group relative overflow-hidden">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]">
-                                                        <ICONS.CreditCard className="w-5 h-5" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-bold text-[#2E2E2F]">Enable Discount Codes</p>
-                                                        <p className="text-[10px] text-[#2E2E2F]/50">Allow promotional codes during checkout.</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) && (
-                                                        <Badge type="info" className="text-[8px] font-black bg-[#2E2E2F] text-white">PRO</Badge>
-                                                    )}
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={formData.enableDiscountCodes}
-                                                        onChange={(e) => setFormData({ ...formData, enableDiscountCodes: e.target.checked })}
-                                                        disabled={!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes)}
-                                                        className="w-6 h-6 accent-[#38BDF2] cursor-pointer disabled:opacity-30"
-                                                    />
-                                                </div>
-                                                {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) && (
-                                                    <div className="absolute inset-0 bg-[#F2F2F2]/40 backdrop-blur-[1px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <Button variant="outline" className="text-[8px] py-1 px-3 border-[#2E2E2F]/20 bg-[#F2F2F2]" onClick={() => navigate('/subscription')}>Upgrade to Unlock</Button>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="rounded-2xl border border-[#2E2E2F]/15 bg-[#F2F2F2] px-5 py-4">
-                                                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2E2E2F]/45">Ticket Setup Rule</p>
-                                                <p className="mt-2 text-sm font-semibold text-[#2E2E2F]">
-                                                    Publishing is locked until at least one ticket type is configured.
-                                                </p>
-                                                <p className="mt-1 text-[12px] text-[#2E2E2F]/60">
-                                                    Clicking next will save draft and open ticket setup automatically.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {wizardStep === 4 && (
-                                    <div className="space-y-6">
-                                        {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) ? (
-                                            <div className="p-10 text-center bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15">
-                                                <div className="w-16 h-16 bg-[#2E2E2F] text-white rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                                    <ICONS.Lock className="w-8 h-8" />
-                                                </div>
-                                                <h3 className="text-xl font-black text-[#2E2E2F] tracking-tight">Promotions Locked</h3>
-                                                <p className="text-[#2E2E2F]/60 text-sm mt-2 max-w-xs mx-auto">Upgrade to a Pro or Enterprise plan to enable discount codes and boost your ticket sales.</p>
-                                                <Button className="mt-6 bg-[#38BDF2]" onClick={() => navigate('/subscription')}>View Plans</Button>
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-6">
-                                                <div className="flex items-center justify-between">
-                                                    <div>
-                                                        <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Active Promotions</h4>
-                                                        <p className="text-[10px] text-[#2E2E2F]/50 mt-1 uppercase tracking-wider">Total: {promotions.length}</p>
-                                                    </div>
-                                                    <Button size="sm" onClick={() => {
-                                                        setEditingPromotion({ new: true });
-                                                        setPromoForm({ code: '', discountType: 'PERCENTAGE', discountValue: '10', maxUses: '100', validFrom: '', validUntil: '', isActive: true });
-                                                    }}>Add Code</Button>
-                                                </div>
-
-                                                {editingPromotion && (
-                                                    <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#38BDF2]/30 space-y-5">
-                                                        <div className="flex items-center justify-between">
-                                                            <h5 className="text-[11px] font-black uppercase tracking-widest">{editingPromotion.new ? 'New Promotion' : 'Edit Promotion'}</h5>
-                                                            <button onClick={() => setEditingPromotion(null)} className="text-[#2E2E2F]/30 hover:text-red-500 transition-colors"><ICONS.X className="w-4 h-4" /></button>
-                                                        </div>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                                            <Input label="Promo Code" placeholder="SALE20" value={promoForm.code} onChange={(e: any) => setPromoForm({ ...promoForm, code: e.target.value.toUpperCase() })} />
-                                                            <div className="space-y-2">
-                                                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide ml-1">Discount Type</label>
-                                                                <select
-                                                                    className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none"
-                                                                    value={promoForm.discountType}
-                                                                    onChange={(e) => setPromoForm({ ...promoForm, discountType: e.target.value })}
-                                                                >
-                                                                    <option value="PERCENTAGE">Percentage (%)</option>
-                                                                    <option value="FIXED">Fixed Amount (PHP)</option>
-                                                                </select>
-                                                            </div>
-                                                            <Input label="Discount Value" type="number" value={promoForm.discountValue} onChange={(e: any) => setPromoForm({ ...promoForm, discountValue: e.target.value })} />
-                                                            <Input label="Max Uses" type="number" value={promoForm.maxUses} onChange={(e: any) => setPromoForm({ ...promoForm, maxUses: e.target.value })} />
-                                                            <Input label="Valid From" type="date" value={promoForm.validFrom} onChange={(e: any) => setPromoForm({ ...promoForm, validFrom: e.target.value })} />
-                                                            <Input label="Valid Until" type="date" value={promoForm.validUntil} onChange={(e: any) => setPromoForm({ ...promoForm, validUntil: e.target.value })} />
-                                                            <div className="md:col-span-2 flex items-center gap-3">
-                                                                <input type="checkbox" id="isActive" checked={promoForm.isActive} onChange={(e) => setPromoForm({ ...promoForm, isActive: e.target.checked })} className="w-5 h-5 accent-[#38BDF2]" />
-                                                                <label htmlFor="isActive" className="text-xs font-bold text-[#2E2E2F]">Active and usable</label>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex gap-3 pt-2">
-                                                            <Button className="flex-1" onClick={handleSavePromotion} disabled={submitting}>{submitting ? '...' : 'Save Promotion'}</Button>
-                                                            <Button variant="outline" onClick={() => setEditingPromotion(null)}>Cancel</Button>
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                <div className="space-y-3">
-                                                    {promotionsLoading ? (
-                                                        <div className="py-10 text-center"><div className="w-6 h-6 border-2 border-[#38BDF2] border-t-transparent rounded-full animate-spin mx-auto"></div></div>
-                                                    ) : promotions.length === 0 ? (
-                                                        <div className="py-10 text-center border-2 border-dashed border-[#2E2E2F]/15 rounded-2xl text-[#2E2E2F]/30 uppercase text-[10px] font-black tracking-widest">No promo codes active</div>
-                                                    ) : (
-                                                        promotions.map(promo => (
-                                                            <div key={promo.promotionId} className="flex items-center justify-between p-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl group border-l-4 border-l-[#38BDF2]">
-                                                                <div>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="font-black text-[#2E2E2F] tracking-tight">{promo.code}</span>
-                                                                        <Badge type={promo.isActive ? 'success' : 'neutral'} className="text-[8px] px-1.5 py-0">{promo.isActive ? 'Active' : 'Inactive'}</Badge>
-                                                                    </div>
-                                                                    <p className="text-[10px] text-[#2E2E2F]/50 mt-1 uppercase tracking-tight font-bold">
-                                                                        {promo.discountType === 'PERCENTAGE' ? `${promo.discountValue}% Off` : `PHP ${promo.discountValue} Off`}
-                                                                        <span className="mx-2">•</span>
-                                                                        {promo.usedCount || 0} / {promo.maxUses} Uses
-                                                                    </p>
-                                                                </div>
-                                                                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                    <button onClick={() => {
-                                                                        setEditingPromotion(promo);
-                                                                        setPromoForm({
-                                                                            code: promo.code,
-                                                                            discountType: promo.discountType,
-                                                                            discountValue: String(promo.discountValue),
-                                                                            maxUses: String(promo.maxUses),
-                                                                            validFrom: promo.validFrom ? promo.validFrom.split('T')[0] : '',
-                                                                            validUntil: promo.validUntil ? promo.validUntil.split('T')[0] : '',
-                                                                            isActive: promo.isActive
-                                                                        });
-                                                                    }} className="p-2 hover:bg-[#38BDF2]/10 rounded-lg text-[#2E2E2F]"><ICONS.Edit className="w-4 h-4" /></button>
-                                                                    <button onClick={() => handleDeletePromotion(promo.promotionId)} className="p-2 hover:bg-red-50 rounded-lg text-red-500"><ICONS.Trash className="w-4 h-4" /></button>
-                                                                </div>
-                                                            </div>
-                                                        ))
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {wizardStep === 5 && (
-                                    <div className="space-y-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                            <div className={`rounded-2xl border px-4 py-4 ${isPersonalProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Account Profile</p>
-                                                <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{isPersonalProfileReady ? 'Ready' : 'Incomplete'}</p>
-                                            </div>
-                                            <div className={`rounded-2xl border px-4 py-4 ${isOrganizerProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Organization Profile</p>
-                                                <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{isOrganizerProfileReady ? 'Ready' : 'Incomplete'}</p>
-                                            </div>
-                                            <div className={`rounded-2xl border px-4 py-4 ${canPublishByTicketRule ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Ticket Setup</p>
-                                                <p className="mt-2 text-sm font-bold text-[#2E2E2F]">
-                                                    {ticketReadinessLoading
-                                                        ? 'Checking...'
-                                                        : isEditMode
-                                                            ? `${activeEventTicketCount} ticket type(s)`
-                                                            : 'Save draft first'}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Event Status</label>
-                                            <p className="mb-2 text-[11px] text-[#2E2E2F]/60">
-                                                Current: <span className="font-bold text-[#2E2E2F]">{initialEventStatus}</span> · Choose final status below.
-                                            </p>
-                                            <select
-                                                className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]"
-                                                value={finalStatusDecision}
-                                                onChange={(e) => {
-                                                    const nextStatus = e.target.value as EventStatus | '';
-                                                    setFinalStatusDecision(nextStatus);
-                                                    if (nextStatus) {
-                                                        setFormData({ ...formData, status: nextStatus as EventStatus });
-                                                    }
-                                                }}
-                                            >
-                                                <option value="">Select final status</option>
-                                                <option value="DRAFT">Draft / Private</option>
-                                                <option value="PUBLISHED" disabled={!canPublishByTicketRule || isAtActiveLimit}>
-                                                    {!canPublishByTicketRule ? 'Published (Add ticket first)' : isAtActiveLimit ? 'Published (Active Event Limit)' : 'Published'}
-                                                </option>
-
-                                                {isEditMode && <option value="CLOSED">Closed</option>}
-                                            </select>
-                                            {isAtActiveLimit && (
-                                                <div className="mt-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
-                                                    <p className="text-[12px] font-bold text-amber-800 flex items-center gap-2">
-                                                        <ICONS.AlertTriangle className="w-4 h-4" />
-                                                        Active Event Limit Reach (Max: {maxActiveEvents})
-                                                    </p>
-                                                    <p className="text-[11px] text-amber-700 mt-1">You are currently at the maximum number of active events for your plan. Please close an existing event or upgrade to publish this one.</p>
-                                                    <Button size="sm" className="mt-2 text-[10px] px-3 py-1 bg-amber-600 text-white hover:bg-black" onClick={() => navigate('/subscription')}>Upgrade Plan</Button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
+                                <WizardStepContent
+                                    wizardStep={wizardStep}
+                                    formData={formData}
+                                    setFormData={setFormData}
+                                    organizerProfile={organizerProfile}
+                                    fileInputRef={fileInputRef}
+                                    handleImageUpload={handleImageUpload}
+                                    isEditMode={isEditMode}
+                                    applyLocationValue={applyLocationValue}
+                                    maxEventCapacity={maxEventCapacity}
+                                    activeEventTicketCount={activeEventTicketCount}
+                                    ticketReadinessLoading={ticketReadinessLoading}
+                                    canPublishByTicketRule={canPublishByTicketRule}
+                                    initialEventStatus={initialEventStatus}
+                                    finalStatusDecision={finalStatusDecision}
+                                    setFinalStatusDecision={setFinalStatusDecision}
+                                    isAtActiveLimit={isAtActiveLimit}
+                                    maxActiveEvents={maxActiveEvents}
+                                    promoForm={promoForm}
+                                    setPromoForm={setPromoForm}
+                                    editingPromotion={editingPromotion}
+                                    setEditingPromotion={setEditingPromotion}
+                                    handleSavePromotion={handleSavePromotion}
+                                    handleDeletePromotion={handleDeletePromotion}
+                                    promotions={promotions}
+                                    promotionsLoading={promotionsLoading}
+                                    showToast={showToast}
+                                    isPersonalProfileReady={isPersonalProfileReady}
+                                    isOrganizerProfileReady={isOrganizerProfileReady}
+                                    navigate={navigate}
+                                    submitting={submitting}
+                                />
 
                                 <div className="hidden md:flex gap-4 pt-8 border-t border-[#2E2E2F]/15">
                                     <Button
@@ -1866,275 +1619,40 @@ export const UserEvents: React.FC = () => {
                                             className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors min-h-[32px]"
                                             disabled={submitting}
                                         >
-                                            {submitting ? 'Saving...' : 'Apply Event Status'}
+                                            {submitting ? 'Processing...' : (isEditMode ? 'Finish Update' : 'Publish Event')}
                                         </Button>
                                     )}
                                 </div>
                             </form>
                         </div>
 
+                        <MobileWizardActions
+                            handleNextWizardStep={handleNextWizardStep}
+                            handleSubmit={handleSubmit}
+                            isPreviewMode={isPreviewMode}
+                            setIsPreviewMode={setIsPreviewMode}
+                            setPreviewDevice={setPreviewDevice}
+                        />
+
+
                         <div className={`${previewDevice === 'desktop'
-                                ? `fixed top-24 right-6 xl:right-8 w-[calc(100vw-3rem)] max-w-[1140px] h-[calc(100vh-7rem)] z-[450] bg-[#F2F2F2] shadow-[0_40px_100px_rgba(0,0,0,0.2)] rounded-[12px] flex flex-col overflow-hidden custom-scrollbar transform transition-all duration-500 ease-in-out border border-[#2E2E2F]/15 ${isPreviewMode ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0'}`
-                                : `${isPreviewMode ? 'fixed inset-0 top-24 z-[450] bg-[#F2F2F2] overflow-y-auto' : 'hidden'} xl:sticky xl:top-0 self-start space-y-3 xl:max-h-[calc(70vh-1rem)] xl:overflow-y-auto xl:pr-1`
+                            ? `fixed top-24 right-6 xl:right-8 w-[calc(100vw-3rem)] max-w-[1140px] h-[calc(100vh-7rem)] z-[450] bg-[#F2F2F2] shadow-[0_40px_100px_rgba(0,0,0,0.2)] rounded-[12px] flex flex-col overflow-hidden custom-scrollbar transform transition-all duration-500 ease-in-out border border-[#2E2E2F]/15 ${isPreviewMode ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0'}`
+                            : `${isPreviewMode ? 'fixed inset-0 top-24 z-[450] bg-[#F2F2F2] overflow-y-auto' : 'hidden'} xl:sticky xl:top-0 self-start space-y-3 xl:max-h-[calc(70vh-1rem)] xl:overflow-y-auto xl:pr-1`
                             }`}>
-                            <div className={`flex flex-col h-full w-full ${previewDevice === 'desktop' ? '' : 'pb-32'}`}>
-                                <div className={`flex items-center justify-between flex-shrink-0 ${previewDevice === 'desktop' ? 'py-6 px-10' : 'mb-3'}`}>
-                                    {previewDevice === 'desktop' ? (
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsPreviewMode(false)}
-                                            className="flex items-center gap-2 text-[#2E2E2F] hover:text-black font-bold text-sm transition-colors"
-                                        >
-                                            <ICONS.ChevronLeft className="w-5 h-5" strokeWidth={3} />
-                                            Preview
-                                        </button>
-                                    ) : (
-                                        <div className="flex items-center justify-between w-full">
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsPreviewMode(false)}
-                                                className="flex items-center gap-2 text-[#2E2E2F] hover:text-black font-bold text-sm transition-colors"
-                                            >
-                                                <ICONS.ChevronRight className="w-4 h-4 text-[#2E2E2F]/65" />
-                                                <h4 className="text-[30px] font-black text-[#2E2E2F] tracking-tight">Preview</h4>
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    <div className="flex items-center gap-2">
-                                        <div className="hidden md:inline-flex items-center rounded-lg border border-[#2E2E2F]/15 bg-transparent p-1 shadow-sm">
-                                            <button
-                                                type="button"
-                                                onClick={() => setPreviewDevice('mobile')}
-                                                className={`w-9 h-9 rounded-md flex items-center justify-center ${previewDevice === 'mobile' ? 'bg-[#2E2E2F]/10 text-[#2E2E2F]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
-                                                title="Mobile preview"
-                                            >
-                                                <MobilePreviewIcon className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setPreviewDevice('desktop')}
-                                                className={`w-9 h-9 rounded-md flex items-center justify-center ${previewDevice === 'desktop' ? 'bg-[#2E2E2F]/10 text-[#2E2E2F]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
-                                                title="Desktop preview"
-                                            >
-                                                <DesktopPreviewIcon className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className={`${previewDevice === 'desktop' ? 'flex-1 overflow-y-auto custom-scrollbar w-full px-8 xl:px-12 py-6 mx-auto flex justify-center' : 'flex-1 w-full overflow-y-auto'}`}>
-                                    <div className={`${previewDevice === 'desktop' ? 'w-full max-w-[1024px] rounded-[12px] shadow-sm border border-[#2E2E2F]/15 min-h-[85vh]' : 'w-full'}`}>
-                                        <div className={`${previewDevice === 'desktop' ? 'relative p-10 pb-[92px]' : 'w-full'}`}>
-                                            {/* Browser Chrome for Laptop/Desktop */}
-                                            {previewDevice !== 'mobile' && previewDevice !== 'desktop' && (
-                                                <div className="bg-[#E5E7EB] h-10 flex items-center px-4 gap-4 border-b border-[#2E2E2F]/15">
-                                                    <div className="flex gap-1.5">
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
-                                                    </div>
-                                                    <div className="flex-1 bg-[#F2F2F2]/60 rounded-md h-6 flex items-center px-3 text-[10px] text-[#2E2E2F]/40 font-medium truncate">
-                                                        startuplab.io/events/{formData.eventName.toLowerCase().replace(/\s+/g, '-')}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            <div className="h-14 border-b border-[#2E2E2F]/15 px-5 flex items-center justify-between bg-[#F2F2F2]">
-                                                <img
-                                                    src={(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) && organizerProfile?.profileImageUrl ? getImageUrl(organizerProfile.profileImageUrl) : BRAND_LOGO_URL}
-                                                    alt="Event Logo"
-                                                    className="h-8 w-auto object-contain"
-                                                />
-                                                <div className="flex items-center gap-3 text-[#2E2E2F]/70">
-                                                    <ICONS.Users className="w-4 h-4" />
-                                                    <ICONS.MoreHorizontal className="w-4 h-4" />
-                                                </div>
-                                            </div>
-
-                                            <div className={`bg-[#F2F2F2] p-5 ${previewDevice === 'desktop' ? 'flex gap-8 items-start' : 'space-y-6'}`}>
-                                                <div className={`flex-1 ${previewDevice === 'desktop' ? 'max-w-[calc(100%-350px)]' : 'w-full'} space-y-6`}>
-                                                    <div className="mb-4">
-                                                        <div className="flex items-center gap-2 text-[8px] font-black tracking-widest uppercase mb-6" style={{ color: previewAccentColor }}>
-                                                            <svg className="w-2.5 h-2.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
-                                                            BACK TO EVENTS
-                                                        </div>
-
-                                                        <div className="flex items-start justify-between gap-4 mb-4">
-                                                            <h2 className={`${previewDevice === 'mobile' ? 'text-2xl' : 'text-3xl'} font-black text-[#2E2E2F] tracking-tighter leading-tight`}>
-                                                                {formData.eventName || 'Event title'}
-                                                            </h2>
-                                                            <div className="flex items-center gap-2 shrink-0">
-                                                                <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
-                                                                    <ICONS.Heart className="w-4 h-4 text-[#2E2E2F]/40" />
-                                                                </div>
-                                                                <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
-                                                                    <ICONS.Download className="w-4 h-4 text-[#2E2E2F]/40" />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="rounded-[2rem] overflow-hidden border-2 border-[#2E2E2F]/15 mb-6 group">
-                                                            <img
-                                                                src={getImageUrl(formData.imageUrl)}
-                                                                alt="Event Preview"
-                                                                className="w-full aspect-video object-cover"
-                                                            />
-                                                        </div>
-
-                                                        <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F]/70">
-                                                            <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
-                                                                <ICONS.Calendar className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
-                                                                {previewDateLabel}
-                                                            </div>
-                                                            <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
-                                                                <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
-                                                                {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
-                                                            </div>
-                                                            {formData.streamingPlatform && (
-                                                                <div className="flex items-center bg-[#F2F2F2] px-3 py-1.5 rounded-xl border text-[10px] font-black tracking-wide" style={{ color: previewAccentColor, borderColor: `${previewAccentColor}33`, backgroundColor: `${previewAccentColor}0D` }}>
-                                                                    VIA {formData.streamingPlatform.toUpperCase()}
-                                                                </div>
-                                                            )}
-                                                            <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
-                                                                CAPACITY: {formData.capacityTotal}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
-                                                        <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
-                                                        <p className="text-[#2E2E2F]/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
-                                                            {formData.description || 'Provide an executive summary of this event session...'}
-                                                        </p>
-                                                    </div>
-
-                                                    <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
-                                                        <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
-                                                        <div className="rounded-[1.2rem] border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] p-4 flex flex-col gap-4">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="w-12 h-12 rounded-full overflow-hidden text-[#F2F2F2] flex items-center justify-center text-lg font-bold shrink-0" style={{ backgroundColor: previewAccentColor }}>
-                                                                    {organizerProfile?.profileImageUrl ? (
-                                                                        <img src={getImageUrl(organizerProfile.profileImageUrl)} alt={organizerProfile.organizerName || 'Organizer'} className="w-full h-full object-cover" />
-                                                                    ) : (
-                                                                        organizerPreviewInitial
-                                                                    )}
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className="text-lg font-black text-[#2E2E2F] tracking-tight truncate">
-                                                                        {organizerProfile?.organizerName || 'Organizer Profile'}
-                                                                    </p>
-                                                                    <div className="flex items-center gap-4 mt-1">
-                                                                        <div>
-                                                                            <p className="text-[8px] uppercase tracking-widest font-black text-[#2E2E2F]/40">Followers</p>
-                                                                            <p className="text-sm font-black">{organizerProfile?.followersCount || 0}</p>
-                                                                        </div>
-                                                                        <div>
-                                                                            <p className="text-[14px] font-black">{events.length}</p>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {hasPreviewPhysicalLocation && (
-                                                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
-                                                            <div className="flex items-center justify-between gap-3 mb-4">
-                                                                <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
-                                                                <span className="text-[9px] font-black uppercase tracking-widest text-[#38BDF2]">Open in Maps</span>
-                                                            </div>
-                                                            <p className="text-[12px] text-[#2E2E2F]/70 font-medium mb-4">{formData.location}</p>
-                                                            <div className="rounded-xl overflow-hidden border-2 border-[#2E2E2F]/15 bg-[#F2F2F2]">
-                                                                <iframe
-                                                                    src={previewMapEmbedUrl}
-                                                                    title="Preview map"
-                                                                    className={`w-full ${previewDevice === 'mobile' ? 'h-40' : 'h-56'}`}
-                                                                    loading="lazy"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className={`${previewDevice === 'desktop' ? 'w-[320px] shrink-0 space-y-6 sticky top-4' : 'w-full flex-col'}`}>
-                                                    {/* Tickets Section in Preview */}
-                                                    <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15 shadow-sm">
-                                                        <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-6">SECURE ACCESS</h3>
-                                                        <div className="space-y-4">
-                                                            {formData.ticketTypes && formData.ticketTypes.length > 0 ? (
-                                                                formData.ticketTypes.map((ticket: any) => (
-                                                                    <div key={ticket.ticketTypeId || ticket.name} className="p-5 rounded-2xl border-2 bg-[#F2F2F2]" style={{ borderColor: `${previewAccentColor}1A` }}>
-                                                                        <div className="flex justify-between items-start mb-1">
-                                                                            <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-wider">{ticket.name}</p>
-                                                                            <span className="text-[8px] font-black px-2 py-0.5 rounded text-white" style={{ backgroundColor: previewAccentColor }}>AVAILABLE</span>
-                                                                        </div>
-                                                                        <p className="text-[16px] font-black text-[#2E2E2F]">
-                                                                            {ticket.priceAmount === 0 ? 'FREE' : `PHP ${ticket.priceAmount.toLocaleString()}.00`}
-                                                                        </p>
-                                                                        <div className="mt-4 pt-4 border-t border-[#2E2E2F]/5 flex items-center justify-between">
-                                                                            <span className="text-[8px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Quantity</span>
-                                                                            <div className="flex items-center gap-3">
-                                                                                <div className="w-6 h-6 rounded-lg bg-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F]/20 text-xs">-</div>
-                                                                                <span className="text-xs font-black">1</span>
-                                                                                <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs text-white" style={{ backgroundColor: previewAccentColor }}>+</div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                ))
-                                                            ) : (
-                                                                <div className="py-12 text-center border-2 border-dashed border-[#2E2E2F]/5 rounded-[2rem]">
-                                                                    <p className="text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-widest">No tickets set</p>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className="mt-8 space-y-4">
-                                                            <button
-                                                                type="button"
-                                                                disabled
-                                                                className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-white/50 cursor-not-allowed"
-                                                                style={{ backgroundColor: `${previewAccentColor}4D` }}
-                                                            >
-                                                                Secure Checkout
-                                                            </button>
-                                                            <div className="flex items-center justify-center gap-2 opacity-20">
-                                                                <ICONS.CreditCard className="w-3.5 h-3.5" />
-                                                                <p className="text-[8px] font-black uppercase tracking-widest">HITPAY SECURE</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <EventPreviewContent
+                                previewDevice={previewDevice}
+                                isPreviewMode={isPreviewMode}
+                                setIsPreviewMode={setIsPreviewMode}
+                                setPreviewDevice={setPreviewDevice}
+                                formData={formData}
+                                organizerProfile={organizerProfile}
+                                events={events}
+                                brandingEnabled={!!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding)}
+                                name={name}
+                            />
                         </div>
                     </div>
-                    {/* Mobile-only bottom action buttons */}
-                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#2E2E2F]/15 md:hidden z-50 flex gap-2">
-                        <button
-                            type="button"
-                            onClick={handleNextWizardStep}
-                            className="flex-1 py-3 bg-[#38BDF2] text-white rounded-xl font-bold text-sm"
-                        >
-                            Next
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleSubmit}
-                            className="flex-1 py-3 bg-[#38BDF2] text-white rounded-xl font-bold text-sm"
-                        >
-                            Save
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => { if (isPreviewMode) { setIsPreviewMode(false); } else { setPreviewDevice('mobile'); setIsPreviewMode(true); } }}
-                            className="flex-1 py-3 bg-[#F2F2F2] text-[#3A3247] rounded-xl font-bold text-sm border-2 border-[#2E2E2F]/15 flex items-center justify-center gap-2"
-                        >
-                            {isPreviewMode ? 'Close' : 'Preview'}
-                        </button>
-                    </div>
+
                 </div>
             )}
 
@@ -2380,10 +1898,17 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                 <select
                                     className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                     value={newTicket.priceAmount === 0 ? 'FREE' : 'PAID'}
-                                    onChange={(e) => setNewTicket({
-                                        ...newTicket,
-                                        priceAmount: e.target.value === 'FREE' ? 0 : 100,
-                                    })}
+                                    onChange={(e) => {
+                                        const isPaid = e.target.value === 'PAID';
+                                        if (isPaid && !isPaymentReady) {
+                                            setIsPaymentRestrictionOpen(true);
+                                            return;
+                                        }
+                                        setNewTicket({
+                                            ...newTicket,
+                                            priceAmount: isPaid ? 100 : 0,
+                                        });
+                                    }}
                                 >
                                     <option value="FREE">Free</option>
                                     <option value="PAID">Paid</option>
@@ -2435,14 +1960,14 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                 label="Quantity Total"
                                 type="number"
                                 value={newTicket.quantityTotal}
-                                onChange={(e: any) => setNewTicket({ ...newTicket, quantityTotal: parseInt(e.target.value, 10) || 0 })}
+                                onChange={(e: any) => setNewTicket({ ...newTicket, quantityTotal: Math.max(0, parseInt(e.target.value, 10) || 0) })}
                             />
                             <Input
                                 label="Guests per Ticket"
                                 type="number"
                                 min={1}
                                 value={newTicket.capacityPerTicket}
-                                onChange={(e: any) => setNewTicket({ ...newTicket, capacityPerTicket: parseInt(e.target.value, 10) || 1 })}
+                                onChange={(e: any) => setNewTicket({ ...newTicket, capacityPerTicket: Math.max(1, parseInt(e.target.value, 10) || 1) })}
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -2457,13 +1982,37 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                 label="Sales Start"
                                 type="datetime-local"
                                 value={newTicket.salesStartAt}
-                                onChange={(e: any) => setNewTicket({ ...newTicket, salesStartAt: e.target.value })}
+                                onChange={(e: any) => {
+                                    const val = e.target.value;
+                                    const now = new Date();
+                                    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                                    const localNow = now.toISOString().slice(0, 16);
+                                    if (val && val < localNow) {
+                                        showToast('error', 'Sales start date cannot be in the past.');
+                                        return;
+                                    }
+                                    setNewTicket({ ...newTicket, salesStartAt: val });
+                                }}
                             />
                             <Input
                                 label="Sales End"
                                 type="datetime-local"
                                 value={newTicket.salesEndAt}
-                                onChange={(e: any) => setNewTicket({ ...newTicket, salesEndAt: e.target.value })}
+                                onChange={(e: any) => {
+                                    const val = e.target.value;
+                                    const now = new Date();
+                                    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                                    const localNow = now.toISOString().slice(0, 16);
+                                    if (val && val < localNow) {
+                                        showToast('error', 'Sales end date cannot be in the past.');
+                                        return;
+                                    }
+                                    if (newTicket.salesStartAt && val < newTicket.salesStartAt) {
+                                        showToast('error', 'Sales end date cannot be before sales start.');
+                                        return;
+                                    }
+                                    setNewTicket({ ...newTicket, salesEndAt: val });
+                                }}
                             />
                         </div>
                         <Button
@@ -2707,7 +2256,17 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                                     <input
                                                         type="datetime-local"
                                                         value={t.salesStartAt || ''}
-                                                        onChange={(e) => updateTicket(t.ticketTypeId, { salesStartAt: e.target.value })}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            const now = new Date();
+                                                            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                                                            const localNow = now.toISOString().slice(0, 16);
+                                                            if (val && val < localNow) {
+                                                                showToast('error', 'Sales start date cannot be in the past.');
+                                                                return;
+                                                            }
+                                                            updateTicket(t.ticketTypeId, { salesStartAt: val });
+                                                        }}
                                                         className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                                     />
                                                 </div>
@@ -2716,7 +2275,21 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                                     <input
                                                         type="datetime-local"
                                                         value={t.salesEndAt || ''}
-                                                        onChange={(e) => updateTicket(t.ticketTypeId, { salesEndAt: e.target.value })}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            const now = new Date();
+                                                            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                                                            const localNow = now.toISOString().slice(0, 16);
+                                                            if (val && val < localNow) {
+                                                                showToast('error', 'Sales end date cannot be in the past.');
+                                                                return;
+                                                            }
+                                                            if (t.salesStartAt && val < t.salesStartAt) {
+                                                                showToast('error', 'Sales end date cannot be before sales start.');
+                                                                return;
+                                                            }
+                                                            updateTicket(t.ticketTypeId, { salesEndAt: val });
+                                                        }}
                                                         className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                                     />
                                                 </div>
@@ -2797,4 +2370,618 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
             </Modal>
         </div>
     );
-}
+};
+
+const EventPreviewContent = React.memo<{
+    previewDevice: 'mobile' | 'desktop';
+    isPreviewMode: boolean;
+    setIsPreviewMode: (val: boolean) => void;
+    setPreviewDevice: (val: 'mobile' | 'desktop') => void;
+    formData: any;
+    organizerProfile: OrganizerProfile | null;
+    events: Event[];
+    brandingEnabled: boolean;
+    name: string;
+}>(({ previewDevice, isPreviewMode, setIsPreviewMode, setPreviewDevice, formData, organizerProfile, events, brandingEnabled, name }) => {
+
+    const previewAccentColor = brandingEnabled ? formData.brandColor || '#38BDF2' : '#38BDF2';
+
+    const previewDateLabel = React.useMemo(() => {
+        if (!formData.eventDate) return 'Date and time not set';
+        const date = new Date(`${formData.eventDate}T${formData.eventTime || '09:00'}`);
+        if (Number.isNaN(date.getTime())) return 'Date and time not set';
+        return date.toLocaleString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+        });
+    }, [formData.eventDate, formData.eventTime]);
+
+    const previewMapEmbedUrl = (formData.location && import.meta.env.VITE_GOOGLE_MAPS_API_KEY)
+        ? `https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(formData.location)}`
+        : formData.location ? `https://maps.google.com/maps?q=${encodeURIComponent(formData.location.trim())}&z=15&output=embed` : '';
+
+    const hasPreviewPhysicalLocation = formData.locationType !== 'ONLINE' && !!formData.location?.trim();
+    const organizerPreviewInitial = (organizerProfile?.organizerName || name || 'O').charAt(0).toUpperCase();
+
+    return (
+        <div className={`flex flex-col h-full w-full ${previewDevice === 'desktop' ? '' : 'pb-32'}`}>
+            <div className={`flex items-center justify-between flex-shrink-0 ${previewDevice === 'desktop' ? 'py-6 px-10' : 'mb-3 px-5 pt-5'}`}>
+                {previewDevice === 'desktop' ? (
+                    <button
+                        type="button"
+                        onClick={() => setIsPreviewMode(false)}
+                        className="flex items-center gap-2 text-[#2E2E2F] hover:text-black font-bold text-sm transition-colors"
+                    >
+                        <ICONS.ChevronLeft className="w-5 h-5" strokeWidth={3} />
+                        Preview
+                    </button>
+                ) : (
+                    <div className="flex items-center justify-between w-full">
+                        <button
+                            type="button"
+                            onClick={() => setIsPreviewMode(false)}
+                            className="flex items-center gap-2 text-[#2E2E2F] hover:text-black font-bold text-sm transition-colors"
+                        >
+                            <ICONS.ChevronRight className="w-4 h-4 text-[#2E2E2F]/65" />
+                            <h4 className="text-[30px] font-black text-[#2E2E2F] tracking-tight">Preview</h4>
+                        </button>
+                    </div>
+                )}
+
+                <div className="flex items-center gap-2">
+                    <div className="hidden md:inline-flex items-center rounded-lg border border-[#2E2E2F]/15 bg-transparent p-1 shadow-sm">
+                        <button
+                            type="button"
+                            onClick={() => setPreviewDevice('mobile')}
+                            className={`w-9 h-9 rounded-md flex items-center justify-center ${previewDevice === 'mobile' ? 'bg-[#2E2E2F]/10 text-[#2E2E2F]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
+                            title="Mobile preview"
+                        >
+                            <MobilePreviewIcon className="w-4 h-4" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setPreviewDevice('desktop')}
+                            className={`w-9 h-9 rounded-md flex items-center justify-center ${previewDevice === 'desktop' ? 'bg-[#2E2E2F]/10 text-[#2E2E2F]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
+                            title="Desktop preview"
+                        >
+                            <DesktopPreviewIcon className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div className={`${previewDevice === 'desktop' ? 'flex-1 overflow-y-auto custom-scrollbar w-full px-8 xl:px-12 py-6 mx-auto flex justify-center' : 'flex-1 w-full overflow-y-auto'}`}>
+                <div className={`${previewDevice === 'desktop' ? 'w-full max-w-[1024px] rounded-[12px] shadow-sm border border-[#2E2E2F]/15 min-h-[85vh]' : 'w-full'}`}>
+                    <div className={`${previewDevice === 'desktop' ? 'relative p-10 pb-[92px]' : 'w-full'}`}>
+                        <div className="h-14 border-b border-[#2E2E2F]/15 px-5 flex items-center justify-between bg-[#F2F2F2]">
+                            <img
+                                src={brandingEnabled && organizerProfile?.profileImageUrl ? getImageUrl(organizerProfile.profileImageUrl) : BRAND_LOGO_URL}
+                                alt="Event Logo"
+                                className="h-8 w-auto object-contain"
+                            />
+                            <div className="flex items-center gap-3 text-[#2E2E2F]/70">
+                                <ICONS.Users className="w-4 h-4" />
+                                <ICONS.MoreHorizontal className="w-4 h-4" />
+                            </div>
+                        </div>
+
+                        <div className={`bg-[#F2F2F2] p-5 ${previewDevice === 'desktop' ? 'flex gap-8 items-start' : 'space-y-6'}`}>
+                            <div className={`flex-1 ${previewDevice === 'desktop' ? 'max-w-[calc(100%-350px)]' : 'w-full'} space-y-6`}>
+                                <div className="mb-4">
+                                    <div className="flex items-center gap-2 text-[8px] font-black tracking-widest uppercase mb-6" style={{ color: previewAccentColor }}>
+                                        <svg className="w-2.5 h-2.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
+                                        BACK TO EVENTS
+                                    </div>
+
+                                    <div className="flex items-start justify-between gap-4 mb-4">
+                                        <h2 className={`${previewDevice === 'mobile' ? 'text-2xl' : 'text-3xl'} font-black text-[#2E2E2F] tracking-tighter leading-tight`}>
+                                            {formData.eventName || 'Event title'}
+                                        </h2>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
+                                                <ICONS.Heart className="w-4 h-4 text-[#2E2E2F]/40" />
+                                            </div>
+                                            <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
+                                                <ICONS.Download className="w-4 h-4 text-[#2E2E2F]/40" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="rounded-[2rem] overflow-hidden border-2 border-[#2E2E2F]/15 mb-6 group">
+                                        <img
+                                            src={getImageUrl(formData.imageUrl)}
+                                            alt="Event Preview"
+                                            className="w-full aspect-video object-cover"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F]/70">
+                                        <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                            <ICONS.Calendar className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
+                                            {previewDateLabel}
+                                        </div>
+                                        <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                            <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
+                                            {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
+                                        </div>
+                                        {formData.streamingPlatform && (
+                                            <div className="flex items-center bg-[#F2F2F2] px-3 py-1.5 rounded-xl border text-[10px] font-black tracking-wide" style={{ color: previewAccentColor, borderColor: `${previewAccentColor}33`, backgroundColor: `${previewAccentColor}0D` }}>
+                                                VIA {formData.streamingPlatform.toUpperCase()}
+                                            </div>
+                                        )}
+                                        <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                            CAPACITY: {formData.capacityTotal}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
+                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
+                                    <p className="text-[#2E2E2F]/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
+                                        {formData.description || 'Provide an executive summary of this event session...'}
+                                    </p>
+                                </div>
+
+                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
+                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
+                                    <div className="rounded-[1.2rem] border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] p-4 flex flex-col gap-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-full overflow-hidden text-[#F2F2F2] flex items-center justify-center text-lg font-bold shrink-0" style={{ backgroundColor: previewAccentColor }}>
+                                                {organizerProfile?.profileImageUrl ? (
+                                                    <img src={getImageUrl(organizerProfile.profileImageUrl)} alt={organizerProfile.organizerName || 'Organizer'} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    organizerPreviewInitial
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-lg font-black text-[#2E2E2F] tracking-tight truncate">
+                                                    {organizerProfile?.organizerName || 'Organizer Profile'}
+                                                </p>
+                                                <div className="flex items-center gap-4 mt-1">
+                                                    <div>
+                                                        <p className="text-[8px] uppercase tracking-widest font-black text-[#2E2E2F]/40">Followers</p>
+                                                        <p className="text-sm font-black">{organizerProfile?.followersCount || 0}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[14px] font-black">{events.length}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {hasPreviewPhysicalLocation && (
+                                    <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
+                                        <div className="flex items-center justify-between gap-3 mb-4">
+                                            <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-[#38BDF2]">Open in Maps</span>
+                                        </div>
+                                        <p className="text-[12px] text-[#2E2E2F]/70 font-medium mb-4">{formData.location}</p>
+                                        <div className="rounded-xl overflow-hidden border-2 border-[#2E2E2F]/15 bg-[#F2F2F2]">
+                                            <iframe
+                                                src={previewMapEmbedUrl}
+                                                title="Preview map"
+                                                className={`w-full ${previewDevice === 'mobile' ? 'h-40' : 'h-56'}`}
+                                                loading="lazy"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className={`${previewDevice === 'desktop' ? 'w-[320px] shrink-0 space-y-6 sticky top-4' : 'w-full flex-col'}`}>
+                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15 shadow-sm">
+                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-6">SECURE ACCESS</h3>
+                                    <div className="space-y-4">
+                                        {formData.ticketTypes && formData.ticketTypes.length > 0 ? (
+                                            formData.ticketTypes.map((ticket: any) => (
+                                                <div key={ticket.ticketTypeId || ticket.name} className="p-5 rounded-2xl border-2 bg-[#F2F2F2]" style={{ borderColor: `${previewAccentColor}1A` }}>
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-wider">{ticket.name}</p>
+                                                        <span className="text-[8px] font-black px-2 py-0.5 rounded text-white" style={{ backgroundColor: previewAccentColor }}>AVAILABLE</span>
+                                                    </div>
+                                                    <p className="text-[16px] font-black text-[#2E2E2F]">
+                                                        {ticket.priceAmount === 0 ? 'FREE' : `PHP ${ticket.priceAmount.toLocaleString()}.00`}
+                                                    </p>
+                                                    <div className="mt-4 pt-4 border-t border-[#2E2E2F]/5 flex items-center justify-between">
+                                                        <span className="text-[8px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Quantity</span>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-6 h-6 rounded-lg bg-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F]/20 text-xs">-</div>
+                                                            <span className="text-xs font-black">1</span>
+                                                            <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs text-white" style={{ backgroundColor: previewAccentColor }}>+</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="py-12 text-center border-2 border-dashed border-[#2E2E2F]/5 rounded-[2rem]">
+                                                <p className="text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-widest">No tickets set</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="mt-8 space-y-4">
+                                        <button
+                                            type="button"
+                                            disabled
+                                            className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-white/50_allowed"
+                                            style={{ backgroundColor: `${previewAccentColor}4D` }}
+                                        >
+                                            Secure Checkout
+                                        </button>
+                                        <div className="flex items-center justify-center gap-2 opacity-20">
+                                            <ICONS.CreditCard className="w-3.5 h-3.5" />
+                                            <p className="text-[8px] font-black uppercase tracking-widest">HITPAY SECURE</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+});
+
+const WizardStepContent = React.memo(({
+    wizardStep,
+    formData,
+    setFormData,
+    organizerProfile,
+    fileInputRef,
+    handleImageUpload,
+    isEditMode,
+    applyLocationValue,
+    maxEventCapacity,
+    activeEventTicketCount,
+    ticketReadinessLoading,
+    canPublishByTicketRule,
+    initialEventStatus,
+    finalStatusDecision,
+    setFinalStatusDecision,
+    isAtActiveLimit,
+    maxActiveEvents,
+    promoForm,
+    setPromoForm,
+    editingPromotion,
+    setEditingPromotion,
+    handleSavePromotion,
+    handleDeletePromotion,
+    promotions,
+    promotionsLoading,
+    showToast,
+    isPersonalProfileReady,
+    isOrganizerProfileReady,
+    navigate,
+    submitting
+}: any) => {
+    return (
+        <div className="animate-in fade-in duration-300">
+            {wizardStep === 1 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+                    <div className="md:col-span-2">
+                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Organizer Name</label>
+                        <select value={organizerProfile?.organizerId || ''} disabled className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[12px] font-semibold tracking-wide outline-none">
+                            {organizerProfile?.organizerId ? <option value={organizerProfile.organizerId}>{organizerProfile.organizerName}</option> : <option value="">No organizer profile set</option>}
+                        </select>
+                    </div>
+                    <div className="md:col-span-2">
+                        <Input label="Event Name" placeholder="e.g. Founder Growth Summit 2026" value={formData.eventName} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, eventName: e.target.value }))} />
+                    </div>
+                    <div className="md:col-span-2">
+                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Description</label>
+                        <textarea className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-[1.5rem] text-sm min-h-[130px] focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors outline-none" value={formData.description} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, description: e.target.value }))} />
+                    </div>
+                    <div className="md:col-span-2">
+                        <div className="flex flex-col gap-2 mb-1 px-1">
+                            <div className="flex items-center justify-between">
+                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Brand Color</label>
+                                {!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) && (
+                                    <Badge type="info" className="text-[8px] px-2 py-0.5 bg-[#2E2E2F] text-white">Premium Feature</Badge>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-4 p-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl relative overflow-hidden">
+                                <input
+                                    type="color"
+                                    value={formData.brandColor || '#38BDF2'}
+                                    onChange={(e) => setFormData((prev: any) => ({ ...prev, brandColor: e.target.value }))}
+                                    disabled={!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding)}
+                                    className={`w-12 h-12 rounded-lg cursor-pointer border-none p-0 bg-transparent ${!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) ? 'opacity-30' : ''}`}
+                                />
+                                <div className="flex-1">
+                                    <p className="text-xs font-bold text-[#2E2E2F]">Primary Accent Color</p>
+                                    <p className="text-[10px] text-[#2E2E2F]/50">Used for buttons, links, and highlights on your event page.</p>
+                                </div>
+                                {!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) && (
+                                    <div className="absolute inset-0 bg-[#F2F2F2]/40 backdrop-blur-[1px] flex items-center justify-center">
+                                        <Button variant="outline" className="text-[8px] py-1 px-3 border-[#2E2E2F]/20" onClick={() => navigate('/subscription')}>Upgrade to Unlock</Button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="md:col-span-2">
+                        <div className="flex flex-col gap-2 mb-1 px-1">
+                            <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Visual Media</label>
+                            <div
+                                className="relative group w-full h-44 rounded-[1.5rem] border-2 border-dashed border-[#2E2E2F]/30 bg-[#F2F2F2] flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#38BDF2] hover:bg-[#38BDF2]/10 transition-colors"
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                {formData.imageUrl ? (
+                                    <img src={getImageUrl(formData.imageUrl)} alt="Preview" className="w-full h-full object-cover rounded-[1.5rem]" />
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center w-full h-full">
+                                        <svg className="w-10 h-10 text-[#2E2E2F]/40 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="2.5" /><path d="M21 15l-5-5L5 21" /></svg>
+                                        <span className="text-[12px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Upload Event Image</span>
+                                    </div>
+                                )}
+                                <div className="absolute bottom-3 right-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-lg px-3 py-1 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors pointer-events-none">Browse</div>
+                            </div>
+                            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {wizardStep === 2 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+                    <Input
+                        label="Session Date"
+                        type="date"
+                        value={formData.eventDate}
+                        onChange={(e: any) => {
+                            const val = e.target.value;
+                            const today = new Date().toISOString().split('T')[0];
+                            if (val < today) {
+                                showToast('error', 'Event date cannot be in the past.');
+                                return;
+                            }
+                            setFormData((prev: any) => ({ ...prev, eventDate: val }));
+                        }}
+                    />
+                    <Input label="Start Time" type="time" value={formData.eventTime} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, eventTime: e.target.value }))} />
+                    <Input
+                        label="End Date"
+                        type="date"
+                        value={formData.endDate}
+                        onChange={(e: any) => {
+                            const val = e.target.value;
+                            const today = new Date().toISOString().split('T')[0];
+                            if (val < today) {
+                                showToast('error', 'End date cannot be in the past.');
+                                return;
+                            }
+                            if (formData.eventDate && val < formData.eventDate) {
+                                showToast('error', 'End date cannot be before session date.');
+                                return;
+                            }
+                            setFormData((prev: any) => ({ ...prev, endDate: val }));
+                        }}
+                    />
+                    <Input label="End Time" type="time" value={formData.endTime} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, endTime: e.target.value }))} />
+                    <div>
+                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Location Type</label>
+                        <select
+                            className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]"
+                            value={formData.locationType}
+                            onChange={(e) => setFormData((prev: any) => ({ ...prev, locationType: e.target.value as Event['locationType'] }))}
+                        >
+                            <option value="ONSITE">Onsite</option>
+                            <option value="ONLINE">Online</option>
+                            <option value="HYBRID">Hybrid</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Timezone</label>
+                        <Input value={formData.timezone} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, timezone: e.target.value }))} />
+                    </div>
+                    <div className="md:col-span-2 space-y-8">
+                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/15">
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]"><ICONS.MapPin className="w-4 h-4" /></div>
+                                <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Venue Details</h4>
+                            </div>
+                            <Input label={formData.locationType === 'ONLINE' ? 'Physical Hub (Optional)' : 'Venue Address'} placeholder="e.g. Global Tech Center" value={formData.location} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, location: e.target.value }))} />
+                            <div className="mt-4"><OnsiteLocationAssistant value={formData.location} onChange={applyLocationValue} /></div>
+                        </div>
+                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/15">
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]"><ICONS.Monitor className="w-4 h-4" /></div>
+                                <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Broadcast Settings</h4>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <Input label="Platform Name" placeholder="e.g. YouTube, Google Meet" value={formData.streamingPlatform} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, streamingPlatform: e.target.value }))} />
+                                <Input label="Connection URL" placeholder="Link to stream or meeting" value={formData.streamingUrl} onChange={(e: any) => applyLocationValue(e.target.value)} />
+                            </div>
+                            {formData.streamingUrl && formData.streamingUrl.startsWith('http') && (
+                                <div className="mt-6 p-6 bg-black rounded-3xl border border-[#F2F2F2]/10 overflow-hidden shadow-xl">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h4 className="text-[12px] font-black text-white uppercase tracking-widest">Stream Preview</h4>
+                                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-red-500/30 bg-red-500/20">
+                                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-white">Live</span>
+                                        </div>
+                                    </div>
+                                    {(formData.streamingUrl.includes('youtube.com') || formData.streamingUrl.includes('youtu.be')) ? (
+                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#F2F2F2]/5 border border-[#F2F2F2]/5">
+                                            {(() => {
+                                                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/|live\/)([^#\&\?]*).*/;
+                                                const match = formData.streamingUrl.match(regExp);
+                                                const videoId = (match && match[2].length === 11) ? match[2] : null;
+                                                return videoId ? (
+                                                    <iframe className="absolute inset-0 w-full h-full" src={`https://www.youtube.com/embed/${videoId}`} title="YouTube Preview" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
+                                                ) : <div className="flex items-center justify-center w-full h-full text-[#F2F2F2]/30 text-xs">Invalid YouTube Link</div>;
+                                            })()}
+                                        </div>
+                                    ) : (formData.streamingUrl.includes('facebook.com') || formData.streamingUrl.includes('fb.watch')) ? (
+                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#F2F2F2]/5 border border-[#F2F2F2]/5">
+                                            <iframe className="absolute inset-0 w-full h-full" src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(formData.streamingUrl)}&show_text=0&width=560&t=0`} title="Facebook Preview" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center p-10 rounded-2xl bg-[#F2F2F2]/5 border border-[#F2F2F2]/5 border-dashed">
+                                            <ICONS.Monitor className="w-8 h-8 text-[#F2F2F2]/20 mb-3" />
+                                            <p className="text-[#F2F2F2]/40 text-[11px] text-center font-medium">This platform doesn't support direct previews, but the link will be provided to attendees.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {wizardStep === 3 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+                    <Input label={`Capacity Total (${formData.capacityTotal}/${maxEventCapacity})`} type="number" min={1} max={maxEventCapacity} value={formData.capacityTotal} onChange={(e: any) => { const val = parseInt(e.target.value, 10) || 1; const nextValue = Math.max(1, Math.min(val, maxEventCapacity)); setFormData((prev: any) => ({ ...prev, capacityTotal: nextValue })); }} error={formData.capacityTotal > maxEventCapacity ? `Capacity exceeds your plan limit (${maxEventCapacity})` : ''} />
+                    <Input label="Registration Open Date" type="date" value={formData.regOpenDate} onChange={(e: any) => { const val = e.target.value; const today = new Date().toISOString().split('T')[0]; if (val < today) { showToast('error', 'Registration open date cannot be in the past.'); return; } setFormData((prev: any) => ({ ...prev, regOpenDate: val })); }} />
+                    <Input label="Registration Open Time" type="time" value={formData.regOpenTime} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, regOpenTime: e.target.value }))} />
+                    <Input label="Registration Close Date" type="date" value={formData.regCloseDate} onChange={(e: any) => { const val = e.target.value; const today = new Date().toISOString().split('T')[0]; if (val < today) { showToast('error', 'Registration close date cannot be in the past.'); return; } if (formData.regOpenDate && val < formData.regOpenDate) { showToast('error', 'Registration close date cannot be before open date.'); return; } setFormData((prev: any) => ({ ...prev, regCloseDate: val })); }} />
+                    <Input label="Registration Close Time" type="time" value={formData.regCloseTime} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, regCloseTime: e.target.value }))} />
+                    <div className="md:col-span-2 space-y-4">
+                        <div className="p-5 rounded-2xl border border-[#2E2E2F]/15 bg-[#F2F2F2] flex items-center justify-between group relative overflow-hidden">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]"><ICONS.CreditCard className="w-5 h-5" /></div>
+                                <div><p className="text-sm font-bold text-[#2E2E2F]">Enable Discount Codes</p><p className="text-[10px] text-[#2E2E2F]/50">Allow promotional codes during checkout.</p></div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) && <Badge type="info" className="text-[8px] font-black bg-[#2E2E2F] text-white">PRO</Badge>}
+                                <input type="checkbox" checked={formData.enableDiscountCodes} onChange={(e) => setFormData((prev: any) => ({ ...prev, enableDiscountCodes: e.target.checked }))} disabled={!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes)} className="w-6 h-6 accent-[#38BDF2] cursor-pointer disabled:opacity-30" />
+                            </div>
+                            {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) && <div className="absolute inset-0 bg-[#F2F2F2]/40 backdrop-blur-[1px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="outline" className="text-[8px] py-1 px-3 border-[#2E2E2F]/20 bg-[#F2F2F2]" onClick={() => navigate('/subscription')}>Upgrade to Unlock</Button></div>}
+                        </div>
+                        <div className="rounded-2xl border border-[#2E2E2F]/15 bg-[#F2F2F2] px-5 py-4">
+                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2E2E2F]/45">Ticket Setup Rule</p>
+                            <p className="mt-2 text-sm font-semibold text-[#2E2E2F]">Publishing is locked until at least one ticket type is configured.</p>
+                            <p className="mt-1 text-[12px] text-[#2E2E2F]/60">Clicking next will save draft and open ticket setup automatically.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {wizardStep === 4 && (
+                <div className="space-y-6">
+                    {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) ? (
+                        <div className="p-10 text-center bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15">
+                            <div className="w-16 h-16 bg-[#2E2E2F] text-white rounded-2xl flex items-center justify-center mx-auto mb-6"><ICONS.Lock className="w-8 h-8" /></div>
+                            <h3 className="text-xl font-black text-[#2E2E2F] tracking-tight">Promotions Locked</h3>
+                            <p className="text-[#2E2E2F]/60 text-sm mt-2 max-w-xs mx-auto">Upgrade to a Pro or Enterprise plan to enable discount codes and boost your ticket sales.</p>
+                            <Button className="mt-6 bg-[#38BDF2]" onClick={() => navigate('/subscription')}>View Plans</Button>
+                        </div>
+                    ) : (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between">
+                                <div><h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Active Promotions</h4><p className="text-[10px] text-[#2E2E2F]/50 mt-1 uppercase tracking-wider">Total: {promotions.length}</p></div>
+                                <Button size="sm" onClick={() => { setEditingPromotion({ new: true }); setPromoForm({ code: '', discountType: 'PERCENTAGE', discountValue: '10', maxUses: '100', validFrom: '', validUntil: '', isActive: true }); }}>Add Code</Button>
+                            </div>
+                            {editingPromotion && (
+                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#38BDF2]/30 space-y-5">
+                                    <div className="flex items-center justify-between">
+                                        <h5 className="text-[11px] font-black uppercase tracking-widest">{editingPromotion.new ? 'New Promotion' : 'Edit Promotion'}</h5>
+                                        <button onClick={() => setEditingPromotion(null)} className="text-[#2E2E2F]/30 hover:text-red-500 transition-colors"><ICONS.X className="w-4 h-4" /></button>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <Input label="Promo Code" placeholder="SALE20" value={promoForm.code} onChange={(e: any) => setPromoForm({ ...promoForm, code: e.target.value.toUpperCase() })} />
+                                        <div className="space-y-2">
+                                            <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide ml-1">Discount Type</label>
+                                            <select className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none" value={promoForm.discountType} onChange={(e) => setPromoForm({ ...promoForm, discountType: e.target.value })}>
+                                                <option value="PERCENTAGE">Percentage (%)</option>
+                                                <option value="FIXED">Fixed Amount (PHP)</option>
+                                            </select>
+                                        </div>
+                                        <Input label="Discount Value" type="number" value={promoForm.discountValue} onChange={(e: any) => setPromoForm({ ...promoForm, discountValue: e.target.value })} />
+                                        <Input label="Max Uses" type="number" value={promoForm.maxUses} onChange={(e: any) => setPromoForm({ ...promoForm, maxUses: e.target.value })} />
+                                        <Input label="Valid From" type="date" value={promoForm.validFrom} onChange={(e: any) => { const val = e.target.value; const today = new Date().toISOString().split('T')[0]; if (val < today) { showToast('error', 'Promotion valid from date cannot be in the past.'); return; } setPromoForm({ ...promoForm, validFrom: val }); }} />
+                                        <Input label="Valid Until" type="date" value={promoForm.validUntil} onChange={(e: any) => { const val = e.target.value; const today = new Date().toISOString().split('T')[0]; if (val < today) { showToast('error', 'Promotion valid until date cannot be in the past.'); return; } if (promoForm.validFrom && val < promoForm.validFrom) { showToast('error', 'Validation expiry date cannot be before start date.'); return; } setPromoForm({ ...promoForm, validUntil: val }); }} />
+                                        <div className="md:col-span-2 flex items-center gap-3">
+                                            <input type="checkbox" id="isActive" checked={promoForm.isActive} onChange={(e) => setPromoForm({ ...promoForm, isActive: e.target.checked })} className="w-5 h-5 accent-[#38BDF2]" />
+                                            <label htmlFor="isActive" className="text-xs font-bold text-[#2E2E2F]">Active and usable</label>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3 pt-2">
+                                        <Button className="flex-1" onClick={handleSavePromotion}>Save Promotion</Button>
+                                        <Button variant="outline" onClick={() => setEditingPromotion(null)}>Cancel</Button>
+                                    </div>
+                                </div>
+                            )}
+                            <div className="space-y-3">
+                                {promotionsLoading ? <div className="py-10 text-center"><div className="w-6 h-6 border-2 border-[#38BDF2] border-t-transparent rounded-full animate-spin mx-auto"></div></div> : promotions.length === 0 ? <div className="py-10 text-center border-2 border-dashed border-[#2E2E2F]/15 rounded-2xl text-[#2E2E2F]/30 uppercase text-[10px] font-black tracking-widest">No promo codes active</div> : promotions.map(promo => (
+                                    <div key={promo.promotionId} className="flex items-center justify-between p-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl group border-l-4 border-l-[#38BDF2]">
+                                        <div>
+                                            <div className="flex items-center gap-2"><span className="font-black text-[#2E2E2F] tracking-tight">{promo.code}</span><Badge type={promo.isActive ? 'success' : 'neutral'} className="text-[8px] px-1.5 py-0">{promo.isActive ? 'Active' : 'Inactive'}</Badge></div>
+                                            <p className="text-[10px] text-[#2E2E2F]/50 mt-1 uppercase tracking-tight font-bold">{promo.discountType === 'PERCENTAGE' ? `${promo.discountValue}% Off` : `PHP ${promo.discountValue} Off`}<span className="mx-2">•</span>{promo.usedCount || 0} / {promo.maxUses} Uses</p>
+                                        </div>
+                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button onClick={() => { setEditingPromotion(promo); setPromoForm({ code: promo.code, discountType: promo.discountType, discountValue: String(promo.discountValue), maxUses: String(promo.maxUses), validFrom: promo.validFrom ? promo.validFrom.split('T')[0] : '', validUntil: promo.validUntil ? promo.validUntil.split('T')[0] : '', isActive: promo.isActive }); }} className="p-2 hover:bg-[#38BDF2]/10 rounded-lg text-[#2E2E2F]"><ICONS.Edit className="w-4 h-4" /></button>
+                                            <button onClick={() => handleDeletePromotion(promo.promotionId)} className="p-2 hover:bg-red-50 rounded-lg text-red-500"><ICONS.Trash className="w-4 h-4" /></button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {wizardStep === 5 && (
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className={`rounded-2xl border px-4 py-4 ${isPersonalProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Account Profile</p>
+                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{isPersonalProfileReady ? 'Ready' : 'Incomplete'}</p>
+                        </div>
+                        <div className={`rounded-2xl border px-4 py-4 ${isOrganizerProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Organization Profile</p>
+                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{isOrganizerProfileReady ? 'Ready' : 'Incomplete'}</p>
+                        </div>
+                        <div className={`rounded-2xl border px-4 py-4 ${canPublishByTicketRule ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Ticket Setup</p>
+                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{ticketReadinessLoading ? 'Checking...' : isEditMode ? `${activeEventTicketCount} ticket type(s)` : 'Save draft first'}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Event Status</label>
+                        <p className="mb-2 text-[11px] text-[#2E2E2F]/60">Current: <span className="font-bold text-[#2E2E2F]">{initialEventStatus}</span> · Choose final status below.</p>
+                        <select className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]" value={finalStatusDecision} onChange={(e) => { const nextStatus = e.target.value as EventStatus | ''; setFinalStatusDecision(nextStatus); if (nextStatus) { setFormData((prev: any) => ({ ...prev, status: nextStatus as EventStatus })); } }}>
+                            <option value="">Select final status</option>
+                            <option value="DRAFT">Draft / Private</option>
+                            <option value="PUBLISHED" disabled={!canPublishByTicketRule || isAtActiveLimit}>
+                                {!canPublishByTicketRule ? 'Published (Add ticket first)' : isAtActiveLimit ? 'Published (Active Event Limit)' : 'Published'}
+                            </option>
+                            {isEditMode && <option value="CLOSED">Closed</option>}
+                        </select>
+                        {isAtActiveLimit && (
+                            <div className="mt-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
+                                <p className="text-[12px] font-bold text-amber-800 flex items-center gap-2"><ICONS.AlertTriangle className="w-4 h-4" />Active Event Limit Reach (Max: {maxActiveEvents})</p>
+                                <p className="text-[11px] text-amber-700 mt-1">You are currently at the maximum number of active events for your plan. Please close an existing event or upgrade to publish this one.</p>
+                                <Button size="sm" className="mt-2 text-[10px] px-3 py-1 bg-amber-600 text-white hover:bg-black" onClick={() => navigate('/subscription')}>Upgrade Plan</Button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+});
+
+const MobileWizardActions = React.memo(({
+    handleNextWizardStep,
+    handleSubmit,
+    isPreviewMode,
+    setIsPreviewMode,
+    setPreviewDevice
+}: any) => {
+    return (
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#2E2E2F]/15 md:hidden z-50 flex gap-2 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] animate-in slide-in-from-bottom duration-300">
+            <button type="button" onClick={handleNextWizardStep} className="flex-1 py-3 bg-[#38BDF2] text-white rounded-xl font-bold text-sm active:scale-95 transition-transform">Next</button>
+            <button type="button" onClick={handleSubmit} className="flex-1 py-3 bg-[#38BDF2] text-white rounded-xl font-bold text-sm active:scale-95 transition-transform">Save</button>
+            <button type="button" onClick={() => { if (isPreviewMode) { setIsPreviewMode(false); } else { setPreviewDevice('mobile'); setIsPreviewMode(true); } }} className="flex-1 py-3 bg-[#F2F2F2] text-[#3A3247] rounded-xl font-bold text-sm border-2 border-[#2E2E2F]/15 flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                {isPreviewMode ? 'Close' : 'Preview'}
+            </button>
+        </div>
+    );
+});
+

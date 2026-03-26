@@ -272,9 +272,6 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
     <div className="max-w-4xl pt-4">
 
       {/* Disabled / Dummy Gateways to match the screenshot layout */}
-      <DummyGatewayCard name="Easebuzz" />
-      <DummyGatewayCard name="Ozow" />
-      <DummyGatewayCard name="Cashfree" />
 
       {/* HitPay Gateway */}
       <div className="border border-[#2E2E2F]/10 bg-[#F2F2F2] rounded-xl mb-6 shadow-sm overflow-hidden transition-all duration-300">

@@ -45,7 +45,10 @@ export const AcceptInvite: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F2F2F2] px-4 overflow-hidden relative">
+    <div 
+      className="min-h-screen flex items-center justify-center bg-[#F2F2F2] px-4 overflow-hidden relative"
+      style={{ zoom: 0.8 }}
+    >
       {/* Decorative side elements */}
       <div className="hidden lg:block absolute left-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
         <ICONS.Zap className="w-64 h-64 text-[#2E2E2F]" />
@@ -53,7 +56,7 @@ export const AcceptInvite: React.FC = () => {
       <div className="hidden lg:block absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
         <ICONS.Calendar className="w-64 h-64 text-[#2E2E2F]" />
       </div>
-      <Card className="p-10 w-full max-w-[540px] bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl origin-center shadow-2xl" style={{ zoom: 0.8 }}>
+      <Card className="p-10 w-full max-w-[540px] bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl origin-center shadow-2xl">
         <h2 className="text-2xl font-black mb-6 text-[#2E2E2F]">Complete Your Account</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-1.5 w-full">

@@ -1061,6 +1061,46 @@ export const getArchivedTransactions = async (req, res) => {
   }
 };
 
+export const bulkArchiveTransactions = async (req, res) => {
+  try {
+    const { orderIds } = req.body;
+    if (!Array.isArray(orderIds) || orderIds.length === 0) {
+      return res.status(400).json({ error: 'orderIds array required' });
+    }
+
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ deleted_at: new Date().toISOString() })
+      .in('orderId', orderIds)
+      .select();
+
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json({ success: true, count: data?.length || 0 });
+  } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
+
+export const bulkRestoreTransactions = async (req, res) => {
+  try {
+    const { orderIds } = req.body;
+    if (!Array.isArray(orderIds) || orderIds.length === 0) {
+      return res.status(400).json({ error: 'orderIds array required' });
+    }
+
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ deleted_at: null })
+      .in('orderId', orderIds)
+      .select();
+
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json({ success: true, count: data?.length || 0 });
+  } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
+
 export const getPlanMetrics = async (req, res) => {
   try {
     const { data: plans } = await supabase.from('plans').select('planId, name');

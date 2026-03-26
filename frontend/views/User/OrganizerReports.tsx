@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, PageLoader } from '../../components/Shared';
+import { Card, Button, PageLoader, Checkbox } from '../../components/Shared';
 import { apiService } from '../../services/apiService';
 import { ICONS } from '../../constants';
 import { useToast } from '../../context/ToastContext';
@@ -14,6 +14,7 @@ interface Transaction {
   currency: string;
   paymentStatus: string;
   createdAt: string;
+  quantity?: number;
 }
 
 const formatCurrency = (amount: number, currency: string = 'SGD') => {
@@ -104,6 +105,24 @@ export const OrganizerReports: React.FC = () => {
     a.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
+  };
+
+  const handleBulkArchive = async () => {
+    if (selectedRows.size === 0) return;
+    if (!confirm(`Are you sure you want to archive ${selectedRows.size} transactions?`)) return;
+    
+    setLoading(true);
+    try {
+      const selectedIds = Array.from(selectedRows);
+      await apiService.bulkArchiveTransactions(selectedIds);
+      showToast('success', `${selectedRows.size} transactions moved to archive.`);
+      setSelectedRows(new Set());
+      loadTransactions();
+    } catch (err: any) {
+      showToast('error', err.message || 'Failed to archive transactions.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const [profile, setProfile] = useState<any>(null);
@@ -246,7 +265,7 @@ export const OrganizerReports: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center">
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="flex bg-transparent border-2 border-[#2E2E2F]/5 rounded-xl p-1.5 w-full md:w-auto">
           {(['all', 'completed', 'pending', 'failed'] as const).map((status) => (
             <button
@@ -260,6 +279,41 @@ export const OrganizerReports: React.FC = () => {
               {status}
             </button>
           ))}
+        </div>
+
+        <div className="flex items-center gap-3">
+          {selectedRows.size > 0 && (
+            <div className="flex items-center gap-3 mr-2 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="w-2 h-2 rounded-full bg-[#38BDF2] animate-pulse" />
+              <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest bg-[#F2F2F2] px-3.5 py-1.5 rounded-lg border border-[#2E2E2F]/10">
+                {selectedRows.size} Selected
+              </span>
+              <button 
+                onClick={handleBulkArchive} 
+                className="flex items-center gap-2 px-5 py-3.5 bg-red-600 border-2 border-red-600 rounded-2xl text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group"
+              >
+                <ICONS.Trash className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                <span className="text-[11px] font-black uppercase tracking-widest">Archive</span>
+              </button>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 ml-2">
+            <button 
+              onClick={handlePrintReports} 
+              className="flex items-center justify-center h-[52px] w-[52px] bg-[#38BDF2] border-2 border-[#38BDF2] rounded-2xl text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group" 
+              title="Print Reports"
+            >
+              <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+            </button>
+            <button 
+              onClick={handleExportReports} 
+              className="flex items-center justify-center h-[52px] w-[52px] bg-[#38BDF2] border-2 border-[#38BDF2] rounded-2xl text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group" 
+              title="Export CSV"
+            >
+              <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -276,25 +330,22 @@ export const OrganizerReports: React.FC = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-transparent border-b border-[#2E2E2F]/10">
-                <th className="px-4 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest whitespace-nowrap w-12">
-                  <input type="checkbox" checked={selectedRows.size === transactions.length && transactions.length > 0} onChange={toggleAll} className="w-4 h-4 rounded" />
+                <th className="px-4 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest whitespace-nowrap w-12 text-center align-middle">
+                   <div className="flex justify-center">
+                      <Checkbox 
+                        checked={selectedRows.size === transactions.length && transactions.length > 0} 
+                        onChange={toggleAll} 
+                        size="sm"
+                      />
+                   </div>
                 </th>
                 <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest whitespace-nowrap">Order ID</th>
                 <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest whitespace-nowrap">Event</th>
                 <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest whitespace-nowrap">Attendee</th>
+                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest text-right whitespace-nowrap">Size</th>
                 <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest text-right whitespace-nowrap">Amount</th>
                 <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest text-center whitespace-nowrap">Status</th>
                 <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest text-right whitespace-nowrap">Date</th>
-                <th className="px-4 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest text-right whitespace-nowrap">
-                  <div className="flex items-center justify-end gap-2">
-                    <button onClick={handlePrintReports} className="p-2 bg-[#38BDF2] text-white rounded-lg hover:bg-[#2E2E2F] transition-colors" title="Print">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                    </button>
-                    <button onClick={handleExportReports} className="p-2 bg-[#38BDF2] text-white rounded-lg hover:bg-[#2E2E2F] transition-colors" title="Export CSV">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    </button>
-                  </div>
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -310,8 +361,14 @@ export const OrganizerReports: React.FC = () => {
                     key={transaction.orderId || index}
                     className={`border-b border-[#2E2E2F]/5 hover:bg-[#38BDF2]/5 transition-colors ${selectedRows.has(transaction.orderId || '') ? 'bg-[#38BDF2]/10' : ''}`}
                   >
-                    <td className="px-4 py-4">
-                      <input type="checkbox" checked={selectedRows.has(transaction.orderId || '')} onChange={() => toggleRow(transaction.orderId || '')} className="w-4 h-4 rounded" />
+                    <td className="px-4 py-4 align-middle">
+                      <div className="flex justify-center">
+                        <Checkbox 
+                          checked={selectedRows.has(transaction.orderId || '')} 
+                          onChange={() => toggleRow(transaction.orderId || '')} 
+                          size="sm"
+                        />
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-[11px] font-bold font-mono text-[#2E2E2F]/60 uppercase tracking-widest bg-[#2E2E2F]/5 px-2 py-1 rounded">
@@ -331,6 +388,12 @@ export const OrganizerReports: React.FC = () => {
                         <p className="text-xs font-medium text-[#2E2E2F]/60 mt-0.5">
                           {transaction.customerEmail || '-'}
                         </p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <span className="text-[14px] font-bold text-[#2E2E2F]">{transaction.quantity || 1}</span>
+                        <span className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Tickets</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">

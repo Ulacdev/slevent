@@ -79,7 +79,8 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
       isOpen={isOpen}
       onClose={handleClose}
       size="xl"
-      className="!max-w-[1100px] w-full origin-center scale-[0.8]"
+      zoom
+      className="!max-w-[1000px] w-full origin-center"
       title=""
       contentClassName="!p-0 !overflow-hidden flex flex-col"
       showClose={false}
@@ -94,7 +95,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
                 </span>
               }
             />
-          <Button variant="outline" onClick={handleClose} className="border-[#2E2E2F]/20 text-white">
+          <Button variant="outline" onClick={handleClose} className="border-[#2E2E2F]/20 text-[#2E2E2F]">
             Cancel / Close
           </Button>
         </div>

@@ -466,6 +466,30 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   const [isMarqueePaused, setIsMarqueePaused] = useState(false);
 
   const categoriesScrollRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!categoriesScrollRef.current) return;
+    isDraggingRef.current = true;
+    startXRef.current = e.pageX - categoriesScrollRef.current.offsetLeft;
+    scrollLeftRef.current = categoriesScrollRef.current.scrollLeft;
+    setIsMarqueePaused(true);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current || !categoriesScrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - categoriesScrollRef.current.offsetLeft;
+    const walk = (x - startXRef.current) * 1.5;
+    categoriesScrollRef.current.scrollLeft = scrollLeftRef.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    isDraggingRef.current = false;
+    setIsMarqueePaused(false);
+  };
 
   useEffect(() => {
     if (!isLanding) return;
@@ -1022,36 +1046,17 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           {/* Category Rail (Top of Available Events) */}
           <div className="mt-44 mb-28 overflow-visible relative z-10">
             <div className="rounded-2xl border border-[#2E2E2F]/10 bg-[#F2F2F2] px-6 py-8 md:px-8 shadow-sm">
-              <div className="flex items-center justify-between gap-4 mb-8">
+              <div className="mb-8">
                 <p className="text-[11px] font-bold tracking-tight text-[#2E2E2F]/60">Event smart categories</p>
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => {
-                        if (categoriesScrollRef.current) {
-                            categoriesScrollRef.current.scrollBy({ left: -200, behavior: 'smooth' });
-                        }
-                    }}
-                    className="p-2 rounded-full bg-[#2E2E2F]/5 hover:bg-[#38BDF2]/10 text-[#2E2E2F]/40 hover:text-[#38BDF2] transition-colors"
-                  >
-                    <ICONS.ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <button 
-                    onClick={() => {
-                        if (categoriesScrollRef.current) {
-                            categoriesScrollRef.current.scrollBy({ left: 200, behavior: 'smooth' });
-                        }
-                    }}
-                    className="p-2 rounded-full bg-[#2E2E2F]/5 hover:bg-[#38BDF2]/10 text-[#2E2E2F]/40 hover:text-[#38BDF2] transition-colors"
-                  >
-                    <ICONS.ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
               </div>
               <div 
-                className="py-2 relative group-categories outline-none"
+                className="py-2 relative group-categories outline-none cursor-grab active:cursor-grabbing select-none"
                 tabIndex={0}
                 onMouseEnter={() => setIsMarqueePaused(true)}
-                onMouseLeave={() => setIsMarqueePaused(false)}
+                onMouseLeave={handleMouseUpOrLeave}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUpOrLeave}
                 onKeyDown={(e) => {
                     if (e.key === 'ArrowLeft') {
                         categoriesScrollRef.current?.scrollBy({ left: -200, behavior: 'smooth' });

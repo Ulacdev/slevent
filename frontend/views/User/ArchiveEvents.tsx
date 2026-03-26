@@ -310,7 +310,7 @@ export const ArchiveEvents: React.FC = () => {
         await Promise.all(ids.map(id => apiService.restoreEvent(id)));
         setEvents(events.filter(e => !selectedRows.has(e.eventId)));
       } else if (activeTab === 'transactions') {
-        await Promise.all(ids.map(id => apiService.restoreTransaction(id)));
+        await apiService.bulkRestoreTransactions(ids);
         setTransactions(transactions.filter(t => !selectedRows.has(t.orderId)));
       } else {
         await apiService.bulkRestoreSupportTickets(ids);

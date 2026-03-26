@@ -20,51 +20,51 @@ type HealthMetrics = {
 };
 
 // ── Hero Stat Card ─────────────────────────────────────────────────────────
-const HeroCard: React.FC<{
+const HeroCard = React.memo<{
   title: string;
   value: string | number;
   sub: string;
   icon: React.ReactNode;
   iconBg: string;
   trendColor: string;
-}> = ({ title, value, sub, icon, iconBg, trendColor }) => (
-  <div className="p-5 rounded-2xl border border-[#E0E0E0] bg-[#F2F2F2] flex items-center gap-4 hover:scale-[1.01] transition-transform cursor-default">
-    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white flex-shrink-0 ${iconBg}`}>
-      <div className="[&>svg]:w-6 [&>svg]:h-6">{icon}</div>
+}>(({ title, value, sub, icon, iconBg, trendColor }) => (
+  <div className="p-4 sm:p-5 rounded-2xl border border-[#E0E0E0] bg-[#F2F2F2] flex items-center gap-4 hover:scale-[1.01] transition-transform cursor-default">
+    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white flex-shrink-0 ${iconBg}`}>
+      <div className="[&>svg]:w-5 [&>svg]:h-5 sm:[&>svg]:w-6 sm:[&>svg]:h-6">{icon}</div>
     </div>
     <div>
-      <p className="text-xs font-bold text-[#1E293B]/50 mb-0.5">{title}</p>
-      <p className="text-2xl font-black text-[#1E293B]">{value}</p>
-      <p className={`text-[10px] font-bold mt-1 ${trendColor}`}>{sub}</p>
+      <p className="text-[10px] sm:text-xs font-bold text-[#1E293B]/50 mb-0.5 uppercase tracking-wider">{title}</p>
+      <p className="text-xl sm:text-2xl font-black text-[#1E293B]">{value}</p>
+      <p className={`text-[9px] sm:text-[10px] font-bold mt-1 ${trendColor}`}>{sub}</p>
     </div>
   </div>
-);
+));
 
 // ── Metric Detail Card ─────────────────────────────────────────────────────
-const MetricCard: React.FC<{
+const MetricCard = React.memo<{
   title: string;
   value: string | number;
   trend: string;
   trendColor: string;
   icon: React.ReactNode;
   link?: () => void;
-}> = ({ title, value, trend, trendColor, icon, link }) => (
-  <Card className="p-6 bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm">
+}>(({ title, value, trend, trendColor, icon, link }) => (
+  <Card className="p-5 sm:p-6 bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm">
     <div className="flex justify-between items-start">
       <div>
-        <p className="text-3xl font-black text-[#1E293B]">{value}</p>
-        <p className="text-sm font-bold text-[#1E293B]/40 mt-1">{title}</p>
+        <p className="text-2xl sm:text-3xl font-black text-[#1E293B]">{value}</p>
+        <p className="text-xs sm:text-sm font-bold text-[#1E293B]/40 mt-1">{title}</p>
       </div>
-      <div className="text-[#1E293B]/20 [&>svg]:w-8 [&>svg]:h-8">{icon}</div>
+      <div className="text-[#1E293B]/20 [&>svg]:w-6 [&>svg]:h-6 sm:[&>svg]:w-8 sm:[&>svg]:h-8">{icon}</div>
     </div>
-    <div className="flex justify-between items-center mt-8">
-      <span className={`text-xs font-black ${trendColor}`}>{trend}</span>
+    <div className="flex justify-between items-center mt-6 sm:mt-8">
+      <span className={`text-[10px] sm:text-xs font-black ${trendColor}`}>{trend}</span>
       {link && (
-        <button onClick={link} className="text-xs font-black text-[#38BDF2] hover:underline">View</button>
+        <button onClick={link} className="text-[10px] sm:text-xs font-black text-[#38BDF2] hover:underline">View</button>
       )}
     </div>
   </Card>
-);
+));
 
 // ── Main Dashboard ─────────────────────────────────────────────────────────
 export const AdminDashboard: React.FC = () => {
@@ -247,7 +247,7 @@ export const AdminDashboard: React.FC = () => {
         </Card>
 
         {/* Plan Distribution + Org Overview */}
-        <Card className="p-8 bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm flex flex-col">
+        <Card className="p-5 sm:p-8 bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <div>
               <h3 className="text-base font-black text-[#1E293B]">Plan Overview</h3>

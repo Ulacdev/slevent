@@ -208,24 +208,24 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   const renderMessageContent = (msg: string | null) => {
     if (!msg) return null;
-    
+
     // Check for [IMAGE_URL: some_url]
     const imageMatch = msg.match(/\[IMAGE_URL: (.*?)\]/);
     if (imageMatch) {
       const imageUrl = imageMatch[1];
       const textPart = msg.replace(/\[IMAGE_URL: (.*?)\]/g, '').trim();
-      
+
       return (
         <div className="space-y-3">
           {textPart && <p className="leading-relaxed whitespace-pre-wrap">{textPart}</p>}
           <div className="relative group cursor-pointer max-w-sm" onClick={() => window.open(imageUrl, '_blank')}>
-            <img 
-              src={imageUrl} 
-              alt="Attachment" 
-              className="max-h-60 w-auto rounded-lg border border-[#2E2E2F]/10 shadow-sm transition-all group-hover:scale-[1.01] active:scale-[0.99]" 
+            <img
+              src={imageUrl}
+              alt="Attachment"
+              className="max-h-60 w-auto rounded-lg border border-[#2E2E2F]/10 shadow-sm transition-all group-hover:scale-[1.01] active:scale-[0.99]"
             />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-               <ICONS.Eye className="w-5 h-5 text-white" />
+              <ICONS.Eye className="w-5 h-5 text-white" />
             </div>
           </div>
         </div>
@@ -551,7 +551,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
       // Show toast
       showToast('success', 'Logged out successfully. See you soon!');
-      
+
       // 4. Navigate to login
       navigate('/');
     } catch {
@@ -782,7 +782,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     <p className="text-xs font-bold text-[#2E2E2F]/40 uppercase tracking-widest">Status Update</p>
                   </div>
                 </div>
-                
+
                 <div className="p-6 sm:p-8 rounded-2xl bg-[#F2F2F2] border border-[#2E2E2F]/5 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#38BDF2]/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[#38BDF2]/10 transition-all duration-700" />
                   <div className="text-sm sm:text-base text-[#2E2E2F]/70 font-medium leading-relaxed relative z-10">
@@ -2113,7 +2113,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   const [organizerSidebarName, setOrganizerSidebarName] = React.useState('');
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  
+
   // Use localStorage to persist the desktop sidebar toggle status
   const [desktopSidebarOpen, setDesktopSidebarOpen] = React.useState(() => {
     const saved = localStorage.getItem('desktopSidebarOpen');
@@ -2302,12 +2302,12 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
     try {
       await fetch(`${API}/api/auth/logout`, { method: "POST", credentials: "include" });
       await supabase.auth.signOut();
-      clearUser(); 
+      clearUser();
       showToast('success', 'Logged out successfully. See you soon!');
       navigate('/');
-    } catch { 
-      clearUser(); 
-      navigate('/'); 
+    } catch {
+      clearUser();
+      navigate('/');
     }
   };
 
@@ -2795,7 +2795,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 <p className="text-lg font-black text-[#2E2E2F] tracking-tight mt-0.5">Message Details</p>
               </div>
             </div>
-            
+
             <div className="p-6 sm:p-8 rounded-[1.5rem] bg-[#F2F2F2] border border-[#2E2E2F]/5 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#38BDF2]/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[#38BDF2]/10 transition-all duration-700" />
               <p className="text-sm sm:text-base text-[#2E2E2F]/70 font-medium leading-relaxed relative z-10 whitespace-pre-wrap">

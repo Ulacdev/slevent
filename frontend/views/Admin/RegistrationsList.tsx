@@ -9,6 +9,119 @@ import { useUser } from '../../context/UserContext';
 import { useToast } from '../../context/ToastContext';
 import QRCode from 'react-qr-code';
 
+const RegistrationMobileCard = React.memo<{
+    reg: RegistrationView;
+    isCheckedIn: boolean;
+    onSelect: () => void;
+    onCheckIn: (e: React.MouseEvent) => void;
+    canManualCheckIn: boolean;
+}>(({ reg, isCheckedIn, onSelect, onCheckIn, canManualCheckIn }) => (
+    <Card
+        className="p-5 border-[#2E2E2F]/10 hover:border-[#38BDF2]/40 transition-colors cursor-pointer"
+        onClick={onSelect}
+    >
+        <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="min-w-0">
+                <h3 className="font-bold text-[#2E2E2F] text-base truncate">{reg.attendeeName}</h3>
+                <p className="text-[12px] text-[#2E2E2F]/60 font-medium truncate">{reg.attendeeEmail}</p>
+            </div>
+            <Badge
+                type={isCheckedIn ? 'success' : 'neutral'}
+                className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 shrink-0"
+            >
+                {isCheckedIn ? 'CHECKED_IN' : 'ISSUED'}
+            </Badge>
+        </div>
+
+        <div className="space-y-3 mb-5">
+            <div className="flex flex-col">
+                <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Event</span>
+                <span className="text-[13px] font-bold text-[#2E2E2F] truncate">{reg.eventName}</span>
+            </div>
+            <div className="flex flex-col">
+                <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Ticket</span>
+                <span className="text-[13px] font-semibold text-[#2E2E2F]/70">{reg.ticketName}</span>
+            </div>
+            <div className="flex items-center justify-between pt-1">
+                <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Payment</span>
+                    <span className="text-[14px] font-black text-[#2E2E2F]">{reg.currency} {(reg.amountPaid ?? 0).toFixed(2)}</span>
+                </div>
+            </div>
+        </div>
+
+        {!isCheckedIn && (
+            <button
+                onClick={onCheckIn}
+                className="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] transition-colors"
+                disabled={!canManualCheckIn}
+            >
+                MANUAL CHECK-IN
+            </button>
+        )}
+    </Card>
+));
+
+const RegistrationTableRow = React.memo<{
+    reg: RegistrationView;
+    isCheckedIn: boolean;
+    isSelected: boolean;
+    onSelect: () => void;
+    onToggleRow: () => void;
+    onCheckIn: (e: React.MouseEvent) => void;
+    actionLoading: boolean;
+    canManualCheckIn: boolean;
+}>(({ reg, isCheckedIn, isSelected, onSelect, onToggleRow, onCheckIn, actionLoading, canManualCheckIn }) => (
+    <tr
+        className={`hover:bg-[#38BDF2]/10 transition-colors cursor-pointer ${isSelected ? 'bg-[#38BDF2]/10' : ''}`}
+        onClick={onSelect}
+    >
+        <td className="px-4 py-6 align-middle" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-center">
+                <Checkbox checked={isSelected} onChange={onToggleRow} />
+            </div>
+        </td>
+        <td className="px-8 py-6">
+            <div className="flex flex-col">
+                <span className="font-bold text-[15px] text-[#2E2E2F] tracking-tight">{reg.attendeeName}</span>
+                <span className="text-[12px] text-[#2E2E2F]/60 font-medium mt-0.5">{reg.attendeeEmail}</span>
+            </div>
+        </td>
+        <td className="px-8 py-6">
+            <div className="flex flex-col">
+                <span className="text-[14px] font-bold text-[#2E2E2F]">{reg.eventName}</span>
+                <span className="text-[12px] text-[#2E2E2F]/60 font-medium mt-0.5">{reg.ticketName}</span>
+            </div>
+        </td>
+        <td className="px-8 py-6">
+            <span className={`inline-flex px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${isCheckedIn
+                ? 'bg-[#38BDF2]/20 text-[#2E2E2F]'
+                : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
+                }`}>
+                {isCheckedIn ? 'CHECKED_IN' : 'ISSUED'}
+            </span>
+        </td>
+        <td className="px-8 py-6">
+            <span className="text-[15px] font-black text-[#2E2E2F] tracking-tighter">
+                {reg.currency} {(reg.amountPaid ?? 0).toFixed(2)}
+            </span>
+        </td>
+        <td className="px-8 py-6 text-right">
+            {!isCheckedIn ? (
+                <button
+                    onClick={onCheckIn}
+                    className="py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] min-h-[32px] transition-colors disabled:opacity-50"
+                    disabled={!canManualCheckIn || actionLoading}
+                >
+                    {actionLoading ? '...' : 'MANUAL CHECK-IN'}
+                </button>
+            ) : (
+                <span className="text-[12px] font-bold text-[#2E2E2F]/40 italic tracking-tight">Arrived</span>
+            )}
+        </td>
+    </tr>
+));
+
 export const RegistrationsList: React.FC = () => {
   const [regs, setRegs] = useState<RegistrationView[]>([]);
   const [loading, setLoading] = useState(true);
@@ -278,59 +391,16 @@ export const RegistrationsList: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:hidden">
-        {pagedRegs.map((reg, index) => {
-          const isCheckedIn = reg.status === 'USED';
-          return (
-            <Card
-              key={reg.id ?? reg.ticketCode ?? index}
-              className="p-5 border-[#2E2E2F]/10 hover:border-[#38BDF2]/40 transition-colors cursor-pointer"
-              onClick={() => setSelectedReg(reg)}
-            >
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div className="min-w-0">
-                  <h3 className="font-bold text-[#2E2E2F] text-base truncate">{reg.attendeeName}</h3>
-                  <p className="text-[12px] text-[#2E2E2F]/60 font-medium truncate">{reg.attendeeEmail}</p>
-                </div>
-                <Badge
-                  type={isCheckedIn ? 'success' : 'neutral'}
-                  className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 shrink-0"
-                >
-                  {isCheckedIn ? 'CHECKED_IN' : 'ISSUED'}
-                </Badge>
-              </div>
-
-              <div className="space-y-3 mb-5">
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Event</span>
-                  <span className="text-[13px] font-bold text-[#2E2E2F] truncate">{reg.eventName}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Ticket</span>
-                  <span className="text-[13px] font-semibold text-[#2E2E2F]/70">{reg.ticketName}</span>
-                </div>
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Payment</span>
-                    <span className="text-[14px] font-black text-[#2E2E2F]">{reg.currency} {(reg.amountPaid ?? 0).toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {!isCheckedIn && (
-                <button
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleCheckIn(reg);
-                  }}
-                  className="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] transition-colors"
-                  disabled={isStaff && !canManualCheckIn}
-                >
-                  MANUAL CHECK-IN
-                </button>
-              )}
-            </Card>
-          );
-        })}
+        {pagedRegs.map((reg, index) => (
+          <RegistrationMobileCard
+            key={reg.id ?? reg.ticketCode ?? index}
+            reg={reg}
+            isCheckedIn={reg.status === 'USED'}
+            onSelect={() => setSelectedReg(reg)}
+            onCheckIn={(e) => { e.stopPropagation(); handleCheckIn(reg); }}
+            canManualCheckIn={!isStaff || canManualCheckIn}
+          />
+        ))}
       </div>
 
       <Card className="hidden md:block overflow-hidden border-[#2E2E2F]/10 rounded-xl bg-[#F2F2F2]">
@@ -384,66 +454,23 @@ export const RegistrationsList: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#2E2E2F]/10">
-              {pagedRegs.map((reg, index) => {
-                const isCheckedIn = reg.status === 'USED';
-                const rowKey = reg.id ?? reg.ticketCode ?? `${reg.eventId}-${reg.orderId}-${index}`;
-
-                return (
-                  <tr
-                    key={rowKey}
-                    className="hover:bg-[#38BDF2]/10 transition-colors cursor-pointer"
-                    onClick={(e) => { if ((e.target as HTMLElement).tagName !== 'INPUT') setSelectedReg(reg); }}
-                  >
-                    <td className="px-4 py-6 align-middle">
-                      <div className="flex justify-center">
-                        <Checkbox checked={selectedRows.has(reg.id || reg.ticketCode || '')} onChange={() => toggleRow(reg.id || reg.ticketCode || '')} />
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-[15px] text-[#2E2E2F] tracking-tight">{reg.attendeeName}</span>
-                        <span className="text-[12px] text-[#2E2E2F]/60 font-medium mt-0.5">{reg.attendeeEmail}</span>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex flex-col">
-                        <span className="text-[14px] font-bold text-[#2E2E2F]">{reg.eventName}</span>
-                        <span className="text-[12px] text-[#2E2E2F]/60 font-medium mt-0.5">{reg.ticketName}</span>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <span className={`inline-flex px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${isCheckedIn
-                        ? 'bg-[#38BDF2]/20 text-[#2E2E2F]'
-                        : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
-                        }`}>
-                        {isCheckedIn ? 'CHECKED_IN' : 'ISSUED'}
-                      </span>
-                    </td>
-                    <td className="px-8 py-6">
-                      <span className="text-[15px] font-black text-[#2E2E2F] tracking-tighter">
-                        {reg.currency} {(reg.amountPaid ?? 0).toFixed(2)}
-                      </span>
-                    </td>
-                    <td className="px-8 py-6 text-right">
-                      {!isCheckedIn ? (
-                        <button
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setActionLoading(reg.id || reg.ticketCode);
-                            handleCheckIn(reg).finally(() => setActionLoading(null));
-                          }}
-                          className="py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] min-h-[32px] transition-colors disabled:opacity-50"
-                          disabled={(isStaff && !canManualCheckIn) || isBulkActionLoading || actionLoading === (reg.id || reg.ticketCode)}
-                        >
-                          {actionLoading === (reg.id || reg.ticketCode) ? '...' : 'MANUAL CHECK-IN'}
-                        </button>
-                      ) : (
-                        <span className="text-[12px] font-bold text-[#2E2E2F]/40 italic tracking-tight">Arrived</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
+              {pagedRegs.map((reg, index) => (
+                <RegistrationTableRow
+                  key={reg.id ?? reg.ticketCode ?? `${reg.eventId}-${reg.orderId}-${index}`}
+                  reg={reg}
+                  isCheckedIn={reg.status === 'USED'}
+                  isSelected={selectedRows.has(reg.id || reg.ticketCode || '')}
+                  onSelect={() => setSelectedReg(reg)}
+                  onToggleRow={() => toggleRow(reg.id || reg.ticketCode || '')}
+                  onCheckIn={(e) => {
+                    e.stopPropagation();
+                    setActionLoading(reg.id || reg.ticketCode);
+                    handleCheckIn(reg).finally(() => setActionLoading(null));
+                  }}
+                  actionLoading={isBulkActionLoading || actionLoading === (reg.id || reg.ticketCode)}
+                  canManualCheckIn={!isStaff || canManualCheckIn}
+                />
+              ))}
             </tbody>
           </table>
         </div>

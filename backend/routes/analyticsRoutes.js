@@ -10,7 +10,9 @@ import {
   exportEventReport,
   exportAllReports,
   archiveTransaction,
+  bulkArchiveTransactions,
   restoreTransaction,
+  bulkRestoreTransactions,
   deleteTransaction,
   getArchivedTransactions,
   getPlanMetrics,
@@ -23,7 +25,9 @@ router.get('/analytics/summary',authMiddleware, getSummary);
 router.get('/analytics/transactions', authMiddleware, getRecentTransactions);
 router.get('/analytics/transactions/archived', authMiddleware, getArchivedTransactions);
 router.post('/analytics/transactions/:orderId/archive', authMiddleware, archiveTransaction);
+router.post('/analytics/transactions/bulk-archive', authMiddleware, bulkArchiveTransactions);
 router.post('/analytics/transactions/:orderId/restore', authMiddleware, restoreTransaction);
+router.post('/analytics/transactions/bulk-restore', authMiddleware, bulkRestoreTransactions);
 router.delete('/analytics/transactions/:orderId', authMiddleware, deleteTransaction);
 router.get('/analytics/transactions/:orderId', authMiddleware, getTransactionDetail);
 router.get('/analytics/orders', authMiddleware, getRecentOrders);
