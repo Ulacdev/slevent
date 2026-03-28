@@ -5,6 +5,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import rateLimit from "express-rate-limit";
 
 import userRoutes from "./routes/userRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
@@ -29,6 +30,9 @@ import eventPromotionRoutes from "./routes/eventPromotionRoutes.js";
 import supportRoutes from "./routes/supportRoutes.js";
 const PORT = process.env.BACKEND_PORT
 const app = express();
+
+// Required for rate limiting behind proxies like Vercel
+app.set("trust proxy", true);
 
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
@@ -57,6 +61,29 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
+
+// Security: Rate limiting for auth and sensitive endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 requests per window for auth
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "🛑 SECURITY PROTECTION: Too many attempts, please try again after 15 minutes" },
+  handler: (req, res, next, options) => {
+    console.warn(`🛑 [SECURITY] Rate limit EXCEEDED for IP: ${req.ip}`);
+    res.status(options.statusCode).send(options.message);
+  },
+  onLimitReached: (req) => {
+    console.warn(`🚨 [SECURITY] LIMIT REACHED for IP: ${req.ip}`);
+  }
+});
+
+const generalApiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 100, // Limit each IP to 100 requests per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 
 app.use(helmet());
@@ -106,8 +133,8 @@ app.use("/api/tickets", ticketRoutes);
 app.use("/api/ticket-types", ticketTypeRoutes);
 app.use("/api", orderRoutes);
 app.use("/api/payments", paymentRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/invite", inviteRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/invite", authLimiter, inviteRoutes);
 app.use("/api", analyticsRoutes);
 app.use("/api", userRoutes);
 app.use("/api", organizerRoutes);

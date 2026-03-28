@@ -61,100 +61,90 @@ const getBackoffDelayMs = (intervalMs, consecutiveFailures) => {
 export const runReservationCleanup = async () => {
   console.log(`[ReservationCleanup] Running cleanup at`, new Date().toISOString());
   const now = new Date();
+  
+  // 1. Audit Log Pruning (90-day retention TTL)
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+  
+  try {
+    const { count: prunedLogs } = await supabase
+      .from('auditLogs')
+      .delete({ count: 'exact' })
+      .lt('createdAt', ninetyDaysAgo.toISOString());
+    
+    if (prunedLogs) {
+      console.log(`[Maintenance] Pruned ${prunedLogs} old audit logs.`);
+    }
+  } catch (err) {
+    console.warn('[Maintenance] Audit log pruning failed:', err.message);
+  }
+
+  // 2. Batch Reservation Cleanup
   const { data: expiredOrders, error } = await supabase
     .from('orders')
-    .select('orderId, expiresAt')
+    .select('orderId')
     .eq('status', 'PENDING_PAYMENT')
     .not('expiresAt', 'is', null)
     .lt('expiresAt', now.toISOString());
 
   if (error) {
     const retryable = isConnectivityError(error);
-
-    if (retryable) {
-      console.error(
-        `[ReservationCleanup] Failed to reach Supabase (${supabaseConfig.host}) while loading expired orders: ${summarizeConnectivityError(error)}`
-      );
-    } else {
-      console.error('Reservation cleanup failed to load orders', error);
-    }
-
-    return {
-      cleaned: 0,
-      error: error.message,
-      retryable,
-      reason: summarizeConnectivityError(error),
-    };
+    console.error('Reservation cleanup failed to load orders', error);
+    return { cleaned: 0, error: error.message, retryable };
   }
 
   if (!expiredOrders || expiredOrders.length === 0) {
     return { cleaned: 0 };
   }
 
-  let cleaned = 0;
+  const expiredOrderIds = expiredOrders.map(o => o.orderId);
 
-  for (const order of expiredOrders) {
-    try {
-      const { data: orderItems, error: itemsErr } = await supabase
-        .from('orderItems')
-        .select('ticketTypeId, quantity')
-        .eq('orderId', order.orderId);
+  try {
+    // A. Fetch all affected item quantities to release inventory in bulk
+    const { data: allItems, error: itemsErr } = await supabase
+      .from('orderItems')
+      .select('ticketTypeId, quantity')
+      .in('orderId', expiredOrderIds);
 
-      if (itemsErr) {
-        console.error('Reservation cleanup failed to load order items', order.orderId, itemsErr);
-        continue;
-      }
+    if (itemsErr) throw itemsErr;
 
-      const qtyByType = {};
-      for (const item of orderItems || []) {
-        qtyByType[item.ticketTypeId] = (qtyByType[item.ticketTypeId] || 0) + (item.quantity || 0);
-      }
-
-      const typeIds = Object.keys(qtyByType);
-      if (typeIds.length) {
-        const { data: ticketTypes, error: typesErr } = await supabase
-          .from('ticketTypes')
-          .select('ticketTypeId, quantitySold')
-          .in('ticketTypeId', typeIds);
-
-        if (typesErr) {
-          console.error('Reservation cleanup failed to load ticket types', order.orderId, typesErr);
-          continue;
-        }
-
-        for (const tt of ticketTypes || []) {
-          const dec = qtyByType[tt.ticketTypeId] || 0;
-          const newSold = Math.max(0, (tt.quantitySold || 0) - dec);
-          const { error: updErr } = await supabase
-            .from('ticketTypes')
-            .update({ quantitySold: newSold })
-            .eq('ticketTypeId', tt.ticketTypeId);
-          if (updErr) {
-            console.error('Reservation cleanup failed to update ticket type', order.orderId, updErr);
-          }
-        }
-      }
-
-      await supabase.from('tickets').delete().eq('orderId', order.orderId);
-      await supabase.from('attendees').delete().eq('orderId', order.orderId);
-
-      const { error: orderErr } = await supabase
-        .from('orders')
-        .update({ status: 'EXPIRED', updated_at: now.toISOString() })
-        .eq('orderId', order.orderId);
-
-      if (orderErr) {
-        console.error('Reservation cleanup failed to update order', order.orderId, orderErr);
-        continue;
-      }
-
-      cleaned += 1;
-    } catch (err) {
-      console.error('Reservation cleanup error', order.orderId, err);
+    // Aggregate inventory to release
+    const releaseMap = {};
+    for (const item of allItems || []) {
+      releaseMap[item.ticketTypeId] = (releaseMap[item.ticketTypeId] || 0) + (item.quantity || 0);
     }
-  }
 
-  return { cleaned };
+    // B. Bulk inventory release (One call per ticket type instead of per order)
+    const releasePromises = Object.entries(releaseMap).map(([id, qty]) => {
+      // Use SQL increment (decrement) if possible, but for now we fetch-and-update
+      // A safer way is to use a DB function for atomic decrement, but this is already 
+      // much faster than the per-order loop.
+      return (async () => {
+         const { data: tt } = await supabase.from('ticketTypes').select('quantitySold').eq('ticketTypeId', id).single();
+         if (tt) {
+           await supabase.from('ticketTypes')
+             .update({ quantitySold: Math.max(0, (tt.quantitySold || 0) - qty) })
+             .eq('ticketTypeId', id);
+         }
+      })();
+    });
+    await Promise.all(releasePromises);
+
+    // C. Bulk status update and record deletion
+    await Promise.all([
+      supabase.from('tickets').delete().in('orderId', expiredOrderIds),
+      supabase.from('attendees').delete().in('orderId', expiredOrderIds),
+      supabase.from('orders')
+        .update({ status: 'EXPIRED', updated_at: now.toISOString() })
+        .in('orderId', expiredOrderIds)
+    ]);
+
+    console.log(`[ReservationCleanup] Successfully expired ${expiredOrderIds.length} orders.`);
+    return { cleaned: expiredOrderIds.length };
+  } catch (err) {
+    console.error('[ReservationCleanup] Batch cleanup error:', err);
+    return { cleaned: 0, error: err.message };
+  }
 };
 
 export const startReservationCleanup = () => {

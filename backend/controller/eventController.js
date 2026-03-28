@@ -131,8 +131,12 @@ export const listEvents = async (req, res) => {
     const endDate = req.query.endDate;
     const sortBy = req.query.sortBy;
 
-    // 1) Fetch candidate events
-    let query = supabase.from('events').select('*').eq('is_archived', false);
+    // 1) Fetch candidate events with SQL Filtering & Pagination
+    let query = supabase
+      .from('events')
+      .select('*', { count: 'exact' })
+      .eq('is_archived', false);
+
     if (statuses.length > 0) query = query.in('status', statuses);
     if (organizerId) query = query.eq('organizerId', organizerId);
 
@@ -154,92 +158,73 @@ export const listEvents = async (req, res) => {
       query = query.eq('locationType', 'IN_PERSON');
     }
 
-    const { data: events, error: eventsError } = await query;
+    // New: SQL Side Date Filtering
+    if (startDate) query = query.gte('startAt', startDate);
+    if (endDate) query = query.lte('startAt', endDate);
+
+    // New: Category filtering (Using SQL iLike if not 'all')
+    if (category && category !== 'all') {
+      query = query.or(`eventName.ilike.%${category}%,description.ilike.%${category}%`);
+    }
+
+    // New: SQL Sorting
+    if (sortBy === 'date_soon') {
+      query = query.order('startAt', { ascending: true });
+    } else {
+      query = query.order('created_at', { ascending: false });
+    }
+
+    const { data: events, error: eventsError, count: totalRows } = await query;
     if (eventsError) return res.status(500).json({ error: eventsError.message });
 
-    // 2) Fetch ticket types for all candidate events (required for price filtering and return)
-    const allEventIds = (events || []).map(e => e.eventId);
+    // 2) Apply Ranking (especially for Trending)
+    let ranked = events || [];
+    
+    // Fetch like counts for ranking if needed
+    if (sortBy === 'trending') {
+      const allCandidateIds = ranked.map(e => e.eventId);
+      const allLikeCountMap = await getEventLikeCountsMap(allCandidateIds);
+      
+      ranked.sort((a, b) => {
+        const likeDiff = (allLikeCountMap.get(b.eventId) || 0) - (allLikeCountMap.get(a.eventId) || 0);
+        if (likeDiff !== 0) return likeDiff;
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      });
+    }
+
+    const total = totalRows || ranked.length;
+    const totalPages = total ? Math.ceil(total / limit) : 1;
+    const pagedEvents = ranked.slice(offset, offset + limit);
+
+    // Performance Update: Add CDN/Edge Caching headers for Discovery
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=600');
+
+    if (pagedEvents.length === 0) {
+      return res.json({ events: [], pagination: { page, limit, total: 0, totalPages: 0 } });
+    }
+
+    // 3) Fetch ticket types for events on THIS page only (huge performance gain)
+    const pageEventIds = pagedEvents.map(e => e.eventId);
     let allTicketTypes = [];
-    if (allEventIds.length > 0) {
+    if (pageEventIds.length > 0) {
       const { data: ttData } = await supabase
         .from('ticketTypes')
         .select('*')
         .eq('status', true)
-        .in('eventId', allEventIds);
+        .in('eventId', pageEventIds);
       allTicketTypes = ttData || [];
     }
+
+    // 5) Build final response objects
+    const eventIdsForPage = pagedEvents.map(e => e.eventId);
+    const allLikeCountMap = await getEventLikeCountsMap(eventIdsForPage);
+
     const ttMap = new Map();
     allTicketTypes.forEach(tt => {
       const list = ttMap.get(tt.eventId) || [];
       list.push(tt);
       ttMap.set(tt.eventId, list);
     });
-
-    // 3) Apply JS-side filters (Date, Price, Category)
-    let filtered = events || [];
-
-    if (startDate) {
-      const start = new Date(startDate);
-      filtered = filtered.filter(e => new Date(e.startAt) >= start);
-    }
-    if (endDate) {
-      const end = new Date(endDate);
-      filtered = filtered.filter(e => new Date(e.startAt) <= end);
-    }
-
-    if (price === 'free' || price === 'paid') {
-      filtered = filtered.filter(e => {
-        const etts = ttMap.get(e.eventId) || [];
-        const minPrice = etts.length ? Math.min(...etts.map(t => t.priceAmount)) : 0;
-        return price === 'free' ? minPrice === 0 : minPrice > 0;
-      });
-    }
-
-    // Category filtering (Keyword based - simplistic replicate of frontend logic)
-    if (category && category !== 'all') {
-      // Replicate some keywords for common categories if needed, or better:
-      // The frontend could pass keywords in search, but search is already used.
-      // For now, we'll just check if the category name itself appears in the event text if it's a specific category.
-      const catLower = category.toLowerCase();
-      filtered = filtered.filter(e => {
-        const source = `${e.eventName} ${e.description} ${e.locationText}`.toLowerCase();
-        // This is a minimal implementation of the frontend's keyword system
-        return source.includes(catLower);
-      });
-    }
-
-    // 4) Rank and Paginate
-    const filteredEventIds = filtered.map(e => e.eventId);
-    const allLikeCountMap = await getEventLikeCountsMap(filteredEventIds);
-
-    let ranked = [...filtered].sort((a, b) => {
-      if (sortBy === 'trending') {
-        const likeDiff = (allLikeCountMap.get(b.eventId) || 0) - (allLikeCountMap.get(a.eventId) || 0);
-        if (likeDiff !== 0) return likeDiff;
-        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-      }
-
-      if (sortBy === 'date_soon') return new Date(a.startAt).getTime() - new Date(b.startAt).getTime();
-      if (sortBy === 'newest' || sortBy === 'relevance' || !sortBy) {
-        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-      }
-
-      const likeDiff = (allLikeCountMap.get(b.eventId) || 0) - (allLikeCountMap.get(a.eventId) || 0);
-      if (likeDiff !== 0) return likeDiff;
-      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-    });
-
-    const total = ranked.length;
-    const totalPages = total ? Math.ceil(total / limit) : 1;
-    const pagedEvents = ranked.slice(offset, offset + limit);
-
-    if (pagedEvents.length === 0) {
-      return res.json({ events: [], pagination: { page, limit, total: 0, totalPages: 0 } });
-    }
-
-    // 5) Build final response objects
-    const eventIdsForPage = pagedEvents.map(e => e.eventId);
-    // Already have ticket types in ttMap, so we can just use those.
 
     // Fetch registration counts for page
     let regCountMap = new Map();

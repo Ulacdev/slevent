@@ -237,22 +237,47 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { access_token, refresh_token } = req.body;
-
-  if (!access_token || !refresh_token) {
-    return res.status(400).json({ message: "Missing tokens" });
-  }
+  const { email, password, access_token, refresh_token } = req.body;
 
   try {
-    // ✅ Verify access token with a short-lived client to avoid mutating global state
-    const authClient = createAuthClient(access_token);
-    const { data: user, error } = await authClient.auth.getUser(access_token);
+    let finalAccessToken = access_token;
+    let finalRefreshToken = refresh_token;
+    let user = null;
 
-    if (error || !user) {
-      return res.status(401).json({ message: "Invalid or expired token" });
+    // A. Direct Login Attempt (Email + Password)
+    // This allows the rate limiter to protect the system
+    if (email && password) {
+      console.log(`[Auth] Backend login attempt for: ${email}`);
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email: email.toLowerCase().trim(), 
+        password 
+      });
+
+      if (error || !data.session) {
+        console.warn(`[Auth] Failed login for ${email}: ${error?.message}`);
+        return res.status(401).json({ message: error?.message || "Invalid credentials" });
+      }
+
+      finalAccessToken = data.session.access_token;
+      finalRefreshToken = data.session.refresh_token;
+      user = data.user;
+    } 
+    
+    // B. Session Sync (Tokens provided after client-side auth)
+    if (!user && finalAccessToken) {
+      const authClient = createAuthClient(finalAccessToken);
+      const { data, error } = await authClient.auth.getUser(finalAccessToken);
+      if (error || !data.user) {
+        return res.status(401).json({ message: "Invalid session" });
+      }
+      user = data.user;
     }
 
-    // ✅ Store tokens in cookies (match middleware attributes)
+    if (!user) {
+      return res.status(400).json({ message: "Missing login credentials or tokens" });
+    }
+
+    // ✅ Store tokens in secure httpOnly cookies
     const isProd = process.env.NODE_ENV === "production";
     const base = {
       httpOnly: true,
@@ -260,19 +285,20 @@ export const login = async (req, res) => {
       secure: isProd ? true : false,
       path: "/",
     };
-    res.cookie("access_token", access_token, { ...base, maxAge: 60 * 60 * 1000 });
-    res.cookie("refresh_token", refresh_token, { ...base, maxAge: 14 * 24 * 60 * 60 * 1000 });
+    res.cookie("access_token", finalAccessToken, { ...base, maxAge: 60 * 60 * 1000 });
+    res.cookie("refresh_token", finalRefreshToken, { ...base, maxAge: 14 * 24 * 60 * 60 * 1000 });
     
     // Log login
-    await logAudit({ actionType: 'LOGIN', actorUserId: user.user.id, req });
+    await logAudit({ actionType: 'LOGIN', actorUserId: user.id, req });
 
     return res.json({
       message: "Logged in successfully",
-      user: user.user,
+      user: user,
+      session: { access_token: finalAccessToken, refresh_token: finalRefreshToken }
     });
   } catch (err) {
     console.error("Login error:", err);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error during login" });
   }
 }
 

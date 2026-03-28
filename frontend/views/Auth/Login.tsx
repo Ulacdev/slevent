@@ -22,74 +22,66 @@ export const LoginPerspective: React.FC = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
-    if (loginError || !data.session) {
-      setLoading(false);
-      const msg = loginError?.message || "Incorrect email or password.";
-      setError(msg);
-      showToast('error', msg);
-      return;
-    }
-    const roleRes = await fetch(`${API}/api/user/role-by-email?email=${encodeURIComponent(email)}`);
-    if (!roleRes.ok) {
-      setLoading(false);
-      const msg = 'Account not found or not authorized.';
-      setError(msg);
-      showToast('error', msg);
-      return;
-    }
-    const userData = await roleRes.json().catch(() => null);
-    const normalizedRole = normalizeUserRole(userData?.role);
-    if (!normalizedRole) {
-      setLoading(false);
-      const msg = 'Account not found or not authorized.';
-      setError(msg);
-      showToast('error', msg);
-      return;
-    }
-    const isOnboarded = !!userData?.isOnboarded;
-    setUser({ userId: data.user.id, role: normalizedRole, email, isOnboarded });
-    const { access_token, refresh_token } = data.session;
-    const response = await fetch(`${API}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ access_token, refresh_token })
-    });
-    if (!response.ok) {
-      setLoading(false);
-      const result = await response.json().catch(() => ({}));
-      const msg = result.message || "Failed to store session";
-      setError(msg);
-      showToast('error', msg);
-      return;
-    }
-    localStorage.removeItem("sb-ddkkbtijqrgpitncxylx-auth-token");
-    const user = data.user;
-    if (!user?.email_confirmed_at) {
-      setLoading(false);
-      showToast('info', 'Please confirm your email address if you haven\'t already.');
-      await supabase.auth.signOut();
-      return;
-    }
+    try {
+      console.log(`DEBUG: Calling Backend login for ${email}...`);
+      const loginResponse = await fetch(`${API}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", 
+        body: JSON.stringify({ email, password })
+      });
 
-    setLoading(false);
-    // User is confirmed, we can show a welcome if we want, but user said "only toast message no redirect... only happen if already confirm"
-    // Wait, "only happen [redirect] if already confirm" 
-    // So if confirmed, WE REDIRECT.
-    showToast('success', 'Welcome back!');
-    if (normalizedRole === UserRole.ADMIN) {
-      navigate('/dashboard');
-    } else if (normalizedRole === UserRole.STAFF) {
-      navigate('/events');
-    } else if (normalizedRole === UserRole.ORGANIZER) {
-      if (isOnboarded) {
-        navigate('/user-home');
-      } else {
-        navigate('/onboarding');
+      console.log(`DEBUG: Response Status: ${loginResponse.status}`);
+
+      const result = await loginResponse.json().catch(() => ({}));
+
+      if (!loginResponse.ok) {
+        setLoading(false);
+        const msg = result.error || result.message || "Incorrect email or password.";
+        setError(msg);
+        showToast('error', msg);
+        return;
       }
-    } else if (normalizedRole === UserRole.ATTENDEE) {
-      navigate('/browse-events');
+
+      const { user } = result;
+      if (!user) throw new Error("User data missing in response");
+
+      // 2. Clear local token and fetch role data
+      localStorage.removeItem("sb-ddkkbtijqrgpitncxylx-auth-token");
+      
+      const roleRes = await fetch(`${API}/api/user/role-by-email?email=${encodeURIComponent(email)}`);
+      const userData = await roleRes.json().catch(() => null);
+      
+      if (!roleRes.ok || !userData) {
+        setLoading(false);
+        showToast('error', 'Account verification failed.');
+        return;
+      }
+
+      const normalizedRole = normalizeUserRole(userData.role);
+      const isOnboarded = !!userData.isOnboarded;
+
+      setUser({ userId: user.id, role: normalizedRole as UserRole, email, isOnboarded });
+
+      if (!user.email_confirmed_at) {
+        setLoading(false);
+        showToast('info', 'Please confirm your email address first.');
+        return;
+      }
+
+      setLoading(false);
+      showToast('success', 'Logged in successfully!');
+      
+      // Redirect based on role
+      if (normalizedRole === UserRole.ADMIN) navigate('/dashboard');
+      else if (normalizedRole === UserRole.STAFF) navigate('/events');
+      else if (normalizedRole === UserRole.ORGANIZER) navigate(isOnboarded ? '/user-home' : '/onboarding');
+      else if (normalizedRole === UserRole.ATTENDEE) navigate('/browse-events');
+
+    } catch (err: any) {
+      setLoading(false);
+      setError("Unable to connect to security server.");
+      showToast('error', 'Connection error.');
     }
   };
 
