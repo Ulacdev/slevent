@@ -277,8 +277,34 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Missing login credentials or tokens" });
     }
 
+    // --- SELF-HEALING: Ensure user and organizer profiles exist ---
+    const { data: dbUser } = await db.from('users').select('userId, role').eq('userId', user.id).maybeSingle();
+    let finalRole = dbUser?.role || ORGANIZER_ROLE;
+
+    if (!dbUser) {
+      console.log(`[Auth] Syncing missing DB user: ${user.email}`);
+      await db.from('users').insert({
+        userId: user.id,
+        email: user.email?.toLowerCase().trim(),
+        name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+        role: ORGANIZER_ROLE,
+      });
+    }
+
+    const { data: orgData } = await db.from('organizers').select('organizerId, isOnboarded').eq('ownerUserId', user.id).maybeSingle();
+    let isOnboarded = orgData?.isOnboarded || false;
+
+    if (!orgData) {
+      console.log(`[Auth] Syncing missing Organizer profile for: ${user.id}`);
+      await db.from('organizers').insert({
+        ownerUserId: user.id,
+        organizerName: user.user_metadata?.name || 'My Organization',
+        isOnboarded: false
+      });
+    }
+
     // ✅ Store tokens in secure httpOnly cookies
-    const isProd = process.env.NODE_ENV === "production";
+    const isProd = (process.env.NODE_ENV === "production");
     const base = {
       httpOnly: true,
       sameSite: isProd ? "None" : "Lax",
@@ -293,8 +319,13 @@ export const login = async (req, res) => {
 
     return res.json({
       message: "Logged in successfully",
-      user: user,
-      session: { access_token: finalAccessToken, refresh_token: finalRefreshToken }
+      user: {
+        userId: user.id,
+        email: user.email,
+        email_confirmed_at: user.email_confirmed_at,
+        role: finalRole,
+        isOnboarded: isOnboarded
+      }
     });
   } catch (err) {
     console.error("Login error:", err);

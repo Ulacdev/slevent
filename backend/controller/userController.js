@@ -254,11 +254,22 @@ export const whoAmI = async (req, res) => {
         .maybeSingle();
 
       if (insertError) {
-        console.error("[whoAmI] JIT creation failed:", insertError.message);
-        return res.status(500).json({ error: "Failed to initialize user profile" });
+        // If it's a conflict, maybe someone just created it, try to fetch again
+        if (insertError.code === '23505') {
+            const { data: secondTry } = await db.from('users').select('*').eq('userId', userId).maybeSingle();
+            if (secondTry) {
+               data = secondTry;
+            } else {
+               return res.status(500).json({ error: "Failed to sync profile (conflict)" });
+            }
+        } else {
+            console.error("[whoAmI] JIT creation failed:", insertError.message);
+            return res.status(500).json({ error: "Failed to initialize user profile due to security policy" });
+        }
+      } else {
+        data = newData;
+        console.log(`[whoAmI] Successfully created JIT user record for ${data.email}`);
       }
-      data = newData;
-      console.log(`[whoAmI] Successfully created JIT user record for ${data.email}`);
     }
 
     if (!data) return res.status(404).json({ error: 'User not found' });

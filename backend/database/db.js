@@ -33,9 +33,21 @@ const normalizeSupabaseUrl = (rawUrl) => {
 const supabaseUrl = normalizeSupabaseUrl(requireEnvValue('SUPABASE_URL'))
 const serviceKey = requireEnvValue('SUPABASE_SERVICE_KEY', ['SUPABASE_SERVICE_ROLE_KEY'])
 
+// Admin client for backend tasks - bypasses RLS
 const supabase = createClient(
   supabaseUrl,
-  serviceKey
+  serviceKey,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+    global: {
+      headers: {
+        Authorization: `Bearer ${serviceKey}`
+      }
+    }
+  }
 )
 
 export function createAuthClient(initialAccessToken) {

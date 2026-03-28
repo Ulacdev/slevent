@@ -67,7 +67,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
         body: JSON.stringify({ email, password })
       });
 
-      console.log(`DEBUG: [Modal] Response Status: ${loginResponse.status}`);
       const result = await loginResponse.json().catch(() => ({}));
 
       if (!loginResponse.ok) {
@@ -81,22 +80,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
       const { user } = result;
       if (!user) throw new Error("User data missing in response");
 
-      // 2. Clear local token and fetch role data
+      // 2. Clear local token
       localStorage.removeItem("sb-ddkkbtijqrgpitncxylx-auth-token");
       
-      const roleRes = await fetch(`${API}/api/user/role-by-email?email=${encodeURIComponent(email)}`);
-      const userData = await roleRes.json().catch(() => null);
-      
-      if (!roleRes.ok || !userData) {
-        setLoading(false);
-        showToast('error', 'Account verification failed.');
-        return;
-      }
+      const normalizedRole = normalizeUserRole(user.role);
+      const isOnboarded = !!user.isOnboarded;
 
-      const normalizedRole = normalizeUserRole(userData.role);
-      const isOnboarded = !!userData.isOnboarded;
-
-      setUser({ userId: user.id, role: normalizedRole as UserRole, email, isOnboarded });
+      setUser({ userId: user.userId, role: normalizedRole as UserRole, email, isOnboarded });
 
       if (!user.email_confirmed_at) {
         setLoading(false);

@@ -69,7 +69,10 @@ export const apiService = {
   // Wrapper for fetch with better error logging and automatic session injection
   _fetch: async (url: string, options: RequestInit = {}) => {
     try {
-      // 🔥 Automatically inject Supabase Session Token as Bearer header
+      // Ensure credentials are included for cookie-based auth
+      options.credentials = options.credentials || 'include';
+
+      // 🔥 Automatically inject Supabase Session Token as Bearer header for mobile/API compatibility
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.access_token) {
         options.headers = {
@@ -451,9 +454,8 @@ export const apiService = {
 
   // --- Subscription APIs ---
   getCurrentSubscription: async (): Promise<{ subscription: any; organizer: any }> => {
-    const { data: { session } } = await supabase.auth.getSession();
     const res = await apiService._fetch(`${API_BASE}/api/subscriptions/current`, {
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` }
+      headers: { 'Content-Type': 'application/json' }
     });
     if (!res.ok) {
       const errorPayload = await res.json().catch(() => ({}));
@@ -463,9 +465,8 @@ export const apiService = {
   },
 
   getSubscriptionPlans: async (): Promise<AdminPlan[]> => {
-    const { data: { session } } = await supabase.auth.getSession();
     const res = await apiService._fetch(`${API_BASE}/api/subscriptions/plans`, {
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` }
+      headers: { 'Content-Type': 'application/json' }
     });
     if (!res.ok) {
       const errorPayload = await res.json().catch(() => ({}));
@@ -476,10 +477,9 @@ export const apiService = {
   },
 
   createSubscription: async (planId: string, billingInterval: string): Promise<{ subscription: any; plan: AdminPlan; paymentUrl?: string; free?: boolean }> => {
-    const { data: { session } } = await supabase.auth.getSession();
     const res = await apiService._fetch(`${API_BASE}/api/subscriptions`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ planId, billingInterval })
     });
     if (!res.ok) {
@@ -490,10 +490,9 @@ export const apiService = {
   },
 
   cancelSubscription: async (subscriptionId: string): Promise<{ success: boolean; message: string }> => {
-    const { data: { session } } = await supabase.auth.getSession();
     const res = await apiService._fetch(`${API_BASE}/api/subscriptions/${encodeURIComponent(subscriptionId)}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` }
+      headers: { 'Content-Type': 'application/json' }
     });
     if (!res.ok) {
       const errorPayload = await res.json().catch(() => ({}));
@@ -503,9 +502,8 @@ export const apiService = {
   },
 
   getSubscriptionHistory: async (): Promise<{ subscriptions: any[] }> => {
-    const { data: { session } } = await supabase.auth.getSession();
     const res = await apiService._fetch(`${API_BASE}/api/subscriptions/history`, {
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` }
+      headers: { 'Content-Type': 'application/json' }
     });
     if (!res.ok) {
       const errorPayload = await res.json().catch(() => ({}));
@@ -515,9 +513,8 @@ export const apiService = {
   },
 
   verifySubscription: async (subscriptionId: string): Promise<{ success: boolean; status: string }> => {
-    const { data: { session } } = await supabase.auth.getSession();
     const res = await apiService._fetch(`${API_BASE}/api/subscriptions/verify/${encodeURIComponent(subscriptionId)}`, {
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` }
+      headers: { 'Content-Type': 'application/json' }
     });
     if (!res.ok) {
       const errorPayload = await res.json().catch(() => ({}));

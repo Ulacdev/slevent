@@ -32,7 +32,8 @@ const PORT = process.env.BACKEND_PORT
 const app = express();
 
 // Required for rate limiting behind proxies like Vercel
-app.set("trust proxy", true);
+// Using '1' satisfies the security check by assuming exactly one proxy hop
+app.set("trust proxy", 1);
 
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
@@ -134,7 +135,7 @@ app.use("/api/ticket-types", ticketTypeRoutes);
 app.use("/api", orderRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/auth", authLimiter, authRoutes);
-app.use("/api/invite", authLimiter, inviteRoutes);
+app.use("/api/invite", inviteRoutes); // Removed authLimiter from the whole dashboard
 app.use("/api", analyticsRoutes);
 app.use("/api", userRoutes);
 app.use("/api", organizerRoutes);
