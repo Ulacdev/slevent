@@ -119,7 +119,7 @@ const AttendeeFacepile: React.FC<{ count: number; realAvatars?: string[]; size?:
         </div>
       ))}
       {count > displayAvatars.length && (
-        <div className={`${size} rounded-full border-[2.5px] border-white bg-[#F2F2F2] flex items-center justify-center text-[10px] font-black text-[#2E2E2F] shadow-sm z-10 relative`}>
+        <div className={`${size} rounded-full border-[2.5px] border-white bg-[#F2F2F2] flex items-center justify-center text-[10px] font-black text-black shadow-sm z-10 relative`}>
           +{count - displayAvatars.length}
         </div>
       )}
@@ -255,7 +255,7 @@ export const EventCard: React.FC<EventCardProps> = ({
       className={`group flex flex-col h-full border rounded-3xl overflow-hidden bg-[#F2F2F2] transition-all duration-500 cursor-pointer 
         ${(event.isPromoted || (event as any).is_promoted)
           ? 'border-[#38BDF2]/40 shadow-[0_20px_50px_rgba(56,189,242,0.12)] scale-[1.01] ring-1 ring-[#38BDF2]/20'
-          : 'border-[#2E2E2F]/10 hover:border-[#38BDF2]/30 shadow-sm'} 
+          : 'border-black/10 hover:border-[#38BDF2]/30 shadow-sm'} 
         hover:shadow-2xl hover:scale-[1.02]`}
       onClick={() => navigate(`/events/${event.slug || event.eventId}`)}
     >
@@ -268,7 +268,7 @@ export const EventCard: React.FC<EventCardProps> = ({
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center p-12 bg-gradient-to-br from-[#38BDF2] to-[#2E2E2F]">
+          <div className="w-full h-full flex flex-col items-center justify-center p-12 bg-gradient-to-br from-[#38BDF2] to-black">
             <img
               src={BRAND_LOGO_URL}
               alt="StartupLab"
@@ -294,13 +294,13 @@ export const EventCard: React.FC<EventCardProps> = ({
                   Promoted
                 </span>
               </div>
-              <div className="absolute left-0 top-full mt-4 w-72 p-6 bg-[#2E2E2F] text-white text-[11px] font-bold rounded-3xl shadow-2xl opacity-0 translate-y-3 pointer-events-none group-hover/promoted:opacity-100 group-hover/promoted:translate-y-0 transition-all z-50 leading-relaxed ring-1 ring-white/10 backdrop-blur-xl">
+              <div className="absolute left-0 top-full mt-4 w-72 p-6 bg-black text-white text-[11px] font-bold rounded-3xl shadow-2xl opacity-0 translate-y-3 pointer-events-none group-hover/promoted:opacity-100 group-hover/promoted:translate-y-0 transition-all z-50 leading-relaxed ring-1 ring-white/10 backdrop-blur-xl">
                 <div className="flex items-center gap-2 mb-3 text-[#38BDF2]">
                   <ICONS.Zap className="w-5 h-5" />
                   <span className="uppercase tracking-[0.3em] font-black text-[10px]">Platform Highlight</span>
                 </div>
                 This event is highlighted by the organizer as a premium featured session on StartupLab for max visibility and engagement.
-                <div className="absolute bottom-full left-6 border-8 border-transparent border-b-[#2E2E2F]"></div>
+                <div className="absolute bottom-full left-6 border-8 border-transparent border-b-black"></div>
               </div>
             </div>
           ) : trendingRank ? (
@@ -317,7 +317,7 @@ export const EventCard: React.FC<EventCardProps> = ({
             onClick={handleLike}
             className={`pointer-events-auto w-10 h-10 sm:w-9 sm:h-9 rounded-xl border backdrop-blur-sm flex items-center justify-center transition-colors active:scale-95 ${liked
               ? 'bg-[#38BDF2] text-white border-[#38BDF2]'
-              : 'bg-white/90 text-[#2E2E2F] border-[#2E2E2F]/20 hover:bg-[#38BDF2]/20'
+              : 'bg-white/90 text-black border-black/20 hover:bg-[#38BDF2]/20'
               }`}
             title={organizerRestricted ? 'Switch to Attending to like events' : 'Like event'}
             aria-label={liked ? 'Unlike event' : 'Like event'}
@@ -327,7 +327,7 @@ export const EventCard: React.FC<EventCardProps> = ({
           <button
             type="button"
             onClick={handleShare}
-            className={`pointer-events-auto w-10 h-10 sm:w-9 sm:h-9 rounded-xl border bg-white/90 text-[#2E2E2F] border-[#2E2E2F]/20 backdrop-blur-sm flex items-center justify-center ${isTrendingLanding ? 'hover:bg-[#2E2E2F]/10' : 'hover:bg-[#38BDF2]/20'} transition-colors active:scale-95`}
+            className={`pointer-events-auto w-10 h-10 sm:w-9 sm:h-9 rounded-xl border bg-white/90 text-black border-black/20 backdrop-blur-sm flex items-center justify-center ${isTrendingLanding ? 'hover:bg-black/10' : 'hover:bg-[#38BDF2]/20'} transition-colors active:scale-95`}
             title="Share event"
             aria-label="Share event"
           >
@@ -340,39 +340,20 @@ export const EventCard: React.FC<EventCardProps> = ({
 
 
         {/* Organizer Profile Summary */}
-        <div
-          className="flex items-center gap-3 mb-5 p-2 rounded-xl transition-colors hover:bg-black/5 -ml-2"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (organizerId) navigate(`/organizer/${organizerId}`);
-          }}
-        >
-          <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 flex items-center justify-center border-2 border-white shadow-sm bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF]">
-            {resolvedOrganizer?.profileImageUrl ? (
-              <img src={getImageUrl(resolvedOrganizer.profileImageUrl)} alt={organizerName} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-white font-black text-[10px] drop-shadow-sm">
-                {organizerName.charAt(0).toUpperCase()}
-              </span>
-            )}
-          </div>
-          <span className="text-[11px] font-semibold text-[#2E2E2F]/60 truncate">
-            {organizerName}
-          </span>
-        </div>
+        {/* Organizer info removed as requested */}
 
-        <h4 className="text-[#2E2E2F] text-xl sm:text-2xl font-bold tracking-tighter leading-tight mb-3 line-clamp-2">
+        <h4 className="text-black text-xl sm:text-2xl font-black tracking-tighter leading-tight mb-3 line-clamp-2">
           {event.eventName}
         </h4>
-        <div className={`flex items-center gap-3 text-[12px] sm:text-[13px] font-semibold mb-3 ${event.isPromoted || (event as any).is_promoted ? 'bg-[#38BDF2]/5 px-3 py-1.5 rounded-xl border border-[#38BDF2]/10 w-fit' : ''}`}>
-          <span className={`w-6 h-6 shrink-0 rounded-full flex items-center justify-center transition-all ${liked ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/30' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]/65 group-hover:bg-[#38BDF2]/20 group-hover:text-[#38BDF2]'}`}>
+        <div className="flex items-center gap-3 text-[12px] sm:text-[13px] font-semibold mb-3">
+          <span className={`w-6 h-6 shrink-0 rounded-full flex items-center justify-center transition-all ${liked ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/30' : 'bg-black/10 text-black group-hover:bg-[#38BDF2]/20 group-hover:text-[#38BDF2]'}`}>
             <ICONS.Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
           </span>
-          <span className={`${event.isPromoted || (event as any).is_promoted ? 'text-[#2E2E2F] font-black' : 'text-[#2E2E2F]/70'}`}>{likeLabel}</span>
+          <span className={`${event.isPromoted || (event as any).is_promoted ? 'text-black font-black' : 'text-black'}`}>{likeLabel}</span>
         </div>
-        <div className="flex flex-col gap-2.5 text-[12px] sm:text-[13px] font-medium text-[#2E2E2F]/70 mb-4">
+        <div className="flex flex-col gap-2.5 text-[12px] sm:text-[13px] font-medium text-black mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-6 shrink-0 flex items-center justify-center text-[#2E2E2F]/40">
+            <div className="w-6 shrink-0 flex items-center justify-center text-black">
               <ICONS.Users className="w-4 h-4" />
             </div>
             <span className="text-[#38BDF2] font-bold">
@@ -380,13 +361,13 @@ export const EventCard: React.FC<EventCardProps> = ({
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-6 shrink-0 flex items-center justify-center text-[#2E2E2F]/40">
+            <div className="w-6 shrink-0 flex items-center justify-center text-black">
               <ICONS.MapPin className="w-4 h-4" />
             </div>
             <span className="line-clamp-1">{event.locationText}</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-6 shrink-0 flex items-center justify-center text-[#2E2E2F]/40">
+            <div className="w-6 shrink-0 flex items-center justify-center text-black">
               <ICONS.Calendar className="w-4 h-4" />
             </div>
             <span>{formatDate(event.startAt, event.timezone, { day: 'numeric', month: 'short', year: 'numeric' })} · {formatTime(event.startAt, event.timezone)}</span>
@@ -395,16 +376,16 @@ export const EventCard: React.FC<EventCardProps> = ({
 
         {/* Price / Fee section */}
         <div className="mt-auto w-full">
-          <div className="h-[1px] w-full bg-[#2E2E2F]/10 invisible group-hover:visible group-hover:opacity-100 transition-all duration-300" />
+          <div className="h-[1px] w-full bg-black/10 invisible group-hover:visible group-hover:opacity-100 transition-all duration-300" />
           {isDone ? (
             <div className="pt-5 flex flex-col items-start">
-              <p className="text-[10px] sm:text-[12px] font-bold text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-1">Status</p>
-              <p className="text-lg sm:text-xl font-bold text-[#2E2E2F]">Event Ended</p>
+              <p className="text-[10px] sm:text-[12px] font-bold text-black uppercase tracking-[0.2em] mb-1">Status</p>
+              <p className="text-lg sm:text-xl font-bold text-black">Event Ended</p>
             </div>
           ) : (
             <div className="pt-5 flex flex-col items-start">
-              <p className="text-[10px] sm:text-[12px] font-bold text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-1">Tickets From</p>
-              <p className="text-lg sm:text-xl font-bold text-[#2E2E2F]">
+              <p className="text-[10px] sm:text-[12px] font-bold text-black uppercase tracking-[0.2em] mb-1">Tickets From</p>
+              <p className="text-lg sm:text-xl font-bold text-black">
                 {minPrice > 0
                   ? `₱${minPrice.toLocaleString()}`
                   : (event.ticketTypes && event.ticketTypes.length > 0) || (minPrice === 0 && event.ticketTypes?.length)
@@ -866,18 +847,18 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
             {/* Left Column: Content */}
             <div className="flex-1 min-w-0 flex flex-col items-start justify-center text-left w-full">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#E8E8E8] border border-[#2E2E2F]/10 text-[10px] font-bold text-[#2E2E2F] mb-7 shadow-sm">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#E8E8E8] border border-black/10 text-[10px] font-bold text-black mb-7 shadow-sm">
                   <span role="img" aria-label="megaphone">📢</span>
                   <span className="opacity-80">New: Advanced QR Ticketing & Analytics Launched!</span>
                 </div>
 
-                <h1 className="text-[2.5rem] sm:text-5xl lg:text-[60px] font-bold text-[#0B1A2E] tracking-tight leading-[1.1] mb-[5px]">
+                <h1 className="text-[2.5rem] sm:text-5xl lg:text-[60px] font-bold text-black tracking-tight leading-[1.1] mb-[5px]">
                   Smart Events for<br />
                   Growing Philippine<br />
                   Organizers
                 </h1>
 
-                <p className="text-sm sm:text-base lg:text-lg font-normal text-[#0B1A2E]/75 leading-relaxed max-w-[550px] mb-8">
+                <p className="text-sm sm:text-base lg:text-lg font-normal text-black leading-relaxed max-w-[550px] mb-8">
                   Manage registrations, tickets, attendee check-ins, and performance in one simple, compliance-ready event platform — built for organizers in the Philippines.
                 </p>
 
@@ -885,7 +866,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   {isAuthenticated && role === UserRole.ORGANIZER && !isOnboarded ? (
                     <Button
                       onClick={() => navigate('/onboarding')}
-                      className="w-full sm:w-auto px-8 bg-[#38BDF2] border-2 border-[#38BDF2] text-white font-bold tracking-wide text-[15px] h-[52px] rounded-xl shadow-[0_4px_20px_rgba(56,189,242,0.2)] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all flex items-center justify-center gap-2 active:scale-95 group"
+                      className="w-full sm:w-auto px-8 bg-[#38BDF2] border-2 border-[#38BDF2] text-white font-bold tracking-wide text-[15px] h-[52px] rounded-xl shadow-[0_4px_20px_rgba(56,189,242,0.2)] hover:bg-black hover:border-black transition-all flex items-center justify-center gap-2 active:scale-95 group"
                     >
                       Complete Setup
                       <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -901,7 +882,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                           openAuthModal('signup');
                         }
                       }}
-                      className="w-full sm:w-auto px-8 bg-[#38BDF2] border-2 border-[#38BDF2] text-white font-bold tracking-wide text-[15px] h-[52px] rounded-xl shadow-[0_4px_20px_rgba(56,189,242,0.2)] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all flex items-center justify-center gap-2 active:scale-95 group"
+                      className="w-full sm:w-auto px-8 bg-[#38BDF2] border-2 border-[#38BDF2] text-white font-bold tracking-wide text-[15px] h-[52px] rounded-xl shadow-[0_4px_20px_rgba(56,189,242,0.2)] hover:bg-black hover:border-black transition-all flex items-center justify-center gap-2 active:scale-95 group"
                     >
                       {isAuthenticated ? 'Go to Dashboard' : 'Get Started'}
                       <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -929,28 +910,28 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               {/* Stats Block - Tucked tightly under the buttons */}
               <div className="mt-10 sm:mt-12 w-full grid grid-cols-2 sm:grid-cols-3 gap-x-6 sm:gap-x-10 gap-y-8 sm:gap-y-12">
                 <div className="flex flex-col items-start w-full">
-                  <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.3] font-semibold text-[#0B1A2E] tracking-tighter text-left mb-2 sm:mb-3">
+                  <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.3] font-semibold text-black tracking-tighter text-left mb-2 sm:mb-3">
                     6+ Core<br />Event<br />Modules
                   </h4>
-                  <p className="text-[11px] sm:text-[14px] text-[#0B1A2E]/80 font-normal text-left leading-relaxed">
+                  <p className="text-[11px] sm:text-[14px] text-black font-normal text-left leading-relaxed">
                     Ticketing, Registration,<br />Check-in, Analytics,<br />Seats, Reports
                   </p>
                 </div>
 
                 <div className="flex flex-col items-start w-full">
-                  <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.3] font-semibold text-[#0B1A2E] tracking-tighter text-left mb-2 sm:mb-3">
+                  <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.3] font-semibold text-black tracking-tighter text-left mb-2 sm:mb-3">
                     {organizerCount > 3 ? organizerCount : '3'}+ Active<br />Event<br />Organizers
                   </h4>
-                  <p className="text-[11px] sm:text-[14px] text-[#0B1A2E]/80 font-normal text-left leading-relaxed">
+                  <p className="text-[11px] sm:text-[14px] text-black font-normal text-left leading-relaxed">
                     Built with real-world<br />organizer experience
                   </p>
                 </div>
 
                 <div className="flex flex-col items-start w-full col-span-2 sm:col-span-1">
-                  <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.3] font-semibold text-[#0B1A2E] tracking-tighter text-left mb-2 sm:mb-3">
+                  <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.3] font-semibold text-black tracking-tighter text-left mb-2 sm:mb-3">
                     {(pagination?.total || 0) > 8 ? pagination.total : '8'}+ Hosted<br />Event<br />Workflows
                   </h4>
-                  <p className="text-[11px] sm:text-[14px] text-[#0B1A2E]/80 font-normal text-left leading-relaxed">
+                  <p className="text-[11px] sm:text-[14px] text-black font-normal text-left leading-relaxed">
                     From event planning to<br />secure payouts
                   </p>
                 </div>
@@ -970,7 +951,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               {/* Floating badge */}
               {/* Floating badge: Organizer Tally */}
               <div
-                className="absolute -bottom-6 sm:-bottom-8 -left-4 sm:-left-8 bg-[#F2F2F2] p-3 sm:p-4 rounded-xl border border-[#2E2E2F]/10 shadow-[0_20px_40px_-15px_rgba(46,46,47,0.15)] flex flex-col items-start gap-3 animate-float group/badge cursor-pointer z-40"
+                className="absolute -bottom-6 sm:-bottom-8 -left-4 sm:-left-8 bg-[#F2F2F2] p-3 sm:p-4 rounded-xl border border-black/10 shadow-[0_20px_40px_-15px_rgba(46,46,47,0.15)] flex flex-col items-start gap-3 animate-float group/badge cursor-pointer z-40"
                 onMouseEnter={() => setShowOrgDropdown(true)}
                 onMouseLeave={() => setShowOrgDropdown(false)}
               >
@@ -980,21 +961,21 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                       <img src={organizer.src} alt={organizer.alt} className="w-full h-full object-cover" />
                     </div>
                   ))}
-                  <div className="w-9 h-9 rounded-full border-2 border-[#F2F2F2] bg-[#E8E8E8] flex items-center justify-center text-[10px] font-black text-[#2E2E2F] shadow-sm ring-1 ring-black/5">
+                  <div className="w-9 h-9 rounded-full border-2 border-[#F2F2F2] bg-[#E8E8E8] flex items-center justify-center text-[10px] font-black text-black shadow-sm ring-1 ring-black/5">
                     +{organizerCount > 3 ? organizerCount - 3 : 3}
                   </div>
                 </div>
                 <div className="space-y-0.5" onClick={() => navigate('/organizers/discover')}>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/40 leading-none">Active Organizers</p>
-                  <p className="text-sm font-black text-[#2E2E2F] leading-tight hover:text-[#38BDF2] transition-colors">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-black leading-none">Active Organizers</p>
+                  <p className="text-sm font-black text-black leading-tight hover:text-[#38BDF2] transition-colors">
                     {organizerCount > 0 ? `${organizerCount}+ Trusted Leaders` : '6+ Trusted Leaders'}
                   </p>
                 </div>
 
                 {/* Dropdown list of organizers */}
-                <div className={`absolute bottom-[calc(100%-10px)] left-0 w-64 bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden transition-all duration-300 origin-bottom-left pb-3 ${showOrgDropdown ? 'opacity-100 scale-100 translate-y-[-10px]' : 'opacity-0 scale-95 pointer-events-none translate-y-0'}`}>
-                  <div className="p-5 border-b border-[#2E2E2F]/5 bg-[#2E2E2F]/[0.02]">
-                    <h5 className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.25em]">Our Partners</h5>
+                <div className={`absolute bottom-[calc(100%-10px)] left-0 w-64 bg-[#F2F2F2] border border-black/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden transition-all duration-300 origin-bottom-left pb-3 ${showOrgDropdown ? 'opacity-100 scale-100 translate-y-[-10px]' : 'opacity-0 scale-95 pointer-events-none translate-y-0'}`}>
+                  <div className="p-5 border-b border-black/5 bg-black/[0.02]">
+                    <h5 className="text-[10px] font-black text-black uppercase tracking-[0.25em]">Our Partners</h5>
                   </div>
                   <div className="max-h-[238px] overflow-y-auto custom-scrollbar p-2.5 space-y-1">
                     {organizers.map((org) => (
@@ -1004,7 +985,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                           e.stopPropagation();
                           navigate(`/organizer/${org.organizerId}`);
                         }}
-                        className="w-full flex items-center gap-3.5 p-2.5 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-300 text-left group/item border border-transparent hover:border-[#2E2E2F]/5"
+                        className="w-full flex items-center gap-3.5 p-2.5 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-300 text-left group/item border border-transparent hover:border-black/5"
                       >
                         <div className="w-9 h-9 rounded-xl overflow-hidden border-2 border-white shadow-sm bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] flex items-center justify-center shrink-0">
                           {org.profileImageUrl ? (
@@ -1016,23 +997,23 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[11px] font-black text-[#2E2E2F] truncate group-hover/item:text-[#38BDF2] transition-colors tracking-tight">
+                          <p className="text-[11px] font-black text-black truncate group-hover/item:text-[#38BDF2] transition-colors tracking-tight">
                             {org.organizerName}
                           </p>
-                          <p className="text-[9px] font-bold text-[#2E2E2F]/30 uppercase tracking-[0.1em]">
+                          <p className="text-[9px] font-bold text-black uppercase tracking-[0.1em]">
                             {org.followersCount || 0} Followers
                           </p>
                         </div>
-                        <ICONS.ChevronRight className="w-3.5 h-3.5 text-[#2E2E2F]/20 group-hover/item:text-[#38BDF2] group-hover/item:translate-x-0.5 transition-all" />
+                        <ICONS.ChevronRight className="w-3.5 h-3.5 text-black group-hover/item:text-[#38BDF2] group-hover/item:translate-x-0.5 transition-all" />
                       </button>
                     ))}
                     {organizers.length === 0 && (
-                      <div className="p-8 text-center bg-[#2E2E2F]/[0.02] rounded-xl mx-1">
-                        <p className="text-[10px] font-black text-[#2E2E2F]/20 uppercase tracking-[0.1em]">No verified partners yet.</p>
+                      <div className="p-8 text-center bg-black/[0.02] rounded-xl mx-1">
+                        <p className="text-[10px] font-black text-black uppercase tracking-[0.1em]">No verified partners yet.</p>
                       </div>
                     )}
                   </div>
-                  <div className="px-4 py-3 bg-[#F2F2F2] border-t border-[#2E2E2F]/5 text-center">
+                  <div className="px-4 py-3 bg-[#F2F2F2] border-t border-black/5 text-center">
                     <div className="flex items-center justify-center gap-2 text-[9px] font-black text-[#38BDF2] uppercase tracking-[0.2em] opacity-40 hover:opacity-100 transition-opacity cursor-default">
                       <div className="w-1 h-1 rounded-full bg-[#38BDF2] animate-pulse" />
                       Verified Community
@@ -1045,9 +1026,9 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
           {/* Category Rail (Top of Available Events) */}
           <div className="mt-44 mb-28 overflow-visible relative z-10">
-            <div className="rounded-2xl border border-[#2E2E2F]/10 bg-[#F2F2F2] px-6 py-8 md:px-8 shadow-sm">
+            <div className="rounded-2xl border border-black/10 bg-[#F2F2F2] px-6 py-8 md:px-8 shadow-sm">
               <div className="mb-8">
-                <p className="text-[11px] font-bold tracking-tight text-[#2E2E2F]/60">Event smart categories</p>
+                <h2 className="text-[13px] sm:text-[15px] font-black tracking-tight text-black">Event smart categories</h2>
               </div>
               <div
                 className="py-2 relative group-categories outline-none cursor-grab active:cursor-grabbing select-none"
@@ -1076,10 +1057,10 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                       onClick={() => navigate(`/categories/${category.key.toLowerCase()}`)}
                       className="shrink-0 w-[128px] flex flex-col items-center gap-3 text-center group px-2 py-4 hover:z-50 hover:-translate-y-1 transition-transform relative"
                     >
-                      <span className="w-[72px] h-[72px] rounded-full border border-transparent flex items-center justify-center text-[#2E2E2F]/70 bg-transparent group-hover:bg-[#38BDF2]/10 group-hover:border-[#38BDF2]/40 group-hover:text-[#2E2E2F] transition-all duration-300 group-hover:scale-125 group-hover:shadow-[0_10px_25px_-5px_rgba(56,189,242,0.4)] group-focus-visible:scale-125 relative z-20">
+                      <span className="w-[72px] h-[72px] rounded-full border border-transparent flex items-center justify-center text-black bg-transparent group-hover:bg-[#38BDF2]/10 group-hover:border-[#38BDF2]/40 group-hover:text-black transition-all duration-300 group-hover:scale-125 group-hover:shadow-[0_10px_25px_-5px_rgba(56,189,242,0.4)] group-focus-visible:scale-125 relative z-20">
                         <category.Icon className="w-7 h-7 transition-all duration-300 group-hover:scale-110" />
                       </span>
-                      <span className="text-[13px] font-bold text-[#2E2E2F] leading-tight min-h-[32px] flex items-center justify-center pt-2 group-hover:text-[#38BDF2] transition-colors">{category.label}</span>
+                      <span className="text-[13px] font-bold text-black leading-tight min-h-[32px] flex items-center justify-center pt-2 group-hover:text-[#38BDF2] transition-colors">{category.label}</span>
                     </button>
                   ))}
                 </div>
@@ -1093,16 +1074,16 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               {/* Header Section */}
               <div className="mb-12 text-center flex flex-col items-center">
                 <div className="flex items-center gap-3 mb-3">
-                  <h2 className="text-3xl md:text-4xl font-black text-[#2E2E2F] tracking-tight leading-none">Promoted Events</h2>
+                  <h2 className="text-3xl md:text-4xl font-black text-black tracking-tight leading-none">Promoted Events</h2>
                   <div className="group/info relative">
-                    <ICONS.Info className="w-6 h-6 text-[#2E2E2F]/30 cursor-help hover:text-[#38BDF2] transition-colors" strokeWidth={2} />
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-64 p-4 bg-[#2E2E2F] text-white text-[11px] font-bold rounded-xl shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover/info:opacity-100 group-hover/info:translate-y-0 transition-all z-50 leading-relaxed text-center">
+                    <ICONS.Info className="w-6 h-6 text-black cursor-help hover:text-[#38BDF2] transition-colors" strokeWidth={2} />
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-64 p-4 bg-black text-white text-[11px] font-bold rounded-xl shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover/info:opacity-100 group-hover/info:translate-y-0 transition-all z-50 leading-relaxed text-center">
                       These events are highlighted because the organizer has subscribed to a premium plan with promotion features.
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-[#2E2E2F]"></div>
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-black"></div>
                     </div>
                   </div>
                 </div>
-                <p className="text-[#2E2E2F]/50 text-sm md:text-base font-medium max-w-2xl leading-relaxed">
+                <p className="text-black text-sm md:text-base font-medium max-w-2xl leading-relaxed">
                   Discover curated sessions highlighted by organizers as part of their elite plan features.
                 </p>
               </div>
@@ -1110,7 +1091,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               {!loadingPromoted && promotedEvents.length > 0 ? (
                 <div className="relative">
                   {/* Carousel Container - More visible border and rounded corners */}
-                  <div className="rounded-2xl overflow-hidden border border-[#2E2E2F]/15 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] group">
+                  <div className="rounded-2xl overflow-hidden border border-black/15 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] group">
                     <div className="relative h-[280px] sm:h-[400px] lg:h-[500px] overflow-hidden bg-white">
                       {/* Carousel Images */}
                       {promotedEvents.map((event, idx) => {
@@ -1146,7 +1127,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                                   const org = event.organizer || organizers.find((o: any) => o.organizerId === event.organizerId);
 
                                   return (
-                                    <div className="flex flex-col gap-5 sm:gap-7 text-[#2E2E2F] max-w-xl">
+                                    <div className="flex flex-col gap-5 sm:gap-7 text-black max-w-xl">
                                       {/* Category Badge - Reduced Size */}
                                       <div className="flex items-center gap-3 mb-6 group/badge shrink-0">
                                         <div className="w-8 h-8 rounded-full bg-[#38BDF2] flex items-center justify-center text-[#F2F2F2] shadow-xl shadow-[#38BDF2]/20 ring-2 ring-white animate-in zoom-in duration-1000">
@@ -1160,35 +1141,35 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                                       </div>
 
                                       {/* Event Title */}
-                                      <h3 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tighter leading-[1.05] text-[#2E2E2F] drop-shadow-sm animate-in fade-in slide-in-from-left-6 duration-1000 delay-100">
+                                      <h3 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tighter leading-[1.05] text-black drop-shadow-sm animate-in fade-in slide-in-from-left-6 duration-1000 delay-100">
                                         {event.eventName}
                                       </h3>
 
                                       {/* Event Details Grid - Refined Weight & Black Color */}
                                       <div className="space-y-3 sm:space-y-4 pt-3 animate-in fade-in slide-in-from-left-8 duration-1000 delay-200">
                                         <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
-                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-[#2E2E2F]/5 rounded-lg">
+                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-black/5 rounded-lg">
                                             <ICONS.Heart className="w-5 h-5" />
                                           </div>
                                           <span>3 likes</span>
                                         </div>
 
                                         <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
-                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-[#2E2E2F]/5 rounded-lg">
+                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-black/5 rounded-lg">
                                             <ICONS.Users className="w-5 h-5" />
                                           </div>
-                                          <span>{soldSlots} registered <span className="opacity-40 mx-1">•</span> {totalSlots} available</span>
+                                          <span>{soldSlots} registered <span className="opacity-40 mx-1">•</span> {Math.max(0, totalSlots - soldSlots)} available</span>
                                         </div>
 
                                         <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
-                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-[#2E2E2F]/5 rounded-lg">
+                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-black/5 rounded-lg">
                                             <ICONS.MapPin className="w-5 h-5" />
                                           </div>
                                           <span className="line-clamp-1">{event.locationText || 'Location TBA'}</span>
                                         </div>
 
                                         <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
-                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-[#2E2E2F]/5 rounded-lg">
+                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-black/5 rounded-lg">
                                             <ICONS.Calendar className="w-5 h-5" />
                                           </div>
                                           <span>{formatStartForCard(event.startAt || '', event.timezone)}</span>
@@ -1202,7 +1183,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                                             e.stopPropagation();
                                             navigate(`/events/${event.slug || event.eventId}`);
                                           }}
-                                          className="px-6 py-2.5 bg-[#38BDF2] text-white text-[12px] font-black rounded-[5px] shadow-lg shadow-[#38BDF2]/20 hover:bg-[#2E2E2F] hover:shadow-none transition-all transform active:scale-95 uppercase tracking-[0.1em] flex items-center justify-center gap-2 group/btn w-fit"
+                                          className="px-6 py-2.5 bg-[#38BDF2] text-white text-[12px] font-black rounded-[5px] shadow-lg shadow-[#38BDF2]/20 hover:bg-black hover:shadow-none transition-all transform active:scale-95 uppercase tracking-[0.1em] flex items-center justify-center gap-2 group/btn w-fit"
                                         >
                                           Get Ticket
                                           <ICONS.ChevronRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-1" strokeWidth={4} />
@@ -1224,7 +1205,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                           if (promotedCarouselInterval) clearInterval(promotedCarouselInterval);
                           setCurrentPromotedIndex((prev) => (prev - 1 + promotedEvents.length) % promotedEvents.length);
                         }}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg border border-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F] hover:bg-[#38BDF2] hover:text-white transition-all opacity-0 group-hover:opacity-100 z-20"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg border border-black/5 flex items-center justify-center text-black hover:bg-[#38BDF2] hover:text-white transition-all opacity-0 group-hover:opacity-100 z-20"
                       >
                         <ICONS.ChevronLeft className="w-5 h-5" strokeWidth={3} />
                       </button>
@@ -1235,7 +1216,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                           if (promotedCarouselInterval) clearInterval(promotedCarouselInterval);
                           setCurrentPromotedIndex((prev) => (prev + 1) % promotedEvents.length);
                         }}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg border border-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F] hover:bg-[#38BDF2] hover:text-white transition-all opacity-0 group-hover:opacity-100 z-20"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg border border-black/5 flex items-center justify-center text-black hover:bg-[#38BDF2] hover:text-white transition-all opacity-0 group-hover:opacity-100 z-20"
                       >
                         <ICONS.ChevronRight className="w-5 h-5" />
                       </button>
@@ -1287,8 +1268,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           {/* Events Listing Section Header */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pt-8 mb-6 pb-0 px-0">
             <div className="flex-1 space-y-1.5">
-              <h2 className="text-2xl md:text-3xl font-black text-[#2E2E2F] tracking-tight leading-none uppercase">{sectionTitle}</h2>
-              <p className="text-[#2E2E2F]/50 text-xs md:text-sm font-medium leading-relaxed">{sectionSubtitle}</p>
+              <h2 className="text-2xl md:text-3xl font-black text-black tracking-tight leading-none uppercase">{sectionTitle}</h2>
+              <p className="text-black text-xs md:text-sm font-medium leading-relaxed">{sectionSubtitle}</p>
             </div>
           </div>
         </section>
@@ -1300,19 +1281,19 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
             {/* Hide Sidebar Toggle */}
             <button
               onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-              className="flex items-center gap-2 bg-[#F2F2F2] px-4 py-2.5 rounded-xl border border-[#2E2E2F]/10 shadow-sm text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all"
+              className="flex items-center gap-2 bg-[#F2F2F2] px-4 py-2.5 rounded-xl border border-[#E5E7EB] shadow-sm text-[10px] font-black uppercase tracking-widest text-black hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all"
             >
               <ICONS.Filter className="w-4 h-4" />
               {isSidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
             </button>
 
             {/* Sort By Dropdown */}
-            <div className="flex items-center gap-3 bg-[#F2F2F2] px-5 py-2.5 rounded-xl border border-[#2E2E2F]/10 shadow-sm justify-between sm:justify-start">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/40">Sort By</span>
+            <div className="flex items-center gap-3 bg-[#F2F2F2] px-5 py-2.5 rounded-xl border border-[#D1D5DB] shadow-sm justify-between sm:justify-start">
+              <span className="text-[10px] font-black uppercase tracking-widest text-black">Sort By</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-transparent text-xs font-bold text-[#2E2E2F] outline-none cursor-pointer"
+                className="bg-transparent text-xs font-bold text-black outline-none cursor-pointer"
               >
                 <option value="relevance">Relevance</option>
                 <option value="newest">Newest</option>
@@ -1324,7 +1305,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
         <div className="w-full sm:w-[280px] md:w-[320px]">
           <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#2E2E2F]/30 group-focus-within:text-[#38BDF2] transition-colors">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-black group-focus-within:text-[#38BDF2] transition-colors">
               <ICONS.Search className="h-4 w-4" strokeWidth={3} />
             </div>
             <input
@@ -1332,14 +1313,14 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               placeholder="Search sessions..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-9 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl text-[12px] font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-[#2E2E2F]/30"
+              className="block w-full pl-10 pr-9 py-3 bg-[#F2F2F2] border border-[#D1D5DB] rounded-xl text-[12px] font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-black"
             />
           </div>
         </div>
       </div>
 
       {interactionNotice && (
-        <div className="mb-6 rounded-xl border border-[#38BDF2]/30 bg-[#38BDF2]/10 px-4 py-3 text-sm font-semibold text-[#2E2E2F]">
+        <div className="mb-6 rounded-xl border border-[#38BDF2]/30 bg-[#38BDF2]/10 px-4 py-3 text-sm font-semibold text-black">
           {interactionNotice}
         </div>
       )}
@@ -1349,8 +1330,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
         {!isLanding && !isSpecialListing && isSidebarVisible && (
           <aside className="w-full lg:w-72 shrink-0 space-y-10 lg:sticky lg:top-28 lg:self-start lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-4 lg:custom-scrollbar animate-in fade-in slide-in-from-left-4 duration-700">
             {/* Active Filters Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-[#2E2E2F]/5">
-              <h3 className="text-xl font-black text-[#2E2E2F] tracking-tight">Filters</h3>
+            <div className="flex items-center justify-between pb-4 border-b border-black/5">
+              <h3 className="text-xl font-black text-black tracking-tight">Filters</h3>
               {(selectedCategory !== 'all' || selectedDate !== 'all' || selectedPrice !== 'all' || selectedFormat !== 'all') && (
                 <button
                   onClick={() => {
@@ -1360,7 +1341,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                     setSelectedFormat('all');
                     setSearchTerm('');
                   }}
-                  className="text-[10px] font-black uppercase tracking-widest text-[#38BDF2] hover:text-[#2E2E2F] transition-colors"
+                  className="text-[10px] font-black uppercase tracking-widest text-[#38BDF2] hover:text-black transition-colors"
                 >
                   Clear all
                 </button>
@@ -1369,15 +1350,15 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
             {/* Category Section */}
             <div className="space-y-6">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40">Category</h4>
+              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Category</h4>
               <div className="space-y-3.5">
                 {(showCategoriesFull ? EVENT_CATEGORIES : EVENT_CATEGORIES.slice(0, 6)).map((cat) => (
                   <button
                     key={cat.key}
                     onClick={() => setSelectedCategory(selectedCategory === cat.key ? 'all' : cat.key)}
-                    className={`flex items-center gap-3.5 w-full text-left group transition-all ${selectedCategory === cat.key ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/70 hover:text-[#38BDF2]'}`}
+                    className={`flex items-center gap-3.5 w-full text-left group transition-all ${selectedCategory === cat.key ? 'text-[#38BDF2]' : 'text-black hover:text-[#38BDF2]'}`}
                   >
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${selectedCategory === cat.key ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#F2F2F2] border border-[#2E2E2F]/5 group-hover:bg-[#38BDF2]/10'}`}>
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${selectedCategory === cat.key ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#F2F2F2] border border-black/5 group-hover:bg-[#38BDF2]/10'}`}>
                       <cat.Icon className="w-4 h-4" />
                     </div>
                     <span className={`text-[13px] font-bold tracking-tight ${selectedCategory === cat.key ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'}`}>{cat.label}</span>
@@ -1395,7 +1376,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
             {/* Date Section */}
             <div className="space-y-6">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40">Date</h4>
+              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Date</h4>
               <div className="space-y-4">
                 {[
                   { id: 'all', label: 'Any time' },
@@ -1408,10 +1389,10 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                     onClick={() => setSelectedDate(opt.id)}
                     className="flex items-center gap-3 w-full group"
                   >
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedDate === opt.id ? 'border-[#38BDF2]' : 'border-[#2E2E2F]/10 group-hover:border-[#38BDF2]/40'}`}>
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedDate === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
                       {selectedDate === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
                     </div>
-                    <span className={`text-[13px] font-bold tracking-tight ${selectedDate === opt.id ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]/60 group-hover:text-[#2E2E2F]'}`}>{opt.label}</span>
+                    <span className={`text-[13px] font-bold tracking-tight ${selectedDate === opt.id ? 'text-black' : 'text-black group-hover:text-black'}`}>{opt.label}</span>
                   </button>
                 ))}
               </div>
@@ -1419,7 +1400,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
             {/* Price Section */}
             <div className="space-y-6">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40">Price</h4>
+              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Price</h4>
               <div className="space-y-4">
                 {[
                   { id: 'all', label: 'All Prices' },
@@ -1431,10 +1412,10 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                     onClick={() => setSelectedPrice(opt.id as any)}
                     className="flex items-center gap-3 w-full group"
                   >
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedPrice === opt.id ? 'border-[#38BDF2]' : 'border-[#2E2E2F]/10 group-hover:border-[#38BDF2]/40'}`}>
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedPrice === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
                       {selectedPrice === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
                     </div>
-                    <span className={`text-[13px] font-bold tracking-tight ${selectedPrice === opt.id ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]/60 group-hover:text-[#2E2E2F]'}`}>{opt.label}</span>
+                    <span className={`text-[13px] font-bold tracking-tight ${selectedPrice === opt.id ? 'text-black' : 'text-black group-hover:text-black'}`}>{opt.label}</span>
                   </button>
                 ))}
               </div>
@@ -1442,7 +1423,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
             {/* Format Section */}
             <div className="space-y-6">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40">Format</h4>
+              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Format</h4>
               <div className="space-y-4">
                 {[
                   { id: 'all', label: 'All Formats' },
@@ -1454,10 +1435,10 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                     onClick={() => setSelectedFormat(opt.id as any)}
                     className="flex items-center gap-3 w-full group"
                   >
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedFormat === opt.id ? 'border-[#38BDF2]' : 'border-[#2E2E2F]/10 group-hover:border-[#38BDF2]/40'}`}>
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedFormat === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
                       {selectedFormat === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
                     </div>
-                    <span className={`text-[13px] font-bold tracking-tight ${selectedFormat === opt.id ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]/60 group-hover:text-[#2E2E2F]'}`}>{opt.label}</span>
+                    <span className={`text-[13px] font-bold tracking-tight ${selectedFormat === opt.id ? 'text-black' : 'text-black group-hover:text-black'}`}>{opt.label}</span>
                   </button>
                 ))}
               </div>
@@ -1486,7 +1467,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
             <div className="flex justify-center mt-12 px-4">
               <button
                 onClick={() => navigate('/browse-events')}
-                className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-4 bg-[#38BDF2] rounded-xl text-[12px] font-black uppercase tracking-widest text-[#F2F2F2] hover:bg-[#2E2E2F] transition-all active:scale-95 shadow-lg shadow-[#38BDF2]/20"
+                className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-4 bg-[#38BDF2] rounded-xl text-[12px] font-black uppercase tracking-widest text-[#F2F2F2] hover:bg-black transition-all active:scale-95 shadow-lg shadow-[#38BDF2]/20"
               >
                 Explore All Events
                 <ICONS.ArrowRight className="w-5 h-5" />
@@ -1496,11 +1477,11 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
           {/* Empty State */}
           {displayEvents.length === 0 && (
-            <div className="py-24 px-6 text-center bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 animate-in zoom-in-95 duration-500">
-              <div className="w-16 h-16 bg-[#F2F2F2] border border-[#2E2E2F]/5 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-sm">
-                <ICONS.Search className="w-8 h-8 text-[#2E2E2F]/20" />
+            <div className="py-24 px-6 text-center bg-[#F2F2F2] rounded-xl border border-[#E5E7EB] animate-in zoom-in-95 duration-500">
+              <div className="w-16 h-16 bg-[#F2F2F2] border border-black/5 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+                <ICONS.Search className="w-8 h-8 text-black" />
               </div>
-              <h3 className="text-2xl font-black text-[#2E2E2F] tracking-tighter mb-4 uppercase">
+              <h3 className="text-2xl font-black text-black tracking-tighter mb-4 uppercase">
                 {isLandingAllListing
                   ? 'No Trending Events Yet'
                   : listing === 'liked'
@@ -1511,7 +1492,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                         ? 'No recommended events yet'
                         : 'No matches found'}
               </h3>
-              <p className="text-sm font-bold text-[#2E2E2F]/50 mb-10 max-w-[340px] mx-auto leading-relaxed">
+              <p className="text-sm font-bold text-black mb-10 max-w-[340px] mx-auto leading-relaxed">
                 {isLandingAllListing
                   ? 'Be the first to like a session to see it trending here, or explore our full catalog below.'
                   : listing === 'all'
@@ -1520,7 +1501,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               </p>
               {isLandingAllListing ? (
                 <Button
-                  className="px-8 py-3.5 rounded-xl bg-[#2E2E2F] text-white font-black uppercase tracking-widest text-[10px] hover:bg-[#38BDF2] transition-colors"
+                  className="px-8 py-3.5 rounded-xl bg-black text-white font-black uppercase tracking-widest text-[10px] hover:bg-[#38BDF2] transition-colors"
                   onClick={() => navigate('/browse-events')}
                 >
                   Discover All Sessions
@@ -1528,7 +1509,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               ) : (
                 <Button
                   variant="outline"
-                  className="px-8 py-3.5 rounded-xl border-2 border-[#2E2E2F]/10 text-[#2E2E2F] font-black uppercase tracking-widest text-[10px]"
+                  className="px-8 py-3.5 rounded-xl border-2 border-[#E5E7EB] text-black font-black uppercase tracking-widest text-[10px]"
                   onClick={() => {
                     setSearchTerm('');
                     setSelectedLocation(DEFAULT_LOCATION);
@@ -1592,10 +1573,10 @@ const FAQSection: React.FC = () => {
     <section className="mt-44 mb-44 animate-in fade-in slide-in-from-bottom-10 duration-1000">
       <div className="text-center mb-16">
         <p className="text-xs font-bold text-[#38BDF2] mb-3 tracking-tight">Help & Support</p>
-        <h2 className="text-3xl md:text-4xl font-black text-[#2E2E2F] tracking-tight leading-none mb-4">
+        <h2 className="text-3xl md:text-4xl font-black text-black tracking-tight leading-none mb-4">
           Frequently Asked Questions
         </h2>
-        <p className="text-[#2E2E2F]/50 text-sm md:text-base font-medium max-w-2xl mx-auto leading-relaxed">
+        <p className="text-black text-sm md:text-base font-medium max-w-2xl mx-auto leading-relaxed">
           Quick guidance for the most common organizer and attendee workflows in StartupLab Ticketing.
         </p>
       </div>
@@ -1605,17 +1586,17 @@ const FAQSection: React.FC = () => {
             key={index}
             className={`group rounded-xl overflow-hidden transition-all duration-300 border-2 ${openIndex === index
               ? 'bg-[#F2F2F2] border-[#38BDF2] shadow-[0_10px_30px_-10px_rgba(56,189,242,0.1)]'
-              : 'bg-[#F2F2F2] border-[#2E2E2F]/10 shadow-none'
+              : 'bg-[#F2F2F2] border-black/10 shadow-none'
               }`}
           >
             <button
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
               className="w-full px-4 sm:px-8 py-5 sm:py-7 flex items-center justify-between text-left focus:outline-none"
             >
-              <span className={`text-sm sm:text-lg font-black tracking-tight transition-colors duration-300 ${openIndex === index ? 'text-[#38BDF2]' : 'text-[#2E2E2F]'}`}>
+              <span className={`text-sm sm:text-lg font-black tracking-tight transition-colors duration-300 ${openIndex === index ? 'text-[#38BDF2]' : 'text-black'}`}>
                 {faq.question}
               </span>
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${openIndex === index ? 'bg-[#38BDF2] text-white rotate-180' : 'bg-[#2E2E2F]/5 text-[#2E2E2F]/30'
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${openIndex === index ? 'bg-[#38BDF2] text-white rotate-180' : 'bg-[#F3F4F6] text-black'
                 }`}>
                 <ICONS.ChevronDown className="w-5 h-5" strokeWidth={3} />
               </div>
@@ -1625,8 +1606,8 @@ const FAQSection: React.FC = () => {
                 }`}
             >
               <div className="overflow-hidden">
-                <div className="px-8 pb-6 border-t border-[#2E2E2F]/5 mt-2">
-                  <p className="text-[#2E2E2F]/60 text-base font-medium leading-relaxed mt-4">
+                <div className="px-8 pb-6 border-t border-black/5 mt-2">
+                  <p className="text-black text-base font-medium leading-relaxed mt-4">
                     {faq.answer}
                   </p>
                 </div>
@@ -1638,7 +1619,7 @@ const FAQSection: React.FC = () => {
       <div className="flex justify-center mt-16">
         <button
           onClick={() => navigate('/faq')}
-          className="flex items-center gap-3 px-10 py-4 bg-[#38BDF2] text-white rounded-xl text-[12px] font-black uppercase tracking-widest hover:bg-[#2E2E2F] transition-all active:scale-95 shadow-lg shadow-[#38BDF2]/20"
+          className="flex items-center gap-3 px-10 py-4 bg-[#38BDF2] text-white rounded-xl text-[12px] font-black uppercase tracking-widest hover:bg-black transition-all active:scale-95 shadow-lg shadow-[#38BDF2]/20"
         >
           Go to FAQ
           <ICONS.MessageSquare className="w-5 h-5" />
@@ -1673,15 +1654,38 @@ const FeaturedOrganizers: React.FC = () => {
 
 
 
+  const isDraggingRef = React.useRef(false);
+  const startXRef = React.useRef(0);
+  const scrollLeftRef = React.useRef(0);
+
   const handleScroll = () => {
     if (carouselRef.current) {
       const scrollLeft = carouselRef.current.scrollLeft;
       const card = carouselRef.current.firstElementChild as HTMLElement;
       if (!card) return;
       const cardWidth = card.offsetWidth + 24; // Width + gap-6 (1.5rem/24px)
-      const newIndex = Math['round'](scrollLeft / cardWidth);
+      const newIndex = Math.round(scrollLeft / cardWidth);
       if (newIndex !== currentIndex) setCurrentIndex(newIndex);
     }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!carouselRef.current) return;
+    isDraggingRef.current = true;
+    startXRef.current = e.pageX - carouselRef.current.offsetLeft;
+    scrollLeftRef.current = carouselRef.current.scrollLeft;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current || !carouselRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - carouselRef.current.offsetLeft;
+    const walk = (x - startXRef.current) * 1.5;
+    carouselRef.current.scrollLeft = scrollLeftRef.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    isDraggingRef.current = false;
   };
 
   if (loading || !organizers || organizers.length === 0) return null;
@@ -1689,25 +1693,33 @@ const FeaturedOrganizers: React.FC = () => {
   const activeDot = Math.min(currentIndex, 4);
 
   return (
-    <section className="mt-10 mb-20 px-4 sm:px-6 lg:px-10 py-12 bg-transparent">
-      <div className="flex flex-col mb-8 text-center items-center justify-center">
-        <p className="text-xs font-bold text-[#38BDF2] mb-3 tracking-tight uppercase">Verified Showcase</p>
-        <h2 className="text-2xl md:text-3xl font-black text-[#2E2E2F] tracking-tight leading-none mb-3 uppercase">Featured Organizers</h2>
-        <p className="text-[#2E2E2F]/40 text-xs md:text-sm font-medium max-w-lg leading-relaxed">Stay connected with our top event creators and never miss a highlight session.</p>
+    <section className="mt-10 mb-20 px-4 sm:px-6 lg:px-10 py-12 bg-transparent relative group">
+      <div className="flex flex-col items-center mb-10 gap-6">
+        <div className="flex flex-col text-center items-center max-w-2xl">
+          <p className="text-xs font-bold text-[#38BDF2] mb-3 tracking-tight uppercase">Verified Showcase</p>
+          <h2 className="text-2xl md:text-3xl font-black text-black tracking-tight leading-none mb-3">Featured Organizers</h2>
+          <p className="text-black text-xs md:text-sm font-medium leading-relaxed">Stay connected with our top event creators and never miss a highlight session.</p>
+        </div>
+
       </div>
 
       <div
         ref={carouselRef}
         onScroll={handleScroll}
-        className="flex gap-6 overflow-x-auto pb-8 pt-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth snap-x snap-mandatory flex-nowrap w-fit max-w-full mx-auto px-2"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUpOrLeave}
+        onMouseLeave={handleMouseUpOrLeave}
+        className="flex gap-6 overflow-x-auto pb-8 pt-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex-nowrap w-fit max-w-full mx-auto px-2 cursor-grab active:cursor-grabbing"
       >
-        {organizers.map((org) => {
+        {organizers.slice(0, 5).map((org, index) => {
           const isFollowing = (followedOrganizerIds || []).includes(org.organizerId);
           return (
             <OrganizerCard
               key={org.organizerId}
               organizer={org}
               isFollowing={isFollowing}
+              rank={index < 5 ? index + 1 : undefined}
               onFollow={async (e) => {
                 e.stopPropagation();
                 if (!isAuthenticated) {
@@ -1724,9 +1736,9 @@ const FeaturedOrganizers: React.FC = () => {
         })}
       </div>
 
-      <div className="flex items-center justify-center gap-2 mt-2">
+      <div className="flex items-center justify-center gap-2 mt-4">
         {Array.from({ length: dotsCount }).map((_, i) => (
-          <div key={i} className={`w-[7px] h-[7px] rounded-full transition-all duration-300 ${i === activeDot ? 'bg-[#38BDF2] scale-110' : 'bg-[#2E2E2F]/15'}`} />
+          <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === activeDot ? 'bg-[#38BDF2] scale-125 shadow-sm shadow-[#38BDF2]/40' : 'bg-[#D1D5DB]'}`} />
         ))}
       </div>
 

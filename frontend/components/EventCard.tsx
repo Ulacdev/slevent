@@ -48,7 +48,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
   return (
     <div
       onClick={handleClick}
-      className="cursor-pointer group rounded-xl overflow-hidden border border-transparent hover:border-[#2E2E2F]/10 bg-[#F2F2F2] transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+      className="cursor-pointer group rounded-xl overflow-hidden border border-transparent hover:border-[#E5E7EB] bg-[#F2F2F2] transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
     >
       {/* Image Container */}
       <div className="relative overflow-hidden h-64 md:h-72 bg-[#F2F2F2]">
@@ -59,11 +59,11 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center p-12 bg-gradient-to-br from-[#38BDF2] to-[#2E2E2F]">
+          <div className="w-full h-full flex flex-col items-center justify-center p-12 bg-gradient-to-br from-[#38BDF2] to-black">
             <img
               src={BRAND_LOGO_URL}
               alt="StartupLab"
-              className="w-20 h-20 object-contain opacity-40 brightness-0 invert drop-shadow-2xl"
+              className="w-20 h-20 object-contain brightness-0 invert drop-shadow-2xl"
             />
           </div>
         )}
@@ -79,24 +79,24 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
 
       {/* Content */}
       <div className="p-5 space-y-3">
-        <h3 className="font-black text-[#2E2E2F] text-2xl line-clamp-2 group-hover:text-[#38BDF2] transition-colors leading-tight">
+        <h3 className="font-black text-black text-2xl line-clamp-2 group-hover:text-[#38BDF2] transition-colors leading-tight">
           {event.eventName}
         </h3>
 
         {/* Date & Location */}
-        <div className="space-y-1.5 text-sm text-[#2E2E2F] font-bold">
+        <div className="space-y-1.5 text-sm text-black font-bold">
           <div className="flex items-start gap-2">
-            <ICONS.Calendar className="w-4 h-4 mt-0.5 shrink-0 text-[#2E2E2F]" strokeWidth={2.5} />
-            <span>{dateStr}{timeStr && <span className="text-[#2E2E2F] mx-1">•</span>}{timeStr}</span>
+            <ICONS.Calendar className="w-4 h-4 mt-0.5 shrink-0 text-black" strokeWidth={2.5} />
+            <span>{dateStr}{timeStr && <span className="text-black mx-1">•</span>}{timeStr}</span>
           </div>
           <div className="flex items-start gap-2">
-            <ICONS.MapPin className="w-4 h-4 mt-0.5 shrink-0 text-[#2E2E2F]" strokeWidth={2.5} />
+            <ICONS.MapPin className="w-4 h-4 mt-0.5 shrink-0 text-black" strokeWidth={2.5} />
             <span className="line-clamp-1">{event.locationText}</span>
           </div>
         </div>
 
         {/* Strict Hover-only Divider */}
-        <div className="h-[1px] w-full bg-[#2E2E2F]/10 invisible group-hover:visible group-hover:opacity-100 transition-all duration-300" />
+        <div className="h-[1px] w-full bg-[#E5E7EB] invisible group-hover:visible group-hover:opacity-100 transition-all duration-300" />
 
         {/* Rating & Price */}
         {/* Rating & Price */}
@@ -106,11 +106,11 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
             <div className="flex items-center gap-1.5">
               {event.avgRating && event.avgRating > 0 ? (
                 <>
-                  <span className="text-[#2E2E2F]">{event.avgRating.toFixed(1)}</span>
-                  <span className="text-[#2E2E2F] text-xs">({event.reviewCount || 0})</span>
+                  <span className="text-black">{event.avgRating.toFixed(1)}</span>
+                  <span className="text-black text-xs">({event.reviewCount || 0})</span>
                 </>
               ) : (
-                <span className="text-[#2E2E2F] text-xs">No ratings yet</span>
+                <span className="text-black text-xs">No ratings yet</span>
               )}
             </div>
           </div>
@@ -122,14 +122,14 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
               const eventEnd = eventStart ? new Date(eventStart.getTime() + 2 * 60 * 60 * 1000) : null;
               const isDone = eventEnd && now > eventEnd;
 
-              if (isDone) return <span className="text-xs text-[#2E2E2F] uppercase tracking-widest">Event Ended</span>;
+              if (isDone) return <span className="text-xs text-black uppercase tracking-widest">Event Ended</span>;
 
               return event.price_min === 0 ? (
                 <span className="text-[11px] uppercase tracking-[0.15em] font-semibold">FREE</span>
               ) : typeof event.price_min === 'number' ? (
                 <span className="text-[11px] uppercase tracking-[0.15em] font-semibold">₱{event.price_min?.toLocaleString()}</span>
               ) : (
-                <span className="text-[11px] uppercase tracking-[0.15em] font-semibold text-[#2E2E2F]">Check pricing</span>
+                <span className="text-[11px] uppercase tracking-[0.15em] font-semibold text-black">Check pricing</span>
               );
             })()}
           </div>
@@ -138,7 +138,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
         {/* Ticket Progress (if available) */}
         {event.ticketsAvailable !== undefined && event.totalTickets !== undefined && (
           <div className="flex items-center gap-2 text-[11px] font-bold text-[#38BDF2]">
-            <ICONS.Users className="w-4 h-4 shrink-0 text-[#2E2E2F]" />
+            <ICONS.Users className="w-4 h-4 shrink-0 text-black" />
             <span>{(event.totalTickets - event.ticketsAvailable)} registered / {event.totalTickets} slots</span>
           </div>
         )}
