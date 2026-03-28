@@ -235,7 +235,7 @@ export const BrowseEventsNavigator: React.FC<BrowseEventsNavigatorProps> = ({
                 key={tab.key}
                 type="button"
                 onClick={() => onTabChange(tab.key)}
-                className={`relative pb-3 text-lg sm:text-xl font-semibold tracking-tight transition-all duration-300 ease-in-out ${isActive ? 'text-[#38BDF2] font-bold' : 'text-[#2E2E2F]/65 hover:text-[#38BDF2]'}`}
+                className={`relative pb-3 text-lg sm:text-xl font-semibold tracking-tight transition-all duration-300 ease-in-out ${isActive ? 'text-[#38BDF2] font-bold' : 'text-[#2E2E2F] hover:text-[#38BDF2]'}`}
                 aria-current={isActive ? 'page' : undefined}
               >
                 {tab.label}
@@ -250,7 +250,7 @@ export const BrowseEventsNavigator: React.FC<BrowseEventsNavigatorProps> = ({
 
       <div className={isLoading ? 'mt-2 min-h-[20px]' : 'mt-0 min-h-0'}>
         {isLoading && (
-          <div className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[#2E2E2F]/60">
+          <div className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[#2E2E2F]">
             <span className="w-3 h-3 border-2 border-[#2E2E2F]/40 border-t-transparent rounded-full animate-spin" />
             Updating event list...
           </div>

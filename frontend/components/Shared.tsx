@@ -97,7 +97,7 @@ export const Input: React.FC<{
 
   return (
     <div className="space-y-2 w-full">
-      {label && <label className="block text-xs sm:text-sm font-semibold text-[#2E2E2F]/70 mb-1">{label}</label>}
+      {label && <label className="block text-xs sm:text-sm font-semibold text-[#2E2E2F] mb-1">{label}</label>}
       <input
         className={`block w-full px-4 py-3 bg-[#F2F2F2] border text-base sm:text-sm min-h-[48px] sm:min-h-[44px] ${error ? 'border-red-500' : 'border-[#2E2E2F]/20'} rounded-xl focus:outline-none focus:ring-2 ${error ? 'focus:ring-red-300/40' : 'focus:ring-[#38BDF2]/40'} transition-colors font-normal ${className}`}
         {...inputProps}
@@ -129,7 +129,7 @@ export const PasswordInput: React.FC<{
   return (
     <div className={`relative group/input ${className}`}>
       {icon && (
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10 w-5 h-5 flex items-center justify-center">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10 w-5 h-5 flex items-center justify-center">
           {icon}
         </div>
       )}
@@ -145,7 +145,7 @@ export const PasswordInput: React.FC<{
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2E2E2F]/50 hover:text-[#2E2E2F] transition-colors p-2 z-10 min-h-[48px] sm:min-h-[44px] w-auto flex items-center justify-center active:scale-95"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-2 z-10 min-h-[48px] sm:min-h-[44px] w-auto flex items-center justify-center active:scale-95"
         >
           {showPassword ? <EyeOffIcon /> : <EyeIcon />}
         </button>
@@ -167,12 +167,12 @@ export const PasswordRequirements: React.FC<{ password: string }> = ({ password 
 
   return (
     <div className={`mt-2 space-y-1.5 p-3 bg-[#F2F2F2] rounded-[5px] border border-[#2E2E2F]/5 transition-all duration-300 ${hasPassword ? 'opacity-100 translate-y-0 max-h-[300px]' : 'opacity-0 -translate-y-2 pointer-events-none max-h-0 !mt-0 !p-0 border-0 overflow-hidden'}`}>
-      <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/30 mb-2">Password Requirements</p>
+      <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] mb-2">Password Requirements</p>
       <div className="grid grid-cols-1 gap-y-1.5">
         {requirements.map((req, i) => (
           <div key={i} className="flex items-center gap-2">
             <div className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${req.test ? 'bg-[#38BDF2] shadow-[0_0_8px_rgba(56,189,242,0.6)] scale-110' : 'bg-[#2E2E2F]/10'}`} />
-            <span className={`text-[10.5px] font-bold tracking-tight transition-colors duration-300 ${req.test ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40'}`}>
+            <span className={`text-[10.5px] font-bold tracking-tight transition-colors duration-300 ${req.test ? 'text-[#38BDF2]' : 'text-[#2E2E2F]'}`}>
               {req.label}
             </span>
           </div>
@@ -270,7 +270,7 @@ export const Modal: React.FC<{
                   </h2>
                 )}
                 {subtitle && (
-                  <p className="mt-1 text-[11px] sm:text-[13px] uppercase tracking-[0.15em] font-bold text-[#2E2E2F]/50">
+                  <p className="mt-1 text-[11px] sm:text-[13px] uppercase tracking-[0.15em] font-bold text-[#2E2E2F]">
                     {subtitle}
                   </p>
                 )}
@@ -301,7 +301,7 @@ export const Modal: React.FC<{
 
 export const PageLoader: React.FC<{
   label?: string;
-  variant?: 'page' | 'section';
+  variant?: 'page' | 'section' | 'viewport';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }> = ({
@@ -311,31 +311,35 @@ export const PageLoader: React.FC<{
   className = ''
 }) => {
     const variants = {
-      page: 'min-h-[100dvh] bg-[#F2F2F2]',
-      section: 'min-h-[30vh] sm:min-h-[60vh] bg-transparent'
+      viewport: 'fixed inset-0 z-[10000] bg-[#F2F2F2]',
+      page: 'min-h-[80vh] flex-1 bg-[#F2F2F2]',
+      section: 'min-h-[40vh] bg-transparent'
     };
 
     const sizes = {
-      sm: 'w-5 h-5 sm:w-6 sm:h-6',
-      md: 'w-7 h-7 sm:w-8 sm:h-8',
-      lg: 'w-8 h-8 sm:w-10 sm:h-10'
+      sm: 'w-8 h-8',
+      md: 'w-12 h-12',
+      lg: 'w-16 h-16'
     };
 
     return (
       <div className={`flex flex-col items-center justify-center text-center ${variants[variant]} ${className}`}>
         <div className={`relative ${sizes[size]}`}>
-          <div className="absolute inset-0 rounded-full border border-[#38BDF2]/35" />
-          <div className="absolute inset-0 rounded-full border-2 border-[#2E2E2F] border-t-transparent animate-spin" />
-          <div className="absolute inset-2 rounded-full bg-[#38BDF2]/10" />
+          {/* Outer ring */}
+          <div className="absolute inset-0 rounded-full border-4 border-[#38BDF2]/10" />
+          {/* Animated spinner */}
+          <div className="absolute inset-0 rounded-full border-4 border-t-[#38BDF2] animate-spin" />
+          {/* Inner pulse */}
+          <div className="absolute inset-[30%] rounded-full bg-[#38BDF2] animate-ping opacity-60" />
         </div>
         {label && (
-          <p className="mt-4 text-[#2E2E2F] font-bold uppercase tracking-wide text-[12px] sm:text-[13px] px-4">
+          <p className="mt-8 text-[#2E2E2F] font-black uppercase tracking-[0.3em] text-[10px] sm:text-[11px] px-6 animate-pulse">
             {label}
           </p>
         )}
       </div>
     );
-  };
+};
 
 export const Checkbox: React.FC<{
   checked: boolean;
@@ -376,7 +380,7 @@ export const Checkbox: React.FC<{
           </svg>
         )}
       </div>
-      {label && <span className="text-[13px] font-medium text-[#2E2E2F]/70 leading-tight group-hover:text-[#2E2E2F] transition-colors mt-0.5">{label}</span>}
+      {label && <span className="text-[13px] font-medium text-[#2E2E2F] leading-tight group-hover:text-[#2E2E2F] transition-colors mt-0.5">{label}</span>}
     </label>
   );
 };
@@ -409,7 +413,7 @@ export const PortalHeader: React.FC<{
           <h1 className="text-4xl md:text-5xl font-black text-[#2E2E2F] tracking-tighter leading-tight mb-4 uppercase">
             {title}
           </h1>
-          <p className="text-[#2E2E2F]/50 text-base md:text-lg font-bold leading-relaxed max-w-xl italic">
+          <p className="text-[#2E2E2F] text-base md:text-lg font-bold leading-relaxed max-w-xl italic">
             {subtitle}
           </p>
         </div>

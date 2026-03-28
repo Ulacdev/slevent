@@ -107,7 +107,7 @@ export const LoginPerspective: React.FC = () => {
 
       <button
         onClick={() => navigate('/')}
-        className="absolute top-6 left-6 p-2 rounded-full text-[#2E2E2F]/40 hover:text-[#38BDF2] hover:bg-white shadow-sm transition-all group"
+        className="absolute top-6 left-6 p-2 rounded-full text-[#2E2E2F] hover:text-[#38BDF2] hover:bg-white shadow-sm transition-all group"
         title="Go to Home"
       >
         <ICONS.Home className="w-6 h-6" />
@@ -122,16 +122,16 @@ export const LoginPerspective: React.FC = () => {
               className="mx-auto mb-3 w-[180px] h-auto"
               style={{ objectFit: 'contain' }}
             />
-            <p className="text-[#2E2E2F]/70 text-base font-medium">Sign in to your account</p>
+            <p className="text-[#2E2E2F] text-base font-medium">Sign in to your account</p>
             <div className="w-16 h-1 bg-[#38BDF2] mx-auto mt-3 rounded-full"></div>
           </div>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
               <div className="space-y-4">
                 <div className="space-y-1.5 w-full">
-                  <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
+                  <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
                   <div className="relative group/input">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10">
                       <ICONS.Mail className="w-5 h-5" />
                     </div>
                     <input
@@ -146,7 +146,7 @@ export const LoginPerspective: React.FC = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
+                  <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
                   <div className="space-y-2">
                     <PasswordInput
                       value={password}
@@ -186,7 +186,7 @@ export const LoginPerspective: React.FC = () => {
           </form>
 
           <div className="mt-6 pt-6 border-t border-[#2E2E2F]/10 text-center">
-            <p className="text-[#2E2E2F]/60 text-[13px] font-medium">
+            <p className="text-[#2E2E2F] text-[13px] font-medium">
               Don't have an account?{' '}
               <button
                 className="text-[#38BDF2] font-black hover:text-[#2E2E2F] transition-colors ml-1"

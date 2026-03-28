@@ -48,7 +48,7 @@ const InfoPageLayout: React.FC<InfoPageProps> = ({
           <article className={`rounded-xl border border-[#2E2E2F]/10 p-6 sm:p-8 lg:p-10 ${articleClassName}`}>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#38BDF2] mb-4">{eyebrow}</p>
             <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-[#2E2E2F] mb-4">{title}</h1>
-            <p className="text-[#2E2E2F]/70 text-sm sm:text-base leading-relaxed mb-8">{intro}</p>
+            <p className="text-[#2E2E2F] text-sm sm:text-base leading-relaxed mb-8">{intro}</p>
             <div className="mb-8 overflow-hidden rounded-xl border border-[#2E2E2F]/10">
               <img
                 src={heroImage}
@@ -59,12 +59,12 @@ const InfoPageLayout: React.FC<InfoPageProps> = ({
             </div>
             {highlights.length > 0 && (
               <div className="mb-8 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-4 sm:p-5">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/50 mb-3">Platform Scope</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] mb-3">Platform Scope</p>
                 <div className="flex flex-wrap gap-2">
                   {highlights.map((item) => (
                     <span
                       key={item}
-                      className="inline-flex items-center rounded-full border border-[#2E2E2F]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-[#2E2E2F]/70 bg-white"
+                      className="inline-flex items-center rounded-full border border-[#2E2E2F]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-[#2E2E2F] bg-white"
                     >
                       {item}
                     </span>
@@ -79,7 +79,7 @@ const InfoPageLayout: React.FC<InfoPageProps> = ({
                   <h2 className="text-xl sm:text-2xl font-black tracking-tight text-[#2E2E2F] mb-3">{section.title}</h2>
                   <div className="space-y-3">
                     {section.paragraphs.map((paragraph) => (
-                      <p key={paragraph} className="text-[13px] sm:text-sm text-[#2E2E2F]/75 leading-relaxed">
+                      <p key={paragraph} className="text-[13px] sm:text-sm text-[#2E2E2F] leading-relaxed">
                         {paragraph}
                       </p>
                     ))}
@@ -87,7 +87,7 @@ const InfoPageLayout: React.FC<InfoPageProps> = ({
                   {section.bullets && section.bullets.length > 0 && (
                     <ul className="mt-4 space-y-2">
                       {section.bullets.map((item) => (
-                        <li key={item} className="text-[13px] sm:text-sm text-[#2E2E2F]/75 leading-relaxed flex items-start gap-2">
+                        <li key={item} className="text-[13px] sm:text-sm text-[#2E2E2F] leading-relaxed flex items-start gap-2">
                           <span className="w-1.5 h-1.5 mt-1.5 rounded-full bg-[#38BDF2] shrink-0" />
                           <span>{item}</span>
                         </li>
@@ -98,13 +98,13 @@ const InfoPageLayout: React.FC<InfoPageProps> = ({
               ))}
             </div>
 
-            <p className="mt-10 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/45">
+            <p className="mt-10 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">
               Last Updated: {updated}
             </p>
           </article>
 
           <aside className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-5 h-fit lg:sticky lg:top-28">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/50 mb-4">Related Pages</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] mb-4">Related Pages</p>
             <div className="space-y-2.5">
               {LEGAL_LINKS.map((link) => (
                 <Link
@@ -112,7 +112,7 @@ const InfoPageLayout: React.FC<InfoPageProps> = ({
                   to={link.path}
                   className={`block rounded-xl border px-3 py-2 text-xs font-bold transition-colors ${location.pathname === link.path
                     ? 'border-[#38BDF2]/40 text-[#38BDF2] bg-white'
-                    : 'border-[#2E2E2F]/10 text-[#2E2E2F]/70 hover:text-[#38BDF2] hover:border-[#38BDF2]/40'
+                    : 'border-[#2E2E2F]/10 text-[#2E2E2F] hover:text-[#38BDF2] hover:border-[#38BDF2]/40'
                     }`}
                 >
                   {link.label}

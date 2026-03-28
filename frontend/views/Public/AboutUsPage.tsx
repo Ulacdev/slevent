@@ -91,21 +91,21 @@ export const AboutUsPage: React.FC = () => {
                 <feature.Icon className="w-5 h-5" />
               </div>
               <h2 className="text-lg font-black tracking-tight text-[#2E2E2F] mb-2">{feature.title}</h2>
-              <p className="text-sm text-[#2E2E2F]/70 leading-relaxed">{feature.description}</p>
+              <p className="text-sm text-[#2E2E2F] leading-relaxed">{feature.description}</p>
             </article>
           ))}
         </section>
 
         <section className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-6 sm:p-8">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/50 mb-4">Meet Our Team</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] mb-4">Meet Our Team</p>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[#2E2E2F]">The people behind StartupLab Ticketing</h2>
-          <p className="mt-3 text-sm sm:text-base text-[#2E2E2F]/70 leading-relaxed">
+          <p className="mt-3 text-sm sm:text-base text-[#2E2E2F] leading-relaxed">
             We’re a cross-functional crew of builders, operators, and event strategists focused on helping organizers run better experiences.
           </p>
         </section>
 
         <section className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-6 sm:p-8">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/50 mb-4">Community Voices</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] mb-4">Community Voices</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {testimonials.map((item) => (
               <article key={item.name} className="rounded-xl border border-[#2E2E2F]/10 p-5 bg-[#F2F2F2] shadow-sm flex flex-col justify-between">
@@ -115,7 +115,7 @@ export const AboutUsPage: React.FC = () => {
                       <ICONS.Star key={i} className="w-4 h-4 fill-current" />
                     ))}
                   </div>
-                  <p className="text-sm text-[#2E2E2F]/80 leading-relaxed mb-6">"{item.quote}"</p>
+                  <p className="text-sm text-[#2E2E2F] leading-relaxed mb-6">"{item.quote}"</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-[#38BDF2] flex items-center justify-center text-white text-sm font-bold shrink-0">
@@ -123,7 +123,7 @@ export const AboutUsPage: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-[13px] font-bold text-[#2E2E2F] leading-tight">{item.name}</p>
-                    <p className="text-[11px] text-[#2E2E2F]/60 mt-0.5">{item.role}</p>
+                    <p className="text-[11px] text-[#2E2E2F] mt-0.5">{item.role}</p>
                   </div>
                 </div>
               </article>
@@ -132,12 +132,12 @@ export const AboutUsPage: React.FC = () => {
         </section>
 
         <section className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-6 sm:p-8">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/50 mb-4">Impact</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] mb-4">Impact</p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {impactStats.map((item) => (
               <div key={item.label} className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] px-4 py-5">
                 <p className="text-2xl font-black tracking-tight" style={{ color: ACCENT }}>{item.value}</p>
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#2E2E2F]/60 mt-2">{item.label}</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#2E2E2F] mt-2">{item.label}</p>
               </div>
             ))}
           </div>

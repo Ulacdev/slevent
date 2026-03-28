@@ -68,7 +68,7 @@ export const SupportCenter: React.FC<SupportCenterProps> = ({
               </div>
             </div>
             <h3 className="text-2xl font-black text-[#2E2E2F]">Request Submitted!</h3>
-            <p className="text-[#2E2E2F]/60 max-w-sm mx-auto">
+            <p className="text-[#2E2E2F] max-w-sm mx-auto">
               Our priority support team will respond to your request within 24 hours.
             </p>
           </div>
@@ -82,7 +82,7 @@ export const SupportCenter: React.FC<SupportCenterProps> = ({
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-[#2E2E2F] mb-1">Dedicated Support</h3>
-                  <p className="text-sm text-[#2E2E2F]/60">
+                  <p className="text-sm text-[#2E2E2F]">
                     Get priority help from our support team. We typically respond within 24 hours.
                   </p>
                 </div>
@@ -93,7 +93,7 @@ export const SupportCenter: React.FC<SupportCenterProps> = ({
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Category */}
               <div>
-                <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/40 mb-3">
+                <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] mb-3">
                   Support Category
                 </label>
                 <select
@@ -131,7 +131,7 @@ export const SupportCenter: React.FC<SupportCenterProps> = ({
 
               {/* Message */}
               <div>
-                <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/40 mb-3">
+                <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] mb-3">
                   Message
                 </label>
                 <textarea

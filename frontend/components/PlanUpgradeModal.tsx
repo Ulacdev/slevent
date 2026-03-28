@@ -90,7 +90,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
               checked={dontShowAgain}
               onChange={setDontShowAgain}
               label={
-                <span className="text-sm font-semibold text-[#2E2E2F]/70">
+                <span className="text-sm font-semibold text-[#2E2E2F]">
                   {dontShowAgain ? "Won't show again until next login" : 'Don\'t show again'}
                 </span>
               }
@@ -109,7 +109,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
               <h2 className="text-2xl font-black tracking-tighter text-[#2E2E2F] mb-1">
                 Upgrade Plan for {organizerName || 'Company'}
               </h2>
-              <p className="text-[#2E2E2F]/60 font-medium">
+              <p className="text-[#2E2E2F] font-medium">
                 {currentPlanId 
                   ? "Manage your current plan or upgrade to unlock more features for your business."
                   : "Select a new plan to unlock more features for your business."}
@@ -133,7 +133,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${billingCycle === 'monthly'
                   ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/25'
-                  : 'text-[#2E2E2F]/60 hover:text-[#2E2E2F] hover:bg-[#D9D9D9]'
+                  : 'text-[#2E2E2F] hover:text-[#2E2E2F] hover:bg-[#D9D9D9]'
                   }`}
               >
                 Monthly
@@ -143,7 +143,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
                 onClick={() => setBillingCycle('yearly')}
                 className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${billingCycle === 'yearly'
                   ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/25'
-                  : 'text-[#2E2E2F]/60 hover:text-[#2E2E2F] hover:bg-[#D9D9D9]'
+                  : 'text-[#2E2E2F] hover:text-[#2E2E2F] hover:bg-[#D9D9D9]'
                   }`}
               >
                 Yearly

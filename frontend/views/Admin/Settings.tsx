@@ -273,10 +273,10 @@ export const SettingsView: React.FC = () => {
       type="button"
       onClick={disabled ? undefined : onClick}
       className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${disabled
-        ? 'text-[#2E2E2F]/40 bg-[#F2F2F2] cursor-not-allowed opacity-60'
+        ? 'text-[#2E2E2F] bg-[#F2F2F2] cursor-not-allowed opacity-60'
         : active
           ? 'text-[#F2F2F2] bg-[#38BDF2]'
-          : 'text-[#2E2E2F]/40 bg-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]'
+          : 'text-[#2E2E2F] bg-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]'
         }`}
     >
       {iconType === 'bell' ? (
@@ -298,14 +298,14 @@ export const SettingsView: React.FC = () => {
               {notification.type === 'success' ? <ICONS.CheckCircle className="w-5 h-5" /> : <ICONS.Layout className="w-5 h-5" />}
             </div>
             <p className="font-black text-sm tracking-tight">{notification.message}</p>
-            <button onClick={() => setNotification(null)} className="ml-4 text-[#2E2E2F]/40 hover:text-[#2E2E2F] text-xl font-black transition-colors">&times;</button>
+            <button onClick={() => setNotification(null)} className="ml-4 text-[#2E2E2F] hover:text-[#2E2E2F] text-xl font-black transition-colors">&times;</button>
           </Card>
         </div>
       )}
       <div className="px-2 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">{activeTabMeta.label}</h1>
-          <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">{activeTabMeta.description}</p>
+          <p className="mt-1 text-sm font-semibold text-[#2E2E2F]">{activeTabMeta.description}</p>
         </div>
       </div>
 
@@ -333,7 +333,7 @@ export const SettingsView: React.FC = () => {
             {activeSubTab === 'directory' ? (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <label className="block text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-3 ml-1">Team Directory</label>
+                  <label className="block text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-3 ml-1">Team Directory</label>
                   <Button onClick={() => setIsInviteModalOpen(true)}>
                     <span className="text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
                       <ICONS.Users className="w-3.5 h-3.5" />
@@ -346,9 +346,9 @@ export const SettingsView: React.FC = () => {
                     <table className="w-full text-left">
                       <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
                         <tr>
-                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Name</th>
-                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Position</th>
-                          <th className="px-4 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] text-right">
+                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Name</th>
+                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Position</th>
+                          <th className="px-4 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-right">
                             <div className="flex items-center justify-end gap-2">
                               <button onClick={handlePrintTeam} className="p-2 bg-[#38BDF2] text-white rounded-lg hover:bg-[#2E2E2F] transition-colors" title="Print All">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
@@ -379,13 +379,13 @@ export const SettingsView: React.FC = () => {
                                       <div className="bg-[#38BDF2] text-[#F2F2F2] text-[8px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest">owner</div>
                                     )}
                                   </div>
-                                  <div className="text-[12px] text-[#2E2E2F]/60 font-bold tracking-tight">{member.email}</div>
+                                  <div className="text-[12px] text-[#2E2E2F] font-bold tracking-tight">{member.email}</div>
                                 </div>
                               </div>
                             </td>
                             <td className="px-10 py-8">
                               <div className="text-[13px] font-black text-[#2E2E2F] uppercase tracking-widest">{member.role}</div>
-                              <div className="text-[10px] font-bold text-[#2E2E2F]/60 uppercase tracking-[0.2em] mt-1">{member.perspective} HUB</div>
+                              <div className="text-[10px] font-bold text-[#2E2E2F] uppercase tracking-[0.2em] mt-1">{member.perspective} HUB</div>
                             </td>
                           </tr>
                         ))}
@@ -397,7 +397,7 @@ export const SettingsView: React.FC = () => {
             ) : (
               <div className="space-y-6 animate-in fade-in duration-300">
                 <div className="flex justify-between items-center">
-                  <label className="block text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-3 ml-1">Access Control</label>
+                  <label className="block text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-3 ml-1">Access Control</label>
                   <Badge type="info" className="font-black text-[9px] tracking-widest uppercase bg-[#38BDF2]/20 text-[#2E2E2F]">Manage Team Permissions</Badge>
                 </div>
                 <Card className="overflow-hidden border-[#2E2E2F]/10 rounded-xl bg-[#F2F2F2]">
@@ -405,11 +405,11 @@ export const SettingsView: React.FC = () => {
                     <table className="w-full text-left">
                       <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
                         <tr>
-                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Name</th>
-                          <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] text-center">View Events</th>
-                          <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] text-center">Edit Events</th>
-                          <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] text-center">Check-in</th>
-                          <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] text-center">Notify</th>
+                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Name</th>
+                          <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-center">View Events</th>
+                          <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-center">Edit Events</th>
+                          <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-center">Check-in</th>
+                          <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-center">Notify</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#2E2E2F]/10">
@@ -428,7 +428,7 @@ export const SettingsView: React.FC = () => {
                                   <div className="flex items-center gap-2 mb-0.5">
                                     <div className="font-black text-[#2E2E2F] text-[14px] tracking-tight">{member.name}</div>
                                   </div>
-                                  <div className="text-[10px] text-[#2E2E2F]/60 font-black uppercase tracking-widest">{member.role}</div>
+                                  <div className="text-[10px] text-[#2E2E2F] font-black uppercase tracking-widest">{member.role}</div>
                                 </div>
                               </div>
                             </td>
@@ -475,13 +475,13 @@ export const SettingsView: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-black text-[#2E2E2F] uppercase tracking-wider">Admin Profile</h3>
-                  <p className="text-[10px] text-[#2E2E2F]/40 font-bold uppercase tracking-widest mt-0.5">Manage your personal identification</p>
+                  <p className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-widest mt-0.5">Manage your personal identification</p>
                 </div>
               </div>
 
               <div className="space-y-6">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em] ml-1">Full Name</label>
+                  <label className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] ml-1">Full Name</label>
                   <Input
                     value={userName}
                     onChange={(e: any) => setUserName(e.target.value)}
@@ -490,7 +490,7 @@ export const SettingsView: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-1.5 opacity-60">
-                  <label className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em] ml-1">Email Address</label>
+                  <label className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] ml-1">Email Address</label>
                   <div className="px-5 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl text-xs text-[#2E2E2F] font-bold">
                     {adminEmail}
                   </div>
@@ -513,7 +513,7 @@ export const SettingsView: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-black text-[#2E2E2F] uppercase tracking-wider">Security</h3>
-                  <p className="text-[10px] text-[#2E2E2F]/40 font-bold uppercase tracking-widest mt-0.5">Manage your authentication credentials</p>
+                  <p className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-widest mt-0.5">Manage your authentication credentials</p>
                 </div>
               </div>
 
@@ -521,7 +521,7 @@ export const SettingsView: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 rounded-xl bg-[#F2F2F2] border border-[#D1D5DB]">
                   <div className="space-y-1">
                     <h4 className="text-xs font-bold text-[#2E2E2F]">Password Protection</h4>
-                    <p className="text-[11px] text-[#2E2E2F]/50 font-medium tracking-tight">Generate a secure reset link</p>
+                    <p className="text-[11px] text-[#2E2E2F] font-medium tracking-tight">Generate a secure reset link</p>
                   </div>
                   <Button
                     variant="outline"
@@ -548,7 +548,7 @@ export const SettingsView: React.FC = () => {
         <form onSubmit={handleInviteSubmit} className="space-y-10 px-2">
           <div className="space-y-6">
             <Input label="Work Email" type="email" placeholder="j.miller@startuplab.co" required className="w-full py-5 px-6 rounded-xl bg-[#F2F2F2] border-[#2E2E2F]/20 text-base" value={inviteData.email} onChange={(e: any) => setInviteData({ ...inviteData, email: e.target.value })} />
-            <Input label="Assigned Position" value="STAFF" disabled className="w-full py-5 px-6 rounded-xl bg-[#F2F2F2] border-[#2E2E2F]/20 text-[#2E2E2F]/60 text-base" />
+            <Input label="Assigned Position" value="STAFF" disabled className="w-full py-5 px-6 rounded-xl bg-[#F2F2F2] border-[#2E2E2F]/20 text-[#2E2E2F] text-base" />
           </div>
           <div className="pt-8 flex flex-col sm:flex-row gap-4">
             <Button className="flex-1" onClick={() => setIsInviteModalOpen(false)}>Cancel</Button>
@@ -628,7 +628,7 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
     }
   };
 
-  if (loading) return <div className="p-8 font-black text-[10px] text-[#2E2E2F]/40 uppercase tracking-widest">Loading Gateway Configuration...</div>;
+  if (loading) return <div className="p-8 font-black text-[10px] text-[#2E2E2F] uppercase tracking-widest">Loading Gateway Configuration...</div>;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -649,35 +649,35 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
         <Card className="lg:col-span-2 p-8 rounded-xl bg-[#F2F2F2] border-[#2E2E2F]/10 shadow-sm space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1.5 opacity-60">
-              <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">Email Provider</label>
-              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+              <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">Email Provider</label>
+              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]">
                 Gmail (SMTP Server)
               </div>
             </div>
 
             <div className="space-y-1.5 opacity-60">
-              <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">Mail Driver</label>
-              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+              <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">Mail Driver</label>
+              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]">
                 smtp
               </div>
             </div>
 
             <div className="space-y-1.5 opacity-60">
-              <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">SMTP Host</label>
-              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+              <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">SMTP Host</label>
+              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]">
                 smtp.gmail.com
               </div>
             </div>
 
             <div className="space-y-1.5 opacity-60">
-              <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">SMTP Port</label>
-              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+              <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">SMTP Port</label>
+              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]">
                 587
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">SMTP Username (Gmail Account)</label>
+              <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">SMTP Username (Gmail Account)</label>
               <Input
                 name="smtpUsername"
                 value={formData.smtpUsername}
@@ -688,7 +688,7 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">SMTP App Password</label>
+              <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">SMTP App Password</label>
               <Input
                 type="password"
                 name="smtpPassword"
@@ -700,14 +700,14 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
             </div>
 
             <div className="space-y-1.5 opacity-60">
-              <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">Mail Encryption</label>
-              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+              <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">Mail Encryption</label>
+              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]">
                 STARTTLS (Standard Secure)
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">From Address</label>
+              <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">From Address</label>
               <Input
                 name="fromAddress"
                 value={formData.fromAddress}
@@ -718,7 +718,7 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
             </div>
 
             <div className="md:col-span-2 space-y-1.5">
-              <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">From Name</label>
+              <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">From Name</label>
               <Input
                 name="fromName"
                 value={formData.fromName}
@@ -743,7 +743,7 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
 
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-[#2E2E2F]/50 uppercase pl-1">Send Test To</label>
+                <label className="text-[11px] font-bold text-[#2E2E2F] uppercase pl-1">Send Test To</label>
                 <Input
                   value={testRecipient}
                   onChange={(e: any) => setTestRecipient(e.target.value)}
@@ -751,7 +751,7 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
                   className="bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-full px-6"
                 />
               </div>
-              <p className="text-[10px] text-[#2E2E2F]/40 font-medium pl-1">
+              <p className="text-[10px] text-[#2E2E2F] font-medium pl-1">
                 Enter an email address to send a test message to verify your settings.
               </p>
               <Button
@@ -776,7 +776,7 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
             <p className="text-[11px] text-[#2E2E2F] leading-relaxed font-bold">
               When using Gmail, you must use a dedicated <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-[#38BDF2] underline decoration-2 underline-offset-2 hover:text-[#2E2E2F] transition-colors">App Password</a> rather than your main password.
             </p>
-            <p className="text-[10px] text-[#2E2E2F]/50 mt-2 font-medium">
+            <p className="text-[10px] text-[#2E2E2F] mt-2 font-medium">
               This ensures secure access and bypasses 2FA requirements for the SMTP server.
             </p>
           </div>

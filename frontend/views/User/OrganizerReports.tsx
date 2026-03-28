@@ -214,7 +214,7 @@ export const OrganizerReports: React.FC = () => {
             <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">
               Transaction Reports
             </h1>
-            <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">
+            <p className="mt-1 text-sm font-semibold text-[#2E2E2F]">
               Analyze revenue flow, monitor audience conversions, and export operational datasets.
             </p>
           </div>
@@ -249,9 +249,9 @@ export const OrganizerReports: React.FC = () => {
         </div>
 
         <div className={`relative group bg-transparent border-2 border-[#2E2E2F]/10 rounded-xl p-6 transition-all duration-300 ${!hasAdvancedReports ? 'cursor-not-allowed border-[#2E2E2F]/20' : 'hover:border-[#2E2E2F] hover:shadow-sm'}`}>
-          <p className="text-xs font-bold text-[#2E2E2F]/50 uppercase tracking-widest mb-3">Total Pending & Failed</p>
+          <p className="text-xs font-bold text-[#2E2E2F] uppercase tracking-widest mb-3">Total Pending & Failed</p>
           <div className={`${!hasAdvancedReports ? 'blur-md select-none opacity-50' : ''}`}>
-             <p className="text-3xl font-extrabold text-[#2E2E2F]/50 leading-none mb-1">{formatCurrency(totalAmount - completedAmount)}</p>
+             <p className="text-3xl font-extrabold text-[#2E2E2F] leading-none mb-1">{formatCurrency(totalAmount - completedAmount)}</p>
           </div>
           {!hasAdvancedReports && (
             <div className="absolute inset-0 flex items-center justify-center p-4 text-center z-10">
@@ -273,7 +273,7 @@ export const OrganizerReports: React.FC = () => {
               onClick={() => setFilter(status)}
               className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === status
                   ? 'bg-[#F2F2F2] text-[#2E2E2F] shadow-lg border border-[#2E2E2F]/10'
-                  : 'bg-transparent text-[#2E2E2F]/40 hover:text-[#2E2E2F]'
+                  : 'bg-transparent text-[#2E2E2F] hover:text-[#2E2E2F]'
                 }`}
             >
               {status}
@@ -285,7 +285,7 @@ export const OrganizerReports: React.FC = () => {
           {selectedRows.size > 0 && (
             <div className="flex items-center gap-3 mr-2 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="w-2 h-2 rounded-full bg-[#38BDF2] animate-pulse" />
-              <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest bg-[#F2F2F2] px-3.5 py-1.5 rounded-lg border border-[#2E2E2F]/10">
+              <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest bg-[#F2F2F2] px-3.5 py-1.5 rounded-lg border border-[#2E2E2F]/10">
                 {selectedRows.size} Selected
               </span>
               <button 
@@ -330,7 +330,7 @@ export const OrganizerReports: React.FC = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-transparent border-b border-[#2E2E2F]/10">
-                <th className="px-4 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest whitespace-nowrap w-12 text-center align-middle">
+                <th className="px-4 py-4 text-xs font-bold text-[#2E2E2F] uppercase tracking-widest whitespace-nowrap w-12 text-center align-middle">
                    <div className="flex justify-center">
                       <Checkbox 
                         checked={selectedRows.size === transactions.length && transactions.length > 0} 
@@ -339,19 +339,19 @@ export const OrganizerReports: React.FC = () => {
                       />
                    </div>
                 </th>
-                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest whitespace-nowrap">Order ID</th>
-                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest whitespace-nowrap">Event</th>
-                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest whitespace-nowrap">Attendee</th>
-                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest text-right whitespace-nowrap">Size</th>
-                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest text-right whitespace-nowrap">Amount</th>
-                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest text-center whitespace-nowrap">Status</th>
-                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F]/60 uppercase tracking-widest text-right whitespace-nowrap">Date</th>
+                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F] uppercase tracking-widest whitespace-nowrap">Order ID</th>
+                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F] uppercase tracking-widest whitespace-nowrap">Event</th>
+                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F] uppercase tracking-widest whitespace-nowrap">Attendee</th>
+                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F] uppercase tracking-widest text-right whitespace-nowrap">Size</th>
+                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F] uppercase tracking-widest text-right whitespace-nowrap">Amount</th>
+                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F] uppercase tracking-widest text-center whitespace-nowrap">Status</th>
+                <th className="px-6 py-4 text-xs font-bold text-[#2E2E2F] uppercase tracking-widest text-right whitespace-nowrap">Date</th>
               </tr>
             </thead>
             <tbody>
               {transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-[#2E2E2F]/40 font-bold text-sm">
+                  <td colSpan={6} className="px-6 py-12 text-center text-[#2E2E2F] font-bold text-sm">
                     No transactions found
                   </td>
                 </tr>
@@ -371,7 +371,7 @@ export const OrganizerReports: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[11px] font-bold font-mono text-[#2E2E2F]/60 uppercase tracking-widest bg-[#2E2E2F]/5 px-2 py-1 rounded">
+                      <span className="text-[11px] font-bold font-mono text-[#2E2E2F] uppercase tracking-widest bg-[#2E2E2F]/5 px-2 py-1 rounded">
                         {transaction.orderId?.slice(0, 8) || '-'}
                       </span>
                     </td>
@@ -385,7 +385,7 @@ export const OrganizerReports: React.FC = () => {
                         <p className="text-sm font-bold text-[#2E2E2F]">
                           {transaction.customerName || 'Unknown'}
                         </p>
-                        <p className="text-xs font-medium text-[#2E2E2F]/60 mt-0.5">
+                        <p className="text-xs font-medium text-[#2E2E2F] mt-0.5">
                           {transaction.customerEmail || '-'}
                         </p>
                       </div>
@@ -393,7 +393,7 @@ export const OrganizerReports: React.FC = () => {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <span className="text-[14px] font-bold text-[#2E2E2F]">{transaction.quantity || 1}</span>
-                        <span className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Tickets</span>
+                        <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest">Tickets</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -405,7 +405,7 @@ export const OrganizerReports: React.FC = () => {
                       {getStatusBadge(transaction.paymentStatus)}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="text-xs font-medium text-[#2E2E2F]/60">
+                      <span className="text-xs font-medium text-[#2E2E2F]">
                         {formatDate(transaction.createdAt)}
                       </span>
                     </td>
@@ -419,7 +419,7 @@ export const OrganizerReports: React.FC = () => {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="px-8 py-5 border-t-2 border-[#2E2E2F]/5 flex justify-between items-center bg-[#F2F2F2]">
-            <p className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">
+            <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest">
               Page {page} of {totalPages}
             </p>
             <div className="flex gap-2">

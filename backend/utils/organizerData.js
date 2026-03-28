@@ -34,7 +34,7 @@ export function isOrganizerTableMissingError(error) {
   return isMissingRelationError(error, 'organizers');
 }
 
-export function serializeOrganizerRecord(record, eventsHostedCount = 0, recentFollowers = []) {
+export function serializeOrganizerRecord(record, eventsHostedCount = 0, recentFollowers = [], likesCount = 0) {
   if (!record) return null;
   return {
     ...record,
@@ -44,14 +44,16 @@ export function serializeOrganizerRecord(record, eventsHostedCount = 0, recentFo
     eventsHostedCount: Number.isFinite(Number(eventsHostedCount))
       ? Number(eventsHostedCount)
       : 0,
+    likesCount: Number.isFinite(Number(likesCount))
+      ? Number(likesCount)
+      : 0,
     recentFollowers: Array.isArray(recentFollowers) ? recentFollowers : [],
   };
 }
 
-function isPublishedEvent(eventRow, statusColumnAvailable) {
-  if (!statusColumnAvailable) return true;
+function isPublishedEvent(eventRow) {
   const normalizedStatus = String(eventRow?.status || '').trim().toUpperCase();
-  return normalizedStatus === 'PUBLISHED';
+  return ['PUBLISHED', 'LIVE', 'COMPLETED'].includes(normalizedStatus);
 }
 
 async function findUserById(userId) {
@@ -104,7 +106,7 @@ export async function getEventsHostedCounts(organizerIds = []) {
 
   for (const event of data || []) {
     if (!event?.organizerId) continue;
-    if (!isPublishedEvent(event, hasStatusColumn)) continue;
+    if (!isPublishedEvent(event)) continue;
     countMap.set(event.organizerId, (countMap.get(event.organizerId) || 0) + 1);
   }
 
@@ -129,17 +131,6 @@ export async function getEventsHostedCounts(organizerIds = []) {
     .select('eventId, organizerId, createdBy, status')
     .in('createdBy', ownerUserIds);
 
-  let legacyHasStatusColumn = true;
-  if (legacyError && isMissingColumnError(legacyError, 'status')) {
-    legacyHasStatusColumn = false;
-    const fallback = await supabase
-      .from('events')
-      .select('eventId, organizerId, createdBy')
-      .in('createdBy', ownerUserIds);
-    legacyEvents = fallback.data;
-    legacyError = fallback.error;
-  }
-
   if (legacyError) {
     if (isMissingColumnError(legacyError, 'createdBy')) return countMap;
     throw legacyError;
@@ -149,7 +140,7 @@ export async function getEventsHostedCounts(organizerIds = []) {
     // If organizerId is already present, it was counted above.
     if (event?.organizerId) continue;
     if (!event?.createdBy) continue;
-    if (!isPublishedEvent(event, legacyHasStatusColumn)) continue;
+    if (!isPublishedEvent(event)) continue;
 
     const organizerId = ownerToOrganizerId.get(event.createdBy);
     if (!organizerId) continue;
@@ -157,6 +148,60 @@ export async function getEventsHostedCounts(organizerIds = []) {
   }
 
   return countMap;
+}
+
+/**
+ * Aggregates total likes from all events owned by an organizer.
+ */
+export async function getOrganizersTotalLikes(organizerIds = []) {
+  const likeMap = new Map();
+  const uniqueIds = [...new Set((organizerIds || []).filter(Boolean))];
+  if (uniqueIds.length === 0) return likeMap;
+
+  // 1. Get all events for these organizers
+  // We include createdBy for legacy fallback
+  const { data: organizers } = await supabase
+    .from('organizers')
+    .select('organizerId, ownerUserId')
+    .in('organizerId', uniqueIds);
+  
+  const ownerToOrg = new Map((organizers || []).map(o => [o.ownerUserId, o.organizerId]));
+  const owners = [...ownerToOrg.keys()].filter(Boolean);
+
+  const { data: events, error } = await supabase
+    .from('events')
+    .select('eventId, organizerId, createdBy, status')
+    .or(`organizerId.in.(${uniqueIds.join(',')}),createdBy.in.(${owners.join(',')})`);
+
+  if (error || !events) return likeMap;
+
+  const publishedEvents = events.filter(e => isPublishedEvent(e));
+  const publishedEventIds = publishedEvents.map(e => e.eventId);
+  
+  if (publishedEventIds.length === 0) return likeMap;
+
+  // 2. Get likes for these events
+  const { data: likes } = await supabase
+    .from('eventLikes') // Try standard table first
+    .select('eventId')
+    .in('eventId', publishedEventIds);
+
+  let finalLikes = likes;
+  if (!finalLikes) {
+    const { data: likes2 } = await supabase.from('eventlikes').select('eventId').in('eventId', publishedEventIds);
+    finalLikes = likes2;
+  }
+
+  if (finalLikes) {
+    for (const l of finalLikes) {
+      const eventId = l.eventId || l.eventid;
+      const event = publishedEvents.find(e => e.eventId === eventId);
+      const orgId = event?.organizerId || (event?.createdBy ? ownerToOrg.get(event.createdBy) : null);
+      if (orgId) likeMap.set(orgId, (likeMap.get(orgId) || 0) + 1);
+    }
+  }
+
+  return likeMap;
 }
 
 export async function getOrganizerByOwnerUserId(ownerUserId) {

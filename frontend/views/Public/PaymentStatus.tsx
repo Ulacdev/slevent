@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { Order } from '../../types';
-import { Card, Button } from '../../components/Shared';
+import { Card, Button, PageLoader } from '../../components/Shared';
 import { ICONS } from '../../constants';
 import QRCode from 'react-qr-code';
 
@@ -78,28 +78,20 @@ export const PaymentStatusView: React.FC = () => {
   const provider = (order?.streamingPlatform && order.streamingPlatform.trim()) || detectedProvider || 'StartupLab Portal';
 
   if (status === 'checking') {
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-20 flex flex-col items-center justify-center text-center">
-        <div className="relative w-16 h-16 mb-8">
-          <div className="absolute inset-0 rounded-full border-4 border-[#38BDF2]/20 border-t-[#38BDF2] animate-spin"></div>
-        </div>
-        <h1 className="text-2xl font-black text-[#2E2E2F] tracking-tight mb-3">Confirming Transaction</h1>
-        <p className="text-[#2E2E2F]/60 font-medium">Please wait while we secure your participation...</p>
-      </div>
-    );
+    return <PageLoader label="Securing participation..." variant="viewport" />;
   }
 
   if (status === 'failed' || status === 'expired') {
     return (
       <div className="max-w-xl mx-auto px-4 py-16">
         <Card className="p-10 text-center rounded-xl bg-[#F2F2F2] border-[#2E2E2F]/10">
-          <div className="w-16 h-16 bg-[#2E2E2F]/5 text-[#2E2E2F]/40 rounded-xl flex items-center justify-center mx-auto mb-8">
+          <div className="w-16 h-16 bg-[#2E2E2F]/5 text-[#2E2E2F] rounded-xl flex items-center justify-center mx-auto mb-8">
             <ICONS.CheckCircle className="w-8 h-8 opacity-20" />
           </div>
           <h1 className="text-3xl font-black text-[#2E2E2F] tracking-tighter mb-4">
             {status === 'expired' ? 'Session Expired' : 'Payment Failed'}
           </h1>
-          <p className="text-[#2E2E2F]/70 font-medium leading-relaxed mb-10 max-w-sm mx-auto">
+          <p className="text-[#2E2E2F] font-medium leading-relaxed mb-10 max-w-sm mx-auto">
             {status === 'expired'
               ? 'Your reservation window has closed. Your selected seats have been released.'
               : 'We encountered an error processing your payment. No funds were captured.'}
@@ -108,7 +100,7 @@ export const PaymentStatusView: React.FC = () => {
             <Button onClick={() => navigate('/')} variant="primary" className="w-full py-4 rounded-xl">
               Back to Events
             </Button>
-            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/40">Enterprise Support • Contact help@startuplab.com</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]">Enterprise Support • Contact help@startuplab.com</p>
           </div>
         </Card>
       </div>
@@ -116,20 +108,7 @@ export const PaymentStatusView: React.FC = () => {
   }
 
   if (status === 'pending') {
-    return (
-      <div className="max-w-xl mx-auto px-4 py-16">
-        <Card className="p-10 text-center rounded-xl bg-[#F2F2F2] border-[#2E2E2F]/10">
-          <div className="relative w-12 h-12 mx-auto mb-8">
-            <div className="absolute inset-0 rounded-full border-4 border-[#38BDF2]/10 border-t-[#38BDF2] animate-spin"></div>
-          </div>
-          <h1 className="text-3xl font-black text-[#2E2E2F] tracking-tighter mb-4">Awaiting Verification</h1>
-          <p className="text-[#2E2E2F]/70 font-medium leading-relaxed mb-10 max-w-sm mx-auto">
-            Your transaction is currently being processed by the provider. This page will update automatically once confirmed.
-          </p>
-          <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/40">Synchronizing with Payment Gateway...</p>
-        </Card>
-      </div>
-    );
+    return <PageLoader label="Awaiting verification..." variant="viewport" />;
   }
 
   // SUCCESS STATE
@@ -145,7 +124,7 @@ export const PaymentStatusView: React.FC = () => {
           <h1 className="text-5xl lg:text-6xl font-black text-[#2E2E2F] tracking-tighter leading-[0.9] mb-4">
             You're all set!
           </h1>
-          <p className="text-[#2E2E2F]/40 font-bold text-xs lg:text-sm uppercase tracking-widest mt-4 flex items-center gap-3">
+          <p className="text-[#2E2E2F] font-bold text-xs lg:text-sm uppercase tracking-widest mt-4 flex items-center gap-3">
             <span>Order #{orderId?.toString().slice(-8).toUpperCase()}</span>
             <span className="w-1 h-1 bg-[#2E2E2F]/20 rounded-full"></span>
             <span>{eventName}</span>
@@ -177,7 +156,7 @@ export const PaymentStatusView: React.FC = () => {
                   <div className="flex items-start justify-between gap-6">
                     <div className="flex-1">
                       <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tight mb-3">Online Event Access</h2>
-                      <p className="text-[#2E2E2F]/70 font-medium leading-relaxed max-w-md">
+                      <p className="text-[#2E2E2F] font-medium leading-relaxed max-w-md">
                         This event is hosted digitally. You can join the session directly from this portal or via the link sent to your email.
                       </p>
                     </div>
@@ -188,7 +167,7 @@ export const PaymentStatusView: React.FC = () => {
 
                   <div className="bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-8">
                     <div className="flex-1 w-full sm:w-auto text-center sm:text-left overflow-hidden">
-                      <p className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest mb-2">Connection Link</p>
+                      <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest mb-2">Connection Link</p>
                       <p className="text-sm font-bold text-[#2E2E2F] truncate mb-1 pr-4">{meetLink}</p>
                       <p className="text-[11px] font-medium text-[#38BDF2] flex items-center justify-center sm:justify-start gap-1">
                         <ICONS.CheckCircle className="w-3 h-3" />
@@ -205,11 +184,11 @@ export const PaymentStatusView: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="p-5 rounded-xl bg-[#F2F2F2] border border-[#2E2E2F]/5">
-                      <p className="text-[9px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-2">Access Method</p>
+                      <p className="text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-2">Access Method</p>
                       <p className="text-sm font-bold text-[#2E2E2F]">{provider}</p>
                     </div>
                     <div className="p-5 rounded-xl bg-[#F2F2F2] border border-[#2E2E2F]/5">
-                      <p className="text-[9px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-2">Entry Status</p>
+                      <p className="text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-2">Entry Status</p>
                       <p className="text-sm font-bold text-[#38BDF2]">Auto-Confirmed</p>
                     </div>
                   </div>
@@ -220,7 +199,7 @@ export const PaymentStatusView: React.FC = () => {
                   <div className="flex items-start justify-between gap-6">
                     <div className="flex-1">
                       <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tight mb-3">Your Digital Ticket</h2>
-                      <p className="text-[#2E2E2F]/70 font-medium leading-relaxed max-w-md">
+                      <p className="text-[#2E2E2F] font-medium leading-relaxed max-w-md">
                         Present this QR code at the event for check-in.
                       </p>
                     </div>
@@ -244,14 +223,14 @@ export const PaymentStatusView: React.FC = () => {
                             />
                           </div>
                           <div className="pt-8 border-t border-[#2E2E2F]/5 text-center">
-                            <p className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.4em] mb-2">TICKET CODE</p>
+                            <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] mb-2">TICKET CODE</p>
                             <p className="text-lg font-black text-[#2E2E2F] tracking-widest uppercase">{tickets[activeTicketIndex].ticketCode}</p>
-                            <p className="text-[10px] font-bold text-[#2E2E2F]/40 mt-2 uppercase">{tickets[activeTicketIndex].attendeeName}</p>
+                            <p className="text-[10px] font-bold text-[#2E2E2F] mt-2 uppercase">{tickets[activeTicketIndex].attendeeName}</p>
                           </div>
                         </Card>
                       </div>
                     ) : (
-                      <div className="py-20 text-center text-[#2E2E2F]/40 font-bold italic">Generating entry credentials...</div>
+                      <div className="py-20 text-center text-[#2E2E2F] font-bold italic">Generating entry credentials...</div>
                     )}
 
                     {tickets.length > 1 && (
@@ -284,7 +263,7 @@ export const PaymentStatusView: React.FC = () => {
                         <ICONS.CheckCircle className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest mb-1">Entry Requirement</p>
+                        <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest mb-1">Entry Requirement</p>
                         <p className="text-[11px] font-bold text-[#2E2E2F] leading-snug">Present this QR code per registrant. Valid identification may be required.</p>
                       </div>
                     </div>
@@ -292,11 +271,11 @@ export const PaymentStatusView: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="p-6 rounded-xl bg-[#F2F2F2] border border-[#2E2E2F]/5">
-                      <p className="text-[9px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-2">Access Method</p>
+                      <p className="text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-2">Access Method</p>
                       <p className="text-sm font-bold text-[#2E2E2F]">In-Person Verification</p>
                     </div>
                     <div className="p-6 rounded-xl bg-[#F2F2F2] border border-[#2E2E2F]/5">
-                      <p className="text-[9px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-2">Entry Status</p>
+                      <p className="text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-2">Entry Status</p>
                       <p className="text-sm font-bold text-[#38BDF2]">Registration Verified</p>
                     </div>
                   </div>
@@ -312,7 +291,7 @@ export const PaymentStatusView: React.FC = () => {
                 <ICONS.Layout className="w-5 h-5" />
               </div>
               <h4 className="text-sm font-black text-[#2E2E2F] uppercase tracking-wide mb-2">Email Delivered</h4>
-              <p className="text-xs text-[#2E2E2F]/60 font-medium leading-relaxed">
+              <p className="text-xs text-[#2E2E2F] font-medium leading-relaxed">
                 A confirmation receipt and detailed instructions have been dispatched to your registered address.
               </p>
             </Card>
@@ -323,7 +302,7 @@ export const PaymentStatusView: React.FC = () => {
               <h4 className="text-sm font-black text-[#2E2E2F] uppercase tracking-wide mb-2">
                 {order?.organizerName || 'Guest Support'}
               </h4>
-              <p className="text-xs text-[#2E2E2F]/60 font-medium leading-relaxed">
+              <p className="text-xs text-[#2E2E2F] font-medium leading-relaxed">
                 Need assistance with your booking? Contact us at{' '}
                 <span className="text-[#38BDF2] font-bold">
                   {order?.supportEmail || 'help@startuplab.com'}
@@ -364,7 +343,7 @@ export const PaymentStatusView: React.FC = () => {
           </Card>
 
           <div className="px-6 text-center">
-            <p className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.4em] mb-4">Secured by StartupLab</p>
+            <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] mb-4">Secured by StartupLab</p>
             <div className="flex justify-center gap-4 opacity-10">
               <img src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/images/hitpay.png" alt="HitPay" className="h-3" />
             </div>

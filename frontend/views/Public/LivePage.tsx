@@ -85,7 +85,7 @@ export const LivePage: React.FC = () => {
         return () => clearInterval(interval);
     }, [currentEvent]);
 
-    if (loading) return <PageLoader label="Loading Live Broadcasts..." variant="page" />;
+    if (loading) return <PageLoader label="Connecting to Broadcast..." variant="viewport" />;
 
     const now = new Date();
     const liveItems = events.filter(e => {
@@ -175,10 +175,10 @@ export const LivePage: React.FC = () => {
                                             ) : (
                                                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12 bg-[#F2F2F2]">
                                                     <div className="w-24 h-24 rounded-full bg-[#2E2E2F]/5 flex items-center justify-center mb-8 border border-[#2E2E2F]/10">
-                                                        <ICONS.Monitor className="w-10 h-10 text-[#2E2E2F]/40" />
+                                                        <ICONS.Monitor className="w-10 h-10 text-[#2E2E2F]" />
                                                     </div>
                                                     <h3 className="text-2xl font-black text-[#2E2E2F] mb-4 uppercase tracking-tighter">External Link</h3>
-                                                    <p className="text-[#2E2E2F]/60 text-sm max-w-sm mb-10 font-medium leading-relaxed">
+                                                    <p className="text-[#2E2E2F] text-sm max-w-sm mb-10 font-medium leading-relaxed">
                                                         This broadcast is hosted on an external platform. {status === 'PAST' ? 'Watch the replay by clicking below.' : 'Click to watch the active stream.'}
                                                     </p>
                                                     <a
@@ -201,12 +201,12 @@ export const LivePage: React.FC = () => {
                                         <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tighter">
                                             {currentEvent.eventName}
                                         </h2>
-                                        <div className="flex items-center gap-3 bg-[#00AEEF]/10 px-4 py-2 rounded-xl text-[#00AEEF]">
+                                        <div className="flex items-center gap-3 bg-[#38BDF2]/10 px-4 py-2 rounded-xl text-[#38BDF2]">
                                             <ICONS.Monitor className="w-4 h-4" />
                                             <span className="text-[10px] font-black uppercase tracking-widest">{currentEvent.streamingPlatform || 'Broadcast'}</span>
                                         </div>
                                     </div>
-                                    <p className="text-[#2E2E2F]/60 text-lg leading-relaxed font-medium line-clamp-3">
+                                    <p className="text-[#2E2E2F] text-lg leading-relaxed font-medium line-clamp-3">
                                         {currentEvent.description}
                                     </p>
                                     <div className="mt-10 pt-10 border-t border-[#2E2E2F]/5 flex flex-wrap gap-8 items-center justify-between">
@@ -223,14 +223,14 @@ export const LivePage: React.FC = () => {
                                                 </div>
                                             )}
                                             <div>
-                                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-1">Organized By</p>
+                                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] mb-1">Organized By</p>
                                                 <p className="text-base font-black text-[#2E2E2F] tracking-tight">{currentEvent.organizer?.organizerName || 'Organizer'}</p>
                                             </div>
                                         </div>
 
                                         <div className="flex flex-wrap items-center gap-x-12 gap-y-6">
                                             <div className="flex flex-col">
-                                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-1">Schedule</p>
+                                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] mb-1">Schedule</p>
                                                 <div className="flex items-center gap-2 text-[#2E2E2F]">
                                                     <ICONS.Calendar className="w-3.5 h-3.5 opacity-50" />
                                                     <p className="text-xs font-bold uppercase tracking-wider">
@@ -241,7 +241,7 @@ export const LivePage: React.FC = () => {
 
                                             {currentEvent.locationType !== 'ONLINE' && (
                                                 <div className="flex flex-col">
-                                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-1">Venue</p>
+                                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] mb-1">Venue</p>
                                                     <div className="flex items-center gap-2 text-[#2E2E2F]">
                                                         <ICONS.MapPin className="w-3.5 h-3.5 opacity-50" />
                                                         <p className="text-xs font-bold uppercase tracking-wider line-clamp-1 max-w-[150px]">
@@ -262,21 +262,21 @@ export const LivePage: React.FC = () => {
                             <div className="flex flex-col items-center justify-center py-32 text-center bg-[#F2F2F2] border border-[#2E2E2F]/5 rounded-xl shadow-sm">
                                 <div className="w-32 h-32 rounded-full bg-[#F2F2F2] flex items-center justify-center mb-10">
                                     {events.length > 0 ? (
-                                        <ICONS.Monitor className="w-12 h-12 text-[#2E2E2F]/20" />
+                                        <ICONS.Monitor className="w-12 h-12 text-[#2E2E2F]" />
                                     ) : (
-                                        <ICONS.Globe className="w-12 h-12 text-[#2E2E2F]/20" />
+                                        <ICONS.Globe className="w-12 h-12 text-[#2E2E2F]" />
                                     )}
                                 </div>
                                 <h2 className="text-4xl font-black text-[#2E2E2F] mb-4 uppercase tracking-tighter">
                                     {events.length > 0 ? 'Select a Broadcast' : 'No Active Broadcasts'}
                                 </h2>
-                                <p className="text-[#2E2E2F]/40 text-sm max-w-sm mb-12 font-medium leading-relaxed">
+                                <p className="text-[#2E2E2F] text-sm max-w-sm mb-12 font-medium leading-relaxed">
                                     {events.length > 0
                                         ? 'Choose an active stream or browse our archives from the sidebar to start watching.'
                                         : 'There are no events streaming right now. Check back later or browse upcoming sessions in our discovery feed.'
                                     }
                                 </p>
-                                <Link to="/browse-events" className="bg-[#00AEEF] text-white px-10 py-5 rounded-xl font-black text-[12px] uppercase tracking-[0.2em] transition-all hover:bg-[#0098D6] hover:scale-105 shadow-xl shadow-[#00AEEF]/20">
+                                <Link to="/browse-events" className="bg-[#38BDF2] text-white px-10 py-5 rounded-xl font-black text-[12px] uppercase tracking-[0.2em] transition-all hover:bg-[#2E2E2F] hover:scale-105 shadow-xl shadow-[#38BDF2]/20">
                                     Browse Events
                                 </Link>
                             </div>
@@ -288,7 +288,7 @@ export const LivePage: React.FC = () => {
                         {liveItems.length > 0 && (
                             <>
                                 <div className="flex items-center justify-between mb-4 mt-2">
-                                    <h3 className="text-[10px] font-black text-[#2E2E2F]/50 uppercase tracking-[0.3em]">Happening Now</h3>
+                                    <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.3em]">Happening Now</h3>
                                     <span className="text-[10px] font-black text-white bg-red-600 px-2.5 py-1 rounded-full shadow-lg shadow-red-600/20 animate-pulse">LIVE</span>
                                 </div>
                                 <div className="space-y-4">
@@ -300,8 +300,8 @@ export const LivePage: React.FC = () => {
                                                 window.scrollTo({ top: 0, behavior: 'smooth' });
                                             }}
                                             className={`w-full text-left p-6 rounded-xl transition-all duration-300 border ${currentEvent?.eventId === event.eventId
-                                                ? 'bg-[#F2F2F2] border-[#00AEEF] shadow-xl shadow-[#00AEEF]/10 scale-[1.02] ring-1 ring-[#00AEEF]/30'
-                                                : 'bg-[#F2F2F2] border-[#2E2E2F]/5 hover:border-[#00AEEF]/40 hover:scale-[1.01]'
+                                                ? 'bg-[#F2F2F2] border-[#38BDF2] shadow-xl shadow-[#38BDF2]/10 scale-[1.02] ring-1 ring-[#38BDF2]/30'
+                                                : 'bg-[#F2F2F2] border-[#2E2E2F]/5 hover:border-[#38BDF2]/40 hover:scale-[1.01]'
                                                 }`}
                                         >
                                             <div className="flex items-start gap-4">
@@ -309,7 +309,7 @@ export const LivePage: React.FC = () => {
                                                     {event.imageUrl ? (
                                                         <img src={typeof event.imageUrl === 'string' ? event.imageUrl : event.imageUrl?.url} className="w-full h-full object-cover" alt="" />
                                                     ) : (
-                                                        <ICONS.Monitor className="w-5 h-5 text-[#2E2E2F]/20" />
+                                                        <ICONS.Monitor className="w-5 h-5 text-[#2E2E2F]" />
                                                     )}
                                                     <div className="absolute bottom-1 right-1 bg-red-600 px-1.5 py-0.5 rounded text-[7px] font-black text-white uppercase tracking-widest shadow-lg">
                                                         LIVE
@@ -319,7 +319,7 @@ export const LivePage: React.FC = () => {
                                                     <h4 className="text-sm font-bold text-[#2E2E2F] line-clamp-1 mb-1 tracking-tight">
                                                         {event.eventName}
                                                     </h4>
-                                                    <p className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-wider">
+                                                    <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-wider">
                                                         {event.streamingPlatform || 'Broadcast'}
                                                     </p>
                                                 </div>
@@ -333,8 +333,8 @@ export const LivePage: React.FC = () => {
                         {archiveItems.length > 0 && (
                             <>
                                 <div className="flex items-center justify-between mb-4 pt-4 border-t border-[#2E2E2F]/5">
-                                    <h3 className="text-[10px] font-black text-[#2E2E2F]/50 uppercase tracking-[0.3em]">Archive / Replays</h3>
-                                    <span className="text-[10px] font-black text-[#2E2E2F]/40 bg-[#2E2E2F]/10 px-2 py-0.5 rounded-xl">{archiveItems.length}</span>
+                                    <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.3em]">Archive / Replays</h3>
+                                    <span className="text-[10px] font-black text-[#2E2E2F] bg-[#2E2E2F]/10 px-2 py-0.5 rounded-xl">{archiveItems.length}</span>
                                 </div>
                                 <div className="space-y-4">
                                     {archiveItems.map((event) => (
@@ -354,7 +354,7 @@ export const LivePage: React.FC = () => {
                                                     {event.imageUrl ? (
                                                         <img src={typeof event.imageUrl === 'string' ? event.imageUrl : event.imageUrl?.url} className="w-full h-full object-cover" alt="" />
                                                     ) : (
-                                                        <ICONS.Monitor className="w-5 h-5 text-[#2E2E2F]/20" />
+                                                        <ICONS.Monitor className="w-5 h-5 text-[#2E2E2F]" />
                                                     )}
                                                     <div className="absolute bottom-1 right-1 bg-[#2E2E2F]/60 backdrop-blur-md px-1.5 py-0.5 rounded text-[7px] font-black text-white uppercase tracking-widest">
                                                         PAST
@@ -364,10 +364,10 @@ export const LivePage: React.FC = () => {
                                                     <h4 className="text-sm font-bold text-[#2E2E2F] line-clamp-1 mb-1 tracking-tight">
                                                         {event.eventName}
                                                     </h4>
-                                                    <p className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-wider mb-2">
+                                                    <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-wider mb-2">
                                                         {event.streamingPlatform || 'Broadcast'}
                                                     </p>
-                                                    <div className="flex items-center gap-2 text-[9px] font-bold text-[#2E2E2F]/30 uppercase tracking-widest">
+                                                    <div className="flex items-center gap-2 text-[9px] font-bold text-[#2E2E2F] uppercase tracking-widest">
                                                         <ICONS.Calendar className="w-3 h-3" />
                                                         <span>{new Date(event.startAt).toLocaleDateString()}</span>
                                                     </div>

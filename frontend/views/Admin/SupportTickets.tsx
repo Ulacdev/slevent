@@ -286,7 +286,7 @@ export const SupportTickets: React.FC = () => {
     const isResolved = ticket.metadata?.status === 'resolved' || ticket.is_read;
     if (isResolved) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F2F2F2] text-[#2E2E2F]/50 text-xs font-bold border border-[#2E2E2F]/10">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F2F2F2] text-[#2E2E2F] text-xs font-bold border border-[#2E2E2F]/10">
           <ICONS.CheckCircle className="w-3.5 h-3.5" />
           Resolved
         </span>
@@ -324,7 +324,7 @@ export const SupportTickets: React.FC = () => {
               disabled={tickets.filter(t => selectedRows.has(t.notification_id) && !(t.metadata?.status === 'resolved' || t.is_read)).length === 0}
               className={`flex items-center gap-2 px-6 py-2.5 border-2 rounded-full transition-all text-[11px] font-black uppercase tracking-widest shadow-lg animate-in fade-in slide-in-from-right-4 ${
                 tickets.filter(t => selectedRows.has(t.notification_id) && !(t.metadata?.status === 'resolved' || t.is_read)).length === 0
-                  ? 'bg-[#F2F2F2] border-[#2E2E2F]/10 text-[#2E2E2F]/20 cursor-not-allowed'
+                  ? 'bg-[#F2F2F2] border-[#2E2E2F]/10 text-[#2E2E2F] cursor-not-allowed'
                   : 'bg-[#38BDF2] border-[#38BDF2] text-white hover:bg-[#0EA5E9]'
               }`}
             >
@@ -347,18 +347,18 @@ export const SupportTickets: React.FC = () => {
         </Card>
       ) : tickets.length === 0 ? (
         <Card className="p-16 text-center border-2 border-dashed border-[#2E2E2F]/10 rounded-xl bg-transparent">
-          <div className="w-20 h-20 mx-auto bg-[#F2F2F2] text-[#2E2E2F]/20 rounded-full flex items-center justify-center mb-6">
+          <div className="w-20 h-20 mx-auto bg-[#F2F2F2] text-[#2E2E2F] rounded-full flex items-center justify-center mb-6">
             <ICONS.MessageSquare className="w-10 h-10" />
           </div>
           <h3 className="text-2xl font-bold text-[#2E2E2F] mb-2">No Support Messages</h3>
-          <p className="text-[#2E2E2F]/60 text-base font-medium">You are all caught up! No active messages from organizers.</p>
+          <p className="text-[#2E2E2F] text-base font-medium">You are all caught up! No active messages from organizers.</p>
         </Card>
       ) : (
         <div className="border-2 border-[#2E2E2F]/5 rounded-xl overflow-hidden bg-transparent shadow-sm">
           <table className="w-full text-left border-collapse">
             <thead className="bg-[#F2F2F2]/50 border-b-2 border-[#2E2E2F]/5">
               <tr>
-                <th className="px-4 py-4 text-xs font-bold uppercase tracking-widest text-[#2E2E2F]/60 w-12">
+                <th className="px-4 py-4 text-xs font-bold uppercase tracking-widest text-[#2E2E2F] w-12">
                   <input
                     type="checkbox"
                     checked={tickets.length > 0 && selectedRows.size === tickets.length}
@@ -366,11 +366,11 @@ export const SupportTickets: React.FC = () => {
                     className="w-4 h-4 rounded border-2 border-[#2E2E2F]/30 cursor-pointer accent-[#38BDF2]"
                   />
                 </th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#2E2E2F]/60">Organizer</th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#2E2E2F]/60">Subject</th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#2E2E2F]/60">Status</th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#2E2E2F]/60 text-right">Date</th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#2E2E2F]/60 text-right">Actions</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#2E2E2F]">Organizer</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#2E2E2F]">Subject</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#2E2E2F]">Status</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#2E2E2F] text-right">Date</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#2E2E2F] text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-[#2E2E2F]/5">
@@ -395,13 +395,13 @@ export const SupportTickets: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-sm font-bold text-[#2E2E2F]">{t.organizer?.organizerName || t.metadata?.orgName || t.actor?.name || 'Organizer'}</p>
-                        <p className="text-[10px] font-medium text-[#2E2E2F]/40">{t.actor?.email}</p>
+                        <p className="text-[10px] font-medium text-[#2E2E2F]">{t.actor?.email}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-5">
                     <p className="text-sm font-bold text-[#2E2E2F]">{t.title}</p>
-                    <p className="text-xs text-[#2E2E2F]/60 truncate max-w-[250px]">
+                    <p className="text-xs text-[#2E2E2F] truncate max-w-[250px]">
                       {t.message?.replace(/\[IMAGE_URL: (.*?)\]/g, ' [Image] ')}
                     </p>
                   </td>
@@ -409,10 +409,10 @@ export const SupportTickets: React.FC = () => {
                     {getStatusBadge(t)}
                   </td>
                   <td className="px-6 py-5 text-right">
-                    <p className="text-xs font-bold text-[#2E2E2F]/50">
+                    <p className="text-xs font-bold text-[#2E2E2F]">
                       {new Date(t.created_at).toLocaleDateString()}
                     </p>
-                    <p className="text-[10px] font-medium text-[#2E2E2F]/30 uppercase">
+                    <p className="text-[10px] font-medium text-[#2E2E2F] uppercase">
                       {new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </td>
@@ -452,7 +452,7 @@ export const SupportTickets: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={() => loadMessages(selectedTicket.notification_id)}
-                    className="p-3 hover:bg-[#F2F2F2] rounded-full text-[#2E2E2F]/40 transition-all hover:text-[#38BDF2]"
+                    className="p-3 hover:bg-[#F2F2F2] rounded-full text-[#2E2E2F] transition-all hover:text-[#38BDF2]"
                     title="Refresh messages"
                   >
                     <ICONS.RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin text-[#38BDF2]' : ''}`} />
@@ -477,7 +477,7 @@ export const SupportTickets: React.FC = () => {
                          {renderMessageContent(selectedTicket.message)}
                       </div>
                    </div>
-                   <p className="text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-[0.2em] ml-14">
+                   <p className="text-[10px] font-bold text-[#2E2E2F] uppercase tracking-[0.2em] ml-14">
                      {selectedTicket.organizer?.organizerName || selectedTicket.metadata?.orgName || 'Organizer'} • {new Date(selectedTicket.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                    </p>
                 </div>
@@ -506,7 +506,7 @@ export const SupportTickets: React.FC = () => {
                            {renderMessageContent(m.message)}
                          </div>
                       </div>
-                      <p className={`text-[10px] font-bold uppercase tracking-[0.2em] text-[#2E2E2F]/30 ${m.is_admin_reply ? 'mr-14' : 'ml-14'}`}>
+                      <p className={`text-[10px] font-bold uppercase tracking-[0.2em] text-[#2E2E2F] ${m.is_admin_reply ? 'mr-14' : 'ml-14'}`}>
                         {m.is_admin_reply ? 'StartupBot' : (selectedTicket.organizer?.organizerName || 'Organizer')} • {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
@@ -522,7 +522,7 @@ export const SupportTickets: React.FC = () => {
                       <input
                         type="text"
                         placeholder="Enter your message here..."
-                        className="w-full h-14 pl-6 pr-32 bg-[#F2F2F2]/50 border-2 border-[#2E2E2F]/20 rounded-full text-sm font-medium focus:border-[#38BDF2]/20 transition-all outline-none placeholder:text-[#2E2E2F]/20 text-[#2E2E2F]"
+                        className="w-full h-14 pl-6 pr-32 bg-[#F2F2F2]/50 border-2 border-[#2E2E2F]/20 rounded-full text-sm font-medium focus:border-[#38BDF2]/20 transition-all outline-none placeholder:text-[#2E2E2F] text-[#2E2E2F]"
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleReply()}
@@ -541,7 +541,7 @@ export const SupportTickets: React.FC = () => {
                  <div className="mt-4 flex justify-center">
                     <button 
                        onClick={() => handleResolve(selectedTicket.notification_id)}
-                       className="text-[10px] font-black uppercase tracking-[0.3em] text-[#2E2E2F]/20 hover:text-[#2E2E2F]/40 transition-all px-6 py-2"
+                       className="text-[10px] font-black uppercase tracking-[0.3em] text-[#2E2E2F] hover:text-[#2E2E2F] transition-all px-6 py-2"
                     >
                        Mark conversation as resolved
                     </button>
@@ -549,7 +549,7 @@ export const SupportTickets: React.FC = () => {
                </div>
              ) : (
                <div className="p-8 bg-[#F2F2F2]/50 border-t border-[#2E2E2F]/5 text-center">
-                 <p className="text-[11px] font-black text-[#2E2E2F]/20 uppercase tracking-[0.3em]">Conversation Concluded</p>
+                 <p className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.3em]">Conversation Concluded</p>
                </div>
              )}
           </div>

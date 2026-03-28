@@ -99,7 +99,7 @@ export const OnsiteLocationAssistant: React.FC<OnsiteLocationAssistantProps> = (
   return (
     <div className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-4 md:p-5 space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/60">Add location details</p>
+        <p className="text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]">Add location details</p>
         <a
           href={openMapUrl}
           target="_blank"
@@ -111,7 +111,7 @@ export const OnsiteLocationAssistant: React.FC<OnsiteLocationAssistantProps> = (
       </div>
 
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#2E2E2F]/50">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#2E2E2F]">
           <ICONS.Search className="w-4 h-4" strokeWidth={2.5} />
         </div>
         <input
@@ -138,7 +138,7 @@ export const OnsiteLocationAssistant: React.FC<OnsiteLocationAssistantProps> = (
             <button
               key={suggestion.place_id}
               type="button"
-              className="w-full text-left px-4 py-3 text-xs text-[#2E2E2F]/80 hover:bg-[#38BDF2]/10 transition-colors border-b border-[#2E2E2F]/5 last:border-b-0"
+              className="w-full text-left px-4 py-3 text-xs text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors border-b border-[#2E2E2F]/5 last:border-b-0"
               onClick={() => handleSelectSuggestion(suggestion)}
             >
               {suggestion.display_name}
@@ -157,7 +157,7 @@ export const OnsiteLocationAssistant: React.FC<OnsiteLocationAssistantProps> = (
         />
       </div>
 
-      <p className="text-[11px] text-[#2E2E2F]/60">
+      <p className="text-[11px] text-[#2E2E2F]">
         Selecting a result from map search automatically fills the location field.
       </p>
     </div>

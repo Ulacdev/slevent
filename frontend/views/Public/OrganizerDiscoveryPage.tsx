@@ -12,13 +12,13 @@ export const OrganizerDiscoveryPage: React.FC = () => {
     const navigate = useNavigate();
     const { isAuthenticated } = useUser();
     const { isFollowing, toggleFollowing, canLikeFollow } = useEngagement();
-    
+
     // State
     const [organizers, setOrganizers] = useState<OrganizerProfile[]>([]);
     const [loading, setLoading] = useState(true);
     const [interactionNotice, setInteractionNotice] = useState('');
     const [isSidebarVisible, setIsSidebarVisible] = useState(true);
-    
+
     // Filters State
     const [searchTerm, setSearchTerm] = useState('');
     const [filterMode, setFilterMode] = useState<'discover' | 'following'>('discover');
@@ -62,34 +62,63 @@ export const OrganizerDiscoveryPage: React.FC = () => {
             if (searchTerm && !org.organizerName.toLowerCase().includes(searchTerm.toLowerCase())) {
                 return false;
             }
-            
+
             // Following mode filter
             if (filterMode === 'following') {
                 if (!isFollowing(org.organizerId)) return false;
-            } else {
-                // In discover mode, we show everything but default sort followed first if not searched
-                // No specific exclusion here unless we wanted to exclude followed ones, 
-                // but usually discover includes everything.
             }
-            
+
             return true;
         });
 
         // Sorting
         return result.sort((a, b) => {
+            // Sort by Composite Popularity (Followers + Events + Likes)
+            const scoreA = (a.followersCount || 0) + (a.eventsHostedCount || 0) + (a.likesCount || 0);
+            const scoreB = (b.followersCount || 0) + (b.eventsHostedCount || 0) + (b.likesCount || 0);
+
             if (sortBy === 'followed_first') {
                 const aFollowed = isFollowing(a.organizerId);
                 const bFollowed = isFollowing(b.organizerId);
+                
+                // 1. Followed ones always first
                 if (aFollowed && !bFollowed) return -1;
                 if (!aFollowed && bFollowed) return 1;
+                
+                // 2. Then Popularity (just like homepage trending)
+                if (scoreB !== scoreA) return scoreB - scoreA;
+                
+                // 3. Alphabetical fallback
                 return a.organizerName.localeCompare(b.organizerName);
             }
+            
             if (sortBy === 'followers') {
-                return (b.followersCount || 0) - (a.followersCount || 0);
+                return scoreB - scoreA;
             }
-            return a.organizerName.localeCompare(b.organizerName);
+            if (sortBy === 'name') {
+                return a.organizerName.localeCompare(b.organizerName);
+            }
+            return 0;
         });
     }, [organizers, searchTerm, filterMode, isFollowing, sortBy]);
+
+    // Calculate Trending/Popular ranks for the first few items
+    const popularRanks = useMemo(() => {
+        const ranks = new Map<string, number>();
+        if (filterMode === 'discover') {
+            // Rank top 5 as "Most Popular" based on engagement score
+            filteredOrganizers
+                .slice(0, 5)
+                .forEach((org, idx) => {
+                    const score = (org.followersCount || 0) + (org.eventsHostedCount || 0) + (org.likesCount || 0);
+                    // Only show rank tag if they have at least some engagement (follower, host an event, or have a like)
+                    if (score > 0) {
+                        ranks.set(org.organizerId, idx + 1);
+                    }
+                });
+        }
+        return ranks;
+    }, [filteredOrganizers, filterMode]);
 
     if (loading) return <PageLoader label="Discovering communities..." variant="page" />;
 
@@ -113,7 +142,7 @@ export const OrganizerDiscoveryPage: React.FC = () => {
 
             {/* Main Layout - Content with Sidebar BELOW Hero */}
             <div className="max-w-[88rem] mx-auto px-4 sm:px-10 py-12">
-                
+
                 {/* Controls Row */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-12">
                     <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -126,22 +155,22 @@ export const OrganizerDiscoveryPage: React.FC = () => {
                         </button>
 
                         <div className="flex items-center gap-3 bg-[#F2F2F2] px-5 py-3 rounded-xl border border-[#2E2E2F]/10 shadow-sm text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]">
-                           <span className="opacity-40 uppercase tracking-[0.15em] text-[10px]">Sort By</span>
-                           <select 
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value as any)}
-                            className="bg-transparent font-black tracking-tight outline-none cursor-pointer text-[#2E2E2F]"
-                           >
+                            <span className="opacity-40 uppercase tracking-[0.15em] text-[10px]">Sort By</span>
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value as any)}
+                                className="bg-transparent font-black tracking-tight outline-none cursor-pointer text-[#2E2E2F]"
+                            >
                                 <option value="followed_first">Followed First</option>
                                 <option value="name">Alphabetical (A-Z)</option>
                                 <option value="followers">Most Followed</option>
-                           </select>
+                            </select>
                         </div>
                     </div>
 
                     <div className="w-full sm:w-[320px]">
                         <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#2E2E2F]/30 group-focus-within:text-[#38BDF2] transition-colors">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#2E2E2F] group-focus-within:text-[#38BDF2] transition-colors">
                                 <ICONS.Search className="h-4 w-4" strokeWidth={3} />
                             </div>
                             <input
@@ -149,7 +178,7 @@ export const OrganizerDiscoveryPage: React.FC = () => {
                                 placeholder="Search communities..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="block w-full pl-10 pr-9 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl text-[13px] font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-[#2E2E2F]/30"
+                                className="block w-full pl-10 pr-9 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl text-[13px] font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-[#2E2E2F]"
                             />
                         </div>
                     </div>
@@ -176,7 +205,7 @@ export const OrganizerDiscoveryPage: React.FC = () => {
 
                             {/* Following Filter */}
                             <div className="space-y-6">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40">Explore Options</h4>
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">Explore Options</h4>
                                 <div className="space-y-4">
                                     {[
                                         { id: 'discover', label: 'Discover Organizers', icon: ICONS.Compass },
@@ -197,7 +226,7 @@ export const OrganizerDiscoveryPage: React.FC = () => {
                             </div>
 
                             <div className="pt-8 border-t border-[#2E2E2F]/5">
-                                <p className="text-[10px] font-bold text-[#2E2E2F]/20 leading-relaxed italic">
+                                <p className="text-[10px] font-bold text-[#2E2E2F] leading-relaxed italic">
                                     Browse all verified organizations or filter to see only your favorite communities.
                                 </p>
                             </div>
@@ -205,49 +234,52 @@ export const OrganizerDiscoveryPage: React.FC = () => {
                     )}
 
                     {/* Content Area */}
-                    <div className="flex-1">
-                        <div className="mb-8">
-                            <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tight">
-                                {filterMode === 'following' ? 'Communities You Follow' : 'Suggested Communities'}
-                            </h2>
-                            <p className="text-[#2E2E2F]/50 text-sm font-medium mt-1">
-                                {filteredOrganizers.length} results found for your search.
-                            </p>
-                        </div>
-
-                        {interactionNotice && (
-                            <div className="mb-10 p-5 rounded-2xl bg-[#F2F2F2] border-2 border-[#38BDF2]/30 text-[#38BDF2] text-xs font-black uppercase tracking-widest shadow-lg shadow-[#38BDF2]/5 animate-in fade-in slide-in-from-top-4 flex items-center gap-3">
-                                <ICONS.Info className="w-5 h-5 shrink-0" />
-                                <span>{interactionNotice}</span>
-                            </div>
-                        )}
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-8">
-                            {filteredOrganizers.map((org) => (
-                                <OrganizerCard
-                                    key={org.organizerId}
-                                    organizer={org}
-                                    isFollowing={isFollowing(org.organizerId)}
-                                    onFollow={(e) => handleFollow(org.organizerId, e)}
-                                    onClick={() => navigate(`/organizer/${org.organizerId}`)}
-                                />
-                            ))}
-                        </div>
-
-                        {filteredOrganizers.length === 0 && (
-                            <div className="text-center py-24 bg-[#E8E8E8]/50 rounded-3xl border-4 border-dashed border-[#2E2E2F]/5">
-                                <div className="w-20 h-20 bg-[#F2F2F2] rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <ICONS.Users className="w-10 h-10 text-[#2E2E2F]/10" />
+                        <div className="flex-1">
+                            <div className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                                <div>
+                                    <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tight">
+                                        {filterMode === 'following' ? 'Communities You Follow' : 'Suggested Communities'}
+                                    </h2>
+                                    <p className="text-[#2E2E2F] text-sm font-medium mt-1">
+                                        {filteredOrganizers.length} results found for your search.
+                                    </p>
                                 </div>
-                                <h2 className="text-xl font-black text-[#2E2E2F] tracking-tighter uppercase mb-2">No results found</h2>
-                                <p className="text-[#2E2E2F]/40 font-bold text-sm max-w-[300px] mx-auto leading-relaxed">
-                                    {filterMode === 'following' 
-                                        ? "You aren't following any organizations that match this search." 
-                                        : "No organizers match your current search terms."}
-                                </p>
                             </div>
-                        )}
-                    </div>
+
+                            {interactionNotice && (
+                                <div className="mb-10 p-5 rounded-2xl bg-[#F2F2F2] border-2 border-[#38BDF2]/30 text-[#38BDF2] text-xs font-black uppercase tracking-widest shadow-lg shadow-[#38BDF2]/5 animate-in fade-in slide-in-from-top-4 flex items-center gap-3">
+                                    <ICONS.Info className="w-5 h-5 shrink-0" />
+                                    <span>{interactionNotice}</span>
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-8">
+                                {filteredOrganizers.map((org) => (
+                                    <OrganizerCard
+                                        key={org.organizerId}
+                                        organizer={org}
+                                        rank={popularRanks.get(org.organizerId)}
+                                        isFollowing={isFollowing(org.organizerId)}
+                                        onFollow={(e) => handleFollow(org.organizerId, e)}
+                                        onClick={() => navigate(`/organizer/${org.organizerId}`)}
+                                    />
+                                ))}
+                            </div>
+
+                            {filteredOrganizers.length === 0 && (
+                                <div className="text-center py-24 bg-[#E8E8E8]/50 rounded-3xl border-4 border-dashed border-[#2E2E2F]/5">
+                                    <div className="w-20 h-20 bg-[#F2F2F2] rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <ICONS.Users className="w-10 h-10 text-[#2E2E2F]" />
+                                    </div>
+                                    <h2 className="text-xl font-black text-[#2E2E2F] tracking-tighter uppercase mb-2">No results found</h2>
+                                    <p className="text-[#2E2E2F] font-bold text-sm max-w-[300px] mx-auto leading-relaxed">
+                                        {filterMode === 'following'
+                                            ? "You aren't following any organizations that match this search."
+                                            : "No organizers match your current search terms."}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
                 </div>
             </div>
 

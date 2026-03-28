@@ -69,7 +69,7 @@ export const UserSettings: React.FC = () => {
     <div className="pb-16 space-y-6">
       <div className="px-2">
         <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">{activeTabMeta.label}</h1>
-        <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">{activeTabMeta.description}</p>
+        <p className="mt-1 text-sm font-semibold text-[#2E2E2F]">{activeTabMeta.description}</p>
       </div>
       <div>
         {activeTab === 'organizer' && <OrganizerSettings />}

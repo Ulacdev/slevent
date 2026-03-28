@@ -4,6 +4,7 @@ import { ICONS } from '../constants';
 import { OrganizerProfile } from '../types';
 import { useEngagement } from '../context/EngagementContext';
 import { useUser } from '../context/UserContext';
+import { Badge } from './Shared';
 
 // Helper to handle JSONB image format
 const getImageUrl = (img: any): string => {
@@ -18,9 +19,10 @@ interface OrganizerCardProps {
     onFollow: (e: React.MouseEvent) => void;
     onClick: () => void;
     className?: string; // Allow custom classes for carousel sizing
+    rank?: number;
 }
 
-export const OrganizerCard: React.FC<OrganizerCardProps> = ({ organizer, isFollowing, onFollow, onClick, className = "" }) => {
+export const OrganizerCard: React.FC<OrganizerCardProps> = ({ organizer, isFollowing, onFollow, onClick, className = "", rank }) => {
     const { userId: currentUserId, imageUrl: currentUserImg, name: currentUserName } = useUser();
     const coverImage = getImageUrl(organizer.coverImageUrl);
     const profileImage = getImageUrl(organizer.profileImageUrl);
@@ -31,13 +33,21 @@ export const OrganizerCard: React.FC<OrganizerCardProps> = ({ organizer, isFollo
             onClick={onClick}
             className={`group relative bg-[#F2F2F2] rounded-xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.08)] border border-[#2E2E2F]/10 cursor-pointer transition-all duration-300 hover:shadow-[0_4px_30px_rgba(0,0,0,0.12)] hover:-translate-y-1 ${className}`}
         >
+            {/* Rank Tag */}
+            {rank && (
+                <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-1.5 bg-[#38BDF2] rounded-full text-[9px] font-black uppercase tracking-widest text-[#F2F2F2] shadow-xl border border-white/20 animate-in zoom-in duration-500 scale-100">
+                    <ICONS.Star className="w-3.5 h-3.5 fill-current" />
+                    #{rank} Popular Organizer
+                </div>
+            )}
+
             {/* Cover Image */}
             <div className="h-36 w-full bg-[#E5E5E5] relative">
                 {coverImage ? (
                     <img src={coverImage} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 ) : (
                     <div className="w-full h-full bg-[#E5E5E5] flex items-center justify-center">
-                        <ICONS.Image className="w-10 h-10 text-[#2E2E2F]/5" />
+                        <ICONS.Image className="w-10 h-10 text-[#2E2E2F]" />
                     </div>
                 )}
             </div>
@@ -57,9 +67,14 @@ export const OrganizerCard: React.FC<OrganizerCardProps> = ({ organizer, isFollo
                 {/* Info */}
                 <div className="space-y-1.5">
                     <h3 className="text-lg font-bold text-[#050505] truncate tracking-tight">{organizer.organizerName}</h3>
-                    <div className="flex items-center gap-1.5">
-                        <p className="text-[13px] text-[#65676B] font-semibold">{organizer.isVerified ? 'Verified Community' : 'Community Organizer'}</p>
-                        {organizer.isVerified && <ICONS.CheckCircle className="w-3.5 h-3.5 text-[#38BDF2] stroke-[3px]" />}
+                    <div className="flex items-center gap-1.5 h-7">
+                        <Badge type={organizer.isVerified ? 'info' : 'neutral'} className="text-[9px] font-black tracking-[0.1em] border-none shadow-sm flex items-center gap-1.5 h-full px-3">
+                            {organizer.isVerified ? (
+                                <><ICONS.CheckCircle className="w-3.5 h-3.5" strokeWidth={3} /> VERIFIED HUB</>
+                            ) : (
+                                "COMMUNITY HUB"
+                            )}
+                        </Badge>
                     </div>
                     <p className="text-[12px] text-[#65676B]/80 font-medium line-clamp-2 min-h-[32px] leading-tight mt-1.5">
                         {organizer.bio || 'Discover exclusive events and join our growing community.'}
@@ -109,10 +124,18 @@ export const OrganizerCard: React.FC<OrganizerCardProps> = ({ organizer, isFollo
                                 ));
                             })()}
                         </div>
-                        <p className="text-[12px] text-[#65676B] font-bold tracking-tight truncate">
-                            {organizer.followersCount > 0
-                                ? `${organizer.followersCount.toLocaleString()} followers`
-                                : 'Be the first to follow'}
+                        <p className="text-[12px] text-[#65676B] font-bold tracking-tight truncate flex items-center gap-1.5">
+                            <span>{organizer.followersCount ? organizer.followersCount.toLocaleString() : 0} followers</span>
+                            <span className="text-[#2E2E2F]/20">•</span>
+                            <span className="flex items-center gap-1">
+                                <ICONS.Heart className="w-3 h-3 text-[#38BDF2]" />
+                                {organizer.likesCount || 0}
+                            </span>
+                            <span className="text-[#2E2E2F]/20">•</span>
+                            <span className="flex items-center gap-1">
+                                <ICONS.Calendar className="w-3 h-3 text-[#38BDF2]" />
+                                {organizer.eventsHostedCount || 0} Events
+                            </span>
                         </p>
                     </div>
                 </div>

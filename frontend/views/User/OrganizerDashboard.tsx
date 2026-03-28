@@ -17,7 +17,7 @@ const HeroCard: React.FC<{
             <div className="[&>svg]:w-6 [&>svg]:h-6">{icon}</div>
         </div>
         <div>
-            <p className="text-xs font-bold text-[#2E2E2F]/50 tracking-tight mb-0.5">{title}</p>
+            <p className="text-xs font-bold text-[#2E2E2F] tracking-tight mb-0.5">{title}</p>
             <p className="text-2xl font-black text-[#2E2E2F]">{value}</p>
             <p className="text-[10px] font-bold mt-1 text-[#38BDF2]">{sub}</p>
         </div>
@@ -86,7 +86,7 @@ export const OrganizerDashboard: React.FC = () => {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
                     <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">Dashboard Overview</h1>
-                    <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">
+                    <p className="mt-1 text-sm font-semibold text-[#2E2E2F]">
                         See your latest registrations, tickets, and revenue at a glance.
                     </p>
                 </div>
@@ -160,7 +160,7 @@ export const OrganizerDashboard: React.FC = () => {
                     </div>
                     <div className="divide-y divide-[#2E2E2F]/5 overflow-y-auto max-h-[400px]">
                         {recentTx.length === 0 && (
-                            <p className="p-10 text-center text-xs font-bold text-[#2E2E2F]/40">No Transactions Found</p>
+                            <p className="p-10 text-center text-xs font-bold text-[#2E2E2F]">No Transactions Found</p>
                         )}
                         {recentTx.map((tx, i) => (
                             <div 
@@ -170,7 +170,7 @@ export const OrganizerDashboard: React.FC = () => {
                             >
                                 <div className="space-y-1">
                                     <p className="font-bold text-sm text-[#2E2E2F] group-hover/item:text-[#38BDF2] transition-colors">{tx.customerName || tx.buyerName || 'Organizer'}</p>
-                                    <p className="text-[10px] font-bold text-[#2E2E2F]/40">
+                                    <p className="text-[10px] font-bold text-[#2E2E2F]">
                                         {tx.planName || 'Ai Automation'} • {new Date(tx.createdAt || tx.created_at).toLocaleString()}
                                     </p>
                                 </div>
@@ -182,7 +182,7 @@ export const OrganizerDashboard: React.FC = () => {
                         ))}
                     </div>
                     <div className="p-4 border-t border-[#2E2E2F]/5 text-center">
-                        <p className="text-[10px] font-bold text-[#2E2E2F]/30">End of List</p>
+                        <p className="text-[10px] font-bold text-[#2E2E2F]">End of List</p>
                     </div>
                 </Card>
 
@@ -194,7 +194,7 @@ export const OrganizerDashboard: React.FC = () => {
                     </div>
                     <div className="divide-y divide-[#2E2E2F]/5 overflow-y-auto max-h-[400px]">
                         {recentOrders.length === 0 && (
-                            <p className="p-10 text-center text-xs font-bold text-[#2E2E2F]/40">No Orders Yet</p>
+                            <p className="p-10 text-center text-xs font-bold text-[#2E2E2F]">No Orders Yet</p>
                         )}
                         {recentOrders.map((order, i) => (
                             <div 
@@ -204,7 +204,7 @@ export const OrganizerDashboard: React.FC = () => {
                             >
                                 <div className="space-y-1">
                                     <p className="font-bold text-sm text-[#2E2E2F] group-hover/item:text-[#38BDF2] transition-colors">{order.buyerName}</p>
-                                    <p className="text-[10px] font-bold text-[#2E2E2F]/40">
+                                    <p className="text-[10px] font-bold text-[#2E2E2F]">
                                         {order.eventName} • Order #{order.orderId?.slice(-8)} • {new Date(order.createdAt).toLocaleString()}
                                     </p>
                                 </div>
@@ -216,7 +216,7 @@ export const OrganizerDashboard: React.FC = () => {
                         ))}
                     </div>
                     <div className="p-4 border-t border-[#2E2E2F]/5 text-center">
-                        <p className="text-[10px] font-bold text-[#2E2E2F]/30">End of List</p>
+                        <p className="text-[10px] font-bold text-[#2E2E2F]">End of List</p>
                     </div>
                 </Card>
 
@@ -235,7 +235,7 @@ export const OrganizerDashboard: React.FC = () => {
                     {auditLogs.length === 0 && (
                         <div className="p-20 text-center">
                             <ICONS.Activity className="w-8 h-8 text-[#38BDF2]/40 mx-auto mb-4" />
-                            <p className="text-[10px] font-bold text-[#2E2E2F]/30">No Activity Found</p>
+                            <p className="text-[10px] font-bold text-[#2E2E2F]">No Activity Found</p>
                         </div>
                     )}
                     {auditLogs.map((log, i) => (
@@ -252,14 +252,14 @@ export const OrganizerDashboard: React.FC = () => {
                                     <p className="text-sm font-bold text-[#2E2E2F]">{log.action || 'System Action'}</p>
                                     <div className="flex items-center gap-2">
                                         <span className="text-[10px] font-bold text-[#38BDF2] bg-[#38BDF2]/5 px-1.5 py-0.5 rounded-sm">{log.actorName || log.performedBy || 'System'}</span>
-                                        <span className="text-[10px] text-[#2E2E2F]/10 font-bold">•</span>
-                                        <p className="text-[10px] font-bold text-[#2E2E2F]/40">Target — {log.target || 'General'}</p>
+                                        <span className="text-[10px] text-[#2E2E2F] font-bold">•</span>
+                                        <p className="text-[10px] font-bold text-[#2E2E2F]">Target — {log.target || 'General'}</p>
                                     </div>
                                 </div>
                             </div>
                             <div className="text-left md:text-right">
-                                <p className="text-xs font-bold text-[#2E2E2F]/60">{new Date(log.timestamp).toLocaleDateString()}</p>
-                                <p className="text-[10px] font-bold text-[#2E2E2F]/40">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                <p className="text-xs font-bold text-[#2E2E2F]">{new Date(log.timestamp).toLocaleDateString()}</p>
+                                <p className="text-[10px] font-bold text-[#2E2E2F]">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                             </div>
                         </div>
                     ))}
@@ -288,7 +288,7 @@ export const OrganizerDashboard: React.FC = () => {
                                 {(selectedTx.customerName || selectedTx.buyerName || 'O').charAt(0).toUpperCase()}
                             </div>
                             <div>
-                                <p className="text-[10px] font-bold text-[#2E2E2F]/40 leading-none mb-1">Customer / Subscriber</p>
+                                <p className="text-[10px] font-bold text-[#2E2E2F] leading-none mb-1">Customer / Subscriber</p>
                                 <p className="text-lg font-bold text-[#2E2E2F] leading-tight">{selectedTx.customerName || selectedTx.buyerName || 'Subscriber'}</p>
                                 <p className="text-xs font-bold text-[#38BDF2]">{selectedTx.customerEmail || selectedTx.buyerEmail || 'No email provided'}</p>
                             </div>
@@ -296,22 +296,22 @@ export const OrganizerDashboard: React.FC = () => {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="p-4 bg-[#F2F2F2] rounded-xl border border-[#E0E0E0]">
-                                <p className="text-[10px] font-bold text-[#2E2E2F]/40 mb-1">Reference ID</p>
+                                <p className="text-[10px] font-bold text-[#2E2E2F] mb-1">Reference ID</p>
                                 <p className="text-xs font-bold text-[#2E2E2F] font-mono">{selectedTx.orderId || 'N/A'}</p>
                             </div>
                             <div className="p-4 bg-[#F2F2F2] rounded-xl border border-[#E0E0E0]">
-                                <p className="text-[10px] font-bold text-[#2E2E2F]/40 mb-1">Payment Date</p>
+                                <p className="text-[10px] font-bold text-[#2E2E2F] mb-1">Payment Date</p>
                                 <p className="text-xs font-bold text-[#2E2E2F]">{new Date(selectedTx.createdAt || selectedTx.created_at).toLocaleString()}</p>
                             </div>
                         </div>
 
                         <div className="p-5 bg-white rounded-2xl border border-[#E0E0E0] space-y-4">
                             <div className="flex justify-between items-center">
-                                <span className="text-sm font-bold text-[#2E2E2F]/60">Payment Mode</span>
+                                <span className="text-sm font-bold text-[#2E2E2F]">Payment Mode</span>
                                 <span className="text-sm font-bold text-[#2E2E2F]">{selectedTx.paymentMethod || 'HitPay'}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-sm font-bold text-[#2E2E2F]/60">Subscription Plan</span>
+                                <span className="text-sm font-bold text-[#2E2E2F]">Subscription Plan</span>
                                 <span className="text-sm font-bold text-[#38BDF2]">{selectedTx.planName || 'Ai Automation'}</span>
                             </div>
                             <div className="h-[1px] bg-[#E0E0E0]" />
@@ -339,7 +339,7 @@ export const OrganizerDashboard: React.FC = () => {
                     <div className="space-y-6">
                         <div className="p-6 bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl flex justify-between items-center shadow-sm">
                             <div>
-                                <p className="text-[10px] font-bold text-[#2E2E2F]/40 mb-1">Order Total</p>
+                                <p className="text-[10px] font-bold text-[#2E2E2F] mb-1">Order Total</p>
                                 <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tight">PHP {Number(selectedOrder.totalAmount || 0).toLocaleString()}</h2>
                             </div>
                             <div className="bg-[#38BDF2]/10 px-3 py-1.5 rounded-lg border border-[#38BDF2]/20">
@@ -353,7 +353,7 @@ export const OrganizerDashboard: React.FC = () => {
                                     <ICONS.Calendar className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-[10px] font-bold text-[#2E2E2F]/40 leading-none mb-1">Event</p>
+                                    <p className="text-[10px] font-bold text-[#2E2E2F] leading-none mb-1">Event</p>
                                     <p className="text-sm font-bold text-[#2E2E2F] truncate">{selectedOrder.eventName || 'Unnamed Event'}</p>
                                 </div>
                             </div>
@@ -363,7 +363,7 @@ export const OrganizerDashboard: React.FC = () => {
                                     <ICONS.Users className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-[10px] font-bold text-[#2E2E2F]/40 leading-none mb-1">Buyer</p>
+                                    <p className="text-[10px] font-bold text-[#2E2E2F] leading-none mb-1">Buyer</p>
                                     <p className="text-sm font-bold text-[#2E2E2F] truncate">{selectedOrder.buyerName}</p>
                                     <p className="text-[10px] font-bold text-[#38BDF2]">{selectedOrder.buyerEmail}</p>
                                 </div>
@@ -372,11 +372,11 @@ export const OrganizerDashboard: React.FC = () => {
 
                         <div className="p-5 bg-white rounded-2xl border border-[#E0E0E0] space-y-4 shadow-sm">
                             <div className="flex justify-between items-center">
-                                <span className="text-sm font-bold text-[#2E2E2F]/50">Order ID</span>
+                                <span className="text-sm font-bold text-[#2E2E2F]">Order ID</span>
                                 <span className="text-sm font-bold text-[#2E2E2F] font-mono">{selectedOrder.orderId}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-sm font-bold text-[#2E2E2F]/50">Date</span>
+                                <span className="text-sm font-bold text-[#2E2E2F]">Date</span>
                                 <span className="text-sm font-bold text-[#2E2E2F]">{new Date(selectedOrder.createdAt).toLocaleString()}</span>
                             </div>
                         </div>

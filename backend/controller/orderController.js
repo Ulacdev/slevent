@@ -88,26 +88,26 @@ export const createOrder = async (req, res) => {
       .select('eventId, regOpenAt, regCloseAt, eventName, timezone')
       .eq('eventId', eventId)
       .maybeSingle();
-    
+
     if (eventErr || !event) {
       return res.status(404).json({ error: 'Event not found' });
     }
-    
+
     const now = new Date();
     const regOpen = event.regOpenAt ? new Date(event.regOpenAt) : null;
     const regClose = event.regCloseAt ? new Date(event.regCloseAt) : null;
-    
+
     if (regOpen && now < regOpen) {
-      return res.status(400).json({ 
-        error: 'Registration has not started yet', 
+      return res.status(400).json({
+        error: 'Registration has not started yet',
         message: `Registration opens on ${regOpen.toISOString()}`,
         nextOpenDate: regOpen.toISOString()
       });
     }
-    
+
     if (regClose && now > regClose) {
-      return res.status(400).json({ 
-        error: 'Registration has closed', 
+      return res.status(400).json({
+        error: 'Registration has closed',
         message: `Registration closed on ${regClose.toISOString()}`,
         closedSince: regClose.toISOString()
       });
@@ -129,7 +129,7 @@ export const createOrder = async (req, res) => {
     for (const item of items) {
       const tt = map.get(item.ticketTypeId);
       if (!tt) return res.status(400).json({ error: 'Ticket type not found' });
-      
+
       const currentSold = tt.quantitySold || 0;
 
       const newSold = currentSold + item.quantity;
@@ -212,7 +212,7 @@ export const createOrder = async (req, res) => {
         buyerPhone: buyerPhone || null,
         totalAmount: finalTotal,
         currency,
-        metadata: { 
+        metadata: {
           ...(company ? { company } : {}),
           ...(req.body.extraGuests ? { extraGuests: req.body.extraGuests } : {})
         },
@@ -284,7 +284,7 @@ export const createOrder = async (req, res) => {
         for (let i = 0; i < totalGuestsToIssue; i++) {
           const isPrimary = guestIdx === 0;
           const guestInfo = isPrimary ? null : (req.body.extraGuests?.[guestIdx - 1]);
-          
+
           const { data: attendee, error: attErr } = await supabase
             .from('attendees')
             .insert({
@@ -333,9 +333,9 @@ export const createOrder = async (req, res) => {
             },
             req
           });
-          issuedTickets.push({ 
-            ticketCode, 
-            qrPayload: ticketCode, 
+          issuedTickets.push({
+            ticketCode,
+            qrPayload: ticketCode,
             status: 'ISSUED',
             attendeeName: attendee.name,
             attendeeEmail: attendee.email
@@ -359,10 +359,10 @@ export const createOrder = async (req, res) => {
         .maybeSingle();
       // Send all ticket notifications in parallel
       const ticketNotifyPromises = [];
-      
+
       for (const t of issuedTickets) {
         const isBuyer = t.attendeeEmail === buyerEmail;
-        
+
         // 1. Send to the Attendee (Guest or Buyer)
         ticketNotifyPromises.push(
           notifyUserByPreference({

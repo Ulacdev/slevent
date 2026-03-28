@@ -110,12 +110,12 @@ export const OrganizerSubscription: React.FC = () => {
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${currentSubscription.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                     {currentSubscription.status === 'active' ? 'Active' : currentSubscription.status}
                   </span>
-                  <span className="text-sm text-[#2E2E2F]/60">
+                  <span className="text-sm text-[#2E2E2F]">
                     {currentSubscription.billingInterval === 'yearly' ? 'Yearly' : 'Monthly'} billing
                   </span>
                 </div>
                 {currentSubscription.endDate && (
-                  <p className="text-sm text-[#2E2E2F]/50 mt-2">
+                  <p className="text-sm text-[#2E2E2F] mt-2">
                     {currentSubscription.subscription.cancelAtPeriodEnd
                       ? `Cancels on ${new Date(currentSubscription.endDate).toLocaleDateString()}`
                       : `Renews on ${new Date(currentSubscription.endDate).toLocaleDateString()}`
@@ -139,7 +139,7 @@ export const OrganizerSubscription: React.FC = () => {
               <div className="space-y-10">
                 {/* Plan Features */}
                 <div>
-                  <p className="text-xs font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-4 ml-1">Plan Features</p>
+                  <p className="text-xs font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-4 ml-1">Plan Features</p>
                   <div className="grid grid-cols-1 gap-3">
                     {[
                       { label: 'Custom Branding', enabled: (currentSubscription.plan.features as any)?.enable_custom_branding || (currentSubscription.plan.features as any)?.custom_branding },
@@ -148,13 +148,13 @@ export const OrganizerSubscription: React.FC = () => {
                       { label: 'Priority Support', enabled: (currentSubscription.plan.features as any)?.enable_priority_support || (currentSubscription.plan.features as any)?.priority_support },
                     ].map((feature, idx) => (
                       <div key={idx} className="flex items-center justify-between p-4 rounded-xl bg-[#F2F2F2]/50 border-2 border-[#2E2E2F]/10 group/feat transition-all hover:border-[#38BDF2]/30 hover:shadow-sm">
-                        <span className={`text-[11px] font-black uppercase tracking-widest ${feature.enabled ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]/30'}`}>{feature.label}</span>
+                        <span className={`text-[11px] font-black uppercase tracking-widest ${feature.enabled ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]'}`}>{feature.label}</span>
                         {feature.enabled ? (
                           <div className="w-6 h-6 rounded-xl bg-[#38BDF2]/10 text-[#38BDF2] flex items-center justify-center">
                             <ICONS.CheckCircle className="w-4 h-4" strokeWidth={3} />
                           </div>
                         ) : (
-                          <div className="w-6 h-6 rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F]/20 flex items-center justify-center">
+                          <div className="w-6 h-6 rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F] flex items-center justify-center">
                             <ICONS.XCircle className="w-4 h-4" strokeWidth={3} />
                           </div>
                         )}
@@ -165,7 +165,7 @@ export const OrganizerSubscription: React.FC = () => {
 
                 {/* Plan Limits & Promotion */}
                 <div>
-                  <p className="text-xs font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-4 ml-1">Plan Limits & Promotion</p>
+                  <p className="text-xs font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-4 ml-1">Plan Limits & Promotion</p>
                   <div className="grid grid-cols-2 gap-3">
                     {[
                       { label: 'Promoted Event Slots', val: (currentSubscription.plan as any)?.promotions?.max_promoted_events || 0, icon: <ICONS.TrendingUp /> },
@@ -201,7 +201,7 @@ export const OrganizerSubscription: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-xl font-black text-[#2E2E2F]">No Active Subscription</h2>
-                <p className="text-[#2E2E2F]/60">Subscribe to a plan to unlock full features</p>
+                <p className="text-[#2E2E2F]">Subscribe to a plan to unlock full features</p>
               </div>
             </div>
           </Card>

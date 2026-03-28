@@ -14,7 +14,7 @@ export const PricingSection: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [billingCycle, setBillingCycle] = useState<PlanBillingCycle>('monthly');
     const navigate = useNavigate();
-    const { isAuthenticated } = useUser();
+    const { isAuthenticated, openAuthModal } = useUser();
 
     useEffect(() => {
         let active = true;
@@ -49,7 +49,7 @@ export const PricingSection: React.FC = () => {
                     <h2 className="text-2xl md:text-4xl font-black text-[#2E2E2F] tracking-tight leading-none mb-4">
                         Simple & Transparent Pricing
                     </h2>
-                    <p className="text-[#2E2E2F]/50 text-sm md:text-base font-medium max-w-xl mx-auto leading-relaxed">
+                    <p className="text-[#2E2E2F] text-sm md:text-base font-medium max-w-xl mx-auto leading-relaxed">
                         Choose the best plan for your needs.
                     </p>
                 </div>
@@ -74,7 +74,7 @@ export const PricingSection: React.FC = () => {
                         showBillingToggle
                         onPlanAction={() => {
                             if (!isAuthenticated) {
-                                navigate('/signup');
+                                openAuthModal('signup');
                             } else {
                                 navigate('/subscription');
                             }
@@ -83,7 +83,13 @@ export const PricingSection: React.FC = () => {
                 )}
                 <div className="flex justify-center mt-12">
                     <button
-                        onClick={() => navigate('/pricing')}
+                        onClick={() => {
+                            if (!isAuthenticated) {
+                                openAuthModal('signup');
+                            } else {
+                                navigate('/pricing');
+                            }
+                        }}
                         className="flex items-center gap-3 px-8 py-3 bg-[#38BDF2] text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-[#2E2E2F] transition-all active:scale-95 shadow-md shadow-[#38BDF2]/15"
                     >
                         {isAuthenticated ? 'Plan Settings' : 'Start now'}

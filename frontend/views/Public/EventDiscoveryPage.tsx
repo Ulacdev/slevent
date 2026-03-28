@@ -174,7 +174,7 @@ export const EventDiscoveryPage: React.FC = () => {
         <div className="flex min-h-screen bg-[#F2F2F2]">
             {/* Edge Left Filter Sidebar */}
             <aside
-                className={`hidden md:block bg-white/40 backdrop-blur-xl border-r border-[#2E2E2F]/5 sticky top-0 h-screen overflow-y-auto transition-all duration-500 ease-in-out z-20 ${isSidebarCollapsed ? 'w-16 md:w-20' : 'w-[240px] md:w-[340px]'
+                className={`hidden md:block bg-white/40 backdrop-blur-xl border-r border-[#2E2E2F]/5 sticky top-0 h-screen overflow-y-auto transition-all duration-500 ease-in-out z-20 ${isSidebarCollapsed ? 'w-16 md:w-20' : 'w-[200px] md:w-[260px]'
                     }`}
             >
                 <div className="flex flex-col h-full">
@@ -183,7 +183,7 @@ export const EventDiscoveryPage: React.FC = () => {
                         {!isSidebarCollapsed && (
                             <div>
                                 <h1 className="text-[22px] font-black text-[#2E2E2F] tracking-tighter uppercase leading-none">Filters</h1>
-                                <p className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mt-2">Personalize Feed</p>
+                                <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] mt-2">Personalize Feed</p>
                             </div>
                         )}
                         <button
@@ -218,7 +218,7 @@ export const EventDiscoveryPage: React.FC = () => {
                                             <button
                                                 key={cat.key}
                                                 onClick={() => toggleCategory(cat.key)}
-                                                className={`flex items-center gap-4 w-full group transition-all ${isChecked ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/70 hover:text-[#38BDF2]'
+                                                className={`flex items-center gap-4 w-full group transition-all ${isChecked ? 'text-[#38BDF2]' : 'text-[#2E2E2F] hover:text-[#38BDF2]'
                                                     }`}
                                             >
                                                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${isChecked ? 'bg-[#38BDF2]/10' : 'bg-[#F2F2F2] group-hover:bg-[#38BDF2]/5'
@@ -246,7 +246,7 @@ export const EventDiscoveryPage: React.FC = () => {
                                         <button
                                             key={date.id}
                                             onClick={() => setSelectedDate(date.id)}
-                                            className={`flex items-center gap-3 w-full group transition-all ${selectedDate === date.id ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/70 hover:text-[#38BDF2]'
+                                            className={`flex items-center gap-3 w-full group transition-all ${selectedDate === date.id ? 'text-[#38BDF2]' : 'text-[#2E2E2F] hover:text-[#38BDF2]'
                                                 }`}
                                         >
                                             <div className={`w-2 h-2 rounded-full transition-all ${selectedDate === date.id ? 'bg-[#38BDF2] scale-125' : 'bg-[#2E2E2F]/10'}`} />
@@ -268,7 +268,7 @@ export const EventDiscoveryPage: React.FC = () => {
                                         <button
                                             key={price.id}
                                             onClick={() => setSelectedPrice(price.id)}
-                                            className={`flex items-center gap-4 w-full group transition-all ${selectedPrice === price.id ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/70 hover:text-[#38BDF2]'
+                                            className={`flex items-center gap-4 w-full group transition-all ${selectedPrice === price.id ? 'text-[#38BDF2]' : 'text-[#2E2E2F] hover:text-[#38BDF2]'
                                                 }`}
                                         >
                                             <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${selectedPrice === price.id ? 'bg-[#38BDF2]/10' : 'bg-[#F2F2F2] group-hover:bg-[#38BDF2]/5'}`}>
@@ -305,20 +305,20 @@ export const EventDiscoveryPage: React.FC = () => {
                     </div>
                 </section>
 
-                <div className="px-8 sm:px-16 py-12 max-w-[1400px]">
+                <div className="px-6 sm:px-10 py-12">
                     {/* Results Header - Aligned with search row */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
                         <div className="flex-1">
                             <h2 className="text-4xl font-black text-[#2E2E2F] tracking-tighter uppercase leading-none">
                                 {locationTerm ? `Events in ${locationTerm}` : 'Browse All Sessions'}
                             </h2>
-                            <p className="text-[11px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em] mt-3">
+                            <p className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] mt-3">
                                 {combinedEvents.length} Sessions found
                             </p>
                         </div>
 
                         <div className="flex items-center bg-white px-5 py-3 rounded-xl border border-[#2E2E2F]/5 shadow-sm whitespace-nowrap">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/40 mr-3">Sort By</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] mr-3">Sort By</span>
                             <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
@@ -372,10 +372,10 @@ export const EventDiscoveryPage: React.FC = () => {
                     {combinedEvents.length === 0 && (
                         <div>
                             <div className="w-24 h-24 bg-[#F2F2F2] rounded-xl border-2 border-[#2E2E2F]/5 flex items-center justify-center mb-8">
-                                <ICONS.Search className="w-10 h-10 text-[#2E2E2F]/10" />
+                                <ICONS.Search className="w-10 h-10 text-[#2E2E2F]" />
                             </div>
                             <h3 className="text-2xl font-black text-[#2E2E2F] uppercase tracking-tighter mb-4">No Sessions Matching Selection</h3>
-                            <p className="text-[#2E2E2F]/40 text-sm font-medium max-w-[320px] mb-10 leading-relaxed">
+                            <p className="text-[#2E2E2F] text-sm font-medium max-w-[320px] mb-10 leading-relaxed">
                                 We couldn't find any results specifically for these filters. Try broadening your date or category selection.
                             </p>
                             <Button

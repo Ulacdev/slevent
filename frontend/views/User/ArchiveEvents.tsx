@@ -341,7 +341,7 @@ export const ArchiveEvents: React.FC = () => {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-[#38BDF2] border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-sm font-medium text-[#2E2E2F]/60">Loading archive...</p>
+          <p className="mt-4 text-sm font-medium text-[#2E2E2F]">Loading archive...</p>
         </div>
       </div>
     );
@@ -353,7 +353,7 @@ export const ArchiveEvents: React.FC = () => {
       <div className="px-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">Archive</h1>
-          <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">
+          <p className="mt-1 text-sm font-semibold text-[#2E2E2F]">
             Manage your deleted {activeTab === 'support' ? 'Support Tickets' : (activeTab === 'transactions' ? 'Transaction Reports' : 'Events')}
           </p>
         </div>
@@ -363,21 +363,21 @@ export const ArchiveEvents: React.FC = () => {
       <div className="flex gap-2 border-b border-[#2E2E2F]/10 px-2 pb-px">
         <button
           onClick={() => setActiveTab('events')}
-          className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'events' ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]/70'}`}
+          className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'events' ? 'text-[#38BDF2]' : 'text-[#2E2E2F] hover:text-[#2E2E2F]'}`}
         >
           Events
           {activeTab === 'events' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#38BDF2] rounded-full" />}
         </button>
         <button
           onClick={() => setActiveTab('transactions')}
-          className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'transactions' ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]/70'}`}
+          className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'transactions' ? 'text-[#38BDF2]' : 'text-[#2E2E2F] hover:text-[#2E2E2F]'}`}
         >
           Transaction Reports
           {activeTab === 'transactions' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#38BDF2] rounded-full" />}
         </button>
         <button
           onClick={() => setActiveTab('support')}
-          className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'support' ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]/70'}`}
+          className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'support' ? 'text-[#38BDF2]' : 'text-[#2E2E2F] hover:text-[#2E2E2F]'}`}
         >
           Support Tickets
           {activeTab === 'support' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#38BDF2] rounded-full" />}
@@ -395,12 +395,12 @@ export const ArchiveEvents: React.FC = () => {
       {(activeTab === 'events' ? events.length === 0 : activeTab === 'transactions' ? transactions.length === 0 : supportTickets.length === 0) ? (
         <Card className="p-12 rounded-xl border-[#2E2E2F]/10 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F2F2F2] flex items-center justify-center">
-            <svg className="w-8 h-8 text-[#2E2E2F]/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-[#2E2E2F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
             </svg>
           </div>
           <h3 className="text-xl font-black text-[#2E2E2F]">No Archived {activeTab === 'events' ? 'Events' : activeTab === 'transactions' ? 'Reports' : 'Support Tickets'}</h3>
-          <p className="text-[#2E2E2F]/60 mt-2">{activeTab === 'events' ? 'Events' : activeTab === 'transactions' ? 'Transactions' : 'Support tickets'} you archive will appear here</p>
+          <p className="text-[#2E2E2F] mt-2">{activeTab === 'events' ? 'Events' : activeTab === 'transactions' ? 'Transactions' : 'Support tickets'} you archive will appear here</p>
           <Button 
             onClick={() => navigate(activeTab === 'events' ? '/my-events' : activeTab === 'transactions' ? '/user/reports' : '/organizer-support')}
             className="mt-6 px-6 py-3 rounded-xl font-black text-[10px]"
@@ -479,16 +479,16 @@ export const ArchiveEvents: React.FC = () => {
               <table className="w-full">
                 <thead>
                   <tr className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
-                    <th className="text-left p-4 text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest w-12 text-center align-middle">
+                    <th className="text-left p-4 text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest w-12 text-center align-middle">
                       <div className="flex justify-center">
                         <Checkbox checked={selectedRows.size === events.length && events.length > 0} onChange={toggleAll} />
                       </div>
                     </th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Event</th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Original Date</th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Archived Date</th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Location</th>
-                    <th className="text-center p-4 text-[12px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Actions</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Event</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Original Date</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Archived Date</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Location</th>
+                    <th className="text-center p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -506,13 +506,13 @@ export const ArchiveEvents: React.FC = () => {
                           </div>
                           <div>
                             <p className="font-bold text-[#2E2E2F] text-[13px]">{event.eventName}</p>
-                            <p className="text-[12px] text-[#2E2E2F]/50">ID: {event.eventId.split('-')[0]}</p>
+                            <p className="text-[12px] text-[#2E2E2F]">ID: {event.eventId.split('-')[0]}</p>
                           </div>
                          </div>
                       </td>
-                      <td className="p-4 text-[12px] text-[#2E2E2F]/70">{event.startAt ? formatDate(event.startAt) : '-'}</td>
-                      <td className="p-4 text-[12px] text-[#2E2E2F]/70">{event.deleted_at ? formatDate(event.deleted_at) : '-'}</td>
-                      <td className="p-4 text-[12px] text-[#2E2E2F]/60 truncate max-w-[200px]">{event.locationText || '-'}</td>
+                      <td className="p-4 text-[12px] text-[#2E2E2F]">{event.startAt ? formatDate(event.startAt) : '-'}</td>
+                      <td className="p-4 text-[12px] text-[#2E2E2F]">{event.deleted_at ? formatDate(event.deleted_at) : '-'}</td>
+                      <td className="p-4 text-[12px] text-[#2E2E2F] truncate max-w-[200px]">{event.locationText || '-'}</td>
                       <td className="p-4 text-center">
                         <div className="flex justify-center items-center gap-2">
                           <button onClick={() => handleRestore(event.eventId)} disabled={!!actionLoading} className="p-2 text-green-500 hover:scale-110 transition-all disabled:opacity-50" title="Restore"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></button>
@@ -527,16 +527,16 @@ export const ArchiveEvents: React.FC = () => {
               <table className="w-full">
                 <thead>
                   <tr className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
-                    <th className="text-left p-4 text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest w-12 text-center align-middle">
+                    <th className="text-left p-4 text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest w-12 text-center align-middle">
                       <div className="flex justify-center">
                         <Checkbox checked={selectedRows.size === transactions.length && transactions.length > 0} onChange={toggleAll} />
                       </div>
                     </th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Transaction / Report</th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Event</th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Amount</th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Archived Date</th>
-                    <th className="text-center p-4 text-[12px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Actions</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Transaction / Report</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Event</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Amount</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Archived Date</th>
+                    <th className="text-center p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -549,11 +549,11 @@ export const ArchiveEvents: React.FC = () => {
                       </td>
                       <td className="p-4">
                         <p className="font-bold text-[#2E2E2F] text-[13px]">{t.customerName}</p>
-                        <p className="text-[11px] text-[#2E2E2F]/50 font-mono tracking-tighter">{t.orderId}</p>
+                        <p className="text-[11px] text-[#2E2E2F] font-mono tracking-tighter">{t.orderId}</p>
                       </td>
-                      <td className="p-4 text-[12px] text-[#2E2E2F]/70">{t.eventName}</td>
+                      <td className="p-4 text-[12px] text-[#2E2E2F]">{t.eventName}</td>
                       <td className="p-4 text-[12px] font-black text-[#2E2E2F]">{t.currency} {t.amount?.toFixed(2)}</td>
-                      <td className="p-4 text-[12px] text-[#2E2E2F]/70">{t.archivedAt ? formatDate(t.archivedAt) : '-'}</td>
+                      <td className="p-4 text-[12px] text-[#2E2E2F]">{t.archivedAt ? formatDate(t.archivedAt) : '-'}</td>
                       <td className="p-4 text-center">
                         <div className="flex justify-center items-center gap-2">
                           <button onClick={() => handleRestore(t.orderId)} disabled={!!actionLoading} className="p-2 text-green-500 hover:scale-110 transition-all disabled:opacity-50" title="Restore"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></button>
@@ -568,15 +568,15 @@ export const ArchiveEvents: React.FC = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
-                      <th className="text-left p-4 text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest w-12 text-center align-middle">
+                      <th className="text-left p-4 text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest w-12 text-center align-middle">
                         <div className="flex justify-center">
                           <Checkbox checked={selectedRows.size === supportTickets.length && supportTickets.length > 0} onChange={toggleAll} />
                         </div>
                       </th>
-                      <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Subject</th>
-                      <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Status</th>
-                      <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Archived Date</th>
-                      <th className="text-center p-4 text-[12px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Actions</th>
+                      <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Subject</th>
+                      <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Status</th>
+                      <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Archived Date</th>
+                      <th className="text-center p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -589,14 +589,14 @@ export const ArchiveEvents: React.FC = () => {
                         </td>
                         <td className="p-4">
                           <p className="font-bold text-[#2E2E2F] text-[13px]">{t.title}</p>
-                          <p className="text-[11px] text-[#2E2E2F]/50 truncate max-w-sm">{t.message}</p>
+                          <p className="text-[11px] text-[#2E2E2F] truncate max-w-sm">{t.message}</p>
                         </td>
                         <td className="p-4">
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-[#2E2E2F]/5 text-[#2E2E2F]/30">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-[#2E2E2F]/5 text-[#2E2E2F]">
                             Archived
                           </span>
                         </td>
-                        <td className="p-4 text-[12px] text-[#2E2E2F]/70">{new Date(t.created_at).toLocaleDateString()}</td>
+                        <td className="p-4 text-[12px] text-[#2E2E2F]">{new Date(t.created_at).toLocaleDateString()}</td>
                         <td className="p-4 text-center" onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-center items-center gap-2">
                             <button onClick={() => handleRestore(t.notification_id)} disabled={!!actionLoading} className="p-2 text-green-500 hover:scale-110 transition-all disabled:opacity-50" title="Restore"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></button>
@@ -629,7 +629,7 @@ export const ArchiveEvents: React.FC = () => {
                 </div>
                 <button 
                   onClick={() => selectedTicket && loadMessages(selectedTicket.notification_id)}
-                  className="p-3 hover:bg-[#2E2E2F]/5 rounded-full text-[#2E2E2F]/40 transition-all hover:text-[#38BDF2]"
+                  className="p-3 hover:bg-[#2E2E2F]/5 rounded-full text-[#2E2E2F] transition-all hover:text-[#38BDF2]"
                   title="Refresh messages"
                 >
                   <ICONS.RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin text-[#38BDF2]' : ''}`} />
@@ -650,7 +650,7 @@ export const ArchiveEvents: React.FC = () => {
                           </p>
                       </div>
                     </div>
-                    <p className="text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-[0.2em] mr-14">
+                    <p className="text-[10px] font-bold text-[#2E2E2F] uppercase tracking-[0.2em] mr-14">
                       You • {new Date(selectedTicket.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                 </div>
@@ -674,7 +674,7 @@ export const ArchiveEvents: React.FC = () => {
                             <p className="text-sm font-medium whitespace-pre-wrap leading-relaxed">{m.message}</p>
                           </div>
                       </div>
-                      <p className={`text-[10px] font-bold uppercase tracking-[0.2em] text-[#2E2E2F]/30 ${m.is_admin_reply ? 'ml-14' : 'mr-14'}`}>
+                      <p className={`text-[10px] font-bold uppercase tracking-[0.2em] text-[#2E2E2F] ${m.is_admin_reply ? 'ml-14' : 'mr-14'}`}>
                         {m.is_admin_reply ? 'Support Team' : 'You'} • {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
@@ -684,7 +684,7 @@ export const ArchiveEvents: React.FC = () => {
 
               {/* Footer (Read Only) */}
               <div className="p-8 bg-transparent border-t border-[#2E2E2F]/5 text-center">
-                <p className="text-[11px] font-black text-[#2E2E2F]/20 uppercase tracking-[0.3em]">This ticket is archived and read-only</p>
+                <p className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.3em]">This ticket is archived and read-only</p>
               </div>
           </div>
         </div>
@@ -706,7 +706,7 @@ export const ArchiveEvents: React.FC = () => {
               <p className="font-bold text-[#2E2E2F] text-[16px] tracking-tight">
                 {bulkDeleteConfirm ? `Permanently delete ${selectedRows.size} ${activeTab}?` : `Permanently delete this ${activeTab === 'events' ? 'event' : 'transaction'}?`}
               </p>
-              <p className="text-[13px] text-[#2E2E2F]/60 font-medium mt-2 leading-relaxed">
+              <p className="text-[13px] text-[#2E2E2F] font-medium mt-2 leading-relaxed">
                 {bulkDeleteConfirm 
                   ? `You are about to permanently delete ${selectedRows.size} selected items. This action cannot be undone.`
                   : activeTab === 'events' 

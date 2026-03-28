@@ -87,7 +87,7 @@ export const EmailSettings: React.FC = () => {
     };
 
 
-    if (loading) return <div className="p-8 text-[#2E2E2F]/60">Loading email settings...</div>;
+    if (loading) return <div className="p-8 text-[#2E2E2F]">Loading email settings...</div>;
 
     if (!canCustomSmtp) {
         return (
@@ -107,7 +107,7 @@ export const EmailSettings: React.FC = () => {
                                 Professional <br/>
                                 <span className="opacity-40 uppercase tracking-widest text-[0.4em] block mt-2 font-bold italic">Email Support</span>
                             </h2>
-                            <p className="text-lg text-[#2E2E2F]/60 font-medium max-w-lg mx-auto leading-relaxed">
+                            <p className="text-lg text-[#2E2E2F] font-medium max-w-lg mx-auto leading-relaxed">
                                 Deliver event communications from your <span className="text-[#2E2E2F] font-bold underline decoration-[#2E2E2F]/20 underline-offset-4">official domain</span> and unlock high-volume sending quotas.
                             </p>
                         </div>
@@ -117,14 +117,14 @@ export const EmailSettings: React.FC = () => {
                                 <div className="bg-[#E8E8E8] p-2 rounded-xl shadow-sm text-[#2E2E2F]"><ICONS.CheckCircle className="w-5 h-5" /></div>
                                 <div className="text-left">
                                     <p className="text-[13px] font-black text-[#2E2E2F]">White-Label Presence</p>
-                                    <p className="text-[11px] text-[#2E2E2F]/50 font-bold uppercase tracking-wide">Brand Your Outbound Emails</p>
+                                    <p className="text-[11px] text-[#2E2E2F] font-bold uppercase tracking-wide">Brand Your Outbound Emails</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 bg-[#2E2E2F]/5 p-5 rounded-2xl border border-[#2E2E2F]/10">
                                 <div className="bg-[#E8E8E8] p-2 rounded-xl shadow-sm text-[#2E2E2F]"><ICONS.Send className="w-5 h-5" /></div>
                                 <div className="text-left">
                                     <p className="text-[13px] font-black text-[#2E2E2F]">Unrestricted Quota</p>
-                                    <p className="text-[11px] text-[#2E2E2F]/50 font-bold uppercase tracking-wide">Bypass Daily Platform Limits</p>
+                                    <p className="text-[11px] text-[#2E2E2F] font-bold uppercase tracking-wide">Bypass Daily Platform Limits</p>
                                 </div>
                             </div>
                         </div>
@@ -136,7 +136,7 @@ export const EmailSettings: React.FC = () => {
                             >
                                 Upgrade Plan
                             </Button>
-                            <p className="mt-6 text-[11px] font-bold text-[#2E2E2F]/40 uppercase tracking-widest">
+                            <p className="mt-6 text-[11px] font-bold text-[#2E2E2F] uppercase tracking-widest">
                                 Enforced for <span className="text-[#2E2E2F]">Custom Branding</span> Compliance
                             </p>
                         </div>
@@ -145,11 +145,11 @@ export const EmailSettings: React.FC = () => {
 
                 <div className="mt-12 p-8 bg-[#2E2E2F]/5 rounded-3xl border border-[#2E2E2F]/10 flex items-start gap-6">
                     <div className="w-12 h-12 bg-[#E8E8E8] rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-[#2E2E2F]/5">
-                        <ICONS.Info className="w-6 h-6 text-[#2E2E2F]/40" />
+                        <ICONS.Info className="w-6 h-6 text-[#2E2E2F]" />
                     </div>
                     <div className="space-y-2">
                         <h4 className="text-sm font-black text-[#2E2E2F] uppercase tracking-wide">Infrastructure Notice</h4>
-                        <p className="text-sm text-[#2E2E2F]/60 leading-relaxed font-medium">
+                        <p className="text-sm text-[#2E2E2F] leading-relaxed font-medium">
                             Your account is using the <span className="font-bold underline decoration-[#2E2E2F]/10">StartupLab Shared SMTP</span>. Activity is monitored and subject to daily volume restrictions to ensure platform performance.
                         </p>
                     </div>
@@ -179,35 +179,35 @@ export const EmailSettings: React.FC = () => {
                 <Card className="lg:col-span-2 p-8 rounded-xl bg-[#F2F2F2] border-[#2E2E2F]/10 shadow-sm space-y-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-1.5 opacity-60">
-                            <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">Email Provider</label>
-                            <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+                            <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">Email Provider</label>
+                            <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]">
                                 Gmail (SMTP Server)
                             </div>
                         </div>
 
                         <div className="space-y-1.5 opacity-60">
-                            <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">Mail Driver</label>
-                            <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+                            <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">Mail Driver</label>
+                            <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]">
                                 smtp
                             </div>
                         </div>
 
                         <div className="space-y-1.5 opacity-60">
-                            <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">SMTP Host</label>
-                            <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+                            <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">SMTP Host</label>
+                            <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]">
                                 smtp.gmail.com
                             </div>
                         </div>
 
                         <div className="space-y-1.5 opacity-60">
-                            <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">SMTP Port</label>
-                            <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+                            <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">SMTP Port</label>
+                            <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]">
                                 587
                             </div>
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">SMTP Username (Gmail Account)</label>
+                            <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">SMTP Username (Gmail Account)</label>
                             <Input
                                 name="smtpUsername"
                                 value={formData.smtpUsername}
@@ -218,7 +218,7 @@ export const EmailSettings: React.FC = () => {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">SMTP App Password</label>
+                            <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">SMTP App Password</label>
                             <Input
                                 type="password"
                                 name="smtpPassword"
@@ -230,14 +230,14 @@ export const EmailSettings: React.FC = () => {
                         </div>
 
                         <div className="space-y-1.5 opacity-60">
-                            <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">Mail Encryption</label>
-                            <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]/60">
+                            <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">Mail Encryption</label>
+                            <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]">
                                 STARTTLS (Standard Secure)
                             </div>
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">From Address</label>
+                            <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">From Address</label>
                             <Input
                                 name="fromAddress"
                                 value={formData.fromAddress}
@@ -247,7 +247,7 @@ export const EmailSettings: React.FC = () => {
                         </div>
 
                         <div className="md:col-span-2 space-y-1.5">
-                            <label className="text-[11px] font-black text-[#2E2E2F]/40 uppercase tracking-widest pl-1">From Name</label>
+                            <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">From Name</label>
                             <Input
                                 name="fromName"
                                 value={formData.fromName}
@@ -270,7 +270,7 @@ export const EmailSettings: React.FC = () => {
 
                         <div className="space-y-4">
                             <div className="space-y-1.5">
-                                <label className="text-[11px] font-bold text-[#2E2E2F]/50 uppercase pl-1">Send Test To</label>
+                                <label className="text-[11px] font-bold text-[#2E2E2F] uppercase pl-1">Send Test To</label>
                                 <Input
                                     value={testRecipient}
                                     onChange={(e: any) => setTestRecipient(e.target.value)}
@@ -278,7 +278,7 @@ export const EmailSettings: React.FC = () => {
                                     className="bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-full px-6"
                                 />
                             </div>
-                            <p className="text-[10px] text-[#2E2E2F]/40 font-medium pl-1">
+                            <p className="text-[10px] text-[#2E2E2F] font-medium pl-1">
                                 Enter an email address to send a test message to verify your settings.
                             </p>
                             <Button
@@ -303,7 +303,7 @@ export const EmailSettings: React.FC = () => {
                         <p className="text-[11px] text-[#2E2E2F] leading-relaxed font-bold">
                             When using Gmail, you must use a dedicated <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-[#38BDF2] underline decoration-2 underline-offset-2 hover:text-[#2E2E2F] transition-colors">App Password</a> rather than your main password.
                         </p>
-                        <p className="text-[10px] text-[#2E2E2F]/50 mt-2 font-medium">
+                        <p className="text-[10px] text-[#2E2E2F] mt-2 font-medium">
                             This ensures secure access and bypasses 2FA requirements for the SMTP server.
                         </p>
                     </div>

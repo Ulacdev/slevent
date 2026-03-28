@@ -73,9 +73,9 @@ export const EventsFeed: React.FC<EventsFeedProps> = ({
         <div className="mb-12">
           {search ? (
             <div className="mb-6">
-              <p className="text-sm font-bold text-[#2E2E2F]/60 uppercase tracking-widest mb-2">Search Results</p>
+              <p className="text-sm font-bold text-[#2E2E2F] uppercase tracking-widest mb-2">Search Results</p>
               <h2 className="text-3xl md:text-4xl font-black text-[#2E2E2F] mb-2">{search}</h2>
-              <p className="text-[#2E2E2F]/60 font-bold">
+              <p className="text-[#2E2E2F] font-bold">
                 Found {totalEvents} event{totalEvents !== 1 ? 's' : ''}{promotedCount > 0 ? ` (${promotedCount} promoted)` : ''}
               </p>
             </div>
@@ -83,12 +83,12 @@ export const EventsFeed: React.FC<EventsFeedProps> = ({
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-2xl">🎉</span>
-                <p className="text-sm font-bold text-[#2E2E2F]/60 uppercase tracking-widest">Discover Events</p>
+                <p className="text-sm font-bold text-[#2E2E2F] uppercase tracking-widest">Discover Events</p>
               </div>
               <h2 className="text-3xl md:text-4xl font-black text-[#2E2E2F]">
                 {location || category ? `${location || category} Events` : 'Featured Events'}
               </h2>
-              <p className="text-[#2E2E2F]/60 font-bold mt-2">
+              <p className="text-[#2E2E2F] font-bold mt-2">
                 {totalEvents} event{totalEvents !== 1 ? 's' :''} available
                 {promotedCount > 0 && (
                   <>
@@ -142,7 +142,7 @@ export const EventsFeed: React.FC<EventsFeedProps> = ({
           )}
 
           {/* Pagination Info */}
-          <div className="text-center mt-8 text-sm font-bold text-[#2E2E2F]/50 uppercase tracking-widest">
+          <div className="text-center mt-8 text-sm font-bold text-[#2E2E2F] uppercase tracking-widest">
             Showing {events.length} of {totalEvents} events • Page {page} of {totalPages}
           </div>
         </>
@@ -150,10 +150,10 @@ export const EventsFeed: React.FC<EventsFeedProps> = ({
         <div className="py-20 text-center">
           <div className="mb-4 text-4xl">🔍</div>
           <h3 className="text-2xl font-black text-[#2E2E2F] mb-2">No Events Found</h3>
-          <p className="text-[#2E2E2F]/60 font-bold mb-8">
+          <p className="text-[#2E2E2F] font-bold mb-8">
             {search ? `No events match "${search}"` : `No events in ${location || category || 'this category'}`}
           </p>
-          <p className="text-sm text-[#2E2E2F]/50">Try adjusting your search filters or browse all events</p>
+          <p className="text-sm text-[#2E2E2F]">Try adjusting your search filters or browse all events</p>
         </div>
       )}
     </div>

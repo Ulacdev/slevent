@@ -41,7 +41,7 @@ export const PricingPage: React.FC = () => {
         };
     }, []);
 
-    if (loading) return <PageLoader variant="page" label="Loading pricing plans..." />;
+    if (loading) return <PageLoader label="Standardizing platform plans..." variant="page" />;
 
     return (
         <div className="bg-[#F2F2F2] min-h-screen">

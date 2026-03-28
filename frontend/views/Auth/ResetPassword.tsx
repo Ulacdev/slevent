@@ -121,7 +121,7 @@ export const ResetPassword: React.FC = () => {
             </div>
             <button
                 onClick={() => navigate('/')}
-                className="absolute top-6 left-6 p-2 rounded-full text-[#2E2E2F]/40 hover:text-[#38BDF2] hover:bg-white shadow-sm transition-all group"
+                className="absolute top-6 left-6 p-2 rounded-full text-[#2E2E2F] hover:text-[#38BDF2] hover:bg-white shadow-sm transition-all group"
                 title="Go to Home"
             >
                 <ICONS.Home className="w-6 h-6" />
@@ -136,7 +136,7 @@ export const ResetPassword: React.FC = () => {
                             className="mx-auto mb-3 w-[180px] h-auto"
                             style={{ objectFit: 'contain' }}
                         />
-                        <p className="text-[#2E2E2F]/70 text-base font-medium">Reset Password</p>
+                        <p className="text-[#2E2E2F] text-base font-medium">Reset Password</p>
                         <div className="w-16 h-1 bg-[#38BDF2] mx-auto mt-3 rounded-full"></div>
                     </div>
 
@@ -144,7 +144,7 @@ export const ResetPassword: React.FC = () => {
                         <form onSubmit={handleResetPassword} className="flex flex-col gap-5">
                              <div className="space-y-4">
                                  <div className="space-y-1.5 w-full">
-                                     <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">New Password <span className="text-red-500">*</span></label>
+                                     <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">New Password <span className="text-red-500">*</span></label>
                                      <PasswordInput
                                          placeholder="••••••••"
                                          value={password}
@@ -156,7 +156,7 @@ export const ResetPassword: React.FC = () => {
                                  </div>
                                  <PasswordRequirements password={password} />
                                  <div className="space-y-1.5 w-full">
-                                     <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Confirm New Password <span className="text-red-500">*</span></label>
+                                     <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Confirm New Password <span className="text-red-500">*</span></label>
                                      <PasswordInput
                                          placeholder="••••••••"
                                          value={confirmPassword}
@@ -188,7 +188,7 @@ export const ResetPassword: React.FC = () => {
                                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                             </div>
                             <h3 className="text-xl font-black text-[#2E2E2F] mb-1 uppercase tracking-tight">PASSWORD UPDATED!</h3>
-                            <p className="text-[#2E2E2F]/60 font-bold text-[13px] mb-6 leading-relaxed">{message}</p>
+                            <p className="text-[#2E2E2F] font-bold text-[13px] mb-6 leading-relaxed">{message}</p>
                             <div className="flex items-center justify-center gap-2 text-[#38BDF2] font-black text-[10px] uppercase tracking-widest">
                                 <div className="w-1.5 h-1.5 rounded-full bg-[#38BDF2] animate-ping" />
                                 Redirecting to login...

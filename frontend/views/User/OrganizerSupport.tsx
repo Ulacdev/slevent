@@ -294,7 +294,7 @@ export const OrganizerSupport: React.FC = () => {
           <ICONS.Lock className="w-10 h-10" strokeWidth={3} />
         </div>
         <h2 className="text-3xl font-black text-[#2E2E2F] mb-4 uppercase tracking-tighter">Support Restricted</h2>
-        <p className="text-[#2E2E2F]/50 max-w-[360px] mx-auto mb-12 text-sm font-bold uppercase tracking-widest leading-relaxed">
+        <p className="text-[#2E2E2F] max-w-[360px] mx-auto mb-12 text-sm font-bold uppercase tracking-widest leading-relaxed">
           The Support Center is exclusive to organizations with Priority Support enabled in their current plan.
         </p>
         <div className="flex flex-col sm:flex-row gap-5">
@@ -315,7 +315,7 @@ export const OrganizerSupport: React.FC = () => {
       <div className="flex items-center justify-end gap-3 mb-2">
         <button 
           onClick={() => setShowHistory(!showHistory)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-transparent border border-[#2E2E2F]/5 rounded-xl text-[#2E2E2F]/50 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-[#2E2E2F]/5 transition-all"
+          className="flex items-center gap-2 px-5 py-2.5 bg-transparent border border-[#2E2E2F]/5 rounded-xl text-[#2E2E2F] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-[#2E2E2F]/5 transition-all"
         >
           {showHistory ? (
             <>
@@ -334,13 +334,13 @@ export const OrganizerSupport: React.FC = () => {
       <div className="bg-transparent border border-[#2E2E2F]/5 rounded-xl p-6 md:p-8 relative overflow-hidden group">
         <div className="flex flex-col gap-4 relative z-10">
           <div className="max-w-2xl">
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-widest mb-4 flex-shrink-0 w-fit ${hasPrioritySupport ? 'bg-[#38BDF2]/10 border-[#38BDF2]/20 text-[#38BDF2]' : 'bg-[#2E2E2F]/5 border-[#2E2E2F]/10 text-[#2E2E2F]/60'}`}>
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-widest mb-4 flex-shrink-0 w-fit ${hasPrioritySupport ? 'bg-[#38BDF2]/10 border-[#38BDF2]/20 text-[#38BDF2]' : 'bg-[#2E2E2F]/5 border-[#2E2E2F]/10 text-[#2E2E2F]'}`}>
               {hasPrioritySupport ? 'Pro Support Active' : 'Standard Support'}
             </div>
             <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">
               {showHistory ? 'Support History' : 'Organizer Support'}
             </h1>
-            <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">
+            <p className="mt-1 text-sm font-semibold text-[#2E2E2F]">
               {showHistory 
                 ? 'Review your previous conversations and admin responses.'
                 : hasPrioritySupport
@@ -357,11 +357,11 @@ export const OrganizerSupport: React.FC = () => {
           <div className="lg:col-span-2 space-y-6">
             {!profile?.plan ? (
               <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center bg-transparent rounded-xl border border-[#2E2E2F]/5 shadow-sm">
-                <div className="w-16 h-16 bg-[#2E2E2F]/5 rounded-full flex items-center justify-center mb-6 text-[#2E2E2F]/20">
+                <div className="w-16 h-16 bg-[#2E2E2F]/5 rounded-full flex items-center justify-center mb-6 text-[#2E2E2F]">
                   <ICONS.Lock className="w-8 h-8" />
                 </div>
                 <h2 className="text-xl font-black text-[#2E2E2F] mb-3 uppercase tracking-tight">Support Restricted</h2>
-                <p className="text-[#2E2E2F]/60 max-w-[280px] mx-auto mb-8 text-sm font-medium leading-relaxed">
+                <p className="text-[#2E2E2F] max-w-[280px] mx-auto mb-8 text-sm font-medium leading-relaxed">
                   Direct messaging services are available for organizations with an active subscription plan.
                 </p>
                 <button
@@ -376,7 +376,7 @@ export const OrganizerSupport: React.FC = () => {
                 <h2 className="text-xl font-bold text-[#2E2E2F] mb-6">Submit a Request</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-widest text-[#2E2E2F]/70 mb-2 block ml-1">Subject</label>
+                    <label className="text-xs font-bold uppercase tracking-widest text-[#2E2E2F] mb-2 block ml-1">Subject</label>
                     <Input
                       value={ticketSubject}
                       onChange={(e) => setTicketSubject(e.target.value)}
@@ -386,7 +386,7 @@ export const OrganizerSupport: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-widest text-[#2E2E2F]/70 mb-2 block ml-1">Message</label>
+                    <label className="text-xs font-bold uppercase tracking-widest text-[#2E2E2F] mb-2 block ml-1">Message</label>
                     <textarea
                       value={ticketMessage}
                       onChange={(e) => setTicketMessage(e.target.value)}
@@ -411,7 +411,7 @@ export const OrganizerSupport: React.FC = () => {
               <h3 className="text-lg font-bold text-[#2E2E2F] tracking-tight mb-2">
                 {hasPrioritySupport ? 'Priority Queue Active' : 'Help Center'}
               </h3>
-              <p className="text-sm font-medium leading-relaxed text-[#2E2E2F]/70">
+              <p className="text-sm font-medium leading-relaxed text-[#2E2E2F]">
                 {hasPrioritySupport
                   ? 'Because you are on a premium plan, your tickets automatically skip the line and are assigned to our specialists.'
                   : 'Need more features? Upgrade your plan to unlock priority support and get faster responses.'}
@@ -420,7 +420,7 @@ export const OrganizerSupport: React.FC = () => {
 
             <Card className="bg-transparent border border-[#2E2E2F]/5 rounded-xl p-6 md:p-8 text-[#2E2E2F] relative overflow-hidden shadow-sm">
               <div className="relative z-10">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#2E2E2F]/50 mb-4">Other Ways to Connect</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-[#2E2E2F] mb-4">Other Ways to Connect</p>
                 <div className="space-y-4">
                   <a href="mailto:support@startuplab.ph" className="flex items-center gap-3 group">
                     <div className="w-9 h-9 rounded-xl bg-[#2E2E2F]/5 flex items-center justify-center group-hover:bg-[#38BDF2]/10 transition-all">
@@ -428,7 +428,7 @@ export const OrganizerSupport: React.FC = () => {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-[#2E2E2F]">Email Us</h4>
-                      <p className="text-xs text-[#2E2E2F]/60">support@startuplab.ph</p>
+                      <p className="text-xs text-[#2E2E2F]">support@startuplab.ph</p>
                     </div>
                   </a>
                 </div>
@@ -440,7 +440,7 @@ export const OrganizerSupport: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">
                 {selectedRows.size > 0 ? `${selectedRows.size} selected` : `Total ${history.length} tickets`}
               </p>
             </div>
@@ -476,7 +476,7 @@ export const OrganizerSupport: React.FC = () => {
               <table className="w-full text-left border-collapse">
                 <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/5">
                   <tr>
-                    <th className="px-4 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 w-12">
+                    <th className="px-4 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] w-12">
                       <div className="flex justify-center">
                         <Checkbox 
                           checked={selectedRows.size === history.length && history.length > 0} 
@@ -485,9 +485,9 @@ export const OrganizerSupport: React.FC = () => {
                         />
                       </div>
                     </th>
-                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40">Subject</th>
-                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40">Status</th>
-                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 text-right">Date Posted</th>
+                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">Subject</th>
+                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">Status</th>
+                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] text-right">Date Posted</th>
                   </tr>
                 </thead>
               <tbody className="divide-y divide-[#2E2E2F]/5">
@@ -508,17 +508,17 @@ export const OrganizerSupport: React.FC = () => {
                            {t.is_read ? null : <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF2]"></span>}
                            {t.title}
                         </p>
-                        <p className="text-xs text-[#2E2E2F]/40 truncate max-w-sm font-medium">{t.message}</p>
+                        <p className="text-xs text-[#2E2E2F] truncate max-w-sm font-medium">{t.message}</p>
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${t.metadata?.status === 'resolved' ? 'bg-[#2E2E2F]/5 text-[#2E2E2F]/30' : 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/20'}`}>
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${t.metadata?.status === 'resolved' ? 'bg-[#2E2E2F]/5 text-[#2E2E2F]' : 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/20'}`}>
                         {t.metadata?.status || 'Open'}
                       </span>
                     </td>
                     <td className="px-8 py-6 text-right">
                       <p className="text-[10px] font-black text-[#2E2E2F]">{new Date(t.created_at).toLocaleDateString()}</p>
-                      <p className="text-[9px] font-bold text-[#2E2E2F]/20 uppercase tracking-tighter">{new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                      <p className="text-[9px] font-bold text-[#2E2E2F] uppercase tracking-tighter">{new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                     </td>
                   </tr>
                 ))}
@@ -546,7 +546,7 @@ export const OrganizerSupport: React.FC = () => {
                </div>
                <button 
                   onClick={() => selectedTicket && loadMessages(selectedTicket.notification_id)}
-                  className="p-3 hover:bg-[#2E2E2F]/5 rounded-full text-[#2E2E2F]/40 transition-all hover:text-[#38BDF2]"
+                  className="p-3 hover:bg-[#2E2E2F]/5 rounded-full text-[#2E2E2F] transition-all hover:text-[#38BDF2]"
                   title="Refresh messages"
                >
                   <ICONS.RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin text-[#38BDF2]' : ''}`} />
@@ -570,7 +570,7 @@ export const OrganizerSupport: React.FC = () => {
                          {renderMessageContent(selectedTicket.message)}
                       </div>
                    </div>
-                   <p className="text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-[0.2em] mr-14">
+                   <p className="text-[10px] font-bold text-[#2E2E2F] uppercase tracking-[0.2em] mr-14">
                       You • {new Date(selectedTicket.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                    </p>
                 </div>
@@ -599,7 +599,7 @@ export const OrganizerSupport: React.FC = () => {
                             {renderMessageContent(m.message)}
                          </div>
                       </div>
-                      <p className={`text-[10px] font-bold uppercase tracking-[0.2em] text-[#2E2E2F]/30 ${m.is_admin_reply ? 'ml-14' : 'mr-14'}`}>
+                      <p className={`text-[10px] font-bold uppercase tracking-[0.2em] text-[#2E2E2F] ${m.is_admin_reply ? 'ml-14' : 'mr-14'}`}>
                         {m.is_admin_reply ? 'Support Team' : 'You'} • {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
@@ -615,7 +615,7 @@ export const OrganizerSupport: React.FC = () => {
                       <input
                         type="text"
                         placeholder="Reply to support..."
-                        className="w-full h-14 pl-6 pr-16 bg-[#F2F2F2]/50 border-2 border-[#2E2E2F]/20 rounded-full text-sm font-medium focus:border-[#38BDF2]/20 transition-all outline-none placeholder:text-[#2E2E2F]/20 text-[#2E2E2F]"
+                        className="w-full h-14 pl-6 pr-16 bg-[#F2F2F2]/50 border-2 border-[#2E2E2F]/20 rounded-full text-sm font-medium focus:border-[#38BDF2]/20 transition-all outline-none placeholder:text-[#2E2E2F] text-[#2E2E2F]"
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleReply()}
@@ -634,7 +634,7 @@ export const OrganizerSupport: React.FC = () => {
                </div>
              ) : (
                <div className="p-8 bg-transparent border-t border-[#2E2E2F]/5 text-center">
-                 <p className="text-[11px] font-black text-[#2E2E2F]/20 uppercase tracking-[0.3em]">This ticket is marked as resolved</p>
+                 <p className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.3em]">This ticket is marked as resolved</p>
                </div>
              )}
           </div>

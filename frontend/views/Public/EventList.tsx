@@ -103,8 +103,8 @@ const AttendeeFacepile: React.FC<{ count: number; realAvatars?: string[]; size?:
   if (displayAvatars.length < maxToDisplay) {
     const mockNames = ['John', 'Alice', 'Mark', 'Sarah', 'James', 'Emily', 'Chris', 'Luna'];
     for (let i = displayAvatars.length; i < maxToDisplay; i++) {
-        const seed = mockNames[(count + i) % mockNames.length];
-        displayAvatars.push(`https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=38BDF2&textColor=ffffff`);
+      const seed = mockNames[(count + i) % mockNames.length];
+      displayAvatars.push(`https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=38BDF2&textColor=ffffff`);
     }
   }
 
@@ -286,14 +286,14 @@ export const EventCard: React.FC<EventCardProps> = ({
             </div>
           ) : (event.isPromoted || (event as any).is_promoted) ? (
             <div className="group/promoted relative">
-                <div 
-                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-[#38BDF2] animate-in fade-in zoom-in duration-700 cursor-help shadow-lg shadow-[#38BDF2]/20"
-                >
-                  <ICONS.Info className="w-3.5 h-3.5 text-white" strokeWidth={5} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.1em] text-white">
-                    Promoted
-                  </span>
-                </div>
+              <div
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-[#38BDF2] animate-in fade-in zoom-in duration-700 cursor-help shadow-lg shadow-[#38BDF2]/20"
+              >
+                <ICONS.Info className="w-3.5 h-3.5 text-white" strokeWidth={5} />
+                <span className="text-[10px] font-black uppercase tracking-[0.1em] text-white">
+                  Promoted
+                </span>
+              </div>
               <div className="absolute left-0 top-full mt-4 w-72 p-6 bg-[#2E2E2F] text-white text-[11px] font-bold rounded-3xl shadow-2xl opacity-0 translate-y-3 pointer-events-none group-hover/promoted:opacity-100 group-hover/promoted:translate-y-0 transition-all z-50 leading-relaxed ring-1 ring-white/10 backdrop-blur-xl">
                 <div className="flex items-center gap-2 mb-3 text-[#38BDF2]">
                   <ICONS.Zap className="w-5 h-5" />
@@ -347,19 +347,19 @@ export const EventCard: React.FC<EventCardProps> = ({
             if (organizerId) navigate(`/organizer/${organizerId}`);
           }}
         >
-            <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 flex items-center justify-center border-2 border-white shadow-sm bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF]">
-              {resolvedOrganizer?.profileImageUrl ? (
-                <img src={getImageUrl(resolvedOrganizer.profileImageUrl)} alt={organizerName} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-white font-black text-[10px] drop-shadow-sm">
-                  {organizerName.charAt(0).toUpperCase()}
-                </span>
-              )}
-            </div>
-            <span className="text-[11px] font-semibold text-[#2E2E2F]/60 truncate">
-              {organizerName}
-            </span>
+          <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 flex items-center justify-center border-2 border-white shadow-sm bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF]">
+            {resolvedOrganizer?.profileImageUrl ? (
+              <img src={getImageUrl(resolvedOrganizer.profileImageUrl)} alt={organizerName} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-white font-black text-[10px] drop-shadow-sm">
+                {organizerName.charAt(0).toUpperCase()}
+              </span>
+            )}
           </div>
+          <span className="text-[11px] font-semibold text-[#2E2E2F]/60 truncate">
+            {organizerName}
+          </span>
+        </div>
 
         <h4 className="text-[#2E2E2F] text-xl sm:text-2xl font-bold tracking-tighter leading-tight mb-3 line-clamp-2">
           {event.eventName}
@@ -1049,7 +1049,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               <div className="mb-8">
                 <p className="text-[11px] font-bold tracking-tight text-[#2E2E2F]/60">Event smart categories</p>
               </div>
-              <div 
+              <div
                 className="py-2 relative group-categories outline-none cursor-grab active:cursor-grabbing select-none"
                 tabIndex={0}
                 onMouseEnter={() => setIsMarqueePaused(true)}
@@ -1058,11 +1058,11 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUpOrLeave}
                 onKeyDown={(e) => {
-                    if (e.key === 'ArrowLeft') {
-                        categoriesScrollRef.current?.scrollBy({ left: -200, behavior: 'smooth' });
-                    } else if (e.key === 'ArrowRight') {
-                        categoriesScrollRef.current?.scrollBy({ left: 200, behavior: 'smooth' });
-                    }
+                  if (e.key === 'ArrowLeft') {
+                    categoriesScrollRef.current?.scrollBy({ left: -200, behavior: 'smooth' });
+                  } else if (e.key === 'ArrowRight') {
+                    categoriesScrollRef.current?.scrollBy({ left: 200, behavior: 'smooth' });
+                  }
                 }}
               >
                 <div
@@ -1164,36 +1164,36 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                                         {event.eventName}
                                       </h3>
 
-                                        {/* Event Details Grid - Refined Weight & Black Color */}
-                                        <div className="space-y-3 sm:space-y-4 pt-3 animate-in fade-in slide-in-from-left-8 duration-1000 delay-200">
-                                          <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
-                                            <div className="w-8 h-8 flex items-center justify-center text-black bg-[#2E2E2F]/5 rounded-lg">
-                                              <ICONS.Heart className="w-5 h-5" />
-                                            </div>
-                                            <span>3 likes</span>
+                                      {/* Event Details Grid - Refined Weight & Black Color */}
+                                      <div className="space-y-3 sm:space-y-4 pt-3 animate-in fade-in slide-in-from-left-8 duration-1000 delay-200">
+                                        <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
+                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-[#2E2E2F]/5 rounded-lg">
+                                            <ICONS.Heart className="w-5 h-5" />
                                           </div>
-
-                                          <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
-                                            <div className="w-8 h-8 flex items-center justify-center text-black bg-[#2E2E2F]/5 rounded-lg">
-                                              <ICONS.Users className="w-5 h-5" />
-                                            </div>
-                                            <span>{soldSlots} registered <span className="opacity-40 mx-1">•</span> {totalSlots} available</span>
-                                          </div>
-  
-                                          <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
-                                            <div className="w-8 h-8 flex items-center justify-center text-black bg-[#2E2E2F]/5 rounded-lg">
-                                              <ICONS.MapPin className="w-5 h-5" />
-                                            </div>
-                                            <span className="line-clamp-1">{event.locationText || 'Location TBA'}</span>
-                                          </div>
-  
-                                          <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
-                                            <div className="w-8 h-8 flex items-center justify-center text-black bg-[#2E2E2F]/5 rounded-lg">
-                                              <ICONS.Calendar className="w-5 h-5" />
-                                            </div>
-                                            <span>{formatStartForCard(event.startAt || '', event.timezone)}</span>
-                                          </div>
+                                          <span>3 likes</span>
                                         </div>
+
+                                        <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
+                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-[#2E2E2F]/5 rounded-lg">
+                                            <ICONS.Users className="w-5 h-5" />
+                                          </div>
+                                          <span>{soldSlots} registered <span className="opacity-40 mx-1">•</span> {totalSlots} available</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
+                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-[#2E2E2F]/5 rounded-lg">
+                                            <ICONS.MapPin className="w-5 h-5" />
+                                          </div>
+                                          <span className="line-clamp-1">{event.locationText || 'Location TBA'}</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
+                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-[#2E2E2F]/5 rounded-lg">
+                                            <ICONS.Calendar className="w-5 h-5" />
+                                          </div>
+                                          <span>{formatStartForCard(event.startAt || '', event.timezone)}</span>
+                                        </div>
+                                      </div>
 
                                       {/* Action Button */}
                                       <div className="pt-6 sm:pt-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
@@ -1554,7 +1554,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
       <div className="mt-12">
         {isLanding && <FeaturedOrganizers />}
       </div>
-      <div className="mt-20">
+      <div className="mt-12">
         {isLanding && <FAQSection />}
       </div>
     </div>
@@ -1742,6 +1742,8 @@ const FeaturedOrganizers: React.FC = () => {
     </section>
   );
 };
+
+
 
 
 

@@ -140,7 +140,7 @@ export const AccountSettings: React.FC = () => {
                     </div>
                     <div>
                         <h3 className="text-sm font-black text-[#2E2E2F] uppercase tracking-wider">Public Profile</h3>
-                        <p className="text-[10px] text-[#2E2E2F]/40 font-bold uppercase tracking-widest mt-0.5">Manage your personal identification</p>
+                        <p className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-widest mt-0.5">Manage your personal identification</p>
                     </div>
                 </div>
 
@@ -153,7 +153,7 @@ export const AccountSettings: React.FC = () => {
                             {previewUrl ? (
                                 <img src={previewUrl} alt="Avatar" className="w-full h-full object-cover" />
                             ) : (
-                                <span className="text-3xl font-black text-[#2E2E2F]/20">{initials}</span>
+                                <span className="text-3xl font-black text-[#2E2E2F]">{initials}</span>
                             )}
                             <div className="absolute inset-0 bg-[#2E2E2F]/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                 <CameraIcon className="w-8 h-8 text-white" />
@@ -161,7 +161,7 @@ export const AccountSettings: React.FC = () => {
                         </div>
                         <div className="space-y-3">
                             <h4 className="text-xs font-bold text-[#2E2E2F]">Profile Photo</h4>
-                            <p className="text-[11px] text-[#2E2E2F]/50 font-medium max-w-xs leading-relaxed">
+                            <p className="text-[11px] text-[#2E2E2F] font-medium max-w-xs leading-relaxed">
                                 Upload a profile picture to make your account more recognizable.
                             </p>
                             <div className="flex gap-2">
@@ -179,7 +179,7 @@ export const AccountSettings: React.FC = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t-2 border-[#2E2E2F]/10">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em] ml-1">Full Name</label>
+                            <label className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] ml-1">Full Name</label>
                             <Input
                                 value={formName}
                                 onChange={(e: any) => setFormName(e.target.value)}
@@ -188,7 +188,7 @@ export const AccountSettings: React.FC = () => {
                             />
                         </div>
                         <div className="space-y-1.5 opacity-60">
-                            <label className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em] ml-1">Email Address</label>
+                            <label className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] ml-1">Email Address</label>
                             <div className="px-5 py-3.5 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-xl text-xs text-[#2E2E2F] font-bold">
                                 {email}
                             </div>
@@ -215,7 +215,7 @@ export const AccountSettings: React.FC = () => {
                     </div>
                     <div>
                         <h3 className="text-sm font-black text-[#2E2E2F] uppercase tracking-wider">Security & Access</h3>
-                        <p className="text-[10px] text-[#2E2E2F]/40 font-bold uppercase tracking-widest mt-0.5">Manage your credentials and account safety</p>
+                        <p className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-widest mt-0.5">Manage your credentials and account safety</p>
                     </div>
                 </div>
 
@@ -223,7 +223,7 @@ export const AccountSettings: React.FC = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 rounded-xl bg-[#F2F2F2] border-2 border-[#2E2E2F]/10">
                         <div className="space-y-1">
                             <h4 className="text-xs font-bold text-[#2E2E2F]">Password</h4>
-                            <p className="text-[11px] text-[#2E2E2F]/50 font-medium">Last changed: (Not recorded)</p>
+                            <p className="text-[11px] text-[#2E2E2F] font-medium">Last changed: (Not recorded)</p>
                         </div>
                         <Button
                             variant="outline"
@@ -237,7 +237,7 @@ export const AccountSettings: React.FC = () => {
 
                     <div className="flex gap-3 items-start p-4 bg-[#38BDF2]/5 border-2 border-[#38BDF2]/20 rounded-xl">
                         <AlertIcon className="w-4 h-4 text-[#38BDF2] mt-0.5 shrink-0" />
-                        <p className="text-[10px] text-[#2E2E2F]/70 font-medium leading-relaxed">
+                        <p className="text-[10px] text-[#2E2E2F] font-medium leading-relaxed">
                             Clicking "Change Password" will send a secure reset link to your email ({email}).
                             This link is powered by the system's professional SMTP configuration.
                         </p>

@@ -248,7 +248,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8 items-start">
             <div className="space-y-6">
               <div className="space-y-3">
-                <label className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Cover Photo</label>
+                <label className="text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Cover Photo</label>
                 <div
                   className={`relative rounded-xl border-2 border-dashed ${dragActive ? 'border-[#38BDF2] bg-[#38BDF2]/10' : 'border-[#2E2E2F]/20 bg-[#F2F2F2]'
                     } p-4 transition-colors group cursor-pointer`}
@@ -271,8 +271,8 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                       <img src={formData.coverImageUrl || localCoverPreviewUrl} alt="Cover" className="w-full h-full object-cover" />
                     ) : (
                       <div className="text-center">
-                        <ICONS.Camera className="w-8 h-8 mx-auto text-[#2E2E2F]/20 mb-2" />
-                        <p className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Add Cover Photo</p>
+                        <ICONS.Camera className="w-8 h-8 mx-auto text-[#2E2E2F] mb-2" />
+                        <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest">Add Cover Photo</p>
                       </div>
                     )}
                   </div>
@@ -285,7 +285,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
               </div>
 
               <div className="space-y-3">
-                <label className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Brand Logo / Avatar</label>
+                <label className="text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Brand Logo / Avatar</label>
                 <div
                   className={`w-32 relative rounded-xl border-2 border-dashed ${dragActive ? 'border-[#38BDF2] bg-[#38BDF2]/10' : 'border-[#2E2E2F]/20 bg-[#F2F2F2]'
                     } p-3 transition-colors`}
@@ -300,7 +300,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                     {displayImageUrl ? (
                       <img src={displayImageUrl} alt="Organizer profile" className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-4xl font-black text-[#2E2E2F]/25">{fallbackInitial}</span>
+                      <span className="text-4xl font-black text-[#2E2E2F]">{fallbackInitial}</span>
                     )}
                   </div>
                   <input
@@ -316,7 +316,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                     </div>
                   )}
                 </div>
-                <p className="text-[10px] text-[#2E2E2F]/40 font-bold uppercase tracking-widest">Recommended: 400x400</p>
+                <p className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-widest">Recommended: 400x400</p>
               </div>
             </div>
 
@@ -324,14 +324,14 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="md:col-span-2">
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Custom Branding</label>
+                    <label className="text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Custom Branding</label>
                     {!canCustomBrand && <Badge type="info" className="text-[8px] bg-[#2E2E2F] text-white uppercase px-2 font-black">Professional Feature</Badge>}
                   </div>
 
                   <div className="p-5 rounded-xl border-2 border-[#2E2E2F]/10 bg-white/50 space-y-4 relative overflow-hidden group">
                     <div className={`flex items-center gap-5 ${!canCustomBrand ? 'opacity-40 grayscale' : ''}`}>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest ml-1">Brand Color</label>
+                        <label className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest ml-1">Brand Color</label>
                         <div className="flex items-center gap-3">
                           <input
                             type="color"
@@ -342,7 +342,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                           />
                           <div>
                             <p className="text-xs font-bold text-[#2E2E2F]">{formData.brandColor.toUpperCase()}</p>
-                            <p className="text-[10px] text-[#2E2E2F]/50 font-medium">Global default for your events</p>
+                            <p className="text-[10px] text-[#2E2E2F] font-medium">Global default for your events</p>
                           </div>
                         </div>
                       </div>
@@ -389,7 +389,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-[#2E2E2F]/70 mb-1.5">
+                  <label className="flex items-center gap-2 text-sm font-medium text-[#2E2E2F] mb-1.5">
                     Bio / Description (Text only)
                     <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block"></span>
                   </label>
@@ -403,7 +403,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-[#2E2E2F]/70 mb-1.5">
+                  <label className="block text-sm font-medium text-[#2E2E2F] mb-1.5">
                     Event Page Description (Short)
                   </label>
                   <textarea
@@ -437,16 +437,16 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <label className="block text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest mb-1">Brand Identity</label>
-                      <p className="text-[12px] text-[#2E2E2F]/60 font-medium">This color will be applied to your event pages and buttons.</p>
+                      <p className="text-[12px] text-[#2E2E2F] font-medium">This color will be applied to your event pages and buttons.</p>
                     </div>
                     {!canCustomBrand && (
-                      <Badge type="neutral" className="bg-[#2E2E2F]/5 text-[#2E2E2F]/40 border-none text-[9px] font-black py-1 px-3">PRO FEATURE</Badge>
+                      <Badge type="neutral" className="bg-[#2E2E2F]/5 text-[#2E2E2F] border-none text-[9px] font-black py-1 px-3">PRO FEATURE</Badge>
                     )}
                   </div>
 
                   <div className="flex items-center gap-6">
                     <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-bold text-[#2E2E2F]/40 uppercase tracking-widest">Hex Code</label>
+                      <label className="text-[10px] font-bold text-[#2E2E2F] uppercase tracking-widest">Hex Code</label>
                       <div className="flex items-center gap-3">
                         <div
                           className="w-12 h-12 rounded-xl shadow-sm border border-[#2E2E2F]/10 transition-transform hover:scale-105"
@@ -475,7 +475,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                         <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px]" style={{ backgroundColor: formData.brandColor }}>
                           <ICONS.CheckCircle className="w-4 h-4" />
                         </div>
-                        <p className="text-[11px] font-bold text-[#2E2E2F]/60 uppercase tracking-widest">Brand System Active</p>
+                        <p className="text-[11px] font-bold text-[#2E2E2F] uppercase tracking-widest">Brand System Active</p>
                       </div>
                     </div>
                   </div>
@@ -488,8 +488,8 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
         <Card className="p-6 rounded-xl border-2 border-[#2E2E2F]/15 bg-[#F2F2F2]">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <p className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Organizer Snapshot</p>
-              <p className="text-sm text-[#2E2E2F]/70 mt-1">
+              <p className="text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Organizer Snapshot</p>
+              <p className="text-sm text-[#2E2E2F] mt-1">
                 Followers: <span className="font-bold text-[#2E2E2F]">{profile?.followersCount || 0}</span>
                 {' '}| Events Hosted: <span className="font-bold text-[#2E2E2F]">{profile?.eventsHostedCount || 0}</span>
               </p>

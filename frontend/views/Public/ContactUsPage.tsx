@@ -97,7 +97,7 @@ export const ContactUsPage: React.FC = () => {
   };
 
   const fieldClassName =
-    'block w-full px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm font-normal text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 transition-colors min-h-[48px] sm:min-h-auto';
+    'block w-full px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm font-normal text-[#2E2E2F] placeholder:text-[#2E2E2F] focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 transition-colors min-h-[48px] sm:min-h-auto';
 
   const labelClassName = 'mb-2 block text-sm font-semibold text-[#2E2E2F]';
 
@@ -125,7 +125,7 @@ export const ContactUsPage: React.FC = () => {
         <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
           <article className="rounded-xl border border-[#3768A2]/20 bg-[#F2F2F2] px-5 py-6 shadow-[0_24px_56px_-36px_rgba(0,62,134,0.2)] sm:px-8 sm:py-8">
             <h2 className="text-4xl font-black leading-tight tracking-tight text-[#2E2E2F] sm:text-5xl">Events Contact Support</h2>
-            <p className="mt-3 max-w-[640px] text-sm leading-relaxed text-[#2E2E2F]/70 sm:text-base">
+            <p className="mt-3 max-w-[640px] text-sm leading-relaxed text-[#2E2E2F] sm:text-base">
               Need help with event registrations or bookings? Fill out the form below and our team will assist you.
             </p>
 

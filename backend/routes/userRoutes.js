@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { getUser, getAllUsers, getRole, getRoleByEmail, whoAmI, updatePermissions, updateUserName, updateUserAvatar } from "../controller/userController.js"
+import { getUser, getAllUsers, getRole, getRoleByEmail, whoAmI, updatePermissions, updateUserName, updateUserAvatar, updateUserProfile } from "../controller/userController.js"
 import { authMiddleware } from "../middleware/auth.js";
 import {
   listUserEvents,
@@ -38,6 +38,7 @@ router.get('/role-by-email', getRoleByEmail);
 router.get('/user/role-by-email', getRoleByEmail);
 router.put('/users/:id/permissions', authMiddleware, updatePermissions);
 router.patch('/user/name', authMiddleware, updateUserName);
+router.patch('/user/profile', authMiddleware, updateUserProfile);
 router.post('/user/avatar', authMiddleware, upload.single('image'), updateUserAvatar);
 
 // ─── User events (only events created by this user) ───

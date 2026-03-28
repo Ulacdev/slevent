@@ -88,7 +88,7 @@ const StreamStatusBanner: React.FC<{ event: Event; isOwner?: boolean }> = ({ eve
       <div className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-8 mb-10">
         <div className="flex items-center gap-2 mb-6">
           <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: platformColor }} />
-          <h3 className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em]">Meeting Link</h3>
+          <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Meeting Link</h3>
         </div>
         <a
           href={normalizedUrl}
@@ -120,13 +120,13 @@ const StreamStatusBanner: React.FC<{ event: Event; isOwner?: boolean }> = ({ eve
             <p className="text-lg font-black text-[#2E2E2F] tracking-tight group-hover:text-[#38BDF2] transition-colors">
               Join {platformName} Session
             </p>
-            <p className="text-[11px] font-bold text-[#2E2E2F]/40 mt-1 truncate">
+            <p className="text-[11px] font-bold text-[#2E2E2F] mt-1 truncate">
               {normalizedUrl}
             </p>
           </div>
 
           {/* Arrow */}
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-[#2E2E2F]/10 group-hover:border-[#38BDF2] group-hover:bg-[#38BDF2] group-hover:text-white text-[#2E2E2F]/30 transition-all shrink-0">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-[#2E2E2F]/10 group-hover:border-[#38BDF2] group-hover:bg-[#38BDF2] group-hover:text-white text-[#2E2E2F] transition-all shrink-0">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7-7 7M5 12h16" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>
         </a>
@@ -141,7 +141,7 @@ const StreamStatusBanner: React.FC<{ event: Event; isOwner?: boolean }> = ({ eve
   return (
     <div className={`overflow-hidden rounded-xl border border-[#2E2E2F]/10 mb-10 shadow-2xl ${isOwner && hasLink ? 'ring-2 ring-[#2E2E2F]/30' : ''}`}>
       {/* Header */}
-      <div className="bg-[#00AEEF] p-6 text-white text-left flex justify-between items-center border-b border-[#00AEEF]/20 shadow-[0_4px_20px_rgba(0,174,239,0.3)]">
+      <div className="bg-[#38BDF2] p-6 text-white text-left flex justify-between items-center border-b border-[#38BDF2]/20 shadow-[0_4px_20px_rgba(56,189,242,0.3)]">
         <div>
           <h2 className="text-xl font-black tracking-tight leading-tight">{event.eventName} <span className="ml-2 px-2 py-0.5 bg-red-600 rounded text-[9px] animate-pulse text-white">LIVE</span></h2>
           <p className="text-[11px] font-bold opacity-90 mt-1 uppercase tracking-widest text-[#F2F2F2]">
@@ -171,7 +171,7 @@ const StreamStatusBanner: React.FC<{ event: Event; isOwner?: boolean }> = ({ eve
               </svg>
             </div>
             <h3 className="text-2xl font-black text-[#2E2E2F] mb-2 uppercase tracking-tighter">No Live Stream</h3>
-            <p className="text-[#2E2E2F]/60 text-xs max-w-sm mb-8 font-medium leading-relaxed">
+            <p className="text-[#2E2E2F] text-xs max-w-sm mb-8 font-medium leading-relaxed">
               There is no live stream at the moment. Please check back during our service times.
             </p>
             <button
@@ -220,7 +220,7 @@ const StreamStatusBanner: React.FC<{ event: Event; isOwner?: boolean }> = ({ eve
                   <ICONS.Monitor className="w-10 h-10 text-[#2E2E2F]" />
                 </div>
                 <p className="text-[#2E2E2F] font-black text-xl tracking-tight">Open Live Stream Channel</p>
-                <div className="mt-4 flex items-center gap-2 text-[10px] text-[#2E2E2F]/40 uppercase tracking-[0.3em] font-black group-hover:text-[#2E2E2F] transition-colors">
+                <div className="mt-4 flex items-center gap-2 text-[10px] text-[#2E2E2F] uppercase tracking-[0.3em] font-black group-hover:text-[#2E2E2F] transition-colors">
                   <span>Watch External</span>
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7-7 7M5 12h16" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 </div>
@@ -264,20 +264,20 @@ const CompactEventRow: React.FC<{ event: Event; brandColor: string }> = ({ event
         <h4 className="text-[17px] font-black text-[#2E2E2F] mb-1 leading-tight transition-colors line-clamp-1" style={{ '--hover-color': brandColor } as any}>
           {event.eventName}
         </h4>
-        <p className="text-[13px] font-bold text-[#2E2E2F]/60 mb-0.5">
+        <p className="text-[13px] font-bold text-[#2E2E2F] mb-0.5">
           {formatDate(event.startAt, event.timezone, { weekday: 'short', day: 'numeric', month: 'long' })} • {formatDate(event.startAt, event.timezone, { timeStyle: 'short' })}
         </p>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           {event.locationText && (
-            <p className="text-[12px] font-medium text-[#2E2E2F]/40 line-clamp-1">
+            <p className="text-[12px] font-medium text-[#2E2E2F] line-clamp-1">
               {event.locationText}
             </p>
           )}
-          <div className="text-[12px] font-bold text-[#2E2E2F]/60">
+          <div className="text-[12px] font-bold text-[#2E2E2F]">
             {discountedMinPrice > 0 ? (
               <span className="flex items-center gap-2">
                 {originalMinPrice > discountedMinPrice && (
-                  <span className="line-through text-[#2E2E2F]/30 italic">₱{originalMinPrice.toLocaleString()}</span>
+                  <span className="line-through text-[#2E2E2F] italic">₱{originalMinPrice.toLocaleString()}</span>
                 )}
                 <span>Starts at ₱{discountedMinPrice.toLocaleString()}</span>
               </span>
@@ -485,8 +485,8 @@ export const EventDetails: React.FC = () => {
     return () => window.clearInterval(intervalId);
   }, [event?.ticketTypes]);
 
-  if (loading) return <PageLoader label="Loading event details..." />;
-  if (!event) return <div className="p-20 text-center text-[#2E2E2F]/60">Session not found.</div>;
+  if (loading) return <PageLoader label="Standardizing content..." variant="page" />;
+  if (!event) return <div className="p-20 text-center text-[#2E2E2F]">Session not found.</div>;
 
   const updateQuantity = (ticketTypeId: string, change: number, available: number) => {
     setQuantities(prev => ({
@@ -682,7 +682,7 @@ export const EventDetails: React.FC = () => {
                     style={{ 
                       background: brandColor 
                         ? `linear-gradient(135deg, ${brandColor}, ${brandColor}DD)` 
-                        : 'linear-gradient(135deg, #38BDF2, #00AEEF)',
+                        : 'linear-gradient(135deg, #38BDF2, #38BDF2)',
                       boxShadow: `0 0 15px ${brandColor ? brandColor + '66' : 'rgba(56,189,242,0.4)'}`
                     }}
                   >
@@ -743,11 +743,11 @@ export const EventDetails: React.FC = () => {
               )}
 
               <div id="event-schedule-info" className="flex flex-wrap gap-4 mt-10 mb-12">
-                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-4 py-2 rounded-xl border border-[#2E2E2F]/10 text-[14px]">
+                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-2 rounded-xl border border-[#2E2E2F]/10 text-[14px]">
                   <ICONS.Calendar className="w-5 h-5 mr-3" strokeWidth={3} style={{ color: brandColor }} />
                   {formatRange(event.startAt, event.endAt, event.timezone)}{event.timezone ? ` TZ: ${event.timezone}` : ''}
                 </div>
-                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-4 py-2 rounded-xl border border-[#2E2E2F]/10 text-[13px] font-bold">
+                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-2 rounded-xl border border-[#2E2E2F]/10 text-[13px] font-bold">
                   <ICONS.Monitor className="w-5 h-5 mr-2" strokeWidth={3} style={{ color: brandColor }} />
                   {event.locationType === 'ONLINE' ? 'DIGITAL SESSION' : event.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
                 </div>
@@ -759,11 +759,11 @@ export const EventDetails: React.FC = () => {
                     VIA {event.streamingPlatform.toUpperCase()}
                   </div>
                 )}
-                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-4 py-2 rounded-xl border border-[#2E2E2F]/10 text-[13px] font-bold">
+                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-2 rounded-xl border border-[#2E2E2F]/10 text-[13px] font-bold">
                   CAPACITY: {(event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0)}
                 </div>
                 {regState && (
-                  <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-4 py-2 rounded-xl border border-[#2E2E2F]/10 text-[13px] font-black uppercase">
+                  <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-2 rounded-xl border border-[#2E2E2F]/10 text-[13px] font-black uppercase">
                     {regState}
                   </div>
                 )}
@@ -771,15 +771,15 @@ export const EventDetails: React.FC = () => {
 
               {/* Event Description */}
               <div className="p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10 w-full">
-                <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.4em] mb-6">EVENT DETAILS</h3>
-                <p className="text-[#2E2E2F]/70 leading-relaxed text-base font-medium whitespace-pre-wrap break-all max-w-full">
+                <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] mb-6">EVENT DETAILS</h3>
+                <p className="text-[#2E2E2F] leading-relaxed text-base font-medium whitespace-pre-wrap break-all max-w-full">
                   {event.description}
                 </p>
               </div>
 
               {/* Organizer Card */}
               <div className="p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10">
-                <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.4em] mb-6">ORGANIZED BY</h3>
+                <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] mb-6">ORGANIZED BY</h3>
                 <div className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-5 flex flex-col md:flex-row md:items-center gap-5">
                   <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-md bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] flex items-center justify-center shrink-0">
                     {organizer?.profileImageUrl ? (
@@ -795,17 +795,17 @@ export const EventDetails: React.FC = () => {
                     <p className="text-2xl font-black text-[#2E2E2F] tracking-tight">
                       {organizer?.organizerName || 'Organizer profile coming soon'}
                     </p>
-                    <div className="flex flex-wrap items-center gap-6 mt-2 text-[#2E2E2F]/80">
+                    <div className="flex flex-wrap items-center gap-6 mt-2 text-[#2E2E2F]">
                       <div>
-                        <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]/50">Followers</p>
+                        <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]">Followers</p>
                         <p className="text-2xl font-black">{organizer?.followersCount || 0}</p>
                       </div>
                       <div>
-                        <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]/50">Events</p>
+                        <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]">Events</p>
                         <p className="text-2xl font-black">{organizer?.eventsHostedCount || 0}</p>
                       </div>
                       <div>
-                        <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]/50">Hosting</p>
+                        <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]">Hosting</p>
                         <p className="text-2xl font-black">{organizer ? 'Active' : '--'}</p>
                       </div>
                     </div>
@@ -826,7 +826,7 @@ export const EventDetails: React.FC = () => {
                       <button
                         type="button"
                         disabled
-                        className="px-8 py-3 rounded-xl border border-[#2E2E2F]/20 text-[#2E2E2F]/40 font-black text-sm cursor-not-allowed"
+                        className="px-8 py-3 rounded-xl border border-[#2E2E2F]/20 text-[#2E2E2F] font-black text-sm cursor-not-allowed"
                       >
                         Contact
                       </button>
@@ -838,7 +838,7 @@ export const EventDetails: React.FC = () => {
                       className={`px-8 py-3 rounded-xl font-black text-sm transition-all duration-300 shadow-md ${following
                         ? 'bg-[#2E2E2F] !text-white opacity-40 cursor-default border-none shadow-none'
                         : !organizerId 
-                          ? 'bg-[#F2F2F2] !text-[#2E2E2F]/40 border border-[#2E2E2F]/20 cursor-not-allowed shadow-none'
+                          ? 'bg-[#F2F2F2] !text-[#2E2E2F] border border-[#2E2E2F]/20 cursor-not-allowed shadow-none'
                           : '!text-white hover:opacity-90 border-none'
                         }`}
                       style={organizerId && !following ? { backgroundColor: brandColor } : {}}
@@ -851,22 +851,40 @@ export const EventDetails: React.FC = () => {
                 {(organizerDescription || organizerWebsite || facebookLink || twitterLink) && (
                   <div className="mt-5 space-y-3">
                     {organizerDescription && (
-                      <p className="text-sm text-[#2E2E2F]/70 leading-relaxed whitespace-pre-wrap">{organizerDescription}</p>
+                      <p className="text-sm text-[#2E2E2F] leading-relaxed whitespace-pre-wrap">{organizerDescription}</p>
                     )}
-                    <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-wide">
+                    <div className="flex flex-wrap items-center gap-4 text-xs font-semibold uppercase tracking-wide">
                       {organizerWebsite && (
-                        <a href={organizerWebsite} target="_blank" rel="noreferrer" className="hover:opacity-70" style={{ color: brandColor }}>
-                          Website
+                        <a 
+                          href={organizerWebsite} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F] hover:bg-[#2E2E2F] hover:text-white transition-all duration-300 hover:scale-110 shadow-sm border border-[#2E2E2F]/10"
+                          title="Website"
+                        >
+                          <ICONS.Globe className="w-5 h-5" />
                         </a>
                       )}
                       {facebookLink && (
-                        <a href={facebookLink} target="_blank" rel="noreferrer" className="hover:opacity-70" style={{ color: brandColor }}>
-                          Facebook
+                        <a 
+                          href={facebookLink} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2] hover:text-white transition-all duration-300 hover:scale-110 shadow-sm border border-[#1877F2]/20"
+                          title="Facebook"
+                        >
+                          <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
                         </a>
                       )}
                       {twitterLink && (
-                        <a href={twitterLink} target="_blank" rel="noreferrer" className="hover:opacity-70" style={{ color: brandColor }}>
-                          Twitter
+                        <a 
+                          href={twitterLink} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#000000]/10 text-[#000000] hover:bg-[#000000] hover:text-white transition-all duration-300 hover:scale-110 shadow-sm border border-[#000000]/20"
+                          title="Twitter"
+                        >
+                          <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                         </a>
                       )}
                     </div>
@@ -895,7 +913,7 @@ export const EventDetails: React.FC = () => {
               {hasPhysicalLocation && (
                 <div className="p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10">
                   <div className="flex items-center justify-between gap-3 mb-4">
-                    <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.4em]">EXACT LOCATION</h3>
+                    <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em]">EXACT LOCATION</h3>
                     <a
                       href={openMapUrl}
                       target="_blank"
@@ -906,7 +924,7 @@ export const EventDetails: React.FC = () => {
                       Open in Maps
                     </a>
                   </div>
-                  <p className="text-sm text-[#2E2E2F]/70 font-medium mb-5">{event.locationText}</p>
+                  <p className="text-sm text-[#2E2E2F] font-medium mb-5">{event.locationText}</p>
                   <div className="rounded-xl overflow-hidden border border-[#2E2E2F]/10 bg-[#F2F2F2]">
                     <iframe
                       src={mapEmbedUrl}
@@ -932,17 +950,17 @@ export const EventDetails: React.FC = () => {
                   <h2 className="text-lg font-black text-[#2E2E2F] mb-1 tracking-tight">
                     Organizer Preview
                   </h2>
-                  <p className="text-[10px] text-[#2E2E2F]/50 font-bold uppercase tracking-widest px-4">
+                  <p className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-widest px-4">
                     Previewing how attendees see your tickets
                   </p>
                 </div>
               ) : isDone ? (
                 <div className="flex flex-col items-center text-center py-10 lg:py-16">
                   <div className="w-20 h-20 rounded-full bg-[#2E2E2F]/5 flex items-center justify-center mb-6">
-                    <ICONS.Calendar className="w-10 h-10 text-[#2E2E2F]/20" />
+                    <ICONS.Calendar className="w-10 h-10 text-[#2E2E2F]" />
                   </div>
                   <h3 className="text-2xl font-black text-[#2E2E2F] mb-3 uppercase tracking-tighter">Event Finished</h3>
-                  <p className="text-[11px] font-bold text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-10 max-w-[200px]">
+                  <p className="text-[11px] font-bold text-[#2E2E2F] uppercase tracking-[0.2em] mb-10 max-w-[200px]">
                     This session has already concluded.
                   </p>
                   <Button
@@ -991,7 +1009,7 @@ export const EventDetails: React.FC = () => {
                           </div>
                           
                           {ticket.description && (
-                            <p className="text-[11px] text-[#2E2E2F]/60 mb-4 font-medium leading-relaxed">
+                            <p className="text-[11px] text-[#2E2E2F] mb-4 font-medium leading-relaxed">
                               {ticket.description}
                             </p>
                           )}
@@ -1001,7 +1019,7 @@ export const EventDetails: React.FC = () => {
                               ticket.saleDiscountPercent && ticket.saleDiscountPercent > 0 && !salesNotStarted && !salesEnded ? (
                                 <div>
                                   <div className="flex items-baseline gap-3 mb-2">
-                                    <span className="line-through text-sm text-[#2E2E2F]/50">
+                                    <span className="line-through text-sm text-[#2E2E2F]">
                                       PHP {ticket.priceAmount.toLocaleString()}.00
                                     </span>
                                     <span className="font-black" style={{ color: brandColor }}>
@@ -1038,14 +1056,14 @@ export const EventDetails: React.FC = () => {
 
                           {salesEnded && ticket.saleDiscountPercent && ticket.saleDiscountPercent > 0 && (
                             <div className="mb-4 p-3 rounded-xl bg-[#2E2E2F]/5 border border-[#2E2E2F]/10">
-                              <div className="text-xs font-semibold text-[#2E2E2F]/70">
+                              <div className="text-xs font-semibold text-[#2E2E2F]">
                                 Sale ended - regular price restored
                               </div>
                             </div>
                           )}
 
                           <div className="pt-6 border-t border-[#2E2E2F]/10 flex items-center justify-between">
-                            <span className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">QUANTITY</span>
+                            <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">QUANTITY</span>
                             <div className="flex items-center gap-5">
                               <button
                                 onClick={() => updateQuantity(ticket.ticketTypeId, -1, available)}
@@ -1122,7 +1140,7 @@ export const EventDetails: React.FC = () => {
                 ))
               ) : (
                 <div className="col-span-full py-12 text-center bg-[#F2F2F2] rounded-xl border border-dashed border-[#2E2E2F]/20">
-                  <p className="text-[#2E2E2F]/40 font-bold uppercase tracking-widest text-[11px]">Searching for more interesting sessions...</p>
+                  <p className="text-[#2E2E2F] font-bold uppercase tracking-widest text-[11px]">Searching for more interesting sessions...</p>
                 </div>
               )}
             </div>

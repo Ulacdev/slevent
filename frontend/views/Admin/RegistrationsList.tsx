@@ -23,7 +23,7 @@ const RegistrationMobileCard = React.memo<{
         <div className="flex items-start justify-between gap-4 mb-4">
             <div className="min-w-0">
                 <h3 className="font-bold text-[#2E2E2F] text-base truncate">{reg.attendeeName}</h3>
-                <p className="text-[12px] text-[#2E2E2F]/60 font-medium truncate">{reg.attendeeEmail}</p>
+                <p className="text-[12px] text-[#2E2E2F] font-medium truncate">{reg.attendeeEmail}</p>
             </div>
             <Badge
                 type={isCheckedIn ? 'success' : 'neutral'}
@@ -35,16 +35,16 @@ const RegistrationMobileCard = React.memo<{
 
         <div className="space-y-3 mb-5">
             <div className="flex flex-col">
-                <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Event</span>
+                <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest">Event</span>
                 <span className="text-[13px] font-bold text-[#2E2E2F] truncate">{reg.eventName}</span>
             </div>
             <div className="flex flex-col">
-                <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Ticket</span>
-                <span className="text-[13px] font-semibold text-[#2E2E2F]/70">{reg.ticketName}</span>
+                <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest">Ticket</span>
+                <span className="text-[13px] font-semibold text-[#2E2E2F]">{reg.ticketName}</span>
             </div>
             <div className="flex items-center justify-between pt-1">
                 <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Payment</span>
+                    <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest">Payment</span>
                     <span className="text-[14px] font-black text-[#2E2E2F]">{reg.currency} {(reg.amountPaid ?? 0).toFixed(2)}</span>
                 </div>
             </div>
@@ -84,13 +84,13 @@ const RegistrationTableRow = React.memo<{
         <td className="px-8 py-6">
             <div className="flex flex-col">
                 <span className="font-bold text-[15px] text-[#2E2E2F] tracking-tight">{reg.attendeeName}</span>
-                <span className="text-[12px] text-[#2E2E2F]/60 font-medium mt-0.5">{reg.attendeeEmail}</span>
+                <span className="text-[12px] text-[#2E2E2F] font-medium mt-0.5">{reg.attendeeEmail}</span>
             </div>
         </td>
         <td className="px-8 py-6">
             <div className="flex flex-col">
                 <span className="text-[14px] font-bold text-[#2E2E2F]">{reg.eventName}</span>
-                <span className="text-[12px] text-[#2E2E2F]/60 font-medium mt-0.5">{reg.ticketName}</span>
+                <span className="text-[12px] text-[#2E2E2F] font-medium mt-0.5">{reg.ticketName}</span>
             </div>
         </td>
         <td className="px-8 py-6">
@@ -116,7 +116,7 @@ const RegistrationTableRow = React.memo<{
                     {actionLoading ? '...' : 'MANUAL CHECK-IN'}
                 </button>
             ) : (
-                <span className="text-[12px] font-bold text-[#2E2E2F]/40 italic tracking-tight">Arrived</span>
+                <span className="text-[12px] font-bold text-[#2E2E2F] italic tracking-tight">Arrived</span>
             )}
         </td>
     </tr>
@@ -337,7 +337,7 @@ export const RegistrationsList: React.FC = () => {
 
   const DetailItem = ({ label, value, mono = false }: { label: string; value?: React.ReactNode; mono?: boolean }) => (
     <div className="space-y-1">
-      <p className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">{label}</p>
+      <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">{label}</p>
       <p className={`text-sm font-semibold text-[#2E2E2F] ${mono ? 'font-mono' : ''}`}>{value || '—'}</p>
     </div>
   );
@@ -357,13 +357,13 @@ export const RegistrationsList: React.FC = () => {
       <div className="px-2 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">Attendee List</h1>
-          <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">
+          <p className="mt-1 text-sm font-semibold text-[#2E2E2F]">
             Full visibility of confirmed registrations and financial transactions.
           </p>
         </div>
         <div className="flex w-full md:w-auto gap-3 items-center">
           <div className="w-full md:w-80 relative group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#2E2E2F]/60">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#2E2E2F]">
               <ICONS.Search className="h-4 w-4" strokeWidth={3} />
             </div>
             <input
@@ -373,7 +373,7 @@ export const RegistrationsList: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="block w-full pl-10 pr-10 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#2E2E2F] transition-colors"
             />
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#2E2E2F]/70">
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#2E2E2F]">
               {isFetching && <div className="w-4 h-4 border-2 border-[#2E2E2F]/30 border-t-transparent rounded-full animate-spin" />}
             </div>
           </div>
@@ -441,16 +441,16 @@ export const RegistrationsList: React.FC = () => {
           <table className="w-full text-left border-collapse">
             <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
               <tr>
-                <th className="px-4 py-5 text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] w-12 text-center align-middle">
+                <th className="px-4 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] w-12 text-center align-middle">
                   <div className="flex justify-center">
                     <Checkbox checked={selectedRows.size === pagedRegs.length && pagedRegs.length > 0} onChange={toggleAll} />
                   </div>
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Attendee</th>
-                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Ticket Information</th>
-                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Status</th>
-                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Transaction</th>
-                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] text-right">Operations</th>
+                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Attendee</th>
+                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Ticket Information</th>
+                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Status</th>
+                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Transaction</th>
+                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-right">Operations</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#2E2E2F]/10">
@@ -477,8 +477,8 @@ export const RegistrationsList: React.FC = () => {
       </Card>
       {pagedRegs.length === 0 && !loading && (
         <div className="py-24 text-center">
-          <ICONS.Users className="w-12 h-12 text-[#2E2E2F]/30 mx-auto mb-4" />
-          <p className="text-[#2E2E2F]/60 font-bold uppercase tracking-widest text-[10px]">No attendees</p>
+          <ICONS.Users className="w-12 h-12 text-[#2E2E2F] mx-auto mb-4" />
+          <p className="text-[#2E2E2F] font-bold uppercase tracking-widest text-[10px]">No attendees</p>
         </div>
       )}
       <Modal
@@ -492,30 +492,30 @@ export const RegistrationsList: React.FC = () => {
             <div className="flex flex-col md:flex-row gap-10">
               <div className="flex-1 space-y-6">
                 <div className="space-y-2">
-                  <h3 className="text-[11px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.3em] mb-2">Identity</h3>
+                  <h3 className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.3em] mb-2">Identity</h3>
                   <div className="bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl p-5 grid grid-cols-1 gap-4">
                     <div className="flex items-center gap-3 min-w-0">
                       <span className="w-10 h-10 rounded-xl bg-[#38BDF2] text-[#F2F2F2] text-lg font-black flex items-center justify-center shrink-0">{selectedReg.attendeeName?.charAt(0)}</span>
                       <span className="font-black text-[#2E2E2F] text-lg truncate min-w-0">{selectedReg.attendeeName}</span>
                     </div>
-                    <div className="text-[13px] text-[#2E2E2F]/70 font-bold break-words truncate min-w-0" title={selectedReg.attendeeEmail}>{selectedReg.attendeeEmail}</div>
-                    {selectedReg.attendeePhone && <div className="text-[13px] text-[#2E2E2F]/70 font-bold break-words truncate min-w-0">{selectedReg.attendeePhone}</div>}
-                    {selectedReg.attendeeCompany && <div className="text-[13px] text-[#2E2E2F]/70 font-bold break-words truncate min-w-0">{selectedReg.attendeeCompany}</div>}
+                    <div className="text-[13px] text-[#2E2E2F] font-bold break-words truncate min-w-0" title={selectedReg.attendeeEmail}>{selectedReg.attendeeEmail}</div>
+                    {selectedReg.attendeePhone && <div className="text-[13px] text-[#2E2E2F] font-bold break-words truncate min-w-0">{selectedReg.attendeePhone}</div>}
+                    {selectedReg.attendeeCompany && <div className="text-[13px] text-[#2E2E2F] font-bold break-words truncate min-w-0">{selectedReg.attendeeCompany}</div>}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-[11px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.3em] mb-2">Ticket & Order</h3>
+                  <h3 className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.3em] mb-2">Ticket & Order</h3>
                   <div className="bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl p-5 grid grid-cols-1 gap-2">
                     <div className="flex flex-wrap gap-4 text-[13px]">
                       <span className="font-black text-[#2E2E2F]">{selectedReg.ticketName}</span>
-                      <span className="font-mono text-[#2E2E2F]/60">{selectedReg.ticketCode}</span>
+                      <span className="font-mono text-[#2E2E2F]">{selectedReg.ticketCode}</span>
                     </div>
-                    <div className="text-[13px] text-[#2E2E2F]/70 font-bold">Order ID: <span className="font-mono">{selectedReg.orderId}</span></div>
-                    <div className="text-[13px] text-[#2E2E2F]/70 font-bold">Event: {selectedReg.eventName}</div>
+                    <div className="text-[13px] text-[#2E2E2F] font-bold">Order ID: <span className="font-mono">{selectedReg.orderId}</span></div>
+                    <div className="text-[13px] text-[#2E2E2F] font-bold">Event: {selectedReg.eventName}</div>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-[11px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.3em] mb-2">Payment & Status</h3>
+                  <h3 className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.3em] mb-2">Payment & Status</h3>
                   <div className="bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl p-5 grid grid-cols-1 gap-2">
                     <div className="flex items-center gap-4">
                       <span className={`px-3 py-1 rounded-xl text-[11px] font-black uppercase tracking-widest ${selectedReg.paymentStatus === 'PAID' ? 'bg-[#38BDF2]/20 text-[#2E2E2F]' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'}`}>{selectedReg.paymentStatus || '—'}</span>
@@ -523,16 +523,16 @@ export const RegistrationsList: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-4">
                       <span className={`px-3 py-1 rounded-xl text-[11px] font-black uppercase tracking-widest ${selectedReg.status === 'USED' ? 'bg-[#38BDF2]/20 text-[#2E2E2F]' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'}`}>{selectedReg.status}</span>
-                      <span className="text-[13px] text-[#2E2E2F]/70 font-bold">Check-in: {formatTimestamp(selectedReg.checkInTimestamp)}</span>
+                      <span className="text-[13px] text-[#2E2E2F] font-bold">Check-in: {formatTimestamp(selectedReg.checkInTimestamp)}</span>
                     </div>
                   </div>
                 </div>
               </div>
               {selectedReg.qrPayload && (
                 <div className="flex flex-col items-center gap-4 justify-center bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/20 px-6 py-8 min-w-[220px]">
-                  <p className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">QR Code</p>
+                  <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">QR Code</p>
                   <QRCode value={selectedReg.qrPayload} size={160} fgColor="#2E2E2F" bgColor="#F2F2F2" />
-                  <span className="text-[11px] text-[#2E2E2F]/60 font-mono break-all">{selectedReg.ticketCode}</span>
+                  <span className="text-[11px] text-[#2E2E2F] font-mono break-all">{selectedReg.ticketCode}</span>
                 </div>
               )}
             </div>

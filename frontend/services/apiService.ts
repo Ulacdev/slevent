@@ -86,15 +86,27 @@ export const apiService = {
     }
   },
 
-  // PATCH /api/user/name
-  updateUserName: async (name: string) => {
-    const res = await apiService._fetch(`${API_BASE}/api/user/name`, {
+  // PATCH /api/user/profile
+  updateProfile: async (payload: { name: string; imageUrl?: string }) => {
+    const res = await apiService._fetch(`${API_BASE}/api/user/profile`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ name })
+      body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error((await res.json()).error || 'Failed to update name');
+    if (!res.ok) throw new Error((await res.json()).error || 'Failed to update profile');
+    return await res.json();
+  },
+
+  uploadUserAvatar: async (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await apiService._fetch(`${API_BASE}/api/user/avatar`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Avatar upload failed');
     return await res.json();
   },
 

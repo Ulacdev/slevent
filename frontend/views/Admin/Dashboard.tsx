@@ -118,7 +118,7 @@ export const AdminDashboard: React.FC = () => {
     load();
   }, []);
 
-  if (loading) return <PageLoader label="Loading dashboard..." variant="page" />;
+  if (loading) return <PageLoader label="Standardizing analytics..." variant="page" />;
 
   // Computed values
   const totalRevenue = planMetrics?.revenueByPlan.reduce((s, p) => s + p.value, 0) || 0;
@@ -145,7 +145,7 @@ export const AdminDashboard: React.FC = () => {
       <div className="pt-4 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">Dashboard</h1>
-          <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">
+          <p className="mt-1 text-sm font-semibold text-[#2E2E2F]">
             Manage organizers, subscriptions, and platform health
           </p>
         </div>
@@ -377,7 +377,7 @@ export const AdminDashboard: React.FC = () => {
             {auditLogs.length === 0 && (
               <div className="p-20 text-center">
                 <ICONS.Activity className="w-8 h-8 text-[#38BDF2]/40 mx-auto mb-4" />
-                <p className="text-[10px] font-bold text-[#2E2E2F]/30">No Activity Found</p>
+                <p className="text-[10px] font-bold text-[#2E2E2F]">No Activity Found</p>
               </div>
             )}
             {auditLogs.map((log, i) => (
@@ -394,20 +394,20 @@ export const AdminDashboard: React.FC = () => {
                     <p className="text-sm font-bold text-[#2E2E2F]">{log.action || 'System Action'}</p>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-bold text-[#38BDF2] bg-[#38BDF2]/5 px-1.5 py-0.5 rounded-sm">{log.actorName || log.performedBy || 'System'}</span>
-                      <span className="text-[10px] text-[#2E2E2F]/10 font-bold">•</span>
-                      <p className="text-[10px] font-bold text-[#2E2E2F]/40">Target — {log.target || 'General'}</p>
+                      <span className="text-[10px] text-[#2E2E2F] font-bold">•</span>
+                      <p className="text-[10px] font-bold text-[#2E2E2F]">Target — {log.target || 'General'}</p>
                     </div>
                   </div>
                 </div>
                 <div className="text-left md:text-right">
-                  <p className="text-xs font-bold text-[#2E2E2F]/60">{new Date(log.timestamp).toLocaleDateString()}</p>
-                  <p className="text-[10px] font-bold text-[#2E2E2F]/40">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                  <p className="text-xs font-bold text-[#2E2E2F]">{new Date(log.timestamp).toLocaleDateString()}</p>
+                  <p className="text-[10px] font-bold text-[#2E2E2F]">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
               </div>
             ))}
           </div>
           <div className="p-4 border-t border-[#2E2E2F]/5 text-center bg-[#F2F2F2]/50">
-            <p className="text-[10px] font-bold text-[#2E2E2F]/30 italic">System Audit Tracking Enabled</p>
+            <p className="text-[10px] font-bold text-[#2E2E2F] italic">System Audit Tracking Enabled</p>
           </div>
         </Card>
 

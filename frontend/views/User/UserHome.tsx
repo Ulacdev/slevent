@@ -221,9 +221,9 @@ export const UserHome: React.FC = () => {
                     {/* Current Plan Card */}
                     <div className="bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
                         <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F]/60 mb-2">Current Plan</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] mb-2">Current Plan</p>
                             <p className="text-2xl font-black text-[#2E2E2F] tracking-tight">{organizerProfile.plan?.name || 'No Active Plan'}</p>
-                            <p className="text-[10px] text-[#2E2E2F]/60 font-medium mt-2">{organizerProfile.plan?.description || (organizerProfile?.currentPlanId ? 'Basic events only' : 'Please select a plan to begin')}</p>
+                            <p className="text-[10px] text-[#2E2E2F] font-medium mt-2">{organizerProfile.plan?.description || (organizerProfile?.currentPlanId ? 'Basic events only' : 'Please select a plan to begin')}</p>
                         </div>
                         {!organizerProfile?.currentPlanId && (
                             <Button
@@ -248,7 +248,7 @@ export const UserHome: React.FC = () => {
                                             <ICONS.CreditCard className="w-5 h-5 text-white" />
                                         </div>
                                         <div>
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F]/60">Paid Events Used</p>
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F]">Paid Events Used</p>
                                             <p className="text-lg font-black text-[#2E2E2F]">
                                                 {usedCount} / {pricedLimit}
                                             </p>
@@ -265,7 +265,7 @@ export const UserHome: React.FC = () => {
                                                 style={{ width: `${Math.min(100, (usedCount / (pricedLimit || 1)) * 100)}%` }}
                                             />
                                         </div>
-                                        <p className="text-[9px] font-bold text-[#2E2E2F]/40 mt-2 uppercase tracking-tight">
+                                        <p className="text-[9px] font-bold text-[#2E2E2F] mt-2 uppercase tracking-tight">
                                             {pricedLimit === 0
                                                 ? 'No paid events allowed on current plan'
                                                 : `${Math.max(0, pricedLimit - usedCount)} paid events remaining`}
@@ -284,7 +284,7 @@ export const UserHome: React.FC = () => {
                                     <ICONS.Mail className="w-5 h-5 text-white" strokeWidth={2} />
                                 </div>
                                 <div>
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F]/60">Email Quota</p>
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F]">Email Quota</p>
                                     <p className="text-lg font-black text-[#2E2E2F]">
                                         {organizerProfile?.currentPlanId ? emailQuota.remaining : '0'}
                                     </p>
@@ -292,7 +292,7 @@ export const UserHome: React.FC = () => {
                             </div>
 
                             <div>
-                                <p className="text-[10px] font-black text-[#2E2E2F]/60 mb-2">
+                                <p className="text-[10px] font-black text-[#2E2E2F] mb-2">
                                     {organizerProfile?.currentPlanId ? `${emailQuota.sent}/${emailQuota.limit}` : 'No Active Plan'}
                                 </p>
                                 {organizerProfile?.currentPlanId ? (
@@ -334,10 +334,10 @@ export const UserHome: React.FC = () => {
                         <ICONS.Plus className="w-8 h-8 stroke-[3]" />
                     </div>
                     <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tight mb-3">Create First Event</h2>
-                    <p className="text-[#2E2E2F]/60 font-medium leading-relaxed mb-8 flex-1">
+                    <p className="text-[#2E2E2F] font-medium leading-relaxed mb-8 flex-1">
                         Follow the organizer workflow: complete your identity, set up your organization profile, pick a subscription plan, save your event as a draft, then add tickets before finally publishing.
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F]/40 tracking-[0.2em] group-hover:text-[#38BDF2] transition-colors">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F] tracking-[0.2em] group-hover:text-[#38BDF2] transition-colors">
                         Start Wizard <ICONS.ChevronRight className="w-4 h-4" />
                     </div>
                 </div>
@@ -351,10 +351,10 @@ export const UserHome: React.FC = () => {
                         <ICONS.Calendar className="w-7 h-7 stroke-[2]" />
                     </div>
                     <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tight mb-3">Manage My Events</h2>
-                    <p className="text-[#2E2E2F]/60 font-medium leading-relaxed mb-8 flex-1">
+                    <p className="text-[#2E2E2F] font-medium leading-relaxed mb-8 flex-1">
                         View, edit, and track the performance of all your existing events. Stay on top of registrations.
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F]/40 tracking-[0.2em] group-hover:text-[#38BDF2] transition-colors">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F] tracking-[0.2em] group-hover:text-[#38BDF2] transition-colors">
                         Open Library <ICONS.ChevronRight className="w-4 h-4" />
                     </div>
                 </div>
@@ -368,10 +368,10 @@ export const UserHome: React.FC = () => {
                         <ICONS.MessageSquare className="w-7 h-7 stroke-[2]" />
                     </div>
                     <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tight mb-3">Help & Support</h2>
-                    <p className="text-[#2E2E2F]/60 font-medium leading-relaxed mb-8 flex-1">
+                    <p className="text-[#2E2E2F] font-medium leading-relaxed mb-8 flex-1">
                         Need assistance? Our support team is here to help you optimize your event operations and resolve any technical issues.
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F]/40 tracking-[0.2em] group-hover:text-[#38BDF2] transition-colors">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F] tracking-[0.2em] group-hover:text-[#38BDF2] transition-colors">
                         Open Support <ICONS.ChevronRight className="w-4 h-4" />
                     </div>
                 </div>
@@ -434,7 +434,7 @@ export const UserHome: React.FC = () => {
                                         />
                                     </div>
                                     <div className="w-1/3">
-                                        <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/40 mb-2.5">Status</label>
+                                        <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] mb-2.5">Status</label>
                                         <select
                                             className="w-full px-4 py-[13.5px] bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-xl text-[11px] font-black uppercase tracking-widest outline-none focus:border-[#38BDF2] transition-colors appearance-none"
                                             value={formData.status}
@@ -446,7 +446,7 @@ export const UserHome: React.FC = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/40 mb-2.5">The Narrative</label>
+                                    <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] mb-2.5">The Narrative</label>
                                     <textarea
                                         className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-xl text-sm min-h-[140px] focus:border-[#38BDF2] transition-colors outline-none resize-none"
                                         placeholder="Tell the story of your event..."
@@ -466,7 +466,7 @@ export const UserHome: React.FC = () => {
                             </div>
 
                             <div className="md:col-span-2">
-                                <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/40 mb-2.5">Operational Presence</label>
+                                <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] mb-2.5">Operational Presence</label>
                                 <div className="flex gap-4">
                                     {['ONSITE', 'ONLINE', 'HYBRID'].map((type) => (
                                         <button
@@ -475,7 +475,7 @@ export const UserHome: React.FC = () => {
                                             onClick={() => setFormData({ ...formData, locationType: type as any })}
                                             className={`flex-1 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${formData.locationType === type
                                                 ? 'bg-[#2E2E2F] border-[#2E2E2F] text-white shadow-lg'
-                                                : 'bg-[#F2F2F2] border-[#2E2E2F]/5 text-[#2E2E2F]/40 hover:bg-[#2E2E2F]/5'}`}
+                                                : 'bg-[#F2F2F2] border-[#2E2E2F]/5 text-[#2E2E2F] hover:bg-[#2E2E2F]/5'}`}
                                         >
                                             {type}
                                         </button>

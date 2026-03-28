@@ -65,7 +65,7 @@ const WelcomeView: React.FC = () => {
           <div className="mb-4">
             <button
               onClick={() => setIsProfileStep(false)}
-              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/60 hover:bg-[#2E2E2F]/5 hover:text-[#2E2E2F] transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] hover:bg-[#2E2E2F]/5 hover:text-[#2E2E2F] transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />

@@ -248,10 +248,10 @@ export const TeamSettings: React.FC = () => {
             type="button"
             onClick={disabled ? undefined : onClick}
             className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${disabled
-                ? 'text-[#2E2E2F]/40 bg-[#F2F2F2] cursor-not-allowed opacity-60'
+                ? 'text-[#2E2E2F] bg-[#F2F2F2] cursor-not-allowed opacity-60'
                 : active
                     ? 'text-[#F2F2F2] bg-[#38BDF2]'
-                    : 'text-[#2E2E2F]/40 bg-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]'
+                    : 'text-[#2E2E2F] bg-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]'
                 }`}
         >
             {iconType === 'bell' ? (
@@ -288,7 +288,7 @@ export const TeamSettings: React.FC = () => {
                 {activeSubTab === 'directory' && (
                     <div className="space-y-6">
                         <div className="flex justify-between items-center">
-                            <label className="block text-[10px] font-semibold text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-1 ml-1">Team Directory</label>
+                            <label className="block text-[10px] font-semibold text-[#2E2E2F] uppercase tracking-[0.2em] mb-1 ml-1">Team Directory</label>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={handlePrintTeam}
@@ -340,9 +340,9 @@ export const TeamSettings: React.FC = () => {
                                 <table className="w-full text-left">
                                     <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
                                         <tr>
-                                            <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Name</th>
-                                            <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Position</th>
-                                            <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] text-right w-24"></th>
+                                            <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Name</th>
+                                            <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Position</th>
+                                            <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-right w-24"></th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-[#2E2E2F]/10">
@@ -364,13 +364,13 @@ export const TeamSettings: React.FC = () => {
                                                                     <div className="bg-[#38BDF2] text-[#F2F2F2] text-[8px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest">owner</div>
                                                                 )}
                                                             </div>
-                                                            <div className="text-[12px] text-[#2E2E2F]/60 font-bold tracking-tight">{member.email}</div>
+                                                            <div className="text-[12px] text-[#2E2E2F] font-bold tracking-tight">{member.email}</div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-10 py-8">
                                                     <div className="text-[13px] font-black text-[#2E2E2F] uppercase tracking-widest">{member.role}</div>
-                                                    <div className="text-[10px] font-bold text-[#2E2E2F]/60 uppercase tracking-[0.2em] mt-1">{member.perspective} HUB</div>
+                                                    <div className="text-[10px] font-bold text-[#2E2E2F] uppercase tracking-[0.2em] mt-1">{member.perspective} HUB</div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -384,7 +384,7 @@ export const TeamSettings: React.FC = () => {
                 {activeSubTab === 'permissions' && (
                     <div className="space-y-6">
                         <div className="flex justify-between items-center">
-                            <label className="block text-[10px] font-semibold text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-1 ml-1">Access Control</label>
+                            <label className="block text-[10px] font-semibold text-[#2E2E2F] uppercase tracking-[0.2em] mb-1 ml-1">Access Control</label>
                             <Badge type="info" className="font-black text-[9px] tracking-widest uppercase bg-[#38BDF2]/20 text-[#2E2E2F]">Manage Team Permissions</Badge>
                         </div>
                         <Card className="overflow-hidden border-2 border-[#2E2E2F]/15 rounded-xl bg-[#F2F2F2] shadow-sm">
@@ -392,11 +392,11 @@ export const TeamSettings: React.FC = () => {
                                 <table className="w-full text-left">
                                     <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
                                         <tr>
-                                            <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">Name</th>
-                                            <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] text-center">View Events</th>
-                                            <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] text-center">Edit Events</th>
-                                            <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] text-center">Check-in</th>
-                                            <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] text-center">Notify</th>
+                                            <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Name</th>
+                                            <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-center">View Events</th>
+                                            <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-center">Edit Events</th>
+                                            <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-center">Check-in</th>
+                                            <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-center">Notify</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-[#2E2E2F]/10">
@@ -415,7 +415,7 @@ export const TeamSettings: React.FC = () => {
                                                             <div className="flex items-center gap-2 mb-0.5">
                                                                 <div className="font-black text-[#2E2E2F] text-[14px] tracking-tight">{member.name}</div>
                                                             </div>
-                                                            <div className="text-[10px] text-[#2E2E2F]/60 font-black uppercase tracking-widest">{member.role}</div>
+                                                            <div className="text-[10px] text-[#2E2E2F] font-black uppercase tracking-widest">{member.role}</div>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -453,7 +453,7 @@ export const TeamSettings: React.FC = () => {
                 <form onSubmit={handleInviteSubmit} className="space-y-10 px-2">
                     <div className="space-y-6">
                         <Input label="Work Email" type="email" placeholder="j.miller@startuplab.co" required className="w-full py-5 px-6 rounded-xl bg-[#F2F2F2] border-2 border-[#2E2E2F]/20 text-base" value={inviteData.email} onChange={(e: any) => setInviteData({ ...inviteData, email: e.target.value })} />
-                        <Input label="Assigned Position" value="STAFF" disabled className="w-full py-5 px-6 rounded-xl bg-[#F2F2F2] border-2 border-[#2E2E2F]/20 text-[#2E2E2F]/60 text-base" />
+                        <Input label="Assigned Position" value="STAFF" disabled className="w-full py-5 px-6 rounded-xl bg-[#F2F2F2] border-2 border-[#2E2E2F]/20 text-[#2E2E2F] text-base" />
                     </div>
                     <div className="pt-8 flex flex-col sm:flex-row gap-4">
                         <Button className="flex-1" onClick={() => setIsInviteModalOpen(false)} disabled={isInviting}>Cancel</Button>

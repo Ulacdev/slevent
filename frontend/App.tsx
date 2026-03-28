@@ -1,52 +1,47 @@
 
 import React, { useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation, useSearchParams, useNavigate, Navigate } from 'react-router-dom';
-import { EventList } from './views/Public/EventList';
-import { CategoryEvents } from './views/Public/CategoryEvents';
-import { EventDetails } from './views/Public/EventDetails';
-import { RegistrationForm } from './views/Public/RegistrationForm';
-import { PaymentStatusView } from './views/Public/PaymentStatus';
-import { TicketView } from './views/Public/TicketView';
-import { AboutUsPage } from './views/Public/AboutUsPage';
-import { ContactUsPage } from './views/Public/ContactUsPage';
-import { PublicEventsPage } from './views/Public/PublicEventsPage';
-import { LikedEventsPage } from './views/Public/LikedEventsPage';
-import { FollowingsEventsPage } from './views/Public/FollowingsEventsPage';
-import MyTicketsPage from './views/Public/MyTicketsPage';
-import { OrganizerProfilePage } from './views/Public/OrganizerProfile';
-import { PricingPage } from './views/Public/PricingPage';
-import {
-  PrivacyPolicyPage,
-  TermsOfServicePage,
-  FaqPage,
-  RefundPolicyPage
-} from './views/Public/InfoPages';
-import { LivePage } from './views/Public/LivePage';
-import { OrganizerDiscoveryPage } from './views/Public/OrganizerDiscoveryPage';
-import { AdminDashboard } from './views/Admin/Dashboard';
-import { EventsManagement } from './views/Admin/EventsManagement';
-import { RegistrationsList } from './views/Admin/RegistrationsList';
-import { CheckIn } from './views/Admin/CheckIn';
-import { ArchiveEvents } from './views/User/ArchiveEvents';
-import { OrganizerReports } from './views/User/OrganizerReports';
-import { SettingsView } from './views/Admin/Settings';
-import { SubscriptionPlans } from './views/Admin/SubscriptionPlans';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { AuthModal } from './components/AuthModal';
-import { LoginPerspective } from './views/Auth/Login';
-import { SignUpView } from './views/Auth/SignUp';
-import { AcceptInvite } from './views/Auth/AcceptInvite';
-import { ForgotPassword } from './views/Auth/ForgotPassword';
-import { ResetPassword } from './views/Auth/ResetPassword';
-import { UserSettings } from './views/User/UserSettings';
-import { UserEvents } from './views/User/UserEvents';
-import { UserHome } from './views/User/UserHome';
-import { OrganizerSubscription } from './views/User/OrganizerSubscription';
-import { OrganizerSupport } from './views/User/OrganizerSupport';
-import { OrganizerDashboard } from './views/User/OrganizerDashboard';
-import { ArchiveSupport } from './views/User/ArchiveSupport';
+
+
+
+
+
+
+
+
+
+
+
+
 import { FloatingSupportModal } from './components/FloatingSupportModal';
-import WelcomeView from './views/User/WelcomeView';
-import { SubscriptionSuccess } from './views/User/SubscriptionSuccess';
+
+
 import { ONLINE_LOCATION_VALUE } from './components/BrowseEventsNavigator';
 import { ICONS } from './constants';
 import { Button, Input, Modal, PageLoader } from './components/Shared';
@@ -57,6 +52,48 @@ import { UserRole, normalizeUserRole } from './types';
 import { supabase } from "./supabase/supabaseClient.js";
 import { useUser } from './context/UserContext';
 import { useEngagement } from './context/EngagementContext';
+const EventList = React.lazy(() => import('./views/Public/EventList').then(module => ({ default: module.EventList })));
+const CategoryEvents = React.lazy(() => import('./views/Public/CategoryEvents').then(module => ({ default: module.CategoryEvents })));
+const EventDetails = React.lazy(() => import('./views/Public/EventDetails').then(module => ({ default: module.EventDetails })));
+const RegistrationForm = React.lazy(() => import('./views/Public/RegistrationForm').then(module => ({ default: module.RegistrationForm })));
+const PaymentStatusView = React.lazy(() => import('./views/Public/PaymentStatus').then(module => ({ default: module.PaymentStatusView })));
+const TicketView = React.lazy(() => import('./views/Public/TicketView').then(module => ({ default: module.TicketView })));
+const AboutUsPage = React.lazy(() => import('./views/Public/AboutUsPage').then(module => ({ default: module.AboutUsPage })));
+const ContactUsPage = React.lazy(() => import('./views/Public/ContactUsPage').then(module => ({ default: module.ContactUsPage })));
+const PublicEventsPage = React.lazy(() => import('./views/Public/PublicEventsPage').then(module => ({ default: module.PublicEventsPage })));
+const LikedEventsPage = React.lazy(() => import('./views/Public/LikedEventsPage').then(module => ({ default: module.LikedEventsPage })));
+const FollowingsEventsPage = React.lazy(() => import('./views/Public/FollowingsEventsPage').then(module => ({ default: module.FollowingsEventsPage })));
+const OrganizerProfilePage = React.lazy(() => import('./views/Public/OrganizerProfile').then(module => ({ default: module.OrganizerProfilePage })));
+const PricingPage = React.lazy(() => import('./views/Public/PricingPage').then(module => ({ default: module.PricingPage })));
+const PrivacyPolicyPage = React.lazy(() => import('./views/Public/InfoPages').then(module => ({ default: module.PrivacyPolicyPage })));
+const TermsOfServicePage = React.lazy(() => import('./views/Public/InfoPages').then(module => ({ default: module.TermsOfServicePage })));
+const FaqPage = React.lazy(() => import('./views/Public/InfoPages').then(module => ({ default: module.FaqPage })));
+const RefundPolicyPage = React.lazy(() => import('./views/Public/InfoPages').then(module => ({ default: module.RefundPolicyPage })));
+const LivePage = React.lazy(() => import('./views/Public/LivePage').then(module => ({ default: module.LivePage })));
+const OrganizerDiscoveryPage = React.lazy(() => import('./views/Public/OrganizerDiscoveryPage').then(module => ({ default: module.OrganizerDiscoveryPage })));
+const AdminDashboard = React.lazy(() => import('./views/Admin/Dashboard').then(module => ({ default: module.AdminDashboard })));
+const EventsManagement = React.lazy(() => import('./views/Admin/EventsManagement').then(module => ({ default: module.EventsManagement })));
+const RegistrationsList = React.lazy(() => import('./views/Admin/RegistrationsList').then(module => ({ default: module.RegistrationsList })));
+const CheckIn = React.lazy(() => import('./views/Admin/CheckIn').then(module => ({ default: module.CheckIn })));
+const ArchiveEvents = React.lazy(() => import('./views/User/ArchiveEvents').then(module => ({ default: module.ArchiveEvents })));
+const OrganizerReports = React.lazy(() => import('./views/User/OrganizerReports').then(module => ({ default: module.OrganizerReports })));
+const SettingsView = React.lazy(() => import('./views/Admin/Settings').then(module => ({ default: module.SettingsView })));
+const SubscriptionPlans = React.lazy(() => import('./views/Admin/SubscriptionPlans').then(module => ({ default: module.SubscriptionPlans })));
+const LoginPerspective = React.lazy(() => import('./views/Auth/Login').then(module => ({ default: module.LoginPerspective })));
+const SignUpView = React.lazy(() => import('./views/Auth/SignUp').then(module => ({ default: module.SignUpView })));
+const AcceptInvite = React.lazy(() => import('./views/Auth/AcceptInvite').then(module => ({ default: module.AcceptInvite })));
+const ForgotPassword = React.lazy(() => import('./views/Auth/ForgotPassword').then(module => ({ default: module.ForgotPassword })));
+const ResetPassword = React.lazy(() => import('./views/Auth/ResetPassword').then(module => ({ default: module.ResetPassword })));
+const UserSettings = React.lazy(() => import('./views/User/UserSettings').then(module => ({ default: module.UserSettings })));
+const UserEvents = React.lazy(() => import('./views/User/UserEvents').then(module => ({ default: module.UserEvents })));
+const UserHome = React.lazy(() => import('./views/User/UserHome').then(module => ({ default: module.UserHome })));
+const OrganizerSubscription = React.lazy(() => import('./views/User/OrganizerSubscription').then(module => ({ default: module.OrganizerSubscription })));
+const OrganizerSupport = React.lazy(() => import('./views/User/OrganizerSupport').then(module => ({ default: module.OrganizerSupport })));
+const OrganizerDashboard = React.lazy(() => import('./views/User/OrganizerDashboard').then(module => ({ default: module.OrganizerDashboard })));
+const ArchiveSupport = React.lazy(() => import('./views/User/ArchiveSupport').then(module => ({ default: module.ArchiveSupport })));
+const SubscriptionSuccess = React.lazy(() => import('./views/User/SubscriptionSuccess').then(module => ({ default: module.SubscriptionSuccess })));
+const MyTicketsPage = React.lazy(() => import('./views/Public/MyTicketsPage'));
+const WelcomeView = React.lazy(() => import('./views/User/WelcomeView'));
 const API = import.meta.env.VITE_API_BASE;
 const DEFAULT_HEADER_LOCATION = 'Your Location';
 const BROWSE_LOCATION_STORAGE_KEY = 'browse_events_location';
@@ -649,7 +686,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               </svg>
             </button>
             <div className="hidden sm:block">
-              <p className="text-[10px] uppercase font-black text-[#2E2E2F]/50 tracking-[0.2em]">
+              <p className="text-[10px] uppercase font-black text-[#2E2E2F] tracking-[0.2em]">
                 {isStaff ? 'Staff Panel' : role === UserRole.ADMIN ? 'Admin Center' : 'Organizer Portal'}
               </p>
             </div>
@@ -682,9 +719,9 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                               </span>
                             )}
                           </div>
-                          <p className="text-[#2E2E2F]/40 text-xs font-bold uppercase tracking-widest">Stay synchronized with your team</p>
+                          <p className="text-[#2E2E2F] text-xs font-bold uppercase tracking-widest">Stay synchronized with your team</p>
                         </div>
-                        <button onClick={() => setNotificationOpen(false)} className="w-10 h-10 rounded-xl bg-[#F2F2F2] flex items-center justify-center text-[#2E2E2F]/40 hover:text-[#2E2E2F] hover:bg-[#2E2E2F]/5 transition-all">
+                        <button onClick={() => setNotificationOpen(false)} className="w-10 h-10 rounded-xl bg-[#F2F2F2] flex items-center justify-center text-[#2E2E2F] hover:text-[#2E2E2F] hover:bg-[#2E2E2F]/5 transition-all">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                           </svg>
@@ -695,12 +732,12 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         {notificationsLoading && notifications.length === 0 ? (
                           <div className="flex flex-col items-center justify-center p-12 text-center h-full">
                             <div className="w-12 h-12 border-4 border-[#38BDF2]/20 border-t-[#38BDF2] rounded-full animate-spin mb-4" />
-                            <p className="text-[#2E2E2F]/40 text-xs font-black uppercase tracking-widest">Syncing notifications...</p>
+                            <p className="text-[#2E2E2F] text-xs font-black uppercase tracking-widest">Syncing notifications...</p>
                           </div>
                         ) : notifications.length > 0 ? (
                           <div className="px-4 space-y-2">
                             <div className="px-4 py-2 flex justify-between items-center mb-4">
-                              <span className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em]">RECENT ACTIVITY</span>
+                              <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">RECENT ACTIVITY</span>
                               <button
                                 onClick={handleMarkAllRead}
                                 className="text-[10px] font-black text-[#38BDF2] hover:text-[#2E2E2F] uppercase tracking-[0.2em] transition-colors"
@@ -721,18 +758,18 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                                   }`}
                               >
                                 <div className="flex items-start gap-4">
-                                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${n.isRead ? 'bg-[#2E2E2F]/5 text-[#2E2E2F]/30' : 'bg-[#38BDF2]/10 text-[#38BDF2]'
+                                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${n.isRead ? 'bg-[#2E2E2F]/5 text-[#2E2E2F]' : 'bg-[#38BDF2]/10 text-[#38BDF2]'
                                     }`}>
                                     <ICONS.Bell className="w-5 h-5" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-1">
                                       <h4 className="text-sm font-black text-[#2E2E2F] tracking-tight truncate">{n.title}</h4>
-                                      <span className="text-[9px] text-[#2E2E2F]/30 font-black uppercase tracking-widest whitespace-nowrap ml-2">
+                                      <span className="text-[9px] text-[#2E2E2F] font-black uppercase tracking-widest whitespace-nowrap ml-2">
                                         {n.createdAt ? new Date(n.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Now'}
                                       </span>
                                     </div>
-                                    <div className="text-xs text-[#2E2E2F]/60 font-medium leading-relaxed mb-3">
+                                    <div className="text-xs text-[#2E2E2F] font-medium leading-relaxed mb-3">
                                       {renderMessageContent(n.message)}
                                     </div>
                                     {!n.isRead && (
@@ -751,10 +788,10 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         ) : (
                           <div className="flex flex-col items-center justify-center p-12 text-center h-full">
                             <div className="w-24 h-24 bg-[#F2F2F2] rounded-xl flex items-center justify-center mb-8">
-                              <ICONS.Bell className="w-10 h-10 text-[#2E2E2F]/10" />
+                              <ICONS.Bell className="w-10 h-10 text-[#2E2E2F]" />
                             </div>
                             <h3 className="text-xl font-black text-[#2E2E2F] tracking-tighter uppercase mb-2">Clean Slate</h3>
-                            <p className="text-sm font-medium text-[#2E2E2F]/40 max-w-[240px] leading-relaxed">
+                            <p className="text-sm font-medium text-[#2E2E2F] max-w-[240px] leading-relaxed">
                               You're all caught up. We'll alert you when there's news.
                             </p>
                           </div>
@@ -779,13 +816,13 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     <ICONS.Bell className="w-7 h-7" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-[#2E2E2F]/40 uppercase tracking-widest">Status Update</p>
+                    <p className="text-xs font-bold text-[#2E2E2F] uppercase tracking-widest">Status Update</p>
                   </div>
                 </div>
 
                 <div className="p-6 sm:p-8 rounded-2xl bg-[#F2F2F2] border border-[#2E2E2F]/5 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#38BDF2]/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[#38BDF2]/10 transition-all duration-700" />
-                  <div className="text-sm sm:text-base text-[#2E2E2F]/70 font-medium leading-relaxed relative z-10">
+                  <div className="text-sm sm:text-base text-[#2E2E2F] font-medium leading-relaxed relative z-10">
                     {renderMessageContent(selectedNotification?.message)}
                   </div>
                 </div>
@@ -815,9 +852,9 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 </div>
                 <div className="hidden sm:block text-left leading-tight">
                   <p className="text-xs font-semibold text-[#2E2E2F] truncate max-w-[120px]">{displayName}</p>
-                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-0.5">{roleLabel}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-0.5">{roleLabel}</p>
                 </div>
-                <svg className="w-4 h-4 text-[#2E2E2F]/50" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[#2E2E2F]" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
@@ -826,14 +863,14 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
                   <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl shadow-[0_10px_40px_-10px_rgba(46,46,47,0.1)] z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
                     <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
-                      <p className="text-[10px] font-medium text-[#2E2E2F]/40 uppercase tracking-widest mb-0.5">Account</p>
+                      <p className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-widest mb-0.5">Account</p>
                       <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
-                      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-1">{roleLabel}</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-1">{roleLabel}</p>
                     </div>
                     {role !== UserRole.STAFF && (
                       <>
                         <button
-                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                           onClick={() => {
                             navigate('/settings?tab=team');
                             setUserMenuOpen(false);
@@ -843,7 +880,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           <span>Teams & Access</span>
                         </button>
                         <button
-                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                           onClick={() => {
                             navigate('/settings?tab=plans');
                             setUserMenuOpen(false);
@@ -853,7 +890,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           <span>Subscription Plans</span>
                         </button>
                         <button
-                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                           onClick={() => {
                             navigate('/settings?tab=email');
                             setUserMenuOpen(false);
@@ -863,7 +900,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           <span>Email Setup</span>
                         </button>
                         <button
-                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                           onClick={() => {
                             navigate('/settings?tab=support');
                             setUserMenuOpen(false);
@@ -875,7 +912,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                       </>
                     )}
                     <button
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                       onClick={() => {
                         navigate('/settings?tab=profile');
                         setUserMenuOpen(false);
@@ -885,7 +922,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                       <span>Profile & Security</span>
                     </button>
                     <button
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
                       onClick={() => {
                         setUserMenuOpen(false);
                         handleLogout();
@@ -919,7 +956,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     <Branding className="h-12 w-auto" />
                   )}
                   {organizerSidebarName && (
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 ml-0.5">
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] ml-0.5">
                       {organizerSidebarName}
                     </span>
                   )}
@@ -976,7 +1013,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             {(noStaffPerms && location.pathname !== '/attendees') ? (
               <div className="flex flex-col items-center justify-center min-h-[40vh]">
                 <div className="text-2xl font-black text-[#2E2E2F] mb-4">No Access</div>
-                <div className="text-[#2E2E2F]/70 text-lg font-medium text-center">You do not have access to any features. Please contact your administrator.</div>
+                <div className="text-[#2E2E2F] text-lg font-medium text-center">You do not have access to any features. Please contact your administrator.</div>
               </div>
             ) : (
               children
@@ -1131,9 +1168,9 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   const displayName = email?.trim() || name?.trim() || 'User';
   const roleLabel = isOrganizer && isAttendingView ? 'Attending' : getRoleLabel(role);
-  const publicUserMenuActionClass = 'w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group';
+  const publicUserMenuActionClass = 'w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group';
   const landingLoginButtonClass = 'px-4 text-[11px] font-black uppercase tracking-widest !bg-transparent !text-[#2E2E2F] hover:!text-[#38BDF2] transition-colors';
-  const landingGetStartedButtonClass = 'px-6 text-[11px] font-black uppercase tracking-widest border border-[#66DBFF] bg-[#00AEEF] text-white shadow-[0_0_16px_rgba(0,174,239,0.45)] hover:bg-black hover:border-black hover:text-white hover:shadow-[0_0_22px_rgba(0,174,239,0.5)] focus-visible:bg-black focus-visible:border-black focus-visible:shadow-[0_0_22px_rgba(0,174,239,0.5)] transition-all duration-300 ease-out active:scale-95';
+  const landingGetStartedButtonClass = 'px-6 text-[11px] font-black uppercase tracking-widest border border-[#38BDF2] bg-[#38BDF2] text-white shadow-[0_0_16px_rgba(56,189,242,0.45)] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] hover:text-white hover:shadow-[0_0_22px_rgba(56,189,242,0.5)] focus-visible:bg-[#2E2E2F] focus-visible:border-[#2E2E2F] focus-visible:shadow-[0_0_22px_rgba(56,189,242,0.5)] transition-all duration-300 ease-out active:scale-95';
   const initials = (email?.split('@')[0] || name?.trim() || displayName || 'U')
     .split(' ')
     .filter(Boolean)
@@ -1357,7 +1394,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                       value={headerSearchTerm}
                       onChange={(event) => setHeaderSearchTerm(event.target.value)}
                       placeholder={animatedPlaceholder || 'Find your events'}
-                      className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 outline-none"
+                      className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F] outline-none"
                     />
                   </label>
                   <div
@@ -1377,7 +1414,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           }}
                           onFocus={() => setHeaderLocationMenuOpen(true)}
                           placeholder="Your Location"
-                          className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 outline-none"
+                          className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F] outline-none"
                           aria-label="Search location"
                         />
                       </div>
@@ -1385,7 +1422,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         type="button"
                         className={`w-11 h-11 flex items-center justify-center transition-all ${headerLocating
                           ? 'text-[#38BDF2] animate-pulse'
-                          : 'text-[#2E2E2F]/40 hover:text-[#38BDF2] hover:bg-[#38BDF2]/8'
+                          : 'text-[#2E2E2F] hover:text-[#38BDF2] hover:bg-[#38BDF2]/8'
                           } rounded-xl mr-1 group/gps`}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1431,7 +1468,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           </div>
                           <div className="flex flex-col">
                             <span className="text-sm font-black text-[#2E2E2F]">Detect My Location</span>
-                            <span className="text-[10px] text-[#2E2E2F]/40 font-bold uppercase tracking-wider">Fast GPS Search</span>
+                            <span className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-wider">Fast GPS Search</span>
                           </div>
                         </button>
 
@@ -1448,13 +1485,13 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           </div>
                           <div className="flex flex-col">
                             <span className="text-sm font-black text-[#2E2E2F]">Online Events</span>
-                            <span className="text-[10px] text-[#2E2E2F]/40 font-bold uppercase tracking-wider">Virtual Experiences</span>
+                            <span className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-wider">Virtual Experiences</span>
                           </div>
                         </button>
 
                         <button
                           type="button"
-                          className="w-full px-5 py-3 flex items-center gap-4 text-left text-[#2E2E2F]/60 hover:bg-red-50 hover:text-red-500 transition-colors group/reset"
+                          className="w-full px-5 py-3 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors group/reset"
                           onClick={() => handleSelectHeaderLocation(DEFAULT_HEADER_LOCATION)}
                         >
                           <div className="w-10 h-10 rounded-full border border-current opacity-20 flex items-center justify-center transition-opacity group-hover/reset:opacity-100">
@@ -1474,7 +1511,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         )}
 
                         <div className="px-5 py-4 bg-[#F8F9FA] border-t border-[#2E2E2F]/5">
-                          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#2E2E2F]/30 italic leading-relaxed">Tip: Type any city name in the input field above for custom filtering.</p>
+                          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#2E2E2F] italic leading-relaxed">Tip: Type any city name in the input field above for custom filtering.</p>
                         </div>
                       </div>
                     )}
@@ -1499,7 +1536,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 <Link
                   key={link.path}
                   to={link.path}
-                  className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2E2E2F]/60 hover:text-[#38BDF2] transition-colors relative group whitespace-nowrap"
+                  className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2E2E2F] hover:text-[#38BDF2] transition-colors relative group whitespace-nowrap"
                 >
                   {link.label}
                   {link.isLive && (
@@ -1557,9 +1594,9 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                       </div>
                       <div className="hidden sm:block text-left leading-tight">
                         <p className="text-xs font-semibold text-[#2E2E2F] truncate max-w-[120px]">{displayName}</p>
-                        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-0.5">{roleLabel}</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-0.5">{roleLabel}</p>
                       </div>
-                      <svg className="w-4 h-4 text-[#2E2E2F]/50" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-[#2E2E2F]" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
@@ -1568,9 +1605,9 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
                         <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl shadow-xl z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
                           <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
-                            <p className="text-[10px] font-medium text-[#2E2E2F]/40 uppercase tracking-widest mb-0.5">Account</p>
+                            <p className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-widest mb-0.5">Account</p>
                             <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
-                            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-1">{roleLabel}</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-1">{roleLabel}</p>
                           </div>
                           {isOrganizer ? (
                             isAttendingView ? (
@@ -1724,7 +1761,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           )}
                           <div className="border-t border-[#2E2E2F]/5 mt-1 pt-1">
                             <button
-                              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
+                              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
                               onClick={() => {
                                 setUserMenuOpen(false);
                                 handleLogout();
@@ -1768,13 +1805,13 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               <form onSubmit={handleHeaderSearchSubmit} className="space-y-2">
                 <div className="flex items-center h-12 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.12)] focus-within:border-[#38BDF2]/50 transition-all">
                   <label className="flex items-center gap-3 px-4 min-w-0 flex-1">
-                    <ICONS.Search className="w-4 h-4 text-[#2E2E2F]/50 shrink-0" />
+                    <ICONS.Search className="w-4 h-4 text-[#2E2E2F] shrink-0" />
                     <input
                       type="text"
                       value={headerSearchTerm}
                       onChange={(event) => setHeaderSearchTerm(event.target.value)}
                       placeholder={animatedPlaceholder || 'Find your events'}
-                      className="w-full bg-transparent text-[13px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F]/40 outline-none"
+                      className="w-full bg-transparent text-[13px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F] outline-none"
                     />
                   </label>
                   <button
@@ -1796,8 +1833,8 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         setHeaderLocationError('');
                       }}
                     >
-                      <ICONS.MapPin className="w-4 h-4 shrink-0 text-[#2E2E2F]/50" />
-                      <span className={`truncate ${hasHeaderExplicitLocation ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]/40'}`}>
+                      <ICONS.MapPin className="w-4 h-4 shrink-0 text-[#2E2E2F]" />
+                      <span className={`truncate ${hasHeaderExplicitLocation ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]'}`}>
                         {hasHeaderExplicitLocation ? headerLocationTerm : DEFAULT_HEADER_LOCATION}
                       </span>
                     </button>
@@ -1805,7 +1842,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                       type="button"
                       className={`mr-1 flex h-10 w-10 items-center justify-center rounded-xl transition-all ${headerLocating
                         ? 'text-[#38BDF2] animate-pulse'
-                        : 'text-[#2E2E2F]/45 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
+                        : 'text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
                         }`}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -1848,7 +1885,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         </div>
                         <div className="flex flex-col">
                           <span className="text-sm font-black text-[#2E2E2F]">Detect My Location</span>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#2E2E2F]/40">Fast GPS Search</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#2E2E2F]">Fast GPS Search</span>
                         </div>
                       </button>
 
@@ -1865,13 +1902,13 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         </div>
                         <div className="flex flex-col">
                           <span className="text-sm font-black text-[#2E2E2F]">Online Events</span>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#2E2E2F]/40">Virtual Experiences</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#2E2E2F]">Virtual Experiences</span>
                         </div>
                       </button>
 
                       <button
                         type="button"
-                        className="flex w-full items-center gap-4 px-5 py-3 text-left text-[#2E2E2F]/60 transition-colors hover:bg-red-50 hover:text-red-500"
+                        className="flex w-full items-center gap-4 px-5 py-3 text-left text-[#2E2E2F] transition-colors hover:bg-red-50 hover:text-red-500"
                         onClick={() => handleSelectHeaderLocation(DEFAULT_HEADER_LOCATION)}
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-full border border-current opacity-20">
@@ -1904,13 +1941,13 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           <div className={`lg:hidden fixed right-0 z-[100] w-[min(21rem,calc(100vw-0.75rem))] overflow-y-auto rounded-l-[1.75rem] border border-[#2E2E2F]/10 bg-[#F2F2F2] shadow-[0_24px_60px_-22px_rgba(46,46,47,0.35)] animate-in slide-in-from-right-3 duration-200 ${mobileMenuPanelClass}`}>
             {!isAuthenticated && (
               <div className="border-b border-[#2E2E2F]/8 px-3 pt-3 pb-2">
-                <p className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/35">Explore StartupLab</p>
+                <p className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">Explore StartupLab</p>
                 <nav className="mt-2 flex flex-col gap-1">
                   {guestMobileLinks.map((link) => (
                     <Link
                       key={link.path}
                       to={link.path}
-                      className="flex items-center gap-3 rounded-xl px-4 py-3 text-xs font-semibold text-[#2E2E2F]/75 transition-colors hover:bg-white hover:text-[#38BDF2]"
+                      className="flex items-center gap-3 rounded-xl px-4 py-3 text-xs font-semibold text-[#2E2E2F] transition-colors hover:bg-white hover:text-[#38BDF2]"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <span className="shrink-0 opacity-70">{link.icon}</span>
@@ -1952,14 +1989,14 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               ) : (
                 <>
                   <div className="px-4 py-3 border-b border-[#2E2E2F]/5">
-                    <p className="text-[9px] font-medium text-[#2E2E2F]/40 uppercase tracking-wider mb-0.5">Account</p>
+                    <p className="text-[9px] font-medium text-[#2E2E2F] uppercase tracking-wider mb-0.5">Account</p>
                     <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
-                    <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-1">Attending</p>
+                    <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-1">Attending</p>
                   </div>
 
                   <Link
                     to="/browse-events"
-                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
+                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <ICONS.Calendar className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" />
@@ -1967,7 +2004,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   </Link>
                   <Link
                     to="/my-tickets"
-                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
+                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <ICONS.Ticket className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" />
@@ -1977,7 +2014,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   {isOrganizer && (
                     <Link
                       to="/user-settings?tab=events"
-                      className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
+                      className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
                       onClick={() => {
                         setPublicMode('organizer');
                         setMobileMenuOpen(false);
@@ -1990,7 +2027,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
                   <Link
                     to="/liked"
-                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
+                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <ICONS.Heart className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" />
@@ -1999,7 +2036,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
                   <Link
                     to="/followings"
-                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
+                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" />
@@ -2007,7 +2044,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   </Link>
 
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-3 text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group text-xs font-semibold border-t border-[#2E2E2F]/5"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors text-left group text-xs font-semibold border-t border-[#2E2E2F]/5"
                     onClick={() => {
                       setMobileMenuOpen(false);
                       handleLogout();
@@ -2024,46 +2061,47 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           </div>
         </>
       )}
-      <main className="flex-1">{children}</main>      <footer className="bg-[#F2F2F2] text-[#2E2E2F]/70 py-24 px-8 border-t border-[#2E2E2F]/10">
+      <main className="flex-1">{children}</main>
+      <footer className="bg-[#F2F2F2] text-[#2E2E2F] py-24 px-8 border-t border-[#2E2E2F]/10" style={{ zoom: 1.1 }}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
             <div>
-              <Branding className="h-24 w-auto" />
-              <p className="mt-4 text-sm font-medium max-w-sm text-[#2E2E2F]/70 leading-relaxed">
+              <Branding className="h-32 w-auto" />
+              <p className="mt-4 text-sm font-medium max-w-sm text-[#2E2E2F] leading-relaxed">
                 Your gateway to StartupLab events.<br />
                 From internal workshops to public showcases, this platform delivers seamless, secure registration for every StartupLab gathering.
               </p>
 
               {/* Social Links */}
               <div className="mt-8 flex items-center gap-4">
-                <a href="https://www.facebook.com/StartupLabAI/" target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-full bg-[#2E2E2F]/10 text-[#2E2E2F]/60 hover:bg-[#1877F2] hover:text-white transition-all duration-300 hover:scale-110">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
+                <a href="https://www.facebook.com/StartupLabAI/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1877F2] text-white hover:brightness-110 transition-all duration-300 hover:scale-110 shadow-md">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
                 </a>
-                <a href="https://discord.com/invite/abt3dkaYTr" target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-full bg-[#2E2E2F]/10 text-[#2E2E2F]/60 hover:bg-[#5865F2] hover:text-white transition-all duration-300 hover:scale-110">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z" /></svg>
+                <a href="https://discord.com/invite/abt3dkaYTr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-[#5865F2] text-white hover:brightness-110 transition-all duration-300 hover:scale-110 shadow-md">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z" /></svg>
                 </a>
-                <a href="https://www.linkedin.com/in/startup-lab-center-36a15734b/" target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-full bg-[#2E2E2F]/10 text-[#2E2E2F]/60 hover:bg-[#0A66C2] hover:text-white transition-all duration-300 hover:scale-110">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
+                <a href="https://www.linkedin.com/in/startup-lab-center-36a15734b/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-[#0A66C2] text-white hover:brightness-110 transition-all duration-300 hover:scale-110 shadow-md">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
                 </a>
-                <a href="mailto:hello@startuplab.ph" target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-full bg-[#2E2E2F]/10 text-[#2E2E2F]/60 hover:bg-[#EA4335] hover:text-white transition-all duration-300 hover:scale-110">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 9.573l8.073-6.08c1.618-1.214 3.927-.059 3.927 1.964z" /></svg>
+                <a href="mailto:hello@startuplab.ph" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-[#EA4335] text-white hover:brightness-110 transition-all duration-300 hover:scale-110 shadow-md">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 9.573l8.073-6.08c1.618-1.214 3.927-.059 3.927 1.964z" /></svg>
                 </a>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-8 lg:text-right uppercase tracking-[0.2em] font-black text-[9px]">
               <div className="space-y-4">
-                <p className="text-[#2E2E2F]/50 mb-4">Platform</p>
-                <Link to="/" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">Events List</Link>
-                <Link to="/organizers/discover" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">Organizers</Link>
-                <Link to="/live" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">Live Broadcasts</Link>
+                <p className="text-[#2E2E2F] mb-4">Platform</p>
+                <Link to="/" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Events List</Link>
+                <Link to="/organizers/discover" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Organizers</Link>
+                <Link to="/live" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Live Broadcasts</Link>
               </div>
               <div className="space-y-4">
-                <Link to="/" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">Home</Link>
-                <Link to="/about-us" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">About Us</Link>
-                <Link to="/browse-events" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">Events</Link>
-                <Link to="/pricing" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">Pricing</Link>
-                <Link to="/contact-us" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">Contact Us</Link>
-                <Link to="/faq" className="block text-[#2E2E2F]/70 hover:text-[#38BDF2]">FAQ</Link>
+                <Link to="/" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Home</Link>
+                <Link to="/about-us" className="block text-[#2E2E2F] hover:text-[#38BDF2]">About Us</Link>
+                <Link to="/browse-events" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Events</Link>
+                <Link to="/pricing" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Pricing</Link>
+                <Link to="/contact-us" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Contact Us</Link>
+                <Link to="/faq" className="block text-[#2E2E2F] hover:text-[#38BDF2]">FAQ</Link>
                 <button
                   onClick={() => setIsSupportModalOpen(true)}
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#38BDF2] text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-xl hover:bg-[#2E2E2F] transition-all duration-300 active:scale-95 shadow-md shadow-[#38BDF2]/20 w-full lg:w-fit"
@@ -2075,7 +2113,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             </div>
           </div>
           <div className="pt-8 border-t border-[#2E2E2F]/10 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-[9px] uppercase tracking-[0.3em] font-black text-[#2E2E2F]/60">
+            <div className="text-[9px] uppercase tracking-[0.3em] font-black text-[#2E2E2F]">
               © 2026 StartupLab Business Center
             </div>
             <div className="flex items-center gap-6 opacity-60 grayscale">
@@ -2498,9 +2536,9 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                               </span>
                             )}
                           </div>
-                          <p className="text-[#2E2E2F]/40 text-xs font-bold uppercase tracking-widest">Stay up to date on important information</p>
+                          <p className="text-[#2E2E2F] text-xs font-bold uppercase tracking-widest">Stay up to date on important information</p>
                         </div>
-                        <button onClick={() => setNotificationOpen(false)} className="w-10 h-10 rounded-xl bg-[#F2F2F2] flex items-center justify-center text-[#2E2E2F]/40 hover:text-[#2E2E2F] hover:bg-[#2E2E2F]/5 transition-all">
+                        <button onClick={() => setNotificationOpen(false)} className="w-10 h-10 rounded-xl bg-[#F2F2F2] flex items-center justify-center text-[#2E2E2F] hover:text-[#2E2E2F] hover:bg-[#2E2E2F]/5 transition-all">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                           </svg>
@@ -2511,12 +2549,12 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                         {notificationsLoading && notifications.length === 0 ? (
                           <div className="flex flex-col items-center justify-center p-12 text-center h-full">
                             <div className="w-12 h-12 border-4 border-[#38BDF2]/20 border-t-[#38BDF2] rounded-full animate-spin mb-4" />
-                            <p className="text-[#2E2E2F]/40 text-xs font-black uppercase tracking-widest">Syncing notifications...</p>
+                            <p className="text-[#2E2E2F] text-xs font-black uppercase tracking-widest">Syncing notifications...</p>
                           </div>
                         ) : notifications.length > 0 ? (
                           <div className="px-4 space-y-2">
                             <div className="px-4 py-2 flex justify-between items-center mb-4">
-                              <span className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em]">RECENT ACTIVITY</span>
+                              <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">RECENT ACTIVITY</span>
                               <button
                                 onClick={handleMarkAllRead}
                                 className="text-[10px] font-black text-[#38BDF2] hover:text-[#2E2E2F] uppercase tracking-[0.2em] transition-colors"
@@ -2537,18 +2575,18 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                                   }`}
                               >
                                 <div className="flex items-start gap-4">
-                                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${n.isRead ? 'bg-[#2E2E2F]/5 text-[#2E2E2F]/30' : 'bg-[#38BDF2]/10 text-[#38BDF2]'
+                                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${n.isRead ? 'bg-[#2E2E2F]/5 text-[#2E2E2F]' : 'bg-[#38BDF2]/10 text-[#38BDF2]'
                                     }`}>
                                     <ICONS.Bell className="w-5 h-5" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-1">
                                       <h4 className="text-sm font-black text-[#2E2E2F] tracking-tight truncate">{n.title}</h4>
-                                      <span className="text-[9px] text-[#2E2E2F]/30 font-black uppercase tracking-widest whitespace-nowrap ml-2">
+                                      <span className="text-[9px] text-[#2E2E2F] font-black uppercase tracking-widest whitespace-nowrap ml-2">
                                         {n.createdAt ? new Date(n.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Now'}
                                       </span>
                                     </div>
-                                    <p className="text-xs text-[#2E2E2F]/60 font-medium leading-relaxed line-clamp-2 mb-3">{n.message}</p>
+                                    <p className="text-xs text-[#2E2E2F] font-medium leading-relaxed line-clamp-2 mb-3">{n.message}</p>
                                     {!n.isRead && (
                                       <button
                                         onClick={() => handleMarkNotificationRead(n.notificationId)}
@@ -2565,10 +2603,10 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                         ) : (
                           <div className="flex flex-col items-center justify-center p-12 text-center h-full">
                             <div className="w-24 h-24 bg-[#F2F2F2] rounded-xl flex items-center justify-center mb-8">
-                              <ICONS.Bell className="w-10 h-10 text-[#2E2E2F]/10" />
+                              <ICONS.Bell className="w-10 h-10 text-[#2E2E2F]" />
                             </div>
                             <h3 className="text-xl font-black text-[#2E2E2F] tracking-tighter uppercase mb-2">Clean Slate</h3>
-                            <p className="text-sm font-medium text-[#2E2E2F]/40 max-w-[240px] leading-relaxed">
+                            <p className="text-sm font-medium text-[#2E2E2F] max-w-[240px] leading-relaxed">
                               You're all caught up. We'll alert you when there's news.
                             </p>
                           </div>
@@ -2606,12 +2644,12 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
                 <div className="absolute right-0 top-[calc(100%+8px)] w-60 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl shadow-xl z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
                   <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
-                    <p className="text-[10px] font-medium text-[#2E2E2F]/40 uppercase tracking-widest mb-0.5">Account</p>
+                    <p className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-widest mb-0.5">Account</p>
                     <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
-                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F]/45 mt-1">{roleLabel}</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-1">{roleLabel}</p>
                   </div>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       setPublicMode('organizer');
                       navigate('/my-events');
@@ -2623,7 +2661,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   </button>
                   {role === UserRole.ORGANIZER && (
                     <button
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                       onClick={handleToggleAttendingMode}
                     >
                       <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
@@ -2631,7 +2669,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     </button>
                   )}
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate(organizerProfilePath);
                       setUserMenuOpen(false);
@@ -2641,7 +2679,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Org Profile</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=team');
                       setUserMenuOpen(false);
@@ -2651,7 +2689,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Teams & Access</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=email');
                       setUserMenuOpen(false);
@@ -2661,7 +2699,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Email Setup</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=payments');
                       setUserMenuOpen(false);
@@ -2671,7 +2709,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Payment Gateway</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=account');
                       setUserMenuOpen(false);
@@ -2682,7 +2720,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   </button>
                   {hasPrioritySupport === true && (
                     <button
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                       onClick={() => {
                         navigate('/organizer-support');
                         setUserMenuOpen(false);
@@ -2693,7 +2731,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     </button>
                   )}
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F]/70 hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
                     onClick={() => {
                       setUserMenuOpen(false);
                       handleLogout();
@@ -2732,7 +2770,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     />
                   )}
                   {organizerSidebarName && (
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 ml-0.5">
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] ml-0.5">
                       {organizerSidebarName}
                     </span>
                   )}
@@ -2791,14 +2829,14 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 <ICONS.Bell className="w-7 h-7" />
               </div>
               <div>
-                <p className="text-xs font-bold text-[#2E2E2F]/40 uppercase tracking-widest">Notification</p>
+                <p className="text-xs font-bold text-[#2E2E2F] uppercase tracking-widest">Notification</p>
                 <p className="text-lg font-black text-[#2E2E2F] tracking-tight mt-0.5">Message Details</p>
               </div>
             </div>
 
             <div className="p-6 sm:p-8 rounded-[1.5rem] bg-[#F2F2F2] border border-[#2E2E2F]/5 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#38BDF2]/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[#38BDF2]/10 transition-all duration-700" />
-              <p className="text-sm sm:text-base text-[#2E2E2F]/70 font-medium leading-relaxed relative z-10 whitespace-pre-wrap">
+              <p className="text-sm sm:text-base text-[#2E2E2F] font-medium leading-relaxed relative z-10 whitespace-pre-wrap">
                 {selectedNotification?.message}
               </p>
             </div>
@@ -2918,7 +2956,8 @@ const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   }, [clearUser, hasResolvedSession, setUser]);
 
-  if (!hasResolvedSession) return <PageLoader label="Loading StartupLab..." variant="page" />;
+  if (!hasResolvedSession) return <PageLoader label="Standardizing Platform..." variant="viewport" />;
+
 
   const isAuthPage = ['/login', '/signup', '/forgot-password', '/reset-password', '/accept-invite'].includes(location.pathname);
   const isOnboardingPage = location.pathname === '/onboarding';
@@ -2964,7 +3003,8 @@ const App: React.FC = () => (
     <ScrollToTop />
     <HashBypassBridge />
     <GlobalOnboardingGuard>
-      <Routes>
+      <React.Suspense fallback={<PageLoader label="Initializing Portal..." variant="viewport" />}>
+<Routes>
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="/signup" element={<Navigate to="/" replace />} />
         <Route path="/forgot-password" element={<Navigate to="/" replace />} />
@@ -3020,6 +3060,7 @@ const App: React.FC = () => (
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+</React.Suspense>
     </GlobalOnboardingGuard>
   </Router>
 );

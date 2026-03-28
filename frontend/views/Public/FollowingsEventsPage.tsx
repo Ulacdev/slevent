@@ -239,9 +239,9 @@ export const FollowingsEventsPage: React.FC = () => {
     return (
       <div className="max-w-6xl mx-auto px-6 py-14">
         <div className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-8 text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/45 mb-3">Followings</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] mb-3">Followings</p>
           <h1 className="text-3xl font-black text-[#2E2E2F] tracking-tight mb-4">Sign in to view organizations you follow</h1>
-          <p className="text-sm text-[#2E2E2F]/65 max-w-xl mx-auto mb-6">
+          <p className="text-sm text-[#2E2E2F] max-w-xl mx-auto mb-6">
             Your followed organizations and their latest events are available after login.
           </p>
           <Button onClick={() => navigate('/signup')}>Sign Up</Button>
@@ -254,9 +254,9 @@ export const FollowingsEventsPage: React.FC = () => {
     return (
       <div className="max-w-6xl mx-auto px-6 py-14">
         <div className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-8 text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/45 mb-3">Followings</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] mb-3">Followings</p>
           <h1 className="text-3xl font-black text-[#2E2E2F] tracking-tight mb-4">No organizations followed yet</h1>
-          <p className="text-sm text-[#2E2E2F]/65 max-w-xl mx-auto mb-6">
+          <p className="text-sm text-[#2E2E2F] max-w-xl mx-auto mb-6">
             Follow an organization from an event card to see that organization profile here, with all events listed below it.
           </p>
           <Button onClick={() => navigate('/browse-events')}>Browse Events</Button>
@@ -309,8 +309,8 @@ export const FollowingsEventsPage: React.FC = () => {
       {!hasSelectedOrganizer && (
         <section className="mb-8 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-5 md:p-6">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/45">Followed Organizations</p>
-            <span className="text-[11px] font-semibold text-[#2E2E2F]/55">{organizers.length} organization(s)</span>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">Followed Organizations</p>
+            <span className="text-[11px] font-semibold text-[#2E2E2F]">{organizers.length} organization(s)</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {organizers.map((organizer) => (
@@ -344,7 +344,7 @@ export const FollowingsEventsPage: React.FC = () => {
                 </svg>
                 All Organizations
               </button>
-              <span className="text-[11px] font-semibold text-[#2E2E2F]/55">
+              <span className="text-[11px] font-semibold text-[#2E2E2F]">
                 {refreshing ? 'Refreshing...' : `${selectedOrganizerEvents.length} event(s)`}
               </span>
             </div>
@@ -382,17 +382,17 @@ export const FollowingsEventsPage: React.FC = () => {
                 <p className="text-2xl font-black text-[#2E2E2F] tracking-tight">
                   {selectedOrganizer.organizerName}
                 </p>
-                <div className="flex flex-wrap items-center gap-6 mt-2 text-[#2E2E2F]/80">
+                <div className="flex flex-wrap items-center gap-6 mt-2 text-[#2E2E2F]">
                   <div>
-                    <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]/50">Followers</p>
+                    <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]">Followers</p>
                     <p className="text-2xl font-black">{selectedOrganizer.followersCount || 0}</p>
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]/50">Events</p>
+                    <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]">Events</p>
                     <p className="text-2xl font-black">{selectedEventsCount}</p>
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]/50">Visible Here</p>
+                    <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]">Visible Here</p>
                     <p className="text-2xl font-black">{selectedOrganizerEvents.length}</p>
                   </div>
                 </div>
@@ -412,7 +412,7 @@ export const FollowingsEventsPage: React.FC = () => {
                   <button
                     type="button"
                     disabled
-                    className="px-8 py-3 rounded-xl border border-[#2E2E2F]/20 text-[#2E2E2F]/40 font-black text-sm cursor-not-allowed"
+                    className="px-8 py-3 rounded-xl border border-[#2E2E2F]/20 text-[#2E2E2F] font-black text-sm cursor-not-allowed"
                   >
                     Contact
                   </button>
@@ -436,7 +436,7 @@ export const FollowingsEventsPage: React.FC = () => {
             <section className="mb-8 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-5 md:p-6">
               <div className="space-y-3">
                 {organizerDescription && (
-                  <p className="text-sm text-[#2E2E2F]/70 leading-relaxed whitespace-pre-wrap">{organizerDescription}</p>
+                  <p className="text-sm text-[#2E2E2F] leading-relaxed whitespace-pre-wrap">{organizerDescription}</p>
                 )}
                 <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-wide">
                   {organizerWebsite && (
@@ -465,11 +465,11 @@ export const FollowingsEventsPage: React.FC = () => {
                 <h2 className="text-lg lg:text-xl font-extrabold text-[#2E2E2F] tracking-tight mb-1.5">
                   Events by {selectedOrganizer.organizerName}
                 </h2>
-                <p className="text-[#2E2E2F]/50 text-[13px] font-medium">
+                <p className="text-[#2E2E2F] text-[13px] font-medium">
                   New events from this organizer appear automatically here.
                 </p>
               </div>
-              <div className="text-xs font-semibold text-[#2E2E2F]/55 flex items-center gap-2">
+              <div className="text-xs font-semibold text-[#2E2E2F] flex items-center gap-2">
                 {refreshing && <ICONS.CheckCircle className="w-4 h-4 text-[#38BDF2]" />}
                 <span>{refreshing ? 'Refreshing...' : `${selectedOrganizerEvents.length} event(s)`}</span>
               </div>
@@ -487,12 +487,12 @@ export const FollowingsEventsPage: React.FC = () => {
           ) : (
             <div className="py-14 px-6 text-center bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10">
               <div className="w-12 h-12 bg-[#F2F2F2] rounded-full flex items-center justify-center mx-auto mb-5 border border-[#2E2E2F]/10">
-                <ICONS.Calendar className="w-6 h-6 text-[#2E2E2F]/60" />
+                <ICONS.Calendar className="w-6 h-6 text-[#2E2E2F]" />
               </div>
               <h3 className="text-xl font-bold text-[#2E2E2F] tracking-tight mb-3">
                 No published events from this organization yet
               </h3>
-              <p className="text-[13px] font-medium text-[#2E2E2F]/55 mb-5">
+              <p className="text-[13px] font-medium text-[#2E2E2F] mb-5">
                 Once the organizer publishes events, they will appear here automatically.
               </p>
               <Button variant="outline" className="px-3" onClick={() => loadFollowingsData(false)}>

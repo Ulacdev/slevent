@@ -98,7 +98,7 @@ export const SignUpView: React.FC = () => {
       </div>
       <button
         onClick={() => navigate('/')}
-        className="absolute top-6 left-6 p-2 rounded-full text-[#2E2E2F]/40 hover:text-[#38BDF2] hover:bg-white shadow-sm transition-all group"
+        className="absolute top-6 left-6 p-2 rounded-full text-[#2E2E2F] hover:text-[#38BDF2] hover:bg-white shadow-sm transition-all group"
         title="Go to Home"
       >
         <ICONS.Home className="w-6 h-6" />
@@ -113,16 +113,16 @@ export const SignUpView: React.FC = () => {
               className="mx-auto mb-2 w-[160px] h-auto"
               style={{ objectFit: 'contain' }}
             />
-            <p className="text-[#2E2E2F]/70 text-[14px] font-medium">Create your account</p>
+            <p className="text-[#2E2E2F] text-[14px] font-medium">Create your account</p>
             <div className="w-16 h-1 bg-[#38BDF2] mx-auto mt-2 rounded-full"></div>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="space-y-3">
               <div className="space-y-1 w-full">
-                <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Full Name <span className="text-red-500">*</span></label>
+                <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Full Name <span className="text-red-500">*</span></label>
                 <div className="relative group/input">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10">
                     <ICONS.Users className="w-4 h-4" />
                   </div>
                   <input
@@ -136,9 +136,9 @@ export const SignUpView: React.FC = () => {
               </div>
 
               <div className="space-y-1 w-full">
-                <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Email <span className="text-red-500">*</span></label>
+                <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email <span className="text-red-500">*</span></label>
                 <div className="relative group/input">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 group-focus-within/input:text-[#38BDF2] transition-colors z-10">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10">
                     <ICONS.Mail className="w-4 h-4" />
                   </div>
                   <input
@@ -153,7 +153,7 @@ export const SignUpView: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
+                <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
                 <div className="space-y-2">
                   <PasswordInput
                     placeholder="••••••••"
@@ -168,7 +168,7 @@ export const SignUpView: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[10.5px] font-bold text-[#2E2E2F]/70 tracking-tight ml-1">Confirm Password <span className="text-red-500">*</span></label>
+                <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Confirm Password <span className="text-red-500">*</span></label>
                 <PasswordInput
                   placeholder="••••••••"
                   required
@@ -186,7 +186,7 @@ export const SignUpView: React.FC = () => {
                   checked={agreedToTerms}
                   onChange={setAgreedToTerms}
                 />
-                <span className="text-[11px] text-[#2E2E2F]/60 font-medium leading-relaxed mt-0.5">
+                <span className="text-[11px] text-[#2E2E2F] font-medium leading-relaxed mt-0.5">
                   I agree to the{' '}
                   <button 
                     type="button"
@@ -223,7 +223,7 @@ export const SignUpView: React.FC = () => {
           </form>
 
           <div className="mt-5 pt-5 border-t border-[#2E2E2F]/10 text-center">
-            <p className="text-[#2E2E2F]/60 text-[12px] font-medium">
+            <p className="text-[#2E2E2F] text-[12px] font-medium">
               Already have an account?{' '}
               <button
                 className="text-[#38BDF2] font-black hover:text-[#2E2E2F] transition-colors ml-1"
@@ -246,7 +246,7 @@ export const SignUpView: React.FC = () => {
         size="lg"
         zIndex={20000}
       >
-        <div className="space-y-6 text-[#2E2E2F]/80 text-[13px] leading-relaxed max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+        <div className="space-y-6 text-[#2E2E2F] text-[13px] leading-relaxed max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
           <section>
             <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">1. Acceptance of Terms</h4>
             <p>By creating an account on StartupLab Business Center, you agree to abide by these terms. Our platform provides event ticketing and management services for organizers and attendees.</p>
@@ -283,7 +283,7 @@ export const SignUpView: React.FC = () => {
         size="lg"
         zIndex={20000}
       >
-        <div className="space-y-6 text-[#2E2E2F]/80 text-[13px] leading-relaxed max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+        <div className="space-y-6 text-[#2E2E2F] text-[13px] leading-relaxed max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
           <section>
             <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">1. Data Collection</h4>
             <p>We collect personal information such as name, email, and billing details to process registrations and maintain your organizer profile. We also collect usage data to improve our platform experience.</p>

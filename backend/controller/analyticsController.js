@@ -327,7 +327,8 @@ export const getSummary = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const startIso = today.toISOString();
-    const ticketsSoldToday = (tickets || []).filter(t => t.issuedAt && t.issuedAt >= startIso).length;
+
+    const ticketsSoldToday = (tickets || []).filter(t => t.issuedAt && t.issuedAt >= startIso).length;
     const revenueToday = paidOrders
       .filter(o => o.created_at && o.created_at >= startIso)
       .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
@@ -351,13 +352,13 @@ export const getSummary = async (req, res) => {
     // Organizer Subscription Analytics (Global for Admin)
     let totalPlanRevenue = 0;
     let activeSubscriptions = 0;
-    
+
     try {
       const { data: subsData, error: subsErr } = await supabase
         .from('organizersubscriptions')
         .select('priceAmount, status')
         .in('status', ['active', 'paid', 'ACTIVE', 'PAID']);
-        
+
       if (!subsErr && subsData) {
         totalPlanRevenue = subsData.reduce((sum, s) => sum + (Number(s.priceAmount) || 0), 0);
         activeSubscriptions = subsData.length;
@@ -413,12 +414,12 @@ export const getRecentTransactions = async (req, res) => {
 
     const { data, error, count } = Array.isArray(filteredEventIds) && filteredEventIds.length
       ? await supabase
-      .from('orders')
-      .select('orderId, eventId, buyerName, buyerEmail, totalAmount, currency, status, created_at, deleted_at', { count: 'exact' })
-      .in('eventId', filteredEventIds)
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
-      .range(from, to)
+        .from('orders')
+        .select('orderId, eventId, buyerName, buyerEmail, totalAmount, currency, status, created_at, deleted_at', { count: 'exact' })
+        .in('eventId', filteredEventIds)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+        .range(from, to)
       : { data: [], error: null, count: 0 };
 
     if (error) {
@@ -842,7 +843,7 @@ export const exportEventReport = async (req, res) => {
       const order = orderMap.get(attendee.orderId);
       const ticket = ticketMap.get(attendee.attendeeId);
       const ticketType = ticket ? ticketTypeMap.get(ticket.ticketTypeId) : null;
-      
+
       const row = [
         `"${(attendee.name || '').replace(/"/g, '""')}"`,
         `"${(attendee.email || '').replace(/"/g, '""')}"`,
@@ -870,7 +871,7 @@ export const exportAllReports = async (req, res) => {
   try {
     // Ensure authorized access
     const filteredEventIds = await getFilteredEventIds(req);
-    
+
     if (!filteredEventIds || filteredEventIds.length === 0) {
       return res.status(404).json({ error: 'No data to export' });
     }
@@ -913,7 +914,7 @@ export const exportAllReports = async (req, res) => {
       .from('tickets')
       .select('ticketCode, attendeeId, status, issuedAt, ticketTypeId')
       .in('orderId', orderIds);
-      
+
     if (ticketErr) return res.status(500).json({ error: ticketErr.message });
 
     // Load ticket types
@@ -937,7 +938,7 @@ export const exportAllReports = async (req, res) => {
       const ticket = ticketMap.get(attendee.attendeeId);
       const ticketType = ticket ? ticketTypeMap.get(ticket.ticketTypeId) : null;
       const eventName = order ? eventMap.get(order.eventId) : 'Unknown';
-      
+
       const row = [
         `"${(eventName || 'Unknown').replace(/"/g, '""')}"`,
         `"${(attendee.name || '').replace(/"/g, '""')}"`,
@@ -962,7 +963,7 @@ export const exportAllReports = async (req, res) => {
     console.error('[exportAllReports] error:', err);
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }
-};export const archiveTransaction = async (req, res) => {
+}; export const archiveTransaction = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { data, error } = await supabase
@@ -1000,7 +1001,7 @@ export const deleteTransaction = async (req, res) => {
     await supabase.from('tickets').delete().eq('orderId', orderId);
     await supabase.from('attendees').delete().eq('orderId', orderId);
     await supabase.from('orderItems').delete().eq('orderId', orderId);
-    
+
     const { data, error } = await supabase
       .from('orders')
       .delete()

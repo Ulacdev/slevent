@@ -40,15 +40,15 @@ const CategoryEventCard: React.FC<{ event: Event }> = ({ event }) => {
       </div>
       <div className="p-6 flex-1 flex flex-col">
         <h4 className="text-[#2E2E2F] text-xl font-bold tracking-tight leading-tight mb-2 line-clamp-2">{event.eventName}</h4>
-        <div className="text-[#2E2E2F]/70 text-[13px] font-medium mb-3 line-clamp-2">
+        <div className="text-[#2E2E2F] text-[13px] font-medium mb-3 line-clamp-2">
           {(event as any).summaryLine || 'Explore sessions under this category and book your seats instantly.'}
         </div>
-        <div className="flex flex-wrap gap-2 text-[12px] font-medium text-[#2E2E2F]/70 mb-3">
+        <div className="flex flex-wrap gap-2 text-[12px] font-medium text-[#2E2E2F] mb-3">
           <span>{event.locationText}</span>
-          <span className="text-[#2E2E2F]/60">•</span>
+          <span className="text-[#2E2E2F]">•</span>
           <span>{formatDate(event.startAt, event.timezone, { day: 'numeric', month: 'short', year: 'numeric' })} · {formatTime(event.startAt, event.timezone)}</span>
         </div>
-        <div className="text-[#2E2E2F]/70 text-[13px] font-medium mb-6 leading-relaxed">
+        <div className="text-[#2E2E2F] text-[13px] font-medium mb-6 leading-relaxed">
           {(event.description || '').length > 120 ? `${event.description.slice(0, 120)}...` : event.description}
         </div>
       </div>
@@ -110,7 +110,7 @@ export const CategoryEvents: React.FC = () => {
     });
   }, [events, searchTerm]);
 
-  if (loading) return <PageLoader label="Loading category events..." />;
+  if (loading) return <PageLoader label="Standardizing results..." variant="page" />;
 
   if (!category) {
     return (
@@ -126,33 +126,48 @@ export const CategoryEvents: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 pt-12 pb-20">
-      <div className="mb-14">
-        <Link
-          to="/"
-          className="text-[#2E2E2F] hover:text-[#38BDF2] text-[11px] font-black tracking-widest uppercase flex items-center mb-8 gap-2 transition-colors"
-        >
-          <svg className="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
-          BACK TO EVENTS
-        </Link>
-
-        <div className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-8 md:p-10">
-          <div className="w-20 h-20 rounded-full border border-[#38BDF2]/40 bg-[#38BDF2]/20 flex items-center justify-center text-[#2E2E2F] mb-5">
-            <category.Icon className="w-9 h-9" />
+    <div className="max-w-7xl mx-auto px-6 pb-20">
+      <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[260px] sm:h-[300px] lg:h-[350px] overflow-hidden mb-10">
+        <div className="absolute inset-0 bg-[linear-gradient(116deg,#38BDF2_0%,#38BDF2_44%,#F2F2F2_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,62,134,0.45)_0%,rgba(0,62,134,0.2)_34%,rgba(0,62,134,0)_72%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />
+        
+        <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl items-center px-6">
+          <div className="max-w-[840px] flex items-center gap-8">
+            <div className="hidden sm:flex w-24 h-24 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 items-center justify-center text-white shrink-0 shadow-2xl">
+              <category.Icon className="w-12 h-12" />
+            </div>
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <Link
+                  to="/"
+                  className="text-white/80 hover:text-white text-[10px] font-black tracking-[0.2em] uppercase flex items-center gap-2 transition-colors"
+                >
+                  <svg className="w-3 h-3 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M9 5l7 7-7 7" /></svg>
+                  Back to Events
+                </Link>
+                <span className="text-white/40">•</span>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/90">Category Browse</p>
+              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-none tracking-tight text-white mb-4">
+                {category.label}
+              </h1>
+              <p className="max-w-[600px] text-base sm:text-lg leading-relaxed text-white/95 font-medium">
+                Explore all published sessions under {category.label.toLowerCase()} and find your next opportunity.
+              </p>
+            </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-[#2E2E2F] tracking-tight leading-tight">{category.label}</h1>
-          <p className="mt-3 text-[#2E2E2F]/60 text-base md:text-lg font-medium">All published events under this category.</p>
         </div>
-      </div>
+      </section>
 
       <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-8">
         <div className="flex-1">
           <h2 className="text-3xl lg:text-4xl font-black text-[#2E2E2F] tracking-tight mb-2">{visibleEvents.length} Event{visibleEvents.length === 1 ? '' : 's'}</h2>
-          <p className="text-[#2E2E2F]/50 font-medium">Refined by category: {category.label}</p>
+          <p className="text-[#2E2E2F] font-medium">Refined by category: {category.label}</p>
         </div>
         <div className="w-full md:w-[280px] lg:w-[360px]">
           <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-[#2E2E2F]/30 group-focus-within:text-[#38BDF2] transition-colors">
+            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-[#2E2E2F] group-focus-within:text-[#38BDF2] transition-colors">
               <ICONS.Search className="h-4 w-4" strokeWidth={3} />
             </div>
             <input
@@ -160,7 +175,7 @@ export const CategoryEvents: React.FC = () => {
               placeholder="Search in this category..."
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              className="block w-full pl-12 pr-12 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl text-[13px] font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-[#2E2E2F]/30"
+              className="block w-full pl-12 pr-12 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl text-[13px] font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-[#2E2E2F]"
             />
           </div>
         </div>
@@ -177,7 +192,7 @@ export const CategoryEvents: React.FC = () => {
       ) : (
         <div className="py-20 px-8 text-center bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10">
           <div className="w-14 h-14 bg-[#F2F2F2] rounded-full flex items-center justify-center mx-auto mb-6 border border-[#2E2E2F]/10">
-            <ICONS.Search className="w-7 h-7 text-[#2E2E2F]/60" />
+            <ICONS.Search className="w-7 h-7 text-[#2E2E2F]" />
           </div>
           <h3 className="text-2xl font-bold text-[#2E2E2F] tracking-tight mb-4">No events found in {category.label}</h3>
           <Link to="/">

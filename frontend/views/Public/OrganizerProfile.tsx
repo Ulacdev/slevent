@@ -118,7 +118,7 @@ export const OrganizerProfilePage: React.FC = () => {
         return () => window.clearTimeout(timeoutId);
     }, [interactionNotice]);
 
-    if (loading) return <PageLoader label="Loading profile..." />;
+    if (loading) return <PageLoader label="Standardizing profile..." variant="page" />;
     if (!organizer) return (
         <div className="max-w-7xl mx-auto px-6 py-20 text-center">
             <h2 className="text-2xl font-bold text-[#2E2E2F] mb-4">Organizer profile not found</h2>
@@ -211,7 +211,7 @@ export const OrganizerProfilePage: React.FC = () => {
                         <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
                     ) : (
                         <div className="w-full h-full bg-[#E5E5E5] flex items-center justify-center">
-                            <ICONS.Image className="w-16 h-16 text-[#2E2E2F]/10" />
+                            <ICONS.Image className="w-16 h-16 text-[#2E2E2F]" />
                         </div>
                     )}
                 </div>
@@ -304,8 +304,8 @@ export const OrganizerProfilePage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Content Area */}
-            <div className="max-w-[1200px] mx-auto px-5 sm:px-10 py-10">
+            {/* Content Area - Tighter spacing requested */}
+            <div className="max-w-[1200px] mx-auto px-5 sm:px-10 py-2">
                 {interactionNotice && (
                     <div className="mb-8 p-4 rounded-xl bg-[#38BDF2]/10 border border-[#38BDF2]/30 text-[#38BDF2] text-xs font-black uppercase tracking-widest shadow-sm animate-in fade-in slide-in-from-top-2 flex items-center gap-3">
                         <ICONS.Info className="w-5 h-5 shrink-0" />
@@ -313,12 +313,9 @@ export const OrganizerProfilePage: React.FC = () => {
                     </div>
                 )}
 
-                <div className="space-y-10">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-2xl font-black text-[#050505] tracking-tight uppercase tracking-wider">
-                            {activeTab === 'upcoming' ? 'Event Marketplace' : 'Activity Archive'}
-                        </h2>
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#65676B]">{displayEvents.length} Items Found</span>
+                <div className="space-y-4">
+                    <div className="flex items-center justify-end px-2">
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#65676B] opacity-60">{displayEvents.length} Items Found</span>
                     </div>
 
                     {displayEvents.length > 0 ? (

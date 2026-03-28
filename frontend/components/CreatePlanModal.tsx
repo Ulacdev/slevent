@@ -205,7 +205,7 @@ export const CreatePlanModal: React.FC<CreatePlanModalProps> = ({ isOpen, onClos
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           {/* Left: Details & Pricing */}
           <div className="space-y-6">
-            <label className="block text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-3 ml-1">
+            <label className="block text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-3 ml-1">
               Plan Details & Pricing
             </label>
             <Input
@@ -231,7 +231,7 @@ export const CreatePlanModal: React.FC<CreatePlanModalProps> = ({ isOpen, onClos
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest ml-1">
+              <label className="block text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest ml-1">
                 Description
               </label>
               <textarea
@@ -245,7 +245,7 @@ export const CreatePlanModal: React.FC<CreatePlanModalProps> = ({ isOpen, onClos
 
           {/* Right: Limits */}
           <div className="space-y-6">
-            <label className="block text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-3 ml-1">
+            <label className="block text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-3 ml-1">
               Plan Limits & Promotions
             </label>
             <div className="grid grid-cols-2 gap-x-4 gap-y-5">
@@ -291,7 +291,7 @@ export const CreatePlanModal: React.FC<CreatePlanModalProps> = ({ isOpen, onClos
 
         {/* Feature Toggles */}
         <div className="space-y-4">
-          <label className="block text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] ml-1">
+          <label className="block text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] ml-1">
             Plan Features
           </label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -302,7 +302,7 @@ export const CreatePlanModal: React.FC<CreatePlanModalProps> = ({ isOpen, onClos
               >
                 <div>
                   <p className="text-[13px] font-black text-[#2E2E2F] uppercase tracking-tight">{toggle.label}</p>
-                  <p className="text-[10px] text-[#2E2E2F]/50 font-bold uppercase tracking-widest mt-0.5">{toggle.desc}</p>
+                  <p className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-widest mt-0.5">{toggle.desc}</p>
                 </div>
                 <Toggle enabled={toggle.enabled || false} onChange={toggle.onToggle} />
               </div>

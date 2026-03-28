@@ -42,6 +42,7 @@ export interface OrganizerProfile {
   profileImageUrl?: string | null;
   coverImageUrl?: string | null;
   followersCount: number;
+  likesCount?: number;
   eventsHostedCount?: number;
   currentPlanId?: string | null;
   subscriptionStatus?: string | null;

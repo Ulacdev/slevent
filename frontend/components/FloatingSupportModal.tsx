@@ -139,7 +139,7 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
         <div className="flex-1 p-8 md:p-12 overflow-y-auto max-h-[90vh]">
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 p-2 text-[#2E2E2F]/30 hover:text-[#38BDF2] hover:bg-white shadow-sm rounded-xl transition-all z-50 group"
+            className="absolute top-6 right-6 p-2 text-[#2E2E2F] hover:text-[#38BDF2] hover:bg-white shadow-sm rounded-xl transition-all z-50 group"
           >
             <ICONS.X className="w-6 h-6" />
           </button>
@@ -147,14 +147,14 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
           <div className="flex justify-between items-start mb-8">
             <div className="flex flex-col gap-1">
               <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tight">Submit Feedback</h2>
-              <p className="text-[11px] font-bold text-[#2E2E2F]/40 uppercase tracking-[0.2em]">Our team will review your report.</p>
+              <p className="text-[11px] font-bold text-[#2E2E2F] uppercase tracking-[0.2em]">Our team will review your report.</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-[#2E2E2F]/70 ml-1">Your email address</label>
+              <label className="text-sm font-semibold text-[#2E2E2F] ml-1">Your email address</label>
               <input
                 type="email"
                 required
@@ -167,7 +167,7 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
 
             {/* Subject */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-[#2E2E2F]/70 ml-1">In a few words, tell us what your enquiry is about</label>
+              <label className="text-sm font-semibold text-[#2E2E2F] ml-1">In a few words, tell us what your enquiry is about</label>
               <input
                 type="text"
                 required
@@ -180,7 +180,7 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
 
             {/* Message + rich toolbar */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-[#2E2E2F]/70 ml-1">Provide a detailed description</label>
+              <label className="text-sm font-semibold text-[#2E2E2F] ml-1">Provide a detailed description</label>
               <div className="relative">
                 <textarea
                   ref={textareaRef}
@@ -193,7 +193,7 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
                 />
 
                 {/* Toolbar */}
-                <div className="absolute bottom-4 left-5 flex items-center gap-4 text-[#2E2E2F]/30">
+                <div className="absolute bottom-4 left-5 flex items-center gap-4 text-[#2E2E2F]">
 
                   {/* ── Emoji ── */}
                   <div className="relative">
@@ -233,7 +233,7 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
                     </button>
                     {showUrlInput && (
                       <div className="absolute bottom-8 left-0 z-50 bg-white border border-[#2E2E2F]/10 rounded-xl shadow-xl p-3 w-64 animate-in zoom-in-95 duration-200">
-                        <p className="text-[11px] font-bold text-[#2E2E2F]/50 uppercase tracking-widest mb-2">Insert URL</p>
+                        <p className="text-[11px] font-bold text-[#2E2E2F] uppercase tracking-widest mb-2">Insert URL</p>
                         <div className="flex gap-2">
                           <input
                             type="text"
@@ -301,14 +301,14 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
                       ✕
                     </button>
                   )}
-                  <p className="text-[10px] text-[#2E2E2F]/40 mt-1 truncate max-w-[200px]">{attachedImage.name}</p>
+                  <p className="text-[10px] text-[#2E2E2F] mt-1 truncate max-w-[200px]">{attachedImage.name}</p>
                 </div>
               )}
             </div>
 
             {/* Category */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-[#2E2E2F]/70 ml-1">Select the item you need help with</label>
+              <label className="text-sm font-semibold text-[#2E2E2F] ml-1">Select the item you need help with</label>
               <select
                 required
                 value={category}
@@ -351,19 +351,19 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
           <div className="space-y-8">
             <div className="space-y-2">
               <h4 className="font-bold text-[#2E2E2F]">Tell us!</h4>
-              <p className="text-sm text-[#2E2E2F]/60 leading-relaxed font-medium">Add as much detail as possible, including site and page name.</p>
+              <p className="text-sm text-[#2E2E2F] leading-relaxed font-medium">Add as much detail as possible, including site and page name.</p>
             </div>
             <div className="space-y-2">
               <h4 className="font-bold text-[#2E2E2F]">Show us!</h4>
-              <p className="text-sm text-[#2E2E2F]/60 leading-relaxed font-medium">Add a screenshot or a link to a video.</p>
+              <p className="text-sm text-[#2E2E2F] leading-relaxed font-medium">Add a screenshot or a link to a video.</p>
             </div>
             <div className="space-y-2">
               <h4 className="font-bold text-[#2E2E2F]">What problem did you experience?</h4>
-              <p className="text-sm text-[#2E2E2F]/60 leading-relaxed font-medium">Describe what happened and what you expected instead.</p>
+              <p className="text-sm text-[#2E2E2F] leading-relaxed font-medium">Describe what happened and what you expected instead.</p>
             </div>
             <div className="space-y-2">
               <h4 className="font-bold text-[#2E2E2F]">When did this problem happen?</h4>
-              <p className="text-sm text-[#2E2E2F]/60 leading-relaxed font-medium">Let us know the date and approximate time.</p>
+              <p className="text-sm text-[#2E2E2F] leading-relaxed font-medium">Let us know the date and approximate time.</p>
             </div>
           </div>
         </div>

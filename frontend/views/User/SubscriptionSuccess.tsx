@@ -156,7 +156,7 @@ export const SubscriptionSuccess: React.FC = () => {
                             <ICONS.CreditCard className="w-10 h-10 text-[#38BDF8]" />
                         </div>
                         <h1 className="text-2xl font-black text-[#2E2E2F]">Processing Payment...</h1>
-                        <p className="text-[#2E2E2F]/60">{message}</p>
+                        <p className="text-[#2E2E2F]">{message}</p>
                         <PageLoader variant="section" />
                     </div>
                 ) : status === 'success' ? (
@@ -165,7 +165,7 @@ export const SubscriptionSuccess: React.FC = () => {
                             <ICONS.CheckCircle className="w-10 h-10 text-white" strokeWidth={3} />
                         </div>
                         <h1 className="text-3xl font-black text-[#2E2E2F]">Subscription Active!</h1>
-                        <p className="text-[#2E2E2F]/60 px-4">
+                        <p className="text-[#2E2E2F] px-4">
                             {message}
                         </p>
 
@@ -191,7 +191,7 @@ export const SubscriptionSuccess: React.FC = () => {
                             <ICONS.CreditCard className="w-10 h-10 text-white" strokeWidth={3} />
                         </div>
                         <h1 className="text-3xl font-black text-[#2E2E2F]">Payment Processing</h1>
-                        <p className="text-[#2E2E2F]/60 px-4">
+                        <p className="text-[#2E2E2F] px-4">
                             {message}
                         </p>
 
@@ -210,7 +210,7 @@ export const SubscriptionSuccess: React.FC = () => {
                             <ICONS.XCircle className="w-10 h-10 text-white" strokeWidth={3} />
                         </div>
                         <h1 className="text-3xl font-black text-[#2E2E2F]">Verification Issue</h1>
-                        <p className="text-[#2E2E2F]/60 px-4">
+                        <p className="text-[#2E2E2F] px-4">
                             {message}
                         </p>
 

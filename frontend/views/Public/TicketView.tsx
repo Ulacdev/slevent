@@ -22,8 +22,8 @@ export const TicketView: React.FC = () => {
     }
   }, [ticketId]);
 
-  if (loading) return <PageLoader label="Loading ticket..." variant="page" />;
-  if (!ticket) return <div className="p-20 text-center text-[#2E2E2F]/60">Ticket not found.</div>;
+  if (loading) return <PageLoader label="Securing ticket..." variant="page" />;
+  if (!ticket) return <div className="p-20 text-center text-[#2E2E2F]">Ticket not found.</div>;
 
   const isCheckedIn = ticket.status === 'USED';
   const paymentLabel = ticket.paymentStatus ? ticket.paymentStatus.replace('_', ' ') : 'PENDING';
@@ -38,7 +38,7 @@ export const TicketView: React.FC = () => {
         <h1 className="text-3xl lg:text-4xl font-black text-[#2E2E2F] tracking-tighter mb-4">
           Your Digital Ticket
         </h1>
-        <p className="text-[#2E2E2F]/60 font-medium max-w-lg mx-auto leading-relaxed">
+        <p className="text-[#2E2E2F] font-medium max-w-lg mx-auto leading-relaxed">
           {showMeetLinkOnly
             ? 'Your online session is ready. Use the link below to join.'
             : 'Present this QR code at the event entrance for check-in.'}
@@ -57,12 +57,12 @@ export const TicketView: React.FC = () => {
                   {isCheckedIn ? 'CHECKED IN' : 'VALID TICKET'}
                 </Badge>
                 <h2 className="text-xl font-black text-[#2E2E2F] tracking-tight mb-2 uppercase">{ticket.eventName}</h2>
-                <p className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.4em]">{ticket.ticketName}</p>
+                <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em]">{ticket.ticketName}</p>
               </div>
 
               {showMeetLinkOnly ? (
                 <div className="w-full bg-[#38BDF2]/5 border border-[#38BDF2]/10 rounded-xl p-8 text-center">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#2E2E2F]/40 mb-6">SECURE CONNECTION</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#2E2E2F] mb-6">SECURE CONNECTION</p>
                   <Button size="md" className="w-full mb-4" onClick={() => { window.location.href = meetLink; }}>
                     JOIN LIVE SESSION
                   </Button>
@@ -82,7 +82,7 @@ export const TicketView: React.FC = () => {
                       />
                     </div>
                     <div className="pt-6 border-t border-[#2E2E2F]/5 text-center">
-                      <p className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.4em] mb-1">TICKET CODE</p>
+                      <p className="text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] mb-1">TICKET CODE</p>
                       <p className="text-sm font-black text-[#2E2E2F] tracking-widest uppercase">{ticket.ticketCode}</p>
                     </div>
                   </Card>
@@ -94,7 +94,7 @@ export const TicketView: React.FC = () => {
                   <ICONS.CheckCircle className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Entry Requirement</p>
+                  <p className="text-[9px] font-black text-[#2E2E2F] uppercase tracking-widest">Entry Requirement</p>
                   <p className="text-[11px] font-bold text-[#2E2E2F] leading-tight">One scan per registrant. Verified ID required at gate.</p>
                 </div>
               </div>
@@ -111,24 +111,24 @@ export const TicketView: React.FC = () => {
             </h3>
             <div className="space-y-6">
               <div>
-                <p className="text-[9px] font-black text-[#2E2E2F]/40 uppercase tracking-widest mb-1.5">Attendee Name</p>
+                <p className="text-[9px] font-black text-[#2E2E2F] uppercase tracking-widest mb-1.5">Attendee Name</p>
                 <p className="text-[13px] font-black text-[#2E2E2F] truncate">{ticket.attendeeName}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[9px] font-black text-[#2E2E2F]/40 uppercase tracking-widest mb-1.5">Email</p>
+                  <p className="text-[9px] font-black text-[#2E2E2F] uppercase tracking-widest mb-1.5">Email</p>
                   <p className="text-[12px] font-bold text-[#2E2E2F] truncate">{ticket.attendeeEmail}</p>
                 </div>
                 <div>
-                  <p className="text-[9px] font-black text-[#2E2E2F]/40 uppercase tracking-widest mb-1.5">Company</p>
+                  <p className="text-[9px] font-black text-[#2E2E2F] uppercase tracking-widest mb-1.5">Company</p>
                   <p className="text-[12px] font-bold text-[#2E2E2F] truncate">{ticket.attendeeCompany || 'N/A'}</p>
                 </div>
               </div>
               <div className="pt-4 border-t border-[#2E2E2F]/5">
-                <p className="text-[9px] font-black text-[#2E2E2F]/40 uppercase tracking-widest mb-2">Order Tracking</p>
+                <p className="text-[9px] font-black text-[#2E2E2F] uppercase tracking-widest mb-2">Order Tracking</p>
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-mono text-[#2E2E2F]/60">#{ticket.orderId.substring(0, 8)}...</span>
-                  <span className={`font-black tracking-widest ${ticket.paymentStatus === 'PAID' ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/60'}`}>
+                  <span className="font-mono text-[#2E2E2F]">#{ticket.orderId.substring(0, 8)}...</span>
+                  <span className={`font-black tracking-widest ${ticket.paymentStatus === 'PAID' ? 'text-[#38BDF2]' : 'text-[#2E2E2F]'}`}>
                     {paymentLabel.toUpperCase()}
                   </span>
                 </div>

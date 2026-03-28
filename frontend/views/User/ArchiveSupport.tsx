@@ -56,7 +56,7 @@ export const ArchiveSupport: React.FC = () => {
             <div className="flex items-center justify-between gap-3 mb-2">
                 <button 
                     onClick={() => navigate('/organizer-support')}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-transparent border border-[#2E2E2F]/5 rounded-xl text-[#2E2E2F]/50 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-[#2E2E2F]/5 transition-all"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-transparent border border-[#2E2E2F]/5 rounded-xl text-[#2E2E2F] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-[#2E2E2F]/5 transition-all"
                 >
                     <ICONS.ArrowLeft className="w-4 h-4" />
                     Back to Support
@@ -72,7 +72,7 @@ export const ArchiveSupport: React.FC = () => {
                         <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">
                             Archived Inquiries
                         </h1>
-                        <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">
+                        <p className="mt-1 text-sm font-semibold text-[#2E2E2F]">
                             Review your completed or archived support tickets and their resolutions.
                         </p>
                     </div>
@@ -85,16 +85,16 @@ export const ArchiveSupport: React.FC = () => {
                     <table className="w-full text-left border-collapse">
                         <thead className="bg-[#2E2E2F]/5 border-b border-[#2E2E2F]/5">
                             <tr>
-                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40">Subject</th>
-                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40">Status</th>
-                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 text-right">Date Archived</th>
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">Subject</th>
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">Status</th>
+                                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] text-right">Date Archived</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[#2E2E2F]/5">
                             {archivedTickets.length === 0 ? (
                                 <tr>
                                     <td colSpan={3} className="px-8 py-20 text-center">
-                                        <p className="text-sm font-bold text-[#2E2E2F]/30 uppercase tracking-widest">No archived tickets found</p>
+                                        <p className="text-sm font-bold text-[#2E2E2F] uppercase tracking-widest">No archived tickets found</p>
                                     </td>
                                 </tr>
                             ) : (
@@ -102,10 +102,10 @@ export const ArchiveSupport: React.FC = () => {
                                     <tr key={t.notification_id} className="hover:bg-[#2E2E2F]/5 transition-colors cursor-pointer" onClick={() => openThread(t)}>
                                         <td className="px-8 py-6">
                                             <p className="text-sm font-bold text-[#2E2E2F]">{t.title}</p>
-                                            <p className="text-xs text-[#2E2E2F]/40 truncate max-w-md">{t.message}</p>
+                                            <p className="text-xs text-[#2E2E2F] truncate max-w-md">{t.message}</p>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-[#2E2E2F]/5 text-[#2E2E2F]/30">
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-[#2E2E2F]/5 text-[#2E2E2F]">
                                                 Archived
                                             </span>
                                         </td>
@@ -137,7 +137,7 @@ export const ArchiveSupport: React.FC = () => {
                             </div>
                             <button 
                                 onClick={() => selectedTicket && loadMessages(selectedTicket.notification_id)}
-                                className="p-3 hover:bg-[#2E2E2F]/5 rounded-full text-[#2E2E2F]/40 transition-all hover:text-[#38BDF2]"
+                                className="p-3 hover:bg-[#2E2E2F]/5 rounded-full text-[#2E2E2F] transition-all hover:text-[#38BDF2]"
                                 title="Refresh messages"
                             >
                                 <ICONS.RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin text-[#38BDF2]' : ''}`} />
@@ -159,7 +159,7 @@ export const ArchiveSupport: React.FC = () => {
                                         </p>
                                     </div>
                                 </div>
-                                <p className="text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-[0.2em] mr-14">
+                                <p className="text-[10px] font-bold text-[#2E2E2F] uppercase tracking-[0.2em] mr-14">
                                     You • {new Date(selectedTicket.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </p>
                             </div>
@@ -184,7 +184,7 @@ export const ArchiveSupport: React.FC = () => {
                                                 <p className="text-sm font-medium whitespace-pre-wrap leading-relaxed">{m.message}</p>
                                             </div>
                                         </div>
-                                        <p className={`text-[10px] font-bold uppercase tracking-[0.2em] text-[#2E2E2F]/30 ${m.is_admin_reply ? 'ml-14' : 'mr-14'}`}>
+                                        <p className={`text-[10px] font-bold uppercase tracking-[0.2em] text-[#2E2E2F] ${m.is_admin_reply ? 'ml-14' : 'mr-14'}`}>
                                             {m.is_admin_reply ? 'Support Team' : 'You'} • {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </p>
                                     </div>
@@ -194,7 +194,7 @@ export const ArchiveSupport: React.FC = () => {
 
                         {/* Footer (Read Only) */}
                         <div className="p-8 bg-transparent border-t border-[#2E2E2F]/5 text-center">
-                            <p className="text-[11px] font-black text-[#2E2E2F]/20 uppercase tracking-[0.3em]">This ticket is archived and read-only</p>
+                            <p className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.3em]">This ticket is archived and read-only</p>
                         </div>
                     </div>
                 </div>

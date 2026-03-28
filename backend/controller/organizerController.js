@@ -7,6 +7,7 @@ import {
   getOrganizerWithStatsById,
   serializeOrganizerRecord,
   getEventsHostedCounts,
+  getOrganizersTotalLikes,
   isOrganizerTableMissingError,
   isMissingColumnError,
   isMissingRelationError,
@@ -254,8 +255,11 @@ export const upsertOrganizer = async (req, res) => {
         req
       });
 
-      const counts = await getEventsHostedCounts([data.organizerId]);
-      return res.json(serializeOrganizerRecord(data, counts.get(data.organizerId) || 0));
+      const [counts, likes] = await Promise.all([
+        getEventsHostedCounts([data.organizerId]),
+        getOrganizersTotalLikes([data.organizerId])
+      ]);
+      return res.json(serializeOrganizerRecord(data, counts.get(data.organizerId) || 0, [], likes.get(data.organizerId) || 0));
     }
 
     const { data, error } = await supabase
@@ -294,7 +298,10 @@ export const upsertOrganizer = async (req, res) => {
       data.plan = planData;
     }
 
-    const counts = await getEventsHostedCounts([data.organizerId]);
+    const [counts, likes] = await Promise.all([
+      getEventsHostedCounts([data.organizerId]),
+      getOrganizersTotalLikes([data.organizerId])
+    ]);
 
     await logAudit({
       actionType: 'ORGANIZER_CREATED',
@@ -302,7 +309,7 @@ export const upsertOrganizer = async (req, res) => {
       req
     });
 
-    return res.status(201).json(serializeOrganizerRecord(data, counts.get(data.organizerId) || 0));
+    return res.status(201).json(serializeOrganizerRecord(data, counts.get(data.organizerId) || 0, [], likes.get(data.organizerId) || 0));
   } catch (err) {
     if (isOrganizerTableMissingError(err)) {
       return res.status(503).json({
@@ -774,9 +781,10 @@ export const getAllOrganizers = async (req, res) => {
     if (error) return res.status(500).json({ error: error.message });
 
     const organizerIds = (organizers || []).map(o => o.organizerId);
-    const [counts, followerProfilesMap] = await Promise.all([
+    const [counts, followerProfilesMap, likesMap] = await Promise.all([
       getEventsHostedCounts(organizerIds),
-      getFollowerProfiles(organizerIds)
+      getFollowerProfiles(organizerIds),
+      getOrganizersTotalLikes(organizerIds)
     ]);
 
     // If joins were missing or failed, fetch plans separately for all
@@ -797,7 +805,17 @@ export const getAllOrganizers = async (req, res) => {
 
     const serialized = (organizers || []).map(o => {
       const recent = followerProfilesMap.get(o.organizerId) || [];
-      return serializeOrganizerRecord(o, counts.get(o.organizerId) || 0, recent);
+      const evCount = counts.get(o.organizerId) || 0;
+      const likeCount = likesMap.get(o.organizerId) || 0;
+      return serializeOrganizerRecord(o, evCount, recent, likeCount);
+    })
+    // High-accuracy popularity sort for Top 5 ranking
+    .sort((a, b) => {
+        // Requirements: followers, events, likes
+        // Weighting: Events are premium indicators (x50), Likes (x10), Followers (x1)
+        const scoreA = (a.followersCount || 0) + (a.eventsHostedCount || 0) * 50 + (a.likesCount || 0) * 10;
+        const scoreB = (b.followersCount || 0) + (b.eventsHostedCount || 0) * 50 + (b.likesCount || 0) * 10;
+        return scoreB - scoreA;
     });
 
     return res.json(serialized);

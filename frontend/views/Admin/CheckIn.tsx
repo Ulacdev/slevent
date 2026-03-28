@@ -107,7 +107,7 @@ export const CheckIn: React.FC = () => {
     <div className="max-w-md mx-auto py-8 px-4 h-full flex flex-col">
       <div className="mb-10 text-center">
         <h1 className="text-2xl font-black text-[#2E2E2F] mb-2">Check-In</h1>
-        <p className="text-[#2E2E2F]/70">Check in attendees and verify tickets.</p>
+        <p className="text-[#2E2E2F]">Check in attendees and verify tickets.</p>
       </div>
 
       <div className="flex-1 space-y-6">
@@ -119,7 +119,7 @@ export const CheckIn: React.FC = () => {
                 <ICONS.CheckCircle className="w-8 h-8 text-[#38BDF2]" />
               </div>
               <p className="font-bold text-lg mb-2 text-[#2E2E2F]">Ready to scan tickets</p>
-              <p className="text-[#2E2E2F]/60 text-sm text-center px-8">Point your camera at a ticket QR code to check in a guest.</p>
+              <p className="text-[#2E2E2F] text-sm text-center px-8">Point your camera at a ticket QR code to check in a guest.</p>
               <button
                 className="mt-8 text-[#2E2E2F] font-bold text-sm tracking-wide"
                 onClick={() => setShowScanner((s) => !s)}
@@ -147,15 +147,15 @@ export const CheckIn: React.FC = () => {
 
               <div className="bg-[#F2F2F2] rounded-xl p-4 text-left w-full space-y-2 border border-[#2E2E2F]/20">
                 <div className="flex justify-between">
-                  <span className="text-[#2E2E2F]/60 text-xs font-bold uppercase tracking-wider">Attendee</span>
+                  <span className="text-[#2E2E2F] text-xs font-bold uppercase tracking-wider">Attendee</span>
                   <span className="text-[#2E2E2F] text-sm font-bold">{attendeeInfo?.attendee?.name || attendeeInfo?.attendeeName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#2E2E2F]/60 text-xs font-bold uppercase tracking-wider">Event</span>
+                  <span className="text-[#2E2E2F] text-xs font-bold uppercase tracking-wider">Event</span>
                   <span className="text-[#2E2E2F] text-sm font-bold truncate max-w-[150px]">{attendeeInfo?.eventName || attendeeInfo?.eventId}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#2E2E2F]/60 text-xs font-bold uppercase tracking-wider">Ticket Type</span>
+                  <span className="text-[#2E2E2F] text-xs font-bold uppercase tracking-wider">Ticket Type</span>
                   <span className="text-[#2E2E2F] text-sm font-bold">{attendeeInfo?.ticketName || attendeeInfo?.ticketCode}</span>
                 </div>
               </div>
@@ -170,7 +170,7 @@ export const CheckIn: React.FC = () => {
                 <svg className="w-10 h-10 text-[#F2F2F2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
               </div>
               <h2 className="text-2xl font-bold mb-1 text-[#2E2E2F]">Ticket Not Valid</h2>
-              <p className="text-[#2E2E2F]/70 text-sm mb-8 font-medium">We couldn't find a valid ticket for this code. Please try again.</p>
+              <p className="text-[#2E2E2F] text-sm mb-8 font-medium">We couldn't find a valid ticket for this code. Please try again.</p>
               <Button className="w-full py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] min-h-[32px] transition-colors" onClick={reset}>
                 Try Another Code
               </Button>
@@ -179,7 +179,7 @@ export const CheckIn: React.FC = () => {
         </Card>
 
         <Card className="p-6">
-          <p className="text-xs font-black text-[#2E2E2F]/60 uppercase tracking-widest mb-4">Enter Ticket Code Manually</p>
+          <p className="text-xs font-black text-[#2E2E2F] uppercase tracking-widest mb-4">Enter Ticket Code Manually</p>
           <form onSubmit={handleManualCheckIn} className="flex gap-2">
             <input
               placeholder="Type or paste ticket code here"
@@ -201,7 +201,7 @@ export const CheckIn: React.FC = () => {
         </Card>
       </div>
 
-      <div className="mt-8 text-center text-[#2E2E2F]/60 text-[10px] font-bold uppercase tracking-[0.2em]">
+      <div className="mt-8 text-center text-[#2E2E2F] text-[10px] font-bold uppercase tracking-[0.2em]">
         StartupLab Business Systems • Ops Portal
       </div>
 

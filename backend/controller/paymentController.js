@@ -73,7 +73,7 @@ export const getHitpayCredentials = async (orderId) => {
 
       const enabled = mapped['hitpay_enabled'] === 'true';
       console.log('[HitPay Credentials] Enabled:', enabled, 'Has API key:', !!mapped['hitpay_api_key'], 'Has salt:', !!mapped['hitpay_salt']);
-      
+
       if (enabled && mapped['hitpay_api_key'] && mapped['hitpay_salt']) {
         return {
           apiKey: decryptString(mapped['hitpay_api_key']),
@@ -133,14 +133,14 @@ export const createHitpayCheckoutSession = async (req, res) => {
       mode: credentials?.mode,
       apiKeyPrefix: credentials?.apiKey?.substring(0, 10) + '...'
     });
-    
+
     if (!credentials || !credentials.apiKey || !credentials.salt) {
       console.error('[HitPay Checkout] Missing API keys for order:', order.orderId);
       return res.status(500).json({ error: 'Payment gateway configuration is missing.' });
     }
     const hitpayApiUrl = credentials.mode === 'sandbox' ? 'https://api.sandbox.hit-pay.com' : 'https://api.hit-pay.com';
     console.log('[HitPay Checkout] Using HitPay URL:', hitpayApiUrl);
-    
+
     const payload = new URLSearchParams()
     payload.set('amount', String(Number(order.totalAmount)))
     payload.set('currency', order.currency || 'PHP')
@@ -171,7 +171,7 @@ export const createHitpayCheckoutSession = async (req, res) => {
     const data = await response.json()
     console.log('[HitPay Checkout] Response status:', response.status);
     console.log('[HitPay Checkout] Response data:', JSON.stringify(data));
-    
+
     if (!response.ok) {
       console.error('[HitPay Checkout] HitPay API error:', data)
       return res.status(500).json({ error: data?.error || data?.message || 'Failed to create HitPay payment request' })
@@ -906,8 +906,8 @@ export const hitpayWebhook = async (req, res) => {
               actionType: 'TICKET_ISSUED',
               orderId: order.orderId,
               ticketId: ticketData?.ticketId || null,
-              details: { 
-                ticketTypeId, 
+              details: {
+                ticketTypeId,
                 source: 'PAID_ORDER',
                 guestIndex: guestIdx + 1,
                 isBundle: capacityPerTicket > 1
