@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { Event, TicketType, UserRole } from '../../types';
-import { Button, Card, PageLoader } from '../../components/Shared';
+import { Button, Card } from '../../components/Shared';
+import { EventDetailsSkeleton } from '../../components/Shared/Skeleton';
 import { ICONS } from '../../constants';
 import { useUser } from '../../context/UserContext';
 import { useEngagement } from '../../context/EngagementContext';
@@ -485,7 +485,7 @@ export const EventDetails: React.FC = () => {
     return () => window.clearInterval(intervalId);
   }, [event?.ticketTypes]);
 
-  if (loading) return <PageLoader label="Standardizing content..." variant="page" />;
+  if (loading) return <EventDetailsSkeleton />;
   if (!event) return <div className="p-20 text-center text-[#2E2E2F]">Session not found.</div>;
 
   const updateQuantity = (ticketTypeId: string, change: number, available: number) => {

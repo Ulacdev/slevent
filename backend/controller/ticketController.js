@@ -472,10 +472,30 @@ export const getTicketsByOrder = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('tickets')
-      .select('ticketId, ticketCode, qrPayload, status, attendeeId, ticketTypeId, orderId, eventId')
+      .select(`
+        ticketId, 
+        ticketCode, 
+        qrPayload, 
+        status, 
+        attendeeId, 
+        ticketTypeId, 
+        orderId, 
+        eventId,
+        attendees (name),
+        ticketTypes (name)
+      `)
       .eq('orderId', orderId);
+      
     if (error) return res.status(500).json({ error: error.message });
-    return res.status(200).json(data || []);
+    
+    // Flatten the response for the frontend
+    const tickets = (data || []).map(t => ({
+      ...t,
+      attendeeName: t.attendees?.name || 'Attendee',
+      ticketName: t.ticketTypes?.name || 'General Admission'
+    }));
+    
+    return res.status(200).json(tickets);
   } catch (err) {
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }

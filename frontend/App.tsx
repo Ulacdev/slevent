@@ -3003,7 +3003,7 @@ const App: React.FC = () => (
     <ScrollToTop />
     <HashBypassBridge />
     <GlobalOnboardingGuard>
-      <React.Suspense fallback={<PageLoader label="Initializing Portal..." variant="viewport" />}>
+      <React.Suspense fallback={<div className="suspense-progress"><div className="suspense-progress-bar" /></div>}>
 <Routes>
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="/signup" element={<Navigate to="/" replace />} />

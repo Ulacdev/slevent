@@ -372,7 +372,7 @@ export const getAllUsers = async (req, res) => {
 
     let query = db
       .from("users")
-      .select("userId, name, email, role, imageUrl, canviewevents, caneditevents, canmanualcheckin, canreceivenotifications, employerId");
+      .select("*");
 
     let { data, error } = await query;
 

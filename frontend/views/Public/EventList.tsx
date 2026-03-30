@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { Event, UserRole, OrganizerProfile } from '../../types';
 import { Card, Button, PageLoader } from '../../components/Shared';
+import { Skeleton, EventCardSkeleton, OrganizerCardSkeleton } from '../../components/Shared/Skeleton';
 import { OrganizerCard } from '../../components/OrganizerCard';
 import { BrowseEventsNavigator, BrowseTabKey, ONLINE_LOCATION_VALUE } from '../../components/BrowseEventsNavigator';
 import { ICONS } from '../../constants';
@@ -834,9 +835,22 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           ? 'Discover curated sessions highlighted by organizers as part of their elite plan features.'
           : 'Browse and register for upcoming business seminars and workshops.';
 
-  if (loading) return (
-    <PageLoader label="Loading events..." />
-  );
+  if (loading) {
+    return (
+      <div className={`max-w-[88rem] mx-auto px-4 sm:px-10 pb-16 ${isLanding ? 'pt-6 sm:pt-12' : 'pt-0'}`}>
+        {isLanding && (
+          <div className="animate-pulse mb-8">
+            <Skeleton variant="rect" width="100%" height={300} className="mb-24" />
+          </div>
+        )}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <EventCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`max-w-[88rem] mx-auto px-4 sm:px-10 pb-16 ${isLanding ? 'pt-6 sm:pt-12' : 'pt-0'}`}>
@@ -847,9 +861,9 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
             {/* Left Column: Content */}
             <div className="flex-1 min-w-0 flex flex-col items-start justify-center text-left w-full">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#E8E8E8] border border-black/10 text-[16px] font-bold text-black mb-7 shadow-sm">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#38BDF2] border border-white/20 text-[16px] font-bold text-white mb-7 shadow-lg shadow-[#38BDF2]/25">
                   <span role="img" aria-label="megaphone">📢</span>
-                  <span className="opacity-80">New: Advanced QR Ticketing & Analytics Launched!</span>
+                  <span className="opacity-95">New: Advanced QR Ticketing & Analytics Launched!</span>
                 </div>
 
                 <h1 className="text-[3rem] sm:text-6xl lg:text-[72px] font-bold text-black tracking-tight leading-[1.1] mb-[5px]">
@@ -858,7 +872,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   Organizers
                 </h1>
 
-                <p className="text-[28px] font-normal text-black leading-relaxed max-w-[800px] mb-8">
+                <p className="text-[25px] font-normal text-black leading-relaxed max-w-[800px] mb-8">
                   Manage registrations, tickets, attendee check-ins, and performance in one simple, compliance-ready event platform — built for organizers in the Philippines.
                 </p>
 
@@ -913,7 +927,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.3] font-semibold text-black tracking-tighter text-left mb-2 sm:mb-3">
                     6+ Core<br />Event<br />Modules
                   </h4>
-                  <p className="text-[16px] lg:text-[28px] lg:leading-[1.2] text-black font-normal text-left">
+                  <p className="text-[16px] lg:text-[25px] lg:leading-[1.2] text-black font-normal text-left">
                     Ticketing, Registration,<br />Check-in, Analytics,<br />Seats, Reports
                   </p>
                 </div>
@@ -922,7 +936,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.3] font-semibold text-black tracking-tighter text-left mb-2 sm:mb-3">
                     {organizerCount > 3 ? organizerCount : '3'}+ Active<br />Event<br />Organizers
                   </h4>
-                  <p className="text-[16px] lg:text-[28px] lg:leading-[1.2] text-black font-normal text-left">
+                  <p className="text-[16px] lg:text-[25px] lg:leading-[1.2] text-black font-normal text-left">
                     Built with real-world<br />organizer experience
                   </p>
                 </div>
@@ -931,7 +945,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.3] font-semibold text-black tracking-tighter text-left mb-2 sm:mb-3">
                     {(pagination?.total || 0) > 8 ? pagination.total : '8'}+ Hosted<br />Event<br />Workflows
                   </h4>
-                  <p className="text-[16px] lg:text-[28px] lg:leading-[1.2] text-black font-normal text-left">
+                  <p className="text-[16px] lg:text-[25px] lg:leading-[1.2] text-black font-normal text-left">
                     From event planning to<br />secure payouts
                   </p>
                 </div>
@@ -1448,7 +1462,11 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
         <div className="flex-1 min-w-0 space-y-10">
           {/* Grid Display */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8 min-h-[400px]">
-            {displayEvents.map((event) => (
+            {loading ? (
+              Array.from({ length: isLandingAllListing ? 3 : 6 }).map((_, idx) => (
+                <EventCardSkeleton key={idx} />
+              ))
+            ) : displayEvents.map((event) => (
               <div key={event.eventId} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <EventCard
                   event={event}
@@ -1641,7 +1659,9 @@ const FeaturedOrganizers: React.FC = () => {
     const fetchOrgs = async () => {
       try {
         const data = await apiService.getOrganizers();
-        setOrganizers(data || []);
+        // Sort by most followers as requested
+        const sorted = (data || []).sort((a: any, b: any) => (b.followersCount || 0) - (a.followersCount || 0));
+        setOrganizers(sorted);
       } catch (error) {
         console.error('Failed to fetch organizers:', error);
       } finally {
@@ -1687,7 +1707,24 @@ const FeaturedOrganizers: React.FC = () => {
     isDraggingRef.current = false;
   };
 
-  if (loading || !organizers || organizers.length === 0) return null;
+  if (loading) {
+    return (
+      <section className="mt-10 mb-20 px-4 sm:px-6 lg:px-10 py-12 bg-transparent relative">
+        <div className="flex flex-col items-center mb-10 text-center">
+            <Skeleton variant="text" width={120} height={16} className="mb-3" />
+            <Skeleton variant="text" width={240} height={32} className="mb-3" />
+            <Skeleton variant="text" width={400} height={20} />
+        </div>
+        <div className="flex gap-6 overflow-x-hidden justify-center pb-8">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <OrganizerCardSkeleton key={i} />
+            ))}
+        </div>
+      </section>
+    );
+  }
+  
+  if (!organizers || organizers.length === 0) return null;
   const dotsCount = Math.min(5, organizers.length);
   const activeDot = Math.min(currentIndex, 4);
 

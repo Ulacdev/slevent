@@ -6,6 +6,7 @@ import { RegistrationView } from '../../types';
 import { Card, Badge, Button, PageLoader } from '../../components/Shared';
 import { ICONS } from '../../constants';
 import QRCode from 'react-qr-code';
+import { format } from 'date-fns';
 
 export const TicketView: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
@@ -57,7 +58,14 @@ export const TicketView: React.FC = () => {
                   {isCheckedIn ? 'CHECKED IN' : 'VALID TICKET'}
                 </Badge>
                 <h2 className="text-xl font-black text-[#2E2E2F] tracking-tight mb-2 uppercase">{ticket.eventName}</h2>
-                <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em]">{ticket.ticketName}</p>
+                <div className="flex flex-col items-center gap-1 mb-6">
+                  <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em]">{ticket.ticketName}</p>
+                  {ticket.eventStartAt && (
+                    <p className="text-[9px] font-bold text-[#2E2E2F]/60 uppercase tracking-widest">
+                      {format(new Date(ticket.eventStartAt), 'MMM dd, yyyy • hh:mm aa')}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {showMeetLinkOnly ? (
@@ -89,13 +97,25 @@ export const TicketView: React.FC = () => {
                 </div>
               )}
 
-              <div className="w-full bg-[#F2F2F2] border border-[#2E2E2F]/5 rounded-xl p-5 flex items-center gap-4">
-                <div className="w-10 h-10 bg-[#38BDF2] rounded-xl flex items-center justify-center text-[#F2F2F2] shrink-0 shadow-lg shadow-[#38BDF2]/20">
-                  <ICONS.CheckCircle className="w-5 h-5" />
+              <div className="w-full space-y-3">
+                <div className="bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl p-4 flex items-center gap-4">
+                  <div className="w-8 h-8 bg-[#38BDF2]/10 rounded-lg flex items-center justify-center text-[#38BDF2] shrink-0">
+                    <ICONS.MapPin className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[8px] font-black text-[#2E2E2F] uppercase tracking-widest">Location</p>
+                    <p className="text-[10px] font-bold text-[#2E2E2F] truncate">{ticket.locationText || 'Venue TBA'}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[9px] font-black text-[#2E2E2F] uppercase tracking-widest">Entry Requirement</p>
-                  <p className="text-[11px] font-bold text-[#2E2E2F] leading-tight">One scan per registrant. Verified ID required at gate.</p>
+
+                <div className="bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl p-4 flex items-center gap-4">
+                  <div className="w-8 h-8 bg-[#38BDF2] rounded-lg flex items-center justify-center text-[#F2F2F2] shrink-0 shadow-lg shadow-[#38BDF2]/20">
+                    <ICONS.CheckCircle className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-black text-[#2E2E2F] uppercase tracking-widest">Entry Requirement</p>
+                    <p className="text-[10px] font-bold text-[#2E2E2F] leading-tight">One scan per registrant. Verified ID required.</p>
+                  </div>
                 </div>
               </div>
             </div>

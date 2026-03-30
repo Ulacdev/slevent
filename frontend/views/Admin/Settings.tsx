@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Card, Button, Input, Badge, Modal } from '../../components/Shared';
 import { ICONS } from '../../constants';
 import { UserRole } from '../../types';
+import { format } from 'date-fns';
 import { apiService } from '../../services/apiService';
 import { AdminPaymentSettings } from './AdminPaymentSettings';
 import { SubscriptionPlans } from './SubscriptionPlans';
@@ -22,6 +23,7 @@ interface TeamMember {
   role: string;
   perspective: UserRole;
   status: 'Active' | 'Inactive' | 'Pending';
+  createdAt?: string | null;
   isOwner?: boolean;
   permissions: PermissionCategory[];
 }
@@ -49,7 +51,7 @@ export const SettingsView: React.FC = () => {
 
   const handleSaveName = async () => {
     try {
-      await apiService.updateUserName(userName);
+      await apiService.updateProfile({ name: userName });
       setNotification({ message: 'Name updated successfully.', type: 'success' });
     } catch (err: any) {
       setNotification({ message: err.message || 'Failed to update name.', type: 'error' });
@@ -174,27 +176,28 @@ export const SettingsView: React.FC = () => {
           ? data
             .map(u => {
               const rawRole = String(u.role || '').toUpperCase();
-              const role = rawRole === 'USER' ? UserRole.ORGANIZER : rawRole;
-              if (role !== UserRole.ADMIN && role !== UserRole.STAFF && role !== UserRole.ORGANIZER) return null;
+              const role = rawRole === 'USER' ? UserRole.ORGANIZER : (rawRole as UserRole);
               return {
                 id: u.userId,
-                name: u.name || '',
+                name: u.name || 'User',
                 email: u.email,
                 imageUrl: u.imageUrl || null,
                 role,
-                perspective: role as UserRole,
+                perspective: role,
+                status: (u.status && String(u.status).trim()) ? u.status : 'Active',
+                createdAt: u.created_at || u.createdAt || null,
                 permissions: [
-                  ...(u.canViewEvents ? ['view_events'] : []),
-                  ...(u.canEditEvents ? ['edit_events'] : []),
-                  ...(u.canManualCheckIn ? ['manual_checkin'] : []),
-                  ...(u.canReceiveNotifications ? ['receive_notifications'] : [])
+                  ...(u.canviewevents ? ['view_events'] : []),
+                  ...(u.caneditevents ? ['edit_events'] : []),
+                  ...(u.canmanualcheckin ? ['manual_checkin'] : []),
+                  ...(u.canreceivenotifications ? ['receive_notifications'] : [])
                 ],
               } as TeamMember;
             })
             .filter((member): member is TeamMember => member !== null)
           : [];
         const sorted = mapped.sort((a, b) => {
-          const rank = { [UserRole.ADMIN]: 0, [UserRole.STAFF]: 1, [UserRole.ORGANIZER]: 2 } as const;
+          const rank = { [UserRole.ADMIN]: 0, [UserRole.ORGANIZER]: 1, [UserRole.STAFF]: 2, [UserRole.ATTENDEE]: 3 } as const;
           const aRank = rank[a.perspective] ?? 99;
           const bRank = rank[b.perspective] ?? 99;
           if (aRank !== bRank) return aRank - bRank;
@@ -347,14 +350,17 @@ export const SettingsView: React.FC = () => {
                       <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
                         <tr>
                           <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Name</th>
-                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Position</th>
+                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Email</th>
+                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Role</th>
+                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Registered Date</th>
+                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Status</th>
                           <th className="px-4 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <button onClick={handlePrintTeam} className="p-2 bg-[#38BDF2] text-white rounded-lg hover:bg-[#2E2E2F] transition-colors" title="Print All">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                            <div className="flex items-center justify-end gap-2 pr-4">
+                              <button onClick={handlePrintTeam} className="p-2 bg-[#38BDF2] text-white rounded-lg hover:bg-[#2E2E2F] transition-all active:scale-95 shadow-sm" title="Print List">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
                               </button>
-                              <button onClick={handleExportTeam} className="p-2 bg-[#38BDF2] text-white rounded-lg hover:bg-[#2E2E2F] transition-colors" title="Export All CSV">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                              <button onClick={handleExportTeam} className="p-2 bg-[#38BDF2] text-white rounded-lg hover:bg-[#2E2E2F] transition-all active:scale-95 shadow-sm" title="Export CSV">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                               </button>
                             </div>
                           </th>
@@ -365,27 +371,34 @@ export const SettingsView: React.FC = () => {
                           <tr key={member.id} className="hover:bg-[#38BDF2]/10 transition-colors group">
                             <td className="px-10 py-8">
                               <div className="flex items-center gap-5">
-                                <div className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-black text-lg ${member.isOwner ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#38BDF2] text-[#F2F2F2]'}`}>
+                                <div className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-black text-lg bg-[#38BDF2] text-[#F2F2F2]`}>
                                   {member.imageUrl ? (
                                     <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
                                   ) : (
                                     member.name.charAt(0)
                                   )}
                                 </div>
-                                <div>
-                                  <div className="flex items-center gap-3 mb-1">
-                                    <div className="font-black text-[#2E2E2F] text-[15px] tracking-tight">{member.name}</div>
-                                    {member.isOwner && (
-                                      <div className="bg-[#38BDF2] text-[#F2F2F2] text-[8px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest">owner</div>
-                                    )}
-                                  </div>
-                                  <div className="text-[12px] text-[#2E2E2F] font-bold tracking-tight">{member.email}</div>
-                                </div>
+                                <div className="font-black text-[#2E2E2F] text-[15px] tracking-tight">{member.name}</div>
                               </div>
                             </td>
                             <td className="px-10 py-8">
-                              <div className="text-[13px] font-black text-[#2E2E2F] uppercase tracking-widest">{member.role}</div>
-                              <div className="text-[10px] font-bold text-[#2E2E2F] uppercase tracking-[0.2em] mt-1">{member.perspective} HUB</div>
+                              <div className="text-[12px] text-[#2E2E2F] font-bold tracking-tight">{member.email}</div>
+                            </td>
+                            <td className="px-10 py-8">
+                              <div className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest">{member.role}</div>
+                            </td>
+                            <td className="px-10 py-8">
+                              <div className="text-[11px] font-black text-[#2E2E2F] tracking-tight">
+                                {member.createdAt ? format(new Date(member.createdAt), 'MMM dd, yyyy') : 'N/A'}
+                              </div>
+                            </td>
+                            <td className="px-10 py-8">
+                              <Badge 
+                                type={member.status === 'Active' ? 'success' : member.status === 'Pending' ? 'warning' : 'neutral'}
+                                className="font-black text-[8px] uppercase tracking-widest"
+                              >
+                                {member.status}
+                              </Badge>
                             </td>
                           </tr>
                         ))}

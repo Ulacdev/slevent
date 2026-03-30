@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { Event } from '../../types';
 import { Card, Button, PageLoader } from '../../components/Shared';
+import { EventCardSkeleton } from '../../components/Shared/Skeleton';
 import { ICONS } from '../../constants';
 import { getCategoryByKey, getEventCategoryKeys } from '../../utils/eventCategories';
 
@@ -110,7 +111,19 @@ export const CategoryEvents: React.FC = () => {
     });
   }, [events, searchTerm]);
 
-  if (loading) return <PageLoader label="Standardizing results..." variant="page" />;
+  if (loading) {
+    return (
+      <div className="bg-[#F2F2F2] min-h-screen">
+        <div className="max-w-[88rem] mx-auto px-4 sm:px-10 py-24">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <EventCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!category) {
     return (

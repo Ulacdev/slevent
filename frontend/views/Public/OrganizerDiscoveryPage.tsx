@@ -6,6 +6,7 @@ import { ICONS } from '../../constants';
 import { useEngagement } from '../../context/EngagementContext';
 import { useUser } from '../../context/UserContext';
 import { PageLoader } from '../../components/Shared';
+import { OrganizerCardSkeleton } from '../../components/Shared/Skeleton';
 import { OrganizerCard } from '../../components/OrganizerCard';
 
 export const OrganizerDiscoveryPage: React.FC = () => {
@@ -22,7 +23,7 @@ export const OrganizerDiscoveryPage: React.FC = () => {
     // Filters State
     const [searchTerm, setSearchTerm] = useState('');
     const [filterMode, setFilterMode] = useState<'discover' | 'following'>('discover');
-    const [sortBy, setSortBy] = useState<'name' | 'followers' | 'followed_first'>('followed_first');
+    const [sortBy, setSortBy] = useState<'name' | 'followers' | 'followed_first'>('followers');
 
     useEffect(() => {
         const fetchOrganizers = async () => {
@@ -73,9 +74,9 @@ export const OrganizerDiscoveryPage: React.FC = () => {
 
         // Sorting
         return result.sort((a, b) => {
-            // Sort by Composite Popularity (Followers + Events + Likes)
-            const scoreA = (a.followersCount || 0) + (a.eventsHostedCount || 0) + (a.likesCount || 0);
-            const scoreB = (b.followersCount || 0) + (b.eventsHostedCount || 0) + (b.likesCount || 0);
+            // Sort by Follower Count as requested
+            const scoreA = (a.followersCount || 0);
+            const scoreB = (b.followersCount || 0);
 
             if (sortBy === 'followed_first') {
                 const aFollowed = isFollowing(a.organizerId);
@@ -110,7 +111,7 @@ export const OrganizerDiscoveryPage: React.FC = () => {
             filteredOrganizers
                 .slice(0, 5)
                 .forEach((org, idx) => {
-                    const score = (org.followersCount || 0) + (org.eventsHostedCount || 0) + (org.likesCount || 0);
+                    const score = (org.followersCount || 0);
                     // Only show rank tag if they have at least some engagement (follower, host an event, or have a like)
                     if (score > 0) {
                         ranks.set(org.organizerId, idx + 1);
@@ -120,7 +121,19 @@ export const OrganizerDiscoveryPage: React.FC = () => {
         return ranks;
     }, [filteredOrganizers, filterMode]);
 
-    if (loading) return <PageLoader label="Discovering communities..." variant="page" />;
+    if (loading) {
+        return (
+            <div className="bg-[#F2F2F2] min-h-screen">
+                <div className="max-w-[88rem] mx-auto px-4 sm:px-10 py-24">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {Array.from({ length: 9 }).map((_, i) => (
+                            <OrganizerCardSkeleton key={i} />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-[#F2F2F2] min-h-screen">

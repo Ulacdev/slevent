@@ -6,6 +6,7 @@ import { Order } from '../../types';
 import { Card, Button, PageLoader } from '../../components/Shared';
 import { ICONS } from '../../constants';
 import QRCode from 'react-qr-code';
+import { format } from 'date-fns';
 
 export const PaymentStatusView: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -213,6 +214,18 @@ export const PaymentStatusView: React.FC = () => {
                       <div className="relative group w-full max-w-[340px] md:max-w-[280px] lg:max-w-[340px]">
                         <div className="absolute -inset-6 bg-[#38BDF2]/5 rounded-xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <Card className="relative p-8 sm:p-10 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl shadow-2xl shadow-[#2E2E2F]/10 overflow-hidden">
+                          <div className="text-center mb-8">
+                            <h3 className="text-lg font-black text-[#2E2E2F] uppercase tracking-tight mb-1">{eventName}</h3>
+                            <div className="flex flex-col items-center gap-0.5">
+                              {order?.eventStartAt && (
+                                <p className="text-[9px] font-bold text-[#2E2E2F]/60 uppercase tracking-widest leading-none mb-1">
+                                  {format(new Date(order.eventStartAt), 'MMM dd, yyyy • hh:mm aa')}
+                                </p>
+                              )}
+                              <p className="text-[8px] font-black text-[#38BDF2] uppercase tracking-[0.2em]">{tickets[activeTicketIndex].ticketName || 'General Admission'}</p>
+                            </div>
+                          </div>
+
                           <div className="flex justify-center mb-8">
                             <QRCode
                               value={tickets[activeTicketIndex].qrPayload || tickets[activeTicketIndex].ticketCode}
@@ -225,7 +238,14 @@ export const PaymentStatusView: React.FC = () => {
                           <div className="pt-8 border-t border-[#2E2E2F]/5 text-center">
                             <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] mb-2">TICKET CODE</p>
                             <p className="text-lg font-black text-[#2E2E2F] tracking-widest uppercase">{tickets[activeTicketIndex].ticketCode}</p>
-                            <p className="text-[10px] font-bold text-[#2E2E2F] mt-2 uppercase">{tickets[activeTicketIndex].attendeeName}</p>
+                            <div className="mt-4 pt-4 border-t border-[#2E2E2F]/5">
+                              <p className="text-[9px] font-black text-[#2E2E2F] uppercase tracking-widest mb-1">Attendee</p>
+                              <p className="text-xs font-bold text-[#2E2E2F] uppercase">{tickets[activeTicketIndex].attendeeName}</p>
+                            </div>
+                            <div className="mt-2 text-left bg-[#38BDF2]/5 p-3 rounded-lg flex items-start gap-3 border border-[#38BDF2]/10">
+                              <ICONS.MapPin className="w-3 h-3 text-[#38BDF2] shrink-0 mt-0.5" />
+                              <p className="text-[9px] font-medium text-[#2E2E2F] leading-snug">{order?.locationText || 'Venue TBA'}</p>
+                            </div>
                           </div>
                         </Card>
                       </div>

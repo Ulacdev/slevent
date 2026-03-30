@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { OrganizerProfile as IOrganizerProfile, Event } from '../../types';
-import { Button, PageLoader, Card } from '../../components/Shared';
+import { Button, Card } from '../../components/Shared';
+import { ProfileSkeleton } from '../../components/Shared/Skeleton';
 import { ICONS } from '../../constants';
 import { useUser } from '../../context/UserContext';
 import { useEngagement } from '../../context/EngagementContext';
@@ -118,7 +119,7 @@ export const OrganizerProfilePage: React.FC = () => {
         return () => window.clearTimeout(timeoutId);
     }, [interactionNotice]);
 
-    if (loading) return <PageLoader label="Standardizing profile..." variant="page" />;
+    if (loading) return <ProfileSkeleton />;
     if (!organizer) return (
         <div className="max-w-7xl mx-auto px-6 py-20 text-center">
             <h2 className="text-2xl font-bold text-[#2E2E2F] mb-4">Organizer profile not found</h2>

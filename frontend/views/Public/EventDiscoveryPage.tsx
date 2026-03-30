@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { Event, UserRole } from '../../types';
 import { Button, PageLoader } from '../../components/Shared';
+import { EventCardSkeleton } from '../../components/Shared/Skeleton';
 import { ICONS } from '../../constants';
 import { EVENT_CATEGORIES, getEventCategoryKeys } from '../../utils/eventCategories';
 import { useUser } from '../../context/UserContext';
@@ -168,7 +169,19 @@ export const EventDiscoveryPage: React.FC = () => {
         );
     };
 
-    if (loading) return <PageLoader label="Discovering events..." variant="page" />;
+    if (loading) {
+        return (
+            <div className="bg-[#F2F2F2] min-h-screen">
+                <div className="max-w-[88rem] mx-auto px-4 sm:px-10 py-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <EventCardSkeleton key={i} />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-screen bg-[#F2F2F2]">
