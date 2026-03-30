@@ -29,7 +29,11 @@ export const EventsManagement: React.FC = () => {
   const [currentEventId, setCurrentEventId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState<Event | null>(null);
+  const [isBulkMode, setIsBulkMode] = useState(false);
+  const [deleteReason, setDeleteReason] = useState('DUPLICATE');
+  const [customReason, setCustomReason] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -315,18 +319,42 @@ export const EventsManagement: React.FC = () => {
 
 
   const handleDeleteEvent = async () => {
-    if (!deleteConfirm) return;
+    if (!deleteConfirm && selectedIds.length === 0) return;
     setSubmitting(true);
     try {
-      await apiService.deleteEvent(deleteConfirm.eventId);
-      setNotification({ message: `"${deleteConfirm.eventName}" has been permanently deleted.`, type: 'success' });
-      setDeleteConfirm(null);
+      const finalReason = deleteReason === 'OTHER' ? customReason : deleteReason;
+      
+      if (isBulkMode) {
+        await Promise.all(selectedIds.map(id => apiService.deleteEvent(id, finalReason)));
+        setNotification({ message: `${selectedIds.length} events have been archived.`, type: 'success' });
+        setSelectedIds([]);
+        setIsBulkMode(false);
+      } else if (deleteConfirm) {
+        await apiService.deleteEvent(deleteConfirm.eventId, finalReason);
+        setNotification({ message: `"${deleteConfirm.eventName}" has been archived.`, type: 'success' });
+        setDeleteConfirm(null);
+      }
+      
+      setDeleteReason('DUPLICATE');
+      setCustomReason('');
       fetchEvents();
     } catch (err) {
-      setNotification({ message: 'Failed to delete event. Please retry.', type: 'error' });
+      setNotification({ message: 'Failed to complete moderation removal. Please retry.', type: 'error' });
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === currentItems.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(currentItems.map(e => e.eventId));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
 
   const handlePageChange = (page: number) => {
@@ -335,13 +363,15 @@ export const EventsManagement: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" style={{ zoom: 0.85 }}>
       {notification && (
-        <div className="fixed top-24 right-8 z-[120]">
-          <Card className={`flex items-center gap-4 px-6 py-4 rounded-xl border ${notification.type === 'success' ? 'bg-[#38BDF2]/20 border-[#38BDF2]/40 text-[#2E2E2F]' : 'bg-[#2E2E2F]/10 border-[#2E2E2F]/30 text-[#2E2E2F]'
+        <div className="fixed top-24 right-8 z-[120] animate-in fade-in slide-in-from-top-4 duration-500">
+          <Card className={`flex items-center gap-4 px-6 py-4 rounded-xl border-2 shadow-2xl ${notification.type === 'success' 
+            ? 'bg-green-50 border-green-200 text-green-800' 
+            : 'bg-red-50 border-red-200 text-red-800'
             }`}>
-            <div className={`p-2 rounded-xl ${notification.type === 'success' ? 'bg-[#38BDF2]/10 text-[#2E2E2F]' : 'bg-[#2E2E2F]/20 text-[#2E2E2F]'}`}>
-              {notification.type === 'success' ? <ICONS.CheckCircle className="w-5 h-5" /> : <ICONS.Layout className="w-5 h-5" />}
+            <div className={`p-2 rounded-xl ${notification.type === 'success' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+              {notification.type === 'success' ? <ICONS.CheckCircle className="w-5 h-5" /> : <ICONS.AlertTriangle className="w-5 h-5" />}
             </div>
             <p className="font-bold text-sm tracking-tight">{notification.message}</p>
           </Card>
@@ -350,8 +380,8 @@ export const EventsManagement: React.FC = () => {
 
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-2">
         <div>
-          <h1 className="text-3xl font-bold text-[#2E2E2F] tracking-tight">Events</h1>
-          <p className="text-[#2E2E2F] font-medium text-sm mt-1">Configure and manage your organization's event lifecycle.</p>
+          <h1 className="text-3xl font-bold text-[#2E2E2F] tracking-tight">Moderation Hub</h1>
+          <p className="text-[#2E2E2F] font-medium text-sm mt-1">Centralized control for event oversight and compliance removal.</p>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-end gap-3 w-full lg:w-auto">
           <div className="relative w-full sm:w-72">
@@ -360,23 +390,19 @@ export const EventsManagement: React.FC = () => {
             </div>
             <input
               type="text"
-              placeholder="Search events..."
+              placeholder="Search platform events..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="block w-full pl-10 pr-10 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors"
             />
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#2E2E2F]">
-              {(isFetching || searchTerm.trim() !== debouncedSearch) && (
-                <div className="w-4 h-4 border-2 border-[#2E2E2F]/30 border-t-transparent rounded-full animate-spin" />
-              )}
-            </div>
           </div>
-          {!isStaff && (
-            <Button onClick={handleOpenCreate} className="rounded-xl px-6 py-3 bg-[#38BDF2] text-[#F2F2F2] hover:text-[#F2F2F2] font-bold transition-colors">
-              <span className="flex items-center gap-2 font-bold text-sm">
-                <ICONS.Calendar className="w-4 h-4" />
-                Create Event
-              </span>
+          {selectedIds.length > 0 && (
+            <Button 
+              onClick={() => { setIsBulkMode(true); setDeleteReason('DUPLICATE'); }} 
+              className="rounded-xl px-6 py-3 bg-red-500 text-white hover:bg-red-600 font-bold transition-all shadow-lg shadow-red-500/20 flex items-center gap-2"
+            >
+              <ICONS.Trash className="w-4 h-4" />
+              Bulk Delete ({selectedIds.length})
             </Button>
           )}
         </div>
@@ -387,15 +413,32 @@ export const EventsManagement: React.FC = () => {
           <table className="w-full text-left">
             <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
               <tr>
+                <th className="px-8 py-5">
+                  <div className="flex items-center">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 rounded border-[#2E2E2F]/20 accent-[#38BDF2]" 
+                      checked={selectedIds.length === currentItems.length && currentItems.length > 0}
+                      onChange={toggleSelectAll}
+                    />
+                  </div>
+                </th>
                 <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Event Identity</th>
                 <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Date & Location</th>
-                <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Lifecycle</th>
-                <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide text-center">Actions</th>
+                <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide text-center">Safety Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#2E2E2F]/10">
               {currentItems.map(event => (
-                <tr key={event.eventId} className="hover:bg-[#38BDF2]/10 transition-colors group">
+                <tr key={event.eventId} className={`hover:bg-[#38BDF2]/10 transition-colors group ${selectedIds.includes(event.eventId) ? 'bg-[#38BDF2]/5' : ''}`}>
+                  <td className="px-8 py-7">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 rounded border-[#2E2E2F]/20 accent-[#38BDF2]" 
+                      checked={selectedIds.includes(event.eventId)}
+                      onChange={() => toggleSelect(event.eventId)}
+                    />
+                  </td>
                   <td className="px-8 py-7">
                     <div className="flex items-center gap-5">
                       <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-[#2E2E2F]/20">
@@ -407,6 +450,7 @@ export const EventsManagement: React.FC = () => {
                       </div>
                       <div>
                         <div className="font-bold text-[#2E2E2F] text-[16px] tracking-tight group-hover:text-[#2E2E2F] transition-colors">{event.eventName}</div>
+                        <p className="text-[10px] font-bold text-[#2E2E2F]/40 uppercase tracking-widest mt-0.5">Status: {event.status}</p>
                       </div>
                     </div>
                   </td>
@@ -419,62 +463,15 @@ export const EventsManagement: React.FC = () => {
                       <ICONS.MapPin className="w-3.5 h-3.5 text-[#2E2E2F]" strokeWidth={2.5} />
                     </div>
                   </td>
-                  <td className="px-8 py-7">
-                    {(() => {
-                      const now = new Date();
-                      const eventEnd = event.endAt ? new Date(event.endAt) : new Date(new Date(event.startAt).getTime() + 2 * 60 * 60 * 1000);
-                      const isCompleted = now > eventEnd;
-
-                      return (
-                        <div className={`inline-flex px-3.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${isCompleted
-                          ? 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
-                          : event.status === 'PUBLISHED'
-                            ? 'bg-[#38BDF2]/20 text-[#2E2E2F]'
-                            : event.status === 'DRAFT'
-                              ? 'bg-[#F2F2F2] text-[#2E2E2F] border border-[#2E2E2F]/20'
-                              : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
-                          }`}>
-                          {isCompleted ? 'COMPLETED' : event.status}
-                        </div>
-                      );
-                    })()}
-                  </td>
                   <td className="px-8 py-7 text-center">
                     <div className="flex justify-center items-center gap-6 opacity-70 group-hover:opacity-100 transition-colors">
                       <button
-                        onClick={() => handleOpenTickets(event)}
-                        className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
-                        title="Manage Tickets"
-                        disabled={isStaff && !canEditEvents}
-                        style={isStaff && !canEditEvents ? { opacity: 0.5, pointerEvents: 'none' } : {}}
+                        onClick={() => { setIsBulkMode(false); setDeleteConfirm(event); }}
+                        className="text-red-500 hover:text-red-600 transition-all p-2 hover:bg-red-50 rounded-lg group/btn"
+                        title="Moderate Removal"
                       >
-                        <ICONS.CreditCard className="w-[1.2rem] h-[1.2rem]" strokeWidth={2.2} />
+                        <ICONS.Trash className="w-[1.2rem] h-[1.2rem] group-hover/btn:scale-110" strokeWidth={2.2} />
                       </button>
-                      <button
-                        onClick={() => handleOpenAttendeePop(event)}
-                        className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
-                        title="View Confirmed Guests"
-                      >
-                        <ICONS.Users className="w-[1.2rem] h-[1.2rem]" strokeWidth={2.2} />
-                      </button>
-                      <button
-                        onClick={() => handleOpenEdit(event)}
-                        className="text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-1"
-                        title="Edit Session"
-                        disabled={isStaff && !canEditEvents}
-                        style={isStaff && !canEditEvents ? { opacity: 0.5, pointerEvents: 'none' } : {}}
-                      >
-                        <svg className="w-[1.2rem] h-[1.2rem]" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                      </button>
-                      {!isStaff && (
-                        <button
-                          onClick={() => setDeleteConfirm(event)}
-                          className="text-[#2E2E2F] hover:text-red-500 transition-colors p-1"
-                          title="Delete Event"
-                        >
-                          <ICONS.Trash className="w-[1.2rem] h-[1.2rem]" strokeWidth={2.2} />
-                        </button>
-                      )}
                     </div>
                   </td>
                 </tr>
@@ -770,41 +767,82 @@ export const EventsManagement: React.FC = () => {
         </div>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
+      {/* Moderated Removal Modal - Unified for single and bulk */}
       <Modal
-        isOpen={!!deleteConfirm}
-        onClose={() => setDeleteConfirm(null)}
-        title="Delete Event"
+        isOpen={!!deleteConfirm || isBulkMode}
+        onClose={() => { setDeleteConfirm(null); setIsBulkMode(false); }}
+        title="Moderated Event Removal"
+        size="md"
       >
         <div className="space-y-6">
-          <div className="flex items-start gap-5 p-6 bg-red-50 border border-red-200 rounded-xl">
-            <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
-              <ICONS.Trash className="w-6 h-6 text-red-500" strokeWidth={2} />
+          <div className="p-5 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-red-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-red-500/20">
+              <ICONS.AlertTriangle className="w-5 h-5" />
             </div>
             <div>
-              <p className="font-bold text-[#2E2E2F] text-[16px] tracking-tight">
-                Are you sure you want to delete this event?
-              </p>
-              <p className="text-[13px] text-[#2E2E2F] font-medium mt-2 leading-relaxed">
-                This will permanently remove <strong>"{deleteConfirm?.eventName}"</strong> and all associated data including ticket types, registrations, and attendee records. This action cannot be undone.
+              <h3 className="text-sm font-black text-red-900 uppercase tracking-tight">Authoritative Removal Zone</h3>
+              <p className="text-xs font-semibold text-red-800/70 mt-1 leading-relaxed">
+                {isBulkMode 
+                  ? `You are about to archive ${selectedIds.length} events simultaneously. ` 
+                  : `You are about to archive "${deleteConfirm?.eventName}". `}
+                This action is logged and organizers will be notified of the removal justification.
               </p>
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="space-y-4">
+            <label className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] ml-1">Select Justification</label>
+            <div className="grid grid-cols-1 gap-2">
+              {[
+                { id: 'DUPLICATE', label: 'Duplicate Entry', icon: <ICONS.Layout /> },
+                { id: 'INAPPROPRIATE', label: 'Policy Violation', icon: <ICONS.Shield /> },
+                { id: 'SPAM', label: 'Spam Activity', icon: <ICONS.MessageSquare /> },
+                { id: 'TEST', label: 'Test Event', icon: <ICONS.Activity /> },
+                { id: 'OTHER', label: 'Custom Reason', icon: <ICONS.Settings /> },
+              ].map((r) => (
+                <button
+                  key={r.id}
+                  onClick={() => setDeleteReason(r.id)}
+                  className={`w-full text-left px-5 py-3.5 rounded-xl border text-[13px] font-semibold transition-all ${deleteReason === r.id
+                    ? 'bg-[#38BDF2] border-[#38BDF2] text-white'
+                    : 'bg-[#F2F2F2] border-[#2E2E2F]/10 text-[#2E2E2F] hover:border-[#38BDF2]/40'
+                    }`}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+
+            {deleteReason === 'OTHER' && (
+              <div className="pt-2 animate-in fade-in slide-in-from-top-2">
+                <textarea
+                  placeholder="Describe the reason for removal..."
+                  value={customReason}
+                  onChange={(e) => setCustomReason(e.target.value)}
+                  className="w-full px-5 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm min-h-[100px] outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-4 pt-4">
             <Button
-              className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border border-[#2E2E2F]/20 hover:bg-[#2E2E2F]/10 transition-colors min-h-[32px]"
-              onClick={() => setDeleteConfirm(null)}
+              className="flex-1 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border border-[#2E2E2F]/20 hover:bg-[#2E2E2F]/10 transition-colors"
+              onClick={() => {
+                setDeleteConfirm(null);
+                setDeleteReason('DUPLICATE');
+                setCustomReason('');
+              }}
               disabled={submitting}
             >
               Cancel
             </Button>
             <Button
-              className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 transition-colors min-h-[32px]"
+              className="flex-[2] py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-red-500 text-white hover:bg-black transition-all shadow-lg shadow-red-500/20"
               onClick={handleDeleteEvent}
-              disabled={submitting}
+              disabled={submitting || (deleteReason === 'OTHER' && !customReason.trim())}
             >
-              {submitting ? 'Deleting...' : 'Yes, Delete Event'}
+              {submitting ? 'Archiving...' : 'Confirm Archival'}
             </Button>
           </div>
         </div>

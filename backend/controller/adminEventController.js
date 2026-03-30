@@ -4,6 +4,7 @@ import path from 'path';
 import { getOrCreateOrganizerForUser, getOrganizerByOwnerUserId } from '../utils/organizerData.js';
 import { logAudit } from '../utils/auditLogger.js';
 import { checkPlanLimits } from '../utils/planValidator.js';
+import { notifyUserByPreference, getAdminSmtpConfig } from '../utils/notificationService.js';
 
 const STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'startuplab-business-ticketing';
 const ADMIN_ROLES = ['ADMIN', 'STAFF'];
@@ -171,6 +172,11 @@ export const listAdminEvents = async (req, res) => {
     const { data: events, error } = await query;
     if (error) return res.status(500).json({ error: error.message });
 
+    // 3) Enforce creator-role filtering for STAFF; ADMINs see EVERYTHING
+    if (requesterRole === 'ADMIN') {
+      return res.json(events || []);
+    }
+
     const filtered = (events || []).filter((event) => allowedCreatorIds.has(String(event.createdBy)));
     return res.json(filtered);
   } catch (err) {
@@ -203,6 +209,7 @@ export const listUserEvents = async (req, res) => {
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }
 };
+
 
 export const createUserEvent = async (req, res) => {
   const userId = req.user?.id;
@@ -630,9 +637,42 @@ export const deleteEvent = async (req, res) => {
 
     await logAudit({
       actionType: 'EVENT_ARCHIVED',
-      details: { eventId: id },
+      details: { eventId: id, reason: req.body?.reason || 'No reason provided' },
       req
     });
+
+    // Notify the organizer about the removal
+    try {
+      const { data: eventDetails } = await supabase
+        .from('events')
+        .select('eventName, createdBy, organizerId')
+        .eq('eventId', id)
+        .maybeSingle();
+
+      if (eventDetails?.createdBy) {
+        const reason = req.body?.reason || 'General moderation / policy violation';
+        const adminSmtp = await getAdminSmtpConfig();
+
+        await notifyUserByPreference({
+          recipientUserId: eventDetails.createdBy,
+          actorUserId: userId,
+          type: 'ADMIN_ALERT',
+          title: 'Event Removed by Admin',
+          message: `Your event "${eventDetails.eventName}" has been archived by a system administrator for the following reason: ${reason}.`,
+          metadata: {
+            eventId: id,
+            eventName: eventDetails.eventName,
+            reason: reason,
+            actionLabel: 'VIEW ARCHIVES',
+            actionUrl: `${process.env.FRONTEND_URL || 'https://startuplab.ph'}/#/organizer-archives`
+          },
+          emailSubject: `[Important] Event Removal: ${eventDetails.eventName}`,
+          smtpConfigOverride: adminSmtp
+        });
+      }
+    } catch (notifyErr) {
+      console.error('[AdminEvent] Failed to notify organizer:', notifyErr.message);
+    }
 
     return res.status(200).json({ message: 'Event archived successfully', archived: true });
   } catch (err) {
@@ -645,7 +685,28 @@ export const restoreEvent = async (req, res) => {
     const { id } = req.params;
     const userId = req.user?.userId;
 
-    const { data, error } = await supabase
+    // Security Check: Only admins can restore moderated events
+    const { data: event, error: fetchErr } = await supabase
+      .from('events')
+      .select('archived_by, createdBy')
+      .eq('eventId', id)
+      .single();
+
+    if (fetchErr || !event) return res.status(404).json({ error: 'Event not found' });
+
+    const { data: adminRows } = await supabase.from('users').select('userId').in('role', ADMIN_ROLES);
+    const adminIds = new Set((adminRows || []).map(a => String(a.userId)));
+
+    const isModerated = event.archived_by && adminIds.has(String(event.archived_by)) && String(event.archived_by) !== String(event.createdBy);
+    const requesterRole = String(req.user?.role || '').toUpperCase();
+
+    if (isModerated && requesterRole !== 'ADMIN') {
+      return res.status(403).json({ 
+        error: 'This event was removed by a platform administrator and cannot be restored by the organizer.' 
+      });
+    }
+
+    const { data: restored, error } = await supabase
       .from('events')
       .update({
         is_archived: false,
@@ -658,7 +719,7 @@ export const restoreEvent = async (req, res) => {
       .single();
 
     if (error) return res.status(500).json({ error: error.message });
-    if (!data) return res.status(404).json({ error: 'Event not found' });
+    if (!restored) return res.status(404).json({ error: 'Event not found' });
 
     await logAudit({
       actionType: 'EVENT_RESTORED',
@@ -674,36 +735,35 @@ export const restoreEvent = async (req, res) => {
 
 export const listArchivedEvents = async (req, res) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?.id || req.user?.userId;
     const { page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
 
     // Get organizer's events that are archived
-    const { data: organizer } = await supabase
-      .from('organizers')
-      .select('organizerId')
-      .eq('ownerUserId', userId)
-      .maybeSingle();
-
     let query = supabase
       .from('events')
-      .select('*', { count: 'exact' })
+      .select('*, ticketTypes(*)', { count: 'exact' })
+      .eq('createdBy', userId)
       .eq('is_archived', true)
       .not('deleted_at', 'is', null)
       .order('deleted_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
-    // If user has organizer profile, filter to their events only
-    if (organizer?.organizerId) {
-      query = query.eq('organizerId', organizer.organizerId);
-    }
-
-    const { data, error, count } = await query;
-
+    const { data: events, error, count } = await query;
     if (error) return res.status(500).json({ error: error.message });
 
+    // SECURITY: Filter out moderated events (those archived by an admin)
+    const { data: admins } = await supabase.from('users').select('userId').in('role', ADMIN_ROLES);
+    const adminIds = new Set((admins || []).map(a => String(a.userId)));
+    
+    const filteredResults = (events || []).filter(e => {
+        // If archived_by is an admin and not the owner himself, it's moderated
+        const isModerated = e.archived_by && adminIds.has(String(e.archived_by)) && String(e.archived_by) !== String(userId);
+        return !isModerated;
+    });
+
     return res.status(200).json({
-      events: data || [],
+      events: filteredResults,
       total: count || 0,
       page: Number(page),
       limit: Number(limit)

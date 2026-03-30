@@ -531,6 +531,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           : role === UserRole.ADMIN
             ? [
               { label: 'Dashboard', path: '/dashboard', icon: <ICONS.Layout className="w-6 h-6" /> },
+              { label: 'Events Moderation', path: '/events', icon: <ICONS.Shield className="w-6 h-6" /> },
               { label: 'Plans', path: '/settings?tab=plans', icon: <ICONS.Layout className="w-6 h-6" /> },
               { label: 'Team and Access', path: '/settings?tab=team', icon: <ICONS.Users className="w-6 h-6" /> },
               { label: 'Email Settings', path: '/settings?tab=email', icon: <ICONS.Mail className="w-6 h-6" /> },
