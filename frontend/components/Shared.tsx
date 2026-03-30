@@ -4,8 +4,10 @@ import React from 'react';
 export const Badge: React.FC<{
   children: React.ReactNode,
   type?: 'success' | 'danger' | 'warning' | 'info' | 'neutral',
-  className?: string
-}> = ({ children, type = 'neutral', className = '' }) => {
+  className?: string,
+  onClick?: () => void,
+  title?: string
+}> = ({ children, type = 'neutral', className = '', onClick, title }) => {
   const styles = {
     success: 'bg-green-100 text-green-700',
     danger: 'bg-red-100 text-red-700',
@@ -14,7 +16,11 @@ export const Badge: React.FC<{
     neutral: 'bg-[#2E2E2F]/10 text-[#2E2E2F]',
   };
   return (
-    <span className={`px-2.5 py-1 rounded-full text-[13px] sm:text-[13px] font-bold uppercase tracking-wide ${styles[type]} inline-block ${className}`}>
+    <span 
+      onClick={onClick} 
+      title={title} 
+      className={`px-2.5 py-1 rounded-full text-[13px] sm:text-[13px] font-bold uppercase tracking-wide ${styles[type]} inline-block ${className} ${onClick ? 'cursor-pointer' : ''}`}
+    >
       {children}
     </span>
   );

@@ -916,10 +916,12 @@ export const apiService = {
   },
 
   // DELETE /api/admin/events/:id (Archives event - soft delete)
-  deleteEvent: async (id: string): Promise<{ archived?: boolean; permanent?: boolean; message?: string }> => {
-    const res = await fetch(`${API_BASE}/api/user/events/${encodeURIComponent(id)}`, {
+  deleteEvent: async (id: string, reason?: string): Promise<{ archived?: boolean; permanent?: boolean; message?: string }> => {
+    const res = await fetch(`${API_BASE}/api/admin/events/${encodeURIComponent(id)}`, {
       method: 'DELETE',
-      credentials: 'include'
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: reason ? JSON.stringify({ reason }) : undefined
     });
     if (!res.ok) {
       const error = await res.json().catch(() => ({}));
@@ -1508,6 +1510,20 @@ export const apiService = {
       throw new Error(text || `Failed to load subscription health: ${res.status}`);
     }
     return res.json();
+  },
+
+  updateUserStatus: async (userId: string, status: string): Promise<any> => {
+    const res = await apiService._fetch(`${API_BASE}/api/users/${encodeURIComponent(userId)}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ status })
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || `Failed to update status: ${res.status}`);
+    }
+    return await res.json();
   },
 };
 

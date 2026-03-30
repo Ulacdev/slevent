@@ -278,8 +278,16 @@ export const login = async (req, res) => {
     }
 
     // --- SELF-HEALING: Ensure user and organizer profiles exist ---
-    const { data: dbUser } = await db.from('users').select('userId, role').eq('userId', user.id).maybeSingle();
+    const { data: dbUser } = await db.from('users').select('userId, role, status').eq('userId', user.id).maybeSingle();
     let finalRole = dbUser?.role || ORGANIZER_ROLE;
+
+    if (dbUser && dbUser.status === 'Inactive') {
+      console.warn(`[Auth] Blocked login for inactive user: ${user.email}`);
+      // Clear cookies if they exist to prevent persistent re-auth attempts
+      res.cookie("access_token", "", { maxAge: 0 });
+      res.cookie("refresh_token", "", { maxAge: 0 });
+      return res.status(403).json({ message: "Your account is currently INACTIVE. Please contact support or your organization administrator for assistance." });
+    }
 
     if (!dbUser) {
       console.log(`[Auth] Syncing missing DB user: ${user.email}`);

@@ -193,7 +193,7 @@ export const whoAmI = async (req, res) => {
     let error = null;
     let resp = await db
       .from('users')
-      .select("userId, name, email, role, imageUrl, canviewevents, caneditevents, canmanualcheckin, canreceivenotifications")
+      .select("userId, name, email, role, imageUrl, canviewevents, caneditevents, canmanualcheckin, canreceivenotifications, status")
       .eq("userId", userId)
       .maybeSingle();
     data = resp.data; error = resp.error;
@@ -202,7 +202,7 @@ export const whoAmI = async (req, res) => {
     if ((!data && !error) || (error && error.message?.includes('column "userId"'))) {
       resp = await db
         .from('users')
-        .select("id, name, email, role, imageUrl, canviewevents, caneditevents, canmanualcheckin, canreceivenotifications")
+        .select("id, name, email, role, imageUrl, canviewevents, caneditevents, canmanualcheckin, canreceivenotifications, status")
         .eq("id", userId)
         .maybeSingle();
       data = resp.data; error = resp.error;
@@ -229,7 +229,9 @@ export const whoAmI = async (req, res) => {
 
     if (error) return res.status(500).json({ error: error.message });
     
-    // 🔥 Just-In-Time (JIT) User Creation for Social Logins
+    if (data && data.status === 'Inactive') {
+      return res.status(403).json({ error: 'Your account is currently INACTIVE. Please contact the administrator.' });
+    }
     if (!data && req.user) {
       console.log(`[whoAmI] JIT creation for user: ${req.user.email} (${req.user.id})`);
       const authUser = req.user;
@@ -600,5 +602,45 @@ export const getRoleByEmail = async (req, res) => {
     return res.json({ role, isOnboarded });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const updateUserStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) return res.status(400).json({ error: 'Status is required' });
+
+    // Validate permission
+    let requesterRole = normalizeRole(req.user?.role || '');
+    if (requesterRole !== 'ADMIN') {
+        const { data: dbUser } = await db.from('users').select('role').eq('userId', req.user?.id).maybeSingle();
+        requesterRole = normalizeRole(dbUser?.role || '');
+    }
+
+    if (requesterRole !== 'ADMIN') {
+        return res.status(403).json({ error: 'Only admins can change user status' });
+    }
+
+    const { data, error } = await db
+      .from('users')
+      .update({ status })
+      .eq('userId', id)
+      .select('userId, name, email, role, status')
+      .maybeSingle();
+
+    if (error) return res.status(500).json({ error: error.message });
+    if (!data) return res.status(404).json({ error: 'User not found' });
+
+    await logAudit({
+        actionType: 'USER_STATUS_UPDATED',
+        details: { targetUserId: id, status, targetEmail: data.email },
+        req
+    });
+
+    return res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

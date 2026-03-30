@@ -240,6 +240,17 @@ export const SettingsView: React.FC = () => {
     }
   };
 
+  const toggleUserStatus = async (userId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+    try {
+      await apiService.updateUserStatus(userId, newStatus);
+      setTeamMembers(prev => prev.map(m => m.id === userId ? { ...m, status: newStatus as any } : m));
+      setNotification({ message: `Account status for user ${userId} updated to ${newStatus}.`, type: 'success' });
+    } catch (err: any) {
+      setNotification({ message: err.message || 'Failed to update account status.', type: 'error' });
+    }
+  };
+
   const handleInviteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const displayName = inviteData.email.split('@')[0] || inviteData.email;
@@ -295,14 +306,14 @@ export const SettingsView: React.FC = () => {
   return (
     <div className="pb-16 space-y-6">
       {notification && (
-        <div className="fixed top-24 right-8 z-[120] animate-in slide-in-from-right-10 duration-500">
-          <Card className={`flex items-center gap-4 px-6 py-4 rounded-xl shadow-xl border ${notification.type === 'success' ? 'bg-[#F2F2F2] border-[#38BDF2]/20 text-[#2E2E2F]' : 'bg-[#F2F2F2] border-red-200 text-[#2E2E2F]'}`}>
-            <div className={`p-2 rounded-xl ${notification.type === 'success' ? 'bg-[#38BDF2] text-[#F2F2F2] shadow-lg shadow-[#38BDF2]/30' : 'bg-red-500 text-white shadow-lg shadow-red-500/30'}`}>
+        <div className={`fixed top-10 right-10 z-[2000] p-5 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-top border-2 flex items-center gap-4 ${
+          notification.type === 'success' ? 'bg-[#22C55E] border-[#22C55E]/20 text-[#F2F2F2]' : 'bg-red-500 border-red-500/20 text-[#F2F2F2]'
+        }`}>
+            <div className={`p-2 rounded-xl ${notification.type === 'success' ? 'bg-white/20 text-white' : 'bg-white/20 text-white'}`}>
               {notification.type === 'success' ? <ICONS.CheckCircle className="w-5 h-5" /> : <ICONS.Layout className="w-5 h-5" />}
             </div>
             <p className="font-black text-sm tracking-tight">{notification.message}</p>
-            <button onClick={() => setNotification(null)} className="ml-4 text-[#2E2E2F] hover:text-[#2E2E2F] text-xl font-black transition-colors">&times;</button>
-          </Card>
+            <button onClick={() => setNotification(null)} className="ml-4 text-white/50 hover:text-white text-xl font-black transition-colors">&times;</button>
         </div>
       )}
       <div className="px-2 flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -395,7 +406,9 @@ export const SettingsView: React.FC = () => {
                             <td className="px-10 py-8">
                               <Badge 
                                 type={member.status === 'Active' ? 'success' : member.status === 'Pending' ? 'warning' : 'neutral'}
-                                className="font-black text-[8px] uppercase tracking-widest"
+                                className="font-black text-[8px] uppercase tracking-widest cursor-pointer hover:scale-105 transition-transform active:scale-95 shadow-sm"
+                                onClick={() => toggleUserStatus(member.id, member.status)}
+                                title={`Click to make ${member.status === 'Active' ? 'Inactive' : 'Active'}`}
                               >
                                 {member.status}
                               </Badge>
