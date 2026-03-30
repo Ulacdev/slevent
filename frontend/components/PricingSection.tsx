@@ -49,7 +49,7 @@ export const PricingSection: React.FC = () => {
                     <h2 className="text-2xl md:text-4xl font-black text-[#2E2E2F] tracking-tight leading-none mb-4">
                         Simple & Transparent Pricing
                     </h2>
-                    <p className="text-[#2E2E2F] text-sm md:text-base font-medium max-w-xl mx-auto leading-relaxed">
+                    <p className="text-[#2E2E2F] text-[18px] font-normal max-w-xl mx-auto leading-relaxed">
                         Choose the best plan for your needs.
                     </p>
                 </div>

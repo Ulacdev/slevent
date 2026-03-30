@@ -2067,7 +2067,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
             <div>
               <Branding className="h-32 w-auto" />
-              <p className="mt-4 text-sm font-medium max-w-sm text-[#2E2E2F] leading-relaxed">
+              <p className="mt-4 text-[11px] font-medium max-w-sm text-[#2E2E2F] leading-relaxed">
                 Your gateway to StartupLab events.<br />
                 From internal workshops to public showcases, this platform delivers seamless, secure registration for every StartupLab gathering.
               </p>
@@ -2088,7 +2088,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 </a>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-8 lg:text-right uppercase tracking-[0.2em] font-black text-[9px]">
+            <div className="grid grid-cols-2 gap-8 lg:text-right uppercase tracking-[0.2em] font-black text-[11px]">
               <div className="space-y-4">
                 <p className="text-[#2E2E2F] mb-4">Platform</p>
                 <Link to="/" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Events List</Link>
@@ -2104,7 +2104,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 <Link to="/faq" className="block text-[#2E2E2F] hover:text-[#38BDF2]">FAQ</Link>
                 <button
                   onClick={() => setIsSupportModalOpen(true)}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#38BDF2] text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-xl hover:bg-[#2E2E2F] transition-all duration-300 active:scale-95 shadow-md shadow-[#38BDF2]/20 w-full lg:w-fit"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#38BDF2] text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-xl hover:bg-[#2E2E2F] transition-all duration-300 active:scale-95 shadow-md shadow-[#38BDF2]/20 w-full lg:w-fit"
                 >
                   <ICONS.AlertTriangle className="w-4 h-4" />
                   Submit Report / Bug
@@ -2113,11 +2113,11 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             </div>
           </div>
           <div className="pt-8 border-t border-[#2E2E2F]/10 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-[9px] uppercase tracking-[0.3em] font-black text-[#2E2E2F]">
+            <div className="text-[11px] uppercase tracking-[0.3em] font-black text-[#2E2E2F]">
               © 2026 StartupLab Business Center
             </div>
             <div className="flex items-center gap-6 opacity-60 grayscale">
-              <img src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/images/hitpay.png" alt="HitPay" className="h-3" />
+              <img src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/images/hitpay.png" alt="HitPay" className="h-4" />
             </div>
           </div>
         </div>

@@ -14,7 +14,7 @@ export const Badge: React.FC<{
     neutral: 'bg-[#2E2E2F]/10 text-[#2E2E2F]',
   };
   return (
-    <span className={`px-2.5 py-1 rounded-full text-[11px] sm:text-[12px] font-bold uppercase tracking-wide ${styles[type]} inline-block ${className}`}>
+    <span className={`px-2.5 py-1 rounded-full text-[13px] sm:text-[13px] font-bold uppercase tracking-wide ${styles[type]} inline-block ${className}`}>
       {children}
     </span>
   );
@@ -67,7 +67,7 @@ export const Button: React.FC<{
     };
 
     const sizes = {
-      sm: 'px-3 py-2 text-[12px] sm:text-[13px] min-h-[40px] sm:min-h-[36px]',
+      sm: 'px-3 py-2 text-[13px] sm:text-[13px] min-h-[40px] sm:min-h-[36px]',
       md: 'px-4 sm:px-4 py-3 sm:py-2.5 text-[13px] sm:text-[14px] min-h-[48px] sm:min-h-[44px]',
       lg: 'px-6 py-3 text-[14px] sm:text-[15px] min-h-[52px] sm:min-h-[48px]',
     };
@@ -97,12 +97,12 @@ export const Input: React.FC<{
 
   return (
     <div className="space-y-2 w-full">
-      {label && <label className="block text-xs sm:text-sm font-semibold text-[#2E2E2F] mb-1">{label}</label>}
+      {label && <label className="block text-[13px] sm:text-sm font-semibold text-[#2E2E2F] mb-1">{label}</label>}
       <input
         className={`block w-full px-4 py-3 bg-[#F2F2F2] border text-base sm:text-sm min-h-[48px] sm:min-h-[44px] ${error ? 'border-red-500' : 'border-[#2E2E2F]/20'} rounded-xl focus:outline-none focus:ring-2 ${error ? 'focus:ring-red-300/40' : 'focus:ring-[#38BDF2]/40'} transition-colors font-normal ${className}`}
         {...inputProps}
       />
-      {error && <p className="text-xs text-red-500 font-medium mt-1">{error}</p>}
+      {error && <p className="text-[13px] text-red-500 font-medium mt-1">{error}</p>}
     </div>
   );
 };
@@ -167,12 +167,12 @@ export const PasswordRequirements: React.FC<{ password: string }> = ({ password 
 
   return (
     <div className={`mt-2 space-y-1.5 p-3 bg-[#F2F2F2] rounded-[5px] border border-[#2E2E2F]/5 transition-all duration-300 ${hasPassword ? 'opacity-100 translate-y-0 max-h-[300px]' : 'opacity-0 -translate-y-2 pointer-events-none max-h-0 !mt-0 !p-0 border-0 overflow-hidden'}`}>
-      <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] mb-2">Password Requirements</p>
+      <p className="text-[13px] font-black uppercase tracking-widest text-[#2E2E2F] mb-2">Password Requirements</p>
       <div className="grid grid-cols-1 gap-y-1.5">
         {requirements.map((req, i) => (
           <div key={i} className="flex items-center gap-2">
             <div className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${req.test ? 'bg-[#38BDF2] shadow-[0_0_8px_rgba(56,189,242,0.6)] scale-110' : 'bg-[#2E2E2F]/10'}`} />
-            <span className={`text-[10.5px] font-bold tracking-tight transition-colors duration-300 ${req.test ? 'text-[#38BDF2]' : 'text-[#2E2E2F]'}`}>
+            <span className={`text-[13px] font-bold tracking-tight transition-colors duration-300 ${req.test ? 'text-[#38BDF2]' : 'text-[#2E2E2F]'}`}>
               {req.label}
             </span>
           </div>
@@ -270,7 +270,7 @@ export const Modal: React.FC<{
                   </h2>
                 )}
                 {subtitle && (
-                  <p className="mt-1 text-[11px] sm:text-[13px] uppercase tracking-[0.15em] font-bold text-[#2E2E2F]">
+                  <p className="mt-1 text-[13px] sm:text-[13px] uppercase tracking-[0.15em] font-bold text-[#2E2E2F]">
                     {subtitle}
                   </p>
                 )}
@@ -333,7 +333,7 @@ export const PageLoader: React.FC<{
           <div className="absolute inset-[30%] rounded-full bg-[#38BDF2] animate-ping opacity-60" />
         </div>
         {label && (
-          <p className="mt-8 text-[#2E2E2F] font-black uppercase tracking-[0.3em] text-[10px] sm:text-[11px] px-6 animate-pulse">
+          <p className="mt-8 text-[#2E2E2F] font-black uppercase tracking-[0.3em] text-[13px] sm:text-[13px] px-6 animate-pulse">
             {label}
           </p>
         )}

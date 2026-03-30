@@ -154,33 +154,33 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-[#2E2E2F] ml-1">Your email address</label>
+              <label className="text-[16px] font-semibold text-[#2E2E2F] ml-1">Your email address</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full px-5 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium"
+                className="w-full px-5 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium text-[16px]"
               />
             </div>
 
             {/* Subject */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-[#2E2E2F] ml-1">In a few words, tell us what your enquiry is about</label>
+              <label className="text-[16px] font-semibold text-[#2E2E2F] ml-1">In a few words, tell us what your enquiry is about</label>
               <input
                 type="text"
                 required
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="Subject of your ticket"
-                className="w-full px-5 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium"
+                className="w-full px-5 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium text-[16px]"
               />
             </div>
 
             {/* Message + rich toolbar */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-[#2E2E2F] ml-1">Provide a detailed description</label>
+              <label className="text-[16px] font-semibold text-[#2E2E2F] ml-1">Provide a detailed description</label>
               <div className="relative">
                 <textarea
                   ref={textareaRef}
@@ -189,7 +189,7 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Describe your issue or question..."
                   rows={6}
-                  className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium resize-none pb-14"
+                  className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium resize-none pb-14 text-[16px]"
                 />
 
                 {/* Toolbar */}
@@ -308,12 +308,12 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
 
             {/* Category */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-[#2E2E2F] ml-1">Select the item you need help with</label>
+              <label className="text-[16px] font-semibold text-[#2E2E2F] ml-1">Select the item you need help with</label>
               <select
                 required
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-5 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium appearance-none cursor-pointer"
+                className="w-full px-5 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 focus:border-[#38BDF2] rounded-xl outline-none transition-all font-medium appearance-none cursor-pointer text-[16px]"
               >
                 <option value="" disabled>Select an option...</option>
                 <option value="Technical Issue">Technical Issue</option>
@@ -330,7 +330,7 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-10 py-3.5 bg-[#38BDF2] text-white rounded-full font-bold shadow-lg shadow-[#38BDF2]/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 flex items-center gap-2"
+                className={`px-10 py-3.5 bg-[#38BDF2] text-white rounded-full font-bold text-[16px] shadow-lg shadow-[#38BDF2]/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 flex items-center gap-2`}
               >
                 {isSubmitting ? (
                   <>
@@ -347,22 +347,22 @@ export const FloatingSupportModal: React.FC<FloatingSupportModalProps> = ({ isOp
 
         {/* Right Side: Info Sidebar */}
         <div className="w-full md:w-[320px] bg-[#2E2E2F]/5 p-8 md:p-12 border-l border-[#2E2E2F]/10 space-y-8 overflow-y-auto">
-          <h3 className="text-xl font-bold text-[#2E2E2F]">Before you submit:</h3>
+          <h3 className="text-[17px] font-bold text-[#2E2E2F]">Before you submit:</h3>
           <div className="space-y-8">
             <div className="space-y-2">
-              <h4 className="font-bold text-[#2E2E2F]">Tell us!</h4>
+              <h4 className="text-[17px] font-bold text-[#2E2E2F]">Tell us!</h4>
               <p className="text-sm text-[#2E2E2F] leading-relaxed font-medium">Add as much detail as possible, including site and page name.</p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-bold text-[#2E2E2F]">Show us!</h4>
+              <h4 className="text-[17px] font-bold text-[#2E2E2F]">Show us!</h4>
               <p className="text-sm text-[#2E2E2F] leading-relaxed font-medium">Add a screenshot or a link to a video.</p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-bold text-[#2E2E2F]">What problem did you experience?</h4>
+              <h4 className="text-[17px] font-bold text-[#2E2E2F]">What problem did you experience?</h4>
               <p className="text-sm text-[#2E2E2F] leading-relaxed font-medium">Describe what happened and what you expected instead.</p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-bold text-[#2E2E2F]">When did this problem happen?</h4>
+              <h4 className="text-[17px] font-bold text-[#2E2E2F]">When did this problem happen?</h4>
               <p className="text-sm text-[#2E2E2F] leading-relaxed font-medium">Let us know the date and approximate time.</p>
             </div>
           </div>

@@ -151,22 +151,22 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
                         {Number(amount || 0).toLocaleString()}
                       </span>
                       <div className="flex flex-col ml-2 mt-2">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] leading-tight">
+                        <span className="text-[12px] font-black uppercase tracking-widest text-[#2E2E2F] leading-tight">
                           PHP /
                         </span>
-                        <span className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] leading-tight">
+                        <span className="text-[12px] font-black uppercase tracking-widest text-[#2E2E2F] leading-tight">
                           {billingCycle === 'monthly' ? 'month' : 'year'}
                         </span>
                       </div>
                     </div>
                     {billingCycle === 'yearly' && Number(amount) > 0 && (
-                      <p className="text-[9px] font-bold mt-1.5 uppercase tracking-widest text-[#2E2E2F] italic">
+                      <p className="text-[12px] font-bold mt-1.5 uppercase tracking-widest text-[#2E2E2F] italic">
                         Billed annually (₱{Number(plan.yearlyPrice).toLocaleString()} per year)
                       </p>
                     )}
                   </div>
 
-                  <p className="text-xs font-medium text-[#2E2E2F] mb-8 leading-snug">
+                  <p className="text-[14px] font-medium text-[#2E2E2F] mb-8 leading-snug">
                     {plan.description || "The ideal solution for organizers looking to scale."}
                   </p>
 
@@ -175,7 +175,7 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
                     <Button
                       onClick={() => onPlanAction?.(plan)}
                       disabled={isCurrentPlan || (actionLoadingPlanId !== null && actionLoadingPlanId !== plan.planId)}
-                      className={`w-full py-2.5 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-300 ${isCurrentPlan
+                      className={`w-full py-2.5 rounded-xl font-black text-[14px] uppercase tracking-[0.2em] transition-all duration-300 ${isCurrentPlan
                         ? '!bg-black/5 !text-[#2E2E2F] border border-black/5 shadow-none hover:scale-100 active:scale-100'
                         : 'bg-[#38BDF2] text-white hover:bg-[#2E2E2F] shadow-lg shadow-[#38BDF2]/10 hover:shadow-[#2E2E2F]/10'
                         }`}
@@ -200,7 +200,7 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
                         <div className={`shrink-0 w-3.5 h-3.5 flex items-center justify-center ${feature.enabled ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]'}`}>
                           {feature.icon}
                         </div>
-                        <span className={`text-[13px] font-medium tracking-tight leading-tight pt-0.5 ${feature.enabled ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]'}`}>
+                        <span className={`text-[14px] font-medium tracking-tight leading-tight pt-0.5 ${feature.enabled ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]'}`}>
                           {feature.label}
                         </span>
                       </div>

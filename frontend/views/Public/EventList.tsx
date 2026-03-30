@@ -345,15 +345,15 @@ export const EventCard: React.FC<EventCardProps> = ({
         <h4 className="text-black text-xl sm:text-2xl font-black tracking-tighter leading-tight mb-3 line-clamp-2">
           {event.eventName}
         </h4>
-        <div className="flex items-center gap-3 text-[12px] sm:text-[13px] font-semibold mb-3">
-          <span className={`w-6 h-6 shrink-0 rounded-full flex items-center justify-center transition-all ${liked ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/30' : 'bg-black/10 text-black group-hover:bg-[#38BDF2]/20 group-hover:text-[#38BDF2]'}`}>
+        <div className="flex items-center gap-3 text-[18px] font-semibold mb-3">
+          <span className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all ${liked ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/30' : 'bg-black/10 text-black group-hover:bg-[#38BDF2]/20 group-hover:text-[#38BDF2]'}`}>
             <ICONS.Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
           </span>
           <span className={`${event.isPromoted || (event as any).is_promoted ? 'text-black font-black' : 'text-black'}`}>{likeLabel}</span>
         </div>
-        <div className="flex flex-col gap-2.5 text-[12px] sm:text-[13px] font-medium text-black mb-4">
+        <div className="flex flex-col gap-2.5 text-[18px] font-medium text-black mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-6 shrink-0 flex items-center justify-center text-black">
+            <div className="w-8 shrink-0 flex items-center justify-center text-black">
               <ICONS.Users className="w-4 h-4" />
             </div>
             <span className="text-[#38BDF2] font-bold">
@@ -361,13 +361,13 @@ export const EventCard: React.FC<EventCardProps> = ({
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-6 shrink-0 flex items-center justify-center text-black">
+            <div className="w-8 shrink-0 flex items-center justify-center text-black">
               <ICONS.MapPin className="w-4 h-4" />
             </div>
             <span className="line-clamp-1">{event.locationText}</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-6 shrink-0 flex items-center justify-center text-black">
+            <div className="w-8 shrink-0 flex items-center justify-center text-black">
               <ICONS.Calendar className="w-4 h-4" />
             </div>
             <span>{formatDate(event.startAt, event.timezone, { day: 'numeric', month: 'short', year: 'numeric' })} · {formatTime(event.startAt, event.timezone)}</span>
@@ -843,22 +843,22 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
       {isLanding && (
         <>
           {/* Premium Hero Section */}
-          <div className="flex flex-col lg:flex-row items-center lg:items-stretch justify-between gap-8 lg:gap-14 mb-20 lg:mb-24">
+          <div className="flex flex-col lg:flex-row items-center lg:items-stretch justify-between gap-8 lg:gap-14 mb-20 lg:mb-24" style={{ zoom: 0.85 }}>
             {/* Left Column: Content */}
             <div className="flex-1 min-w-0 flex flex-col items-start justify-center text-left w-full">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#E8E8E8] border border-black/10 text-[10px] font-bold text-black mb-7 shadow-sm">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#E8E8E8] border border-black/10 text-[16px] font-bold text-black mb-7 shadow-sm">
                   <span role="img" aria-label="megaphone">📢</span>
                   <span className="opacity-80">New: Advanced QR Ticketing & Analytics Launched!</span>
                 </div>
 
-                <h1 className="text-[2.5rem] sm:text-5xl lg:text-[60px] font-bold text-black tracking-tight leading-[1.1] mb-[5px]">
+                <h1 className="text-[3rem] sm:text-6xl lg:text-[72px] font-bold text-black tracking-tight leading-[1.1] mb-[5px]">
                   Smart Events for<br />
                   Growing Philippine<br />
                   Organizers
                 </h1>
 
-                <p className="text-sm sm:text-base lg:text-lg font-normal text-black leading-relaxed max-w-[550px] mb-8">
+                <p className="text-[28px] font-normal text-black leading-relaxed max-w-[800px] mb-8">
                   Manage registrations, tickets, attendee check-ins, and performance in one simple, compliance-ready event platform — built for organizers in the Philippines.
                 </p>
 
@@ -866,7 +866,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   {isAuthenticated && role === UserRole.ORGANIZER && !isOnboarded ? (
                     <Button
                       onClick={() => navigate('/onboarding')}
-                      className="w-full sm:w-auto px-8 bg-[#38BDF2] border-2 border-[#38BDF2] text-white font-bold tracking-wide text-[15px] h-[52px] rounded-xl shadow-[0_4px_20px_rgba(56,189,242,0.2)] hover:bg-black hover:border-black transition-all flex items-center justify-center gap-2 active:scale-95 group"
+                      className="w-full sm:w-[220px] px-8 bg-[#38BDF2] border-2 border-[#38BDF2] text-white text-[14px] font-black uppercase tracking-wide h-[52px] rounded-xl shadow-[0_4px_20px_rgba(56,189,242,0.2)] hover:bg-black hover:border-black transition-all flex items-center justify-center gap-2 active:scale-95 group"
                     >
                       Complete Setup
                       <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -882,7 +882,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                           openAuthModal('signup');
                         }
                       }}
-                      className="w-full sm:w-auto px-8 bg-[#38BDF2] border-2 border-[#38BDF2] text-white font-bold tracking-wide text-[15px] h-[52px] rounded-xl shadow-[0_4px_20px_rgba(56,189,242,0.2)] hover:bg-black hover:border-black transition-all flex items-center justify-center gap-2 active:scale-95 group"
+                      className="w-full sm:w-[220px] px-8 bg-[#38BDF2] border-2 border-[#38BDF2] text-white text-[14px] font-black uppercase tracking-wide h-[52px] rounded-xl shadow-[0_4px_20px_rgba(56,189,242,0.2)] hover:bg-black hover:border-black transition-all flex items-center justify-center gap-2 active:scale-95 group"
                     >
                       {isAuthenticated ? 'Go to Dashboard' : 'Get Started'}
                       <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -899,7 +899,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                         navigate('/pricing');
                       }
                     }}
-                    className="w-full sm:w-auto px-8 !bg-transparent !border-2 !border-solid !border-[#38BDF2] !text-[#38BDF2] font-bold tracking-wide text-[15px] h-[52px] rounded-xl hover:!bg-[#38BDF2] hover:!text-white transition-colors duration-300 flex items-center justify-center gap-2 active:scale-95 group"
+                    className="w-full sm:w-[220px] px-8 !bg-transparent !border-2 !border-solid !border-[#38BDF2] !text-[#38BDF2] text-[14px] font-black uppercase tracking-wide h-[52px] rounded-xl hover:!bg-[#38BDF2] hover:!text-white transition-colors duration-300 flex items-center justify-center gap-2 active:scale-95 group"
                   >
                     <ICONS.CreditCard className="w-5 h-5 !text-[#38BDF2] group-hover:!text-white transition-colors duration-300" />
                     Pricing
@@ -913,7 +913,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.3] font-semibold text-black tracking-tighter text-left mb-2 sm:mb-3">
                     6+ Core<br />Event<br />Modules
                   </h4>
-                  <p className="text-[11px] sm:text-[14px] text-black font-normal text-left leading-relaxed">
+                  <p className="text-[16px] lg:text-[28px] lg:leading-[1.2] text-black font-normal text-left">
                     Ticketing, Registration,<br />Check-in, Analytics,<br />Seats, Reports
                   </p>
                 </div>
@@ -922,7 +922,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.3] font-semibold text-black tracking-tighter text-left mb-2 sm:mb-3">
                     {organizerCount > 3 ? organizerCount : '3'}+ Active<br />Event<br />Organizers
                   </h4>
-                  <p className="text-[11px] sm:text-[14px] text-black font-normal text-left leading-relaxed">
+                  <p className="text-[16px] lg:text-[28px] lg:leading-[1.2] text-black font-normal text-left">
                     Built with real-world<br />organizer experience
                   </p>
                 </div>
@@ -931,7 +931,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   <h4 className="text-lg sm:text-2xl md:text-[32px] lg:text-[42px] leading-[1.3] font-semibold text-black tracking-tighter text-left mb-2 sm:mb-3">
                     {(pagination?.total || 0) > 8 ? pagination.total : '8'}+ Hosted<br />Event<br />Workflows
                   </h4>
-                  <p className="text-[11px] sm:text-[14px] text-black font-normal text-left leading-relaxed">
+                  <p className="text-[16px] lg:text-[28px] lg:leading-[1.2] text-black font-normal text-left">
                     From event planning to<br />secure payouts
                   </p>
                 </div>
@@ -941,82 +941,81 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
             {/* Right Column: Visual */}
             <div className="flex-1 relative w-full mt-10 lg:mt-0">
               <div className="absolute -inset-8 bg-gradient-to-tr from-[#38BDF2]/10 to-transparent blur-3xl opacity-50"></div>
-              <div className="relative bg-[#F2F2F2] p-1.5 rounded-xl shadow-[0_28px_56px_-16px_rgba(46,46,47,0.15)] overflow-hidden transform lg:rotate-2 hover:rotate-0 transition-transform duration-700">
+              <div className="relative bg-[#F2F2F2] p-1.5 rounded-xl shadow-[0_28px_56px_-16px_rgba(46,46,47,0.15)] transform lg:rotate-2 hover:rotate-0 transition-transform duration-700">
                 <img
                   src="/hero-analytics.png"
                   alt="Event Management Dashboard"
                   className="w-full h-auto rounded-xl"
                 />
-              </div>
-              {/* Floating badge */}
-              {/* Floating badge: Organizer Tally */}
-              <div
-                className="absolute -bottom-6 sm:-bottom-8 -left-4 sm:-left-8 bg-[#F2F2F2] p-3 sm:p-4 rounded-xl border border-black/10 shadow-[0_20px_40px_-15px_rgba(46,46,47,0.15)] flex flex-col items-start gap-3 animate-float group/badge cursor-pointer z-40"
-                onMouseEnter={() => setShowOrgDropdown(true)}
-                onMouseLeave={() => setShowOrgDropdown(false)}
-              >
-                <div className="flex -space-x-3">
-                  {organizerBadgeItems.map((organizer) => (
-                    <div key={organizer.key} className="w-9 h-9 rounded-full border-2 border-[#F2F2F2] overflow-hidden shadow-sm ring-1 ring-black/5 bg-[#38BDF2]/10">
-                      <img src={organizer.src} alt={organizer.alt} className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                  <div className="w-9 h-9 rounded-full border-2 border-[#F2F2F2] bg-[#E8E8E8] flex items-center justify-center text-[10px] font-black text-black shadow-sm ring-1 ring-black/5">
-                    +{organizerCount > 3 ? organizerCount - 3 : 3}
-                  </div>
-                </div>
-                <div className="space-y-0.5" onClick={() => navigate('/organizers/discover')}>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-black leading-none">Active Organizers</p>
-                  <p className="text-sm font-black text-black leading-tight hover:text-[#38BDF2] transition-colors">
-                    {organizerCount > 0 ? `${organizerCount}+ Trusted Leaders` : '6+ Trusted Leaders'}
-                  </p>
-                </div>
-
-                {/* Dropdown list of organizers */}
-                <div className={`absolute bottom-[calc(100%-10px)] left-0 w-64 bg-[#F2F2F2] border border-black/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden transition-all duration-300 origin-bottom-left pb-3 ${showOrgDropdown ? 'opacity-100 scale-100 translate-y-[-10px]' : 'opacity-0 scale-95 pointer-events-none translate-y-0'}`}>
-                  <div className="p-5 border-b border-black/5 bg-black/[0.02]">
-                    <h5 className="text-[10px] font-black text-black uppercase tracking-[0.25em]">Our Partners</h5>
-                  </div>
-                  <div className="max-h-[238px] overflow-y-auto custom-scrollbar p-2.5 space-y-1">
-                    {organizers.map((org) => (
-                      <button
-                        key={org.organizerId}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/organizer/${org.organizerId}`);
-                        }}
-                        className="w-full flex items-center gap-3.5 p-2.5 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-300 text-left group/item border border-transparent hover:border-black/5"
-                      >
-                        <div className="w-9 h-9 rounded-xl overflow-hidden border-2 border-white shadow-sm bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] flex items-center justify-center shrink-0">
-                          {org.profileImageUrl ? (
-                            <img src={getImageUrl(org.profileImageUrl)} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-white text-[11px] font-black uppercase drop-shadow-sm">
-                              {(org.organizerName || 'O').charAt(0)}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[11px] font-black text-black truncate group-hover/item:text-[#38BDF2] transition-colors tracking-tight">
-                            {org.organizerName}
-                          </p>
-                          <p className="text-[9px] font-bold text-black uppercase tracking-[0.1em]">
-                            {org.followersCount || 0} Followers
-                          </p>
-                        </div>
-                        <ICONS.ChevronRight className="w-3.5 h-3.5 text-black group-hover/item:text-[#38BDF2] group-hover/item:translate-x-0.5 transition-all" />
-                      </button>
-                    ))}
-                    {organizers.length === 0 && (
-                      <div className="p-8 text-center bg-black/[0.02] rounded-xl mx-1">
-                        <p className="text-[10px] font-black text-black uppercase tracking-[0.1em]">No verified partners yet.</p>
+                {/* Floating badge: Organizer Tally */}
+                <div
+                  className="absolute -bottom-6 sm:-bottom-8 -left-4 sm:-left-8 bg-[#F2F2F2] p-3 sm:p-4 rounded-xl border border-black/10 shadow-[0_20px_40px_-15px_rgba(46,46,47,0.15)] flex flex-col items-start gap-3 animate-float group/badge cursor-pointer z-40"
+                  onMouseEnter={() => setShowOrgDropdown(true)}
+                  onMouseLeave={() => setShowOrgDropdown(false)}
+                >
+                  <div className="flex -space-x-3">
+                    {organizerBadgeItems.map((organizer) => (
+                      <div key={organizer.key} className="w-9 h-9 rounded-full border-2 border-[#F2F2F2] overflow-hidden shadow-sm ring-1 ring-black/5 bg-[#38BDF2]/10">
+                        <img src={organizer.src} alt={organizer.alt} className="w-full h-full object-cover" />
                       </div>
-                    )}
+                    ))}
+                    <div className="w-9 h-9 rounded-full border-2 border-[#F2F2F2] bg-[#E8E8E8] flex items-center justify-center text-[10px] font-black text-black shadow-sm ring-1 ring-black/5">
+                      +{organizerCount > 3 ? organizerCount - 3 : 3}
+                    </div>
                   </div>
-                  <div className="px-4 py-3 bg-[#F2F2F2] border-t border-black/5 text-center">
-                    <div className="flex items-center justify-center gap-2 text-[9px] font-black text-[#38BDF2] uppercase tracking-[0.2em] opacity-40 hover:opacity-100 transition-opacity cursor-default">
-                      <div className="w-1 h-1 rounded-full bg-[#38BDF2] animate-pulse" />
-                      Verified Community
+                  <div className="space-y-0.5" onClick={() => navigate('/organizers/discover')}>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-black leading-none">Active Organizers</p>
+                    <p className="text-sm font-black text-black leading-tight hover:text-[#38BDF2] transition-colors">
+                      {organizerCount > 0 ? `${organizerCount}+ Trusted Leaders` : '6+ Trusted Leaders'}
+                    </p>
+                  </div>
+
+                  {/* Dropdown list of organizers */}
+                  <div className={`absolute bottom-[calc(100%-10px)] left-0 w-64 bg-[#F2F2F2] border border-black/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden transition-all duration-300 origin-bottom-left pb-3 ${showOrgDropdown ? 'opacity-100 scale-100 translate-y-[-10px]' : 'opacity-0 scale-95 pointer-events-none translate-y-0'}`}>
+                    <div className="p-5 border-b border-black/5 bg-black/[0.02]">
+                      <h5 className="text-[10px] font-black text-black uppercase tracking-[0.25em]">Our Partners</h5>
+                    </div>
+                    <div className="max-h-[238px] overflow-y-auto custom-scrollbar p-2.5 space-y-1">
+                      {organizers.map((org) => (
+                        <button
+                          key={org.organizerId}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/organizer/${org.organizerId}`);
+                          }}
+                          className="w-full flex items-center gap-3.5 p-2.5 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-300 text-left group/item border border-transparent hover:border-black/5"
+                        >
+                          <div className="w-9 h-9 rounded-xl overflow-hidden border-2 border-white shadow-sm bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] flex items-center justify-center shrink-0">
+                            {org.profileImageUrl ? (
+                              <img src={getImageUrl(org.profileImageUrl)} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-white text-[11px] font-black uppercase drop-shadow-sm">
+                                {(org.organizerName || 'O').charAt(0)}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] font-black text-black truncate group-hover/item:text-[#38BDF2] transition-colors tracking-tight">
+                              {org.organizerName}
+                            </p>
+                            <p className="text-[9px] font-bold text-black opacity-50 truncate tracking-tight uppercase">
+                              Verified Event Partner
+                            </p>
+                          </div>
+                          <ICONS.ChevronRight className="w-3.5 h-3.5 text-black opacity-0 group-hover/item:opacity-100 group-hover/item:translate-x-1 transition-all" />
+                        </button>
+                      ))}
+                      {organizers.length === 0 && (
+                        <div className="p-8 text-center bg-black/[0.02] rounded-xl mx-1">
+                          <p className="text-[10px] font-black text-black uppercase tracking-[0.1em]">No verified partners yet.</p>
+                        </div>
+                      )}
+                    </div>
+                    <div className="px-4 py-3 bg-[#F2F2F2] border-t border-black/5 text-center">
+                      <div className="flex items-center justify-center gap-2 text-[9px] font-black text-[#38BDF2] uppercase tracking-[0.2em] opacity-40 hover:opacity-100 transition-opacity cursor-default">
+                        <div className="w-1 h-1 rounded-full bg-[#38BDF2] animate-pulse" />
+                        Verified Community
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1028,7 +1027,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           <div className="mt-44 mb-28 overflow-visible relative z-10">
             <div className="rounded-2xl border border-black/10 bg-[#F2F2F2] px-6 py-8 md:px-8 shadow-sm">
               <div className="mb-8">
-                <h2 className="text-[13px] sm:text-[15px] font-black tracking-tight text-black">Event smart categories</h2>
+                <h2 className="text-[16px] font-black tracking-tight text-black">Event smart categories</h2>
               </div>
               <div
                 className="py-2 relative group-categories outline-none cursor-grab active:cursor-grabbing select-none"
@@ -1060,7 +1059,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                       <span className="w-[72px] h-[72px] rounded-full border border-transparent flex items-center justify-center text-black bg-transparent group-hover:bg-[#38BDF2]/10 group-hover:border-[#38BDF2]/40 group-hover:text-black transition-all duration-300 group-hover:scale-125 group-hover:shadow-[0_10px_25px_-5px_rgba(56,189,242,0.4)] group-focus-visible:scale-125 relative z-20">
                         <category.Icon className="w-7 h-7 transition-all duration-300 group-hover:scale-110" />
                       </span>
-                      <span className="text-[13px] font-bold text-black leading-tight min-h-[32px] flex items-center justify-center pt-2 group-hover:text-[#38BDF2] transition-colors">{category.label}</span>
+                      <span className="text-[14px] font-bold text-black leading-tight min-h-[32px] flex items-center justify-center pt-2 group-hover:text-[#38BDF2] transition-colors">{category.label}</span>
                     </button>
                   ))}
                 </div>
@@ -1083,7 +1082,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                     </div>
                   </div>
                 </div>
-                <p className="text-black text-sm md:text-base font-medium max-w-2xl leading-relaxed">
+                <p className="text-black text-[18px] font-normal max-w-2xl leading-relaxed">
                   Discover curated sessions highlighted by organizers as part of their elite plan features.
                 </p>
               </div>
@@ -1269,7 +1268,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pt-8 mb-6 pb-0 px-0">
             <div className="flex-1 space-y-1.5">
               <h2 className="text-2xl md:text-3xl font-black text-black tracking-tight leading-none uppercase">{sectionTitle}</h2>
-              <p className="text-black text-xs md:text-sm font-medium leading-relaxed">{sectionSubtitle}</p>
+              <p className="text-black text-[18px] font-normal leading-relaxed">{sectionSubtitle}</p>
             </div>
           </div>
         </section>
@@ -1350,7 +1349,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
             {/* Category Section */}
             <div className="space-y-6">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Category</h4>
+              <h4 className="text-[14px] font-black uppercase tracking-wide text-black">Category</h4>
               <div className="space-y-3.5">
                 {(showCategoriesFull ? EVENT_CATEGORIES : EVENT_CATEGORIES.slice(0, 6)).map((cat) => (
                   <button
@@ -1376,7 +1375,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
             {/* Date Section */}
             <div className="space-y-6">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Date</h4>
+              <h4 className="text-[14px] font-black uppercase tracking-wide text-black">Date</h4>
               <div className="space-y-4">
                 {[
                   { id: 'all', label: 'Any time' },
@@ -1400,7 +1399,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
             {/* Price Section */}
             <div className="space-y-6">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Price</h4>
+              <h4 className="text-[14px] font-black uppercase tracking-wide text-black">Price</h4>
               <div className="space-y-4">
                 {[
                   { id: 'all', label: 'All Prices' },
@@ -1423,7 +1422,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
             {/* Format Section */}
             <div className="space-y-6">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Format</h4>
+              <h4 className="text-[14px] font-black uppercase tracking-wide text-black">Format</h4>
               <div className="space-y-4">
                 {[
                   { id: 'all', label: 'All Formats' },
@@ -1576,7 +1575,7 @@ const FAQSection: React.FC = () => {
         <h2 className="text-3xl md:text-4xl font-black text-black tracking-tight leading-none mb-4">
           Frequently Asked Questions
         </h2>
-        <p className="text-black text-sm md:text-base font-medium max-w-2xl mx-auto leading-relaxed">
+        <p className="text-black text-[18px] font-normal max-w-2xl mx-auto leading-relaxed">
           Quick guidance for the most common organizer and attendee workflows in StartupLab Ticketing.
         </p>
       </div>
@@ -1698,7 +1697,7 @@ const FeaturedOrganizers: React.FC = () => {
         <div className="flex flex-col text-center items-center max-w-2xl">
           <p className="text-xs font-bold text-[#38BDF2] mb-3 tracking-tight uppercase">Verified Showcase</p>
           <h2 className="text-2xl md:text-3xl font-black text-black tracking-tight leading-none mb-3">Featured Organizers</h2>
-          <p className="text-black text-xs md:text-sm font-medium leading-relaxed">Stay connected with our top event creators and never miss a highlight session.</p>
+          <p className="text-black text-[18px] font-normal leading-relaxed">Stay connected with our top event creators and never miss a highlight session.</p>
         </div>
 
       </div>

@@ -241,7 +241,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
             <form onSubmit={handleLogin} className="flex flex-col gap-4">
               <div className="space-y-4">
                 <div className="space-y-1.5 w-full">
-                  <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
+                  <label className="block text-[13px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
                   <div className="relative group/input">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10">
                       <ICONS.Mail className="w-5 h-5" />
@@ -252,26 +252,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="w-full pl-12 pr-4 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[14px]"
+                      className="w-full pl-12 pr-4 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[13px]"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
+                  <label className="block text-[13px] font-bold text-[#2E2E2F] tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
                   <div className="space-y-2">
                     <PasswordInput
                       value={password}
                       onChange={(e: any) => setPassword(e.target.value)}
                       required
                       icon={<ICONS.Lock className="w-5 h-5" />}
-                      className="!rounded-2xl"
+                      className="!rounded-2xl !text-[13px]"
                     />
                     <div className="flex justify-end pr-1">
                       <button
                         type="button"
                         onClick={() => setView('forgot-password')}
-                        className="text-[11px] font-bold text-[#38BDF2] hover:text-[#2E2E2F] transition-colors"
+                        className="text-[13px] font-bold text-[#38BDF2] hover:text-[#2E2E2F] transition-colors"
                       >
                         Forgot password?
                       </button>
@@ -307,7 +307,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
             <form onSubmit={handleSignup} className="flex flex-col gap-4">
               <div className="space-y-3">
                 <div className="space-y-1 w-full">
-                  <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Full Name <span className="text-red-500">*</span></label>
+                  <label className="block text-[13px] font-bold text-[#2E2E2F] tracking-tight ml-1">Full Name <span className="text-red-500">*</span></label>
                   <div className="relative group/input">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10">
                       <ICONS.Users className="w-4 h-4" />
@@ -323,7 +323,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                 </div>
 
                 <div className="space-y-1 w-full">
-                  <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
+                  <label className="block text-[13px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
                   <div className="relative group/input">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10">
                       <ICONS.Mail className="w-4 h-4" />
@@ -340,26 +340,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                 </div>
 
                 <div className="space-y-1 w-full">
-                  <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
+                  <label className="block text-[13px] font-bold text-[#2E2E2F] tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
                   <PasswordInput
                     placeholder="••••••••"
                     required
                     value={signupData.password}
                     onChange={(e: any) => setSignupData({ ...signupData, password: e.target.value })}
                     icon={<ICONS.Lock className="w-4 h-4" />}
-                    className="!rounded-2xl py-2.5"
+                    className="!rounded-2xl py-2.5 !text-[13px]"
                   />
                 </div>
                 <PasswordRequirements password={signupData.password} />
                 <div className="space-y-1 w-full">
-                  <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Confirm Password <span className="text-red-500">*</span></label>
+                  <label className="block text-[13px] font-bold text-[#2E2E2F] tracking-tight ml-1">Confirm Password <span className="text-red-500">*</span></label>
                   <PasswordInput
                     placeholder="••••••••"
                     required
                     value={signupData.confirmPassword}
                     onChange={(e: any) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
                     icon={<ICONS.Lock className="w-4 h-4" />}
-                    className="!rounded-2xl py-2.5"
+                    className="!rounded-2xl py-2.5 !text-[13px]"
                   />
                 </div>
               </div>
@@ -369,7 +369,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                   checked={agreedToTerms}
                   onChange={setAgreedToTerms}
                 />
-                <span className="text-[11px] text-[#2E2E2F] font-medium leading-relaxed mt-0.5">
+                <span className="text-[13px] text-[#2E2E2F] font-medium leading-relaxed mt-0.5">
                   I agree to the{' '}
                   <button
                     type="button"
@@ -420,7 +420,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                     Enter your email and we'll send you a link to reset your password.
                   </p>
                   <div className="space-y-1.5 w-full text-left">
-                    <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
+                    <label className="block text-[13px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
                     <div className="relative group/input">
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-all z-10">
                         <ICONS.Mail className="w-5 h-5" />
@@ -431,7 +431,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
                         required
-                        className="w-full pl-12 pr-4 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[14px]"
+                        className="w-full pl-12 pr-4 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[13px]"
                       />
                     </div>
                   </div>
@@ -445,7 +445,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                   <button
                     type="button"
                     onClick={() => setView('login')}
-                    className="text-[11px] font-bold text-[#2E2E2F] hover:text-[#38BDF2] transition-colors"
+                    className="text-[13px] font-bold text-[#2E2E2F] hover:text-[#38BDF2] transition-colors"
                   >
                     Back to Sign In
                   </button>
@@ -454,7 +454,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                 <div className="text-center py-4">
                   <p className="text-[#2E2E2F] font-bold text-[13px] mb-6">{forgotMessage}</p>
                   <Button
-                    className="w-full py-4 text-[11px] font-black uppercase tracking-widest rounded-[5px]"
+                    className="w-full py-4 text-[13px] font-black uppercase tracking-widest rounded-[5px]"
                     onClick={() => setView('login')}
                   >
                     Back to Sign In
@@ -465,7 +465,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
           )}
 
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-[11px] font-bold text-center animate-in shake duration-300">
+            <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-[13px] font-bold text-center animate-in shake duration-300">
               {error}
             </div>
           )}
@@ -484,27 +484,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
       >
         <div className="space-y-6 text-[#2E2E2F] text-[13px] leading-relaxed max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
           <section>
-            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">1. Acceptance of Terms</h4>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[13px] tracking-widest mb-2">1. Acceptance of Terms</h4>
             <p>By creating an account on StartupLab Business Center, you agree to abide by these terms. Our platform provides event ticketing and management services for organizers and attendees.</p>
           </section>
 
           <section>
-            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">2. Organizer Responsibilities</h4>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[13px] tracking-widest mb-2">2. Organizer Responsibilities</h4>
             <p>Organizers are responsible for the accuracy of event details, ticket pricing, and fulfillment of event promises. StartupLab acts as a facilitator and is not liable for event cancellations or modifications.</p>
           </section>
 
           <section>
-            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">3. Fees and Payments</h4>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[13px] tracking-widest mb-2">3. Fees and Payments</h4>
             <p>Our platform may charge service fees per ticket sold. These fees are non-refundable unless otherwise stated in specific event policies. Payment processing is handled by secure third-party gateways.</p>
           </section>
 
           <section>
-            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">4. Prohibited Content</h4>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[13px] tracking-widest mb-2">4. Prohibited Content</h4>
             <p>Users may not post illegal, fraudulent, or harmful content. We reserve the right to suspend accounts that violate our community standards or engage in suspicious activity.</p>
           </section>
 
           <section>
-            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">5. Limitation of Liability</h4>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[13px] tracking-widest mb-2">5. Limitation of Liability</h4>
             <p>StartupLab shall not be held liable for any indirect, incidental, or consequential damages resulting from the use of our ticketing services or platform downtime.</p>
           </section>
         </div>
@@ -522,27 +522,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
       >
         <div className="space-y-6 text-[#2E2E2F] text-[13px] leading-relaxed max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
           <section>
-            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">1. Data Collection</h4>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[13px] tracking-widest mb-2">1. Data Collection</h4>
             <p>We collect personal information such as name, email, and billing details to process registrations and maintain your organizer profile. We also collect usage data to improve our platform experience.</p>
           </section>
 
           <section>
-            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">2. How We Use Data</h4>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[13px] tracking-widest mb-2">2. How We Use Data</h4>
             <p>Your information is used to facilitate ticket sales, send transactional emails, and provide customer support. We do not sell your personal data to third-party advertisers.</p>
           </section>
 
           <section>
-            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">3. Data Sharing</h4>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[13px] tracking-widest mb-2">3. Data Sharing</h4>
             <p>Attendee data is shared with the specific event organizer for check-in and event communication purposes. Metadata may be shared with our payment processors to ensure secure transactions.</p>
           </section>
 
           <section>
-            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">4. Security Measures</h4>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[13px] tracking-widest mb-2">4. Security Measures</h4>
             <p>We implement industry-standard encryption and security protocols to protect your data from unauthorized access. However, no internet transmission is 100% secure.</p>
           </section>
 
           <section>
-            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">5. Your Rights</h4>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[13px] tracking-widest mb-2">5. Your Rights</h4>
             <p>You have the right to access, update, or delete your personal information at any time through your account settings or by contacting our support team.</p>
           </section>
         </div>
