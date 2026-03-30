@@ -2067,7 +2067,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
             <div>
               <Branding className="h-32 w-auto" />
-              <p className="mt-4 text-[11px] font-medium max-w-sm text-[#2E2E2F] leading-relaxed">
+              <p className="mt-4 text-[16px] font-medium max-w-sm text-[#2E2E2F] leading-relaxed">
                 Your gateway to StartupLab events.<br />
                 From internal workshops to public showcases, this platform delivers seamless, secure registration for every StartupLab gathering.
               </p>
