@@ -1,0 +1,147 @@
+[
+  {
+    "id": "52e74e5d-230d-4151-88e6-bb023260b04d",
+    "key": "BUSINESS",
+    "label": "Business",
+    "icon_name": "Layout",
+    "keywords": [
+      "business",
+      "startup",
+      "networking",
+      "summit",
+      "conference",
+      "seminar",
+      "pitch",
+      "demo day",
+      "professional"
+    ],
+    "is_active": true,
+    "created_at": "2026-03-30T07:37:22.205801+00:00",
+    "updated_at": "2026-03-30T07:37:22.205801+00:00"
+  },
+  {
+    "id": "2a5602e9-0449-4bcc-81ce-c0f684cc3d84",
+    "key": "FOOD_DRINK",
+    "label": "Food & Drink",
+    "icon_name": "CreditCard",
+    "keywords": [
+      "food",
+      "drink",
+      "coffee",
+      "culinary",
+      "tasting",
+      "dinner",
+      "lunch",
+      "restaurant",
+      "bar"
+    ],
+    "is_active": true,
+    "created_at": "2026-03-30T07:37:22.205801+00:00",
+    "updated_at": "2026-03-30T07:37:22.205801+00:00"
+  },
+  {
+    "id": "5dbbe996-f23e-4659-acd5-110466835119",
+    "key": "HEALTH",
+    "label": "Health",
+    "icon_name": "Heart",
+    "keywords": [
+      "health",
+      "wellness",
+      "medical",
+      "fitness",
+      "mental health",
+      "yoga",
+      "meditation"
+    ],
+    "is_active": true,
+    "created_at": "2026-03-30T07:37:22.205801+00:00",
+    "updated_at": "2026-03-30T07:37:22.205801+00:00"
+  },
+  {
+    "id": "4d373e8a-ec30-4751-972f-acb4c1e7d568",
+    "key": "MUSIC",
+    "label": "Music",
+    "icon_name": "Bell",
+    "keywords": [
+      "music",
+      "concert",
+      "band",
+      "dj",
+      "acoustic",
+      "choir",
+      "orchestra",
+      "festival"
+    ],
+    "is_active": true,
+    "created_at": "2026-03-30T07:37:22.205801+00:00",
+    "updated_at": "2026-03-30T07:37:22.205801+00:00"
+  },
+  {
+    "id": "a6fda449-9235-4b8d-9396-298fdb7ff67f",
+    "key": "SCIENCE_TECH",
+    "label": "Science & Tech",
+    "icon_name": "Monitor",
+    "keywords": [
+      "science",
+      "tech",
+      "technology",
+      "it",
+      "software",
+      "coding",
+      "ai",
+      "robotics"
+    ],
+    "is_active": true,
+    "created_at": "2026-03-30T07:37:22.205801+00:00",
+    "updated_at": "2026-03-30T07:37:22.205801+00:00"
+  },
+  {
+    "id": "85a4ba6b-339b-4fae-8fdc-deeca8849d2e",
+    "key": "SPORTS_FITNESS",
+    "label": "Sports & Fitness",
+    "icon_name": "TrendingUp",
+    "keywords": [
+      "sports",
+      "fitness",
+      "gym",
+      "workout",
+      "running",
+      "football",
+      "basketball",
+      "soccer"
+    ],
+    "is_active": true,
+    "created_at": "2026-03-30T07:37:22.205801+00:00",
+    "updated_at": "2026-03-30T07:37:22.205801+00:00"
+  },
+  {
+    "id": "625d47ec-520c-4aa4-a866-f0edde424927",
+    "key": "TRAVEL_OUTDOOR",
+    "label": "Travel & Outdoor",
+    "icon_name": "MapPin",
+    "keywords": [
+      "travel",
+      "outdoor",
+      "adventure",
+      "hiking",
+      "camping",
+      "nature",
+      "trip"
+    ],
+    "is_active": true,
+    "created_at": "2026-03-30T07:37:22.205801+00:00",
+    "updated_at": "2026-03-30T07:37:22.205801+00:00"
+  },
+  {
+    "id": "ce38b38e-853d-4552-bf15-3b534b0d94e7",
+    "key": "DSADASDSAD",
+    "label": "dsadas",
+    "icon_name": "Trash",
+    "keywords": [
+      "dasd"
+    ],
+    "is_active": true,
+    "created_at": "2026-03-30T07:42:00.927633+00:00",
+    "updated_at": "2026-03-30T07:42:00.927633+00:00"
+  }
+]

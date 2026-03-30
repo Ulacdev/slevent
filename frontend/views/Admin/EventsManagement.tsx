@@ -326,12 +326,12 @@ export const EventsManagement: React.FC = () => {
       
       if (isBulkMode) {
         await Promise.all(selectedIds.map(id => apiService.deleteEvent(id, finalReason)));
-        setNotification({ message: `${selectedIds.length} events have been archived.`, type: 'success' });
+        setNotification({ message: `${selectedIds.length} events have been permanently deleted.`, type: 'success' });
         setSelectedIds([]);
         setIsBulkMode(false);
       } else if (deleteConfirm) {
         await apiService.deleteEvent(deleteConfirm.eventId, finalReason);
-        setNotification({ message: `"${deleteConfirm.eventName}" has been archived.`, type: 'success' });
+        setNotification({ message: `"${deleteConfirm.eventName}" has been permanently deleted from the system.`, type: 'success' });
         setDeleteConfirm(null);
       }
       
@@ -468,7 +468,7 @@ export const EventsManagement: React.FC = () => {
                       <button
                         onClick={() => { setIsBulkMode(false); setDeleteConfirm(event); }}
                         className="text-red-500 hover:text-red-600 transition-all p-2 hover:bg-red-50 rounded-lg group/btn"
-                        title="Moderate Removal"
+                        title="Permanent Delete"
                       >
                         <ICONS.Trash className="w-[1.2rem] h-[1.2rem] group-hover/btn:scale-110" strokeWidth={2.2} />
                       </button>
@@ -771,7 +771,7 @@ export const EventsManagement: React.FC = () => {
       <Modal
         isOpen={!!deleteConfirm || isBulkMode}
         onClose={() => { setDeleteConfirm(null); setIsBulkMode(false); }}
-        title="Moderated Event Removal"
+        title="Permanent System Removal"
         size="md"
       >
         <div className="space-y-6">
@@ -780,12 +780,12 @@ export const EventsManagement: React.FC = () => {
               <ICONS.AlertTriangle className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-black text-red-900 uppercase tracking-tight">Authoritative Removal Zone</h3>
+              <h3 className="text-sm font-black text-red-900 uppercase tracking-tight">Permanent Removal Zone</h3>
               <p className="text-xs font-semibold text-red-800/70 mt-1 leading-relaxed">
                 {isBulkMode 
-                  ? `You are about to archive ${selectedIds.length} events simultaneously. ` 
-                  : `You are about to archive "${deleteConfirm?.eventName}". `}
-                This action is logged and organizers will be notified of the removal justification.
+                  ? `You are about to PERMANENTLY DELETE ${selectedIds.length} events from the entire system. ` 
+                  : `You are about to PERMANENTLY DELETE "${deleteConfirm?.eventName}" from the entire system. `}
+                This action is irreversible and will remove all associated ticket data.
               </p>
             </div>
           </div>
@@ -842,7 +842,7 @@ export const EventsManagement: React.FC = () => {
               onClick={handleDeleteEvent}
               disabled={submitting || (deleteReason === 'OTHER' && !customReason.trim())}
             >
-              {submitting ? 'Archiving...' : 'Confirm Archival'}
+              {submitting ? 'Deleting...' : 'Confirm Permanent Deletion'}
             </Button>
           </div>
         </div>

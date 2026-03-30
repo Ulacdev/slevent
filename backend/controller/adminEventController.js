@@ -591,90 +591,26 @@ export const deleteEvent = async (req, res) => {
     const { id } = req.params;
     const userId = req.user?.userId;
 
-    // Check if event is already archived
-    const { data: existingEvent } = await supabase
-      .from('events')
-      .select('is_archived, deleted_at')
-      .eq('eventId', id)
-      .maybeSingle();
+    // Hard delete - remove all related data first
+    await supabase.from('tickets').delete().eq('eventId', id);
+    await supabase.from('ticketTypes').delete().eq('eventId', id);
+    await supabase.from('orders').delete().eq('eventId', id);
+    await supabase.from('event_likes').delete().eq('eventId', id);
 
-    // If already archived, do permanent delete
-    if (existingEvent?.is_archived && existingEvent?.deleted_at) {
-      // Permanent delete - remove all related data first
-      await supabase.from('tickets').delete().eq('eventId', id);
-      await supabase.from('ticket_types').delete().eq('eventId', id);
-      await supabase.from('orders').delete().eq('eventId', id);
-      await supabase.from('event_likes').delete().eq('eventId', id);
-
-      const { error } = await supabase
-        .from('events')
-        .delete()
-        .eq('eventId', id);
-
-      if (error) return res.status(500).json({ error: error.message });
-
-      await logAudit({
-        actionType: 'EVENT_PERMANENTLY_DELETED',
-        details: { eventId: id },
-        req
-      });
-
-      return res.status(200).json({ message: 'Event permanently deleted', permanent: true });
-    }
-
-    // Soft delete - archive the event
     const { error } = await supabase
       .from('events')
-      .update({
-        is_archived: true,
-        deleted_at: new Date().toISOString(),
-        archived_by: userId,
-        updated_at: new Date().toISOString()
-      })
+      .delete()
       .eq('eventId', id);
 
     if (error) return res.status(500).json({ error: error.message });
 
     await logAudit({
-      actionType: 'EVENT_ARCHIVED',
-      details: { eventId: id, reason: req.body?.reason || 'No reason provided' },
+      actionType: 'EVENT_PERMANENTLY_DELETED',
+      details: { eventId: id },
       req
     });
 
-    // Notify the organizer about the removal
-    try {
-      const { data: eventDetails } = await supabase
-        .from('events')
-        .select('eventName, createdBy, organizerId')
-        .eq('eventId', id)
-        .maybeSingle();
-
-      if (eventDetails?.createdBy) {
-        const reason = req.body?.reason || 'General moderation / policy violation';
-        const adminSmtp = await getAdminSmtpConfig();
-
-        await notifyUserByPreference({
-          recipientUserId: eventDetails.createdBy,
-          actorUserId: userId,
-          type: 'ADMIN_ALERT',
-          title: 'Event Removed by Admin',
-          message: `Your event "${eventDetails.eventName}" has been archived by a system administrator for the following reason: ${reason}.`,
-          metadata: {
-            eventId: id,
-            eventName: eventDetails.eventName,
-            reason: reason,
-            actionLabel: 'VIEW ARCHIVES',
-            actionUrl: `${process.env.FRONTEND_URL || 'https://startuplab.ph'}/#/organizer-archives`
-          },
-          emailSubject: `[Important] Event Removal: ${eventDetails.eventName}`,
-          smtpConfigOverride: adminSmtp
-        });
-      }
-    } catch (notifyErr) {
-      console.error('[AdminEvent] Failed to notify organizer:', notifyErr.message);
-    }
-
-    return res.status(200).json({ message: 'Event archived successfully', archived: true });
+    return res.status(200).json({ message: 'Event permanently deleted from system', permanent: true });
   } catch (err) {
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }

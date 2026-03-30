@@ -5,8 +5,11 @@ import { Event, UserRole } from '../../types';
 import { Button, PageLoader } from '../../components/Shared';
 import { EventCardSkeleton } from '../../components/Shared/Skeleton';
 import { ICONS } from '../../constants';
-import { EVENT_CATEGORIES, getEventCategoryKeys } from '../../utils/eventCategories';
+import { EVENT_CATEGORIES } from '../../utils/eventCategories';
+// Removed static category helpers to use dynamic DB-driven ones
 import { useUser } from '../../context/UserContext';
+
+
 import { useEngagement } from '../../context/EngagementContext';
 import { EventCard } from './EventList';
 
@@ -41,11 +44,37 @@ export const EventDiscoveryPage: React.FC = () => {
     };
 
     // Data state
+    const [categories, setCategories] = useState<any[]>([]);
     const [events, setEvents] = useState<Event[]>([]);
+
+
     const [loading, setLoading] = useState(true);
     const [interactionNotice, setInteractionNotice] = useState('');
     const [promotedEvents, setPromotedEvents] = useState<Event[]>([]);
     const [loadingPromoted, setLoadingPromoted] = useState(true);
+
+    // Fetch dynamic categories
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/categories`);
+                const data = await response.json();
+                console.log("Discovery Categories from API:", data);
+                if (Array.isArray(data) && data.length > 0) {
+                    const active = data.filter(c => c.is_active);
+                    if (active.length > 0) {
+                        setCategories(active.map(c => ({
+                            ...c,
+                            Icon: (ICONS as any)[c.icon_name] || ICONS.Layout
+                        })));
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch discovery categories:", err);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     // Sync state with URL params
     useEffect(() => {
@@ -92,8 +121,15 @@ export const EventDiscoveryPage: React.FC = () => {
     const filteredEvents = useMemo(() => {
         return events.filter(event => {
             if (selectedCategories.length > 0) {
-                const eventCats = getEventCategoryKeys(event);
-                if (!selectedCategories.some(cat => eventCats.includes(cat as any))) return false;
+                // Dynamic keyword matching for each selected category
+                const sourceText = `${event.eventName || ''} ${event.description || ''} ${event.locationText || ''}`.toLowerCase();
+                const matches = selectedCategories.some(catKey => {
+                    const cat = categories.find(c => c.key === catKey);
+                    if (!cat) return false;
+                    const keywords = Array.isArray(cat.keywords) ? cat.keywords : [];
+                    return keywords.some((keyword: string) => sourceText.includes(keyword.toLowerCase()));
+                });
+                if (!matches) return false;
             }
 
             if (selectedFormat === 'online' && event.locationType !== 'ONLINE') return false;
@@ -150,7 +186,7 @@ export const EventDiscoveryPage: React.FC = () => {
             }
             return 0; // Default relevance
         });
-    }, [events, selectedCategories, selectedDate, selectedPrice, selectedFormat, showFollowedOnly, likedEventIds, sortBy]);
+    }, [events, categories, selectedCategories, selectedDate, selectedPrice, selectedFormat, showFollowedOnly, likedEventIds, sortBy]);
 
     // Combine promoted and filtered events, with promoted first
     const combinedEvents = useMemo(() => {
@@ -225,7 +261,7 @@ export const EventDiscoveryPage: React.FC = () => {
                                     )}
                                 </div>
                                 <div className="space-y-4">
-                                    {EVENT_CATEGORIES.slice(0, 15).map(cat => {
+                                    {categories.map(cat => {
                                         const isChecked = selectedCategories.includes(cat.key);
                                         return (
                                             <button
@@ -242,7 +278,6 @@ export const EventDiscoveryPage: React.FC = () => {
                                             </button>
                                         );
                                     })}
-                                    <button className="text-xs font-bold text-[#38BDF2] pt-2 hover:underline">View more</button>
                                 </div>
                             </div>
 

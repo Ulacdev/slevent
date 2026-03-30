@@ -5,7 +5,8 @@ import { Event } from '../../types';
 import { Card, Button, PageLoader } from '../../components/Shared';
 import { EventCardSkeleton } from '../../components/Shared/Skeleton';
 import { ICONS } from '../../constants';
-import { getCategoryByKey, getEventCategoryKeys } from '../../utils/eventCategories';
+// Removed static category helpers to use dynamic DB-driven ones
+
 
 const getImageUrl = (img: any): string => {
   if (!img) return 'https://via.placeholder.com/800x400';
@@ -59,17 +60,42 @@ const CategoryEventCard: React.FC<{ event: Event }> = ({ event }) => {
 
 export const CategoryEvents: React.FC = () => {
   const { categoryKey = '' } = useParams<{ categoryKey: string }>();
-  const category = getCategoryByKey(categoryKey);
+  const [categories, setCategories] = React.useState<any[]>([]);
   const [events, setEvents] = React.useState<Event[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
+
+  const category = React.useMemo(() => {
+    const normalized = categoryKey.toUpperCase().replace(/-/g, '_');
+    return categories.find(c => c.key === normalized);
+  }, [categories, categoryKey]);
+
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/categories`);
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setCategories(data.map(c => ({
+            ...c,
+            Icon: (ICONS as any)[c.icon_name] || ICONS.Layout
+          })));
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   React.useEffect(() => {
     let cancelled = false;
 
     const fetchAllEvents = async () => {
       if (!category) {
-        setLoading(false);
+        // If categories are still loading, don't stop yet
+        if (categories.length > 0) setLoading(false);
         return;
       }
 
@@ -89,7 +115,13 @@ export const CategoryEvents: React.FC = () => {
           mergedEvents = mergedEvents.concat(...remaining.map((result) => result.events || []));
         }
 
-        const filtered = mergedEvents.filter((event) => getEventCategoryKeys(event).includes(category.key));
+        // Dynamic keyword filtering
+        const keywords = Array.isArray(category.keywords) ? category.keywords : [];
+        const filtered = mergedEvents.filter((event) => {
+          const sourceText = `${event.eventName || ''} ${event.description || ''} ${event.locationText || ''}`.toLowerCase();
+          return keywords.some((keyword: string) => sourceText.includes(keyword.toLowerCase()));
+        });
+
         if (!cancelled) setEvents(filtered);
       } catch {
         if (!cancelled) setEvents([]);
@@ -100,7 +132,7 @@ export const CategoryEvents: React.FC = () => {
 
     fetchAllEvents();
     return () => { cancelled = true; };
-  }, [category?.key]);
+  }, [category, categories.length]);
 
   const visibleEvents = React.useMemo(() => {
     const needle = searchTerm.trim().toLowerCase();

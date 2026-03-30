@@ -28,6 +28,8 @@ import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 import promotionRoutes from "./routes/promotionRoutes.js";
 import eventPromotionRoutes from "./routes/eventPromotionRoutes.js";
 import supportRoutes from "./routes/supportRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import announcementRoutes from "./routes/announcementRoutes.js";
 const PORT = process.env.BACKEND_PORT
 const app = express();
 
@@ -73,9 +75,6 @@ const authLimiter = rateLimit({
   handler: (req, res, next, options) => {
     console.warn(`🛑 [SECURITY] Rate limit EXCEEDED for IP: ${req.ip}`);
     res.status(options.statusCode).send(options.message);
-  },
-  onLimitReached: (req) => {
-    console.warn(`🚨 [SECURITY] LIMIT REACHED for IP: ${req.ip}`);
   }
 });
 
@@ -148,6 +147,8 @@ app.use("/api/admin/plans", authMiddleware, adminPlanRoutes);
 app.use("/api", promotionRoutes);
 app.use("/api", eventPromotionRoutes);
 app.use("/api", supportRoutes);
+app.use("/api", categoryRoutes);
+app.use("/api/announcements", announcementRoutes);
 
 // Root endpoint for status check
 app.get("/", (req, res) => {

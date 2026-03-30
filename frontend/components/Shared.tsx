@@ -203,6 +203,7 @@ export const Modal: React.FC<{
   variant?: 'dialog' | 'page';
   zoom?: boolean;
   zIndex?: number;
+  hideHeader?: boolean;
 }> = ({
   isOpen,
   onClose,
@@ -217,7 +218,8 @@ export const Modal: React.FC<{
   contentClassName = '',
   variant = 'dialog',
   zoom = false,
-  zIndex = 1000
+  zIndex = 1000,
+  hideHeader = false
 }) => {
     if (!isOpen) return null;
 
@@ -267,7 +269,7 @@ export const Modal: React.FC<{
             transform: zoom ? 'scale(0.8)' : undefined
           }}
         >
-          {(title || showClose) && (
+          {!hideHeader && (title || showClose) && (
             <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-[#2E2E2F]/10 flex items-start justify-between gap-3 sticky top-0 bg-[#F2F2F2] z-10">
               <div className="min-w-0">
                 {title && (

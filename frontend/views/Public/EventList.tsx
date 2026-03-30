@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { Event, UserRole, OrganizerProfile } from '../../types';
-import { Card, Button, PageLoader } from '../../components/Shared';
+import { Card, Button, PageLoader, Modal, Checkbox } from '../../components/Shared';
 import { Skeleton, EventCardSkeleton, OrganizerCardSkeleton } from '../../components/Shared/Skeleton';
 import { OrganizerCard } from '../../components/OrganizerCard';
 import { BrowseEventsNavigator, BrowseTabKey, ONLINE_LOCATION_VALUE } from '../../components/BrowseEventsNavigator';
@@ -14,6 +14,15 @@ import { PricingSection } from '../../components/PricingSection';
 
 
 const BRAND_LOGO_URL = 'https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg';
+
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  type: 'INFO' | 'SUCCESS' | 'WARNING' | 'CRITICAL';
+  target_audience: 'ALL' | 'ORGANIZERS' | 'ATTENDEES';
+  created_at: string;
+}
 
 // Helper to handle JSONB image format
 const getImageUrl = (img: any): string => {
@@ -448,6 +457,11 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   const [promotedCarouselInterval, setPromotedCarouselInterval] = useState<NodeJS.Timeout | null>(null);
   const [isMarqueePaused, setIsMarqueePaused] = useState(false);
 
+  // Announcement Modal State
+  const [activeAnnouncement, setActiveAnnouncement] = useState<Announcement | null>(null);
+  const [showAnnouncement, setShowAnnouncement] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
+
   const categoriesScrollRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
@@ -627,6 +641,43 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
       return () => clearInterval(poll);
     }
   }, [listing]);
+
+  // Load latest announcement for modal
+  useEffect(() => {
+    if (!isLanding) return;
+    
+    const fetchLatestAnnouncement = async () => {
+      try {
+        const res = await apiService._fetch(`${import.meta.env.VITE_API_BASE}/api/announcements`, {
+          credentials: 'include'
+        });
+        if (res.ok) {
+          const data = await res.json();
+          // Find the latest published announcement for this user type
+          const published = data.filter((a: any) => a.is_published);
+          if (published.length > 0) {
+            const latest = published[0];
+            const dismissed = localStorage.getItem(`announcement_dismissed_${latest.id}`);
+            if (!dismissed) {
+              setActiveAnnouncement(latest);
+              // Small delay for better UX
+              setTimeout(() => setShowAnnouncement(true), 1500);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch announcement:', err);
+      }
+    };
+    fetchLatestAnnouncement();
+  }, [isLanding]);
+
+  const dismissAnnouncement = () => {
+    if (activeAnnouncement && dontShowAgain) {
+      localStorage.setItem(`announcement_dismissed_${activeAnnouncement.id}`, 'true');
+    }
+    setShowAnnouncement(false);
+  };
 
   const organizerBadgeItems = useMemo(() => {
     if (organizers.length === 0) {
@@ -817,7 +868,33 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   const totalPages = Math.max(1, pagination.totalPages || 1);
   const showPagination = !isLanding && !isSpecialListing && orderedEvents.length > 0 && totalPages > 1;
   const showViewAllButton = isLandingAllListing && Number(pagination.total || 0) > displayEvents.length;
-  const marqueeCategories = useMemo(() => [...EVENT_CATEGORIES, ...EVENT_CATEGORIES], []);
+  const [categories, setCategories] = useState<any[]>(EVENT_CATEGORIES);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/categories`);
+        const data = await response.json();
+        console.log("Fetched Categories for Marquee:", data);
+        if (data && Array.isArray(data) && data.length > 0) {
+          const active = data.filter(c => c.is_active).map(c => ({
+            ...c,
+            Icon: (ICONS as any)[c.icon_name] || ICONS.Layout
+          }));
+          if (active.length > 0) {
+            setCategories(active);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch smart categories:", err);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   const sectionTitle = isLandingAllListing
     ? 'Trending Events'
     : listing === 'liked'
@@ -1044,7 +1121,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   ref={categoriesScrollRef}
                   className="flex items-center gap-6 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                 >
-                  {marqueeCategories.map((category, index) => (
+                  {[...categories, ...categories].map((category, index) => (
                     <button
                       key={`${category.key}-${index}`}
                       type="button"
@@ -1346,7 +1423,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
             <div className="space-y-6">
               <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Category</h4>
               <div className="space-y-3.5">
-                {(showCategoriesFull ? EVENT_CATEGORIES : EVENT_CATEGORIES.slice(0, 6)).map((cat) => (
+                {(showCategoriesFull ? categories : categories.slice(0, 6)).map((cat) => (
                   <button
                     key={cat.key}
                     onClick={() => setSelectedCategory(selectedCategory === cat.key ? 'all' : cat.key)}
@@ -1536,6 +1613,77 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
       <div className="mt-12">
         {isLanding && <FAQSection />}
       </div>
+
+      {/* Modern Announcement Modal */}
+      <Modal
+        isOpen={showAnnouncement}
+        onClose={dismissAnnouncement}
+        title="" // No internal header, custom design
+        size="md"
+        hideHeader
+      >
+        <div className="relative overflow-hidden rounded-3xl bg-white shadow-2xl">
+          {/* Accent Header */}
+          <div className={`h-24 flex items-center justify-center ${
+            activeAnnouncement?.type === 'INFO' ? 'bg-blue-500' :
+            activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-500' :
+            activeAnnouncement?.type === 'WARNING' ? 'bg-amber-500' : 
+            'bg-rose-500'
+          } text-white shadow-lg relative`}>
+             <div className="absolute top-4 right-4 z-50">
+               <button 
+                 onClick={dismissAnnouncement}
+                 className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
+                >
+                  <ICONS.X className="w-5 h-5 text-white" />
+               </button>
+             </div>
+             <ICONS.Bell className="w-10 h-10 animate-bounce" strokeWidth={2.5} />
+          </div>
+
+          <div className="p-8 text-center space-y-4">
+            <div className="space-y-2">
+              <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border ${
+                activeAnnouncement?.type === 'INFO' ? 'bg-blue-50 text-blue-600 border-blue-200' : 
+                activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 
+                activeAnnouncement?.type === 'WARNING' ? 'bg-amber-50 text-amber-600 border-amber-200' : 
+                'bg-rose-50 text-rose-600 border-rose-200'
+              }`}>
+                {activeAnnouncement?.type} Announcement
+              </span>
+              <h3 className="text-2xl font-black text-[#2E2E2F] leading-tight">
+                {activeAnnouncement?.title}
+              </h3>
+            </div>
+
+            <p className="text-[#2E2E2F]/70 text-sm leading-relaxed px-4 whitespace-pre-wrap">
+              {activeAnnouncement?.content}
+            </p>
+
+            <div className="pt-4 flex items-center justify-center">
+              <Checkbox 
+                checked={dontShowAgain}
+                onChange={setDontShowAgain}
+                label={<span className="text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/70">Don't show this again</span>}
+              />
+            </div>
+
+            <div className="pt-6">
+              <Button
+                onClick={dismissAnnouncement}
+                className={`w-full py-4 rounded-xl font-black text-[11px] uppercase tracking-widest text-white shadow-xl transition-transform hover:scale-[1.02] active:scale-95 ${
+                  activeAnnouncement?.type === 'INFO' ? 'bg-blue-500 shadow-blue-500/20' :
+                  activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-500 shadow-emerald-500/20' :
+                  activeAnnouncement?.type === 'WARNING' ? 'bg-amber-500 shadow-amber-500/20' : 
+                  'bg-rose-500 shadow-rose-500/20'
+                }`}
+              >
+                Got it, Thanks!
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
