@@ -12,6 +12,7 @@ import { useUser } from '../../context/UserContext';
 
 import { useEngagement } from '../../context/EngagementContext';
 import { EventCard } from './EventList';
+import { DestinationSlider } from '../../components/DestinationSlider';
 
 export const EventDiscoveryPage: React.FC = () => {
     const navigate = useNavigate();
@@ -352,11 +353,20 @@ export const EventDiscoveryPage: React.FC = () => {
                         </div>
                     </div>
                 </section>
+                
+                <div className="max-w-[88rem] mx-auto px-6 sm:px-10">
+                    <DestinationSlider onSelect={(city) => {
+                        navigate(`?location=${encodeURIComponent(city)}`);
+                        setLocationTerm(city);
+                        const target = document.getElementById('discovery-results');
+                        if (target) target.scrollIntoView({ behavior: 'smooth' });
+                    }} />
+                </div>
 
                 <div className="px-6 sm:px-10 py-12">
                     {/* Results Header - Aligned with search row */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
-                        <div className="flex-1">
+                        <div className="flex-1" id="discovery-results">
                             <h2 className="text-4xl font-black text-black tracking-tighter uppercase leading-none">
                                 {locationTerm ? `Events in ${locationTerm}` : 'Browse All Sessions'}
                             </h2>

@@ -80,6 +80,7 @@ const OrganizerReports = React.lazy(() => import('./views/User/OrganizerReports'
 const SettingsView = React.lazy(() => import('./views/Admin/Settings').then(module => ({ default: module.SettingsView })));
 const SubscriptionPlans = React.lazy(() => import('./views/Admin/SubscriptionPlans').then(module => ({ default: module.SubscriptionPlans })));
 const CategoryManagement = React.lazy(() => import('./views/Admin/CategoryManagement').then(module => ({ default: module.CategoryManagement })));
+const DiscoveryHub = React.lazy(() => import('./views/Admin/DiscoveryHub').then(module => ({ default: module.DiscoveryHub })));
 const Announcements = React.lazy(() => import('./views/Admin/Announcements'));
 const LoginPerspective = React.lazy(() => import('./views/Auth/Login').then(module => ({ default: module.LoginPerspective })));
 const SignUpView = React.lazy(() => import('./views/Auth/SignUp').then(module => ({ default: module.SignUpView })));
@@ -544,7 +545,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     if (!isAuthenticated) return;
     if (!role) return;
     const staffAllowed = ['/events', '/attendees', '/checkin', '/settings'];
-    const adminAllowed = ['/dashboard', '/events', '/attendees', '/checkin', '/settings', '/admin/categories', '/admin/announcements'];
+    const adminAllowed = ['/dashboard', '/events', '/attendees', '/checkin', '/settings', '/admin/categories', '/admin/discovery', '/admin/announcements'];
     const userAllowed = ['/user-home', '/my-events', '/my-events/create', '/my-events/edit', '/user-settings', '/organizer-settings', '/account-settings', '/user/attendees', '/user/checkin', '/user/archive', '/user/reports', '/dashboard', '/organizer-support', '/subscription'];
 
     if (role === UserRole.ORGANIZER) {
@@ -594,6 +595,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               { label: 'Dashboard', path: '/dashboard', icon: <ICONS.Layout className="w-6 h-6" /> },
               { label: 'Events Moderation', path: '/events', icon: <ICONS.Shield className="w-6 h-6" /> },
               { label: 'Smart Categories', path: '/admin/categories', icon: <ICONS.Zap className="w-6 h-6" /> },
+              { label: 'Discovery Hub', path: '/admin/discovery', icon: <ICONS.MapPin className="w-6 h-6" /> },
               { label: 'Plans', path: '/settings?tab=plans', icon: <ICONS.Layout className="w-6 h-6" /> },
               { label: 'Team and Access', path: '/settings?tab=team', icon: <ICONS.Users className="w-6 h-6" /> },
               { label: 'Email Settings', path: '/settings?tab=email', icon: <ICONS.Mail className="w-6 h-6" /> },
@@ -3094,6 +3096,7 @@ const App: React.FC = () => (
         <Route path="/attendees" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><RegistrationsList /></PortalLayout></RequireRoleRoute>} />
         <Route path="/checkin" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><CheckIn /></PortalLayout></RequireRoleRoute>} />
         <Route path="/admin/categories" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><CategoryManagement /></PortalLayout></RequireRoleRoute>} />
+        <Route path="/admin/discovery" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><DiscoveryHub /></PortalLayout></RequireRoleRoute>} />
         <Route path="/admin/announcements" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><Announcements /></PortalLayout></RequireRoleRoute>} />
         <Route path="/settings" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><SettingsView /></PortalLayout></RequireRoleRoute>} />
 

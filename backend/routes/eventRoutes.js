@@ -1,10 +1,13 @@
 import express from 'express';
-import { listEvents, getEventBySlug, listLiveEvents, getEventsFeed, getEventDetails } from '../controller/eventController.js';
+import { listEvents, getEventBySlug, listLiveEvents, getEventsFeed, getEventDetails, getLocationSummary } from '../controller/eventController.js';
 import { getMyLikedEvents, likeEvent, unlikeEvent } from '../controller/eventLikeController.js';
 import { createEvent } from '../controller/adminEventController.js';
 import { authMiddleware } from '../middleware/auth.js';
 
 const router = express.Router();
+
+// GET /api/events/locations/summary - Top physical cities with active events
+router.get('/locations/summary', getLocationSummary);
 
 // GET /api/events/live
 router.get('/live', listLiveEvents);

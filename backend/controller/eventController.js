@@ -149,7 +149,9 @@ export const listEvents = async (req, res) => {
       if (location === 'Online Events') {
         query = query.in('locationType', ['ONLINE', 'HYBRID']);
       } else {
-        query = query.ilike('locationText', `%${location}%`);
+        // Broad location search: check address, name, and description for the location term
+        // This ensures "related" events are caught even if the city name is only in the description
+        query = query.or(`locationText.ilike.%${location}%,eventName.ilike.%${location}%,description.ilike.%${location}%`);
       }
     }
 
@@ -304,6 +306,92 @@ export const listEvents = async (req, res) => {
     });
   } catch (err) {
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
+
+/**
+ * GET /api/events/locations/summary
+ * Returns a list of cities where events are currently happening, ranked by frequency.
+ */
+export const getLocationSummary = async (req, res) => {
+  try {
+    const now = new Date().toISOString();
+    
+    // 1) Fetch only future, published, physical events
+    const { data: events, error } = await supabase
+      .from('events')
+      .select('eventId, locationText, locationType')
+      .eq('status', 'PUBLISHED')
+      .eq('is_archived', false)
+      .gte('startAt', now);
+
+    if (error) return res.status(500).json({ error: error.message });
+    if (!events || events.length === 0) return res.json([]);
+
+    // 2) Fetch like counts for all identified events to determine 'Trending' status
+    const eventIds = events.map(e => e.eventId);
+    const likeCountsMap = await getEventLikeCountsMap(eventIds);
+
+    const cityStats = {};
+
+    events.forEach(event => {
+      if (event.locationType === 'ONLINE') return;
+      if (!event.locationText) return;
+
+      const parts = event.locationText.split(',').map(p => p.trim()).filter(p => p.length > 0);
+      
+      if (parts.length >= 1) {
+        // Find the city/country by looking from the back of the address string
+        // Format: [Street/Venue], [Town/District], [City/Province], [Country]
+        const country = parts[parts.length - 1];
+        
+        // If there's only one part, it's both the 'city' and the 'country' contextually
+        // If multiple, the town/city is usually 1 or 2 steps back from the country.
+        let city = parts[0]; 
+        
+        if (parts.length >= 3) {
+            city = parts[parts.length - 3]; // e.g. 'Kawit' in 'Acacia St, Kawit, Cavite, Philippines'
+        } else if (parts.length === 2) {
+            city = parts[0]; // e.g. 'Manila' in 'Manila, Philippines'
+        } else if (parts.length > 3) {
+            // Take the town part (usually index 1 or 2 points from the back)
+            city = parts[parts.length - 3];
+        }
+
+        const likes = likeCountsMap.get(event.eventId) || 0;
+
+        if (city && city.length < 30) { // Safety check against long strings
+          if (!cityStats[city]) {
+            cityStats[city] = { city, country, totalLikes: 0, eventCount: 0 };
+          }
+          cityStats[city].totalLikes += likes;
+          cityStats[city].eventCount += 1;
+        }
+      }
+    });
+
+    // 3) Transform and sort by total community likes (The 'Trending' metric)
+    const recommendations = Object.values(cityStats)
+      .map(stat => ({
+        city: stat.city,
+        country: stat.country,
+        count: stat.eventCount,
+        likes: stat.totalLikes,
+        isLive: true
+      }))
+      .sort((a, b) => {
+        // Primary Sort: Total Community Likes
+        const likeDiff = b.likes - a.likes;
+        if (likeDiff !== 0) return likeDiff;
+        // Secondary Sort: Total Event Volume
+        return b.count - a.count;
+      })
+      .slice(0, 10);
+
+    return res.json(recommendations);
+  } catch (err) {
+    console.error('❌ [Location Summary] Error:', err);
+    return res.status(500).json({ error: err.message });
   }
 };
 

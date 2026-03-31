@@ -11,6 +11,7 @@ import { EVENT_CATEGORIES } from '../../utils/eventCategories';
 import { useUser } from '../../context/UserContext';
 import { useEngagement } from '../../context/EngagementContext';
 import { PricingSection } from '../../components/PricingSection';
+import { DestinationSlider } from '../../components/DestinationSlider';
 
 
 const BRAND_LOGO_URL = 'https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg';
@@ -526,8 +527,6 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    if (!params.toString()) return;
-
     const nextSearch = (params.get('search') || '').trim();
     const locationFromQuery = (params.get('location') || '').trim();
     const nextLocation = locationFromQuery || (isLanding ? getInitialBrowseLocation() : DEFAULT_LOCATION);
@@ -537,6 +536,11 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
     setSelectedLocation(nextLocation);
     setActiveBrowseTab('ALL');
     setCurrentPage(1);
+
+    // If a location is selected via URL, ensure we sort by popularity/relevance to match "Most Popular" hero
+    if (locationFromQuery) {
+      setSortBy('relevance');
+    }
   }, [location.search, isLanding]);
 
   useEffect(() => {
@@ -608,6 +612,24 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
     fetchData();
   }, [currentPage, isSpecialListing, isLandingAllListing, serverSearchTerm, selectedCategory, selectedPrice, selectedFormat, selectedDate, activeBrowseTab, sortBy]);
 
+  const [destinations, setDestinations] = useState<any[]>([]);
+  const [selectedCityImage, setSelectedCityImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchDestinations = async () => {
+      try {
+        const res = await apiService._fetch(`${import.meta.env.VITE_API_BASE}/api/discovery/destinations`);
+        if (res.ok) {
+          const data = await res.json();
+          setDestinations(data || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch hero destinations:', err);
+      }
+    };
+    fetchDestinations();
+  }, []);
+
   useEffect(() => {
     const fetchOrganizers = async () => {
       try {
@@ -619,6 +641,34 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
     };
     fetchOrganizers();
   }, []);
+
+  useEffect(() => {
+    if (!selectedLocation || selectedLocation === DEFAULT_LOCATION || selectedLocation === ONLINE_LOCATION_VALUE) {
+      setSelectedCityImage(null);
+      return;
+    }
+
+    const cityData = destinations.find(d => d.city.toLowerCase() === selectedLocation.toLowerCase());
+    if (cityData?.imageUrl) {
+      setSelectedCityImage(cityData.imageUrl);
+    } else {
+      // Fallback fallback seeding if not in curated list
+      const isPH = selectedLocation.toLowerCase().includes('ph');
+      const pool = isPH ? [
+        'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?q=80&w=1200&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1582236378415-38fc7a871790?q=80&w=1200&auto=format&fit=crop'
+      ] : [
+        'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=1200&auto=format&fit=crop'
+      ];
+      // Consistent hash-based pick
+      let hash = 0;
+      for (let i = 0; i < selectedLocation.length; i++) {
+        hash = selectedLocation.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const idx = Math.abs(hash) % pool.length;
+      setSelectedCityImage(pool[idx]);
+    }
+  }, [selectedLocation, destinations]);
 
   // Load promoted events with real-time polling
   useEffect(() => {
@@ -645,7 +695,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   // Load latest announcement for modal
   useEffect(() => {
     if (!isLanding) return;
-    
+
     const fetchLatestAnnouncement = async () => {
       try {
         const res = await apiService._fetch(`${import.meta.env.VITE_API_BASE}/api/announcements`, {
@@ -1303,53 +1353,111 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
       )}
 
       {!isLanding && (
-        <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[260px] sm:h-[300px] lg:h-[350px] overflow-hidden mb-8">
-          <div className="absolute inset-0 bg-[linear-gradient(116deg,#38BDF2_0%,#38BDF2_44%,#F2F2F2_100%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,62,134,0.45)_0%,rgba(0,62,134,0.2)_34%,rgba(0,62,134,0)_72%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />
-          <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-5 sm:px-8">
-            <div className="max-w-[720px]">
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-white/90 mb-3">Event Marketplace</p>
-              <h1 className="text-[2.1rem] font-extrabold leading-none tracking-tight text-white sm:text-5xl">All Events</h1>
-              <p className="mt-4 max-w-[680px] text-base leading-relaxed text-white/95 sm:text-[1.05rem]">
-                Explore all published events and use the sorting controls to narrow by relevance, timing, and location context.
+        <>
+          {selectedLocation !== DEFAULT_LOCATION && selectedLocation !== ONLINE_LOCATION_VALUE ? (
+            /* Premium City Hub Hero */
+            <section
+              className={`relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[350px] sm:h-[450px] lg:h-[500px] overflow-hidden mb-12 shadow-2xl transition-all duration-1000 ${selectedCityImage ? 'bg-black' : ''}`}
+              style={{ zoom: 0.9 }}
+            >
+              {selectedCityImage ? (
+                <div className="absolute inset-0">
+                  <img
+                    src={selectedCityImage}
+                    alt=""
+                    className="w-full h-full object-cover opacity-60 scale-105 animate-pulse-slow font-black"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent" />
+                </div>
+              ) : (
+                <div className="absolute inset-0 bg-[#38BDF2]/40" />
+              )}
+              <div className="relative z-10 mx-auto flex h-full w-full max-w-[88rem] items-center px-4 sm:px-10">
+                <div className="max-w-[900px] animate-in fade-in slide-in-from-left-6 duration-1000">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="px-3 py-1.5 bg-[#38BDF2] rounded-full text-[9px] font-black uppercase tracking-widest text-white shadow-lg shadow-[#38BDF2]/40">
+                      Discovery Hub
+                    </div>
+                  </div>
+                  <h1 className="text-[1.85rem] font-black leading-[1.1] tracking-tighter text-white sm:text-4xl lg:text-5xl xl:text-6xl uppercase transform-gpu">
+                    Most Popular Events in<br />
+                    <span className="text-[#38BDF2] drop-shadow-xl underline decoration-white/20 underline-offset-[8px]">
+                      {selectedLocation}
+                    </span>
+                  </h1>
+                  <p className="mt-8 max-w-[650px] text-sm sm:text-base leading-relaxed text-white/90 font-medium tracking-tight drop-shadow-sm uppercase opacity-90">
+                    Discover elite curated sessions happening now in {selectedLocation}.
+                  </p>
+                </div>
+              </div>
+            </section>
+          ) : (
+            /* Classic Marketplace Hero for "All Events" */
+            <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[260px] sm:h-[300px] lg:h-[350px] overflow-hidden mb-8">
+              <div className="absolute inset-0 bg-[linear-gradient(116deg,#38BDF2_0%,#38BDF2_44%,#F2F2F2_100%)]" />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,62,134,0.45)_0%,rgba(0,62,134,0.2)_34%,rgba(0,62,134,0)_72%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />
+              <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-5 sm:px-8">
+                <div className="max-w-[720px]">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-white/90 mb-3">Event Marketplace</p>
+                  <h1 className="text-[2.1rem] font-extrabold leading-none tracking-tight text-white sm:text-5xl">All Events</h1>
+                  <p className="mt-4 max-w-[680px] text-base leading-relaxed text-white/95 sm:text-[1.05rem]">
+                    Explore all published events and use the sorting controls to narrow by relevance, timing, and location context.
+                  </p>
+                </div>
+              </div>
+            </section>
+          )}
+        </>
+      )}
+
+      {isLanding && !isSpecialListing && (
+        <section className="mb-0 px-0 pt-0 pb-4">
+          <div id="marketplace-results" className="scroll-mt-32">
+            <BrowseEventsNavigator
+              activeTab={activeBrowseTab}
+              onTabChange={setActiveBrowseTab}
+              selectedLocation={selectedLocation}
+              onLocationSelect={(loc) => {
+                // On Home, we just filter the local grid, no redirect
+                setSelectedLocation(loc);
+                setCurrentPage(1);
+              }}
+              onLocationClear={() => {
+                setSearchTerm('');
+                setDebouncedSearch('');
+                setSelectedLocation(DEFAULT_LOCATION);
+                setActiveBrowseTab('ALL');
+              }}
+              isLoading={isFetching}
+              className="mt-0 mb-8 mx-0"
+            />
+          </div>
+
+          <div id="marketplace-results-grid" className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pt-8 mb-6 pb-0 px-0 scroll-mt-24">
+            <div className="flex-1 space-y-1.5">
+              <h2 className="text-2xl md:text-3xl font-black text-black tracking-tight leading-none uppercase">
+                {selectedLocation === DEFAULT_LOCATION ? 'Global Trending Events' : `Trending in ${selectedLocation}`}
+              </h2>
+              <p className="text-black text-xs md:text-sm font-medium leading-relaxed">
+                {selectedLocation === DEFAULT_LOCATION
+                  ? 'The most liked and anticipated sessions happening now world-wide.'
+                  : `Top rated sessions happening across ${selectedLocation}.`}
               </p>
             </div>
           </div>
         </section>
       )}
 
-      {isLanding && !isSpecialListing && (
-        <section className="mb-0 px-0 pt-0 pb-4">
-          <BrowseEventsNavigator
-            activeTab={activeBrowseTab}
-            onTabChange={setActiveBrowseTab}
-            selectedLocation={selectedLocation}
-            onLocationSelect={setSelectedLocation}
-            onLocationClear={() => {
-              setSearchTerm('');
-              setDebouncedSearch('');
-              setSelectedLocation(DEFAULT_LOCATION);
-              setActiveBrowseTab('ALL');
-            }}
-            isLoading={isFetching}
-            className="mt-0 mb-2 mx-0 sm:mx-0 lg:mx-0"
-          />
-
-          {/* Events Listing Section Header */}
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pt-8 mb-6 pb-0 px-0">
-            <div className="flex-1 space-y-1.5">
-              <h2 className="text-2xl md:text-3xl font-black text-black tracking-tight leading-none uppercase">{sectionTitle}</h2>
-              <p className="text-black text-xs md:text-sm font-medium leading-relaxed">{sectionSubtitle}</p>
-            </div>
-          </div>
-        </section>
+      {!isLanding && (
+        <div className="mb-0">
+          {/* Internal Navigator for Discovery Mode - Hidden per request */}
+        </div>
       )}
 
       <div className={`flex flex-col sm:flex-row items-center justify-between gap-6 px-0 ${isLanding ? 'mb-6 mt-0 !justify-start' : 'mb-8 mt-2'}`}>
         {!isLanding && !isSpecialListing && (
           <div className="flex items-center gap-4 w-full sm:w-auto">
-            {/* Hide Sidebar Toggle */}
             <button
               onClick={() => setIsSidebarVisible(!isSidebarVisible)}
               className="flex items-center gap-2 bg-[#F2F2F2] px-4 py-2.5 rounded-xl border border-[#E5E7EB] shadow-sm text-[10px] font-black uppercase tracking-widest text-black hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all"
@@ -1358,7 +1466,6 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               {isSidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
             </button>
 
-            {/* Sort By Dropdown */}
             <div className="flex items-center gap-3 bg-[#F2F2F2] px-5 py-2.5 rounded-xl border border-[#D1D5DB] shadow-sm justify-between sm:justify-start">
               <span className="text-[10px] font-black uppercase tracking-widest text-black">Sort By</span>
               <select
@@ -1381,7 +1488,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
             </div>
             <input
               type="text"
-              placeholder="Search sessions..."
+              placeholder={`Search in ${selectedLocation}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="block w-full pl-10 pr-9 py-3 bg-[#F2F2F2] border border-[#D1D5DB] rounded-xl text-[12px] font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-black"
@@ -1517,87 +1624,138 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           </aside>
         )}
 
-        <div className="flex-1 min-w-0 space-y-10">
-          {/* Grid Display */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8 min-h-[400px]">
-            {loading ? (
-              Array.from({ length: isLandingAllListing ? 3 : 6 }).map((_, idx) => (
-                <EventCardSkeleton key={idx} />
-              ))
-            ) : displayEvents.map((event) => (
-              <div key={event.eventId} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <EventCard
-                  event={event}
-                  onActionNotice={setInteractionNotice}
-                  trendingRank={trendingRankByEventId.get(event.eventId) ?? null}
-                  organizers={organizers}
-                  isLanding={isLanding}
-                  listing={listing}
-                />
+        <div className="flex-1 min-w-0 space-y-12">
+          {/* Most Liked Events Section (Discovery Mode Only) */}
+          {!isLanding && selectedLocation !== DEFAULT_LOCATION && displayEvents.length > 0 && !loading && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="flex items-center gap-4">
+                <div className="h-0.5 bg-[#38BDF2] w-8" />
+                <h3 className="text-xl font-black text-black tracking-tight uppercase">Most Liked in {selectedLocation}</h3>
+                <div className="h-px bg-black/5 flex-1" />
               </div>
-            ))}
-          </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                {displayEvents.slice(0, 3).map((event) => (
+                  <EventCard
+                    key={`featured-${event.eventId}`}
+                    event={event}
+                    onActionNotice={setInteractionNotice}
+                    trendingRank={trendingRankByEventId.get(event.eventId) ?? null}
+                    organizers={organizers}
+                    isLanding={isLanding}
+                    listing={listing}
+                  />
+                ))}
+              </div>
 
-          {isLandingAllListing && (
-            <div className="flex justify-center mt-12 px-4">
-              <button
-                onClick={() => navigate('/browse-events')}
-                className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-4 bg-[#38BDF2] rounded-xl text-[12px] font-black uppercase tracking-widest text-[#F2F2F2] hover:bg-black transition-all active:scale-95 shadow-lg shadow-[#38BDF2]/20"
-              >
-                Explore All Events
-                <ICONS.ArrowRight className="w-5 h-5" />
-              </button>
+              {displayEvents.length > 3 && (
+                <div className="pt-8 space-y-8">
+                  <div className="flex items-center gap-4">
+                    <div className="h-0.5 bg-black/20 w-8" />
+                    <h3 className="text-xl font-black text-black tracking-tight uppercase">Other Events</h3>
+                    <div className="h-px bg-black/5 flex-1" />
+                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                    {displayEvents.slice(3).map((event) => (
+                      <EventCard
+                        key={`other-${event.eventId}`}
+                        event={event}
+                        onActionNotice={setInteractionNotice}
+                        trendingRank={trendingRankByEventId.get(event.eventId) ?? null}
+                        organizers={organizers}
+                        isLanding={isLanding}
+                        listing={listing}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Explore Button for Discovery Mode */}
+                  <div className="flex justify-center mt-16 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                    <button
+                      onClick={() => {
+                        setSearchTerm('');
+                        setSelectedLocation(DEFAULT_LOCATION);
+                        setActiveBrowseTab('ALL');
+                        navigate('/browse-events');
+                      }}
+                      className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 bg-[#38BDF2] rounded-2xl text-[13px] font-black uppercase tracking-widest text-[#F2F2F2] hover:bg-black transition-all active:scale-95 shadow-[0_20px_50px_rgba(56,189,242,0.25)] hover:shadow-black/20"
+                    >
+                      Explore All Events
+                      <ICONS.ArrowRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Empty State */}
-          {displayEvents.length === 0 && (
-            <div className="py-24 px-6 text-center bg-[#F2F2F2] rounded-xl border border-[#E5E7EB] animate-in zoom-in-95 duration-500">
-              <div className="w-16 h-16 bg-[#F2F2F2] border border-black/5 rounded-xl flex items-center justify-center mx-auto mb-6 shadow-sm">
-                <ICONS.Search className="w-8 h-8 text-black" />
+          {/* Standard Grid Display (Fallbacks) */}
+          {((isLanding || selectedLocation === DEFAULT_LOCATION) || loading) && (
+            <>
+              <div className={`grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8 ${displayEvents.length > 0 ? 'min-h-[400px]' : 'min-h-0'}`}>
+                {loading ? (
+                  Array.from({ length: isLandingAllListing ? 3 : 6 }).map((_, idx) => (
+                    <EventCardSkeleton key={idx} />
+                  ))
+                ) : displayEvents.map((event) => (
+                  <div key={event.eventId} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <EventCard
+                      event={event}
+                      onActionNotice={setInteractionNotice}
+                      trendingRank={trendingRankByEventId.get(event.eventId) ?? null}
+                      organizers={organizers}
+                      isLanding={isLanding}
+                      listing={listing}
+                    />
+                  </div>
+                ))}
               </div>
-              <h3 className="text-2xl font-black text-black tracking-tighter mb-4 uppercase">
+
+              {isLandingAllListing && displayEvents.length > 0 && (
+                <div className="flex justify-center mt-12 px-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                  <button
+                    onClick={() => navigate('/browse-events')}
+                    className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-4 bg-[#38BDF2] rounded-xl text-[12px] font-black uppercase tracking-widest text-[#F2F2F2] hover:bg-black transition-all active:scale-95 shadow-lg shadow-[#38BDF2]/20 shadow-blue-500/20"
+                  >
+                    Explore All Events
+                    <ICONS.ArrowRight className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {displayEvents.length === 0 && (
+            <div className="py-12 px-6 text-center bg-white rounded-3xl border border-black/5 animate-in zoom-in-95 duration-500 shadow-sm">
+              <div className="w-14 h-14 bg-[#F2F2F2] border border-black/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <ICONS.Search className="w-7 h-7 text-black opacity-40" />
+              </div>
+              <h3 className="text-xl font-black text-black tracking-tight mb-3 uppercase">
                 {isLandingAllListing
-                  ? 'No Trending Events Yet'
-                  : listing === 'liked'
-                    ? 'No liked events yet'
-                    : listing === 'followings'
-                      ? 'No events from followed organizations yet'
-                      : activeBrowseTab === 'FOR_YOU'
-                        ? 'No recommended events yet'
-                        : 'No matches found'}
+                  ? 'No Trending Hubs Yet'
+                  : selectedLocation !== DEFAULT_LOCATION
+                    ? `No Sessions in ${selectedLocation}`
+                    : 'No matches found'}
               </h3>
-              <p className="text-sm font-bold text-black mb-10 max-w-[340px] mx-auto leading-relaxed">
+              <p className="text-xs font-bold text-black/60 mb-8 max-w-[280px] mx-auto leading-relaxed">
                 {isLandingAllListing
                   ? 'Be the first to like a session to see it trending here, or explore our full catalog below.'
-                  : listing === 'all'
-                    ? 'Try adjusting your filters or search terms to discover more exciting sessions.'
-                    : 'Like events or follow organizations to build your personalized feed.'}
+                  : `We couldn't find any upcoming events in this local hub. Try broadening your location or checking "All areas".`}
               </p>
-              {isLandingAllListing ? (
-                <Button
-                  className="px-8 py-3.5 rounded-xl bg-black text-white font-black uppercase tracking-widest text-[10px] hover:bg-[#38BDF2] transition-colors"
-                  onClick={() => navigate('/browse-events')}
-                >
-                  Discover All Sessions
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  className="px-8 py-3.5 rounded-xl border-2 border-[#E5E7EB] text-black font-black uppercase tracking-widest text-[10px]"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setSelectedLocation(DEFAULT_LOCATION);
-                    setActiveBrowseTab('ALL');
-                    setSelectedCategory('all');
-                    setSelectedDate('all');
-                    setSelectedPrice('all');
-                    setSelectedFormat('all');
-                  }}
-                >
-                  Reset All Filters
-                </Button>
-              )}
+              <Button
+                className="px-8 py-3.5 rounded-xl bg-black text-white font-black uppercase tracking-widest text-[10px] hover:bg-[#38BDF2] transition-all transform active:scale-95 shadow-lg shadow-black/10"
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedLocation(DEFAULT_LOCATION);
+                  setActiveBrowseTab('ALL');
+                  setSelectedCategory('all');
+                  setSelectedDate('all');
+                  setSelectedPrice('all');
+                  setSelectedFormat('all');
+                  navigate('/browse-events');
+                }}
+              >
+                Discover All Hubs
+              </Button>
             </div>
           )}
 
@@ -1605,6 +1763,13 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
         </div>
       </div>
 
+
+      {isLanding && (
+        <DestinationSlider onSelect={(city) => {
+          navigate(`/browse-events?location=${encodeURIComponent(city)}`);
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }} />
+      )}
 
       {isLanding && <PricingSection />}
       <div className="mt-12">
@@ -1624,31 +1789,29 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
       >
         <div className="relative overflow-hidden rounded-3xl bg-white shadow-2xl">
           {/* Accent Header */}
-          <div className={`h-24 flex items-center justify-center ${
-            activeAnnouncement?.type === 'INFO' ? 'bg-blue-500' :
-            activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-500' :
-            activeAnnouncement?.type === 'WARNING' ? 'bg-amber-500' : 
-            'bg-rose-500'
-          } text-white shadow-lg relative`}>
-             <div className="absolute top-4 right-4 z-50">
-               <button 
-                 onClick={dismissAnnouncement}
-                 className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
-                >
-                  <ICONS.X className="w-5 h-5 text-white" />
-               </button>
-             </div>
-             <ICONS.Bell className="w-10 h-10 animate-bounce" strokeWidth={2.5} />
+          <div className={`h-24 flex items-center justify-center ${activeAnnouncement?.type === 'INFO' ? 'bg-blue-500' :
+              activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-500' :
+                activeAnnouncement?.type === 'WARNING' ? 'bg-amber-500' :
+                  'bg-rose-500'
+            } text-white shadow-lg relative`}>
+            <div className="absolute top-4 right-4 z-50">
+              <button
+                onClick={dismissAnnouncement}
+                className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
+              >
+                <ICONS.X className="w-5 h-5 text-white" />
+              </button>
+            </div>
+            <ICONS.Bell className="w-10 h-10 animate-bounce" strokeWidth={2.5} />
           </div>
 
           <div className="p-8 text-center space-y-4">
             <div className="space-y-2">
-              <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border ${
-                activeAnnouncement?.type === 'INFO' ? 'bg-blue-50 text-blue-600 border-blue-200' : 
-                activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 
-                activeAnnouncement?.type === 'WARNING' ? 'bg-amber-50 text-amber-600 border-amber-200' : 
-                'bg-rose-50 text-rose-600 border-rose-200'
-              }`}>
+              <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border ${activeAnnouncement?.type === 'INFO' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                  activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                    activeAnnouncement?.type === 'WARNING' ? 'bg-amber-50 text-amber-600 border-amber-200' :
+                      'bg-rose-50 text-rose-600 border-rose-200'
+                }`}>
                 {activeAnnouncement?.type} Announcement
               </span>
               <h3 className="text-2xl font-black text-[#2E2E2F] leading-tight">
@@ -1661,7 +1824,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
             </p>
 
             <div className="pt-4 flex items-center justify-center">
-              <Checkbox 
+              <Checkbox
                 checked={dontShowAgain}
                 onChange={setDontShowAgain}
                 label={<span className="text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/70">Don't show this again</span>}
@@ -1671,12 +1834,11 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
             <div className="pt-6">
               <Button
                 onClick={dismissAnnouncement}
-                className={`w-full py-4 rounded-xl font-black text-[11px] uppercase tracking-widest text-white shadow-xl transition-transform hover:scale-[1.02] active:scale-95 ${
-                  activeAnnouncement?.type === 'INFO' ? 'bg-blue-500 shadow-blue-500/20' :
-                  activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-500 shadow-emerald-500/20' :
-                  activeAnnouncement?.type === 'WARNING' ? 'bg-amber-500 shadow-amber-500/20' : 
-                  'bg-rose-500 shadow-rose-500/20'
-                }`}
+                className={`w-full py-4 rounded-xl font-black text-[11px] uppercase tracking-widest text-white shadow-xl transition-transform hover:scale-[1.02] active:scale-95 ${activeAnnouncement?.type === 'INFO' ? 'bg-blue-500 shadow-blue-500/20' :
+                    activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-500 shadow-emerald-500/20' :
+                      activeAnnouncement?.type === 'WARNING' ? 'bg-amber-500 shadow-amber-500/20' :
+                        'bg-rose-500 shadow-rose-500/20'
+                  }`}
               >
                 Got it, Thanks!
               </Button>
