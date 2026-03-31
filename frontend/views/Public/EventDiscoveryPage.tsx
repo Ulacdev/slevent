@@ -193,10 +193,10 @@ export const EventDiscoveryPage: React.FC = () => {
     const combinedEvents = useMemo(() => {
         const promotedIds = new Set(promotedEvents.map(e => e.eventId));
         const nonPromotedFiltered = filteredEvents.filter(e => !promotedIds.has(e.eventId));
-        
+
         // Add promoted flag to each promoted event
         const markedPromotedEvents = promotedEvents.map(e => ({ ...e, isPromoted: true }));
-        
+
         return [...markedPromotedEvents, ...nonPromotedFiltered];
     }, [promotedEvents, filteredEvents]);
 
@@ -340,7 +340,7 @@ export const EventDiscoveryPage: React.FC = () => {
                     <div className="absolute inset-0 bg-[linear-gradient(116deg,#38BDF2_0%,#38BDF2_44%,#F2F2F2_100%)]" />
                     <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,62,134,0.45)_0%,rgba(0,62,134,0.2)_34%,rgba(0,62,134,0)_72%)]" />
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />
-                    
+
                     <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-5 sm:px-8">
                         <div className="max-w-[840px]">
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/90 mb-4">All Events</p>
@@ -353,7 +353,7 @@ export const EventDiscoveryPage: React.FC = () => {
                         </div>
                     </div>
                 </section>
-                
+
                 <div className="max-w-[88rem] mx-auto px-6 sm:px-10">
                     <DestinationSlider onSelect={(city) => {
                         navigate(`?location=${encodeURIComponent(city)}`);
@@ -395,9 +395,9 @@ export const EventDiscoveryPage: React.FC = () => {
                         <div className="mb-12">
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
                                 {combinedEvents.map((event, idx) => (
-                                    <div 
-                                        key={event.eventId} 
-                                        className="relative animate-in fade-in slide-in-from-bottom-4 duration-700" 
+                                    <div
+                                        key={event.eventId}
+                                        className="relative animate-in fade-in slide-in-from-bottom-4 duration-700"
                                         style={{ animationDelay: `${idx * 50}ms` }}
                                     >
                                         {/* Featured Badge - Show only for promoted events */}

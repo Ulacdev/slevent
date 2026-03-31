@@ -981,7 +981,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   }
 
   return (
-    <div className={`max-w-[88rem] mx-auto px-4 sm:px-10 pb-16 ${isLanding ? 'pt-6 sm:pt-12' : 'pt-0'}`}>
+    <div className={`${isLanding ? 'max-w-[88rem] mx-auto px-4 sm:px-10 pt-6 sm:pt-12' : 'max-w-full px-6 sm:px-10 pt-0'} pb-16`}>
       {isLanding && (
         <>
           {/* Premium Hero Section */}

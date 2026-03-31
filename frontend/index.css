@@ -674,7 +674,7 @@ img {
    ADMIN UI OVERRIDES
    ======================================== */
 
-.hide-admin-ui header, 
+.hide-admin-ui header,
 .hide-admin-ui aside {
   display: none !important;
 }
@@ -691,6 +691,7 @@ img {
   0% {
     transform: translateX(-100%);
   }
+
   100% {
     transform: translateX(100%);
   }
@@ -723,8 +724,16 @@ img {
 }
 
 @keyframes suspense-loading {
-  0% { transform: scaleX(0); }
-  50% { transform: scaleX(0.7); }
-  100% { transform: scaleX(1); opacity: 0; }
+  0% {
+    transform: scaleX(0);
+  }
+
+  50% {
+    transform: scaleX(0.7);
+  }
+
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
 }
-
