@@ -59,7 +59,7 @@ export const SignUpView: React.FC = () => {
         body: JSON.stringify({
           name: formData.name.trim(),
           email: formData.email.trim().toLowerCase(),
-          password: formData.password
+          password: "B64:" + btoa(unescape(encodeURIComponent(formData.password)))
         })
       });
 

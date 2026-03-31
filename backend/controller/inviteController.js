@@ -4,6 +4,7 @@ import { sendSmtpEmail } from '../utils/smtpMailer.js';
 import { getSmtpConfig } from '../utils/notificationService.js';
 import { checkPlanLimits } from '../utils/planValidator.js';
 import { getOrganizerByUserId } from '../utils/organizerData.js';
+import { decodeAuthPassword } from '../utils/encryption.js';
 
 const normalizeRole = (role) => {
   const normalized = String(role || '').toUpperCase();
@@ -197,7 +198,8 @@ export async function createInviteAndSend(req, res) {
 // Accept invite and set password
 export async function acceptInvite(req, res) {
   try {
-    const { token, password, name } = req.body;
+    let { token, password, name } = req.body;
+    password = decodeAuthPassword(password);
     const normalizedToken = String(token || '').trim().replace(/[?.,;:!]+$/, '');
     const { data: invites, error } = await db.from('invites').select('*').eq('token', normalizedToken).gt('expiresAt', new Date().toISOString());
     if (error || !invites.length) return res.status(400).json({ error: 'Invalid or expired invite' });

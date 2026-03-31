@@ -4,11 +4,13 @@ import { sendMakeNotification } from '../utils/makeWebhook.js';
 
 import { notifyUserByPreference, getAdminSmtpConfig } from "../utils/notificationService.js";
 import { logAudit } from "../utils/auditLogger.js";
+import { decodeAuthPassword } from "../utils/encryption.js";
 
 const ORGANIZER_ROLE = 'ORGANIZER';
 
 export const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  let { name, email, password } = req.body;
+  password = decodeAuthPassword(password);
 
   if (!email || !password) {
     return res.status(400).json({ message: "Email and password are required" });
@@ -237,7 +239,8 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { email, password, access_token, refresh_token } = req.body;
+  let { email, password, access_token, refresh_token } = req.body;
+  password = decodeAuthPassword(password);
 
   try {
     let finalAccessToken = access_token;
@@ -248,6 +251,20 @@ export const login = async (req, res) => {
     // This allows the rate limiter to protect the system
     if (email && password) {
       console.log(`[Auth] Backend login attempt for: ${email}`);
+
+      // 1. Check if account is locked
+      const { data: lockoutCheck } = await db.from('users')
+        .select('failed_login_attempts, locked_until')
+        .eq('email', email.toLowerCase().trim())
+        .maybeSingle();
+
+      if (lockoutCheck?.locked_until && new Date(lockoutCheck.locked_until) > new Date()) {
+        const remaining = Math.ceil((new Date(lockoutCheck.locked_until).getTime() - new Date().getTime()) / 60000);
+        return res.status(403).json({ 
+          message: `🛑 SECURITY LOCK: Too many failed attempts. Account is locked for another ${remaining} minutes.` 
+        });
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email: email.toLowerCase().trim(), 
         password 
@@ -255,8 +272,28 @@ export const login = async (req, res) => {
 
       if (error || !data.session) {
         console.warn(`[Auth] Failed login for ${email}: ${error?.message}`);
+        
+        // 2. Increment failed attempts
+        if (email) {
+          const currentAttempts = (lockoutCheck?.failed_login_attempts || 0) + 1;
+          const updates = { failed_login_attempts: currentAttempts };
+          
+          if (currentAttempts >= 10) {
+            updates.locked_until = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+          }
+
+          await db.from('users')
+            .update(updates)
+            .eq('email', email.toLowerCase().trim());
+        }
+
         return res.status(401).json({ message: error?.message || "Invalid credentials" });
       }
+
+      // 3. Reset failed attempts on success
+      await db.from('users')
+        .update({ failed_login_attempts: 0, locked_until: null })
+        .eq('email', email.toLowerCase().trim());
 
       finalAccessToken = data.session.access_token;
       finalRefreshToken = data.session.refresh_token;

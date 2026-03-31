@@ -28,7 +28,7 @@ export const LoginPerspective: React.FC = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", 
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password: "B64:" + btoa(unescape(encodeURIComponent(password))) })
       });
 
       console.log(`DEBUG: Response Status: ${loginResponse.status}`);

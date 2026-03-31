@@ -313,7 +313,8 @@ export const createOrder = async (req, res) => {
               attendeeId: attendee.attendeeId,
               ticketCode,
               qrPayload: ticketCode,
-              status: 'ISSUED'
+              status: 'ISSUED',
+              issuedAt: new Date().toISOString()
             })
             .select('ticketId')
             .maybeSingle();

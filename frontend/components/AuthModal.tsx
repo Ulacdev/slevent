@@ -64,7 +64,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", 
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password: "B64:" + btoa(unescape(encodeURIComponent(password))) })
       });
 
       const result = await loginResponse.json().catch(() => ({}));
@@ -146,7 +146,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
         body: JSON.stringify({
           name: signupData.name.trim(),
           email: signupData.email.trim().toLowerCase(),
-          password: signupData.password
+          password: "B64:" + btoa(unescape(encodeURIComponent(signupData.password)))
         })
       });
 

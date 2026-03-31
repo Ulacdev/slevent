@@ -42,6 +42,16 @@ const RegistrationMobileCard = React.memo<{
                 <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest">Ticket</span>
                 <span className="text-[13px] font-semibold text-[#2E2E2F]">{reg.ticketName}</span>
             </div>
+            <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest">Phone</span>
+                    <span className="text-[12px] font-bold text-[#2E2E2F] truncate">{reg.attendeePhone || 'N/A'}</span>
+                </div>
+                <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest">Date</span>
+                    <span className="text-[12px] font-bold text-[#2E2E2F] truncate">{reg.registrationDate ? new Date(reg.registrationDate).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</span>
+                </div>
+            </div>
             <div className="flex items-center justify-between pt-1">
                 <div className="flex flex-col">
                     <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest">Payment</span>
@@ -102,8 +112,14 @@ const RegistrationTableRow = React.memo<{
             </span>
         </td>
         <td className="px-8 py-6">
-            <span className="text-[15px] font-black text-[#2E2E2F] tracking-tighter">
-                {reg.currency} {(reg.amountPaid ?? 0).toFixed(2)}
+            <div className="flex flex-col">
+                <span className="text-[14px] font-bold text-[#2E2E2F]">{reg.currency} {(reg.amountPaid ?? 0).toFixed(2)}</span>
+                <span className="text-[11px] text-[#2E2E2F]/60 font-medium mt-0.5">{reg.attendeePhone || 'N/A'}</span>
+            </div>
+        </td>
+        <td className="px-8 py-6">
+             <span className="text-[13px] font-bold text-[#2E2E2F] tracking-tight">
+                {reg.registrationDate ? new Date(reg.registrationDate).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}
             </span>
         </td>
         <td className="px-8 py-6 text-right">
@@ -449,7 +465,8 @@ export const RegistrationsList: React.FC = () => {
                 <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Attendee</th>
                 <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Ticket Information</th>
                 <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Status</th>
-                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Transaction</th>
+                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Transaction & Phone</th>
+                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Registered On</th>
                 <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-right">Operations</th>
               </tr>
             </thead>

@@ -57,3 +57,20 @@ export function maskString(text) {
     if (str.length <= 6) return '*'.repeat(str.length);
     return '*'.repeat(Math.max(0, str.length - 4)) + str.slice(-4);
 }
+
+/**
+ * Decodes the password if it's prefixed with B64: (Base64 encoded from frontend)
+ * This is used to mask the password in the network request payload.
+ */
+export function decodeAuthPassword(password) {
+    if (typeof password !== 'string') return password;
+    if (password.startsWith('B64:')) {
+        try {
+            return Buffer.from(password.substring(4), 'base64').toString('utf-8');
+        } catch (e) {
+            console.error('[Encryption] Failed to decode B64 password', e);
+            return password;
+        }
+    }
+    return password;
+}

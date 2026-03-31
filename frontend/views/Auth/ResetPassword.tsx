@@ -99,7 +99,10 @@ export const ResetPassword: React.FC = () => {
                 navigate('/');
             }, 3000);
         } catch (err: any) {
-            const errMsg = err.message || "Failed to update password. Link may be expired.";
+            let errMsg = err.message || "Failed to update password. Link may be expired.";
+            if (errMsg.toLowerCase().includes('expired') || errMsg.toLowerCase().includes('fetch')) {
+                errMsg = "This reset link has expired. Please request a new one.";
+            }
             setError(errMsg);
             showToast('error', errMsg);
         } finally {

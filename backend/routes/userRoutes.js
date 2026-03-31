@@ -9,7 +9,9 @@ import {
   uploadUserEventImage,
   deleteEvent,
   restoreEvent,
-  listArchivedEvents
+  listArchivedEvents,
+  cancelEvent,
+  sendBulkNotification
 } from "../controller/adminEventController.js";
 import {
   submitSupportTicket,
@@ -55,6 +57,12 @@ router.post('/user/events/:id/image', authMiddleware, upload.single('image'), (r
 // ─── Archive system for organizers ───
 // DELETE /user/events/:id - Archive (soft delete) event
 router.delete('/user/events/:id', authMiddleware, deleteEvent);
+
+// PATCH /user/events/:id/cancel - Cancel event and notify attendees
+router.patch('/user/events/:id/cancel', authMiddleware, cancelEvent);
+
+// POST /user/events/:id/notify - Send bulk notification to attendees
+router.post('/user/events/:id/notify', authMiddleware, sendBulkNotification);
 
 // GET /user/events/archived - List archived events
 router.get('/user/events/archived', authMiddleware, listArchivedEvents);

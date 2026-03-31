@@ -254,6 +254,7 @@ export interface RegistrationView {
   amountPaid: number;
   currency: string;
   streamingPlatform?: string | null;
+  registrationDate?: string;
   checkInTimestamp?: string;
 }
 

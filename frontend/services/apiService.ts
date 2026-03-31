@@ -871,6 +871,32 @@ export const apiService = {
     if (!res.ok) throw new Error(`Failed to delete user event: ${res.status}`);
   },
 
+  cancelUserEvent: async (id: string): Promise<any> => {
+    const res = await fetch(`${API_BASE}/api/user/events/${encodeURIComponent(id)}/cancel`, {
+      method: 'PATCH',
+      credentials: 'include'
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.error || `Failed to cancel event: ${res.status}`);
+    }
+    return await res.json();
+  },
+
+  sendBulkNotification: async (eventId: string, payload: { subject: string, message: string }): Promise<any> => {
+    const res = await fetch(`${API_BASE}/api/user/events/${encodeURIComponent(eventId)}/notify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.error || `Failed to send notification: ${res.status}`);
+    }
+    return await res.json();
+  },
+
 
   uploadUserEventImage: async (file: File, eventId?: string): Promise<{ publicUrl: string }> => {
     const formData = new FormData();

@@ -33,7 +33,7 @@ export const AcceptInvite: React.FC = () => {
     const res = await fetch(`${API}/api/invite/accept-invite`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, password, name: name.trim() })
+      body: JSON.stringify({ token, password: "B64:" + btoa(unescape(encodeURIComponent(password))), name: name.trim() })
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));

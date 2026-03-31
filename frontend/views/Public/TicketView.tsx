@@ -68,32 +68,32 @@ export const TicketView: React.FC = () => {
                 </div>
               </div>
 
-              {showMeetLinkOnly ? (
-                <div className="w-full bg-[#38BDF2]/5 border border-[#38BDF2]/10 rounded-xl p-8 text-center">
+              <div className="relative group w-full max-w-[280px]">
+                <div className="absolute -inset-6 bg-[#38BDF2]/5 rounded-xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <Card className="relative p-6 sm:p-8 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl shadow-xl shadow-[#2E2E2F]/5">
+                  <div className="flex justify-center mb-6">
+                    <QRCode
+                      value={ticket.qrPayload || ticket.ticketCode}
+                      size={180}
+                      fgColor="#2E2E2F"
+                      bgColor="#F2F2F2"
+                      className="w-full h-auto"
+                    />
+                  </div>
+                  <div className="pt-6 border-t border-[#2E2E2F]/5 text-center">
+                    <p className="text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] mb-1">TICKET CODE</p>
+                    <p className="text-sm font-black text-[#2E2E2F] tracking-widest uppercase">{ticket.ticketCode}</p>
+                  </div>
+                </Card>
+              </div>
+
+              {showMeetLinkOnly && (
+                <div className="w-full bg-[#38BDF2]/5 border border-[#38BDF2]/10 rounded-xl p-8 text-center mt-6">
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#2E2E2F] mb-6">SECURE CONNECTION</p>
                   <Button size="md" className="w-full mb-4" onClick={() => { window.location.href = meetLink; }}>
                     JOIN LIVE SESSION
                   </Button>
                   <p className="text-[11px] font-bold text-[#38BDF2] break-all opacity-80">{meetLink}</p>
-                </div>
-              ) : (
-                <div className="relative group w-full max-w-[280px]">
-                  <div className="absolute -inset-6 bg-[#38BDF2]/5 rounded-xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <Card className="relative p-6 sm:p-8 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl shadow-xl shadow-[#2E2E2F]/5">
-                    <div className="flex justify-center mb-6">
-                      <QRCode
-                        value={ticket.qrPayload || ticket.ticketCode}
-                        size={180}
-                        fgColor="#2E2E2F"
-                        bgColor="#F2F2F2"
-                        className="w-full h-auto"
-                      />
-                    </div>
-                    <div className="pt-6 border-t border-[#2E2E2F]/5 text-center">
-                      <p className="text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] mb-1">TICKET CODE</p>
-                      <p className="text-sm font-black text-[#2E2E2F] tracking-widest uppercase">{ticket.ticketCode}</p>
-                    </div>
-                  </Card>
                 </div>
               )}
 

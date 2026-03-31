@@ -787,3 +787,141 @@ export const closeEvent = async (req, res) => {
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }
 };
+
+export const cancelEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+    const ownership = await ensureEventOwnership(id, userId);
+    if (ownership.status !== 200) {
+      return res.status(ownership.status).json({ error: ownership.message });
+    }
+
+    const { data: event, error: updErr } = await supabase
+      .from('events')
+      .update({ status: 'CANCELLED', updated_at: new Date().toISOString() })
+      .eq('eventId', id)
+      .select('*')
+      .single();
+
+    if (updErr) return res.status(500).json({ error: updErr.message });
+    if (!event) return res.status(404).json({ error: 'Event not found' });
+
+    // Mark all tickets as CANCELLED for this event
+    await supabase
+      .from('tickets')
+      .update({ status: 'CANCELLED', updated_at: new Date().toISOString() })
+      .eq('eventId', id);
+
+    // ─── Automated Cancellation Emails ───
+    const { data: tickets } = await supabase
+      .from('tickets')
+      .select('attendeeId')
+      .eq('eventId', id);
+
+    if (tickets && tickets.length > 0) {
+      const attendeeIds = [...new Set(tickets.map(t => t.attendeeId))];
+      const { data: attendees } = await supabase
+        .from('attendees')
+        .select('name, email')
+        .in('attendeeId', attendeeIds);
+
+      if (attendees && attendees.length > 0) {
+        const emailPromises = attendees.map(attendee => 
+          notifyUserByPreference({
+            recipientFallbackEmail: attendee.email,
+            organizerId: event.organizerId,
+            actorUserId: userId,
+            eventId: id,
+            type: 'TICKET_CANCELLED',
+            title: `Event Cancelled: ${event.eventName}`,
+            message: `We regret to inform you that the event "${event.eventName}" has been cancelled by the organizer.`,
+            metadata: {
+              eventName: event.eventName,
+              typeIcon: '🚫',
+              tag: 'CANCELLED'
+            }
+          })
+        );
+        await Promise.allSettled(emailPromises);
+      }
+    }
+
+    await logAudit({
+      actionType: 'EVENT_CANCELLED',
+      details: { eventId: event.eventId, eventName: event.eventName },
+      req
+    });
+
+    return res.json({ success: true, message: 'Event cancelled and attendees notified.', event });
+  } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
+
+export const sendBulkNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { subject, message } = req.body;
+    const userId = req.user?.id;
+
+    if (!subject || !message) return res.status(400).json({ error: 'Subject and message are required' });
+
+    const ownership = await ensureEventOwnership(id, userId);
+    if (ownership.status !== 200) {
+      return res.status(ownership.status).json({ error: ownership.message });
+    }
+
+    const event = ownership.event;
+
+    const { data: tickets } = await supabase
+      .from('tickets')
+      .select('attendeeId')
+      .eq('eventId', id);
+
+    if (!tickets || tickets.length === 0) {
+      return res.status(400).json({ error: 'No attendees found for this event.' });
+    }
+
+    const attendeeIds = [...new Set(tickets.map(t => t.attendeeId))];
+    const { data: attendees } = await supabase
+      .from('attendees')
+      .select('name, email')
+      .in('attendeeId', attendeeIds);
+
+    if (!attendees || attendees.length === 0) {
+      return res.status(400).json({ error: 'No attendees found for this event.' });
+    }
+
+    const emailPromises = attendees.map(attendee => 
+      notifyUserByPreference({
+        recipientFallbackEmail: attendee.email,
+        organizerId: event.organizerId,
+        actorUserId: userId,
+        eventId: id,
+        type: 'EVENT_UPDATE',
+        title: subject,
+        message: message,
+        metadata: {
+          eventName: event.eventName,
+          typeIcon: '🔔',
+          tag: 'ANNOUNCEMENT'
+        }
+      })
+    );
+
+    await Promise.allSettled(emailPromises);
+
+    await logAudit({
+      actionType: 'BULK_NOTIFICATION_SENT',
+      details: { eventId: id, subject, recipientCount: attendees.length },
+      req
+    });
+
+    return res.json({ success: true, message: `Notification sent to ${attendees.length} attendees.` });
+  } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};

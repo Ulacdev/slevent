@@ -93,7 +93,7 @@ export const getRegistrationsByEvent = async (req, res) => {
 
     let ticketsQuery = supabase
       .from('tickets')
-      .select('ticketId, ticketCode, qrPayload, status, attendeeId, eventId, orderId, ticketTypeId, issuedAt, usedAt')
+      .select('ticketId, ticketCode, qrPayload, status, attendeeId, eventId, orderId, ticketTypeId, issuedAt, usedAt, created_at')
       .eq('eventId', eventId);
 
     if (attendeeFilterIds) {
@@ -153,6 +153,7 @@ export const getRegistrationsByEvent = async (req, res) => {
         currency: order.currency || 'PHP',
         streamingPlatform: evResp.data?.streamingPlatform || null,
         locationType: evResp.data?.locationType || null,
+        registrationDate: t.issuedAt || t.created_at || null,
         checkInTimestamp: t.usedAt || null
       };
     });
@@ -264,7 +265,7 @@ export const getAllRegistrations = async (req, res) => {
 
     let ticketsQuery = supabase
       .from('tickets')
-      .select('ticketId, ticketCode, qrPayload, status, attendeeId, eventId, orderId, ticketTypeId, issuedAt, usedAt', { count: 'exact' })
+      .select('ticketId, ticketCode, qrPayload, status, attendeeId, eventId, orderId, ticketTypeId, issuedAt, usedAt, created_at', { count: 'exact' })
       .order('created_at', { ascending: false });
 
     if (filteredEventIds) {
@@ -362,6 +363,7 @@ export const getAllRegistrations = async (req, res) => {
         currency: order.currency || 'PHP',
         streamingPlatform: event.streamingPlatform || null,
         locationType: event.locationType || null,
+        registrationDate: t.issuedAt || t.created_at || null,
         checkInTimestamp: t.usedAt || null
       };
     });
@@ -415,6 +417,22 @@ export const checkInTicket = async (req, res) => {
       if (!event || event.createdBy !== requesterId) {
         return res.status(403).json({ error: 'You do not have permission to check in this attendee.' });
       }
+    }
+
+    // Check if event is cancelled
+    const { data: eventData } = await supabase
+      .from('events')
+      .select('status, eventName')
+      .eq('eventId', ticket.eventId)
+      .maybeSingle();
+
+    if (eventData?.status === 'CANCELLED') {
+      return res.status(403).json({ error: `Check-in rejected: The event "${eventData.eventName}" has been cancelled.` });
+    }
+
+    // If ticket is already cancelled, reject
+    if (ticket.status === 'CANCELLED') {
+      return res.status(409).json({ error: 'This ticket has been cancelled and cannot be used.' });
     }
 
     // If already checked in / used, reject
@@ -504,7 +522,7 @@ export const getTicketsByOrder = async (req, res) => {
 export const getTicketById = async (req, res) => {
   try {
     const { id } = req.params;
-    const selectFields = 'ticketId, ticketCode, qrPayload, status, attendeeId, eventId, orderId, ticketTypeId, issuedAt, usedAt';
+    const selectFields = 'ticketId, ticketCode, qrPayload, status, attendeeId, eventId, orderId, ticketTypeId, issuedAt, usedAt, created_at';
     let { data: ticket, error } = await supabase
       .from('tickets')
       .select(selectFields)
@@ -550,6 +568,8 @@ export const getTicketById = async (req, res) => {
 
     return res.json({
       ...ticket,
+      ticketCode: ticket.ticketCode || ticket.ticketId,
+      qrPayload: ticket.qrPayload || ticket.ticketCode || ticket.ticketId,
       eventName: evResp.data?.eventName || '',
       locationType: evResp.data?.locationType || null,
       locationText: evResp.data?.locationText || null,

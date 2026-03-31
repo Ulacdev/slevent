@@ -138,6 +138,7 @@ export const listEvents = async (req, res) => {
       .eq('is_archived', false);
 
     if (statuses.length > 0) query = query.in('status', statuses);
+    query = query.neq('status', 'CANCELLED'); // Explicitly exclude cancelled events
     if (organizerId) query = query.eq('organizerId', organizerId);
 
     if (search) {
@@ -385,7 +386,7 @@ export const getEventsFeed = async (req, res) => {
     const location = (req.query.location || '').toString().trim();
 
     // Build base query for active, published events
-    let query = supabase.from('events').select('*').eq('is_archived', false).eq('status', 'PUBLISHED');
+    let query = supabase.from('events').select('*').eq('is_archived', false).eq('status', 'PUBLISHED').neq('status', 'CANCELLED');
 
     if (search) {
       query = query.or(`eventName.ilike.%${search}%,locationText.ilike.%${search}%,description.ilike.%${search}%`);

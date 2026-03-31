@@ -170,6 +170,36 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const navigate = useNavigate();
   const { userId, role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canViewEvents, canEditEvents, canManualCheckIn, canReceiveNotifications, hasResolvedSession } = useUser();
   const isStaff = role === UserRole.STAFF;
+  const { showToast } = useToast();
+
+  const handleLogout = React.useCallback(async (message?: string) => {
+    try {
+      // 1. Call backend logout to clear cookies
+      await fetch(`${API}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include"
+      });
+
+      // 2. Sign out from Supabase
+      await supabase.auth.signOut();
+
+      // 3. Clear any local tokens/storage
+      localStorage.removeItem('sb-ddkkbtijqrgpitncxylx-auth-token');
+      localStorage.removeItem('hideUpgradeModal');
+      sessionStorage.removeItem('hideUpgradeModal');
+      clearUser();
+
+      // Show toast
+      showToast('success', message || 'Logged out successfully. See you soon!');
+
+      // 4. Navigate to login
+      navigate('/');
+    } catch {
+      // Still navigate to login even if there was an error
+      clearUser();
+      navigate('/');
+    }
+  }, [clearUser, navigate, showToast]);
   const [organizerSidebarLogoUrl, setOrganizerSidebarLogoUrl] = React.useState('');
   const [organizerSidebarName, setOrganizerSidebarName] = React.useState('');
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
@@ -193,6 +223,35 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const saved = localStorage.getItem('desktopSidebarOpen');
     return saved !== null ? JSON.parse(saved) : true;
   });
+
+  // Session Inactivity Tracking (31 minutes limit as per security requirements)
+  const lastActivityRef = React.useRef(Date.now());
+  const INACTIVITY_LIMIT = 31 * 60 * 1000; 
+
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const updateActivity = () => {
+      lastActivityRef.current = Date.now();
+    };
+
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+    events.forEach(name => document.addEventListener(name, updateActivity));
+
+    // Check for inactivity every minute
+    const interval = setInterval(() => {
+      const now = Date.now();
+      if (now - lastActivityRef.current > INACTIVITY_LIMIT) {
+        console.warn('🕒 [SECURITY] Session expired due to inactivity (31 mins)');
+        handleLogout('Your session has expired');
+      }
+    }, 60000);
+
+    return () => {
+      events.forEach(name => document.removeEventListener(name, updateActivity));
+      clearInterval(interval);
+    };
+  }, [isAuthenticated]);
 
   // Sync state to localStorage whenever it changes
   React.useEffect(() => {
@@ -572,36 +631,9 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   };
 
 
-  const { showToast } = useToast();
 
-  const handleLogout = async () => {
-    try {
-      // 1. Call backend logout to clear cookies
-      await fetch(`${API}/api/auth/logout`, {
-        method: "POST",
-        credentials: "include"
-      });
 
-      // 2. Sign out from Supabase
-      await supabase.auth.signOut();
 
-      // 3. Clear any local tokens/storage
-      localStorage.removeItem('sb-ddkkbtijqrgpitncxylx-auth-token');
-      localStorage.removeItem('hideUpgradeModal');
-      sessionStorage.removeItem('hideUpgradeModal');
-      clearUser();
-
-      // Show toast
-      showToast('success', 'Logged out successfully. See you soon!');
-
-      // 4. Navigate to login
-      navigate('/');
-    } catch {
-      // Still navigate to login even if there was an error
-      clearUser();
-      navigate('/');
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#F2F2F2] font-sans selection:bg-[#38BDF2]/30">

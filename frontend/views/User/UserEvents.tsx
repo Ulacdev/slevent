@@ -80,10 +80,12 @@ const EventMobileCard = React.memo<{
     onOpenAttendeePop: () => void;
     onTogglePromotion: (e: React.MouseEvent) => void;
     onArchive: () => void;
+    onCancel: () => void;
+    onNotify: () => void;
     openDropdownId: string | null;
     setOpenDropdownId: (id: string | null) => void;
     navigate: any;
-}>(({ event, isPromoted, onOpenEdit, onOpenTickets, onOpenAttendeePop, onTogglePromotion, onArchive, openDropdownId, setOpenDropdownId, navigate }) => {
+}>(({ event, isPromoted, onOpenEdit, onOpenTickets, onOpenAttendeePop, onTogglePromotion, onArchive, onCancel, onNotify, openDropdownId, setOpenDropdownId, navigate }) => {
     const isDropdownOpen = openDropdownId === event.eventId;
 
     return (
@@ -166,7 +168,15 @@ const EventMobileCard = React.memo<{
                         <button onClick={onTogglePromotion} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <ICONS.Zap className="w-4 h-4" fill={isPromoted ? "currentColor" : "none"} /> Promote
                         </button>
+                        <button onClick={(e) => { e.stopPropagation(); onNotify(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <ICONS.Mail className="w-4 h-4" /> Notify Guests
+                        </button>
                         <div className="my-1 border-t border-[#2E2E2F]/5" />
+                        {event.status !== 'CANCELLED' && (
+                            <button onClick={(e) => { e.stopPropagation(); onCancel(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-amber-600/70 hover:bg-amber-500/10 hover:text-amber-600 flex items-center gap-3 transition-colors">
+                                <ICONS.AlertTriangle className="w-4 h-4" /> Cancel Event
+                            </button>
+                        )}
                         <button onClick={(e) => { e.stopPropagation(); onArchive(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-600 flex items-center gap-3 transition-colors">
                             <ICONS.Trash className="w-4 h-4" /> Archive
                         </button>
@@ -190,10 +200,12 @@ const EventTableRow = React.memo<{
     onOpenAttendeePop: () => void;
     onTogglePromotion: (e: React.MouseEvent) => void;
     onArchive: () => void;
+    onCancel: () => void;
+    onNotify: () => void;
     isPromoted: boolean;
     openDropdownId: string | null;
     setOpenDropdownId: (id: string | null) => void;
-}>(({ event, isSelected, onToggle, onOpenEdit, onOpenTickets, onOpenAttendeePop, onTogglePromotion, onArchive, isPromoted, openDropdownId, setOpenDropdownId }) => {
+}>(({ event, isSelected, onToggle, onOpenEdit, onOpenTickets, onOpenAttendeePop, onTogglePromotion, onArchive, onCancel, onNotify, isPromoted, openDropdownId, setOpenDropdownId }) => {
     const navigate = useNavigate();
     const isDropdownOpen = openDropdownId === event.eventId;
 
@@ -293,7 +305,15 @@ const EventTableRow = React.memo<{
                         <button onClick={onTogglePromotion} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <ICONS.Zap className="w-4 h-4" fill={isPromoted ? "currentColor" : "none"} /> Promote
                         </button>
+                        <button onClick={(e) => { e.stopPropagation(); onNotify(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <ICONS.Mail className="w-4 h-4" /> Notify Guests
+                        </button>
                         <div className="my-1 border-t border-[#2E2E2F]/5" />
+                        {event.status !== 'CANCELLED' && (
+                            <button onClick={(e) => { e.stopPropagation(); onCancel(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-amber-600/70 hover:bg-amber-500/10 hover:text-amber-600 flex items-center gap-3 transition-colors">
+                                <ICONS.AlertTriangle className="w-4 h-4" /> Cancel Event
+                            </button>
+                        )}
                         <button onClick={(e) => { e.stopPropagation(); onArchive(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-600 flex items-center gap-3 transition-colors">
                             <ICONS.Trash className="w-4 h-4" /> Archive
                         </button>
@@ -339,6 +359,10 @@ export const UserEvents: React.FC = () => {
     const [hitpaySettings, setHitpaySettings] = useState<any>(null);
     const [hitpayLoading, setHitpayLoading] = useState(true);
     const [deleteConfirm, setDeleteConfirm] = useState<Event | null>(null);
+    const [cancelConfirm, setCancelConfirm] = useState<Event | null>(null);
+    const [cancelMeta, setCancelMeta] = useState<{ attendeeCount: number; hasPaidTickets: boolean; loading: boolean }>({ attendeeCount: 0, hasPaidTickets: false, loading: false });
+    const [bulkNotifyEvent, setBulkNotifyEvent] = useState<Event | null>(null);
+    const [bulkNotifyForm, setBulkNotifyForm] = useState({ subject: '', message: '' });
     const [wizardStep, setWizardStep] = useState<EventSetupStep>(1);
     const [initialEventStatus, setInitialEventStatus] = useState<EventStatus>('DRAFT');
     const [activeEventTicketCount, setActiveEventTicketCount] = useState(0);
@@ -1086,6 +1110,58 @@ export const UserEvents: React.FC = () => {
         }
     };
 
+    useEffect(() => {
+        if (cancelConfirm) {
+            const fetchCancelMeta = async () => {
+                setCancelMeta(prev => ({ ...prev, loading: true }));
+                try {
+                    const tickets = await apiService.getEventRegistrations(cancelConfirm.eventId);
+                    const paid = tickets.some(t => t.paymentStatus === 'PAID' && t.amountPaid > 0);
+                    setCancelMeta({
+                        attendeeCount: tickets.length,
+                        hasPaidTickets: paid,
+                        loading: false
+                    });
+                } catch (err) {
+                    console.error('Failed to fetch cancellation metadata', err);
+                    setCancelMeta(prev => ({ ...prev, loading: false }));
+                }
+            };
+            fetchCancelMeta();
+        }
+    }, [cancelConfirm]);
+
+    const handleCancelEvent = async () => {
+        if (!cancelConfirm) return;
+        setSubmitting(true);
+        try {
+            await apiService.cancelUserEvent(cancelConfirm.eventId);
+            showToast('success', 'Event cancelled and attendees notified.');
+            setCancelConfirm(null);
+            fetchEvents();
+        } catch (err: any) {
+            showToast('error', err.message || 'Failed to cancel event.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleSendBulkNotification = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!bulkNotifyEvent || !bulkNotifyForm.subject.trim() || !bulkNotifyForm.message.trim()) return;
+        setSubmitting(true);
+        try {
+            await apiService.sendBulkNotification(bulkNotifyEvent.eventId, bulkNotifyForm);
+            showToast('success', 'Broadcast message sent to all attendees.');
+            setBulkNotifyEvent(null);
+            setBulkNotifyForm({ subject: '', message: '' });
+        } catch (err: any) {
+            showToast('error', err.message || 'Failed to send broadcast.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
 
 
     const handleCloseTicketModal = () => {
@@ -1273,6 +1349,8 @@ export const UserEvents: React.FC = () => {
                                                 }
                                             }}
                                             onArchive={() => setDeleteConfirm(event)}
+                                            onCancel={() => setCancelConfirm(event)}
+                                            onNotify={() => setBulkNotifyEvent(event)}
                                             openDropdownId={openDropdownId}
                                             setOpenDropdownId={setOpenDropdownId}
                                             navigate={navigate}
@@ -1355,6 +1433,8 @@ export const UserEvents: React.FC = () => {
                                                             }
                                                         }}
                                                         onArchive={() => setDeleteConfirm(event)}
+                                                        onCancel={() => setCancelConfirm(event)}
+                                                        onNotify={() => setBulkNotifyEvent(event)}
                                                         isPromoted={promotedEventsMap[event.eventId]?.promoted || false}
                                                         openDropdownId={openDropdownId}
                                                         setOpenDropdownId={setOpenDropdownId}
@@ -1684,21 +1764,46 @@ export const UserEvents: React.FC = () => {
 
                     <div className="max-h-[500px] overflow-y-auto pr-2 space-y-4">
                         {attendees.filter(r => r.eventId === selectedEvent?.eventId).map((reg) => (
-                            <div key={reg.id} className="flex items-center justify-between p-5 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-[1.75rem] hover:border-[#38BDF2]/30 transition-colors group">
-                                <div className="flex items-center gap-5">
-                                    <div className="w-11 h-11 rounded-2xl bg-[#F2F2F2] flex items-center justify-center text-[#2E2E2F] font-semibold text-sm border-2 border-[#2E2E2F]/15 group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors">
-                                        {reg.attendeeName.charAt(0)}
+                            <div key={reg.id} className="flex flex-col p-5 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-[1.75rem] hover:border-[#38BDF2]/30 transition-colors group">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-2xl bg-[#F2F2F2] flex items-center justify-center text-[#2E2E2F] font-semibold text-sm border-2 border-[#2E2E2F]/15 group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors">
+                                            {reg.attendeeName.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-[#2E2E2F] text-[15px] tracking-tight">{reg.attendeeName}</p>
+                                            <p className="text-[11px] text-[#2E2E2F]/50 font-medium uppercase tracking-tight">{reg.attendeeEmail}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-semibold text-[#2E2E2F] text-[15px] tracking-tight">{reg.attendeeName}</p>
-                                        <p className="text-[12px] text-[#2E2E2F]/60 font-medium uppercase tracking-tight mt-0.5">{reg.attendeeEmail}</p>
+                                    <div className="text-right">
+                                        <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${reg.status === 'USED' ? 'bg-[#38BDF2]/20 text-[#2E2E2F]' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'}`}>
+                                            {reg.status}
+                                        </span>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-[11px] font-medium text-[#2E2E2F] uppercase tracking-wide mb-1.5">{reg.ticketName}</p>
-                                    <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-semibold uppercase tracking-wide ${reg.status === 'USED' ? 'bg-[#38BDF2]/20 text-[#2E2E2F]' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'}`}>
-                                        {reg.status}
-                                    </span>
+                                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#2E2E2F]/5">
+                                    <div className="space-y-1">
+                                        <p className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Ticket Type</p>
+                                        <p className="text-[11px] font-bold text-[#2E2E2F] truncate uppercase">{reg.ticketName}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Phone</p>
+                                        <p className="text-[11px] font-bold text-[#2E2E2F]">{reg.attendeePhone || 'N/A'}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Registered On</p>
+                                        <p className="text-[11px] font-bold text-[#2E2E2F]">
+                                            {reg.registrationDate ? new Date(reg.registrationDate).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+                                        </p>
+                                    </div>
+                                    {reg.checkInTimestamp && (
+                                        <div className="space-y-1">
+                                            <p className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Checked In</p>
+                                            <p className="text-[11px] font-bold text-[#2E2E2F]">
+                                                {new Date(reg.checkInTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -1721,7 +1826,7 @@ export const UserEvents: React.FC = () => {
             <Modal
                 isOpen={!!deleteConfirm}
                 onClose={() => setDeleteConfirm(null)}
-                title="Delete Event"
+                title="Archive Event"
             >
                 <div className="space-y-6">
                     <div className="flex items-start gap-5 p-6 bg-amber-50 border border-amber-200 rounded-[1.75rem]">
@@ -1733,7 +1838,7 @@ export const UserEvents: React.FC = () => {
                                 Are you sure you want to archive this event?
                             </p>
                             <p className="text-[13px] text-[#2E2E2F]/60 font-medium mt-2 leading-relaxed">
-                                This will move <strong>"{deleteConfirm?.eventName}"</strong> to the archive. The event will be hidden from public pages but can be restored later from the Archive page. This action can be undone.
+                                This will move <strong>"{deleteConfirm?.eventName}"</strong> to the archive. The event will be hidden from public pages but can be restored later from the Archive page.
                             </p>
                         </div>
                     </div>
@@ -1755,6 +1860,114 @@ export const UserEvents: React.FC = () => {
                         </Button>
                     </div>
                 </div>
+            </Modal>
+
+            <Modal
+                isOpen={!!cancelConfirm}
+                onClose={() => setCancelConfirm(null)}
+                title="Cancel Event"
+            >
+                <div className="space-y-6">
+                    <div className={`flex items-start gap-5 p-6 rounded-[1.75rem] border ${cancelMeta.hasPaidTickets ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'}`}>
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${cancelMeta.hasPaidTickets ? 'bg-amber-100' : 'bg-red-100'}`}>
+                            <ICONS.AlertTriangle className={`w-6 h-6 ${cancelMeta.hasPaidTickets ? 'text-amber-500' : 'text-red-500'}`} strokeWidth={2} />
+                        </div>
+                        <div className="flex-1">
+                            <p className="font-bold text-[#2E2E2F] text-[16px] tracking-tight">
+                                {cancelMeta.hasPaidTickets ? 'CRITICAL: Financial Liability Detected' : 'Mandatory Confirmation'}
+                            </p>
+                            <div className="text-[13px] text-[#2E2E2F]/60 font-medium mt-2 leading-relaxed space-y-3">
+                                <p>You are about to cancel <strong>"{cancelConfirm?.eventName}"</strong>.</p>
+                                
+                                {cancelMeta.loading ? (
+                                    <p className="italic animate-pulse">Calculating impact...</p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2 py-1 px-3 bg-white/50 rounded-lg border border-black/5 w-fit">
+                                            <div className={`w-2 h-2 rounded-full ${cancelMeta.attendeeCount > 0 ? 'bg-red-500' : 'bg-green-500'}`} />
+                                            <span className="text-[11px] font-black uppercase tracking-widest">{cancelMeta.attendeeCount} Registered Attendees</span>
+                                        </div>
+
+                                        {cancelMeta.hasPaidTickets ? (
+                                            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-900 text-[12px] font-bold">
+                                                🚨 ALERT: This event has PAID bookings. Cancelling will NOT automatically refund attendees. You are responsible for manual refunds via your payment provider.
+                                            </div>
+                                        ) : cancelMeta.attendeeCount > 0 ? (
+                                            <p className="text-red-600 font-bold">All {cancelMeta.attendeeCount} registered guests will be notified immediately of this cancellation via an automated email.</p>
+                                        ) : (
+                                            <p className="text-green-600 font-bold">No attendees detected. It is safe to cancel this event.</p>
+                                        )}
+                                    </div>
+                                )}
+                                <p className="text-[#2E2E2F]/40 text-[11px] mt-4 font-black uppercase tracking-widest pt-4 border-t border-black/5">This action cannot be undone on the public discovery side.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                        <Button
+                            className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border-2 border-[#2E2E2F]/15 hover:bg-[#2E2E2F]/10 transition-colors min-h-[32px]"
+                            onClick={() => setCancelConfirm(null)}
+                            disabled={submitting}
+                        >
+                            Back
+                        </Button>
+                        <Button
+                            className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 transition-colors min-h-[32px]"
+                            onClick={handleCancelEvent}
+                            disabled={submitting}
+                        >
+                            {submitting ? 'Cancelling...' : 'Confirm Cancellation'}
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
+
+            <Modal
+                isOpen={!!bulkNotifyEvent}
+                onClose={() => setBulkNotifyEvent(null)}
+                title="Broadcast Notification"
+                subtitle={`Message all attendees of ${bulkNotifyEvent?.eventName}`}
+            >
+                <form onSubmit={handleSendBulkNotification} className="space-y-6">
+                    <div className="space-y-4">
+                        <Input
+                            label="Subject"
+                            placeholder="e.g. Important Update regarding our event"
+                            required
+                            value={bulkNotifyForm.subject}
+                            onChange={(e: any) => setBulkNotifyForm({ ...bulkNotifyForm, subject: e.target.value })}
+                        />
+                        <div className="space-y-1.5">
+                            <label className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Message Body</label>
+                            <textarea
+                                className="w-full px-4 py-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl text-[14px] outline-none focus:border-[#38BDF2] min-h-[150px] leading-relaxed"
+                                placeholder="Type your announcement here..."
+                                required
+                                value={bulkNotifyForm.message}
+                                onChange={(e) => setBulkNotifyForm({ ...bulkNotifyForm, message: e.target.value })}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                        <Button
+                            type="button"
+                            className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border-2 border-[#2E2E2F]/15 hover:bg-[#2E2E2F]/10 transition-colors min-h-[32px]"
+                            onClick={() => setBulkNotifyEvent(null)}
+                            disabled={submitting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors min-h-[32px]"
+                            disabled={submitting || !bulkNotifyForm.subject.trim() || !bulkNotifyForm.message.trim()}
+                        >
+                            {submitting ? 'Sending...' : 'Send Broadcast'}
+                        </Button>
+                    </div>
+                </form>
             </Modal>
         </div>
     );

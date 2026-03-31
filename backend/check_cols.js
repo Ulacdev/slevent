@@ -1,39 +1,29 @@
+import { createClient } from '@supabase/supabase-js'
+import dotenv from 'dotenv'
 
-import dotenv from 'dotenv';
-dotenv.config();
+dotenv.config()
 
-import supabase from './database/db.js';
-async function checkCols() {
-    console.log('Starting column check...');
-    const timeout = setTimeout(() => {
-        console.error('Timed out after 5 seconds');
-        process.exit(1);
-    }, 5000);
+const supabaseUrl = process.env.SUPABASE_URL
+const serviceKey = process.env.SUPABASE_SERVICE_KEY
 
-    const tableName = process.argv[2] || 'events';
-    try {
-        const { data, error } = await supabase.from(tableName).select('*').limit(1);
-        clearTimeout(timeout);
-        if (error) {
-            console.error('Database Error:', error);
-            process.exit(1);
-        }
-        if (data && data[0]) {
-            console.log('Columns found in events table:', Object.keys(data[0]));
-            console.log('First event data (redacted):', {
-                eventId: data[0].eventId,
-                locationText: data[0].locationText,
-                streaming_url: data[0].streaming_url,
-                status: data[0].status
-            });
-        } else {
-            console.log('No events found in table.');
-        }
-        process.exit(0);
-    } catch (err) {
-        console.error('Unexpected Error:', err);
-        process.exit(1);
+if (!supabaseUrl || !serviceKey) {
+    console.error('Missing variables:', { supabaseUrl: !!supabaseUrl, serviceKey: !!serviceKey })
+    process.exit(1)
+}
+
+const supabase = createClient(supabaseUrl, serviceKey)
+
+async function check() {
+    const { data, error } = await supabase.from('users').select('*').limit(1);
+    if (error) {
+        console.error('Error fetching users:', error);
+    } else if (data && data.length > 0) {
+        const columns = Object.keys(data[0]);
+        console.log('--- ALL COLUMNS ---');
+        columns.forEach(c => console.log(`- ${c}`));
+    } else {
+        console.log('No users found in table.');
     }
 }
 
-checkCols();
+check().then(() => process.exit(0));
