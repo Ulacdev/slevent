@@ -1430,10 +1430,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F2F2F2]" style={{ zoom: 0.9 }}>
-      <header className={`sticky top-0 z-[1000] px-4 lg:px-10 h-20 transition-all duration-500 ${scrolled
-        ? 'bg-[#F2F2F2]/90 backdrop-blur-xl shadow-[0_10px_30px_-10px_rgba(46,46,47,0.15)] border-b border-[#2E2E2F]/10'
-        : 'bg-transparent border-b border-transparent'
-        }`}>
+      <header className="sticky top-0 z-[1000] px-4 lg:px-10 h-20 bg-[#F2F2F2]/90 backdrop-blur-xl shadow-[0_10px_30px_-10px_rgba(46,46,47,0.15)] border-b border-[#2E2E2F]/10 transition-all duration-300">
         <div className="max-w-full w-full h-full flex flex-wrap lg:flex-nowrap items-center gap-2 lg:gap-4">
           {/* Left: Branding Segment - Logo on mobile, hidden on lg */}
           <div className="flex lg:hidden flex-none items-center">
@@ -2129,7 +2126,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           </div>
         </>
       )}
-      <main className="flex-1 overflow-x-hidden">{children}</main>
+      <main className="flex-1">{children}</main>
       <footer className="bg-[#F2F2F2] text-[#2E2E2F] py-24 px-8 border-t border-[#2E2E2F]/10" style={{ zoom: 1.1 }}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
@@ -2159,7 +2156,6 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             <div className="grid grid-cols-2 gap-8 lg:text-right uppercase tracking-[0.2em] font-black text-[11px]">
               <div className="space-y-4">
                 <p className="text-[#2E2E2F] mb-4">Platform</p>
-                <Link to="/" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Events List</Link>
                 <Link to="/organizers/discover" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Organizers</Link>
                 <Link to="/live" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Live Broadcasts</Link>
               </div>

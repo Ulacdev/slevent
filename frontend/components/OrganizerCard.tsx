@@ -124,7 +124,7 @@ export const OrganizerCard: React.FC<OrganizerCardProps> = ({ organizer, isFollo
                                 ));
                             })()}
                         </div>
-                        <p className="text-[12px] text-[#65676B] font-bold tracking-tight truncate flex items-center gap-1.5">
+                        <p className="text-[12px] text-[#65676B] font-medium tracking-tight truncate flex items-center gap-1.5">
                             <span>{organizer.followersCount ? organizer.followersCount.toLocaleString() : 0} followers</span>
                             <span className="text-[#2E2E2F]/20">•</span>
                             <span className="flex items-center gap-1">

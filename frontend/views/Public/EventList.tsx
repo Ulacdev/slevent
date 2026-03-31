@@ -356,33 +356,40 @@ export const EventCard: React.FC<EventCardProps> = ({
         <h4 className="text-black text-xl sm:text-2xl font-black tracking-tighter leading-tight mb-3 line-clamp-2">
           {event.eventName}
         </h4>
-        <div className="flex items-center gap-3 text-[18px] font-medium mb-3 text-black/80">
-          <span className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all ${liked ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/30' : 'bg-black/10 text-black group-hover:bg-[#38BDF2]/20 group-hover:text-[#38BDF2]'}`}>
-            <ICONS.Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
-          </span>
-          <span className="font-bold truncate">{likeLabel}</span>
-        </div>
+        {/* Core Info - 4 Symmetrical Points (Following Location Style) */}
+        <div className="flex flex-col gap-2.5 text-[17px] font-normal text-black mt-2 mb-5">
+          {/* 1. Likes */}
+          <div className="flex items-center gap-3">
+             <div className="w-8 shrink-0 flex items-center justify-center">
+               <ICONS.Heart className={`w-4.5 h-4.5 ${liked ? 'fill-[#38BDF2] text-[#38BDF2]' : 'text-black'}`} />
+             </div>
+             <span>{likeLabel}</span>
+          </div>
 
-        <div className="flex flex-col gap-3 text-[18px] font-medium text-black/90 mb-5">
+          {/* 2. Registered */}
           <div className="flex items-center gap-3">
             <div className="w-8 shrink-0 flex items-center justify-center">
-              <ICONS.Users className="w-4 h-4" />
+              <ICONS.Users className="w-4.5 h-4.5 text-black" />
             </div>
-            <span className="text-[#38BDF2] font-semibold truncate">
+            <span className="text-[#38BDF2] truncate">
               {(event as any).attendeeCount || 0} Registered
             </span>
           </div>
+
+          {/* 3. Location */}
           <div className="flex items-center gap-3">
             <div className="w-8 shrink-0 flex items-center justify-center">
-              <ICONS.MapPin className="w-4 h-4" />
+              <ICONS.MapPin className="w-4.5 h-4.5 text-black" />
             </div>
             <span className="truncate">{event.locationText}</span>
           </div>
+
+          {/* 4. Date & Time */}
           <div className="flex items-center gap-3">
             <div className="w-8 shrink-0 flex items-center justify-center">
-              <ICONS.Calendar className="w-4 h-4" />
+              <ICONS.Calendar className="w-4.5 h-4.5 text-black" />
             </div>
-            <span className="font-semibold truncate">{formatDate(event.startAt, event.timezone, { day: 'numeric', month: 'short', year: 'numeric' })} · {formatTime(event.startAt, event.timezone)}</span>
+            <span className="truncate">{formatDate(event.startAt, event.timezone, { day: 'numeric', month: 'short', year: 'numeric' })} · {formatTime(event.startAt, event.timezone)}</span>
           </div>
         </div>
 
@@ -1357,7 +1364,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           {selectedLocation !== DEFAULT_LOCATION && selectedLocation !== ONLINE_LOCATION_VALUE ? (
             /* Premium City Hub Hero */
             <section
-              className={`relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[350px] sm:h-[450px] lg:h-[500px] overflow-hidden mb-12 shadow-2xl transition-all duration-1000 ${selectedCityImage ? 'bg-black' : ''}`}
+              className={`relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[350px] sm:h-[450px] lg:h-[500px] overflow-x-hidden overflow-y-hidden mb-12 shadow-2xl transition-all duration-1000 ${selectedCityImage ? 'bg-black' : ''}`}
               style={{ zoom: 0.9 }}
             >
               {selectedCityImage ? (
@@ -1393,7 +1400,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
             </section>
           ) : (
             /* Classic Marketplace Hero for "All Events" */
-            <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[260px] sm:h-[300px] lg:h-[350px] overflow-hidden mb-8">
+            <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[260px] sm:h-[300px] lg:h-[350px] overflow-x-hidden mb-8">
               <div className="absolute inset-0 bg-[linear-gradient(116deg,#38BDF2_0%,#38BDF2_44%,#F2F2F2_100%)]" />
               <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,62,134,0.45)_0%,rgba(0,62,134,0.2)_34%,rgba(0,62,134,0)_72%)]" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />

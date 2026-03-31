@@ -83,65 +83,52 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
           {event.eventName}
         </h3>
 
-        {/* Date & Location */}
-        <div className="space-y-1.5 text-sm text-black font-bold">
-          <div className="flex items-start gap-2">
-            <ICONS.Calendar className="w-4 h-4 mt-0.5 shrink-0 text-black" strokeWidth={2.5} />
-            <span>{dateStr}{timeStr && <span className="text-black mx-1">•</span>}{timeStr}</span>
+        {/* Core Info - 4 Symmetrical Points (Following Location Style) */}
+        <div className="space-y-2 text-sm text-[#2E2E2F] font-normal mt-2">
+          {/* 1. Likes */}
+          <div className="flex items-center gap-3">
+            <ICONS.Heart className="w-4 h-4 shrink-0 text-[#38BDF2]" strokeWidth={2} />
+            <span>{event.likesCount || 0} likes</span>
           </div>
-          <div className="flex items-start gap-2">
-            <ICONS.MapPin className="w-4 h-4 mt-0.5 shrink-0 text-black" strokeWidth={2.5} />
+
+          {/* 2. Registered */}
+          <div className="flex items-center gap-3">
+            <ICONS.Users className="w-4 h-4 shrink-0 text-black" strokeWidth={2} />
+            <span className="text-[#38BDF2]">{event.totalTickets && event.ticketsAvailable ? (event.totalTickets - event.ticketsAvailable) : 0} Registered</span>
+          </div>
+          
+          {/* 3. Location */}
+          <div className="flex items-center gap-3">
+            <ICONS.MapPin className="w-4 h-4 shrink-0 text-black" strokeWidth={2} />
             <span className="line-clamp-1">{event.locationText}</span>
+          </div>
+
+          {/* 4. Date & Time */}
+          <div className="flex items-center gap-3">
+            <ICONS.Calendar className="w-4 h-4 shrink-0 text-black" strokeWidth={2} />
+            <span>{dateStr}{timeStr && <span className="mx-1">•</span>}{timeStr}</span>
           </div>
         </div>
 
-        {/* Strict Hover-only Divider */}
-        <div className="h-[1px] w-full bg-[#E5E7EB] invisible group-hover:visible group-hover:opacity-100 transition-all duration-300" />
-
-        {/* Rating & Price */}
-        {/* Rating & Price */}
-        <div className="space-y-1.5 text-sm font-bold">
-          <div className="flex items-center gap-2">
-            <span className="w-4 h-4 shrink-0 text-[#38BDF2] flex items-center">⭐</span>
-            <div className="flex items-center gap-1.5">
-              {event.avgRating && event.avgRating > 0 ? (
-                <>
-                  <span className="text-black">{event.avgRating.toFixed(1)}</span>
-                  <span className="text-black text-xs">({event.reviewCount || 0})</span>
-                </>
-              ) : (
-                <span className="text-black text-xs">No ratings yet</span>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-[#38BDF2]">
-            <span className="w-4 h-4 shrink-0" />
+        {/* Secondary Marketplace Info (Price) */}
+        <div className="pt-3 flex items-center justify-between border-t border-[#2E2E2F]/5 mt-2">
+          <div className="flex items-center gap-2 text-[#38BDF2] font-black uppercase tracking-widest text-[11px]">
             {(() => {
               const now = new Date();
               const eventStart = event.startAt ? new Date(event.startAt) : null;
               const eventEnd = eventStart ? new Date(eventStart.getTime() + 2 * 60 * 60 * 1000) : null;
               const isDone = eventEnd && now > eventEnd;
 
-              if (isDone) return <span className="text-xs text-black uppercase tracking-widest">Event Ended</span>;
+              if (isDone) return <span className="text-black opacity-40 font-bold">Event Ended</span>;
 
-              return event.price_min === 0 ? (
-                <span className="text-[11px] uppercase tracking-[0.15em] font-semibold">FREE</span>
-              ) : typeof event.price_min === 'number' ? (
-                <span className="text-[11px] uppercase tracking-[0.15em] font-semibold">₱{event.price_min?.toLocaleString()}</span>
-              ) : (
-                <span className="text-[11px] uppercase tracking-[0.15em] font-semibold text-black">Check pricing</span>
-              );
+              return event.price_min === 0 ? "FREE SESSION" : `₱${event.price_min?.toLocaleString()}`;
             })()}
           </div>
-        </div>
-
-        {/* Ticket Progress (if available) */}
-        {event.ticketsAvailable !== undefined && event.totalTickets !== undefined && (
-          <div className="flex items-center gap-2 text-[11px] font-bold text-[#38BDF2]">
-            <ICONS.Users className="w-4 h-4 shrink-0 text-black" />
-            <span>{(event.totalTickets - event.ticketsAvailable)} registered / {event.totalTickets} slots</span>
+          
+          <div className="flex items-center gap-2 text-[10px] font-bold text-[#65676B] opacity-60">
+             ⭐ {event.avgRating && event.avgRating > 0 ? event.avgRating.toFixed(1) : "N/A"}
           </div>
-        )}
+        </div>
 
         {/* Promoted Duration (if promoted) */}
         {event.is_promoted && event.promotionEndDate && (
