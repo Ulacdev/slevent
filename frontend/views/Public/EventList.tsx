@@ -1273,32 +1273,32 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                                         {event.eventName}
                                       </h3>
 
-                                      {/* Event Details Grid - Refined Weight & Black Color */}
+                                      {/* Event Details Grid - Normal Weight & Full Opacity */}
                                       <div className="space-y-3 sm:space-y-4 pt-3 animate-in fade-in slide-in-from-left-8 duration-1000 delay-200">
-                                        <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
+                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-black">
                                           <div className="w-8 h-8 flex items-center justify-center text-black bg-black/5 rounded-lg">
-                                            <ICONS.Heart className="w-5 h-5" />
+                                            <ICONS.Heart className="w-5 h-5" strokeWidth={2} />
                                           </div>
                                           <span>3 likes</span>
                                         </div>
 
-                                        <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
+                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-black">
                                           <div className="w-8 h-8 flex items-center justify-center text-black bg-black/5 rounded-lg">
-                                            <ICONS.Users className="w-5 h-5" />
+                                            <ICONS.Users className="w-5 h-5" strokeWidth={2} />
                                           </div>
-                                          <span>{soldSlots} registered <span className="opacity-40 mx-1">•</span> {Math.max(0, totalSlots - soldSlots)} available</span>
+                                          <span>{soldSlots} registered <span className="mx-1">•</span> {Math.max(0, totalSlots - soldSlots)} available</span>
                                         </div>
 
-                                        <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
+                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-black">
                                           <div className="w-8 h-8 flex items-center justify-center text-black bg-black/5 rounded-lg">
-                                            <ICONS.MapPin className="w-5 h-5" />
+                                            <ICONS.MapPin className="w-5 h-5" strokeWidth={2} />
                                           </div>
                                           <span className="line-clamp-1">{event.locationText || 'Location TBA'}</span>
                                         </div>
 
-                                        <div className="flex items-center gap-4 text-base sm:text-lg font-medium text-black">
+                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-black">
                                           <div className="w-8 h-8 flex items-center justify-center text-black bg-black/5 rounded-lg">
-                                            <ICONS.Calendar className="w-5 h-5" />
+                                            <ICONS.Calendar className="w-5 h-5" strokeWidth={2} />
                                           </div>
                                           <span>{formatStartForCard(event.startAt || '', event.timezone)}</span>
                                         </div>
@@ -1392,7 +1392,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                       {selectedLocation}
                     </span>
                   </h1>
-                  <p className="mt-8 max-w-[650px] text-sm sm:text-base leading-relaxed text-white/90 font-medium tracking-tight drop-shadow-sm uppercase opacity-90">
+                  <p className="mt-8 max-w-[650px] text-sm sm:text-base leading-relaxed text-white font-normal uppercase tracking-[0.1em] drop-shadow-sm">
                     Discover elite curated sessions happening now in {selectedLocation}.
                   </p>
                 </div>
@@ -2031,8 +2031,8 @@ const FeaturedOrganizers: React.FC = () => {
       <div className="flex flex-col items-center mb-10 gap-6">
         <div className="flex flex-col text-center items-center max-w-2xl">
           <p className="text-xs font-bold text-[#38BDF2] mb-3 tracking-tight uppercase">Verified Showcase</p>
-          <h2 className="text-2xl md:text-3xl font-black text-black tracking-tighter uppercase mb-2">Featured Organizers</h2>
-          <p className="text-xs md:text-sm font-medium text-black opacity-60 leading-relaxed max-w-[500px]">Stay connected with our top event creators and never miss a highlight session.</p>
+          <h2 className="text-2xl md:text-3xl font-black text-black tracking-tighter mb-2">Featured Organizers</h2>
+          <p className="text-xs md:text-sm font-normal text-black leading-relaxed max-w-[500px]">Stay connected with our top event creators and never miss a highlight session.</p>
         </div>
 
       </div>

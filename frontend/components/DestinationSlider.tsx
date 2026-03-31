@@ -138,14 +138,14 @@ export const DestinationSlider: React.FC<DestinationSliderProps> = ({ onSelect }
                         <div className="h-px bg-black/10 flex-1" />
                     </div>
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <h2 className="text-3xl md:text-3.5xl font-black text-black tracking-tighter leading-none uppercase">
+                        <h2 className="text-3xl md:text-3.5xl font-black text-black tracking-tighter leading-none">
                             Top destinations in
                         </h2>
-                        <span className="text-3xl md:text-3.5xl font-black text-[#38BDF2] tracking-tighter leading-none uppercase">
+                        <span className="text-3xl md:text-3.5xl font-black text-[#38BDF2] tracking-tighter leading-none">
                             {featuredCountry}
                         </span>
                     </div>
-                    <p className="text-black/40 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] leading-relaxed">
+                    <p className="text-black text-[18px] font-normal tracking-tight leading-relaxed">
                         Trending city hubs ranked by community popularity and likes.
                     </p>
                 </div>

@@ -1430,7 +1430,10 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F2F2F2]" style={{ zoom: 0.9 }}>
-      <header className="sticky top-0 z-[1000] px-4 lg:px-10 h-20 bg-[#F2F2F2]/90 backdrop-blur-xl shadow-[0_10px_30px_-10px_rgba(46,46,47,0.15)] border-b border-[#2E2E2F]/10 transition-all duration-300">
+      <header className={`sticky top-0 z-[1000] px-4 lg:px-10 h-20 bg-[#F2F2F2]/90 backdrop-blur-xl transition-all duration-500 ${scrolled
+        ? 'shadow-[0_10px_30px_-10px_rgba(46,46,47,0.15)] border-b border-[#2E2E2F]/10'
+        : 'shadow-none border-b border-transparent'
+        }`}>
         <div className="max-w-full w-full h-full flex flex-wrap lg:flex-nowrap items-center gap-2 lg:gap-4">
           {/* Left: Branding Segment - Logo on mobile, hidden on lg */}
           <div className="flex lg:hidden flex-none items-center">
