@@ -198,22 +198,33 @@ export async function getSmtpConfig(organizerId = null, triggerUserId = null, re
 export async function getAdminSmtpConfig() {
   debugLog('🔍 [SMTP] Getting Admin SMTP config for system emails...');
 
-  const { data: adminUser } = await supabase
+  // 1. Get all users with ADMIN role
+  const { data: admins, error: adminError } = await supabase
     .from('users')
-    .select('userId')
-    .eq('role', 'ADMIN')
-    .limit(1)
-    .maybeSingle();
+    .select('userId, email')
+    .eq('role', 'ADMIN');
 
-  if (adminUser?.userId) {
-    const config = await fetchSmtpFromSettingsTable(adminUser.userId);
+  if (adminError) {
+    debugLog(`❌ [SMTP] Error fetching Admin users: ${adminError.message}`);
+    return null;
+  }
+
+  if (!admins || admins.length === 0) {
+    debugLog('⚠️ [SMTP] No users found with role = ADMIN in database.');
+    return null;
+  }
+
+  // 2. Iterate through admins to find the one with configured SMTP settings
+  for (const admin of admins) {
+    debugLog(`🔍 [SMTP] Checking settings for Admin: ${admin.email} (${admin.userId})...`);
+    const config = await fetchSmtpFromSettingsTable(admin.userId);
     if (config) {
-      debugLog('✅ [SMTP] Admin SMTP config loaded for system emails.');
+      debugLog(`✅ [SMTP] Admin SMTP config loaded from user: ${admin.email}`);
       return config;
     }
   }
 
-  debugLog('⚠️ [SMTP] No admin SMTP config found.');
+  debugLog('⚠️ [SMTP] No admin SMTP config found among any ADMIN users.');
   return null;
 }
 
