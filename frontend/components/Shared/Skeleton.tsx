@@ -38,11 +38,11 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 };
 
 export const EventCardSkeleton: React.FC = () => (
-  <div className="bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl overflow-hidden shadow-sm h-full flex flex-col">
+  <div className="bg-[#F2F2F2] border border-black/5 rounded-[5px] overflow-hidden shadow-sm h-full flex flex-col">
     {/* Image Area */}
-    <Skeleton className="aspect-[16/9] w-full !rounded-none" />
+    <Skeleton className="h-44 sm:h-52 w-full !rounded-none" />
     
-    <div className="p-5 flex-1 flex flex-col gap-4">
+    <div className="p-5 flex-1 flex flex-col gap-3">
       {/* Title */}
       <div className="space-y-2">
         <Skeleton variant="text" width="90%" height={24} />
@@ -50,24 +50,21 @@ export const EventCardSkeleton: React.FC = () => (
       </div>
 
       {/* Info Rows */}
-      <div className="space-y-3 mt-2">
-        <div className="flex items-center gap-3">
-          <Skeleton variant="circle" width={32} height={32} />
-          <Skeleton variant="text" width="40%" />
-        </div>
-        <div className="flex items-center gap-3">
-          <Skeleton variant="circle" width={32} height={32} />
+      <div className="space-y-2 mt-2">
+        <div className="flex items-center gap-2.5">
+          <Skeleton variant="rect" width={16} height={16} />
           <Skeleton variant="text" width="70%" />
         </div>
-        <div className="flex items-center gap-3">
-          <Skeleton variant="circle" width={32} height={32} />
+        <div className="flex items-center gap-2.5">
+          <Skeleton variant="rect" width={16} height={16} />
           <Skeleton variant="text" width="50%" />
         </div>
       </div>
 
-      {/* Button/Price Area */}
-      <div className="mt-auto pt-5 border-t border-black/5">
-        <Skeleton variant="rect" width="100%" height={40} />
+      {/* Footer Area */}
+      <div className="mt-auto flex items-center justify-between pt-3 border-t border-black/5">
+        <Skeleton variant="rect" width={80} height={28} className="rounded-full" />
+        <Skeleton variant="text" width={60} height={24} />
       </div>
     </div>
   </div>
@@ -142,6 +139,63 @@ export const EventDetailsSkeleton: React.FC = () => (
           <Skeleton variant="rect" width="100%" height={150} className="rounded-3xl" />
         </div>
       </div>
+    </div>
+  </div>
+);
+
+export const PortalCardSkeleton: React.FC = () => (
+  <div className="p-5 rounded-2xl border border-[#E0E0E0] bg-[#F2F2F2] flex items-center gap-4">
+    <Skeleton variant="rect" width={48} height={48} className="rounded-xl shrink-0" />
+    <div className="flex-1 space-y-2">
+      <Skeleton variant="text" width="40%" height={12} />
+      <Skeleton variant="text" width="60%" height={24} />
+      <Skeleton variant="text" width="80%" height={10} />
+    </div>
+  </div>
+);
+
+export const PortalSkeleton: React.FC = () => (
+  <div className="space-y-12 max-w-6xl mx-auto pt-10 px-4 sm:px-6 lg:px-0">
+    {/* Hero Section Skeleton */}
+    <div className="rounded-xl p-10 md:p-14 bg-[#38BDF2]/10 border-2 border-[#38BDF2]/20 shadow-sm overflow-hidden relative">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 relative z-10">
+        <div className="max-w-2xl flex-1 space-y-6">
+          <Skeleton variant="rect" width={48} height={48} className="rounded-xl bg-white/20" />
+          <Skeleton variant="text" width="70%" height={40} className="bg-white/20" />
+          <Skeleton variant="text" width="90%" height={20} className="bg-white/20" />
+        </div>
+        <div className="flex gap-10 shrink-0">
+          <div className="text-center space-y-3">
+            <Skeleton variant="text" width={60} height={48} className="bg-white/20 mx-auto" />
+            <Skeleton variant="text" width={40} height={12} className="bg-white/20 mx-auto" />
+          </div>
+          <div className="text-center space-y-3">
+            <Skeleton variant="text" width={60} height={48} className="bg-white/20 mx-auto" />
+            <Skeleton variant="text" width={40} height={12} className="bg-white/20 mx-auto" />
+          </div>
+        </div>
+      </div>
+      {/* Decorative Shimmer Overlay to look consistent with brand colors */}
+      <div className="absolute inset-0 bg-[#38BDF2] mix-blend-overlay opacity-30 pointer-events-none" />
+    </div>
+
+    {/* Stat Widgets Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <Skeleton variant="rect" width="100%" height={160} className="rounded-xl" />
+      <Skeleton variant="rect" width="100%" height={160} className="rounded-xl" />
+      <Skeleton variant="rect" width="100%" height={160} className="rounded-xl" />
+    </div>
+
+    {/* Content Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="rounded-xl border-2 border-[#2E2E2F]/5 p-8 space-y-6">
+          <Skeleton variant="rect" width={56} height={56} className="rounded-xl" />
+          <Skeleton variant="text" width="80%" height={32} />
+          <Skeleton variant="text" width="100%" height={60} />
+          <Skeleton variant="text" width="40%" height={16} />
+        </div>
+      ))}
     </div>
   </div>
 );

@@ -244,17 +244,21 @@ export async function acceptInvite(req, res) {
     const finalName = (name || invite.name || '').trim();
     let userUpsertError = null;
 
-    console.log('[invite/acceptInvite] Attempting upsert for user:', { userId, email: invite.email, finalName });
+    // Resolve organization owner to ensure consistent hierarchy
+    const inviterOrg = await getOrganizerByUserId(invite.invitedBy);
+    const orgOwnerId = inviterOrg?.ownerUserId || invite.invitedBy || null;
+
+    console.log('[invite/acceptInvite] Attempting upsert for user:', { userId, email: invite.email, finalName, orgOwnerId });
     let upsertResp = await db
       .from('users')
-      .upsert({ userId, email: invite.email, role: normalizedInviteRole, name: finalName, employerId: invite.invitedBy || null }, { onConflict: 'userId' });
+      .upsert({ userId, email: invite.email, role: normalizedInviteRole, name: finalName, employerId: orgOwnerId, employerid: orgOwnerId }, { onConflict: 'userId' });
     userUpsertError = upsertResp.error;
 
     if (userUpsertError && userUpsertError.message?.includes('column "userId"')) {
       console.log('[invite/acceptInvite] Retrying upsert by id column');
       upsertResp = await db
         .from('users')
-        .upsert({ id: userId, email: invite.email, role: normalizedInviteRole, name: finalName, employerId: invite.invitedBy || null }, { onConflict: 'id' });
+        .upsert({ id: userId, email: invite.email, role: normalizedInviteRole, name: finalName, employerId: orgOwnerId, employerid: orgOwnerId }, { onConflict: 'id' });
       userUpsertError = upsertResp.error;
     }
 
@@ -262,7 +266,7 @@ export async function acceptInvite(req, res) {
     const emailToUpdate = (invite.email || '').trim().toLowerCase();
     await db
       .from('users')
-      .update({ name: finalName })
+      .update({ name: finalName, employerId: orgOwnerId, employerid: orgOwnerId })
       .eq('email', emailToUpdate);
 
     if (userUpsertError && !/duplicate key|unique/i.test(userUpsertError.message || '')) {

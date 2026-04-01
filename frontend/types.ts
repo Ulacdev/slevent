@@ -38,6 +38,7 @@ export interface OrganizerProfile {
   eventPageDescription?: string | null;
   facebookId?: string | null;
   twitterHandle?: string | null;
+  youtubeUrl?: string | null;
   emailOptIn: boolean;
   profileImageUrl?: string | null;
   coverImageUrl?: string | null;

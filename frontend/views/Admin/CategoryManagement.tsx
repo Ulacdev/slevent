@@ -117,7 +117,7 @@ export const CategoryManagement: React.FC = () => {
     }
   };
 
-  if (loading) return <PageLoader />;
+  if (loading) return <PageLoader variant="page" label="Loading Categories..." />;
 
   return (
     <div className="space-y-8" style={{ zoom: 0.85 }}>

@@ -35,23 +35,88 @@ function formatTime(dateString: string, timezone?: string) {
 const CategoryEventCard: React.FC<{ event: Event }> = ({ event }) => {
   const navigate = useNavigate();
 
+  // Completion calculation
+  const now = new Date();
+  const eventStart = event.startAt ? new Date(event.startAt) : null;
+  const eventEnd = event.endAt ? new Date(event.endAt) : (eventStart ? new Date(eventStart.getTime() + 2 * 60 * 60 * 1000) : null);
+  const isDone = eventEnd && now > eventEnd;
+
+  // Date Badge calculations
+  const eventDate = eventStart || new Date();
+  const month = eventDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+  const day = eventDate.getDate();
+
+  const minPrice = event.ticketTypes?.length
+    ? Math.min(...event.ticketTypes.map(t => t.priceAmount))
+    : 0;
+
+  const formatTimeRange = (start: string, end?: string, timezone?: string) => {
+    if (!start) return '';
+    const startTime = formatTime(start, timezone);
+    if (!end) return startTime;
+    const endTime = formatTime(end, timezone);
+    return `${startTime} - ${endTime}`;
+  };
+
   return (
-    <Card className="flex flex-col h-full border border-[#2E2E2F]/10 rounded-xl overflow-hidden bg-[#F2F2F2] hover:border-[#38BDF2]/40 transition-colors cursor-pointer" onClick={() => navigate(`/events/${event.slug}`)}>
-      <div className="relative h-52 overflow-hidden">
-        <img src={getImageUrl(event.imageUrl)} alt={event.eventName} className="w-full h-full object-cover" />
+    <Card
+      className="group flex flex-col h-full border border-black/5 rounded-[5px] overflow-hidden bg-[#F2F2F2] transition-all duration-500 cursor-pointer hover:shadow-xl hover:translate-y-[-4px]"
+      onClick={() => navigate(`/events/${event.slug || event.eventId}`)}
+    >
+      {/* Image Section */}
+      <div className="relative h-44 sm:h-52 overflow-hidden">
+        {event.imageUrl ? (
+          <img
+            src={getImageUrl(event.imageUrl)}
+            alt={event.eventName}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+            <div className="w-16 h-16 opacity-20 grayscale flex items-center justify-center">
+              <ICONS.Layout className="w-full h-full" />
+            </div>
+          </div>
+        )}
+
+        {/* Date Badge Overlay */}
+        <div className="absolute top-3 left-3 z-20 flex flex-col items-center justify-center bg-[#38BDF2] text-white rounded-md py-1.5 px-3 min-w-[54px] shadow-lg">
+          <span className="text-[10px] font-bold tracking-widest text-white/90">{month}</span>
+          <span className="text-xl font-bold leading-none mt-0.5">{day}</span>
+        </div>
       </div>
-      <div className="p-6 flex-1 flex flex-col">
-        <h4 className="text-[#2E2E2F] text-xl font-bold tracking-tight leading-tight mb-2 line-clamp-2">{event.eventName}</h4>
-        <div className="text-[#2E2E2F] text-[13px] font-medium mb-3 line-clamp-2">
-          {(event as any).summaryLine || 'Explore sessions under this category and book your seats instantly.'}
+
+      {/* Content Section */}
+      <div className="p-5 flex-1 flex flex-col">
+        <h4 className="text-[#1A1A1A] text-lg sm:text-xl font-bold leading-tight mb-3 line-clamp-2">
+          {event.eventName}
+        </h4>
+
+        <div className="flex flex-col gap-2 mb-4 text-[#4A4A4A]">
+          {/* Location */}
+          <div className="flex items-start gap-2.5">
+            <ICONS.MapPin className="w-4 h-4 shrink-0 mt-0.5 text-black/60" />
+            <span className="text-[14px] leading-tight line-clamp-1">{event.locationText}</span>
+          </div>
+
+          {/* Time */}
+          <div className="flex items-start gap-2.5">
+            <ICONS.Clock className="w-4 h-4 shrink-0 mt-0.5 text-black/60" />
+            <span className="text-[14px] leading-tight">
+              {formatTimeRange(event.startAt, event.endAt, event.timezone)}
+            </span>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2 text-[12px] font-medium text-[#2E2E2F] mb-3">
-          <span>{event.locationText}</span>
-          <span className="text-[#2E2E2F]">•</span>
-          <span>{formatDate(event.startAt, event.timezone, { day: 'numeric', month: 'short', year: 'numeric' })} · {formatTime(event.startAt, event.timezone)}</span>
-        </div>
-        <div className="text-[#2E2E2F] text-[13px] font-medium mb-6 leading-relaxed">
-          {(event.description || '').length > 120 ? `${event.description.slice(0, 120)}...` : event.description}
+
+        {/* Footer */}
+        <div className="mt-auto flex items-center justify-end pt-3">
+          <div className="text-base sm:text-lg font-black text-[#1A1A1A]">
+            {isDone ? (
+              <span className="text-sm text-gray-400 uppercase tracking-wider">Ended</span>
+            ) : (
+              minPrice > 0 ? `₱${minPrice.toLocaleString()}` : 'Free'
+            )}
+          </div>
         </div>
       </div>
     </Card>
@@ -144,17 +209,7 @@ export const CategoryEvents: React.FC = () => {
   }, [events, searchTerm]);
 
   if (loading) {
-    return (
-      <div className="bg-[#F2F2F2] min-h-screen">
-        <div className="max-w-[88rem] mx-auto px-4 sm:px-10 py-24">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <EventCardSkeleton key={i} />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <PageLoader label={`Syncing ${category?.label || 'category'} sessions...`} variant="page" />;
   }
 
   if (!category) {

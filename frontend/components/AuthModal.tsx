@@ -86,7 +86,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
       const normalizedRole = normalizeUserRole(user.role);
       const isOnboarded = !!user.isOnboarded;
 
-      setUser({ userId: user.userId, role: normalizedRole as UserRole, email, isOnboarded });
+      setUser({ 
+        userId: user.userId, 
+        role: normalizedRole as UserRole, 
+        email, 
+        isOnboarded,
+        canViewEvents: user.canViewEvents,
+        canEditEvents: user.canEditEvents,
+        canManualCheckIn: user.canManualCheckIn,
+        canReceiveNotifications: user.canReceiveNotifications,
+        employerId: user.employerId,
+        employerLogoUrl: user.employerLogoUrl,
+        employerName: user.employerName
+      });
 
       if (!user.email_confirmed_at) {
         setLoading(false);

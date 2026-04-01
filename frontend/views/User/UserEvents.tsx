@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
-import { Event, TicketType, EventStatus, RegistrationView, OrganizerProfile } from '../../types';
+import { Event, TicketType, EventStatus, RegistrationView, OrganizerProfile, UserRole } from '../../types';
 import { Card, Badge, Button, Modal, Input, PageLoader, Checkbox } from '../../components/Shared';
 import { OnsiteLocationAssistant } from '../../components/OnsiteLocationAssistant';
 import { ICONS } from '../../constants';
@@ -333,7 +333,9 @@ export const EVENT_SETUP_STEP_DETAIL: Record<EventSetupStep, string> = {
 };
 
 export const UserEvents: React.FC = () => {
-    const { name } = useUser();
+    const { name, role, canEditEvents } = useUser();
+    const isStaff = role === UserRole.STAFF;
+    const canCreate = !isStaff;
     const [events, setEvents] = useState<Event[]>([]);
     const [loading, setLoading] = useState(true);
     const [isFetching, setIsFetching] = useState(false);
@@ -1205,14 +1207,16 @@ export const UserEvents: React.FC = () => {
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3">
                                 <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">Events</h1>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsWorkflowNoticeOpen(true)}
-                                    title="Show Organizer Event Workflow guide"
-                                    className="h-[38px] w-[38px] shrink-0 rounded-xl border-2 border-[#2E2E2F]/20 bg-[#F2F2F2] text-[#2E2E2F]/70 hover:text-[#2E2E2F] hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/10 transition-colors flex items-center justify-center"
-                                >
-                                    <ICONS.Info className="w-4 h-4" />
-                                </button>
+                                {!isStaff && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsWorkflowNoticeOpen(true)}
+                                        title="Show Organizer Event Workflow guide"
+                                        className="h-[38px] w-[38px] shrink-0 rounded-xl border-2 border-[#2E2E2F]/20 bg-[#F2F2F2] text-[#2E2E2F]/70 hover:text-[#2E2E2F] hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/10 transition-colors flex items-center justify-center"
+                                    >
+                                        <ICONS.Info className="w-4 h-4" />
+                                    </button>
+                                )}
                             </div>
                             <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">Configure and manage your session lifecycle.</p>
                         </div>
@@ -1221,39 +1225,43 @@ export const UserEvents: React.FC = () => {
                             {/* Plan Status & Promotions Quota - Top Right */}
                             <div className="flex flex-wrap items-center gap-3 justify-end">
 
-                                {promotionQuota && (
-                                    <div className="flex items-center gap-2 px-3 py-1.5 border-2 rounded-xl shadow-sm whitespace-nowrap border-[#D1D5DB] bg-[#F2F2F2]">
-                                        <ICONS.Zap className="w-3.5 h-3.5 text-[#2E2E2F]/40" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/60">
-                                            Promotions
-                                        </span>
-                                        <span className="text-[10px] font-bold text-[#2E2E2F]/30">|</span>
-                                        <span className={`text-[10px] font-bold ${promotionQuota.used < promotionQuota.limit
-                                            ? 'text-[#2E2E2F]/50'
-                                            : 'text-red-500'
-                                            }`}>
-                                            {promotionQuota.used}/{promotionQuota.limit}
-                                        </span>
-                                    </div>
+                                {!isStaff && (
+                                    <>
+                                        {promotionQuota && (
+                                            <div className="flex items-center gap-2 px-3 py-1.5 border-2 rounded-xl shadow-sm whitespace-nowrap border-[#D1D5DB] bg-[#F2F2F2]">
+                                                <ICONS.Zap className="w-3.5 h-3.5 text-[#2E2E2F]/40" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/60">
+                                                    Promotions
+                                                </span>
+                                                <span className="text-[10px] font-bold text-[#2E2E2F]/30">|</span>
+                                                <span className={`text-[10px] font-bold ${promotionQuota.used < promotionQuota.limit
+                                                    ? 'text-[#2E2E2F]/50'
+                                                    : 'text-red-500'
+                                                    }`}>
+                                                    {promotionQuota.used}/{promotionQuota.limit}
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        {organizerProfile && (() => {
+                                            const pricedLimit = Number(organizerProfile?.plan?.limits?.max_priced_events || organizerProfile?.plan?.max_priced_events || organizerProfile?.plan?.maxPricedEvents || 0);
+                                            const currentPaidCount = events.filter(e => (e.ticketTypes || []).some((t: any) => (t.priceAmount || 0) > 0)).length;
+
+                                            return (
+                                                <div className={`flex items-center gap-2 px-3 py-1.5 bg-[#F2F2F2] border-2 rounded-xl shadow-sm whitespace-nowrap border-[#D1D5DB]`}>
+                                                    <ICONS.CreditCard className="w-3.5 h-3.5 text-[#2E2E2F]/40" />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/60">
+                                                        Paid Events
+                                                    </span>
+                                                    <span className="text-[10px] font-bold text-[#2E2E2F]/30">|</span>
+                                                    <span className={`text-[10px] font-bold ${currentPaidCount >= pricedLimit ? 'text-red-500' : 'text-[#2E2E2F]/40'}`}>
+                                                        {currentPaidCount}/{pricedLimit}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })()}
+                                    </>
                                 )}
-
-                                {organizerProfile && (() => {
-                                    const pricedLimit = Number(organizerProfile?.plan?.limits?.max_priced_events || organizerProfile?.plan?.max_priced_events || organizerProfile?.plan?.maxPricedEvents || 0);
-                                    const currentPaidCount = events.filter(e => (e.ticketTypes || []).some((t: any) => (t.priceAmount || 0) > 0)).length;
-
-                                    return (
-                                        <div className={`flex items-center gap-2 px-3 py-1.5 bg-[#F2F2F2] border-2 rounded-xl shadow-sm whitespace-nowrap border-[#D1D5DB]`}>
-                                            <ICONS.CreditCard className="w-3.5 h-3.5 text-[#2E2E2F]/40" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/60">
-                                                Paid Events
-                                            </span>
-                                            <span className="text-[10px] font-bold text-[#2E2E2F]/30">|</span>
-                                            <span className={`text-[10px] font-bold ${currentPaidCount >= pricedLimit ? 'text-red-500' : 'text-[#2E2E2F]/40'}`}>
-                                                {currentPaidCount}/{pricedLimit}
-                                            </span>
-                                        </div>
-                                    );
-                                })()}
 
 
                             </div>
@@ -1298,21 +1306,23 @@ export const UserEvents: React.FC = () => {
                                     </button>
                                 </div>
 
-                                <div className="flex flex-col items-end">
-                                    <Button
-                                        onClick={handleOpenCreate}
-                                        className="rounded-xl px-6 py-3 bg-[#38BDF2] text-[#F2F2F2] hover:text-[#F2F2F2] font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        disabled={!canStartCreation || organizerLoading || isAtTotalLimit}
-                                    >
-                                        <span className="flex items-center gap-2 font-bold text-sm">
-                                            <ICONS.Calendar className="w-4 h-4" />
-                                            {isAtTotalLimit ? 'Limit Reached' : 'Create Event'}
-                                        </span>
-                                    </Button>
-                                    {isAtTotalLimit && (
-                                        <p className="mt-1.5 text-[10px] text-[#2E2E2F]/50 font-bold uppercase tracking-tight">Upgrade for more events</p>
-                                    )}
-                                </div>
+                                {canCreate && (
+                                    <div className="flex flex-col items-end">
+                                        <Button
+                                            onClick={handleOpenCreate}
+                                            className="rounded-xl px-6 py-3 bg-[#38BDF2] text-[#F2F2F2] hover:text-[#F2F2F2] font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled={!canStartCreation || organizerLoading || isAtTotalLimit}
+                                        >
+                                            <span className="flex items-center gap-2 font-bold text-sm">
+                                                <ICONS.Calendar className="w-4 h-4" />
+                                                {isAtTotalLimit ? 'Limit Reached' : 'Create Event'}
+                                            </span>
+                                        </Button>
+                                        {isAtTotalLimit && (
+                                            <p className="mt-1.5 text-[10px] text-[#2E2E2F]/50 font-bold uppercase tracking-tight">Upgrade for more events</p>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -1878,7 +1888,7 @@ export const UserEvents: React.FC = () => {
                             </p>
                             <div className="text-[13px] text-[#2E2E2F]/60 font-medium mt-2 leading-relaxed space-y-3">
                                 <p>You are about to cancel <strong>"{cancelConfirm?.eventName}"</strong>.</p>
-                                
+
                                 {cancelMeta.loading ? (
                                     <p className="italic animate-pulse">Calculating impact...</p>
                                 ) : (

@@ -100,14 +100,28 @@ const WelcomeView = React.lazy(() => import('./views/User/WelcomeView'));
 const API = import.meta.env.VITE_API_BASE;
 const DEFAULT_HEADER_LOCATION = 'Your Location';
 const BROWSE_LOCATION_STORAGE_KEY = 'browse_events_location';
-const Branding: React.FC<{ className?: string, light?: boolean }> = ({ className = '', light = false }) => (
-  <img
-    src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
-    alt="StartupLab Business Ticketing Logo"
-    className={`block max-w-full transform transition-all duration-300 hover:scale-[1.03] cursor-pointer ${className}`}
-    style={{ filter: light ? 'invert(1) grayscale(1) brightness(2)' : undefined }}
-  />
-);
+const Branding: React.FC<{ className?: string, light?: boolean }> = ({ className = '', light = false }) => {
+  const { role, employerLogoUrl } = useUser();
+  const isStaff = (role === UserRole.STAFF);
+
+  // Strict Policy: Staff MUST see their logo. If it's missing, show a neutral placeholder while sync happens.
+  if (isStaff && !employerLogoUrl) {
+    return (
+      <div className={`flex items-center justify-center p-2 rounded-lg opacity-20 animate-pulse ${className}`}>
+        <div className="w-10 h-10 bg-[#2E2E2F] rounded" />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={employerLogoUrl || "https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"}
+      alt="Logo"
+      className={`block max-w-full transform transition-all duration-300 hover:scale-[1.03] cursor-pointer ${className}`}
+      style={{ filter: light && !employerLogoUrl ? 'invert(1) grayscale(1) brightness(2)' : undefined }}
+    />
+  );
+};
 
 
 const getRoleLabel = (roleValue: unknown): string => {
@@ -169,40 +183,30 @@ const CrownBadge = () => (
 const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { userId, role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canViewEvents, canEditEvents, canManualCheckIn, canReceiveNotifications, hasResolvedSession } = useUser();
+  const {
+    userId, role, email, name, imageUrl, isAuthenticated,
+    clearUser, setUser, canViewEvents, canEditEvents,
+    canManualCheckIn, canReceiveNotifications, hasResolvedSession,
+    employerLogoUrl, employerName, employerId
+  } = useUser();
   const isStaff = role === UserRole.STAFF;
   const { showToast } = useToast();
 
   const handleLogout = React.useCallback(async (message?: string) => {
     try {
-      // 1. Call backend logout to clear cookies
-      await fetch(`${API}/api/auth/logout`, {
-        method: "POST",
-        credentials: "include"
-      });
-
-      // 2. Sign out from Supabase
+      await fetch(`${API}/api/auth/logout`, { method: "POST", credentials: "include" });
       await supabase.auth.signOut();
-
-      // 3. Clear any local tokens/storage
       localStorage.removeItem('sb-ddkkbtijqrgpitncxylx-auth-token');
       localStorage.removeItem('hideUpgradeModal');
       sessionStorage.removeItem('hideUpgradeModal');
       clearUser();
-
-      // Show toast
-      showToast('success', message || 'Logged out successfully. See you soon!');
-
-      // 4. Navigate to login
+      showToast('success', message || 'Logged out successfully.');
       navigate('/');
     } catch {
-      // Still navigate to login even if there was an error
       clearUser();
       navigate('/');
     }
   }, [clearUser, navigate, showToast]);
-  const [organizerSidebarLogoUrl, setOrganizerSidebarLogoUrl] = React.useState('');
-  const [organizerSidebarName, setOrganizerSidebarName] = React.useState('');
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const [profileModalOpen, setProfileModalOpen] = React.useState(false);
   const [nameInput, setNameInput] = React.useState('');
@@ -387,6 +391,10 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             canViewEvents: data.canViewEvents,
             canEditEvents: data.canEditEvents,
             canManualCheckIn: data.canManualCheckIn,
+            canReceiveNotifications: data.canReceiveNotifications,
+            employerId: data.employerId || null,
+            employerLogoUrl: data.employerLogoUrl || null,
+            employerName: data.employerName || null,
           });
         }
       }
@@ -396,32 +404,6 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   React.useEffect(() => {
     if (profileModalOpen) fetchProfile();
   }, [profileModalOpen]);
-
-  React.useEffect(() => {
-    let isMounted = true;
-    const loadOrganizerSidebarBrand = async () => {
-      if (role !== UserRole.STAFF) {
-        if (isMounted) {
-          setOrganizerSidebarLogoUrl('');
-          setOrganizerSidebarName('');
-        }
-        return;
-      }
-      try {
-        const organizer = await apiService.getMyOrganizer();
-        if (!isMounted) return;
-        setOrganizerSidebarLogoUrl(organizer?.profileImageUrl || '');
-        setOrganizerSidebarName((organizer?.organizerName || '').trim());
-      } catch {
-        if (isMounted) {
-          setOrganizerSidebarLogoUrl('');
-          setOrganizerSidebarName('');
-        }
-      }
-    };
-    loadOrganizerSidebarBrand();
-    return () => { isMounted = false; };
-  }, [role, location.pathname, name]);
 
   React.useEffect(() => {
     return () => {
@@ -490,6 +472,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           canViewEvents,
           canEditEvents,
           canManualCheckIn,
+          employerId,
         });
       }
 
@@ -531,6 +514,10 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           canViewEvents: me.canViewEvents,
           canEditEvents: me.canEditEvents,
           canManualCheckIn: me.canManualCheckIn,
+          canReceiveNotifications: me.canReceiveNotifications,
+          employerId: me.employerId || null,
+          employerLogoUrl: me.employerLogoUrl || null,
+          employerName: me.employerName || null,
         });
       } catch {
         clearUser();
@@ -574,7 +561,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   }, [isAuthenticated, isStaff, location.pathname, navigate, role, canViewEvents, canManualCheckIn]);
 
   const staffPermsLoaded = role !== UserRole.STAFF || (
-    typeof canViewEvents === 'boolean' && typeof canManualCheckIn === 'boolean'
+    canViewEvents !== undefined && canManualCheckIn !== undefined
   );
   const noStaffPerms = role === UserRole.STAFF && canViewEvents === false && canManualCheckIn === false;
   const menuItems = (
@@ -588,7 +575,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           ? [
             ...(canViewEvents !== false ? [{ label: 'Events', path: '/events', icon: <ICONS.Calendar className="w-6 h-6" /> }] : []),
             { label: 'Attendees', path: '/attendees', icon: <ICONS.Users className="w-6 h-6" /> },
-            ...(canManualCheckIn !== false ? [{ label: 'Scan', path: '/checkin', icon: <ICONS.CheckCircle className="w-6 h-6" /> }] : []),
+            ...(canManualCheckIn !== false ? [{ label: 'Scan', path: '/checkin', icon: <ICONS.CheckCircle className="w-6 h-6" />, separator: true }] : []),
           ]
           : role === UserRole.ADMIN
             ? [
@@ -641,15 +628,15 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     <div className="min-h-screen flex flex-col md:flex-row bg-[#F2F2F2] font-sans selection:bg-[#38BDF2]/30">
       {/* Sidebar for desktop */}
       <aside
-        className={`bg-[#F2F2F2] border-r border-[#D1D5DB] hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-64' : 'w-20'}`}
+        className={`bg-[#F2F2F2] border-r border-[#D1D5DB] hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-52' : 'w-16'}`}
         style={{ overflow: desktopSidebarOpen ? 'hidden' : 'visible' }}
       >
         <div className={`flex items-center justify-center border-b border-[#D1D5DB] shrink-0 h-24`}>
-          <Link to="/dashboard" className="flex items-center justify-center group transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98]">
-            {organizerSidebarLogoUrl ? (
+          <Link to={role === UserRole.ADMIN ? "/dashboard" : (role === UserRole.STAFF ? "/events" : "/user-home")} className="flex items-center justify-center group transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98]">
+            {employerLogoUrl ? (
               <img
-                src={organizerSidebarLogoUrl}
-                alt={organizerSidebarName || 'Logo'}
+                src={employerLogoUrl}
+                alt={employerName || 'Logo'}
                 className={desktopSidebarOpen ? "h-20 w-auto max-w-full object-contain px-4" : "h-12 w-12 object-contain rounded-lg border border-[#E5E7EB]"}
               />
             ) : desktopSidebarOpen ? (
@@ -660,7 +647,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           </Link>
         </div>
         <nav className={`flex-1 pt-6 pb-6 ${desktopSidebarOpen ? 'px-0' : 'px-2'} flex flex-col gap-0.5 overflow-y-auto overflow-x-visible scrollbar-none scroll-smooth`}
-          style={{ width: desktopSidebarOpen ? '100%' : '260px', paddingRight: desktopSidebarOpen ? '0' : '180px' }}>
+          style={{ width: desktopSidebarOpen ? '100%' : '220px', paddingRight: desktopSidebarOpen ? '0' : '150px' }}>
           {menuItems.map((item: any, idx) => {
             const isActive = checkIsActiveAdmin(item.path);
 
@@ -673,7 +660,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   to={item.path}
                   className={`flex transition-all duration-200 group relative shrink-0 ${desktopSidebarOpen
                     ? 'flex-row items-center gap-3 px-3 py-2.5 mx-2 rounded-lg'
-                    : 'flex-col items-center justify-center gap-1 py-4 px-1 rounded-lg'
+                    : 'flex-col items-center justify-center w-11 h-11 mx-auto rounded-xl'
                     } ${isActive
                       ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20'
                       : 'text-[#000000]/90 hover:bg-[#D1D5DB]/50 hover:text-[#000000]'
@@ -682,18 +669,18 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 >
                   <div className="relative shrink-0 flex items-center justify-center">
                     {React.cloneElement(item.icon as React.ReactElement<any>, {
-                      className: `transition-colors duration-200 ${desktopSidebarOpen ? 'w-[18px] h-[18px]' : 'w-5 h-5 group-hover:scale-105'} ${isActive ? 'stroke-[2px] text-white' : 'stroke-[1.5px] text-[#000000]/90 group-hover:text-[#000000]'}`
+                      className: `transition-colors duration-200 ${desktopSidebarOpen ? 'w-[18px] h-[18px]' : 'w-5 h-5 group-hover:scale-105'} ${isActive ? 'stroke-[2.5px] text-white' : 'stroke-[1.8px] text-[#000000] group-hover:text-[#000000]'}`
                     })}
                     {item.premium && <CrownBadge />}
                   </div>
 
                   {desktopSidebarOpen ? (
-                    <span className={`text-[14px] tracking-tight truncate ${isActive ? 'font-semibold text-white' : 'font-medium text-[#000000]/90'}`}>
+                    <span className={`text-[13px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#000000]'}`}>
                       {item.label}
                     </span>
                   ) : (
-                    <div className="absolute left-full ml-5 px-3 py-1.5 bg-[#111827] text-white text-[11px] font-medium rounded-md opacity-0 translate-x-[-10px] pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 z-[999] whitespace-nowrap shadow-xl flex items-center">
-                      <div className="absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 border-[4px] border-transparent border-r-[#111827]" />
+                    <div className="absolute left-full ml-5 px-3 py-1.5 bg-[#38BDF2] text-white text-[11px] font-bold rounded-md opacity-0 translate-x-[-10px] pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 z-[999] whitespace-nowrap shadow-xl flex items-center">
+                      <div className="absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 border-[4px] border-transparent border-r-[#38BDF2]" />
                       {item.label}
                     </div>
                   )}
@@ -705,7 +692,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       </aside>
 
       <main
-        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-52' : 'md:pl-16'}`}
       >
         <header className="h-24 !bg-[#F2F2F2] border-b border-[#D1D5DB] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-[500] w-full">
           <div className="flex items-center gap-3">
@@ -984,19 +971,19 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             <div className="fixed inset-0 bg-[#2E2E2F]/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
             <aside className="relative w-[min(18.5rem,calc(100vw-1rem))] bg-[#F2F2F2] border-r border-[#E5E7EB] flex flex-col h-full z-[110] animate-in slide-in-from-left duration-300 shadow-2xl">
               <div className="p-8 pb-4 flex items-center justify-between border-b border-[#E5E7EB]">
-                <Link to="/dashboard" onClick={() => setSidebarOpen(false)} className="flex flex-col items-start gap-2 group transition-all duration-500">
-                  {organizerSidebarLogoUrl ? (
+                <Link to={role === UserRole.ADMIN ? "/dashboard" : (role === UserRole.STAFF ? "/events" : "/user-home")} onClick={() => setSidebarOpen(false)} className="flex flex-col items-start gap-2 group transition-all duration-500">
+                  {employerLogoUrl ? (
                     <img
-                      src={organizerSidebarLogoUrl}
-                      alt={organizerSidebarName || 'Logo'}
+                      src={employerLogoUrl}
+                      alt={employerName || 'Logo'}
                       className="h-12 w-auto max-w-[168px] object-contain"
                     />
                   ) : (
                     <Branding className="h-12 w-auto" />
                   )}
-                  {organizerSidebarName && (
+                  {employerName && (
                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] ml-0.5">
-                      {organizerSidebarName}
+                      {employerName}
                     </span>
                   )}
                 </Link>
@@ -2483,7 +2470,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
     <div className="min-h-screen flex bg-[#F2F2F2] selection:bg-[#38BDF2]/30">
       {/* Sidebar for desktop */}
       <aside
-        className={`bg-[#F2F2F2] border-r border-[#D1D5DB] hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-64' : 'w-20'}`}
+        className={`bg-[#F2F2F2] border-r border-[#D1D5DB] hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-52' : 'w-16'}`}
         style={{ overflow: desktopSidebarOpen ? 'hidden' : 'visible' }}
       >
         <div className={`flex items-center justify-center border-b border-[#D1D5DB] shrink-0 h-24`}>
@@ -2504,7 +2491,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
           </Link>
         </div>
         <nav className={`flex-1 pt-6 pb-6 ${desktopSidebarOpen ? 'px-0' : 'px-2'} flex flex-col gap-0.5 overflow-y-auto overflow-x-visible scrollbar-none scroll-smooth`}
-          style={{ width: desktopSidebarOpen ? '100%' : '260px', paddingRight: desktopSidebarOpen ? '0' : '180px' }}>
+          style={{ width: desktopSidebarOpen ? '100%' : '220px', paddingRight: desktopSidebarOpen ? '0' : '150px' }}>
           {menuItems.map((item: any, idx) => {
             const isActive = checkIsActive(item.path);
 
@@ -2517,7 +2504,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   to={item.path}
                   className={`flex transition-all duration-200 group relative shrink-0 ${desktopSidebarOpen
                     ? 'flex-row items-center gap-3 px-3 py-2.5 mx-2 rounded-lg'
-                    : 'flex-col items-center justify-center w-12 h-12 mx-auto rounded-xl'
+                    : 'flex-col items-center justify-center w-11 h-11 mx-auto rounded-xl'
                     } ${isActive
                       ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20'
                       : 'text-[#000000]/90 hover:bg-[#D1D5DB]/50 hover:text-[#000000]'
@@ -2526,18 +2513,18 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 >
                   <div className="relative shrink-0 flex items-center justify-center">
                     {React.cloneElement(item.icon as React.ReactElement<any>, {
-                      className: `transition-colors duration-200 ${desktopSidebarOpen ? 'w-[18px] h-[18px]' : 'w-5 h-5 group-hover:scale-105'} ${isActive ? 'stroke-[2px] text-white' : 'stroke-[1.5px] text-[#000000]/90 group-hover:text-[#000000]'}`
+                      className: `transition-colors duration-200 ${desktopSidebarOpen ? 'w-[18px] h-[18px]' : 'w-5 h-5 group-hover:scale-105'} ${isActive ? 'stroke-[2.5px] text-white' : 'stroke-[1.8px] text-[#000000] group-hover:text-[#000000]'}`
                     })}
                     {item.premium && <CrownBadge />}
                   </div>
 
                   {desktopSidebarOpen ? (
-                    <span className={`text-[14px] tracking-tight truncate ${isActive ? 'font-semibold text-white' : 'font-medium text-[#000000]/90'}`}>
+                    <span className={`text-[13px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#000000]'}`}>
                       {item.label}
                     </span>
                   ) : (
-                    <div className="absolute left-full ml-5 px-3 py-2.5 bg-[#111827] text-white text-[11px] font-medium rounded-md opacity-0 translate-x-[-10px] pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 z-[999] whitespace-nowrap shadow-xl flex items-center">
-                      <div className="absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 border-[4px] border-transparent border-r-[#111827]" />
+                    <div className="absolute left-full ml-5 px-3 py-1.5 bg-[#38BDF2] text-white text-[11px] font-bold rounded-md opacity-0 translate-x-[-10px] pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 z-[999] whitespace-nowrap shadow-xl flex items-center">
+                      <div className="absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 border-[4px] border-transparent border-r-[#38BDF2]" />
                       {item.label}
                     </div>
                   )}
@@ -2549,7 +2536,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
       </aside>
 
       <main
-        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-52' : 'md:pl-16'}`}
       >
         <header className="h-24 bg-[#F2F2F2] border-b border-[#D1D5DB] px-4 sm:px-8 flex items-center justify-between gap-4 sm:gap-6 sticky top-0 z-[500] w-full">
           <div className="flex items-center gap-3">
@@ -2569,7 +2556,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
               </svg>
             </button>
             <div className="ml-1 hidden sm:block">
-              <p className="text-[10px] uppercase font-semibold text-[#111111]/60 tracking-[0.2em]">
+              <p className="text-[10px] uppercase font-black text-[#111111] tracking-[0.2em]">
                 Organizer Portal
               </p>
             </div>
@@ -2699,8 +2686,8 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 )}
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-[13px] font-medium text-[#111827] truncate max-w-[100px] leading-none">{displayName}</p>
-                <p className="text-[10px] font-normal text-[#6B7280] uppercase tracking-wide mt-1">{roleLabel}</p>
+                <p className="text-[13px] font-bold text-[#111827] truncate max-w-[100px] leading-none">{displayName}</p>
+                <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide mt-1">{roleLabel}</p>
               </div>
               <svg className="w-4 h-4 text-[#9CA3AF]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -3005,6 +2992,9 @@ const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ childr
               canEditEvents: me.canEditEvents ?? true,
               canManualCheckIn: me.canManualCheckIn ?? true,
               canReceiveNotifications: me.canReceiveNotifications ?? true,
+              employerId: me.employerId || null,
+              employerLogoUrl: me.employerLogoUrl || null,
+              employerName: me.employerName || null,
             });
             return;
           }
@@ -3065,6 +3055,11 @@ const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ childr
   );
 };
 
+const EventsPortal = () => {
+  const { role } = useUser();
+  return role === UserRole.ADMIN ? <EventsManagement /> : <UserEvents />;
+};
+
 const App: React.FC = () => (
   <Router>
     <ScrollToTop />
@@ -3112,7 +3107,7 @@ const App: React.FC = () => (
           <Route path="/user/attendees" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><RegistrationsList /></UserPortalLayout></RequireRoleRoute>} />
           <Route path="/user/checkin" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><CheckIn /></UserPortalLayout></RequireRoleRoute>} />
           <Route path="/user/archive" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><ArchiveEvents /></UserPortalLayout></RequireRoleRoute>} />
-          <Route path="/user/reports" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerReports /></UserPortalLayout></RequireRoleRoute>} />
+          <Route path="/user/reports" element={<RequireRoleRoute allow={[UserRole.ORGANIZER, UserRole.STAFF]}><UserPortalLayout><OrganizerReports /></UserPortalLayout></RequireRoleRoute>} />
           <Route path="/subscription" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerSubscription /></UserPortalLayout></RequireRoleRoute>} />
           <Route path="/organizer-support" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerSupport /></UserPortalLayout></RequireRoleRoute>} />
           <Route path="/organizer-support/archive" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><ArchiveSupport /></UserPortalLayout></RequireRoleRoute>} />
@@ -3120,7 +3115,7 @@ const App: React.FC = () => (
 
           {/* Admin Portal Routes */}
           <Route path="/dashboard" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.ORGANIZER]}><DashboardWrapper /></RequireRoleRoute>} />
-          <Route path="/events" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><EventsManagement /></PortalLayout></RequireRoleRoute>} />
+          <Route path="/events" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><EventsPortal /></PortalLayout></RequireRoleRoute>} />
           <Route path="/attendees" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><RegistrationsList /></PortalLayout></RequireRoleRoute>} />
           <Route path="/checkin" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><CheckIn /></PortalLayout></RequireRoleRoute>} />
           <Route path="/admin/categories" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><CategoryManagement /></PortalLayout></RequireRoleRoute>} />

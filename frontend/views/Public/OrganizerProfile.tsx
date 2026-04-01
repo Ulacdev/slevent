@@ -173,7 +173,7 @@ export const OrganizerProfilePage: React.FC = () => {
     const embedUrl = liveEvent ? getEmbedUrl(liveEvent.streaming_url || liveEvent.locationText) : null;
 
     return (
-        <div className="bg-[#F2F2F2] min-h-screen">
+        <div className="bg-[#F2F2F2] min-h-screen" style={{ transform: 'scale(0.9)', transformOrigin: 'top center' }}>
             <div className="max-w-[1200px] mx-auto bg-[#F2F2F2]">
                 {/* Cover Photo Area - Facebook style */}
                 <div className="relative w-full aspect-[3/1] lg:aspect-[3.5/1] bg-[#E5E5E5] overflow-hidden rounded-b-2xl shadow-sm border-x border-b border-[#2E2E2F]/5">
@@ -259,10 +259,7 @@ export const OrganizerProfilePage: React.FC = () => {
                         <div className="flex items-center gap-3 pb-2">
                             <button
                                 onClick={handleFollow}
-                                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-3 rounded-xl font-bold text-sm transition-all shadow-md ${following
-                                    ? 'bg-[#E4E6EB] text-[#050505]'
-                                    : 'bg-[#38BDF2] text-white hover:brightness-110 active:scale-95'
-                                    }`}
+                                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-3 rounded-xl font-bold text-sm transition-all shadow-md bg-[#38BDF2] text-white hover:brightness-95 active:scale-95"
                             >
                                 {following ? <ICONS.CheckCircle className="w-4 h-4" /> : <ICONS.Plus className="w-4 h-4 stroke-[3px]" />}
                                 {following ? 'Following' : 'Follow'}
@@ -270,11 +267,35 @@ export const OrganizerProfilePage: React.FC = () => {
                             {organizer.websiteUrl && (
                                 <button
                                     onClick={() => window.open(organizer.websiteUrl, '_blank')}
-                                    className="p-3 bg-[#E4E6EB] text-[#050505] rounded-xl hover:bg-[#D8DADF] transition-all shadow-sm active:scale-95"
+                                    className="p-3 bg-[#E4E6EB] text-[#050505] rounded-xl hover:bg-[#D8DADF] transition-all shadow-sm active:scale-95 flex items-center justify-center w-12 h-12 shrink-0"
                                 >
                                     <ICONS.Globe className="w-5 h-5" />
                                 </button>
                             )}
+
+                            <button
+                                onClick={() => window.open(organizer.facebookId ? `https://facebook.com/${organizer.facebookId.replace(/^@|\//g, '')}` : 'https://facebook.com', '_blank')}
+                                className="rounded-xl transition-all shadow-md flex items-center justify-center w-12 h-12 shrink-0 bg-[#1877F2] text-white active:scale-95 hover:brightness-110 cursor-pointer"
+                                title={organizer.facebookId ? `Facebook: ${organizer.facebookId}` : 'Visit Facebook'}
+                            >
+                                <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
+                            </button>
+                            
+                            <button
+                                onClick={() => window.open(organizer.twitterHandle ? `https://twitter.com/${organizer.twitterHandle.replace(/^@|\//g, '')}` : 'https://twitter.com', '_blank')}
+                                className="rounded-xl transition-all shadow-md flex items-center justify-center w-12 h-12 shrink-0 bg-black text-white active:scale-95 hover:brightness-110 cursor-pointer"
+                                title={organizer.twitterHandle ? `Twitter/X: ${organizer.twitterHandle}` : 'Visit Twitter/X'}
+                            >
+                                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
+                            </button>
+                            
+                            <button
+                                onClick={() => window.open(organizer.youtubeUrl ? organizer.youtubeUrl : 'https://youtube.com', '_blank')}
+                                className="rounded-xl transition-all shadow-md flex items-center justify-center w-12 h-12 shrink-0 bg-[#FF0000] text-white active:scale-95 hover:brightness-110 cursor-pointer"
+                                title={organizer.youtubeUrl ? `YouTube: ${organizer.youtubeUrl}` : 'Visit YouTube'}
+                            >
+                                <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                            </button>
                         </div>
                     </div>
 

@@ -3,14 +3,29 @@ import { logAudit } from '../utils/auditLogger.js';
 
 export const listAnnouncements = async (req, res) => {
   try {
-    const { target } = req.query; // optional filtering by target audience
+    const { target, public: isPublic } = req.query; // optional filtering by target audience
     let query = supabase
       .from('announcements')
       .select('*')
       .order('created_at', { ascending: false });
 
     if (target) {
-      query = query.eq('target_audience', target);
+      if (isPublic === 'true' && target !== 'ALL') {
+        query = query.in('target_audience', ['ALL', target]);
+      } else {
+        query = query.eq('target_audience', target);
+      }
+    }
+
+    // Filter by published, scheduled, and not expired for public-facing list
+    if (isPublic === 'true') {
+      const now = new Date().toISOString();
+      // Basic published filter
+      query = query.eq('is_published', true);
+      
+      // We can also let the frontend handle the granular date filtering
+      // to avoid Supabase 'or' string complexities if it's the cause
+      // of the empty results.
     }
 
     const { data, error } = await query;
@@ -23,10 +38,10 @@ export const listAnnouncements = async (req, res) => {
 
 export const createAnnouncement = async (req, res) => {
   try {
-    const { title, content, type, target_audience, is_published, scheduled_at } = req.body;
+    const { title, content, type, target_audience, is_published, scheduled_at, expires_at } = req.body;
     
-    if (!title || !content) {
-      return res.status(400).json({ error: 'Title and content are required' });
+    if (!title || !content || !scheduled_at || !expires_at) {
+      return res.status(400).json({ error: 'Title, content, scheduled date, and expiry date are required' });
     }
 
     const payload = {
@@ -36,6 +51,7 @@ export const createAnnouncement = async (req, res) => {
       target_audience: target_audience || 'ALL',
       is_published: is_published ?? true,
       scheduled_at: scheduled_at || null,
+      expires_at: expires_at || null,
       author_id: req.user?.id,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -68,6 +84,15 @@ export const updateAnnouncement = async (req, res) => {
     delete updates.id;
     delete updates.author_id;
     delete updates.created_at;
+    
+    // Ensure required timestamp fields are not cleared
+    if (updates.scheduled_at === '' || updates.scheduled_at === null) {
+      return res.status(400).json({ error: 'Scheduled date is required' });
+    }
+    if (updates.expires_at === '' || updates.expires_at === null) {
+      return res.status(400).json({ error: 'Expiry date is required' });
+    }
+    
     updates.updated_at = new Date().toISOString();
 
     const { data, error } = await supabase

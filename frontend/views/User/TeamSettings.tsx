@@ -160,6 +160,17 @@ export const TeamSettings: React.FC = () => {
         refreshTeamData();
     }, []);
 
+    useEffect(() => {
+        if (isInviteModalOpen) {
+            document.body.classList.add('hide-admin-ui');
+        } else {
+            document.body.classList.remove('hide-admin-ui');
+        }
+        return () => {
+            document.body.classList.remove('hide-admin-ui');
+        };
+    }, [isInviteModalOpen]);
+
     const [inviteData, setInviteData] = useState({
         email: '',
         role: 'STAFF',

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Input, Badge, Checkbox } from '../../components/Shared';
+import { Card, Button, Input, Badge, Checkbox, PageLoader } from '../../components/Shared';
 import { apiService } from '../../services/apiService';
 import { OrganizerProfile } from '../../types';
 import { useUser } from '../../context/UserContext';
@@ -98,6 +98,8 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
       if (localCoverPreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(localCoverPreviewUrl);
     };
   }, [localPreviewUrl, localCoverPreviewUrl]);
+
+  if (loading) return <PageLoader variant="page" label="Loading Settings..." />;
 
   const handleFormChange = (field: keyof FormState, value: string | boolean) => {
     setFormData((prev) => ({

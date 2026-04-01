@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Badge, Button, Input, Checkbox, Modal } from '../../components/Shared';
+import { Card, Badge, Button, Input, Checkbox, Modal, PageLoader } from '../../components/Shared';
 import { apiService } from '../../services/apiService';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
@@ -337,14 +337,7 @@ export const ArchiveEvents: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-[#38BDF2] border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-sm font-medium text-[#2E2E2F]">Loading archive...</p>
-        </div>
-      </div>
-    );
+    return <PageLoader variant="page" label="Loading Archive..." />;
   }
 
   return (

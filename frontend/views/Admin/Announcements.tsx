@@ -12,11 +12,18 @@ interface Announcement {
   target_audience: 'ALL' | 'ORGANIZERS' | 'ATTENDEES';
   is_published: boolean;
   scheduled_at: string | null;
+  expires_at: string | null;
   created_at: string;
   updated_at: string;
 }
-
 export const Announcements: React.FC = () => {
+  const toLocalISOString = (isoString?: string | null) => {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return '';
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  };
+
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -30,7 +37,8 @@ export const Announcements: React.FC = () => {
     type: 'INFO' as 'INFO' | 'SUCCESS' | 'WARNING' | 'CRITICAL',
     target_audience: 'ALL' as 'ALL' | 'ORGANIZERS' | 'ATTENDEES',
     is_published: true,
-    scheduled_at: ''
+    scheduled_at: '',
+    expires_at: ''
   });
 
   const fetchAnnouncements = async () => {
@@ -63,7 +71,8 @@ export const Announcements: React.FC = () => {
         type: announcement.type,
         target_audience: announcement.target_audience,
         is_published: announcement.is_published,
-        scheduled_at: announcement.scheduled_at ? new Date(announcement.scheduled_at).toISOString().slice(0, 16) : ''
+        scheduled_at: toLocalISOString(announcement.scheduled_at),
+        expires_at: toLocalISOString(announcement.expires_at)
       });
     } else {
       setEditingAnnouncement(null);
@@ -73,7 +82,8 @@ export const Announcements: React.FC = () => {
         type: 'INFO',
         target_audience: 'ALL',
         is_published: true,
-        scheduled_at: ''
+        scheduled_at: '',
+        expires_at: ''
       });
     }
     setModalOpen(true);
@@ -89,10 +99,16 @@ export const Announcements: React.FC = () => {
       
       const method = editingAnnouncement ? 'PATCH' : 'POST';
 
+      const payload = {
+        ...formData,
+        scheduled_at: formData.scheduled_at ? new Date(formData.scheduled_at).toISOString() : null,
+        expires_at: formData.expires_at ? new Date(formData.expires_at).toISOString() : null
+      };
+
       const res = await apiService._fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
         credentials: 'include'
       });
 
@@ -127,7 +143,7 @@ export const Announcements: React.FC = () => {
     }
   };
 
-  if (loading) return <PageLoader />;
+  if (loading) return <PageLoader variant="page" label="Loading Announcements..." />;
 
   return (
     <div className="space-y-8" style={{ zoom: 0.85 }}>
@@ -181,6 +197,9 @@ export const Announcements: React.FC = () => {
                   <span>Created {new Date(ann.created_at).toLocaleDateString()}</span>
                   {ann.scheduled_at && (
                     <span className="text-[#38BDF2]">Scheduled for {new Date(ann.scheduled_at).toLocaleString()}</span>
+                  )}
+                  {ann.expires_at && (
+                    <span className="text-rose-500 font-black">Expires {new Date(ann.expires_at).toLocaleString()}</span>
                   )}
                 </div>
               </div>
@@ -270,22 +289,31 @@ export const Announcements: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input 
-                label="Scheduled For (Optional)"
+                label="Scheduled For (Start Date)"
                 type="datetime-local"
                 value={formData.scheduled_at}
                 onChange={(e: any) => setFormData({ ...formData, scheduled_at: e.target.value })}
+                required
               />
-              <div className="flex items-end pb-3">
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <input 
-                    type="checkbox"
-                    checked={formData.is_published}
-                    onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
-                    className="w-5 h-5 rounded border-black/20 text-[#38BDF2] focus:ring-[#38BDF2]"
-                  />
-                  <span className="text-sm font-bold text-[#2E2E2F] group-hover:text-[#38BDF2] transition-colors">Publish Immediately</span>
-                </label>
-              </div>
+              <Input 
+                label="Expires At (End Date)"
+                type="datetime-local"
+                value={formData.expires_at}
+                onChange={(e: any) => setFormData({ ...formData, expires_at: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="flex items-end pb-3">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input 
+                  type="checkbox"
+                  checked={formData.is_published}
+                  onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
+                  className="w-5 h-5 rounded border-black/20 text-[#38BDF2] focus:ring-[#38BDF2]"
+                />
+                <span className="text-sm font-bold text-[#2E2E2F] group-hover:text-[#38BDF2] transition-colors">Publish Immediately</span>
+              </label>
             </div>
           </div>
 

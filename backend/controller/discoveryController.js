@@ -160,22 +160,51 @@ export const getAvailableLocations = async (req, res) => {
 
         const cities = new Set();
         const countries = new Set();
+        const KNOWN_COUNTRIES = ['Philippines', 'Singapore', 'United States', 'Malaysia', 'Indonesia', 'Japan', 'South Korea'];
 
         (data || []).forEach(event => {
             if (event.locationType === 'ONLINE' || !event.locationText) return;
-            const parts = event.locationText.split(',').map(p => p.trim()).filter(p => p.length > 0);
-            if (parts.length >= 1) {
-                countries.add(parts[parts.length - 1]);
+            
+            const text = event.locationText;
+            const textLower = text.toLowerCase();
+            
+            // Identify Country
+            const foundCountry = KNOWN_COUNTRIES.find(c => textLower.includes(c.toLowerCase()));
+            if (foundCountry) {
+                countries.add(foundCountry);
+            } else {
+                // Fallback to Philippines for local events without explicit country in string
+                countries.add('Philippines');
+            }
+
+            // Identify City / Municipality
+            // Remove the country from the parts if it was explicitly written at the end
+            let parts = text.split(',').map(p => p.trim()).filter(p => p.length > 0);
+            if (foundCountry && parts.length > 0 && parts[parts.length - 1].toLowerCase() === foundCountry.toLowerCase()) {
+                parts.pop(); 
+            }
+
+            if (parts.length > 0) {
+                // In a typical PH address (e.g. Ayala Malls, Kawit, Cavite)
+                // The last part is Province, the second to last is Municipality/City
                 if (parts.length >= 3) {
-                    cities.add(parts[parts.length - 3]);
+                    // E.g. [Building, Barangay, Municipality, Province] -> Municipality is second to last
+                    cities.add(parts[parts.length - 2]);
                 } else if (parts.length === 2) {
+                    // E.g. [Building, Municipality] OR [Municipality, Province] -> use first part
+                    cities.add(parts[0]);
+                } else {
+                    // Just 1 part
                     cities.add(parts[0]);
                 }
             }
         });
 
+        // Clean up cities array to remove anything obviously wrong
+        const cleanCities = Array.from(cities).filter(c => c.length > 2 && c.length < 50).sort();
+
         return res.json({
-            cities: Array.from(cities).sort(),
+            cities: cleanCities,
             countries: Array.from(countries).sort()
         });
     } catch (err) {

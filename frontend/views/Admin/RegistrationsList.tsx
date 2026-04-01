@@ -364,9 +364,7 @@ export const RegistrationsList: React.FC = () => {
     setCurrentPage(1);
   }, [debouncedSearch, eventId]);
 
-  if (loading) {
-    return <PageLoader label="Loading attendees..." variant="section" />;
-  }
+  if (loading) return <PageLoader variant="page" label="Loading Attendees..." />;
 
   return (
     <div className="pb-16 space-y-6">

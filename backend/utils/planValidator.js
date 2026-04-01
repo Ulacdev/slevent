@@ -229,12 +229,12 @@ export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 
                 const totalStaffPotential = currentCount + (inviteCount || 0);
                 const limitValue = (limits.max_staff_accounts ?? 2);
 
-                if (totalStaffPotential >= limitValue) {
+                if (currentCount >= limitValue) {
                     return {
                         allowed: false,
-                        message: `Staff account limit reached. Your current plan allows up to ${limitValue} staff accounts (including pending invites).`,
+                        message: `Staff account limit reached. Your current plan allows up to ${limitValue} staff accounts.`,
                         limit: limitValue,
-                        current: totalStaffPotential
+                        current: currentCount
                     };
                 }
                 break;

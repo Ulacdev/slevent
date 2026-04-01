@@ -280,7 +280,7 @@ export const SupportTickets: React.FC = () => {
     return <p className="text-sm font-medium whitespace-pre-wrap leading-relaxed">{message}</p>;
   };
 
-  if (loading) return <PageLoader label="Loading support messages..." />;
+  if (loading) return <PageLoader variant="page" label="Loading Support Hub..." />;
 
   const getStatusBadge = (ticket: any) => {
     const isResolved = ticket.metadata?.status === 'resolved' || ticket.is_read;

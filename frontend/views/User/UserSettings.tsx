@@ -13,32 +13,32 @@ const tabItems: Array<{
   label: string;
   description: string;
 }> = [
-  {
-    id: 'organizer',
-    label: 'Org Profile',
-    description: 'Brand, socials, and event page defaults',
-  },
-  {
-    id: 'team',
-    label: 'Team & Access',
-    description: 'Invite members and manage permissions',
-  },
-  {
-    id: 'email',
-    label: 'Email Settings',
-    description: 'Professional SMTP server configuration',
-  },
-  {
-    id: 'payments',
-    label: 'Payment Gateway',
-    description: 'HitPay credentials and payout routing',
-  },
-  {
-    id: 'account',
-    label: 'Account',
-    description: 'Name, avatar, and login preferences',
-  },
-];
+    {
+      id: 'organizer',
+      label: 'Org Profile',
+      description: 'Brand, socials, and event page defaults',
+    },
+    {
+      id: 'team',
+      label: 'Team & Access',
+      description: 'Invite members and manage permissions',
+    },
+    {
+      id: 'email',
+      label: 'Email Settings',
+      description: 'Professional SMTP server configuration',
+    },
+    {
+      id: 'payments',
+      label: 'Payment Gateway',
+      description: 'HitPay credentials and payout routing',
+    },
+    {
+      id: 'account',
+      label: 'Account',
+      description: 'Name, avatar, and login preferences',
+    },
+  ];
 
 const normalizeTab = (value: string | null): SettingsTab => {
   if (value === 'email') return 'email';

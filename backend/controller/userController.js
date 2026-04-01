@@ -298,13 +298,18 @@ export const whoAmI = async (req, res) => {
 
     // If organizer, fetch onboarding status
     let isOnboarded = false;
+    let employerLogoUrl = null;
+    let employerName = null;
+
     if (role === 'ORGANIZER') {
       const { data: orgData } = await db
         .from('organizers')
-        .select('isOnboarded, organizerName')
+        .select('isOnboarded, organizerName, profileImageUrl')
         .eq('ownerUserId', data.userId || data.id)
         .maybeSingle();
       isOnboarded = !!orgData?.isOnboarded;
+      employerLogoUrl = orgData?.profileImageUrl || null;
+      employerName = orgData?.organizerName || null;
       
       // 🔥 Fallback: If user name is missing but organizer name exists, sync it
       if (!data.name && orgData?.organizerName) {
@@ -315,7 +320,7 @@ export const whoAmI = async (req, res) => {
     }
 
     // Normalize response with permissive defaults for staff unless explicitly false
-    return res.json({
+    const result = {
       userId: data.userId || data.id,
       name: data.name,
       email: data.email,
@@ -326,7 +331,43 @@ export const whoAmI = async (req, res) => {
       canEditEvents: data.caneditevents === undefined || data.caneditevents === null ? defaultStaff : !!data.caneditevents,
       canManualCheckIn: data.canmanualcheckin === undefined || data.canmanualcheckin === null ? defaultStaff : !!data.canmanualcheckin,
       canReceiveNotifications: data.canreceivenotifications === undefined || data.canreceivenotifications === null ? defaultStaff : !!data.canreceivenotifications,
-    });
+      employerId: data.employerId || data.employerid || null,
+      employerLogoUrl: employerLogoUrl || null,
+      employerName: employerName || null,
+    };
+
+    if (role === 'STAFF') {
+      let empId = String(data.employerId || data.employerid || '').trim();
+      
+      // AUTO-HEALING: If employerId is missing for STAFF, try to deduce it from invitations or activity
+      if (!empId) {
+        try {
+          const { data: recentInvite } = await db.from('invites').select('invitedBy').eq('email', data.email?.toLowerCase().trim()).maybeSingle();
+          if (recentInvite?.invitedBy) empId = recentInvite.invitedBy;
+        } catch (e) { /* ignore */ }
+      }
+
+      if (empId) {
+        // Ultimate resilient lookup: Try ownerUserId, organizerId, AND then name coincidence if all fails
+        let { data: orgData } = await db.from('organizers').select('profileImageUrl, organizerName').eq('ownerUserId', empId).maybeSingle();
+        if (!orgData) {
+          const { data: orgData2 } = await db.from('organizers').select('profileImageUrl, organizerName').eq('organizerId', empId).maybeSingle();
+          orgData = orgData2;
+        }
+        
+        if (orgData) {
+          result.employerLogoUrl = orgData.profileImageUrl;
+          result.employerName = orgData.organizerName;
+          
+          // Persistence: Heal the user record if it was missing the employerId
+          if (!data.employerId && result.userId) {
+            await db.from('users').update({ employerId: empId }).eq('userId', result.userId);
+          }
+        }
+      }
+    }
+
+    return res.json(result);
 
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -404,10 +445,12 @@ export const getAllUsers = async (req, res) => {
 
     let filtered = Array.isArray(data) ? data : [];
 
+    const organizationOwnerId = requesterRole === 'ORGANIZER' ? requesterId : (await db.from('users').select('employerId').eq('userId', requesterId).maybeSingle()).data?.employerId || requesterId;
+
     if (shouldScopeToRequesterTeam) {
       filtered = filtered.filter((user) => {
         const employerId = user?.employerId || user?.employerid || null;
-        return isRequesterRecord(user) || String(employerId || '') === String(requesterId || '');
+        return isRequesterRecord(user) || String(employerId || '') === String(organizationOwnerId || '');
       });
     }
 

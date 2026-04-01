@@ -78,7 +78,7 @@ export const OrganizerDashboard: React.FC = () => {
         fetchDashboardData();
     }, []);
 
-    if (loading) return <PageLoader label="Loading Analytics..." variant="page" />;
+    if (loading) return <PageLoader variant="page" label="Loading Organizer Dashboard..." />;
 
     return (
         <div className="space-y-10 max-w-7xl mx-auto pt-4 px-2 font-sans">

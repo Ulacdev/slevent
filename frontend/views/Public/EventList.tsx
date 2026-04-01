@@ -7,7 +7,7 @@ import { Skeleton, EventCardSkeleton, OrganizerCardSkeleton } from '../../compon
 import { OrganizerCard } from '../../components/OrganizerCard';
 import { BrowseEventsNavigator, BrowseTabKey, ONLINE_LOCATION_VALUE } from '../../components/BrowseEventsNavigator';
 import { ICONS } from '../../constants';
-import { EVENT_CATEGORIES } from '../../utils/eventCategories';
+import { EVENT_CATEGORIES, getEventCategoryKeys, getCategoryByKey } from '../../utils/eventCategories';
 import { useUser } from '../../context/UserContext';
 import { useEngagement } from '../../context/EngagementContext';
 import { PricingSection } from '../../components/PricingSection';
@@ -16,6 +16,9 @@ import { DestinationSlider } from '../../components/DestinationSlider';
 
 const BRAND_LOGO_URL = 'https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg';
 
+// Track dismissals only for the current page session (resets on hard refresh)
+const sessionDismissed = new Set<string>();
+
 interface Announcement {
   id: string;
   title: string;
@@ -23,6 +26,9 @@ interface Announcement {
   type: 'INFO' | 'SUCCESS' | 'WARNING' | 'CRITICAL';
   target_audience: 'ALL' | 'ORGANIZERS' | 'ATTENDEES';
   created_at: string;
+  is_published: boolean;
+  scheduled_at?: string | null;
+  expires_at?: string | null;
 }
 
 // Helper to handle JSONB image format
@@ -145,6 +151,7 @@ interface EventCardProps {
   organizers?: OrganizerProfile[];
   isLanding?: boolean;
   listing?: string;
+  isRecommended?: boolean;
 }
 
 export const EventCard: React.FC<EventCardProps> = ({
@@ -153,49 +160,44 @@ export const EventCard: React.FC<EventCardProps> = ({
   trendingRank = null,
   organizers = [],
   isLanding = true,
-  listing = 'all'
+  listing = 'all',
+  isRecommended = false
 }) => {
   const navigate = useNavigate();
-  const { isAuthenticated, role } = useUser();
+  const { isAuthenticated, role, openAuthModal } = useUser();
   const {
     canLikeFollow,
     isAttendingView,
     isLiked,
     toggleLike
   } = useEngagement();
-  const [likeCount, setLikeCount] = useState<number>(Number(event.likesCount || 0));
-
-  useEffect(() => {
-    setLikeCount(Number(event.likesCount || 0));
-  }, [event.eventId, event.likesCount]);
 
   // Safe calculation for minPrice if ticketTypes exist
   const minPrice = event.ticketTypes?.length
     ? Math.min(...event.ticketTypes.map(t => t.priceAmount))
     : 0;
 
-  const organizerId = event.organizerId || event.organizer?.organizerId || '';
+  // Date Badge, Completion and Timing
+  const now = new Date();
+  const eventStart = event.startAt ? new Date(event.startAt) : null;
+  const eventEnd = event.endAt ? new Date(event.endAt) : (eventStart ? new Date(eventStart.getTime() + 2 * 60 * 60 * 1000) : null);
+  const isDone = eventEnd && now > eventEnd;
+  const eventDate = eventStart || new Date();
+  const month = eventDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+  const day = eventDate.getDate();
 
-  // Lookup correct organizer profile from global list if missing on event object
-  const resolvedOrganizer = useMemo(() => {
-    return event.organizer || organizers.find(o => o.organizerId === organizerId);
-  }, [event.organizer, organizers, organizerId]);
-
-  const organizerName = resolvedOrganizer?.organizerName || 'Organization';
   const liked = isLiked(event.eventId);
+  // Trending for top liked events, regardless of landing page.
+  const isTrending = trendingRank && (listing === 'all');
   const organizerRestricted = isAuthenticated && role === UserRole.ORGANIZER && !isAttendingView;
 
-  // Registration window label
-  const now = new Date();
-  const regOpen = event.regOpenAt ? new Date(event.regOpenAt) : null;
-  const regClose = event.regCloseAt ? new Date(event.regCloseAt) : null;
-  const regLabel = regOpen && now < regOpen
-    ? `Opens ${formatDate(regOpen.toISOString(), event.timezone, { year: 'numeric', month: 'short', day: 'numeric' })}`
-    : regClose
-      ? `Closes ${formatDate(regClose.toISOString(), event.timezone, { year: 'numeric', month: 'short', day: 'numeric' })}`
-      : '';
-
-  const gotoSignup = () => navigate('/signup');
+  const gotoSignup = () => {
+    if (openAuthModal) {
+      openAuthModal('signup');
+    } else {
+      navigate('/signup'); // fallback
+    }
+  };
 
   const handleLike = async (eventClick: React.MouseEvent<HTMLButtonElement>) => {
     eventClick.stopPropagation();
@@ -208,10 +210,7 @@ export const EventCard: React.FC<EventCardProps> = ({
       return;
     }
     try {
-      const nextLiked = await toggleLike(event.eventId);
-      setLikeCount((prev) => (
-        nextLiked ? prev + 1 : Math.max(0, prev - 1)
-      ));
+      await toggleLike(event.eventId);
     } catch (error) {
       const message = error instanceof Error && error.message
         ? error.message
@@ -248,176 +247,131 @@ export const EventCard: React.FC<EventCardProps> = ({
     }
   };
 
-  const likeLabel = liked
-    ? (likeCount <= 1
-      ? 'You liked this'
-      : `You and ${formatCompactCount(likeCount - 1)} others`)
-    : `${formatCompactCount(likeCount)} likes`;
+  // Category Badge (Dynamic)
+  const categoryKeys = getEventCategoryKeys(event);
+  const rawFirstCategory = (event as any).category || categoryKeys[0];
+  const categoryObject = getCategoryByKey(rawFirstCategory as string) || EVENT_CATEGORIES.find(c => c.label === rawFirstCategory) || EVENT_CATEGORIES.find(c => c.key === 'BUSINESS');
+  const categoryLabel = categoryObject?.label || (typeof rawFirstCategory === 'string' ? rawFirstCategory : 'Networking');
+  const CategoryIcon = categoryObject?.Icon;
 
-  // Completion calculation
-  const eventStart = event.startAt ? new Date(event.startAt) : null;
-  const eventEnd = event.endAt ? new Date(event.endAt) : (eventStart ? new Date(eventStart.getTime() + 2 * 60 * 60 * 1000) : null);
-  const isDone = eventEnd && now > eventEnd;
+  const formatTimeRange = (start: string, end?: string, timezone?: string) => {
+    if (!start) return '';
+    const startTime = formatTime(start, timezone);
+    if (!end) return startTime;
+    const endTime = formatTime(end, timezone);
+    return `${startTime} - ${endTime}`;
+  };
 
-  // Branding Restriction for Trending Landing Cards
-  const isTrendingLanding = isLanding && listing === 'all';
   return (
     <Card
-      className={`group flex flex-col h-full border rounded-3xl overflow-hidden bg-[#F2F2F2] transition-all duration-500 cursor-pointer 
-        ${(event.isPromoted || (event as any).is_promoted)
-          ? 'border-[#38BDF2]/40 shadow-[0_20px_50px_rgba(56,189,242,0.12)] scale-[1.01] ring-1 ring-[#38BDF2]/20'
-          : 'border-black/10 hover:border-[#38BDF2]/30 shadow-sm'} 
-        hover:shadow-2xl hover:scale-[1.02]`}
+      className={`group relative flex flex-col h-full border ${isTrending ? 'border-[#38BDF2] ring-1 ring-[#38BDF2]' : 'border-black/5'} rounded-[5px] bg-[#F2F2F2] transition-all duration-500 cursor-pointer hover:shadow-xl hover:translate-y-[-4px]`}
       onClick={() => navigate(`/events/${event.slug || event.eventId}`)}
     >
-      {/* Image Section - Keep phone-like proportions through tablet widths */}
-      <div className="relative h-40 sm:h-48 lg:h-64 overflow-hidden">
+      {/* Image Section */}
+      <div className="relative h-44 sm:h-52 overflow-hidden rounded-t-[5px]">
+        {/* Trending Tag Overlay */}
+        {isTrending && (
+          <div className="absolute bottom-4 left-4 z-30">
+            <div
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2 bg-[#38BDF2] text-white text-[11px] font-black uppercase tracking-[0.12em] shadow-xl border border-white/20 transition-all hover:scale-110 active:scale-95 whitespace-nowrap"
+            >
+              <ICONS.Star className="w-3.5 h-3.5 fill-current text-white" />
+              #{trendingRank} Trending
+            </div>
+          </div>
+        )}
         {event.imageUrl ? (
           <img
             src={getImageUrl(event.imageUrl)}
             alt={event.eventName}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center p-12 bg-gradient-to-br from-[#38BDF2] to-black">
-            <img
-              src={BRAND_LOGO_URL}
-              alt="StartupLab"
-              className="w-24 h-24 object-contain opacity-40 brightness-0 invert drop-shadow-2xl"
-            />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+            <img src={BRAND_LOGO_URL} alt="StartupLab" className="w-16 h-16 opacity-20 grayscale" />
           </div>
         )}
-        {/* Top Left: Badges */}
-        <div className="absolute top-6 left-6 sm:left-7 z-10">
-          {trendingRank && (isLanding && listing === 'all') ? (
-            <div
-              className="inline-flex items-center rounded-full px-3.5 py-1.5 bg-[#38BDF2] text-white text-[10px] font-bold uppercase tracking-[0.15em] shadow-lg shadow-black/10 transition-transform active:scale-95"
-            >
-              #{trendingRank} Trending
-            </div>
-          ) : (event.isPromoted || (event as any).is_promoted) ? (
-            <div className="group/promoted relative">
-              <div
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-[#38BDF2] animate-in fade-in zoom-in duration-700 cursor-help shadow-lg shadow-[#38BDF2]/20"
-              >
-                <ICONS.Info className="w-3.5 h-3.5 text-white" strokeWidth={5} />
-                <span className="text-[10px] font-black uppercase tracking-[0.1em] text-white">
-                  Promoted
-                </span>
-              </div>
-              <div className="absolute left-0 top-full mt-4 w-72 p-6 bg-black text-white text-[11px] font-bold rounded-3xl shadow-2xl opacity-0 translate-y-3 pointer-events-none group-hover/promoted:opacity-100 group-hover/promoted:translate-y-0 transition-all z-50 leading-relaxed ring-1 ring-white/10 backdrop-blur-xl">
-                <div className="flex items-center gap-2 mb-3 text-[#38BDF2]">
-                  <ICONS.Zap className="w-5 h-5" />
-                  <span className="uppercase tracking-[0.3em] font-black text-[10px]">Platform Highlight</span>
-                </div>
-                This event is highlighted by the organizer as a premium featured session on StartupLab for max visibility and engagement.
-                <div className="absolute bottom-full left-6 border-8 border-transparent border-b-black"></div>
-              </div>
-            </div>
-          ) : trendingRank ? (
-            <div
-              className="inline-flex items-center rounded-full px-3.5 py-1.5 bg-[#38BDF2] text-white text-[10px] font-bold uppercase tracking-[0.15em] shadow-lg shadow-black/10 transition-transform active:scale-95"
-            >
-              #{trendingRank} Trending
-            </div>
-          ) : null}
+
+        {/* Date Badge Overlay */}
+        <div className="absolute top-3 left-3 z-20 flex flex-col items-center justify-center bg-[#38BDF2] text-white rounded-md py-1.5 px-3 min-w-[54px] shadow-lg">
+          <span className="text-[10px] font-bold tracking-widest text-white/90">{month}</span>
+          <span className="text-xl font-bold leading-none mt-0.5">{day}</span>
         </div>
-        <div className="absolute top-3 right-3 flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity pointer-events-none">
+
+        {/* Actions Overlay (Hidden initially, visible on hover) */}
+        <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button
             type="button"
             onClick={handleLike}
-            className={`pointer-events-auto w-10 h-10 sm:w-9 sm:h-9 rounded-xl border backdrop-blur-sm flex items-center justify-center transition-colors active:scale-95 ${liked
-              ? 'bg-[#38BDF2] text-white border-[#38BDF2]'
-              : 'bg-white/90 text-black border-black/20 hover:bg-[#38BDF2]/20'
-              }`}
-            title={organizerRestricted ? 'Switch to Attending to like events' : 'Like event'}
-            aria-label={liked ? 'Unlike event' : 'Like event'}
+            className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center transition-all ${liked ? 'bg-[#38BDF2] text-white' : 'bg-white/80 text-black hover:bg-white'}`}
           >
-            <ICONS.Heart className="w-4 h-4" />
+            <ICONS.Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
           </button>
           <button
             type="button"
             onClick={handleShare}
-            className={`pointer-events-auto w-10 h-10 sm:w-9 sm:h-9 rounded-xl border bg-white/90 text-black border-black/20 backdrop-blur-sm flex items-center justify-center ${isTrendingLanding ? 'hover:bg-black/10' : 'hover:bg-[#38BDF2]/20'} transition-colors active:scale-95`}
-            title="Share event"
-            aria-label="Share event"
+            className="w-9 h-9 rounded-full bg-white/80 backdrop-blur-md text-black flex items-center justify-center hover:bg-white transition-all"
           >
             <ICONS.Download className="w-4 h-4" />
           </button>
         </div>
       </div>
+
       {/* Content Section */}
-      <div className="p-4 sm:p-5 flex-1 flex flex-col">
-
-
-        {/* Organizer Profile Summary */}
-        {/* Organizer info removed as requested */}
-
-        <h4 className="text-black text-xl sm:text-2xl font-black tracking-tighter leading-tight mb-3 line-clamp-2">
+      <div className="p-5 flex-1 flex flex-col">
+        <h4 className="text-[#1A1A1A] text-lg sm:text-xl font-black leading-tight mb-3 line-clamp-2 order-1">
           {event.eventName}
         </h4>
-        {/* Core Info - 4 Symmetrical Points (Following Location Style) */}
-        <div className="flex flex-col gap-2.5 text-[17px] font-normal text-black mt-2 mb-5">
-          {/* 1. Likes */}
-          <div className="flex items-center gap-3">
-             <div className="w-8 shrink-0 flex items-center justify-center">
-               <ICONS.Heart className={`w-4.5 h-4.5 ${liked ? 'fill-[#38BDF2] text-[#38BDF2]' : 'text-black'}`} />
-             </div>
-             <span>{likeLabel}</span>
+
+        {/* Decorative Separator Line */}
+        <div className="order-2 flex items-center mb-4 -mx-5">
+          <div className="flex-1 border-t border-black/10" />
+          <div className="w-2 h-2 rounded-full border-2 border-black/10 bg-[#F2F2F2] -mr-1 z-10" />
+          <div className="w-5" />
+        </div>
+
+        <div className="flex flex-col gap-2 mb-4 order-3 text-[#4A4A4A]">
+          {/* Location */}
+          <div className="flex items-start gap-2.5">
+            <ICONS.MapPin className="w-[18px] h-[18px] shrink-0 mt-0.5 text-black/60" />
+            <span className="text-[18px] leading-tight line-clamp-1">{event.locationText}</span>
           </div>
 
-          {/* 2. Registered */}
-          <div className="flex items-center gap-3">
-            <div className="w-8 shrink-0 flex items-center justify-center">
-              <ICONS.Users className="w-4.5 h-4.5 text-black" />
-            </div>
-            <span className="text-[#38BDF2] truncate">
-              {(event as any).attendeeCount || 0} Registered
+          {/* Time */}
+          <div className="flex items-start gap-2.5">
+            <ICONS.Clock className="w-[18px] h-[18px] shrink-0 mt-0.5 text-black/60" />
+            <span className="text-[18px] leading-tight">
+              {formatTimeRange(event.startAt, event.endAt, event.timezone)}
             </span>
           </div>
 
-          {/* 3. Location */}
-          <div className="flex items-center gap-3">
-            <div className="w-8 shrink-0 flex items-center justify-center">
-              <ICONS.MapPin className="w-4.5 h-4.5 text-black" />
-            </div>
-            <span className="truncate">{event.locationText}</span>
-          </div>
-
-          {/* 4. Date & Time */}
-          <div className="flex items-center gap-3">
-            <div className="w-8 shrink-0 flex items-center justify-center">
-              <ICONS.Calendar className="w-4.5 h-4.5 text-black" />
-            </div>
-            <span className="truncate">{formatDate(event.startAt, event.timezone, { day: 'numeric', month: 'short', year: 'numeric' })} · {formatTime(event.startAt, event.timezone)}</span>
+          {/* Likes / Engagement matching opacity of other rows */}
+          <div className="flex items-start gap-2.5">
+            <ICONS.Heart className="w-[18px] h-[18px] shrink-0 mt-0.5 text-black/60" />
+            <span className="text-[18px] leading-tight">
+              {formatCompactCount(event.likesCount || 0)} Likes
+            </span>
           </div>
         </div>
 
-        {/* Price / Fee section */}
-        <div className="mt-auto w-full">
-          <div className="h-[1px] w-full bg-black/10 invisible group-hover:visible group-hover:opacity-100 transition-all duration-300" />
-          {isDone ? (
-            <div className="pt-5 flex flex-col items-start">
-              <p className="text-[10px] sm:text-[12px] font-bold text-black uppercase tracking-[0.2em] mb-1">Status</p>
-              <p className="text-lg sm:text-xl font-bold text-black">Event Ended</p>
+        {/* Footer */}
+        <div className="mt-auto flex items-center justify-between order-3 pt-3">
+          <div className="flex items-center gap-4">
+            <div className="px-3 py-1 bg-[#38BDF2] text-white text-[11px] font-black uppercase tracking-wider rounded-md shadow-sm border border-[#38BDF2]/20 shadow-md flex items-center gap-1.5 transition-all">
+              {CategoryIcon && <CategoryIcon className="w-4 h-4" />}
+              {categoryLabel}
             </div>
-          ) : (
-            <div className="pt-5 flex flex-col items-start">
-              <p className="text-[10px] sm:text-[12px] font-bold text-black uppercase tracking-[0.2em] mb-1">Tickets From</p>
-              <p className="text-lg sm:text-xl font-bold text-black">
-                {minPrice > 0
-                  ? `₱${minPrice.toLocaleString()}`
-                  : (event.ticketTypes && event.ticketTypes.length > 0) || (minPrice === 0 && event.ticketTypes?.length)
-                    ? 'Free'
-                    : 'TBA'}
-              </p>
-            </div>
-          )}
+          </div>
+          <div className="text-base sm:text-lg font-black text-[#1A1A1A]">
+            {isDone ? (
+              <span className="text-sm text-gray-400 uppercase tracking-wider">Ended</span>
+            ) : (
+              minPrice > 0 ? `₱${minPrice.toLocaleString()}` : 'Free'
+            )}
+          </div>
         </div>
-
-
       </div>
-    </Card >
+    </Card>
   );
 };
 
@@ -472,14 +426,14 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
   const categoriesScrollRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
-  const startXRef = useRef(0);
-  const scrollLeftRef = useRef(0);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!categoriesScrollRef.current) return;
     isDraggingRef.current = true;
-    startXRef.current = e.pageX - categoriesScrollRef.current.offsetLeft;
-    scrollLeftRef.current = categoriesScrollRef.current.scrollLeft;
+    setStartX(e.pageX - categoriesScrollRef.current.offsetLeft);
+    setScrollLeft(categoriesScrollRef.current.scrollLeft);
     setIsMarqueePaused(true);
   };
 
@@ -487,8 +441,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
     if (!isDraggingRef.current || !categoriesScrollRef.current) return;
     e.preventDefault();
     const x = e.pageX - categoriesScrollRef.current.offsetLeft;
-    const walk = (x - startXRef.current) * 1.5;
-    categoriesScrollRef.current.scrollLeft = scrollLeftRef.current - walk;
+    const walk = (x - startX) * 1.5;
+    categoriesScrollRef.current.scrollLeft = scrollLeft - walk;
   };
 
   const handleMouseUpOrLeave = () => {
@@ -498,20 +452,28 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
   useEffect(() => {
     if (!isLanding) return;
-    let animationFrameId: number;
+    
+    let frameId: number;
     const step = () => {
-      if (categoriesScrollRef.current && !isMarqueePaused) {
+      if (categoriesScrollRef.current && !isMarqueePaused && !isDraggingRef.current) {
         const el = categoriesScrollRef.current;
-        if (el.scrollLeft >= (el.scrollWidth / 2)) {
+        el.scrollLeft += 0.8;
+        
+        // Reset to middle for infinite effect (categories are duplicated)
+        if (el.scrollLeft >= el.scrollHeight) {
+           // Basic check, better one is half width
+        }
+        
+        const half = el.scrollWidth / 2;
+        if (el.scrollLeft >= half) {
           el.scrollLeft = 0;
-        } else {
-          el.scrollLeft += 0.5;
         }
       }
-      animationFrameId = requestAnimationFrame(step);
+      frameId = requestAnimationFrame(step);
     };
-    animationFrameId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(animationFrameId);
+    
+    frameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frameId);
   }, [isLanding, isMarqueePaused]);
 
   const likedSet = useMemo(() => new Set(likedEventIds), [likedEventIds]);
@@ -705,18 +667,28 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
     const fetchLatestAnnouncement = async () => {
       try {
-        const res = await apiService._fetch(`${import.meta.env.VITE_API_BASE}/api/announcements`, {
+        const target = role === UserRole.ORGANIZER ? 'ORGANIZERS' : (role === UserRole.ATTENDEE ? 'ATTENDEES' : 'ALL');
+        const res = await apiService._fetch(`${import.meta.env.VITE_API_BASE}/api/announcements?public=true&target=${target}`, {
           credentials: 'include'
         });
         if (res.ok) {
           const data = await res.json();
-          // Find the latest published announcement for this user type
-          const published = data.filter((a: any) => a.is_published);
-          if (published.length > 0) {
-            const latest = published[0];
-            const dismissed = localStorage.getItem(`announcement_dismissed_${latest.id}`);
-            if (!dismissed) {
-              setActiveAnnouncement(latest);
+          const now = new Date();
+          
+          // Granular filtering on frontend to guarantee correctness
+          const validAnnouncements = (data || []).filter((ann: Announcement) => {
+            const isPub = ann.is_published !== false;
+            const isSched = !ann.scheduled_at || new Date(ann.scheduled_at) <= now;
+            const isNotExp = !ann.expires_at || new Date(ann.expires_at) > now;
+            return isPub && isSched && isNotExp;
+          });
+
+          if (validAnnouncements.length > 0) {
+            // Find the first valid announcement that hasn't been seen in this session
+            const firstUnseen = validAnnouncements.find(ann => !sessionDismissed.has(ann.id));
+
+            if (firstUnseen) {
+              setActiveAnnouncement(firstUnseen);
               // Small delay for better UX
               setTimeout(() => setShowAnnouncement(true), 1500);
             }
@@ -727,11 +699,13 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
       }
     };
     fetchLatestAnnouncement();
-  }, [isLanding]);
+  }, [isLanding, role]);
 
+  // Announcement dismissal handler
   const dismissAnnouncement = () => {
-    if (activeAnnouncement && dontShowAgain) {
-      localStorage.setItem(`announcement_dismissed_${activeAnnouncement.id}`, 'true');
+    if (activeAnnouncement) {
+      // Mark as dismissed for THIS session only (will show again on F5)
+      sessionDismissed.add(activeAnnouncement.id);
     }
     setShowAnnouncement(false);
   };
@@ -1159,24 +1133,17 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 <h2 className="text-[16px] font-black tracking-tight text-black">Event smart categories</h2>
               </div>
               <div
-                className="py-2 relative group-categories outline-none cursor-grab active:cursor-grabbing select-none"
+                className="py-2 relative overflow-hidden outline-none cursor-grab active:cursor-grabbing select-none"
                 tabIndex={0}
                 onMouseEnter={() => setIsMarqueePaused(true)}
                 onMouseLeave={handleMouseUpOrLeave}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUpOrLeave}
-                onKeyDown={(e) => {
-                  if (e.key === 'ArrowLeft') {
-                    categoriesScrollRef.current?.scrollBy({ left: -200, behavior: 'smooth' });
-                  } else if (e.key === 'ArrowRight') {
-                    categoriesScrollRef.current?.scrollBy({ left: 200, behavior: 'smooth' });
-                  }
-                }}
               >
                 <div
                   ref={categoriesScrollRef}
-                  className="flex items-center gap-6 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                  className="flex items-center gap-6 overflow-x-hidden whitespace-nowrap"
                 >
                   {[...categories, ...categories].map((category, index) => (
                     <button
@@ -1437,13 +1404,13 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 setActiveBrowseTab('ALL');
               }}
               isLoading={isFetching}
-              className="mt-0 mb-8 mx-0"
+              className="mt-0 mb-5 mx-0"
             />
           </div>
 
-          <div id="marketplace-results-grid" className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pt-8 mb-6 pb-0 px-0 scroll-mt-24">
+          <div id="marketplace-results-grid" className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-2 mb-6 pb-0 px-0 scroll-mt-24">
             <div className="flex-1 space-y-1.5">
-              <h2 className="text-2xl md:text-3xl font-black text-black tracking-tight leading-none uppercase">
+              <h2 className="text-2xl md:text-3xl font-black text-black tracking-tight leading-none">
                 {selectedLocation === DEFAULT_LOCATION ? 'Global Trending Events' : `Trending in ${selectedLocation}`}
               </h2>
               <p className="text-black text-xs md:text-sm font-medium leading-relaxed">
@@ -1451,6 +1418,21 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   ? 'The most liked and anticipated sessions happening now world-wide.'
                   : `Top rated sessions happening across ${selectedLocation}.`}
               </p>
+            </div>
+
+            <div className="w-full md:w-[320px] shrink-0">
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-black group-focus-within:text-[#38BDF2] transition-colors">
+                  <ICONS.Search className="h-4 w-4" strokeWidth={3} />
+                </div>
+                <input
+                  type="text"
+                  placeholder={`Search in ${selectedLocation}...`}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="block w-full pl-10 pr-9 py-3 bg-[#F2F2F2] border border-[#D1D5DB] rounded-xl text-[12px] font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-black"
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -1462,7 +1444,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
         </div>
       )}
 
-      <div className={`flex flex-col sm:flex-row items-center justify-between gap-6 px-0 ${isLanding ? 'mb-6 mt-0 !justify-start' : 'mb-8 mt-2'}`}>
+      <div className={`flex flex-col sm:flex-row items-center justify-between gap-6 px-0 ${isLanding ? 'hidden' : 'mb-8 mt-2'}`}>
         {!isLanding && !isSpecialListing && (
           <div className="flex items-center gap-4 w-full sm:w-auto">
             <button
@@ -1640,7 +1622,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 <h3 className="text-xl font-black text-black tracking-tight uppercase">Most Liked in {selectedLocation}</h3>
                 <div className="h-px bg-black/5 flex-1" />
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 pt-10">
                 {displayEvents.slice(0, 3).map((event) => (
                   <EventCard
                     key={`featured-${event.eventId}`}
@@ -1661,7 +1643,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                     <h3 className="text-xl font-black text-black tracking-tight uppercase">Other Events</h3>
                     <div className="h-px bg-black/5 flex-1" />
                   </div>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 pt-10">
                     {displayEvents.slice(3).map((event) => (
                       <EventCard
                         key={`other-${event.eventId}`}
@@ -1674,23 +1656,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                       />
                     ))}
                   </div>
-
-                  {/* Explore Button for Discovery Mode */}
-                  <div className="flex justify-center mt-16 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-                    <button
-                      onClick={() => {
-                        setSearchTerm('');
-                        setSelectedLocation(DEFAULT_LOCATION);
-                        setActiveBrowseTab('ALL');
-                        navigate('/browse-events');
-                      }}
-                      className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 bg-[#38BDF2] rounded-2xl text-[13px] font-black uppercase tracking-widest text-[#F2F2F2] hover:bg-black transition-all active:scale-95 shadow-[0_20px_50px_rgba(56,189,242,0.25)] hover:shadow-black/20"
-                    >
-                      Explore All Events
-                      <ICONS.ArrowRight className="w-5 h-5" />
-                    </button>
-                  </div>
                 </div>
+
               )}
             </div>
           )}
@@ -1698,12 +1665,12 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           {/* Standard Grid Display (Fallbacks) */}
           {((isLanding || selectedLocation === DEFAULT_LOCATION) || loading) && (
             <>
-              <div className={`grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8 ${displayEvents.length > 0 ? 'min-h-[400px]' : 'min-h-0'}`}>
+              <div className={`grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8 pt-10 ${displayEvents.length > 0 ? 'min-h-[400px]' : 'min-h-0'}`}>
                 {loading ? (
                   Array.from({ length: isLandingAllListing ? 3 : 6 }).map((_, idx) => (
                     <EventCardSkeleton key={idx} />
                   ))
-                ) : displayEvents.map((event) => (
+                ) : displayEvents.map((event, idx) => (
                   <div key={event.eventId} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <EventCard
                       event={event}
@@ -1712,6 +1679,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                       organizers={organizers}
                       isLanding={isLanding}
                       listing={listing}
+                      isRecommended={isLandingAllListing && idx === 1}
                     />
                   </div>
                 ))}
@@ -1797,9 +1765,9 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
         <div className="relative overflow-hidden rounded-3xl bg-white shadow-2xl">
           {/* Accent Header */}
           <div className={`h-24 flex items-center justify-center ${activeAnnouncement?.type === 'INFO' ? 'bg-blue-500' :
-              activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-500' :
-                activeAnnouncement?.type === 'WARNING' ? 'bg-amber-500' :
-                  'bg-rose-500'
+            activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-500' :
+              activeAnnouncement?.type === 'WARNING' ? 'bg-amber-500' :
+                'bg-rose-500'
             } text-white shadow-lg relative`}>
             <div className="absolute top-4 right-4 z-50">
               <button
@@ -1815,15 +1783,22 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           <div className="p-8 text-center space-y-4">
             <div className="space-y-2">
               <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border ${activeAnnouncement?.type === 'INFO' ? 'bg-blue-50 text-blue-600 border-blue-200' :
-                  activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
-                    activeAnnouncement?.type === 'WARNING' ? 'bg-amber-50 text-amber-600 border-amber-200' :
-                      'bg-rose-50 text-rose-600 border-rose-200'
+                activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                  activeAnnouncement?.type === 'WARNING' ? 'bg-amber-50 text-amber-600 border-amber-200' :
+                    'bg-rose-50 text-rose-600 border-rose-200'
                 }`}>
                 {activeAnnouncement?.type} Announcement
               </span>
-              <h3 className="text-2xl font-black text-[#2E2E2F] leading-tight">
+              <h3 className="text-2xl font-black text-[#2E2E2F] leading-tight px-4">
                 {activeAnnouncement?.title}
               </h3>
+              
+              {/* Decorative Separator Line */}
+              <div className="flex items-center mt-6 -mx-8 ">
+                <div className="flex-1 border-t border-black/5" />
+                <div className="w-2.5 h-2.5 rounded-full border-2 border-black/5 bg-white -mr-1.5 z-10" />
+                <div className="w-8" />
+              </div>
             </div>
 
             <p className="text-[#2E2E2F]/70 text-sm leading-relaxed px-4 whitespace-pre-wrap">
@@ -1842,9 +1817,9 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               <Button
                 onClick={dismissAnnouncement}
                 className={`w-full py-4 rounded-xl font-black text-[11px] uppercase tracking-widest text-white shadow-xl transition-transform hover:scale-[1.02] active:scale-95 ${activeAnnouncement?.type === 'INFO' ? 'bg-blue-500 shadow-blue-500/20' :
-                    activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-500 shadow-emerald-500/20' :
-                      activeAnnouncement?.type === 'WARNING' ? 'bg-amber-500 shadow-amber-500/20' :
-                        'bg-rose-500 shadow-rose-500/20'
+                  activeAnnouncement?.type === 'SUCCESS' ? 'bg-emerald-500 shadow-emerald-500/20' :
+                    activeAnnouncement?.type === 'WARNING' ? 'bg-amber-500 shadow-amber-500/20' :
+                      'bg-rose-500 shadow-rose-500/20'
                   }`}
               >
                 Got it, Thanks!
@@ -1885,14 +1860,14 @@ const FAQSection: React.FC = () => {
   ];
 
   return (
-    <section className="mt-44 mb-44 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+    <section className="mt-20 mb-20 animate-in fade-in slide-in-from-bottom-10 duration-1000">
       <div className="text-center mb-16">
         <p className="text-xs font-bold text-[#38BDF2] mb-3 tracking-tight">Help & Support</p>
-        <h2 className="text-3xl md:text-4xl font-black text-black tracking-tight leading-none mb-4">
+        <h2 className="text-3xl md:text-3xl font-black text-black tracking-tight leading-none mb-4">
           Frequently Asked Questions
         </h2>
         <p className="text-black text-sm md:text-base font-medium max-w-2xl mx-auto leading-relaxed">
-          Quick guidance for the most common organizer and attendee workflows in StartupLab Ticketing.
+          Quick guidance for the most common organizer and attendee workflows.
         </p>
       </div>
       <div className="max-w-4xl mx-auto space-y-4">
@@ -1934,7 +1909,7 @@ const FAQSection: React.FC = () => {
       <div className="flex justify-center mt-16">
         <button
           onClick={() => navigate('/faq')}
-          className="flex items-center gap-3 px-10 py-4 bg-[#38BDF2] text-white rounded-xl text-[12px] font-black uppercase tracking-widest hover:bg-black transition-all active:scale-95 shadow-lg shadow-[#38BDF2]/20"
+          className="flex items-center gap-3 px-10 py-4 bg-[#38BDF2] text-white rounded-xl text-[13px] font-black uppercase tracking-widest hover:bg-black transition-all active:scale-95 shadow-lg shadow-[#38BDF2]/40 hover:scale-105"
         >
           Go to FAQ
           <ICONS.MessageSquare className="w-5 h-5" />

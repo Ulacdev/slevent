@@ -14,10 +14,13 @@ interface UserContextState {
   canManualCheckIn?: boolean;
   canReceiveNotifications?: boolean;
   isOnboarded?: boolean;
+  employerId?: string | null;
+  employerLogoUrl?: string | null;
+  employerName?: string | null;
 }
 
 interface UserContextValue extends UserContextState {
-  setUser: (payload: { userId: string; role: UserRole; email: string; name?: string | null; imageUrl?: string | null; canViewEvents?: boolean; canEditEvents?: boolean; canManualCheckIn?: boolean; canReceiveNotifications?: boolean; isOnboarded?: boolean }) => void;
+  setUser: (payload: { userId: string; role: UserRole; email: string; name?: string | null; imageUrl?: string | null; canViewEvents?: boolean; canEditEvents?: boolean; canManualCheckIn?: boolean; canReceiveNotifications?: boolean; isOnboarded?: boolean; employerId?: string | null; employerLogoUrl?: string | null; employerName?: string | null }) => void;
   clearUser: () => void;
   authModal: { isOpen: boolean; view: 'login' | 'signup' | 'forgot-password' };
   openAuthModal: (view?: 'login' | 'signup' | 'forgot-password') => void;
@@ -40,9 +43,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     canManualCheckIn: undefined,
     canReceiveNotifications: undefined,
     isOnboarded: undefined,
+    employerId: null,
+    employerLogoUrl: null,
+    employerName: null,
   });
 
-  const setUser = React.useCallback((payload: { userId: string; role: UserRole; email: string; name?: string | null; imageUrl?: string | null; canViewEvents?: boolean; canEditEvents?: boolean; canManualCheckIn?: boolean; canReceiveNotifications?: boolean; isOnboarded?: boolean }) => {
+  const setUser = React.useCallback((payload: { userId: string; role: UserRole; email: string; name?: string | null; imageUrl?: string | null; canViewEvents?: boolean; canEditEvents?: boolean; canManualCheckIn?: boolean; canReceiveNotifications?: boolean; isOnboarded?: boolean; employerId?: string | null; employerLogoUrl?: string | null; employerName?: string | null }) => {
     setState((prev) => {
       const next: UserContextState = {
         userId: payload.userId,
@@ -57,6 +63,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         canManualCheckIn: payload.canManualCheckIn !== undefined ? payload.canManualCheckIn : prev.canManualCheckIn,
         canReceiveNotifications: payload.canReceiveNotifications !== undefined ? payload.canReceiveNotifications : prev.canReceiveNotifications,
         isOnboarded: payload.isOnboarded !== undefined ? payload.isOnboarded : prev.isOnboarded,
+        employerId: payload.employerId !== undefined ? payload.employerId : prev.employerId,
+        employerLogoUrl: payload.employerLogoUrl !== undefined ? payload.employerLogoUrl : prev.employerLogoUrl,
+        employerName: payload.employerName !== undefined ? payload.employerName : prev.employerName,
       };
 
       if (
@@ -71,7 +80,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         prev.canViewEvents === next.canViewEvents &&
         prev.canEditEvents === next.canEditEvents &&
         prev.canManualCheckIn === next.canManualCheckIn &&
-        prev.canReceiveNotifications === next.canReceiveNotifications
+        prev.canReceiveNotifications === next.canReceiveNotifications &&
+        prev.employerId === next.employerId &&
+        prev.employerLogoUrl === next.employerLogoUrl &&
+        prev.employerName === next.employerName
       ) {
         return prev;
       }
@@ -94,7 +106,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         canEditEvents: undefined,
         canManualCheckIn: undefined,
         canReceiveNotifications: undefined,
-        isOnboarded: undefined
+        isOnboarded: undefined,
+        employerId: null,
+        employerLogoUrl: null,
+        employerName: null,
       };
     });
   }, []);

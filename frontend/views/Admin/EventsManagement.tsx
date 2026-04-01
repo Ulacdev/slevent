@@ -152,7 +152,7 @@ export const EventsManagement: React.FC = () => {
     if (currentPage > totalPages) setCurrentPage(1);
   }, [currentPage, totalPages]);
 
-  if (loading) return <PageLoader label="Loading events..." variant="section" />;
+  if (loading) return <PageLoader variant="page" label="Loading Moderation Hub..." />;
 
   const formatDateForInput = (value: string) => {
     if (!value) return { date: '', time: '' };

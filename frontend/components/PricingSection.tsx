@@ -83,13 +83,7 @@ export const PricingSection: React.FC = () => {
                 )}
                 <div className="flex justify-center mt-12">
                     <button
-                        onClick={() => {
-                            if (!isAuthenticated) {
-                                openAuthModal('signup');
-                            } else {
-                                navigate('/pricing');
-                            }
-                        }}
+                        onClick={() => navigate('/pricing')}
                         className="flex items-center gap-3 px-8 py-3 bg-[#38BDF2] text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-[#2E2E2F] transition-all active:scale-95 shadow-md shadow-[#38BDF2]/15"
                     >
                         {isAuthenticated ? 'Plan Settings' : 'Start now'}

@@ -315,7 +315,7 @@ export const login = async (req, res) => {
     }
 
     // --- SELF-HEALING: Ensure user and organizer profiles exist ---
-    const { data: dbUser } = await db.from('users').select('userId, role, status').eq('userId', user.id).maybeSingle();
+    const { data: dbUser } = await db.from('users').select('*').eq('userId', user.id).maybeSingle();
     let finalRole = dbUser?.role || ORGANIZER_ROLE;
 
     if (dbUser && dbUser.status === 'Inactive') {
@@ -362,16 +362,54 @@ export const login = async (req, res) => {
     // Log login
     await logAudit({ actionType: 'LOGIN', actorUserId: user.id, req });
 
-    return res.json({
+    const response = {
       message: "Logged in successfully",
       user: {
         userId: user.id,
         email: user.email,
         email_confirmed_at: user.email_confirmed_at,
         role: finalRole,
-        isOnboarded: isOnboarded
+        isOnboarded: isOnboarded,
+        canViewEvents: dbUser?.canviewevents !== undefined ? !!dbUser.canviewevents : true,
+        canEditEvents: dbUser?.caneditevents !== undefined ? !!dbUser.caneditevents : true,
+        canManualCheckIn: dbUser?.canmanualcheckin !== undefined ? !!dbUser.canmanualcheckin : true,
+        canReceiveNotifications: dbUser?.canreceivenotifications !== undefined ? !!dbUser.canreceivenotifications : true,
+        employerId: dbUser?.employerId || dbUser?.employerid || null,
+        employerIdRaw: dbUser?.employerId || dbUser?.employerid || null,
+        employerLogoUrl: null,
+        employerName: null,
       }
-    });
+    };
+
+    // If staff or organizer, pre-fetch branding assets for immediate UX display
+    let empId = String(dbUser?.employerId || dbUser?.employerid || (finalRole === 'ORGANIZER' ? user.id : null) || '').trim();
+    if (finalRole === 'STAFF' && !empId) {
+      // Heal: try to find from invitation if account is newly created or missing linkage
+      const { data: maybeInvite } = await supabase.from('invites').select('invitedBy').eq('email', user.email?.toLowerCase().trim()).maybeSingle();
+      if (maybeInvite?.invitedBy) empId = maybeInvite.invitedBy;
+    }
+
+    if ((finalRole === 'STAFF' || finalRole === 'ORGANIZER') && empId) {
+      // Robust lookup: try ownerUserId first, then direct organizerId
+      let { data: orgData } = await supabase.from('organizers').select('profileImageUrl, organizerName').eq('ownerUserId', empId).maybeSingle();
+      if (!orgData && finalRole === 'STAFF') {
+        const { data: orgData2 } = await supabase.from('organizers').select('profileImageUrl, organizerName').eq('organizerId', empId).maybeSingle();
+        orgData = orgData2;
+      }
+
+      if (orgData) {
+        response.user.employerLogoUrl = orgData.profileImageUrl;
+        response.user.employerName = orgData.organizerName;
+        
+        // Healing: persist the employer linkage if found during lookup
+        if (finalRole === 'STAFF' && !dbUser?.employerId) {
+          response.user.employerId = empId;
+          await supabase.from('users').update({ employerId: empId }).eq('userId', user.id);
+        }
+      }
+    }
+
+    return res.json(response);
   } catch (err) {
     console.error("Login error:", err);
     return res.status(500).json({ message: "Server error during login" });

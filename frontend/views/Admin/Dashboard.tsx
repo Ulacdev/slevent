@@ -7,6 +7,7 @@ import { Card, PageLoader, Modal } from '../../components/Shared';
 import { ICONS } from '../../constants';
 import { useUser } from '../../context/UserContext';
 import { CreatePlanModal } from '../../components/CreatePlanModal';
+import { PortalSkeleton, PortalCardSkeleton } from '../../components/Shared/Skeleton';
 
 // ── Types ─────────────────────────────────────────────────────────────────
 type PlanMetrics = {
@@ -118,7 +119,7 @@ export const AdminDashboard: React.FC = () => {
     load();
   }, []);
 
-  if (loading) return <PageLoader label="Standardizing analytics..." variant="page" />;
+  if (loading) return <PageLoader variant="page" label="Loading Dashboard..."/>;
 
   // Computed values
   const totalRevenue = planMetrics?.revenueByPlan.reduce((s, p) => s + p.value, 0) || 0;

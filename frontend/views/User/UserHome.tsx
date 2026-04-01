@@ -9,6 +9,7 @@ import { OnsiteLocationAssistant } from '../../components/OnsiteLocationAssistan
 import { PlanUpgradeModal } from '../../components/PlanUpgradeModal';
 import { SupportCenter } from '../../components/SupportCenter';
 import { ICONS } from '../../constants';
+import { PortalSkeleton } from '../../components/Shared/Skeleton';
 
 const getImageUrl = (img: any): string => {
     if (!img) return 'https://via.placeholder.com/800x400';
@@ -168,6 +169,8 @@ export const UserHome: React.FC = () => {
         setFormData(nextData);
     };
 
+    if (loadingStats) return <PortalSkeleton />;
+
     return (
         <div className="space-y-12 max-w-6xl mx-auto pt-10 -mt-4">
             {notification && (
@@ -259,8 +262,8 @@ export const UserHome: React.FC = () => {
                                         <div className="w-full h-2 bg-[#2E2E2F]/10 rounded-full overflow-hidden">
                                             <div
                                                 className={`h-full rounded-full transition-all ${usedCount >= pricedLimit
-                                                        ? 'bg-[#2E2E2F]/20'
-                                                        : 'bg-[#38BDF2]'
+                                                    ? 'bg-[#2E2E2F]/20'
+                                                    : 'bg-[#38BDF2]'
                                                     }`}
                                                 style={{ width: `${Math.min(100, (usedCount / (pricedLimit || 1)) * 100)}%` }}
                                             />
@@ -304,7 +307,7 @@ export const UserHome: React.FC = () => {
                                             />
                                         </div>
                                         {!emailQuota.canSend && (
-                                            <button 
+                                            <button
                                                 onClick={() => setIsUpgradeModalOpen(true)}
                                                 className="w-full py-2 bg-red-500 hover:bg-red-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-colors"
                                             >

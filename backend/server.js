@@ -69,10 +69,11 @@ app.use(cors({
 // Security: Rate limiting for auth and sensitive endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // Limit each IP to 10 requests per window for auth
+  max: 30, // Limit each IP to 30 failed attempts per window for auth
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "🛑 SECURITY PROTECTION: Too many attempts, please try again after 15 minutes" },
+  skipSuccessfulRequests: true, // IMPORTANT: only count failures (4xx, 5xx)
+  message: { error: "🛑 SECURITY PROTECTION: Too many invalid attempts, please try again after 15 minutes" },
   handler: (req, res, next, options) => {
     console.warn(`🛑 [SECURITY] Rate limit EXCEEDED for IP: ${req.ip}`);
     res.status(options.statusCode).send(options.message);

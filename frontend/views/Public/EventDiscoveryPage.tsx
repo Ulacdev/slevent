@@ -207,17 +207,7 @@ export const EventDiscoveryPage: React.FC = () => {
     };
 
     if (loading) {
-        return (
-            <div className="bg-[#F2F2F2] min-h-screen">
-                <div className="max-w-[88rem] mx-auto px-4 sm:px-10 py-12">
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                            <EventCardSkeleton key={i} />
-                        ))}
-                    </div>
-                </div>
-            </div>
-        );
+        return <PageLoader label="Searching for discovery matches..." variant="page" />;
     }
 
     return (

@@ -108,7 +108,7 @@ export const AdminDashboard: React.FC = () => {
     load();
   }, []);
 
-  if (loading) return <PageLoader label="Loading dashboard..." variant="page" />;
+  if (loading) return <PageLoader variant="page" label="Loading BI Dashboard..." />;
 
   // Computed values
   const totalRevenue = planMetrics?.revenueByPlan.reduce((s, p) => s + p.value, 0) || 0;

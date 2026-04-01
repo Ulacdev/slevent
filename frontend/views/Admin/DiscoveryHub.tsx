@@ -104,7 +104,7 @@ export const DiscoveryHub: React.FC = () => {
     } else {
       setEditingDest(null);
       setCity('');
-      setCountry('Philippines');
+      setCountry('');
       setImageUrl('');
       setPriority(0);
     }
@@ -196,17 +196,17 @@ export const DiscoveryHub: React.FC = () => {
     }
   };
 
-  if (loading) return <PageLoader />;
+  if (loading) return <PageLoader variant="page" label="Loading Discovery Hub..." />;
 
   return (
     <div className="space-y-10" style={{ zoom: 0.85 }}>
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-2">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-             <h1 className="text-4xl font-black text-[#2E2E2F] tracking-tighter uppercase">Discovery Hub</h1>
-             <span className="px-3 py-1 bg-[#38BDF2] rounded-lg text-[10px] font-black text-white uppercase tracking-widest">Premium Discovery</span>
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+             <h1 className="text-3xl font-bold text-[#2E2E2F] tracking-tight">Discovery Hub</h1>
+             <span className="px-3 py-1 bg-[#38BDF2] rounded-lg text-[10px] font-black text-white uppercase tracking-widest">Premium</span>
           </div>
-          <p className="text-[#2E2E2F]/60 font-bold text-xs uppercase tracking-widest mt-1">Curate top-tier destinations for the marketplace discovery slider.</p>
+          <p className="text-[#2E2E2F] font-medium text-sm mt-1">Curate top-tier destinations for the marketplace discovery slider.</p>
         </div>
         <Button 
           onClick={() => handleOpenModal()}
@@ -294,33 +294,33 @@ export const DiscoveryHub: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                   <div className="space-y-3">
                     <label className="text-[11px] font-black text-black/40 uppercase tracking-[0.2em] ml-1">City / Town Name</label>
-                    <Input 
-                      placeholder="e.g. Kawit" 
-                      value={city} 
+                    <select
+                      value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="!bg-[#F2F2F2] !rounded-2xl !h-14 !border-none !shadow-inner"
-                      list="city-suggestions"
+                      className="w-full bg-[#F2F2F2] rounded-2xl h-14 border-none shadow-inner px-4 text-sm outline-none focus:ring-2 focus:ring-[#38BDF2]/40 text-[#2E2E2F]"
                       required
-                      autoComplete="off"
-                    />
-                    <datalist id="city-suggestions">
-                      {filteredCities.map(c => <option key={c} value={c} />)}
-                    </datalist>
+                    >
+                      <option value="" disabled>Select a city from events</option>
+                      {editingDest && !filteredCities.includes(editingDest.city) && (
+                        <option value={editingDest.city}>{editingDest.city}</option>
+                      )}
+                      {filteredCities.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
                   </div>
                   <div className="space-y-3">
                     <label className="text-[11px] font-black text-black/40 uppercase tracking-[0.2em] ml-1">Country</label>
-                    <Input 
-                      placeholder="e.g. Philippines" 
-                      value={country} 
+                    <select
+                      value={country}
                       onChange={(e) => setCountry(e.target.value)}
-                      className="!bg-[#F2F2F2] !rounded-2xl !h-14 !border-none !shadow-inner"
-                      list="country-suggestions"
+                      className="w-full bg-[#F2F2F2] rounded-2xl h-14 border-none shadow-inner px-4 text-sm outline-none focus:ring-2 focus:ring-[#38BDF2]/40 text-[#2E2E2F]"
                       required
-                      autoComplete="off"
-                    />
-                    <datalist id="country-suggestions">
-                      {availableCountries.map(c => <option key={c} value={c} />)}
-                    </datalist>
+                    >
+                      <option value="" disabled>Select a country from events</option>
+                      {editingDest && !availableCountries.includes(editingDest.country) && (
+                        <option value={editingDest.country}>{editingDest.country}</option>
+                      )}
+                      {availableCountries.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
                   </div>
                 </div>
 

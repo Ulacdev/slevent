@@ -31,12 +31,13 @@ export const Card: React.FC<{
   className?: string,
   style?: React.CSSProperties,
   onClick?: () => void,
+  overflowHidden?: boolean,
   [key: string]: any;
-}> = ({ children, className = '', style, onClick, ...props }) => (
+}> = ({ children, className = '', style, onClick, overflowHidden = false, ...props }) => (
   <div
     onClick={onClick}
     style={style}
-    className={`bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl overflow-hidden ${className} shadow-sm hover:shadow-md transition-shadow`}
+    className={`bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl ${overflowHidden ? 'overflow-hidden' : ''} ${className} shadow-sm hover:shadow-md transition-shadow`}
     {...props}
   >
     {children}
@@ -318,34 +319,52 @@ export const PageLoader: React.FC<{
   size = 'md',
   className = ''
 }) => {
-    const variants = {
-      viewport: 'fixed inset-0 z-[10000] bg-[#F2F2F2]',
-      page: 'min-h-[80vh] flex-1 bg-[#F2F2F2]',
-      section: 'min-h-[40vh] bg-transparent'
-    };
-
-    const sizes = {
-      sm: 'w-8 h-8',
-      md: 'w-12 h-12',
-      lg: 'w-16 h-16'
-    };
+    if (variant === 'viewport') {
+        return (
+            <div className="fixed inset-0 z-[10000] bg-[#F2F2F2] flex flex-col items-center justify-center p-8">
+                <div className="w-24 h-24 relative mb-12">
+                    <div className="absolute inset-0 rounded-full border-4 border-[#38BDF2]/10" />
+                    <div className="absolute inset-0 rounded-full border-4 border-t-[#38BDF2] animate-spin" />
+                </div>
+                <p className="text-[#2E2E2F] font-black uppercase tracking-[0.4em] text-[15px] animate-pulse">
+                    {label}
+                </p>
+            </div>
+        );
+    }
 
     return (
-      <div className={`flex flex-col items-center justify-center text-center ${variants[variant]} ${className}`}>
-        <div className={`relative ${sizes[size]}`}>
-          {/* Outer ring */}
-          <div className="absolute inset-0 rounded-full border-4 border-[#38BDF2]/10" />
-          {/* Animated spinner */}
-          <div className="absolute inset-0 rounded-full border-4 border-t-[#38BDF2] animate-spin" />
-          {/* Inner pulse */}
-          <div className="absolute inset-[30%] rounded-full bg-[#38BDF2] animate-ping opacity-60" />
+        <div className={`flex flex-col gap-12 w-full pt-10 px-4 sm:px-8 ${className}`}>
+            {/* Skeleton Hero */}
+            <div className="w-full h-64 sm:h-80 bg-[#E0E0E0]/30 rounded-2xl relative overflow-hidden animate-pulse">
+                <div className="absolute inset-x-8 bottom-12 space-y-4">
+                    <div className="h-10 w-2/3 bg-[#E0E0E0]/50 rounded-lg" />
+                    <div className="h-6 w-1/2 bg-[#E0E0E0]/50 rounded-lg" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+            </div>
+
+            {/* Skeleton Content Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[...Array(3)].map((_, i) => (
+                    <div key={i} className="space-y-4">
+                        <div className="aspect-video bg-[#E0E0E0]/30 rounded-xl relative overflow-hidden animate-pulse">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                        </div>
+                        <div className="h-6 w-2/3 bg-[#E0E0E0]/30 rounded-lg animate-pulse" />
+                        <div className="h-4 w-full bg-[#E0E0E0]/20 rounded-lg animate-pulse" />
+                    </div>
+                ))}
+            </div>
+            
+            {label && (
+                <div className="flex justify-center mt-4">
+                    <p className="text-[#2E2E2F] font-black uppercase tracking-[0.2em] text-[10px] animate-pulse">
+                        {label}
+                    </p>
+                </div>
+            )}
         </div>
-        {label && (
-          <p className="mt-8 text-[#2E2E2F] font-black uppercase tracking-[0.3em] text-[13px] sm:text-[13px] px-6 animate-pulse">
-            {label}
-          </p>
-        )}
-      </div>
     );
 };
 

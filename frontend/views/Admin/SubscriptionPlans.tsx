@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ICONS } from '../../constants';
 import { apiService } from '../../services/apiService';
 import { AdminPlan, UserRole } from '../../types';
-import { Button, Card, Modal, Input } from '../../components/Shared';
+import { Button, Card, Modal, Input, PageLoader } from '../../components/Shared';
 import { useUser } from '../../context/UserContext';
 import { PricingPlansGrid } from '../../components/PricingPlansGrid';
 import { formatLimitValue } from '../../utils/pricingPlans';
@@ -250,9 +250,7 @@ export const SubscriptionPlans: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <div className="py-10 text-sm font-semibold text-[#2E2E2F]/60">Loading plans...</div>;
-  }
+  if (loading) return <PageLoader variant="page" label="Loading Subscription Plans..." />;
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700 pb-20">
