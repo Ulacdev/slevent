@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ICONS } from '../../constants';
 import { PublicPageHero } from '../../components/PublicPageHero';
+import { apiService } from '../../services/apiService';
 
 const ACCENT = '#38BDF2';
 
@@ -134,12 +135,31 @@ export const AboutUsPage: React.FC = () => {
         <section className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-6 sm:p-8">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] mb-4">Impact</p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {impactStats.map((item) => (
-              <div key={item.label} className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] px-4 py-5">
+            {[
+              { label: 'Events Hosted', value: '2,400+' },
+              { label: 'Attendees Served', value: '120K+' },
+              { label: 'Organizer Teams', value: '900+' },
+              { label: 'Check-ins Processed', value: '1.1M+' },
+            ].map((item) => (
+              <div key={item.label} className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] px-4 py-5 shadow-sm">
                 <p className="text-2xl font-black tracking-tight" style={{ color: ACCENT }}>{item.value}</p>
                 <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#2E2E2F] mt-2">{item.label}</p>
               </div>
             ))}
+          </div>
+
+          {/* Logo Section */}
+          <div className="mt-12 pt-12 border-t border-[#2E2E2F]/5 flex flex-col items-center gap-6">
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#2E2E2F]/40 mb-2">Developed & Powered By</p>
+            <div className="flex items-center gap-3 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all duration-500 cursor-pointer">
+              <div className="w-10 h-10 rounded-xl bg-[#2E2E2F] flex items-center justify-center shadow-lg">
+                <ICONS.Monitor className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xl font-black tracking-tighter text-[#2E2E2F] uppercase italic leading-none">StartupLab</span>
+                <span className="text-[10px] font-bold text-[#38BDF2] tracking-widest uppercase">Business Ticketing</span>
+              </div>
+            </div>
           </div>
         </section>
       </div>

@@ -274,17 +274,17 @@ export const EventCard: React.FC<EventCardProps> = ({
 
     const formattedDate = formatDate(event.startAt, event.timezone, { weekday: 'short', month: 'short', day: 'numeric' });
     const formattedTime = formatTime(event.startAt, event.timezone);
-    
+
     const handleSingleClick = (e: React.MouseEvent) => {
-        if (layout === 'horizontal' && onSelectEvent) {
-            onSelectEvent((event as unknown) as Event);
-        } else {
-            navigate(`/events/${event.slug || event.eventId}`);
-        }
+      if (layout === 'horizontal' && onSelectEvent) {
+        onSelectEvent((event as unknown) as Event);
+      } else {
+        navigate(`/events/${event.slug || event.eventId}`);
+      }
     };
 
     const handleDoubleClick = (e: React.MouseEvent) => {
-        navigate(`/events/${event.slug || event.eventId}`);
+      navigate(`/events/${event.slug || event.eventId}`);
     };
 
     return (
@@ -303,11 +303,11 @@ export const EventCard: React.FC<EventCardProps> = ({
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
-             <div className="w-full h-full flex items-center justify-center bg-[#F2F2F2]">
-                <img src={BRAND_LOGO_URL} alt="StartupLab" className="w-16 h-16 object-contain opacity-20 grayscale" />
-             </div>
+            <div className="w-full h-full flex items-center justify-center bg-[#F2F2F2]">
+              <img src={BRAND_LOGO_URL} alt="StartupLab" className="w-16 h-16 object-contain opacity-20 grayscale" />
+            </div>
           )}
-          
+
           {/* Top Left Date Badge */}
           <div className="absolute top-3 left-3 z-20 flex flex-col items-center justify-center bg-[#38BDF2] shadow-lg rounded-xl py-2 px-3 min-w-[58px] border border-white/20 group-hover:scale-110 transition-transform duration-300">
             <span className="text-[10px] font-black tracking-[0.1em] text-white uppercase leading-none mb-1">{month}</span>
@@ -363,10 +363,10 @@ export const EventCard: React.FC<EventCardProps> = ({
 
             <div className="flex items-center gap-1 -mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <button type="button" aria-label="Share" onClick={handleShare} className="p-2.5 text-[#4B5563] hover:text-[#111827] hover:bg-black/5 rounded-full transition-colors flex items-center justify-center">
-                 <ICONS.Download className="w-4 h-4" />
+                <ICONS.Download className="w-4 h-4" />
               </button>
               <button type="button" aria-label="Like" onClick={handleLike} className={`p-2.5 rounded-full transition-colors flex items-center justify-center ${liked ? 'text-[#38BDF2] hover:bg-[#38BDF2]/10' : 'text-[#4B5563] hover:text-[#111827] hover:bg-black/5'}`}>
-                 <ICONS.Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
+                <ICONS.Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
               </button>
             </div>
           </div>
@@ -386,26 +386,26 @@ export const EventCard: React.FC<EventCardProps> = ({
         {/* Tags Overlay (Trending & Promoted) */}
         <div className="absolute bottom-4 left-4 z-30 flex flex-col gap-2 items-start">
           {isTrending && (
-              <div
-                className="inline-flex items-center gap-2 rounded-full px-5 py-2 bg-[#38BDF2] text-white text-[11px] font-black uppercase tracking-[0.12em] shadow-xl border border-white/20 transition-all hover:scale-110 active:scale-95 whitespace-nowrap"
-              >
-                <ICONS.Star className="w-3.5 h-3.5 fill-current text-white" />
-                #{trendingRank} Trending
-              </div>
+            <div
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2 bg-[#38BDF2] text-white text-[11px] font-black uppercase tracking-[0.12em] shadow-xl border border-white/20 transition-all hover:scale-110 active:scale-95 whitespace-nowrap"
+            >
+              <ICONS.Star className="w-3.5 h-3.5 fill-current text-white" />
+              #{trendingRank} Trending
+            </div>
           )}
           {!isTrending && (event.is_promoted || (event as any).isPromoted) && (
-              <div className="group/promoted relative">
-                  <div className="inline-flex items-center gap-2 rounded-full px-4 py-1 bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.15em] border border-[#38BDF2]/30 transition-all hover:scale-105 active:scale-95 whitespace-nowrap cursor-help">
-                    <ICONS.Info className="w-3.5 h-3.5" strokeWidth={3} />
-                    PROMOTED
-                  </div>
-                  <div className="absolute bottom-full left-0 mb-2 opacity-0 group-hover/promoted:opacity-100 pointer-events-none transition-all duration-300 translate-y-1 group-hover/promoted:translate-y-0 z-50">
-                      <div className="bg-black text-white text-[9px] font-bold px-3 py-1.5 rounded-lg whitespace-nowrap shadow-2xl border border-white/10 uppercase tracking-widest text-center leading-tight">
-                          Featured: Highlighted via<br />Organizer Subscription
-                      </div>
-                      <div className="w-2 h-2 bg-black rotate-45 absolute -bottom-1 left-4 border-r border-b border-white/10"></div>
-                  </div>
+            <div className="group/promoted relative">
+              <div className="inline-flex items-center gap-2 rounded-full px-4 py-1 bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.15em] border border-[#38BDF2]/30 transition-all hover:scale-105 active:scale-95 whitespace-nowrap cursor-help">
+                <ICONS.Info className="w-3.5 h-3.5" strokeWidth={3} />
+                PROMOTED
               </div>
+              <div className="absolute bottom-full left-0 mb-2 opacity-0 group-hover/promoted:opacity-100 pointer-events-none transition-all duration-300 translate-y-1 group-hover/promoted:translate-y-0 z-50">
+                <div className="bg-black text-white text-[9px] font-bold px-3 py-1.5 rounded-lg whitespace-nowrap shadow-2xl border border-white/10 uppercase tracking-widest text-center leading-tight">
+                  Featured: Highlighted via<br />Organizer Subscription
+                </div>
+                <div className="w-2 h-2 bg-black rotate-45 absolute -bottom-1 left-4 border-r border-b border-white/10"></div>
+              </div>
+            </div>
           )}
 
         </div>
@@ -532,6 +532,13 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   const [showOrgDropdown, setShowOrgDropdown] = useState(false);
   const initialLoadRef = useRef(true);
   const requestIdRef = useRef(0);
+  const gotoSignup = () => {
+    if (openAuthModal) {
+      openAuthModal('signup');
+    } else {
+      navigate('/signup');
+    }
+  };
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedPrice, setSelectedPrice] = useState<'all' | 'free' | 'paid'>('all');
@@ -548,6 +555,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   const [currentPromotedIndex, setCurrentPromotedIndex] = useState(0);
   const [promotedCarouselInterval, setPromotedCarouselInterval] = useState<NodeJS.Timeout | null>(null);
   const [isMarqueePaused, setIsMarqueePaused] = useState(false);
+  const [categories, setCategories] = useState<any[]>(EVENT_CATEGORIES);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   // Announcement Modal State
   const [activeAnnouncement, setActiveAnnouncement] = useState<Announcement | null>(null);
@@ -582,29 +591,32 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
   useEffect(() => {
     if (!isLanding) return;
-    
+
     let frameId: number;
-    const step = () => {
+    let lastTime = performance.now();
+
+    const step = (time: number) => {
       if (categoriesScrollRef.current && !isMarqueePaused && !isDraggingRef.current) {
         const el = categoriesScrollRef.current;
-        el.scrollLeft += 0.8;
-        
+        const deltaTime = time - lastTime;
+
+        // Target ~1 pixel per frame (60px/sec) at standard 60Hz (16.6ms)
+        const speedMultiplier = deltaTime / 16.67;
+        el.scrollLeft += 1.0 * speedMultiplier;
+
         // Reset to middle for infinite effect (categories are duplicated)
-        if (el.scrollLeft >= el.scrollHeight) {
-           // Basic check, better one is half width
-        }
-        
         const half = el.scrollWidth / 2;
         if (el.scrollLeft >= half) {
-          el.scrollLeft = 0;
+          el.scrollLeft = el.scrollLeft - half;
         }
       }
+      lastTime = time;
       frameId = requestAnimationFrame(step);
     };
-    
+
     frameId = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frameId);
-  }, [isLanding, isMarqueePaused]);
+  }, [isLanding, isMarqueePaused, categories.length]);
 
   const likedSet = useMemo(() => new Set(likedEventIds), [likedEventIds]);
   const followedSet = useMemo(() => new Set(followedOrganizerIds), [followedOrganizerIds]);
@@ -804,7 +816,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
         if (res.ok) {
           const data = await res.json();
           const now = new Date();
-          
+
           // Granular filtering on frontend to guarantee correctness
           const validAnnouncements = (data || []).filter((ann: Announcement) => {
             const isPub = ann.is_published !== false;
@@ -1029,8 +1041,6 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   const totalPages = Math.max(1, pagination.totalPages || 1);
   const showPagination = !isLanding && !isSpecialListing && orderedEvents.length > 0 && totalPages > 1;
   const showViewAllButton = isLandingAllListing && Number(pagination.total || 0) > displayEvents.length;
-  const [categories, setCategories] = useState<any[]>(EVENT_CATEGORIES);
-  const [loadingCategories, setLoadingCategories] = useState(true);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -1121,7 +1131,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                       if (isAuthenticated) {
                         navigate(role === UserRole.ORGANIZER ? '/user-home' : '/browse-events');
                       } else {
-                        navigate('/signup');
+                        gotoSignup();
                       }
                     }}
                     className="w-full sm:w-auto px-10 py-4 bg-[#38BDF2] text-white font-black text-[15px] rounded-xl shadow-lg shadow-[#38BDF2]/30 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
@@ -1187,7 +1197,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
                 {/* Floating badge: Organizer Tally - Exact Corner Match */}
                 <div
-                  className="absolute -bottom-6 -left-8 bg-white p-4 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col items-start gap-3 animate-float group/badge cursor-pointer z-40"
+                  className="absolute -bottom-6 -left-8 bg-[#F2F2F2] p-4 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col items-start gap-3 animate-float group/badge cursor-pointer z-40"
                   onMouseEnter={() => setShowOrgDropdown(true)}
                   onMouseLeave={() => setShowOrgDropdown(false)}
                 >
@@ -1324,11 +1334,10 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                         return (
                           <div
                             key={event.eventId}
-                            className={`absolute inset-0 transition-opacity duration-700 ease-in-out cursor-pointer ${
-                              idx === currentPromotedIndex 
-                                ? 'opacity-100 pointer-events-auto' 
-                                : 'opacity-0 pointer-events-none invisible'
-                            }`}
+                            className={`absolute inset-0 transition-all duration-[600ms] ease-in-out transform cursor-pointer ${idx === currentPromotedIndex
+                                ? 'opacity-100 translate-x-0 z-10 pointer-events-auto'
+                                : 'opacity-0 translate-x-full z-0 pointer-events-none invisible'
+                              }`}
                             aria-hidden={idx !== currentPromotedIndex}
                             onClick={() => navigate(`/events/${event.slug || event.eventId}`)}
                           >
@@ -1359,24 +1368,23 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                                     <div className="flex flex-col gap-3 sm:gap-4 text-white max-w-xl">
                                       {/* Category Badge */}
                                       <div className="flex items-center gap-3 group/badge shrink-0">
-                                        <div className="w-8 h-8 rounded-full bg-[#38BDF2] flex items-center justify-center text-white shadow-xl shadow-[#38BDF2]/40 ring-2 ring-white/20 animate-in zoom-in duration-1000">
+                                        <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-white shadow-lg animate-in zoom-in duration-1000">
                                           <ICONS.Check className="w-4 h-4" strokeWidth={5} />
                                         </div>
                                         <div className="flex flex-col">
-                                          <span className="text-xs font-black tracking-[0.15em] text-[#38BDF2] uppercase leading-none">
+                                          <span className="text-xs font-black tracking-[0.15em] text-white uppercase leading-none">
                                             Featured Session
                                           </span>
                                         </div>
                                       </div>
 
-                                        {/* Event Title */}
-                                        <h3 className={`font-black tracking-tighter leading-[1.1] text-[#38BDF2] drop-shadow-sm animate-in fade-in slide-in-from-left-6 duration-1000 delay-100 line-clamp-2 ${
-                                          (event.eventName || '').length > 40 
-                                            ? 'text-xl sm:text-2xl md:text-3xl' 
-                                            : 'text-2xl sm:text-3xl md:text-5xl'
+                                      {/* Event Title */}
+                                      <h3 className={`font-black tracking-tighter leading-[1.1] text-white drop-shadow-sm animate-in fade-in slide-in-from-left-6 duration-1000 delay-100 line-clamp-2 ${(event.eventName || '').length > 40
+                                          ? 'text-xl sm:text-2xl md:text-3xl'
+                                          : 'text-2xl sm:text-3xl md:text-5xl'
                                         }`}>
-                                          {event.eventName}
-                                        </h3>
+                                        {event.eventName}
+                                      </h3>
 
                                       {/* Event Details Grid - White text on dark bg */}
                                       <div className="space-y-2 sm:space-y-2.5 pt-1 animate-in fade-in slide-in-from-left-8 duration-1000 delay-200">
@@ -1416,10 +1424,10 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                                             e.stopPropagation();
                                             navigate(`/events/${event.slug || event.eventId}`);
                                           }}
-                                          className="px-6 py-2.5 bg-[#38BDF2] text-white text-[12px] font-black rounded-[5px] shadow-lg shadow-[#38BDF2]/20 hover:bg-black hover:shadow-none transition-all transform active:scale-95 uppercase tracking-[0.1em] flex items-center justify-center gap-2 group/btn w-fit"
+                                          className="px-8 py-3 bg-white/10 backdrop-blur-sm text-white text-[14px] font-bold rounded-full border-2 border-white hover:bg-white/20 transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-3 group/btn w-fit shadow-xl"
                                         >
+                                          <ICONS.Ticket className="w-4 h-4" />
                                           Get Ticket
-                                          <ICONS.ChevronRight className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-x-1" strokeWidth={4} />
                                         </button>
                                       </div>
                                     </div>
@@ -1583,215 +1591,192 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
       )}
 
       <div style={{ zoom: !isLanding ? 0.8 : undefined }} className="origin-top transition-transform duration-500">
-      <div className={`flex flex-col sm:flex-row items-center justify-between gap-6 px-0 ${isLanding ? 'hidden' : 'mb-8 mt-2'}`}>
-        {!isLanding && !isSpecialListing && (
-          <div className="flex items-center gap-4 w-full sm:w-auto">
-            <button
-              onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-              className="flex items-center gap-2 bg-[#F2F2F2] px-4 py-2.5 rounded-xl border border-[#E5E7EB] shadow-sm text-[10px] font-black uppercase tracking-widest text-black hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all"
-            >
-              <ICONS.Filter className="w-4 h-4" />
-              {isSidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
-            </button>
-
-            <div className="flex items-center gap-3 bg-[#F2F2F2] px-5 py-2.5 rounded-xl border border-[#D1D5DB] shadow-sm justify-between sm:justify-start">
-              <span className="text-[10px] font-black uppercase tracking-widest text-black">Sort By</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-transparent text-xs font-bold text-black outline-none cursor-pointer"
+        <div className={`flex flex-col sm:flex-row items-center justify-between gap-6 px-0 ${isLanding ? 'hidden' : 'mb-8 mt-2'}`}>
+          {!isLanding && !isSpecialListing && (
+            <div className="flex items-center gap-4 w-full sm:w-auto">
+              <button
+                onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+                className="flex items-center gap-2 bg-[#F2F2F2] px-4 py-2.5 rounded-xl border border-[#E5E7EB] shadow-sm text-[10px] font-black uppercase tracking-widest text-black hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all"
               >
-                <option value="relevance">Relevance</option>
-                <option value="newest">Newest</option>
-                <option value="date_soon">Soonest</option>
-              </select>
+                <ICONS.Filter className="w-4 h-4" />
+                {isSidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
+              </button>
+
+              <div className="flex items-center gap-3 bg-[#F2F2F2] px-5 py-2.5 rounded-xl border border-[#D1D5DB] shadow-sm justify-between sm:justify-start">
+                <span className="text-[10px] font-black uppercase tracking-widest text-black">Sort By</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-transparent text-xs font-bold text-black outline-none cursor-pointer"
+                >
+                  <option value="relevance">Relevance</option>
+                  <option value="newest">Newest</option>
+                  <option value="date_soon">Soonest</option>
+                </select>
+              </div>
             </div>
+          )}
+
+          <div className="w-full sm:w-[280px] md:w-[320px]">
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-black group-focus-within:text-[#38BDF2] transition-colors">
+                <ICONS.Search className="h-4 w-4" strokeWidth={3} />
+              </div>
+              <input
+                type="text"
+                placeholder={`Search in ${selectedLocation}...`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full pl-10 pr-9 py-3 bg-[#F2F2F2] border border-[#D1D5DB] rounded-xl text-[12px] font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-black"
+              />
+            </div>
+          </div>
+        </div>
+
+        {interactionNotice && (
+          <div className="mb-6 rounded-xl border border-[#38BDF2]/30 bg-[#38BDF2]/10 px-4 py-3 text-sm font-semibold text-black">
+            {interactionNotice}
           </div>
         )}
 
-        <div className="w-full sm:w-[280px] md:w-[320px]">
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-black group-focus-within:text-[#38BDF2] transition-colors">
-              <ICONS.Search className="h-4 w-4" strokeWidth={3} />
-            </div>
-            <input
-              type="text"
-              placeholder={`Search in ${selectedLocation}...`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-9 py-3 bg-[#F2F2F2] border border-[#D1D5DB] rounded-xl text-[12px] font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-black"
-            />
-          </div>
-        </div>
-      </div>
-
-      {interactionNotice && (
-        <div className="mb-6 rounded-xl border border-[#38BDF2]/30 bg-[#38BDF2]/10 px-4 py-3 text-sm font-semibold text-black">
-          {interactionNotice}
-        </div>
-      )}
-
-      <div className="flex flex-col lg:flex-row gap-10">
-        {/* Sidebar Filter - Eventbrite style */}
-        {!isLanding && !isSpecialListing && isSidebarVisible && (
-          <aside 
-            className="w-full lg:w-72 shrink-0 space-y-10 lg:sticky lg:top-28 lg:self-start lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-4 lg:custom-scrollbar animate-in fade-in slide-in-from-left-4 duration-700"
-            style={{ zoom: 1.1 }}
-          >
-            {/* Active Filters Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-black/5">
-              <h3 className="text-xl font-black text-black tracking-tight">Filters</h3>
-              {(selectedCategory !== 'all' || selectedDate !== 'all' || selectedPrice !== 'all' || selectedFormat !== 'all') && (
-                <button
-                  onClick={() => {
-                    setSelectedCategory('all');
-                    setSelectedDate('all');
-                    setSelectedPrice('all');
-                    setSelectedFormat('all');
-                    setSearchTerm('');
-                  }}
-                  className="text-[10px] font-black uppercase tracking-widest text-[#38BDF2] hover:text-black transition-colors"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
-
-            {/* Category Section */}
-            <div className="space-y-6">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Category</h4>
-              <div className="space-y-3.5">
-                {(showCategoriesFull ? categories : categories.slice(0, 6)).map((cat) => (
+        <div className="flex flex-col lg:flex-row gap-10">
+          {/* Sidebar Filter - Eventbrite style */}
+          {!isLanding && !isSpecialListing && isSidebarVisible && (
+            <aside
+              className="w-full lg:w-72 shrink-0 space-y-10 lg:sticky lg:top-28 lg:self-start lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-4 lg:custom-scrollbar animate-in fade-in slide-in-from-left-4 duration-700"
+              style={{ zoom: 1.1 }}
+            >
+              {/* Active Filters Header */}
+              <div className="flex items-center justify-between pb-4 border-b border-black/5">
+                <h3 className="text-xl font-black text-black tracking-tight">Filters</h3>
+                {(selectedCategory !== 'all' || selectedDate !== 'all' || selectedPrice !== 'all' || selectedFormat !== 'all') && (
                   <button
-                    key={cat.key}
-                    onClick={() => setSelectedCategory(selectedCategory === cat.key ? 'all' : cat.key)}
-                    className={`flex items-center gap-3.5 w-full text-left group transition-all ${selectedCategory === cat.key ? 'text-[#38BDF2]' : 'text-black hover:text-[#38BDF2]'}`}
+                    onClick={() => {
+                      setSelectedCategory('all');
+                      setSelectedDate('all');
+                      setSelectedPrice('all');
+                      setSelectedFormat('all');
+                      setSearchTerm('');
+                    }}
+                    className="text-[10px] font-black uppercase tracking-widest text-[#38BDF2] hover:text-black transition-colors"
                   >
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${selectedCategory === cat.key ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#F2F2F2] border border-black/5 group-hover:bg-[#38BDF2]/10'}`}>
-                      <cat.Icon className="w-4 h-4" />
-                    </div>
-                    <span className={`text-[13px] font-bold tracking-tight ${selectedCategory === cat.key ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'}`}>{cat.label}</span>
+                    Clear all
                   </button>
-                ))}
-                <button
-                  onClick={() => setShowCategoriesFull(!showCategoriesFull)}
-                  className="text-xs font-black text-[#38BDF2] pt-2 hover:underline transition-all flex items-center gap-1"
-                >
-                  {showCategoriesFull ? 'View less' : 'View more'}
-                  <ICONS.ChevronDown className={`w-3.5 h-3.5 transition-transform ${showCategoriesFull ? 'rotate-180' : ''}`} />
-                </button>
+                )}
               </div>
-            </div>
 
-            {/* Date Section */}
-            <div className="space-y-6">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Date</h4>
-              <div className="space-y-4">
-                {[
-                  { id: 'all', label: 'Any time' },
-                  { id: 'today', label: 'Today' },
-                  { id: 'tomorrow', label: 'Tomorrow' },
-                  { id: 'weekend', label: 'This weekend' }
-                ].map((opt) => (
+              {/* Category Section */}
+              <div className="space-y-6">
+                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Category</h4>
+                <div className="space-y-3.5">
+                  {(showCategoriesFull ? categories : categories.slice(0, 6)).map((cat) => (
+                    <button
+                      key={cat.key}
+                      onClick={() => setSelectedCategory(selectedCategory === cat.key ? 'all' : cat.key)}
+                      className={`flex items-center gap-3.5 w-full text-left group transition-all ${selectedCategory === cat.key ? 'text-[#38BDF2]' : 'text-black hover:text-[#38BDF2]'}`}
+                    >
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${selectedCategory === cat.key ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#F2F2F2] border border-black/5 group-hover:bg-[#38BDF2]/10'}`}>
+                        <cat.Icon className="w-4 h-4" />
+                      </div>
+                      <span className={`text-[13px] font-bold tracking-tight ${selectedCategory === cat.key ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'}`}>{cat.label}</span>
+                    </button>
+                  ))}
                   <button
-                    key={opt.id}
-                    onClick={() => setSelectedDate(opt.id)}
-                    className="flex items-center gap-3 w-full group"
+                    onClick={() => setShowCategoriesFull(!showCategoriesFull)}
+                    className="text-xs font-black text-[#38BDF2] pt-2 hover:underline transition-all flex items-center gap-1"
                   >
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedDate === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
-                      {selectedDate === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
-                    </div>
-                    <span className={`text-[13px] font-bold tracking-tight ${selectedDate === opt.id ? 'text-black' : 'text-black group-hover:text-black'}`}>{opt.label}</span>
+                    {showCategoriesFull ? 'View less' : 'View more'}
+                    <ICONS.ChevronDown className={`w-3.5 h-3.5 transition-transform ${showCategoriesFull ? 'rotate-180' : ''}`} />
                   </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Price Section */}
-            <div className="space-y-6">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Price</h4>
-              <div className="space-y-4">
-                {[
-                  { id: 'all', label: 'All Prices' },
-                  { id: 'free', label: 'Free' },
-                  { id: 'paid', label: 'Paid' }
-                ].map((opt) => (
-                  <button
-                    key={opt.id}
-                    onClick={() => setSelectedPrice(opt.id as any)}
-                    className="flex items-center gap-3 w-full group"
-                  >
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedPrice === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
-                      {selectedPrice === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
-                    </div>
-                    <span className={`text-[13px] font-bold tracking-tight ${selectedPrice === opt.id ? 'text-black' : 'text-black group-hover:text-black'}`}>{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Format Section */}
-            <div className="space-y-6">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Format</h4>
-              <div className="space-y-4">
-                {[
-                  { id: 'all', label: 'All Formats' },
-                  { id: 'online', label: 'Online' },
-                  { id: 'in-person', label: 'In-person' }
-                ].map((opt) => (
-                  <button
-                    key={opt.id}
-                    onClick={() => setSelectedFormat(opt.id as any)}
-                    className="flex items-center gap-3 w-full group"
-                  >
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedFormat === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
-                      {selectedFormat === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
-                    </div>
-                    <span className={`text-[13px] font-bold tracking-tight ${selectedFormat === opt.id ? 'text-black' : 'text-black group-hover:text-black'}`}>{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </aside>
-        )}
-
-        <div className="flex-1 flex min-w-0 gap-10">
-          <div className="flex-1 min-w-0 space-y-12">
-            {/* Most Liked Events Section (Discovery Mode Only) */}
-          {!isLanding && selectedLocation !== DEFAULT_LOCATION && displayEvents.length > 0 && !loading && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <div className="flex items-center gap-4">
-                <div className="h-0.5 bg-[#38BDF2] w-8" />
-                <h3 className="text-xl font-black text-black tracking-tight uppercase">Most Liked in {selectedLocation}</h3>
-                <div className="h-px bg-black/5 flex-1" />
-              </div>
-              <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`}>
-                {displayEvents.slice(0, 3).map((event) => (
-                  <EventCard
-                    key={`featured-${event.eventId}`}
-                    event={event}
-                    onActionNotice={setInteractionNotice}
-                    trendingRank={trendingRankByEventId.get(event.eventId) ?? null}
-                    organizers={organizers}
-                    isLanding={isLanding}
-                    listing={listing}
-                    layout={!isLanding ? 'horizontal' : 'vertical'}
-                    onSelectEvent={setSelectedMapEvent}
-                  />
-                ))}
+                </div>
               </div>
 
-              {displayEvents.length > 3 && (
-                <div className="pt-8 space-y-8">
+              {/* Date Section */}
+              <div className="space-y-6">
+                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Date</h4>
+                <div className="space-y-4">
+                  {[
+                    { id: 'all', label: 'Any time' },
+                    { id: 'today', label: 'Today' },
+                    { id: 'tomorrow', label: 'Tomorrow' },
+                    { id: 'weekend', label: 'This weekend' }
+                  ].map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => setSelectedDate(opt.id)}
+                      className="flex items-center gap-3 w-full group"
+                    >
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedDate === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
+                        {selectedDate === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
+                      </div>
+                      <span className={`text-[13px] font-bold tracking-tight ${selectedDate === opt.id ? 'text-black' : 'text-black group-hover:text-black'}`}>{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Section */}
+              <div className="space-y-6">
+                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Price</h4>
+                <div className="space-y-4">
+                  {[
+                    { id: 'all', label: 'All Prices' },
+                    { id: 'free', label: 'Free' },
+                    { id: 'paid', label: 'Paid' }
+                  ].map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => setSelectedPrice(opt.id as any)}
+                      className="flex items-center gap-3 w-full group"
+                    >
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedPrice === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
+                        {selectedPrice === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
+                      </div>
+                      <span className={`text-[13px] font-bold tracking-tight ${selectedPrice === opt.id ? 'text-black' : 'text-black group-hover:text-black'}`}>{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Format Section */}
+              <div className="space-y-6">
+                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Format</h4>
+                <div className="space-y-4">
+                  {[
+                    { id: 'all', label: 'All Formats' },
+                    { id: 'online', label: 'Online' },
+                    { id: 'in-person', label: 'In-person' }
+                  ].map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => setSelectedFormat(opt.id as any)}
+                      className="flex items-center gap-3 w-full group"
+                    >
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedFormat === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
+                        {selectedFormat === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
+                      </div>
+                      <span className={`text-[13px] font-bold tracking-tight ${selectedFormat === opt.id ? 'text-black' : 'text-black group-hover:text-black'}`}>{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </aside>
+          )}
+
+          <div className="flex-1 flex min-w-0 gap-10">
+            <div className="flex-1 min-w-0 space-y-12">
+              {/* Most Liked Events Section (Discovery Mode Only) */}
+              {!isLanding && selectedLocation !== DEFAULT_LOCATION && displayEvents.length > 0 && !loading && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                   <div className="flex items-center gap-4">
-                    <div className="h-0.5 bg-black/20 w-8" />
-                    <h3 className="text-xl font-black text-black tracking-tight uppercase">Other Events</h3>
+                    <div className="h-0.5 bg-[#38BDF2] w-8" />
+                    <h3 className="text-xl font-black text-black tracking-tight uppercase">Most Liked in {selectedLocation}</h3>
                     <div className="h-px bg-black/5 flex-1" />
                   </div>
                   <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`}>
-                    {displayEvents.slice(3).map((event) => (
+                    {displayEvents.slice(0, 3).map((event) => (
                       <EventCard
-                        key={`other-${event.eventId}`}
+                        key={`featured-${event.eventId}`}
                         event={event}
                         onActionNotice={setInteractionNotice}
                         trendingRank={trendingRankByEventId.get(event.eventId) ?? null}
@@ -1803,108 +1788,131 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                       />
                     ))}
                   </div>
-                </div>
 
-              )}
-            </div>
-          )}
-
-          {/* Standard Grid Display (Fallbacks) */}
-          {((isLanding || selectedLocation === DEFAULT_LOCATION) || loading) && (
-            <>
-              <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8'} pt-10 ${displayEvents.length > 0 ? 'min-h-[400px]' : 'min-h-0'}`}>
-                {loading ? (
-                  Array.from({ length: isLandingAllListing ? 3 : 6 }).map((_, idx) => (
-                    <div key={idx} className={!isLanding ? 'h-[190px]' : ''}>
-                        <EventCardSkeleton layout={!isLanding ? 'horizontal' : 'vertical'} />
+                  {displayEvents.length > 3 && (
+                    <div className="pt-8 space-y-8">
+                      <div className="flex items-center gap-4">
+                        <div className="h-0.5 bg-black/20 w-8" />
+                        <h3 className="text-xl font-black text-black tracking-tight uppercase">Other Events</h3>
+                        <div className="h-px bg-black/5 flex-1" />
+                      </div>
+                      <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`}>
+                        {displayEvents.slice(3).map((event) => (
+                          <EventCard
+                            key={`other-${event.eventId}`}
+                            event={event}
+                            onActionNotice={setInteractionNotice}
+                            trendingRank={trendingRankByEventId.get(event.eventId) ?? null}
+                            organizers={organizers}
+                            isLanding={isLanding}
+                            listing={listing}
+                            layout={!isLanding ? 'horizontal' : 'vertical'}
+                            onSelectEvent={setSelectedMapEvent}
+                          />
+                        ))}
+                      </div>
                     </div>
-                  ))
-                ) : displayEvents.map((event, idx) => (
-                  <div key={event.eventId} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <EventCard
-                      event={event}
-                      onActionNotice={setInteractionNotice}
-                      trendingRank={trendingRankByEventId.get(event.eventId) ?? null}
-                      organizers={organizers}
-                      isLanding={isLanding}
-                      listing={listing}
-                      isRecommended={isLandingAllListing && idx === 1}
-                      layout={!isLanding ? 'horizontal' : 'vertical'}
-                      onSelectEvent={setSelectedMapEvent}
-                    />
-                  </div>
-                ))}
-              </div>
 
-              {isLandingAllListing && displayEvents.length > 0 && (
-                <div className="flex justify-center mt-12 px-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-                  <button
-                    onClick={() => navigate('/browse-events')}
-                    className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-4 bg-[#38BDF2] rounded-xl text-[12px] font-black uppercase tracking-widest text-[#F2F2F2] hover:bg-black transition-all active:scale-95 shadow-lg shadow-[#38BDF2]/20 shadow-blue-500/20"
-                  >
-                    Explore All Events
-                    <ICONS.ArrowRight className="w-5 h-5" />
-                  </button>
+                  )}
                 </div>
               )}
-            </>
-          )}
 
-          {displayEvents.length === 0 && (
-            <div className="py-12 px-6 text-center bg-white rounded-3xl border border-black/5 animate-in zoom-in-95 duration-500 shadow-sm">
-              <div className="w-14 h-14 bg-[#F2F2F2] border border-black/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <ICONS.Search className="w-7 h-7 text-black opacity-40" />
-              </div>
-              <h3 className="text-xl font-black text-black tracking-tight mb-3 uppercase">
-                {isLandingAllListing
-                  ? 'No Trending Hubs Yet'
-                  : selectedLocation !== DEFAULT_LOCATION
-                    ? `No Sessions in ${selectedLocation}`
-                    : 'No matches found'}
-              </h3>
-              <p className="text-xs font-bold text-black/60 mb-8 max-w-[280px] mx-auto leading-relaxed">
-                {isLandingAllListing
-                  ? 'Be the first to like a session to see it trending here, or explore our full catalog below.'
-                  : `We couldn't find any upcoming events in this local hub. Try broadening your location or checking "All areas".`}
-              </p>
-              <Button
-                className="px-8 py-3.5 rounded-xl bg-black text-white font-black uppercase tracking-widest text-[10px] hover:bg-[#38BDF2] transition-all transform active:scale-95 shadow-lg shadow-black/10"
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedLocation(DEFAULT_LOCATION);
-                  setActiveBrowseTab('ALL');
-                  setSelectedCategory('all');
-                  setSelectedDate('all');
-                  setSelectedPrice('all');
-                  setSelectedFormat('all');
-                  navigate('/browse-events');
-                }}
-              >
-                Discover All Hubs
-              </Button>
+              {/* Standard Grid Display (Fallbacks) */}
+              {((isLanding || selectedLocation === DEFAULT_LOCATION) || loading) && (
+                <>
+                  <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8'} pt-10 ${displayEvents.length > 0 ? 'min-h-[400px]' : 'min-h-0'}`}>
+                    {loading ? (
+                      Array.from({ length: isLandingAllListing ? 3 : 6 }).map((_, idx) => (
+                        <div key={idx} className={!isLanding ? 'h-[190px]' : ''}>
+                          <EventCardSkeleton layout={!isLanding ? 'horizontal' : 'vertical'} />
+                        </div>
+                      ))
+                    ) : displayEvents.map((event, idx) => (
+                      <div key={event.eventId} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <EventCard
+                          event={event}
+                          onActionNotice={setInteractionNotice}
+                          trendingRank={trendingRankByEventId.get(event.eventId) ?? null}
+                          organizers={organizers}
+                          isLanding={isLanding}
+                          listing={listing}
+                          isRecommended={isLandingAllListing && idx === 1}
+                          layout={!isLanding ? 'horizontal' : 'vertical'}
+                          onSelectEvent={setSelectedMapEvent}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {isLandingAllListing && displayEvents.length > 0 && (
+                    <div className="flex justify-center mt-12 px-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                      <button
+                        onClick={() => navigate('/browse-events')}
+                        className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-4 bg-[#38BDF2] rounded-xl text-[12px] font-black uppercase tracking-widest text-[#F2F2F2] hover:bg-black transition-all active:scale-95 shadow-lg shadow-[#38BDF2]/20 shadow-blue-500/20"
+                      >
+                        Explore All Events
+                        <ICONS.ArrowRight className="w-5 h-5" />
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {displayEvents.length === 0 && (
+                <div className="py-12 px-6 text-center bg-white rounded-3xl border border-black/5 animate-in zoom-in-95 duration-500 shadow-sm">
+                  <div className="w-14 h-14 bg-[#F2F2F2] border border-black/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <ICONS.Search className="w-7 h-7 text-black opacity-40" />
+                  </div>
+                  <h3 className="text-xl font-black text-black tracking-tight mb-3 uppercase">
+                    {isLandingAllListing
+                      ? 'No Trending Hubs Yet'
+                      : selectedLocation !== DEFAULT_LOCATION
+                        ? `No Sessions in ${selectedLocation}`
+                        : 'No matches found'}
+                  </h3>
+                  <p className="text-xs font-bold text-black/60 mb-8 max-w-[280px] mx-auto leading-relaxed">
+                    {isLandingAllListing
+                      ? 'Be the first to like a session to see it trending here, or explore our full catalog below.'
+                      : `We couldn't find any upcoming events in this local hub. Try broadening your location or checking "All areas".`}
+                  </p>
+                  <Button
+                    className="px-8 py-3.5 rounded-xl bg-black text-white font-black uppercase tracking-widest text-[10px] hover:bg-[#38BDF2] transition-all transform active:scale-95 shadow-lg shadow-black/10"
+                    onClick={() => {
+                      setSearchTerm('');
+                      setSelectedLocation(DEFAULT_LOCATION);
+                      setActiveBrowseTab('ALL');
+                      setSelectedCategory('all');
+                      setSelectedDate('all');
+                      setSelectedPrice('all');
+                      setSelectedFormat('all');
+                      navigate('/browse-events');
+                    }}
+                  >
+                    Discover All Hubs
+                  </Button>
+                </div>
+              )}
+
+
             </div>
-          )}
 
+            {/* Map Sidebar ONLY on Browse Events (!isLanding) */}
+            {!isLanding && !isSpecialListing && (
+              <aside className="hidden xl:block w-[340px] 2xl:w-[420px] shrink-0 sticky top-28 self-start h-[500px] max-h-[calc(100vh-140px)] rounded-xl overflow-hidden bg-[#E5E7EB] border border-[#2E2E2F]/10 z-10 shadow-sm relative">
+                <div className="absolute inset-0 transition-all duration-500">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    className="absolute inset-0 z-0"
+                    style={{ border: 0 }}
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent((selectedMapEvent ? (selectedMapEvent.locationText || selectedMapEvent.eventName) : selectedLocation) || 'Philippines')}&t=&z=12&ie=UTF8&iwloc=&output=embed`}
+                  />
+                </div>
+              </aside>
+            )}
 
           </div>
-          
-          {/* Map Sidebar ONLY on Browse Events (!isLanding) */}
-          {!isLanding && !isSpecialListing && (
-            <aside className="hidden xl:block w-[340px] 2xl:w-[420px] shrink-0 sticky top-28 self-start h-[500px] max-h-[calc(100vh-140px)] rounded-xl overflow-hidden bg-[#E5E7EB] border border-[#2E2E2F]/10 z-10 shadow-sm relative">
-                <div className="absolute inset-0 transition-all duration-500">
-                    <iframe 
-                        width="100%" 
-                        height="100%" 
-                        className="absolute inset-0 z-0" 
-                        style={{ border: 0 }} 
-                        src={`https://maps.google.com/maps?q=${encodeURIComponent((selectedMapEvent ? (selectedMapEvent.locationText || selectedMapEvent.eventName) : selectedLocation) || 'Philippines')}&t=&z=12&ie=UTF8&iwloc=&output=embed`} 
-                    />
-                </div>
-            </aside>
-          )}
-
         </div>
-      </div>
       </div>
 
       {isLanding && (
@@ -1960,7 +1968,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               <h3 className="text-2xl font-black text-[#2E2E2F] leading-tight px-4">
                 {activeAnnouncement?.title}
               </h3>
-              
+
               {/* Decorative Separator Line */}
               <div className="flex items-center mt-6 -mx-8 ">
                 <div className="flex-1 border-t border-black/5" />

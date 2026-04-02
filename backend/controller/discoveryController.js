@@ -300,3 +300,34 @@ export const uploadDiscoveryImage = async (req, res) => {
         return res.status(500).json({ error: err.message });
     }
 };
+
+/**
+ * GET /api/discovery/impact-stats
+ * Aggregates real-time counts for Events, Attendees, Organizers, and Check-ins.
+ */
+export const getPublicImpactStats = async (req, res) => {
+    try {
+        // Parallelized count queries for performance
+        const [
+            { count: eventsCount },
+            { count: attendeesCount },
+            { count: organizersCount },
+            { count: checkinsCount }
+        ] = await Promise.all([
+            supabase.from('events').select('*', { count: 'exact', head: true }).eq('status', 'PUBLISHED'),
+            supabase.from('attendees').select('*', { count: 'exact', head: true }),
+            supabase.from('organizers').select('*', { count: 'exact', head: true }),
+            supabase.from('tickets').select('*', { count: 'exact', head: true }).not('usedAt', 'is', null)
+        ]);
+
+        return res.json({
+            eventsHosted: eventsCount || 0,
+            attendeesServed: attendeesCount || 0,
+            organizerTeams: organizersCount || 0,
+            checkinsProcessed: checkinsCount || 0
+        });
+    } catch (err) {
+        console.error('[Impact Stats Error]:', err);
+        return res.status(500).json({ error: 'Failed to aggregate impact metrics.' });
+    }
+};

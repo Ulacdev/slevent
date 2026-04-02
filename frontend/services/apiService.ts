@@ -605,6 +605,15 @@ export const apiService = {
     return data;
   },
 
+  getImpactStats: async (): Promise<{ eventsHosted: number; attendeesServed: number; organizerTeams: number; checkinsProcessed: number }> => {
+    const res = await apiService._fetch(`${API_BASE}/api/discovery/impact-stats`, {
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store'
+    });
+    if (!res.ok) throw new Error(`Failed to load impact stats: ${res.status}`);
+    return await res.json();
+  },
+
   // GET /api/events/:id/details
   getEventDetails: async (id: string) => {
     const res = await apiService._fetch(`${API_BASE}/api/events/${encodeURIComponent(id)}/details`, {

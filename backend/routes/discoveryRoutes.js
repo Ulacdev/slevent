@@ -3,6 +3,7 @@ import multer from 'multer';
 import { 
     getDiscoveryDestinations, 
     getAdminDiscoveryStats, 
+    getPublicImpactStats,
     createDiscoveryDestination, 
     updateDiscoveryDestination, 
     deleteDiscoveryDestination,
@@ -22,6 +23,7 @@ const upload = multer({
  */
 router.get('/destinations', getDiscoveryDestinations);
 router.get('/locations', getAvailableLocations);
+router.get('/impact-stats', getPublicImpactStats);
 
 /**
  * Admin Routes for Discovery Hub Management
