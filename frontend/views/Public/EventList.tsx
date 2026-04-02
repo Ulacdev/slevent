@@ -1326,8 +1326,12 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                         return (
                           <div
                             key={event.eventId}
-                            className={`absolute inset-0 transition-opacity duration-700 ease-in-out cursor-pointer ${idx === currentPromotedIndex ? 'opacity-100' : 'opacity-0'
-                              }`}
+                            className={`absolute inset-0 transition-opacity duration-700 ease-in-out cursor-pointer ${
+                              idx === currentPromotedIndex 
+                                ? 'opacity-100 pointer-events-auto' 
+                                : 'opacity-0 pointer-events-none invisible'
+                            }`}
+                            aria-hidden={idx !== currentPromotedIndex}
                             onClick={() => navigate(`/events/${event.slug || event.eventId}`)}
                           >
                             {/* Main Image - Full width with hover scale */}
@@ -1339,8 +1343,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
                             {/* Info Overlay Panel */}
                             <div className="absolute inset-0 z-20 flex flex-col justify-center">
-                              {/* Refined Gradient Overlay for higher image visibility */}
-                              <div className="absolute inset-0 z-[1] bg-gradient-to-r from-white via-white/90 via-white/30 to-transparent w-full lg:w-[45%]" />
+                              {/* Dark gradient on left half for text readability */}
+                              <div className="absolute inset-0 z-[1] bg-gradient-to-r from-black/85 via-black/60 via-[40%] to-transparent" />
 
                               {/* Content Area */}
                               <div className="relative z-30 p-8 sm:p-12 animate-in fade-in slide-in-from-left-4 duration-700">
@@ -1354,10 +1358,10 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                                   const org = event.organizer || organizers.find((o: any) => o.organizerId === event.organizerId);
 
                                   return (
-                                    <div className="flex flex-col gap-5 sm:gap-7 text-black max-w-xl">
-                                      {/* Category Badge - Reduced Size */}
-                                      <div className="flex items-center gap-3 mb-6 group/badge shrink-0">
-                                        <div className="w-8 h-8 rounded-full bg-[#38BDF2] flex items-center justify-center text-[#F2F2F2] shadow-xl shadow-[#38BDF2]/20 ring-2 ring-white animate-in zoom-in duration-1000">
+                                    <div className="flex flex-col gap-3 sm:gap-4 text-white max-w-xl">
+                                      {/* Category Badge */}
+                                      <div className="flex items-center gap-3 group/badge shrink-0">
+                                        <div className="w-8 h-8 rounded-full bg-[#38BDF2] flex items-center justify-center text-white shadow-xl shadow-[#38BDF2]/40 ring-2 ring-white/20 animate-in zoom-in duration-1000">
                                           <ICONS.Check className="w-4 h-4" strokeWidth={5} />
                                         </div>
                                         <div className="flex flex-col">
@@ -1367,36 +1371,40 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                                         </div>
                                       </div>
 
-                                      {/* Event Title */}
-                                      <h3 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tighter leading-[1.05] text-black drop-shadow-sm animate-in fade-in slide-in-from-left-6 duration-1000 delay-100">
-                                        {event.eventName}
-                                      </h3>
+                                        {/* Event Title */}
+                                        <h3 className={`font-black tracking-tighter leading-[1.1] text-[#38BDF2] drop-shadow-sm animate-in fade-in slide-in-from-left-6 duration-1000 delay-100 line-clamp-2 ${
+                                          (event.eventName || '').length > 40 
+                                            ? 'text-xl sm:text-2xl md:text-3xl' 
+                                            : 'text-2xl sm:text-3xl md:text-5xl'
+                                        }`}>
+                                          {event.eventName}
+                                        </h3>
 
-                                      {/* Event Details Grid - Normal Weight & Full Opacity */}
-                                      <div className="space-y-3 sm:space-y-4 pt-3 animate-in fade-in slide-in-from-left-8 duration-1000 delay-200">
-                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-black">
-                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-black/5 rounded-lg">
+                                      {/* Event Details Grid - White text on dark bg */}
+                                      <div className="space-y-2 sm:space-y-2.5 pt-1 animate-in fade-in slide-in-from-left-8 duration-1000 delay-200">
+                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-white">
+                                          <div className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-lg">
                                             <ICONS.Heart className="w-5 h-5" strokeWidth={2} />
                                           </div>
                                           <span>3 likes</span>
                                         </div>
 
-                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-black">
-                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-black/5 rounded-lg">
+                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-white">
+                                          <div className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-lg">
                                             <ICONS.Users className="w-5 h-5" strokeWidth={2} />
                                           </div>
                                           <span>{soldSlots} registered <span className="mx-1">•</span> {Math.max(0, totalSlots - soldSlots)} available</span>
                                         </div>
 
-                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-black">
-                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-black/5 rounded-lg">
+                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-white">
+                                          <div className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-lg">
                                             <ICONS.MapPin className="w-5 h-5" strokeWidth={2} />
                                           </div>
                                           <span className="line-clamp-1">{event.locationText || 'Location TBA'}</span>
                                         </div>
 
-                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-black">
-                                          <div className="w-8 h-8 flex items-center justify-center text-black bg-black/5 rounded-lg">
+                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-white">
+                                          <div className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-lg">
                                             <ICONS.Calendar className="w-5 h-5" strokeWidth={2} />
                                           </div>
                                           <span>{formatStartForCard(event.startAt || '', event.timezone)}</span>

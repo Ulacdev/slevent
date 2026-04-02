@@ -345,6 +345,21 @@ export const EventsManagement: React.FC = () => {
     }
   };
 
+  const handleTogglePromotion = async (event: Event) => {
+    try {
+      const result = await apiService.toggleEventPromotion(event.eventId);
+      setNotification({ 
+        message: result.promoted 
+          ? `"${event.eventName}" is now promoted on the discovery feed.` 
+          : `Promotion removed for "${event.eventName}".`, 
+        type: 'success' 
+      });
+      fetchEvents();
+    } catch (err) {
+      setNotification({ message: 'Failed to update promotion status.', type: 'error' });
+    }
+  };
+
   const toggleSelectAll = () => {
     if (selectedIds.length === currentItems.length) {
       setSelectedIds([]);
@@ -450,7 +465,14 @@ export const EventsManagement: React.FC = () => {
                       </div>
                       <div>
                         <div className="font-bold text-[#2E2E2F] text-[16px] tracking-tight group-hover:text-[#2E2E2F] transition-colors">{event.eventName}</div>
-                        <p className="text-[10px] font-bold text-[#2E2E2F]/40 uppercase tracking-widest mt-0.5">Status: {event.status}</p>
+                        <p className="text-[10px] font-bold text-[#2E2E2F]/40 uppercase tracking-widest mt-0.5 flex items-center gap-2">
+                          Status: {event.status}
+                          {(event.is_promoted || event.isPromoted) && (
+                            <span className="flex items-center gap-1 text-[#38BDF2] bg-[#38BDF2]/10 px-1.5 py-0.5 rounded-md border border-[#38BDF2]/20 text-[9px] animate-pulse uppercase">
+                              PROMOTED
+                            </span>
+                          )}
+                        </p>
                       </div>
                     </div>
                   </td>
@@ -465,6 +487,14 @@ export const EventsManagement: React.FC = () => {
                   </td>
                   <td className="px-8 py-7 text-center">
                     <div className="flex justify-center items-center gap-6 opacity-70 group-hover:opacity-100 transition-colors">
+                      <button
+                        onClick={() => handleTogglePromotion(event)}
+                        className={`transition-all p-2 rounded-lg group/btn flex items-center gap-2 ${event.is_promoted || event.isPromoted ? 'text-[#38BDF2] bg-[#38BDF2]/10' : 'text-[#2E2E2F]/40 hover:text-[#38BDF2] hover:bg-[#38BDF2]/5'}`}
+                        title={event.is_promoted || event.isPromoted ? "Featured (Click to Demote)" : "Featured this event"}
+                      >
+                        <ICONS.Star className={`w-[1.2rem] h-[1.2rem] group-hover/btn:scale-110 ${event.is_promoted || event.isPromoted ? 'fill-current' : ''}`} strokeWidth={2.2} />
+                      </button>
+                      
                       <button
                         onClick={() => { setIsBulkMode(false); setDeleteConfirm(event); }}
                         className="text-red-500 hover:text-red-600 transition-all p-2 hover:bg-red-50 rounded-lg group/btn"

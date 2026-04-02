@@ -33,61 +33,84 @@ export const toggleEventPromotion = async (req, res) => {
     if (eventErr) throw eventErr;
     if (!event) return res.status(404).json({ error: 'Event not found' });
 
-    // Check authorization
+    // Check authorization & Admin bypass
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('userId', userId)
+      .maybeSingle();
+
+    const isAdmin = 
+      String(userData?.role || '').toUpperCase() === 'ADMIN' || 
+      String(req.user?.role || '').toUpperCase() === 'ADMIN';
+
     const createdByUser = event.createdBy === userId;
     const isEventOrganizer = event.organizerId === userId || (event.organizerId && event.organizerId.includes(userId));
-    if (!createdByUser && !isEventOrganizer) {
+    
+    if (!isAdmin && !createdByUser && !isEventOrganizer) {
       return res.status(403).json({ error: 'Not authorized' });
     }
 
-    // Get organizer's subscription and plan
-    const { data: organizer, error: orgErr } = await supabase
-      .from('organizers')
-      .select('organizerId, currentPlanId')
-      .eq('ownerUserId', userId)
-      .maybeSingle();
+    // Get organizer's subscription and plan (for non-admins)
+    let organizerId = event.organizerId;
+    let promotionDurationDays = DEFAULT_PROMOTION_DURATION_DAYS;
+    let maxPromotedEvents = isAdmin ? 999999 : 0;
 
-    if (orgErr) throw orgErr;
-    if (!organizer) return res.status(403).json({ error: 'Not an organizer' });
-    if (!organizer.currentPlanId) {
-      return res.status(402).json({
-        error: 'Promotion is not available on your current plan.',
-        limit: 0,
-        activeCount: 0
+    if (!isAdmin) {
+      const { data: organizer, error: orgErr } = await supabase
+        .from('organizers')
+        .select('organizerId, currentPlanId')
+        .eq('ownerUserId', userId)
+        .maybeSingle();
+
+      if (orgErr) throw orgErr;
+      if (!organizer) return res.status(403).json({ error: 'Not an organizer' });
+      organizerId = organizer.organizerId;
+
+      if (!organizer.currentPlanId) {
+        return res.status(402).json({
+          error: 'Promotion is not available on your current plan.',
+          limit: 0,
+          activeCount: 0
+        });
+      }
+
+      // Get the plan details
+      const { data: planFeatures, error: planErr } = await supabase
+        .from('planFeatures')
+        .select('key, value')
+        .eq('planId', organizer.currentPlanId);
+
+      if (planErr) throw planErr;
+
+      // Extract promotion limits from plan features
+      (planFeatures || []).forEach(feat => {
+        if (feat.key === 'max_promoted_events') {
+          const parsed = Number.parseInt(feat.value, 10);
+          if (Number.isFinite(parsed) && parsed >= 0) maxPromotedEvents = parsed;
+        }
+        if (feat.key === 'promotion_duration_days') {
+          const parsed = Number.parseInt(feat.value, 10);
+          if (Number.isFinite(parsed) && parsed > 0) promotionDurationDays = parsed;
+        }
       });
+    } else {
+       // For admins, we use the event's own organizerId if available, otherwise null (if schema allows)
+       organizerId = event.organizerId || null;
     }
 
-    // Get the plan details
-    const { data: planFeatures, error: planErr } = await supabase
-      .from('planFeatures')
-      .select('key, value')
-      .eq('planId', organizer.currentPlanId);
-
-    if (planErr) throw planErr;
-
-    // Extract promotion limits from plan features
-    let maxPromotedEvents = 0;
-    let promotionDurationDays = DEFAULT_PROMOTION_DURATION_DAYS;
-
-    (planFeatures || []).forEach(feat => {
-      if (feat.key === 'max_promoted_events') {
-        const parsed = Number.parseInt(feat.value, 10);
-        if (Number.isFinite(parsed) && parsed >= 0) maxPromotedEvents = parsed;
-      }
-      if (feat.key === 'promotion_duration_days') {
-        const parsed = Number.parseInt(feat.value, 10);
-        if (Number.isFinite(parsed) && parsed > 0) promotionDurationDays = parsed;
-      }
-    });
-
     // Check if promotion exists
-    const { data: existingPromo, error: checkErr } = await supabase
+    let promoQuery = supabase
       .from('promoted_events')
       .select('promotion_id')
       .eq('eventId', eventId)
-      .eq('organizerId', organizer.organizerId)
-      .gte('expires_at', new Date().toISOString())
-      .maybeSingle();
+      .gte('expires_at', new Date().toISOString());
+
+    if (organizerId) {
+      promoQuery = promoQuery.eq('organizerId', organizerId);
+    }
+    
+    const { data: existingPromo, error: checkErr } = await promoQuery.maybeSingle();
 
     if (checkErr && checkErr.code !== 'PGRST116') throw checkErr;
 
@@ -102,29 +125,48 @@ export const toggleEventPromotion = async (req, res) => {
 
       await logAudit({
         actionType: 'EVENT_PROMOTION_REMOVED',
-        details: { eventId, organizerId: organizer.organizerId },
+        details: { eventId, organizerId: organizerId || 'system-admin' },
         req
       });
 
       return res.json({ promoted: false, message: 'Event promotion removed' });
     }
 
-    // Check promotion limit
-    const { data: activePromos, error: countErr } = await supabase
-      .from('promoted_events')
-      .select('promotion_id')
-      .eq('organizerId', organizer.organizerId)
-      .gte('expires_at', new Date().toISOString());
+    // Check promotion limit (skip for admins)
+    let activePromoCount = 0;
+    if (isAdmin && !organizerId) {
+       // Search for admin's own organizer account or any system-level organizer to satisfy NOT NULL FK
+       const { data: adminOrg } = await supabase
+         .from('organizers')
+         .select('organizerId')
+         .eq('ownerUserId', userId)
+         .maybeSingle();
 
-    if (countErr && countErr.code !== 'PGRST116') throw countErr;
-    const activePromoCount = (activePromos || []).length;
+       if (adminOrg) {
+         organizerId = adminOrg.organizerId;
+       } else {
+         const { data: firstOrg } = await supabase.from('organizers').select('organizerId').limit(1).maybeSingle();
+         organizerId = firstOrg?.organizerId;
+       }
+    }
 
-    if (maxPromotedEvents > 0 && activePromoCount >= maxPromotedEvents) {
-      return res.status(402).json({
-        error: `Promotion limit reached. Your plan allows ${maxPromotedEvents} promoted events at a time.`,
-        activeCount: activePromoCount,
-        limit: maxPromotedEvents
-      });
+    if (!isAdmin && organizerId) {
+      const { data: activePromos, error: countErr } = await supabase
+        .from('promoted_events')
+        .select('promotion_id')
+        .eq('organizerId', organizerId)
+        .gte('expires_at', new Date().toISOString());
+
+      if (countErr && countErr.code !== 'PGRST116') throw countErr;
+      activePromoCount = (activePromos || []).length;
+
+      if (maxPromotedEvents > 0 && activePromoCount >= maxPromotedEvents) {
+        return res.status(402).json({
+          error: `Promotion limit reached. Your plan allows ${maxPromotedEvents} promoted events at a time.`,
+          activeCount: activePromoCount,
+          limit: maxPromotedEvents
+        });
+      }
     }
 
     // Create promotion
@@ -135,7 +177,7 @@ export const toggleEventPromotion = async (req, res) => {
       .from('promoted_events')
       .insert({
         eventId,
-        organizerId: organizer.organizerId,
+        organizerId,
         createdAt: now.toISOString(),
         expires_at: expiresAt.toISOString(),
         duration_days: promotionDurationDays
@@ -147,7 +189,7 @@ export const toggleEventPromotion = async (req, res) => {
 
     await logAudit({
       actionType: 'EVENT_PROMOTION_CREATED',
-      details: { eventId, organizerId: organizer.organizerId, expiresAt },
+      details: { eventId, organizerId: organizerId || 'system-admin', expiresAt },
       req
     });
 

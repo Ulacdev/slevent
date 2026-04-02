@@ -51,7 +51,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick, layou
   return (
     <div
       onClick={handleClick}
-      className={`cursor-pointer group flex bg-white transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-[#2E2E2F]/5 hover:border-[#2E2E2F]/15 ${isHorizontal ? 'flex-row rounded-2xl p-4 gap-6' : 'flex-col rounded-xl overflow-hidden'}`}
+      className={`cursor-pointer group flex transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.2)] border border-[#2E2E2F]/10 hover:border-[#38BDF2]/30 ${isHorizontal ? 'flex-row rounded-2xl p-4 gap-6 bg-white' : 'flex-col rounded-xl overflow-hidden bg-[#1A1A1A]'}`}
       style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
     >
       {/* Image Container */}
@@ -75,15 +75,14 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick, layou
         {/* Promoted Badge - Top Left */}
         {event.is_promoted && (
           <div className="absolute top-5 left-5 bg-[#38BDF2] px-3 py-1.5 rounded-full text-[10px] font-black tracking-widest text-white flex items-center gap-1.5 shadow-lg animate-in fade-in zoom-in duration-500 z-20">
-            <ICONS.Info className="w-3.5 h-3.5 text-white" strokeWidth={5} />
             <span>PROMOTED</span>
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className={`flex flex-col ${isHorizontal ? 'flex-1 py-1' : 'p-5 space-y-3'}`}>
-        <h3 className="font-black text-black text-2xl line-clamp-2 group-hover:text-[#38BDF2] transition-colors leading-tight">
+      <div className={`flex flex-col ${isHorizontal ? 'flex-1 py-1 text-black' : 'p-5 space-y-3 bg-[#1A1A1A]'}`}>
+        <h3 className={`font-black text-2xl line-clamp-2 transition-colors leading-tight ${isHorizontal ? 'text-black group-hover:text-[#38BDF2]' : 'text-white group-hover:text-[#38BDF2]'}`}>
           {event.eventName}
         </h3>
 
