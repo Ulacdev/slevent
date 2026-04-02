@@ -344,13 +344,12 @@ export const EventCard: React.FC<EventCardProps> = ({
           {/* Promoted / Bottom Area */}
           <div className="mt-auto pt-6 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              {(event.is_promoted || (event as any).isPromoted) && (
+              {!isTrending && (event.is_promoted || (event as any).isPromoted) && (
                 <div className="group/promoted relative">
                   <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.15em] border border-[#38BDF2]/30 whitespace-nowrap cursor-help transition-all hover:bg-[#38BDF2]/20">
                     <ICONS.Info className="w-3.5 h-3.5" strokeWidth={3} />
                     PROMOTED
                   </div>
-                  {/* Tooltip Overlay */}
                   <div className="absolute bottom-full left-0 mb-3 opacity-0 group-hover/promoted:opacity-100 pointer-events-none transition-all duration-300 translate-y-1 group-hover/promoted:translate-y-0 z-50">
                     <div className="bg-black text-white text-[9px] font-bold px-3 py-1.5 rounded-xl whitespace-nowrap shadow-2xl border border-white/10 uppercase tracking-widest text-center leading-tight">
                       Featured: Highlighted via<br />Organizer Subscription
@@ -359,6 +358,7 @@ export const EventCard: React.FC<EventCardProps> = ({
                   </div>
                 </div>
               )}
+
             </div>
 
             <div className="flex items-center gap-1 -mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -393,15 +393,12 @@ export const EventCard: React.FC<EventCardProps> = ({
                 #{trendingRank} Trending
               </div>
           )}
-          {(event.is_promoted || (event as any).isPromoted) && (
+          {!isTrending && (event.is_promoted || (event as any).isPromoted) && (
               <div className="group/promoted relative">
-                  <div
-                    className="inline-flex items-center gap-2 rounded-full px-4 py-1 bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.15em] border border-[#38BDF2]/30 transition-all hover:scale-105 active:scale-95 whitespace-nowrap cursor-help"
-                  >
+                  <div className="inline-flex items-center gap-2 rounded-full px-4 py-1 bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.15em] border border-[#38BDF2]/30 transition-all hover:scale-105 active:scale-95 whitespace-nowrap cursor-help">
                     <ICONS.Info className="w-3.5 h-3.5" strokeWidth={3} />
                     PROMOTED
                   </div>
-                  {/* Tooltip Overlay */}
                   <div className="absolute bottom-full left-0 mb-2 opacity-0 group-hover/promoted:opacity-100 pointer-events-none transition-all duration-300 translate-y-1 group-hover/promoted:translate-y-0 z-50">
                       <div className="bg-black text-white text-[9px] font-bold px-3 py-1.5 rounded-lg whitespace-nowrap shadow-2xl border border-white/10 uppercase tracking-widest text-center leading-tight">
                           Featured: Highlighted via<br />Organizer Subscription
@@ -410,6 +407,7 @@ export const EventCard: React.FC<EventCardProps> = ({
                   </div>
               </div>
           )}
+
         </div>
         {event.imageUrl ? (
           <img
