@@ -22,11 +22,12 @@ export type EventCardData = {
 type EventCardProps = {
   event: EventCardData;
   onEventClick?: (eventId: string) => void;
+  layout?: 'vertical' | 'horizontal';
 };
 
 const BRAND_LOGO_URL = 'https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg';
 
-export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => {
+export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick, layout = 'vertical' }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -45,13 +46,16 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
     ? ((event.totalTickets - event.ticketsAvailable) / event.totalTickets) * 100
     : 0;
 
+  const isHorizontal = layout === 'horizontal';
+
   return (
     <div
       onClick={handleClick}
-      className="cursor-pointer group rounded-xl overflow-hidden border border-transparent hover:border-[#E5E7EB] bg-[#F2F2F2] transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+      className={`cursor-pointer group flex bg-white transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-[#2E2E2F]/5 hover:border-[#2E2E2F]/15 ${isHorizontal ? 'flex-row rounded-2xl p-4 gap-6' : 'flex-col rounded-xl overflow-hidden'}`}
+      style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
     >
       {/* Image Container */}
-      <div className="relative overflow-hidden h-64 md:h-72 bg-[#F2F2F2]">
+      <div className={`relative overflow-hidden bg-[#F2F2F2] shrink-0 ${isHorizontal ? 'w-[280px] h-[190px] rounded-xl' : 'h-64 md:h-72 w-full'}`}>
         {event.image_url ? (
           <img
             src={event.image_url}
@@ -78,7 +82,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick }) => 
       </div>
 
       {/* Content */}
-      <div className="p-5 space-y-3">
+      <div className={`flex flex-col ${isHorizontal ? 'flex-1 py-1' : 'p-5 space-y-3'}`}>
         <h3 className="font-black text-black text-2xl line-clamp-2 group-hover:text-[#38BDF2] transition-colors leading-tight">
           {event.eventName}
         </h3>

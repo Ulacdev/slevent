@@ -37,38 +37,81 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   );
 };
 
-export const EventCardSkeleton: React.FC = () => (
-  <div className="bg-[#F2F2F2] border border-black/5 rounded-[5px] overflow-hidden shadow-sm h-full flex flex-col">
-    {/* Image Area */}
-    <Skeleton className="h-44 sm:h-52 w-full !rounded-none" />
-    
-    <div className="p-5 flex-1 flex flex-col gap-3">
-      {/* Title */}
-      <div className="space-y-2">
-        <Skeleton variant="text" width="90%" height={24} />
-        <Skeleton variant="text" width="60%" height={24} />
-      </div>
-
-      {/* Info Rows */}
-      <div className="space-y-2 mt-2">
-        <div className="flex items-center gap-2.5">
-          <Skeleton variant="rect" width={16} height={16} />
-          <Skeleton variant="text" width="70%" />
+export const EventCardSkeleton: React.FC<{ layout?: 'vertical' | 'horizontal' }> = ({ layout = 'vertical' }) => {
+  if (layout === 'horizontal') {
+    return (
+      <div className="bg-[#F2F2F2] border border-black/5 rounded-2xl p-4 flex flex-col sm:flex-row gap-6 shadow-sm w-full animate-in fade-in duration-500">
+        {/* Image Area */}
+        <div className="relative w-full sm:w-[280px] lg:w-[320px] h-[180px] rounded-xl overflow-hidden shrink-0">
+          <Skeleton className="w-full h-full !rounded-none" />
+          {/* Top Left Date Badge Placeholder */}
+          <div className="absolute top-3 left-3 z-[1]">
+             <Skeleton variant="rect" width={58} height={54} className="rounded-xl opacity-70" />
+          </div>
         </div>
-        <div className="flex items-center gap-2.5">
-          <Skeleton variant="rect" width={16} height={16} />
-          <Skeleton variant="text" width="50%" />
+        
+        {/* Content Area */}
+        <div className="flex flex-col flex-1 py-1 gap-5">
+          <div className="space-y-3">
+             <Skeleton variant="text" width="85%" height={32} />
+             <Skeleton variant="text" width="60%" height={24} />
+             <Skeleton variant="text" width="40%" height={24} />
+          </div>
+          
+          <div className="mt-auto flex items-center justify-between pt-6">
+             <Skeleton variant="rect" width={110} height={32} className="rounded-full" />
+             <div className="flex gap-2">
+                <Skeleton variant="circle" width={38} height={38} />
+                <Skeleton variant="circle" width={38} height={38} />
+             </div>
+          </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Footer Area */}
-      <div className="mt-auto flex items-center justify-between pt-3 border-t border-black/5">
-        <Skeleton variant="rect" width={80} height={28} className="rounded-full" />
-        <Skeleton variant="text" width={60} height={24} />
+  return (
+    <div className="bg-[#F2F2F2] border border-black/5 rounded-[5px] overflow-hidden shadow-sm h-full flex flex-col animate-in fade-in duration-500">
+      {/* Image Area with Date Overlay */}
+      <div className="relative h-44 sm:h-52 w-full overflow-hidden">
+        <Skeleton className="w-full h-full !rounded-none" />
+        <div className="absolute top-3 left-3 z-[1]">
+           <Skeleton variant="rect" width={54} height={50} className="rounded-md opacity-70" />
+        </div>
+      </div>
+      
+      <div className="p-5 flex-1 flex flex-col gap-4">
+        {/* Title */}
+        <Skeleton variant="text" width="90%" height={26} />
+        
+        {/* Separator style */}
+        <div className="h-px bg-black/5 w-full my-1.5" />
+
+        {/* Info Rows */}
+        <div className="space-y-3.5">
+          <div className="flex items-center gap-2.5">
+            <Skeleton variant="rect" width={18} height={18} />
+            <Skeleton variant="text" width="75%" height={18} />
+          </div>
+          <div className="flex items-center gap-2.5">
+            <Skeleton variant="rect" width={18} height={18} />
+            <Skeleton variant="text" width="55%" height={18} />
+          </div>
+          <div className="flex items-center gap-2.5">
+            <Skeleton variant="rect" width={18} height={18} />
+            <Skeleton variant="text" width="50%" height={18} />
+          </div>
+        </div>
+
+        {/* Footer Area */}
+        <div className="mt-auto flex items-center justify-between pt-4">
+          <Skeleton variant="rect" width={90} height={32} className="rounded-md" />
+          <Skeleton variant="text" width={60} height={24} />
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const OrganizerCardSkeleton: React.FC = () => (
   <div className="w-[300px] sm:w-[360px] shrink-0 snap-center bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl p-6 flex flex-col items-center text-center">

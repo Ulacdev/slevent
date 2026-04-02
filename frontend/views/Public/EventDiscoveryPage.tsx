@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { Event, UserRole } from '../../types';
 import { Button, PageLoader } from '../../components/Shared';
-import { EventCardSkeleton } from '../../components/Shared/Skeleton';
+import { Skeleton, EventCardSkeleton } from '../../components/Shared/Skeleton';
 import { ICONS } from '../../constants';
 import { EVENT_CATEGORIES } from '../../utils/eventCategories';
 // Removed static category helpers to use dynamic DB-driven ones
@@ -195,7 +195,7 @@ export const EventDiscoveryPage: React.FC = () => {
         const nonPromotedFiltered = filteredEvents.filter(e => !promotedIds.has(e.eventId));
 
         // Add promoted flag to each promoted event
-        const markedPromotedEvents = promotedEvents.map(e => ({ ...e, isPromoted: true }));
+        const markedPromotedEvents = promotedEvents.map(e => ({ ...e, is_promoted: true }));
 
         return [...markedPromotedEvents, ...nonPromotedFiltered];
     }, [promotedEvents, filteredEvents]);
@@ -207,7 +207,44 @@ export const EventDiscoveryPage: React.FC = () => {
     };
 
     if (loading) {
-        return <PageLoader label="Searching for discovery matches..." variant="page" />;
+        return (
+            <div className="flex min-h-screen bg-[#F2F2F2]">
+                {/* Skeleton Sidebar */}
+                <aside className="hidden md:block w-[200px] md:w-[260px] bg-[#F9FAFB] border-r border-[#E5E7EB] p-8 space-y-12 animate-in slide-in-from-left-4 duration-500">
+                    <div className="space-y-4">
+                        <Skeleton variant="text" width="70%" height={28} />
+                        <Skeleton variant="text" width="40%" height={16} />
+                    </div>
+                    <div className="space-y-8 pt-8">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={i} className="flex items-center gap-4">
+                                <Skeleton variant="rect" width={32} height={32} className="rounded-xl" />
+                                <Skeleton variant="text" width="60%" />
+                            </div>
+                        ))}
+                    </div>
+                </aside>
+                {/* Skeleton Main Content */}
+                <main className="flex-1 p-8 md:p-12 overflow-y-auto">
+                    <div className="max-w-7xl mx-auto space-y-12">
+                        {/* Header Skeleton */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                            <div className="space-y-4">
+                                <Skeleton variant="text" width={300} height={40} />
+                                <Skeleton variant="text" width={120} height={16} />
+                            </div>
+                            <Skeleton variant="rect" width={160} height={48} className="rounded-xl shadow-sm" />
+                        </div>
+                        {/* Grid Skeleton */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
+                            {[...Array(6)].map((_, i) => (
+                                <EventCardSkeleton key={i} />
+                            ))}
+                        </div>
+                    </div>
+                </main>
+            </div>
+        );
     }
 
     return (
@@ -325,24 +362,7 @@ export const EventDiscoveryPage: React.FC = () => {
 
             {/* Main Content Area */}
             <main className="flex-1 min-w-0 h-screen overflow-y-auto scrollbar-hide">
-                {/* Hero Section */}
-                <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[260px] sm:h-[300px] lg:h-[350px] overflow-hidden">
-                    <div className="absolute inset-0 bg-[linear-gradient(116deg,#38BDF2_0%,#38BDF2_44%,#F2F2F2_100%)]" />
-                    <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,62,134,0.45)_0%,rgba(0,62,134,0.2)_34%,rgba(0,62,134,0)_72%)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />
-
-                    <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-5 sm:px-8">
-                        <div className="max-w-[840px]">
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/90 mb-4">All Events</p>
-                            <h1 className="text-[2.1rem] font-black leading-none tracking-tight text-white sm:text-5xl">
-                                Event Marketplace
-                            </h1>
-                            <p className="mt-4 max-w-[700px] text-base leading-relaxed text-white/95 sm:text-[1.1rem]">
-                                Explore all published events and use the sorting controls to narrow by relevance, timing, and location context.
-                            </p>
-                        </div>
-                    </div>
-                </section>
+                {/* Hero Section Removed per user request */}
 
                 <div className="max-w-[88rem] mx-auto px-6 sm:px-10">
                     <DestinationSlider onSelect={(city) => {
@@ -392,9 +412,18 @@ export const EventDiscoveryPage: React.FC = () => {
                                     >
                                         {/* Featured Badge - Show only for promoted events */}
                                         {event.isPromoted && (
-                                            <div className="absolute -top-4 left-4 z-10 flex items-center gap-2 px-3 py-1.5 bg-[#38BDF2] rounded-full text-[9px] font-bold uppercase tracking-widest text-white shadow-lg border border-white/20">
-                                                <ICONS.Star className="w-3 h-3 text-white fill-current" />
-                                                Featured
+                                            <div className="group/promoted relative absolute -top-4 left-4 z-10">
+                                                <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.15em] border border-[#38BDF2]/30 whitespace-nowrap cursor-help">
+                                                    <ICONS.Info className="w-3.5 h-3.5" strokeWidth={3} />
+                                                    PROMOTED
+                                                </div>
+                                                {/* Tooltip Overlay */}
+                                                <div className="absolute bottom-full left-0 mb-3 opacity-0 group-hover/promoted:opacity-100 pointer-events-none transition-all duration-300 translate-y-1 group-hover/promoted:translate-y-0 z-50">
+                                                    <div className="bg-black text-white text-[9px] font-bold px-3 py-1.5 rounded-xl whitespace-nowrap shadow-2xl border border-white/10 uppercase tracking-widest text-center leading-tight">
+                                                        Featured: Highlighted via<br />Organizer Subscription
+                                                    </div>
+                                                    <div className="w-2 h-2 bg-black rotate-45 absolute -bottom-1 left-4 border-r border-b border-white/10"></div>
+                                                </div>
                                             </div>
                                         )}
                                         <EventCard event={event} onActionNotice={setInteractionNotice} />

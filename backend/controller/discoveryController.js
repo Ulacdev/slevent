@@ -13,7 +13,7 @@ export const getDiscoveryDestinations = async (req, res) => {
             .from('tbl_popular_places')
             .select('*')
             .eq('is_active', true)
-            .order('priority', { ascending: false });
+            .order('created_at', { ascending: false });
 
         // Map database fields (image_url) to frontend fields (imageUrl) 
         // and mark it as 'isCurated' so the slider prioritizes it.
@@ -158,55 +158,110 @@ export const getAvailableLocations = async (req, res) => {
 
         if (error) return res.status(500).json({ error: error.message });
 
-        const cities = new Set();
+        const countryToCities = {};
         const countries = new Set();
         const KNOWN_COUNTRIES = ['Philippines', 'Singapore', 'United States', 'Malaysia', 'Indonesia', 'Japan', 'South Korea'];
+
+        // Fetch already featured destinations to exclude them from suggestions
+        const { data: featuredData } = await supabase
+            .from('tbl_popular_places')
+            .select('city');
+        const featuredCities = new Set((featuredData || []).map(d => d.city.toLowerCase().trim()));
 
         (data || []).forEach(event => {
             if (event.locationType === 'ONLINE' || !event.locationText) return;
             
             const text = event.locationText;
+            if (!text || text.toLowerCase() === 'undefined') return;
             const textLower = text.toLowerCase();
             
             // Identify Country
-            const foundCountry = KNOWN_COUNTRIES.find(c => textLower.includes(c.toLowerCase()));
-            if (foundCountry) {
-                countries.add(foundCountry);
-            } else {
-                // Fallback to Philippines for local events without explicit country in string
-                countries.add('Philippines');
-            }
+            const foundCountry = KNOWN_COUNTRIES.find(c => textLower.includes(c.toLowerCase())) || 'Philippines';
+            countries.add(foundCountry);
 
             // Identify City / Municipality
-            // Remove the country from the parts if it was explicitly written at the end
-            let parts = text.split(',').map(p => p.trim()).filter(p => p.length > 0);
-            if (foundCountry && parts.length > 0 && parts[parts.length - 1].toLowerCase() === foundCountry.toLowerCase()) {
+            let parts = text.split(',').map(p => p.trim()).filter(p => p.length > 0 && p.toLowerCase() !== 'undefined');
+            if (parts.length > 0 && parts[parts.length - 1].toLowerCase() === foundCountry.toLowerCase()) {
                 parts.pop(); 
             }
 
             if (parts.length > 0) {
-                // In a typical PH address (e.g. Ayala Malls, Kawit, Cavite)
-                // The last part is Province, the second to last is Municipality/City
-                if (parts.length >= 3) {
-                    // E.g. [Building, Barangay, Municipality, Province] -> Municipality is second to last
-                    cities.add(parts[parts.length - 2]);
-                } else if (parts.length === 2) {
-                    // E.g. [Building, Municipality] OR [Municipality, Province] -> use first part
-                    cities.add(parts[0]);
-                } else {
-                    // Just 1 part
-                    cities.add(parts[0]);
+                const PH_REGIONS = [
+                    'National Capital Region', 'NCR', 'Cordillera Administrative Region', 'CAR',
+                    'Ilocos Region', 'Region I', 'Cagayan Valley', 'Region II', 'Central Luzon', 'Region III',
+                    'CALABARZON', 'Region IV-A', 'MIMAROPA', 'Region IV-B', 'Bicol Region', 'Region V',
+                    'Western Visayas', 'Region VI', 'Central Visayas', 'Region VII', 'Eastern Visayas', 'Region VIII',
+                    'Zamboanga Peninsula', 'Region IX', 'Northern Mindanao', 'Region X', 'Davao Region', 'Region XI',
+                    'SOCCSKSARGEN', 'Region XII', 'Caraga', 'Region XIII', 'BARMM', 'ARMM', 'Mimaropa'
+                ];
+                
+                const PH_PROVINCES = [
+                    'Abra', 'Agusan del Norte', 'Agusan del Sur', 'Aklan', 'Albay', 'Antique', 'Apayao', 'Aurora',
+                    'Basilan', 'Bataan', 'Batanes', 'Batangas', 'Benguet', 'Biliran', 'Bohol', 'Bukidnon', 'Bulacan',
+                    'Cagayan', 'Camarines Norte', 'Camarines Sur', 'Camiguin', 'Capiz', 'Catanduanes', 'Cavite', 'Cebu',
+                    'Cotabato', 'Davao de Oro', 'Davao del Norte', 'Davao del Sur', 'Davao Occidental', 'Davao Oriental',
+                    'Dinagat Islands', 'Eastern Samar', 'Guimaras', 'Ifugao', 'Ilocos Norte', 'Ilocos Sur', 'Iloilo',
+                    'Isabela', 'Kalinga', 'La Union', 'Laguna', 'Lanao del Norte', 'Lanao del Sur', 'Leyte', 'Maguindanao',
+                    'Marinduque', 'Masbate', 'Misamis Occidental', 'Misamis Oriental', 'Mountain Province', 'Negros Occidental',
+                    'Negros Oriental', 'Northern Samar', 'Nueva Ecija', 'Nueva Vizcaya', 'Occidental Mindoro', 'Oriental Mindoro',
+                    'Palawan', 'Pampanga', 'Pangasinan', 'Quezon', 'Quirino', 'Rizal', 'Romblon', 'Samar', 'Sarangani', 'Siquijor',
+                    'Sorsogon', 'South Cotabato', 'Southern Leyte', 'Sultan Kudarat', 'Sulu', 'Surigao del Norte', 'Surigao del Sur',
+                    'Tarlac', 'Tawi-Tawi', 'Zambales', 'Zamboanga del Norte', 'Zamboanga del Sur', 'Zamboanga Sibugay', 'Metro Manila'
+                ];
+
+                const ADDRESS_KEYWORDS = [
+                    'Street', 'St', 'Ave', 'Avenue', 'Road', 'Rd', 'Blvd', 'Building', 'Bldg', 
+                    'Unit', 'Floor', 'Barangay', 'Brgy', 'Zone', 'Poblacion', 'Subdivision', 'Subd',
+                    'Km', 'Corner', 'Cor', 'Highway', 'Hway', 'Compound', 'Cmpd'
+                ];
+
+                const blacklist = new Set([
+                    ...PH_REGIONS, ...PH_PROVINCES, ...ADDRESS_KEYWORDS
+                ].map(s => s.toLowerCase()));
+
+                let foundCity = null;
+                for (let i = parts.length - 1; i >= 0; i--) {
+                    const part = parts[i];
+                    const partLower = part.toLowerCase();
+                    
+                    // 1. Skip if exactly matches or starts with anything in the blacklist
+                    if (blacklist.has(partLower)) continue;
+                    
+                    // 2. Skip if part CONTAINS any known province or region name (e.g. "4107 Cavite")
+                    const isRegionPart = [...PH_REGIONS, ...PH_PROVINCES].some(r => partLower.includes(r.toLowerCase()));
+                    if (isRegionPart) continue;
+
+                    // 3. Skip if contains ANY address/building keywords (e.g. "123 Street")
+                    const isAddressPart = ADDRESS_KEYWORDS.some(k => partLower.includes(k.toLowerCase()));
+                    if (isAddressPart) continue;
+
+                    // 4. Skip if part is mostly numeric (Zip codes Like 4107, etc)
+                    // Matches strings that are just numbers, or 4-5 digit numbers at the start
+                    if (/^\d{4,10}(\s|$)/.test(part) || /^\d+$/.test(part.replace(/[-\s]/g, ''))) continue;
+
+                    foundCity = part;
+                    break;
+                }
+
+                // IMPORTANT: Only add if we actually found a valid municipality/city,
+                // and avoid the "parts[0]" fallback which often yields streets/zipcodes.
+                if (foundCity && foundCity.toLowerCase() !== 'undefined' && !featuredCities.has(foundCity.toLowerCase().trim())) {
+                    if (!countryToCities[foundCountry]) countryToCities[foundCountry] = new Set();
+                    countryToCities[foundCountry].add(foundCity);
                 }
             }
         });
 
-        // Clean up cities array to remove anything obviously wrong
-        const cleanCities = Array.from(cities).filter(c => c.length > 2 && c.length < 50).sort();
+        const responseData = {
+            countries: Array.from(countries).sort(),
+            countryToCities: {}
+        };
 
-        return res.json({
-            cities: cleanCities,
-            countries: Array.from(countries).sort()
-        });
+        for (const [country, citySet] of Object.entries(countryToCities)) {
+            responseData.countryToCities[country] = Array.from(citySet).filter(c => c.length > 2 && c.length < 50).sort();
+        }
+
+        return res.json(responseData);
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }

@@ -87,6 +87,10 @@ const EventMobileCard = React.memo<{
     navigate: any;
 }>(({ event, isPromoted, onOpenEdit, onOpenTickets, onOpenAttendeePop, onTogglePromotion, onArchive, onCancel, onNotify, openDropdownId, setOpenDropdownId, navigate }) => {
     const isDropdownOpen = openDropdownId === event.eventId;
+    const now = new Date();
+    const eventEnd = event.endAt ? new Date(event.endAt) : new Date(new Date(event.startAt).getTime() + 2 * 60 * 60 * 1000);
+    const isCompleted = now > eventEnd;
+    const isArchiveDisabled = event.status === 'PUBLISHED' && !isCompleted;
 
     return (
         <Card
@@ -99,19 +103,12 @@ const EventMobileCard = React.memo<{
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
-                        {(() => {
-                            const now = new Date();
-                            const eventEnd = event.endAt ? new Date(event.endAt) : new Date(new Date(event.startAt).getTime() + 2 * 60 * 60 * 1000);
-                            const isCompleted = now > eventEnd;
-                            return (
-                                <Badge
-                                    type={isCompleted ? 'neutral' : (event.status === 'PUBLISHED' ? 'success' : 'neutral')}
-                                    className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5"
-                                >
-                                    {isCompleted ? 'COMPLETED' : event.status}
-                                </Badge>
-                            );
-                        })()}
+                        <Badge
+                            type={isCompleted ? 'neutral' : (event.status === 'PUBLISHED' ? 'success' : 'neutral')}
+                            className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5"
+                        >
+                            {isCompleted ? 'COMPLETED' : event.status}
+                        </Badge>
                         {isPromoted && (
                             <Badge
                                 type="success"
@@ -177,8 +174,16 @@ const EventMobileCard = React.memo<{
                                 <ICONS.AlertTriangle className="w-4 h-4" /> Cancel Event
                             </button>
                         )}
-                        <button onClick={(e) => { e.stopPropagation(); onArchive(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-600 flex items-center gap-3 transition-colors">
-                            <ICONS.Trash className="w-4 h-4" /> Archive
+                        <button 
+                            onClick={(e) => { 
+                                if (isArchiveDisabled) return;
+                                e.stopPropagation(); 
+                                onArchive(); 
+                            }} 
+                            disabled={isArchiveDisabled}
+                            className={`w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-colors ${isArchiveDisabled ? 'text-[#2E2E2F]/20 cursor-not-allowed opacity-50' : 'text-red-500/70 hover:bg-red-500/10 hover:text-red-600'}`}
+                        >
+                            <ICONS.Trash className="w-4 h-4" /> {isArchiveDisabled ? 'Archive Lock' : 'Archive'}
                         </button>
                     </div>
                 </div>
@@ -208,6 +213,10 @@ const EventTableRow = React.memo<{
 }>(({ event, isSelected, onToggle, onOpenEdit, onOpenTickets, onOpenAttendeePop, onTogglePromotion, onArchive, onCancel, onNotify, isPromoted, openDropdownId, setOpenDropdownId }) => {
     const navigate = useNavigate();
     const isDropdownOpen = openDropdownId === event.eventId;
+    const now = new Date();
+    const eventEnd = event.endAt ? new Date(event.endAt) : new Date(new Date(event.startAt).getTime() + 2 * 60 * 60 * 1000);
+    const isCompleted = now > eventEnd;
+    const isArchiveDisabled = event.status === 'PUBLISHED' && !isCompleted;
 
     return (
         <tr className={`hover:bg-[#38BDF2]/10 transition-colors group cursor-pointer ${isSelected ? 'bg-[#38BDF2]/10' : ''}`} onClick={onOpenEdit}>
@@ -253,23 +262,16 @@ const EventTableRow = React.memo<{
                 </div>
             </td>
             <td className="px-8 py-7">
-                {(() => {
-                    const now = new Date();
-                    const eventEnd = event.endAt ? new Date(event.endAt) : new Date(new Date(event.startAt).getTime() + 2 * 60 * 60 * 1000);
-                    const isCompleted = now > eventEnd;
-                    return (
-                        <div className={`inline-flex px-3.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${isCompleted
-                            ? 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
-                            : event.status === 'PUBLISHED'
-                                ? 'bg-[#38BDF2]/20 text-[#2E2E2F]'
-                                : event.status === 'DRAFT'
-                                    ? 'bg-[#F2F2F2] text-[#2E2E2F]/60 border-2 border-[#2E2E2F]/15'
-                                    : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
-                            }`}>
-                            {isCompleted ? 'COMPLETED' : event.status}
-                        </div>
-                    );
-                })()}
+                <div className={`inline-flex px-3.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${isCompleted
+                    ? 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
+                    : event.status === 'PUBLISHED'
+                        ? 'bg-[#38BDF2]/20 text-[#2E2E2F]'
+                        : event.status === 'DRAFT'
+                            ? 'bg-[#F2F2F2] text-[#2E2E2F]/60 border-2 border-[#2E2E2F]/15'
+                            : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
+                    }`}>
+                    {isCompleted ? 'COMPLETED' : event.status}
+                </div>
             </td>
             <td className="px-8 py-7">
                 <div className="flex items-center gap-2">
@@ -314,8 +316,16 @@ const EventTableRow = React.memo<{
                                 <ICONS.AlertTriangle className="w-4 h-4" /> Cancel Event
                             </button>
                         )}
-                        <button onClick={(e) => { e.stopPropagation(); onArchive(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-600 flex items-center gap-3 transition-colors">
-                            <ICONS.Trash className="w-4 h-4" /> Archive
+                        <button 
+                            onClick={(e) => { 
+                                if (isArchiveDisabled) return;
+                                e.stopPropagation(); 
+                                onArchive(); 
+                            }} 
+                            disabled={isArchiveDisabled}
+                            className={`w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-colors ${isArchiveDisabled ? 'text-[#2E2E2F]/20 cursor-not-allowed opacity-50' : 'text-red-500/70 hover:bg-red-500/10 hover:text-red-600'}`}
+                        >
+                            <ICONS.Trash className="w-4 h-4" /> {isArchiveDisabled ? 'Archive Lock' : 'Archive'}
                         </button>
                     </div>
                 </div>
@@ -451,6 +461,19 @@ export const UserEvents: React.FC = () => {
     };
     const handleBulkArchive = async () => {
         if (selectedRows.size === 0) return;
+
+        const selectedEvents = events.filter(e => selectedRows.has(e.eventId));
+        const now = new Date();
+        const restrictedEvents = selectedEvents.filter(e => {
+            const eventEnd = e.endAt ? new Date(e.endAt) : new Date(new Date(e.startAt).getTime() + 2 * 60 * 60 * 1000);
+            return e.status === 'PUBLISHED' && now <= eventEnd;
+        });
+
+        if (restrictedEvents.length > 0) {
+            showToast('error', `Cannot archive ${restrictedEvents.length} active published events. Only completed or cancelled events can be archived.`);
+            return;
+        }
+
         if (!confirm(`Are you sure you want to archive ${selectedRows.size} events?`)) return;
         setSubmitting(true);
         try {
@@ -1878,13 +1901,13 @@ export const UserEvents: React.FC = () => {
                 title="Cancel Event"
             >
                 <div className="space-y-6">
-                    <div className={`flex items-start gap-5 p-6 rounded-[1.75rem] border ${cancelMeta.hasPaidTickets ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'}`}>
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${cancelMeta.hasPaidTickets ? 'bg-amber-100' : 'bg-red-100'}`}>
-                            <ICONS.AlertTriangle className={`w-6 h-6 ${cancelMeta.hasPaidTickets ? 'text-amber-500' : 'text-red-500'}`} strokeWidth={2} />
+                    <div className={`flex items-start gap-5 p-6 rounded-[1.75rem] border ${cancelMeta.hasPaidTickets && cancelMeta.attendeeCount > 0 ? 'bg-red-100 border-red-300' : (cancelMeta.hasPaidTickets ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200')}`}>
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${cancelMeta.hasPaidTickets && cancelMeta.attendeeCount > 0 ? 'bg-red-200' : (cancelMeta.hasPaidTickets ? 'bg-amber-100' : 'bg-red-100')}`}>
+                            <ICONS.AlertTriangle className={`w-6 h-6 ${cancelMeta.hasPaidTickets && cancelMeta.attendeeCount > 0 ? 'text-red-600' : (cancelMeta.hasPaidTickets ? 'text-amber-500' : 'text-red-500')}`} strokeWidth={2} />
                         </div>
                         <div className="flex-1">
                             <p className="font-bold text-[#2E2E2F] text-[16px] tracking-tight">
-                                {cancelMeta.hasPaidTickets ? 'CRITICAL: Financial Liability Detected' : 'Mandatory Confirmation'}
+                                {cancelMeta.hasPaidTickets && cancelMeta.attendeeCount > 0 ? 'CANCELLATION PROHIBITED' : (cancelMeta.hasPaidTickets ? 'CRITICAL: Financial Liability Detected' : 'Mandatory Confirmation')}
                             </p>
                             <div className="text-[13px] text-[#2E2E2F]/60 font-medium mt-2 leading-relaxed space-y-3">
                                 <p>You are about to cancel <strong>"{cancelConfirm?.eventName}"</strong>.</p>
@@ -1898,7 +1921,11 @@ export const UserEvents: React.FC = () => {
                                             <span className="text-[11px] font-black uppercase tracking-widest">{cancelMeta.attendeeCount} Registered Attendees</span>
                                         </div>
 
-                                        {cancelMeta.hasPaidTickets ? (
+                                        {cancelMeta.hasPaidTickets && cancelMeta.attendeeCount > 0 ? (
+                                            <div className="p-4 bg-red-600/10 border border-red-600/20 rounded-xl text-red-700 text-[12px] font-bold">
+                                                🚨 SYSTEM LOCK: Cancellation is not allowed for paid events with active attendees. This policy protects ticket holders and ensures financial integrity. Please contact support if you need to discuss this event status.
+                                            </div>
+                                        ) : cancelMeta.hasPaidTickets ? (
                                             <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-900 text-[12px] font-bold">
                                                 🚨 ALERT: This event has PAID bookings. Cancelling will NOT automatically refund attendees. You are responsible for manual refunds via your payment provider.
                                             </div>
@@ -1915,20 +1942,20 @@ export const UserEvents: React.FC = () => {
                     </div>
 
                     <div className="flex gap-4">
-                        <Button
-                            className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border-2 border-[#2E2E2F]/15 hover:bg-[#2E2E2F]/10 transition-colors min-h-[32px]"
+                        <button
+                            className="flex-1 min-h-[44px] rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border-2 border-[#2E2E2F]/15 hover:bg-[#2E2E2F]/10 transition-colors"
                             onClick={() => setCancelConfirm(null)}
                             disabled={submitting}
                         >
                             Back
-                        </Button>
-                        <Button
-                            className="flex-[2] py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 transition-colors min-h-[32px]"
+                        </button>
+                        <button
+                            className={`flex-[2] min-h-[44px] rounded-xl text-[9px] font-black uppercase tracking-widest text-white transition-colors ${cancelMeta.hasPaidTickets && cancelMeta.attendeeCount > 0 ? 'bg-red-300 cursor-not-allowed opacity-50' : 'bg-red-500 hover:bg-red-600'}`}
                             onClick={handleCancelEvent}
-                            disabled={submitting}
+                            disabled={submitting || (cancelMeta.hasPaidTickets && cancelMeta.attendeeCount > 0)}
                         >
                             {submitting ? 'Cancelling...' : 'Confirm Cancellation'}
-                        </Button>
+                        </button>
                     </div>
                 </div>
             </Modal>
@@ -2200,44 +2227,46 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                 onChange={(e: any) => setNewTicket({ ...newTicket, currency: e.target.value.toUpperCase() })}
                             />
                         </div>
-                        <div className="space-y-4 mb-2">
-                            <Input
-                                label="Sales Start"
-                                type="datetime-local"
-                                value={newTicket.salesStartAt}
-                                onChange={(e: any) => {
-                                    const val = e.target.value;
-                                    const now = new Date();
-                                    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                                    const localNow = now.toISOString().slice(0, 16);
-                                    if (val && val < localNow) {
-                                        showToast('error', 'Sales start date cannot be in the past.');
-                                        return;
-                                    }
-                                    setNewTicket({ ...newTicket, salesStartAt: val });
-                                }}
-                            />
-                            <Input
-                                label="Sales End"
-                                type="datetime-local"
-                                value={newTicket.salesEndAt}
-                                onChange={(e: any) => {
-                                    const val = e.target.value;
-                                    const now = new Date();
-                                    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                                    const localNow = now.toISOString().slice(0, 16);
-                                    if (val && val < localNow) {
-                                        showToast('error', 'Sales end date cannot be in the past.');
-                                        return;
-                                    }
-                                    if (newTicket.salesStartAt && val < newTicket.salesStartAt) {
-                                        showToast('error', 'Sales end date cannot be before sales start.');
-                                        return;
-                                    }
-                                    setNewTicket({ ...newTicket, salesEndAt: val });
-                                }}
-                            />
-                        </div>
+                        {newTicket.priceAmount > 0 && (
+                            <div className="space-y-4 mb-2">
+                                <Input
+                                    label="Sales Start"
+                                    type="datetime-local"
+                                    value={newTicket.salesStartAt}
+                                    onChange={(e: any) => {
+                                        const val = e.target.value;
+                                        const now = new Date();
+                                        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                                        const localNow = now.toISOString().slice(0, 16);
+                                        if (val && val < localNow) {
+                                            showToast('error', 'Sales start date cannot be in the past.');
+                                            return;
+                                        }
+                                        setNewTicket({ ...newTicket, salesStartAt: val });
+                                    }}
+                                />
+                                <Input
+                                    label="Sales End"
+                                    type="datetime-local"
+                                    value={newTicket.salesEndAt}
+                                    onChange={(e: any) => {
+                                        const val = e.target.value;
+                                        const now = new Date();
+                                        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                                        const localNow = now.toISOString().slice(0, 16);
+                                        if (val && val < localNow) {
+                                            showToast('error', 'Sales end date cannot be in the past.');
+                                            return;
+                                        }
+                                        if (newTicket.salesStartAt && val < newTicket.salesStartAt) {
+                                            showToast('error', 'Sales end date cannot be before sales start.');
+                                            return;
+                                        }
+                                        setNewTicket({ ...newTicket, salesEndAt: val });
+                                    }}
+                                />
+                            </div>
+                        )}
                         <Button
                             onClick={() => {
                                 addTicket();
@@ -2473,50 +2502,52 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                                     rows={2}
                                                 />
                                             </div>
-                                            <div className="md:col-span-2 space-y-4 mb-2">
-                                                <div className="space-y-1.5">
-                                                    <label className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Sales Start</label>
-                                                    <input
-                                                        type="datetime-local"
-                                                        value={t.salesStartAt || ''}
-                                                        onChange={(e) => {
-                                                            const val = e.target.value;
-                                                            const now = new Date();
-                                                            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                                                            const localNow = now.toISOString().slice(0, 16);
-                                                            if (val && val < localNow) {
-                                                                showToast('error', 'Sales start date cannot be in the past.');
-                                                                return;
-                                                            }
-                                                            updateTicket(t.ticketTypeId, { salesStartAt: val });
-                                                        }}
-                                                        className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
-                                                    />
+                                            {t.priceAmount > 0 && (
+                                                <div className="md:col-span-2 space-y-4 mb-2">
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Sales Start</label>
+                                                        <input
+                                                            type="datetime-local"
+                                                            value={t.salesStartAt || ''}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                const now = new Date();
+                                                                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                                                                const localNow = now.toISOString().slice(0, 16);
+                                                                if (val && val < localNow) {
+                                                                    showToast('error', 'Sales start date cannot be in the past.');
+                                                                    return;
+                                                                }
+                                                                updateTicket(t.ticketTypeId, { salesStartAt: val });
+                                                            }}
+                                                            className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Sales End</label>
+                                                        <input
+                                                            type="datetime-local"
+                                                            value={t.salesEndAt || ''}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                const now = new Date();
+                                                                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                                                                const localNow = now.toISOString().slice(0, 16);
+                                                                if (val && val < localNow) {
+                                                                    showToast('error', 'Sales end date cannot be in the past.');
+                                                                    return;
+                                                                }
+                                                                if (t.salesStartAt && val < t.salesStartAt) {
+                                                                    showToast('error', 'Sales end date cannot be before sales start.');
+                                                                    return;
+                                                                }
+                                                                updateTicket(t.ticketTypeId, { salesEndAt: val });
+                                                            }}
+                                                            className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="space-y-1.5">
-                                                    <label className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Sales End</label>
-                                                    <input
-                                                        type="datetime-local"
-                                                        value={t.salesEndAt || ''}
-                                                        onChange={(e) => {
-                                                            const val = e.target.value;
-                                                            const now = new Date();
-                                                            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                                                            const localNow = now.toISOString().slice(0, 16);
-                                                            if (val && val < localNow) {
-                                                                showToast('error', 'Sales end date cannot be in the past.');
-                                                                return;
-                                                            }
-                                                            if (t.salesStartAt && val < t.salesStartAt) {
-                                                                showToast('error', 'Sales end date cannot be before sales start.');
-                                                                return;
-                                                            }
-                                                            updateTicket(t.ticketTypeId, { salesEndAt: val });
-                                                        }}
-                                                        className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
-                                                    />
-                                                </div>
-                                            </div>
+                                            )}
                                         </div>
                                     )}
 

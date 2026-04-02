@@ -152,6 +152,8 @@ interface EventCardProps {
   isLanding?: boolean;
   listing?: string;
   isRecommended?: boolean;
+  layout?: 'vertical' | 'horizontal';
+  onSelectEvent?: (event: Event) => void;
 }
 
 export const EventCard: React.FC<EventCardProps> = ({
@@ -161,7 +163,9 @@ export const EventCard: React.FC<EventCardProps> = ({
   organizers = [],
   isLanding = true,
   listing = 'all',
-  isRecommended = false
+  isRecommended = false,
+  layout = 'vertical',
+  onSelectEvent
 }) => {
   const navigate = useNavigate();
   const { isAuthenticated, role, openAuthModal } = useUser();
@@ -262,24 +266,151 @@ export const EventCard: React.FC<EventCardProps> = ({
     return `${startTime} - ${endTime}`;
   };
 
+  if (layout === 'horizontal') {
+    const totalSlots = (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0);
+    const soldSlots = (event as any).registrationCount ?? (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantitySold || 0), 0);
+    const ticketPercentage = totalSlots > 0 ? (soldSlots / totalSlots) * 100 : 0;
+    const isGoingFast = ticketPercentage > 75;
+
+    const formattedDate = formatDate(event.startAt, event.timezone, { weekday: 'short', month: 'short', day: 'numeric' });
+    const formattedTime = formatTime(event.startAt, event.timezone);
+    
+    const handleSingleClick = (e: React.MouseEvent) => {
+        if (layout === 'horizontal' && onSelectEvent) {
+            onSelectEvent((event as unknown) as Event);
+        } else {
+            navigate(`/events/${event.slug || event.eventId}`);
+        }
+    };
+
+    const handleDoubleClick = (e: React.MouseEvent) => {
+        navigate(`/events/${event.slug || event.eventId}`);
+    };
+
+    return (
+      <div
+        onClick={handleSingleClick}
+        onDoubleClick={handleDoubleClick}
+        className="relative cursor-pointer group flex flex-col sm:flex-row p-4 gap-6 rounded-2xl bg-[#F2F2F2] hover:bg-[#E5E7EB] transition-all duration-200 border border-transparent hover:border-[#D1D5DB] w-full"
+        style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
+      >
+        {/* Image Container */}
+        <div className="relative overflow-hidden shrink-0 w-full sm:w-[280px] lg:w-[320px] self-stretch min-h-[180px] rounded-xl bg-[#F2F2F2]">
+          {event.imageUrl ? (
+            <img
+              src={getImageUrl(event.imageUrl)}
+              alt={event.eventName}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+             <div className="w-full h-full flex items-center justify-center bg-[#F2F2F2]">
+                <img src={BRAND_LOGO_URL} alt="StartupLab" className="w-16 h-16 object-contain opacity-20 grayscale" />
+             </div>
+          )}
+          
+          {/* Top Left Date Badge */}
+          <div className="absolute top-3 left-3 z-20 flex flex-col items-center justify-center bg-[#38BDF2] shadow-lg rounded-xl py-2 px-3 min-w-[58px] border border-white/20 group-hover:scale-110 transition-transform duration-300">
+            <span className="text-[10px] font-black tracking-[0.1em] text-white uppercase leading-none mb-1">{month}</span>
+            <span className="text-xl font-black leading-none text-white">{day}</span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex flex-col flex-1 py-1 min-w-0 pr-2">
+          {/* Status Badge */}
+          {isGoingFast && (
+            <div className="mb-2 inline-flex items-center text-[10px] sm:text-[11px] font-black px-2.5 py-1 bg-[#FFF0E6] text-[#D13B30] rounded-md tracking-wider uppercase">
+              Going fast
+            </div>
+          )}
+
+          <div className="flex flex-col gap-4">
+            {/* Title */}
+            <h3 className="font-bold text-[#111827] text-2xl sm:text-[28px] tracking-tight leading-tight line-clamp-2 md:line-clamp-3 group-hover:text-[#38BDF2] transition-colors pr-8">
+              {event.eventName}
+            </h3>
+
+            {/* Date & Time */}
+            <p className="text-base sm:text-lg text-[#6B7280] font-medium tracking-tight truncate">
+              {formattedDate} • {formattedTime}
+            </p>
+
+            {/* Price */}
+            <p className="text-base sm:text-lg text-[#374151] font-medium tracking-tight">
+              {minPrice === 0 ? "Free" : `From ₱${minPrice.toLocaleString()}`}
+            </p>
+          </div>
+
+          {/* Promoted / Bottom Area */}
+          <div className="mt-auto pt-6 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              {(event.is_promoted || (event as any).isPromoted) && (
+                <div className="group/promoted relative">
+                  <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.15em] border border-[#38BDF2]/30 whitespace-nowrap cursor-help transition-all hover:bg-[#38BDF2]/20">
+                    <ICONS.Info className="w-3.5 h-3.5" strokeWidth={3} />
+                    PROMOTED
+                  </div>
+                  {/* Tooltip Overlay */}
+                  <div className="absolute bottom-full left-0 mb-3 opacity-0 group-hover/promoted:opacity-100 pointer-events-none transition-all duration-300 translate-y-1 group-hover/promoted:translate-y-0 z-50">
+                    <div className="bg-black text-white text-[9px] font-bold px-3 py-1.5 rounded-xl whitespace-nowrap shadow-2xl border border-white/10 uppercase tracking-widest text-center leading-tight">
+                      Featured: Highlighted via<br />Organizer Subscription
+                    </div>
+                    <div className="w-2 h-2 bg-black rotate-45 absolute -bottom-1 left-4 border-r border-b border-white/10"></div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1 -mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <button type="button" aria-label="Share" onClick={handleShare} className="p-2.5 text-[#4B5563] hover:text-[#111827] hover:bg-black/5 rounded-full transition-colors flex items-center justify-center">
+                 <ICONS.Download className="w-4 h-4" />
+              </button>
+              <button type="button" aria-label="Like" onClick={handleLike} className={`p-2.5 rounded-full transition-colors flex items-center justify-center ${liked ? 'text-[#38BDF2] hover:bg-[#38BDF2]/10' : 'text-[#4B5563] hover:text-[#111827] hover:bg-black/5'}`}>
+                 <ICONS.Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Card
       className={`group relative flex flex-col h-full border ${isTrending ? 'border-[#38BDF2] ring-1 ring-[#38BDF2]' : 'border-black/5'} rounded-[5px] bg-[#F2F2F2] transition-all duration-500 cursor-pointer hover:shadow-xl hover:translate-y-[-4px]`}
       onClick={() => navigate(`/events/${event.slug || event.eventId}`)}
+      style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
     >
       {/* Image Section */}
       <div className="relative h-44 sm:h-52 overflow-hidden rounded-t-[5px]">
-        {/* Trending Tag Overlay */}
-        {isTrending && (
-          <div className="absolute bottom-4 left-4 z-30">
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2 bg-[#38BDF2] text-white text-[11px] font-black uppercase tracking-[0.12em] shadow-xl border border-white/20 transition-all hover:scale-110 active:scale-95 whitespace-nowrap"
-            >
-              <ICONS.Star className="w-3.5 h-3.5 fill-current text-white" />
-              #{trendingRank} Trending
-            </div>
-          </div>
-        )}
+        {/* Tags Overlay (Trending & Promoted) */}
+        <div className="absolute bottom-4 left-4 z-30 flex flex-col gap-2 items-start">
+          {isTrending && (
+              <div
+                className="inline-flex items-center gap-2 rounded-full px-5 py-2 bg-[#38BDF2] text-white text-[11px] font-black uppercase tracking-[0.12em] shadow-xl border border-white/20 transition-all hover:scale-110 active:scale-95 whitespace-nowrap"
+              >
+                <ICONS.Star className="w-3.5 h-3.5 fill-current text-white" />
+                #{trendingRank} Trending
+              </div>
+          )}
+          {(event.is_promoted || (event as any).isPromoted) && (
+              <div className="group/promoted relative">
+                  <div
+                    className="inline-flex items-center gap-2 rounded-full px-4 py-1 bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.15em] border border-[#38BDF2]/30 transition-all hover:scale-105 active:scale-95 whitespace-nowrap cursor-help"
+                  >
+                    <ICONS.Info className="w-3.5 h-3.5" strokeWidth={3} />
+                    PROMOTED
+                  </div>
+                  {/* Tooltip Overlay */}
+                  <div className="absolute bottom-full left-0 mb-2 opacity-0 group-hover/promoted:opacity-100 pointer-events-none transition-all duration-300 translate-y-1 group-hover/promoted:translate-y-0 z-50">
+                      <div className="bg-black text-white text-[9px] font-bold px-3 py-1.5 rounded-lg whitespace-nowrap shadow-2xl border border-white/10 uppercase tracking-widest text-center leading-tight">
+                          Featured: Highlighted via<br />Organizer Subscription
+                      </div>
+                      <div className="w-2 h-2 bg-black rotate-45 absolute -bottom-1 left-4 border-r border-b border-white/10"></div>
+                  </div>
+              </div>
+          )}
+        </div>
         {event.imageUrl ? (
           <img
             src={getImageUrl(event.imageUrl)}
@@ -319,7 +450,7 @@ export const EventCard: React.FC<EventCardProps> = ({
 
       {/* Content Section */}
       <div className="p-5 flex-1 flex flex-col">
-        <h4 className="text-[#1A1A1A] text-lg sm:text-xl font-black leading-tight mb-3 line-clamp-2 order-1">
+        <h4 className="text-[#1A1A1A] text-2xl sm:text-[26px] tracking-tight font-black leading-tight mb-4 line-clamp-2 order-1">
           {event.eventName}
         </h4>
 
@@ -330,16 +461,16 @@ export const EventCard: React.FC<EventCardProps> = ({
           <div className="w-5" />
         </div>
 
-        <div className="flex flex-col gap-2 mb-4 order-3 text-[#4A4A4A]">
+        <div className="flex flex-col gap-2 mb-4 order-3 text-[#4A4A4A] font-medium">
           {/* Location */}
           <div className="flex items-start gap-2.5">
-            <ICONS.MapPin className="w-[18px] h-[18px] shrink-0 mt-0.5 text-black/60" />
+            <ICONS.MapPin className="w-[18px] h-[18px] shrink-0 mt-0.5 text-black/60" strokeWidth={2} />
             <span className="text-[18px] leading-tight line-clamp-1">{event.locationText}</span>
           </div>
 
           {/* Time */}
           <div className="flex items-start gap-2.5">
-            <ICONS.Clock className="w-[18px] h-[18px] shrink-0 mt-0.5 text-black/60" />
+            <ICONS.Clock className="w-[18px] h-[18px] shrink-0 mt-0.5 text-black/60" strokeWidth={2} />
             <span className="text-[18px] leading-tight">
               {formatTimeRange(event.startAt, event.endAt, event.timezone)}
             </span>
@@ -347,7 +478,7 @@ export const EventCard: React.FC<EventCardProps> = ({
 
           {/* Likes / Engagement matching opacity of other rows */}
           <div className="flex items-start gap-2.5">
-            <ICONS.Heart className="w-[18px] h-[18px] shrink-0 mt-0.5 text-black/60" />
+            <ICONS.Heart className="w-[18px] h-[18px] shrink-0 mt-0.5 text-black/60" strokeWidth={2} />
             <span className="text-[18px] leading-tight">
               {formatCompactCount(event.likesCount || 0)} Likes
             </span>
@@ -389,6 +520,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   const { role, isAuthenticated, isOnboarded, openAuthModal } = useUser();
   const { likedEventIds, followedOrganizerIds } = useEngagement();
   const [events, setEvents] = useState<Event[]>([]);
+  const [selectedMapEvent, setSelectedMapEvent] = useState<Event | null>(null);
   const [pagination, setPagination] = useState({ page: 1, limit: 6, total: 0, totalPages: 1 });
   const [loading, setLoading] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
@@ -1444,6 +1576,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
         </div>
       )}
 
+      <div style={{ zoom: !isLanding ? 0.8 : undefined }} className="origin-top transition-transform duration-500">
       <div className={`flex flex-col sm:flex-row items-center justify-between gap-6 px-0 ${isLanding ? 'hidden' : 'mb-8 mt-2'}`}>
         {!isLanding && !isSpecialListing && (
           <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -1495,7 +1628,10 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
       <div className="flex flex-col lg:flex-row gap-10">
         {/* Sidebar Filter - Eventbrite style */}
         {!isLanding && !isSpecialListing && isSidebarVisible && (
-          <aside className="w-full lg:w-72 shrink-0 space-y-10 lg:sticky lg:top-28 lg:self-start lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-4 lg:custom-scrollbar animate-in fade-in slide-in-from-left-4 duration-700">
+          <aside 
+            className="w-full lg:w-72 shrink-0 space-y-10 lg:sticky lg:top-28 lg:self-start lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-4 lg:custom-scrollbar animate-in fade-in slide-in-from-left-4 duration-700"
+            style={{ zoom: 1.1 }}
+          >
             {/* Active Filters Header */}
             <div className="flex items-center justify-between pb-4 border-b border-black/5">
               <h3 className="text-xl font-black text-black tracking-tight">Filters</h3>
@@ -1613,8 +1749,9 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           </aside>
         )}
 
-        <div className="flex-1 min-w-0 space-y-12">
-          {/* Most Liked Events Section (Discovery Mode Only) */}
+        <div className="flex-1 flex min-w-0 gap-10">
+          <div className="flex-1 min-w-0 space-y-12">
+            {/* Most Liked Events Section (Discovery Mode Only) */}
           {!isLanding && selectedLocation !== DEFAULT_LOCATION && displayEvents.length > 0 && !loading && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
               <div className="flex items-center gap-4">
@@ -1622,7 +1759,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 <h3 className="text-xl font-black text-black tracking-tight uppercase">Most Liked in {selectedLocation}</h3>
                 <div className="h-px bg-black/5 flex-1" />
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 pt-10">
+              <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`}>
                 {displayEvents.slice(0, 3).map((event) => (
                   <EventCard
                     key={`featured-${event.eventId}`}
@@ -1632,6 +1769,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                     organizers={organizers}
                     isLanding={isLanding}
                     listing={listing}
+                    layout={!isLanding ? 'horizontal' : 'vertical'}
+                    onSelectEvent={setSelectedMapEvent}
                   />
                 ))}
               </div>
@@ -1643,7 +1782,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                     <h3 className="text-xl font-black text-black tracking-tight uppercase">Other Events</h3>
                     <div className="h-px bg-black/5 flex-1" />
                   </div>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 pt-10">
+                  <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`}>
                     {displayEvents.slice(3).map((event) => (
                       <EventCard
                         key={`other-${event.eventId}`}
@@ -1653,6 +1792,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                         organizers={organizers}
                         isLanding={isLanding}
                         listing={listing}
+                        layout={!isLanding ? 'horizontal' : 'vertical'}
+                        onSelectEvent={setSelectedMapEvent}
                       />
                     ))}
                   </div>
@@ -1665,10 +1806,12 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           {/* Standard Grid Display (Fallbacks) */}
           {((isLanding || selectedLocation === DEFAULT_LOCATION) || loading) && (
             <>
-              <div className={`grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8 pt-10 ${displayEvents.length > 0 ? 'min-h-[400px]' : 'min-h-0'}`}>
+              <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8'} pt-10 ${displayEvents.length > 0 ? 'min-h-[400px]' : 'min-h-0'}`}>
                 {loading ? (
                   Array.from({ length: isLandingAllListing ? 3 : 6 }).map((_, idx) => (
-                    <EventCardSkeleton key={idx} />
+                    <div key={idx} className={!isLanding ? 'h-[190px]' : ''}>
+                        <EventCardSkeleton layout={!isLanding ? 'horizontal' : 'vertical'} />
+                    </div>
                   ))
                 ) : displayEvents.map((event, idx) => (
                   <div key={event.eventId} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -1680,6 +1823,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                       isLanding={isLanding}
                       listing={listing}
                       isRecommended={isLandingAllListing && idx === 1}
+                      layout={!isLanding ? 'horizontal' : 'vertical'}
+                      onSelectEvent={setSelectedMapEvent}
                     />
                   </div>
                 ))}
@@ -1735,9 +1880,26 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           )}
 
 
+          </div>
+          
+          {/* Map Sidebar ONLY on Browse Events (!isLanding) */}
+          {!isLanding && !isSpecialListing && (
+            <aside className="hidden xl:block w-[340px] 2xl:w-[420px] shrink-0 sticky top-28 self-start h-[500px] max-h-[calc(100vh-140px)] rounded-xl overflow-hidden bg-[#E5E7EB] border border-[#2E2E2F]/10 z-10 shadow-sm relative">
+                <div className="absolute inset-0 transition-all duration-500">
+                    <iframe 
+                        width="100%" 
+                        height="100%" 
+                        className="absolute inset-0 z-0" 
+                        style={{ border: 0 }} 
+                        src={`https://maps.google.com/maps?q=${encodeURIComponent((selectedMapEvent ? (selectedMapEvent.locationText || selectedMapEvent.eventName) : selectedLocation) || 'Philippines')}&t=&z=12&ie=UTF8&iwloc=&output=embed`} 
+                    />
+                </div>
+            </aside>
+          )}
+
         </div>
       </div>
-
+      </div>
 
       {isLanding && (
         <DestinationSlider onSelect={(city) => {

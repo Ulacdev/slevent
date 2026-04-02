@@ -304,17 +304,7 @@ export const Announcements: React.FC = () => {
               />
             </div>
 
-            <div className="flex items-end pb-3">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <input 
-                  type="checkbox"
-                  checked={formData.is_published}
-                  onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
-                  className="w-5 h-5 rounded border-black/20 text-[#38BDF2] focus:ring-[#38BDF2]"
-                />
-                <span className="text-sm font-bold text-[#2E2E2F] group-hover:text-[#38BDF2] transition-colors">Publish Immediately</span>
-              </label>
-            </div>
+            {/* Removed Publish Immediately checkbox */}
           </div>
 
           <div className="flex gap-4 pt-4">

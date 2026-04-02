@@ -183,14 +183,17 @@ export const listEvents = async (req, res) => {
     // 2) Apply Ranking (especially for Trending)
     let ranked = events || [];
     
-    // Fetch like counts for ranking if needed
-    if (sortBy === 'trending') {
+    // Default to Trending/Popularity ranking if no specific date sort is requested
+    if (!sortBy || sortBy === 'relevance' || sortBy === 'trending') {
       const allCandidateIds = ranked.map(e => e.eventId);
       const allLikeCountMap = await getEventLikeCountsMap(allCandidateIds);
       
       ranked.sort((a, b) => {
+        // High engagement (likes) beats newness
         const likeDiff = (allLikeCountMap.get(b.eventId) || 0) - (allLikeCountMap.get(a.eventId) || 0);
         if (likeDiff !== 0) return likeDiff;
+        
+        // Secondary: creation date for equal engagement
         return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
       });
     }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { Event, TicketType, UserRole } from '../../types';
-import { Button, Card } from '../../components/Shared';
+import { Button, Card, Modal } from '../../components/Shared';
 import { EventDetailsSkeleton } from '../../components/Shared/Skeleton';
 import { ICONS } from '../../constants';
 import { useUser } from '../../context/UserContext';
@@ -325,6 +325,7 @@ export const EventDetails: React.FC = () => {
   const [timeRemaining, setTimeRemaining] = useState<Record<string, string>>({});
 
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [showRefundPolicyModal, setShowRefundPolicyModal] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -527,14 +528,23 @@ export const EventDetails: React.FC = () => {
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.locationText.trim())}`
     : '';
 
+  const handleConfirmedRegister = () => {
+    const selections = event.ticketTypes.filter(t => (Number(quantities[t.ticketTypeId]) || 0) > 0).map(t => ({
+      id: t.ticketTypeId,
+      qty: Number(quantities[t.ticketTypeId])
+    }));
+    const selectionParam = encodeURIComponent(JSON.stringify(selections));
+    navigate(`/events/${event.slug}/register?selections=${selectionParam}`);
+    setShowRefundPolicyModal(false);
+  };
+
   const handleRegister = () => {
     if (totalQuantity > 0) {
-      const selections = event.ticketTypes.filter(t => (Number(quantities[t.ticketTypeId]) || 0) > 0).map(t => ({
-        id: t.ticketTypeId,
-        qty: Number(quantities[t.ticketTypeId])
-      }));
-      const selectionParam = encodeURIComponent(JSON.stringify(selections));
-      navigate(`/events/${event.slug}/register?selections=${selectionParam}`);
+      if (grandTotal > 0) {
+        setShowRefundPolicyModal(true);
+      } else {
+        handleConfirmedRegister();
+      }
     }
   };
 
@@ -1187,7 +1197,49 @@ export const EventDetails: React.FC = () => {
           </div>
         </div>
       )}
+
+      <Modal
+        isOpen={showRefundPolicyModal}
+        onClose={() => setShowRefundPolicyModal(false)}
+        title="Refund & Cancellation Policy"
+      >
+        <div className="space-y-6">
+          <div className="flex items-start gap-5 p-6 bg-amber-50 border border-amber-200 rounded-[1.75rem]">
+            <div className="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center shrink-0">
+              <ICONS.AlertTriangle className="w-6 h-6 text-amber-600" strokeWidth={2.5} />
+            </div>
+            <div className="space-y-2">
+              <p className="font-bold text-[#2E2E2F] text-[16px] tracking-tight">
+                Important Purchase Notice
+              </p>
+              <div className="text-[13px] text-[#2E2E2F]/70 font-medium leading-relaxed space-y-3">
+                <p>
+                  By proceeding with this reservation, you acknowledge that all ticket purchases for paid events are <strong>final and non-refundable</strong>.
+                </p>
+                <p>
+                  Our system platform does not allow for refunds or event cancellations once tickets are purchased. Please ensure all details are correct before completing your secure HitPay checkout.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-4 pt-2">
+            <Button
+              className="flex-1 py-1 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border-2 border-[#2E2E2F]/15"
+              onClick={() => setShowRefundPolicyModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="flex-[2] py-1 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest text-white hover:bg-black transition-colors min-h-[32px]"
+              onClick={handleConfirmedRegister}
+              style={{ backgroundColor: brandColor }}
+            >
+              I Understand, Proceed
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
-

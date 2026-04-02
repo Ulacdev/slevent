@@ -27,6 +27,7 @@ export const DiscoveryHub: React.FC = () => {
   const [priority, setPriority] = useState(0);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [availableCountries, setAvailableCountries] = useState<string[]>([]);
+  const [featuredRegions, setFeaturedRegions] = useState<Record<string, string[]>>({});
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -51,8 +52,8 @@ export const DiscoveryHub: React.FC = () => {
       const res = await apiService._fetch(`${import.meta.env.VITE_API_BASE}/api/discovery/locations`);
       if (res.ok) {
         const data = await res.json();
-        setAvailableCities(data.cities || []);
         setAvailableCountries(data.countries || []);
+        setFeaturedRegions(data.countryToCities || {});
       }
     } catch (err) {
       console.error('Failed to fetch available locations:', err);
@@ -158,8 +159,10 @@ export const DiscoveryHub: React.FC = () => {
     }
   };
 
-  const filteredCities = availableCities.filter(city => 
-    !destinations.some(d => d.city.toLowerCase() === city.toLowerCase() && (!editingDest || d.id !== editingDest.id))
+  const currentCountryCities = featuredRegions[country] || [];
+  
+  const filteredCities = currentCountryCities.filter(cityName => 
+    !destinations.some(d => d.city.toLowerCase() === cityName.toLowerCase() && (!editingDest || d.id !== editingDest.id))
   );
 
   const toggleStatus = async (dest: PopularPlace) => {
@@ -253,10 +256,6 @@ export const DiscoveryHub: React.FC = () => {
                 <div className="absolute bottom-8 left-8 text-left">
                     <p className="text-[9px] font-black text-[#38BDF2] uppercase tracking-[0.4em] mb-1">{dest.country}</p>
                     <h3 className="text-2xl font-black text-white tracking-tighter uppercase leading-none mb-2">{dest.city}</h3>
-                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-white/10 rounded-md backdrop-blur-sm border border-white/10">
-                        <ICONS.ArrowUp className="w-3 h-3 text-[#38BDF2]" />
-                        <span className="text-[10px] font-black text-white uppercase tracking-tighter">Priority: {dest.priority}</span>
-                    </div>
                 </div>
             </div>
           </div>
@@ -311,7 +310,10 @@ export const DiscoveryHub: React.FC = () => {
                     <label className="text-[11px] font-black text-black/40 uppercase tracking-[0.2em] ml-1">Country</label>
                     <select
                       value={country}
-                      onChange={(e) => setCountry(e.target.value)}
+                      onChange={(e) => {
+                        setCountry(e.target.value);
+                        setCity('');
+                      }}
                       className="w-full bg-[#F2F2F2] rounded-2xl h-14 border-none shadow-inner px-4 text-sm outline-none focus:ring-2 focus:ring-[#38BDF2]/40 text-[#2E2E2F]"
                       required
                     >
@@ -360,21 +362,7 @@ export const DiscoveryHub: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="space-y-3">
-                    <div className="flex justify-between items-end mb-1">
-                        <label className="text-[11px] font-black text-black/40 uppercase tracking-[0.2em] ml-1">Ranking Priority</label>
-                        <span className="text-xl font-black text-[#38BDF2] leading-none">{priority}</span>
-                    </div>
-                    <input 
-                        type="range" 
-                        min="0" 
-                        max="100" 
-                        value={priority}
-                        onChange={(e) => setPriority(parseInt(e.target.value))}
-                        className="w-full h-2 bg-black/10 rounded-lg appearance-none cursor-pointer accent-[#38BDF2]"
-                    />
-                    <p className="text-[9px] font-bold text-black/30 uppercase tracking-widest text-right">Higher priority appears first</p>
-                </div>
+                {/* Ranking priority removed per user request */}
 
                 <div className="flex gap-4 pt-4">
                   <Button
