@@ -412,13 +412,35 @@ export const EventsManagement: React.FC = () => {
             />
           </div>
           {selectedIds.length > 0 && (
-            <Button 
-              onClick={() => { setIsBulkMode(true); setDeleteReason('DUPLICATE'); }} 
-              className="rounded-xl px-6 py-3 bg-red-500 text-white hover:bg-red-600 font-bold transition-all shadow-lg shadow-red-500/20 flex items-center gap-2"
-            >
-              <ICONS.Trash className="w-4 h-4" />
-              Bulk Delete ({selectedIds.length})
-            </Button>
+            <div className="flex items-center gap-3 animate-in fade-in slide-in-from-right-4">
+              <Button 
+                onClick={() => { setIsBulkMode(true); setDeleteReason('DUPLICATE'); }} 
+                className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-red-500 !text-red-500 px-6 py-2.5 text-[13px] hover:!bg-red-500 hover:!text-white flex items-center gap-2 group"
+              >
+                <ICONS.Trash className="w-5 h-5 text-red-500 group-hover:text-white transition-colors" />
+                MODERATE REMOVAL ({selectedIds.length})
+              </Button>
+              <Button 
+                onClick={async () => {
+                   if (!confirm(`Dismiss reports for ${selectedIds.length} events?`)) return;
+                   setSubmitting(true);
+                   try {
+                     await Promise.all(selectedIds.map(id => apiService.bulkResolveEventReports(id)));
+                     setNotification({ message: 'Safety records cleared for selected events.', type: 'success' });
+                     setSelectedIds([]);
+                     fetchEvents();
+                   } catch (err) {
+                     setNotification({ message: 'Failed to clear records.', type: 'error' });
+                   } finally {
+                     setSubmitting(false);
+                   }
+                }} 
+                className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-[#38BDF2] !text-[#38BDF2] px-6 py-2.5 text-[13px] hover:!bg-[#38BDF2] hover:!text-white flex items-center gap-2 group"
+              >
+                <ICONS.CheckCircle className="w-5 h-5 text-[#38BDF2] group-hover:text-white transition-colors" />
+                DISMISS RISK ({selectedIds.length})
+              </Button>
+            </div>
           )}
         </div>
       </div>
@@ -440,7 +462,8 @@ export const EventsManagement: React.FC = () => {
                 </th>
                 <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Event Identity</th>
                 <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Date & Location</th>
-                <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide text-center">Safety Actions</th>
+                <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide text-center">Safety Insight</th>
+                <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#2E2E2F]/10">
@@ -484,6 +507,19 @@ export const EventsManagement: React.FC = () => {
                       <span className="truncate max-w-[200px]">{event.locationText}</span>
                       <ICONS.MapPin className="w-3.5 h-3.5 text-[#2E2E2F]" strokeWidth={2.5} />
                     </div>
+                  </td>
+                  <td className="px-8 py-7 text-center">
+                    {(event as any).reportCount > 0 ? (
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 border border-red-200 rounded-full text-red-600 animate-pulse">
+                        <ICONS.AlertTriangle className="w-3 h-3" />
+                        <span className="text-[10px] font-black">{(event as any).reportCount} REPORTS</span>
+                      </div>
+                    ) : (
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-50 border border-green-100 rounded-full text-green-600">
+                        <ICONS.CheckCircle className="w-3 h-3" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Clear</span>
+                      </div>
+                    )}
                   </td>
                   <td className="px-8 py-7 text-center">
                     <div className="flex justify-center items-center gap-6 opacity-70 group-hover:opacity-100 transition-colors">
@@ -868,7 +904,7 @@ export const EventsManagement: React.FC = () => {
               Cancel
             </Button>
             <Button
-              className="flex-[2] py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-red-500 text-white hover:bg-black transition-all shadow-lg shadow-red-500/20"
+              className="flex-[2] py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-transparent border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
               onClick={handleDeleteEvent}
               disabled={submitting || (deleteReason === 'OTHER' && !customReason.trim())}
             >

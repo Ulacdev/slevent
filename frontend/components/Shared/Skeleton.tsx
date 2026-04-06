@@ -75,37 +75,48 @@ export const EventCardSkeleton: React.FC<{ layout?: 'vertical' | 'horizontal' }>
       {/* Image Area with Date Overlay */}
       <div className="relative h-44 sm:h-52 w-full overflow-hidden">
         <Skeleton className="w-full h-full !rounded-none" />
+        
+        {/* Date Badge Overlay Placeholder */}
         <div className="absolute top-3 left-3 z-[1]">
            <Skeleton variant="rect" width={54} height={50} className="rounded-md opacity-70" />
         </div>
+
+        {/* Trending Rank Placeholder */}
+        <div className="absolute bottom-4 left-4 z-[1]">
+           <Skeleton variant="rect" width={110} height={32} className="rounded-full opacity-70" />
+        </div>
       </div>
       
-      <div className="p-5 flex-1 flex flex-col gap-4">
+      <div className="p-5 flex-1 flex flex-col pt-6">
         {/* Title */}
-        <Skeleton variant="text" width="90%" height={26} />
+        <Skeleton variant="text" width="90%" height={26} className="mb-4" />
         
-        {/* Separator style */}
-        <div className="h-px bg-black/5 w-full my-1.5" />
+        {/* Decorative Separator Matching Order-2 of Real Card */}
+        <div className="flex items-center mb-4 -mx-5">
+           <div className="flex-1 border-t border-black/10" />
+           <div className="w-2 h-2 rounded-full border-2 border-black/10 bg-[#F2F2F2] -mr-1 z-10" />
+           <div className="w-5" />
+        </div>
 
         {/* Info Rows */}
-        <div className="space-y-3.5">
-          <div className="flex items-center gap-2.5">
-            <Skeleton variant="rect" width={18} height={18} />
+        <div className="flex flex-col gap-2 mb-4 order-3">
+          <div className="flex items-start gap-2.5">
+            <Skeleton variant="rect" width={18} height={18} className="mt-0.5" />
             <Skeleton variant="text" width="75%" height={18} />
           </div>
-          <div className="flex items-center gap-2.5">
-            <Skeleton variant="rect" width={18} height={18} />
+          <div className="flex items-start gap-2.5">
+            <Skeleton variant="rect" width={18} height={18} className="mt-0.5" />
             <Skeleton variant="text" width="55%" height={18} />
           </div>
-          <div className="flex items-center gap-2.5">
-            <Skeleton variant="rect" width={18} height={18} />
+          <div className="flex items-start gap-2.5">
+            <Skeleton variant="rect" width={18} height={18} className="mt-0.5" />
             <Skeleton variant="text" width="50%" height={18} />
           </div>
         </div>
 
         {/* Footer Area */}
-        <div className="mt-auto flex items-center justify-between pt-4">
-          <Skeleton variant="rect" width={90} height={32} className="rounded-md" />
+        <div className="mt-auto flex items-center justify-between pt-3 order-3">
+          <Skeleton variant="rect" width={90} height={28} className="rounded-md" />
           <Skeleton variant="text" width={60} height={24} />
         </div>
       </div>
@@ -242,4 +253,54 @@ export const PortalSkeleton: React.FC = () => (
     </div>
   </div>
 );
+
+export const PromotedEventSkeleton: React.FC = () => (
+  <div className="w-full rounded-2xl overflow-hidden border border-black/15 bg-white shadow-sm">
+    <div className="relative h-[280px] sm:h-[400px] lg:h-[500px] overflow-hidden bg-[#F2F2F2]">
+      <Skeleton className="w-full h-full !rounded-none" />
+      
+      {/* Overlay Panel Placeholder */}
+      <div className="absolute inset-0 z-20 flex flex-col justify-center p-8 sm:p-12">
+        <div className="max-w-xl space-y-6">
+          <div className="flex items-center gap-3">
+            <Skeleton variant="circle" width={32} height={32} className="opacity-20" />
+            <Skeleton variant="text" width={120} height={12} className="opacity-20" />
+          </div>
+          
+          <Skeleton variant="text" width="80%" height={48} className="opacity-20" />
+          
+          <div className="space-y-3 pt-2">
+            <Skeleton variant="text" width="50%" height={20} className="opacity-20" />
+            <Skeleton variant="text" width="60%" height={20} className="opacity-20" />
+            <Skeleton variant="text" width="55%" height={20} className="opacity-20" />
+          </div>
+          
+          <div className="pt-8">
+            <Skeleton variant="rect" width={160} height={48} className="rounded-full opacity-20" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+export const DestinationSliderSkeleton: React.FC = () => (
+  <div className="py-24 space-y-12 overflow-hidden mx-0 px-0">
+    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-4">
+      <div className="space-y-4 flex-1">
+        <Skeleton variant="rect" width={140} height={24} className="rounded-full opacity-10" />
+        <Skeleton variant="text" width="40%" height={40} className="opacity-10" />
+        <Skeleton variant="text" width="30%" height={20} className="opacity-10" />
+      </div>
+    </div>
+    <div className="flex gap-8 overflow-hidden px-2">
+      {[1, 2, 3].map(i => (
+        <div key={i} className="flex-none w-[320px] sm:w-[380px] h-[440px] sm:h-[480px] rounded-2xl overflow-hidden bg-[#F2F2F2]">
+          <Skeleton className="w-full h-full !rounded-none opacity-10" />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 

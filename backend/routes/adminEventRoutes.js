@@ -10,7 +10,8 @@ import {
   listArchivedEvents,
   publishEvent,
   closeEvent,
-  uploadEventImage
+  uploadEventImage,
+  resolveEventReports
 } from '../controller/adminEventController.js';
 import { requireRoles } from '../middleware/permissions.js';
 
@@ -54,5 +55,8 @@ router.post('/:id/publish', publishEvent);
 
 // POST /api/admin/events/:id/close
 router.post('/:id/close', closeEvent);
+
+// POST /api/admin/events/:id/resolve-reports - Clear safety reports
+router.post('/:id/resolve-reports', resolveEventReports);
 
 export default router;

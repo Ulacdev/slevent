@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { ICONS } from '../constants';
 import { apiService } from '../services/apiService';
+import { DestinationSliderSkeleton } from './Shared/Skeleton';
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
@@ -114,16 +115,7 @@ export const DestinationSlider: React.FC<DestinationSliderProps> = ({ onSelect }
         }
     };
 
-    if (loading) return (
-        <div className="py-24 space-y-12 animate-pulse overflow-hidden">
-            <div className="h-10 bg-black/5 rounded-2xl w-1/4" />
-            <div className="flex gap-6">
-                {[1, 2, 3].map(i => (
-                    <div key={i} className="flex-none w-[300px] h-[400px] bg-black/5 rounded-2xl" />
-                ))}
-            </div>
-        </div>
-    );
+    if (loading) return <DestinationSliderSkeleton />;
 
     if (destinations.length === 0) return null;
 

@@ -65,6 +65,23 @@ const CategoryEventCard: React.FC<{ event: Event }> = ({ event }) => {
     >
       {/* Image Section */}
       <div className="relative h-44 sm:h-52 overflow-hidden">
+        {/* Tags Overlay (Promoted) */}
+        <div className="absolute bottom-4 left-4 z-30 flex flex-col gap-2 items-start">
+          {(event.is_promoted || (event as any).isPromoted) && (
+            <div className="group/promoted relative">
+              <div className="inline-flex items-center gap-2 rounded-full px-4 py-1 bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.15em] border border-[#38BDF2]/30 transition-all hover:scale-105 active:scale-95 whitespace-nowrap cursor-help">
+                <ICONS.Info className="w-3.5 h-3.5" strokeWidth={3} />
+                PROMOTED
+              </div>
+              <div className="absolute bottom-full left-0 mb-2 opacity-0 group-hover/promoted:opacity-100 pointer-events-none transition-all duration-300 translate-y-1 group-hover/promoted:translate-y-0 z-50">
+                <div className="bg-black text-white text-[9px] font-bold px-3 py-1.5 rounded-lg whitespace-nowrap shadow-2xl border border-white/10 uppercase tracking-widest text-center leading-tight">
+                  Featured: Highlighted via<br />Organizer Subscription
+                </div>
+                <div className="w-2 h-2 bg-black rotate-45 absolute -bottom-1 left-4 border-r border-b border-white/10"></div>
+              </div>
+            </div>
+          )}
+        </div>
         {event.imageUrl ? (
           <img
             src={getImageUrl(event.imageUrl)}

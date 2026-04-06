@@ -290,10 +290,10 @@ export const OrganizerReports: React.FC = () => {
               </span>
               <button 
                 onClick={handleBulkArchive} 
-                className="flex items-center gap-2 px-5 py-3.5 bg-red-600 border-2 border-red-600 rounded-2xl text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group"
+                className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-red-500 !text-red-500 px-6 py-2.5 text-[12px] hover:!bg-red-500 hover:!text-white flex items-center gap-2 group"
               >
-                <ICONS.Trash className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                <span className="text-[11px] font-black uppercase tracking-widest">Archive</span>
+                <ICONS.Trash className="w-5 h-5 text-red-500 group-hover:text-white transition-colors" />
+                ARCHIVE ({selectedRows.size})
               </button>
             </div>
           )}

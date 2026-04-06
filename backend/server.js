@@ -31,6 +31,7 @@ import supportRoutes from "./routes/supportRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import announcementRoutes from "./routes/announcementRoutes.js";
 import discoveryRoutes from "./routes/discoveryRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 const PORT = process.env.BACKEND_PORT
 const app = express();
 
@@ -152,6 +153,7 @@ app.use("/api", supportRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api/announcements", announcementRoutes);
 app.use("/api/discovery", discoveryRoutes);
+app.use("/api", reportRoutes);
 
 // Root endpoint for status check
 app.get("/", (req, res) => {

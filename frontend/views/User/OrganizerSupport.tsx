@@ -460,13 +460,22 @@ export const OrganizerSupport: React.FC = () => {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
               </button>
               {selectedRows.size > 0 && (
-                <button 
-                  onClick={handleBulkArchive} 
-                  className="flex items-center gap-2 px-5 py-2.5 bg-red-600 border border-red-600 rounded-xl text-white hover:bg-red-700 transition-all text-[10px] font-black uppercase tracking-widest shadow-lg animate-in fade-in slide-in-from-right-4 duration-300"
-                >
-                  <ICONS.Lock className="w-4 h-4" />
-                  Archive ({selectedRows.size})
-                </button>
+                <div className="flex items-center gap-3 animate-in fade-in slide-in-from-right-4">
+                  <button 
+                    onClick={handleBulkArchive} 
+                    className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-[#38BDF2] !text-[#38BDF2] px-6 py-2.5 text-[12px] hover:!bg-[#38BDF2] hover:!text-white flex items-center gap-2 group"
+                  >
+                    <ICONS.Archive className="w-4 h-4 text-[#38BDF2] group-hover:text-white transition-colors" />
+                    ARCHIVE ({selectedRows.size})
+                  </button>
+                  <button 
+                    onClick={handleBulkDelete} 
+                    className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-red-500 !text-red-500 px-6 py-2.5 text-[12px] hover:!bg-red-500 hover:!text-white flex items-center gap-2 group"
+                  >
+                    <ICONS.Trash className="w-4 h-4 text-red-500 group-hover:text-white transition-colors" />
+                    DELETE ({selectedRows.size})
+                  </button>
+                </div>
               )}
             </div>
           </div>

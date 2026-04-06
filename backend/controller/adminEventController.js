@@ -159,7 +159,7 @@ export const listAdminEvents = async (req, res) => {
       }
     }
 
-    // 2) Query events and then enforce creator-role filtering in code
+    // 2) Query events
     let query = supabase
       .from('events')
       .select('*, ticketTypes(*)')
@@ -172,7 +172,27 @@ export const listAdminEvents = async (req, res) => {
     const { data: events, error } = await query;
     if (error) return res.status(500).json({ error: error.message });
 
-    // 3) Enforce creator-role filtering for STAFF; ADMINs see EVERYTHING
+    // 3) Fetch report counts for these events
+    const { data: reportNotifs, error: reportErr } = await supabase
+      .from('notifications')
+      .select('notification_id, metadata')
+      .eq('type', 'EVENT_REPORT')
+      .is('deleted_at', null);
+    
+    if (!reportErr && reportNotifs) {
+      const reportMap = {};
+      reportNotifs.forEach(n => {
+        const eventId = n.metadata?.eventId;
+        if (eventId) {
+          reportMap[eventId] = (reportMap[eventId] || 0) + 1;
+        }
+      });
+      events.forEach(e => {
+        e.reportCount = reportMap[e.eventId] || 0;
+      });
+    }
+
+    // 4) Enforce creator-role filtering for STAFF; ADMINs see EVERYTHING
     if (requesterRole === 'ADMIN') {
       return res.json(events || []);
     }
@@ -582,6 +602,76 @@ export const updateEvent = async (req, res) => {
 
     return res.json(data);
   } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
+
+export const resolveEventReports = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id || req.user?.userId;
+
+    if (!id) return res.status(400).json({ error: 'Event ID is required' });
+
+    console.log(`🛡️ [AdminEvent] Resolving reports for event: ${id} by admin: ${userId}`);
+
+    // Select specifically the reports for THIS event to avoid fetching the entire notifications table
+    const { data: reports, error: fetchErr } = await supabase
+      .from('notifications')
+      .select('notification_id, metadata')
+      .eq('type', 'EVENT_REPORT')
+      .is('deleted_at', null);
+
+    if (fetchErr) {
+      console.error(`❌ [AdminEvent] Fetch reports error:`, fetchErr);
+      return res.status(500).json({ error: fetchErr.message });
+    }
+
+    // Since metadata filtering is complex in JS client for JSONB, we still filter in memory 
+    // but we can at least be certain about the data we're working with.
+    const reportIds = (reports || [])
+      .filter(n => String(n.metadata?.eventId) === String(id))
+      .map(n => n.notification_id);
+
+    if (reportIds.length === 0) {
+      console.log(`ℹ️ [AdminEvent] No active reports found for event: ${id}`);
+      return res.json({ success: true, count: 0, message: 'No active reports found for this event.' });
+    }
+
+    // Soft delete these reports and mark resolution details
+    const now = new Date().toISOString();
+    const { error: updateErr } = await supabase
+      .from('notifications')
+      .update({ 
+        deleted_at: now,
+        is_read: true, // Also mark as read when resolved
+        read_at: now,
+        metadata: { 
+          // Take metadata from the first report if available
+          ...(reports.find(r => r.notification_id === reportIds[0])?.metadata || {}), 
+          resolvedBy: userId, 
+          resolvedAt: now,
+          status: 'resolved'
+        }
+      })
+      .in('notification_id', reportIds);
+
+    if (updateErr) {
+      console.error(`❌ [AdminEvent] Update reports error:`, updateErr);
+      return res.status(500).json({ error: updateErr.message });
+    }
+
+    console.log(`✅ [AdminEvent] Resolved ${reportIds.length} reports for event: ${id}`);
+
+    await logAudit({
+      actionType: 'EVENT_REPORTS_RESOLVED',
+      details: { eventId: id, count: reportIds.length, resolvedBy: userId },
+      req
+    });
+
+    return res.json({ success: true, count: reportIds.length });
+  } catch (err) {
+    console.error(`❌ [AdminEvent] Resolve reports crash:`, err);
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }
 };

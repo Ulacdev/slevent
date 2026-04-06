@@ -2117,61 +2117,118 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         </>
       )}
       <main className="flex-1">{children}</main>
-      <footer className="bg-[#F2F2F2] text-[#2E2E2F] py-24 px-8 border-t border-[#2E2E2F]/10" style={{ zoom: 1.1 }}>
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
-            <div>
-              <Branding className="h-32 w-auto" />
-              <p className="mt-4 text-[16px] font-medium max-w-sm text-[#2E2E2F] leading-relaxed">
-                Your gateway to StartupLab events.<br />
-                From internal workshops to public showcases, this platform delivers seamless, secure registration for every StartupLab gathering.
+      <footer className="bg-[#0F172A] text-white py-12 px-4 lg:px-10 border-t border-white/10 relative overflow-hidden">
+        {/* Subtle Background Glow */}
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#38BDF2]/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+        
+        <div className="max-w-full mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1px_1.8fr] gap-6 lg:gap-10">
+            {/* Left Section: Branding & Newsletter */}
+            <div className="flex flex-col items-start text-left">
+              <img src="/lgo-footer.png" className="h-16 w-auto mb-1" alt="StartupLab" />
+              <h3 className="mt-3 text-lg font-black text-white">Build. Connect. Launch.</h3>
+              <p className="mt-2 text-xs font-medium max-w-sm text-gray-400 leading-relaxed">
+                Your gateway to StartupLab events — from internal workshops to public showcases, 
+                this platform delivers seamless registration for every gathering.
               </p>
 
               {/* Social Links */}
-              <div className="mt-8 flex items-center gap-4">
-                <a href="https://www.facebook.com/StartupLabAI/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-[#1877F2] text-white hover:brightness-110 transition-all duration-300 hover:scale-110 shadow-md">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
+              <div className="mt-4 flex items-center gap-2">
+                <a href="https://www.facebook.com/StartupLabAI/" target="_blank" rel="noopener noreferrer" className="w-7 h-7 flex items-center justify-center rounded-full bg-[#1877F2] text-white hover:brightness-110 transition-all">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
                 </a>
-                <a href="https://discord.com/invite/abt3dkaYTr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-[#5865F2] text-white hover:brightness-110 transition-all duration-300 hover:scale-110 shadow-md">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z" /></svg>
+                <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="w-7 h-7 flex items-center justify-center rounded-full bg-white text-black hover:bg-gray-200 transition-all">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
                 </a>
-                <a href="https://www.linkedin.com/in/startup-lab-center-36a15734b/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-[#0A66C2] text-white hover:brightness-110 transition-all duration-300 hover:scale-110 shadow-md">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
+                <a href="https://discord.com/invite/abt3dkaYTr" target="_blank" rel="noopener noreferrer" className="w-7 h-7 flex items-center justify-center rounded-full bg-[#5865F2] text-white hover:brightness-110 transition-all">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z" /></svg>
                 </a>
-                <a href="mailto:hello@startuplab.ph" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center rounded-full bg-[#EA4335] text-white hover:brightness-110 transition-all duration-300 hover:scale-110 shadow-md">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 9.573l8.073-6.08c1.618-1.214 3.927-.059 3.927 1.964z" /></svg>
+                <a href="https://www.linkedin.com/in/startup-lab-center-36a15734b/" target="_blank" rel="noopener noreferrer" className="w-7 h-7 flex items-center justify-center rounded-full bg-[#0A66C2] text-white hover:brightness-110 transition-all">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
                 </a>
+              </div>
+
+              {/* Newsletter */}
+              <div className="mt-6 max-w-[320px] w-full">
+                <form className="flex focus-within:ring-2 focus-within:ring-[#38BDF2]/30 rounded-xl overflow-hidden transition-all shadow-sm" onSubmit={(e) => e.preventDefault()}>
+                  <input 
+                    type="email" 
+                    placeholder="Email" 
+                    className="flex-1 px-3 py-2.5 bg-white/5 text-white placeholder:text-gray-500 outline-none text-xs font-medium"
+                  />
+                  <button className="bg-[#38BDF2] text-white px-4 py-2.5 text-xs font-black transition-colors hover:bg-[#38BDF2]/90">
+                    Join
+                  </button>
+                </form>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-8 lg:text-right uppercase tracking-[0.2em] font-black text-[11px]">
-              <div className="space-y-4">
-                <p className="text-[#2E2E2F] mb-4">Platform</p>
-                <Link to="/organizers/discover" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Organizers</Link>
-                <Link to="/live" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Live Broadcasts</Link>
-              </div>
-              <div className="space-y-4">
-                <Link to="/" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Home</Link>
-                <Link to="/about-us" className="block text-[#2E2E2F] hover:text-[#38BDF2]">About Us</Link>
-                <Link to="/browse-events" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Events</Link>
-                <Link to="/pricing" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Pricing</Link>
-                <Link to="/contact-us" className="block text-[#2E2E2F] hover:text-[#38BDF2]">Contact Us</Link>
-                <Link to="/faq" className="block text-[#2E2E2F] hover:text-[#38BDF2]">FAQ</Link>
-                <button
-                  onClick={() => setIsSupportModalOpen(true)}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#38BDF2] text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-xl hover:bg-[#2E2E2F] transition-all duration-300 active:scale-95 shadow-md shadow-[#38BDF2]/20 w-full lg:w-fit"
-                >
-                  <ICONS.AlertTriangle className="w-4 h-4" />
-                  Submit Report / Bug
-                </button>
+
+            {/* Vertical Separator */}
+            <div className="hidden lg:block bg-white/10 w-[1px] h-full" />
+
+            {/* Right Section: Multi-column Links */}
+            <div className="flex flex-col justify-center">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+                {/* Column 1: Platform */}
+                <div>
+                  <h4 className="font-black text-white text-[11px] uppercase tracking-[0.2em] mb-3">Platform</h4>
+                  <nav className="flex flex-col gap-2.5">
+                    <Link to="/" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Home</Link>
+                    <Link to="/live" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Live</Link>
+                    <Link to="/browse-events" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Events</Link>
+                    <Link to="/organizers/discover" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Explore</Link>
+                    <button onClick={() => openAuthModal && openAuthModal('login')} className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors text-left uppercase tracking-tighter">Login</button>
+                  </nav>
+                </div>
+
+                {/* Column 2: Company */}
+                <div>
+                  <h4 className="font-black text-white text-[11px] uppercase tracking-[0.2em] mb-3">Company</h4>
+                  <nav className="flex flex-col gap-2.5">
+                    <Link to="/about-us" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">About</Link>
+                    <Link to="/pricing" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Pricing</Link>
+                    <a href="mailto:hello@startuplab.ph" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Partner</a>
+                  </nav>
+                </div>
+
+                {/* Column 3: Support */}
+                <div>
+                  <h4 className="font-black text-white text-[11px] uppercase tracking-[0.2em] mb-3">Support</h4>
+                  <nav className="flex flex-col gap-2.5">
+                    <Link to="/contact-us" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Contact</Link>
+                    <Link to="/faq" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">FAQ</Link>
+                    <button 
+                      onClick={() => setIsSupportModalOpen(true)}
+                      className="text-[#38BDF2] hover:text-white font-bold text-[9px] uppercase tracking-widest mt-1 flex items-center gap-1.5"
+                    >
+                      <ICONS.AlertTriangle className="w-3 h-3" />
+                      Support
+                    </button>
+                  </nav>
+                </div>
+
+                {/* Column 4: Legal */}
+                <div>
+                  <h4 className="font-black text-white text-[11px] uppercase tracking-[0.2em] mb-3">Legal</h4>
+                  <nav className="flex flex-col gap-2.5">
+                    <Link to="/privacy-policy" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Privacy</Link>
+                    <Link to="/terms-of-service" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Terms</Link>
+                    <Link to="/refund-policy" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Refund</Link>
+                  </nav>
+                </div>
               </div>
             </div>
           </div>
-          <div className="pt-8 border-t border-[#2E2E2F]/10 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-[11px] uppercase tracking-[0.3em] font-black text-[#2E2E2F]">
-              © 2026 StartupLab Business Center
+
+          {/* Bottom Bar */}
+          <div className="mt-8 pt-4 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-2">
+            <div className="text-[10px] font-bold text-gray-400">
+              © 2026 <span className="font-black text-white">StartupLab</span> Business Center
             </div>
-            <div className="flex items-center gap-6 opacity-60 grayscale">
-              <img src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/images/hitpay.png" alt="HitPay" className="h-4" />
+            <div className="flex items-center gap-3 text-[10px] font-bold">
+              <Link to="/privacy-policy" className="text-gray-400 hover:text-[#38BDF2] transition-colors">Privacy</Link>
+              <span className="text-white/20">|</span>
+              <Link to="/terms-of-service" className="text-gray-400 hover:text-[#38BDF2] transition-colors">Terms</Link>
             </div>
           </div>
         </div>

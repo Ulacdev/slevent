@@ -8,6 +8,7 @@ import { ICONS } from '../../constants';
 import { useUser } from '../../context/UserContext';
 import { useEngagement } from '../../context/EngagementContext';
 import { getEventCategoryKeys } from '../../utils/eventCategories';
+import { EventReportModal } from '../../components/Public/EventReportModal';
 
 const BRAND_LOGO_URL = 'https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg';
 
@@ -326,6 +327,7 @@ export const EventDetails: React.FC = () => {
 
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [showRefundPolicyModal, setShowRefundPolicyModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -917,13 +919,24 @@ export const EventDetails: React.FC = () => {
                       />
                     </div>
                   )}
+                
+                <div className="mt-8 pt-6 border-t border-[#2E2E2F]/10 flex justify-center">
+                  <button
+                    onClick={() => setShowReportModal(true)}
+                    className="flex items-center gap-2 text-[12px] font-black uppercase tracking-[0.2em] transition-opacity hover:opacity-75 group"
+                    style={{ color: brandColor }}
+                  >
+                    <ICONS.Flag className="w-4 h-4 transition-transform group-hover:scale-110" />
+                    Report this event
+                  </button>
+                </div>
               </div>
 
               {/* Location Card */}
               {hasPhysicalLocation && (
                 <div className="p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10">
                   <div className="flex items-center justify-between gap-3 mb-4">
-                    <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em]">EXACT LOCATION</h3>
+                    <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] EXACt LOCATION">EXACT LOCATION</h3>
                     <a
                       href={openMapUrl}
                       target="_blank"
@@ -1240,6 +1253,16 @@ export const EventDetails: React.FC = () => {
           </div>
         </div>
       </Modal>
+
+      <EventReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        event={{
+          eventId: event.eventId,
+          eventName: event.eventName
+        }}
+        brandColor={brandColor}
+      />
     </div>
   );
 };

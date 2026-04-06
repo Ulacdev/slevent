@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { Event, UserRole, OrganizerProfile } from '../../types';
 import { Card, Button, PageLoader, Modal, Checkbox } from '../../components/Shared';
-import { Skeleton, EventCardSkeleton, OrganizerCardSkeleton } from '../../components/Shared/Skeleton';
+import { Skeleton, EventCardSkeleton, OrganizerCardSkeleton, PromotedEventSkeleton } from '../../components/Shared/Skeleton';
 import { OrganizerCard } from '../../components/OrganizerCard';
 import { BrowseEventsNavigator, BrowseTabKey, ONLINE_LOCATION_VALUE } from '../../components/BrowseEventsNavigator';
 import { ICONS } from '../../constants';
@@ -589,34 +589,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
     setIsMarqueePaused(false);
   };
 
-  useEffect(() => {
-    if (!isLanding) return;
+    // CSS Marquee is used for categories instead of JS frame-by-frame scroll for better performance
 
-    let frameId: number;
-    let lastTime = performance.now();
-
-    const step = (time: number) => {
-      if (categoriesScrollRef.current && !isMarqueePaused && !isDraggingRef.current) {
-        const el = categoriesScrollRef.current;
-        const deltaTime = time - lastTime;
-
-        // Target ~1 pixel per frame (60px/sec) at standard 60Hz (16.6ms)
-        const speedMultiplier = deltaTime / 16.67;
-        el.scrollLeft += 1.0 * speedMultiplier;
-
-        // Reset to middle for infinite effect (categories are duplicated)
-        const half = el.scrollWidth / 2;
-        if (el.scrollLeft >= half) {
-          el.scrollLeft = el.scrollLeft - half;
-        }
-      }
-      lastTime = time;
-      frameId = requestAnimationFrame(step);
-    };
-
-    frameId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frameId);
-  }, [isLanding, isMarqueePaused, categories.length]);
 
   const likedSet = useMemo(() => new Set(likedEventIds), [likedEventIds]);
   const followedSet = useMemo(() => new Set(followedOrganizerIds), [followedOrganizerIds]);
@@ -1185,80 +1159,97 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               </div>
             </div>
 
-            {/* Right Column: Visual */}
-            <div className="flex-1 relative w-full mt-10 lg:mt-0">
-              <div className="absolute -inset-8 bg-gradient-to-tr from-[#38BDF2]/10 to-transparent blur-3xl opacity-50"></div>
-              <div className="relative bg-[#F2F2F2] p-1.5 rounded-xl shadow-[0_28px_56px_-16px_rgba(46,46,47,0.15)] transform lg:rotate-2 hover:rotate-0 transition-transform duration-700">
+            {/* Right Column: Visual Dashboard Stack - Balanced & Static (Stand Still) */}
+            <div className="flex-1 relative w-full mt-10 lg:mt-0 flex flex-col gap-6 lg:gap-8 justify-center">
+              <div className="absolute -inset-10 bg-gradient-to-tr from-[#38BDF2]/10 to-transparent blur-[80px] opacity-30"></div>
+              
+              {/* Top Card: Admin Center */}
+              <div className="relative bg-[#F2F2F2] p-1.5 rounded-2xl shadow-[0_20px_40px_-10px_rgba(46,46,47,0.1)] overflow-hidden group max-w-[620px] mx-auto lg:ml-auto transition-transform hover:scale-[1.02] duration-500">
                 <img
-                  src="/hero-analytics.png"
-                  alt="Event Management Dashboard"
-                  className="w-full h-full object-cover rounded-lg"
+                  src="/hero-admin-preview.png"
+                  alt="Admin Center Dashboard"
+                  className="w-full h-auto rounded-xl block"
                 />
+                <div className="absolute top-3 right-3 bg-white/40 backdrop-blur-md px-3 py-1 rounded-full text-[8px] font-black text-black/60 uppercase tracking-[0.2em]">
+                  Admin Center
+                </div>
+              </div>
 
-                {/* Floating badge: Organizer Tally - Exact Corner Match */}
-                <div
-                  className="absolute -bottom-6 -left-8 bg-[#F2F2F2] p-4 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col items-start gap-3 animate-float group/badge cursor-pointer z-40"
-                  onMouseEnter={() => setShowOrgDropdown(true)}
-                  onMouseLeave={() => setShowOrgDropdown(false)}
-                >
-                  <div className="flex -space-x-3">
-                    {organizerBadgeItems.map((organizer) => (
-                      <div key={organizer.key} className="w-10 h-10 rounded-full border-[3px] border-white overflow-hidden shadow-sm bg-[#38BDF2]/10 ring-1 ring-black/5">
-                        <img src={organizer.src} alt={organizer.alt} className="w-full h-full object-cover" />
-                      </div>
+                {/* Bottom Card: Organizer Portal */}
+              <div className="relative bg-[#F2F2F2] p-1.5 rounded-2xl shadow-[0_25px_50px_-12px_rgba(46,46,47,0.12)] overflow-hidden group max-w-[620px] mx-auto lg:ml-auto transition-transform hover:scale-[1.02] duration-500">
+                <img
+                  src="/hero-dashboard-preview.png"
+                  alt="Organizer Portal Dashboard"
+                  className="w-full h-auto rounded-xl block"
+                />
+                <div className="absolute top-3 right-3 bg-white/40 backdrop-blur-md px-3 py-1 rounded-full text-[8px] font-black text-black/60 uppercase tracking-[0.2em]">
+                  Organizer Portal
+                </div>
+              </div>
+
+              {/* Floating badge: Organizer Tally - Resized (More Compact) */}
+              <div
+                className="absolute -bottom-4 -left-4 bg-[#F2F2F2] p-2.5 rounded-xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] flex flex-col items-start gap-2 animate-float group/badge cursor-pointer z-40 scale-90 lg:scale-100"
+                onMouseEnter={() => setShowOrgDropdown(true)}
+                onMouseLeave={() => setShowOrgDropdown(false)}
+              >
+                <div className="flex -space-x-2.5">
+                  {organizerBadgeItems.map((organizer) => (
+                    <div key={organizer.key} className="w-8 h-8 rounded-full border-[2px] border-white overflow-hidden shadow-sm bg-[#38BDF2]/10 ring-1 ring-black/5">
+                      <img src={organizer.src} alt={organizer.alt} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                  <div className="w-8 h-8 rounded-full border-[2px] border-white bg-[#E8E8E8] flex items-center justify-center text-[9px] font-black text-black shadow-sm ring-1 ring-black/5">
+                    +{organizerCount > 3 ? organizerCount - 3 : 5}
+                  </div>
+                </div>
+                <div className="space-y-0" onClick={() => navigate('/organizers/discover')}>
+                  <p className="text-[7.5px] font-black uppercase tracking-[0.05em] text-black/60 leading-tight">Active Organizers</p>
+                  <p className="text-[14px] font-black text-black leading-tight hover:text-[#38BDF2] transition-colors tracking-tight">
+                    8+ Trusted Leaders
+                  </p>
+                </div>
+
+                {/* Dropdown list of organizers (Restored) */}
+                <div className={`absolute bottom-[calc(100%-10px)] left-0 w-64 bg-[#F2F2F2] border border-black/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden transition-all duration-300 origin-bottom-left pb-3 ${showOrgDropdown ? 'opacity-100 scale-100 translate-y-[-10px]' : 'opacity-0 scale-95 pointer-events-none translate-y-0'}`}>
+                  <div className="p-5 border-b border-black/5 bg-black/[0.02]">
+                    <h5 className="text-[10px] font-black text-black uppercase tracking-[0.25em]">Our Partners</h5>
+                  </div>
+                  <div className="max-h-[238px] overflow-y-auto custom-scrollbar p-2.5 space-y-1">
+                    {organizers.map((org) => (
+                      <button
+                        key={org.organizerId}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/organizer/${org.organizerId}`);
+                        }}
+                        className="w-full flex items-center gap-3.5 p-2.5 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-300 text-left group/item border border-transparent hover:border-black/5"
+                      >
+                        <div className="w-9 h-9 rounded-xl overflow-hidden border-2 border-white shadow-sm bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] flex items-center justify-center shrink-0">
+                          {org.profileImageUrl ? (
+                            <img src={getImageUrl(org.profileImageUrl)} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-white text-[11px] font-black uppercase drop-shadow-sm">
+                              {(org.organizerName || 'O').charAt(0)}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] font-black text-black truncate group-hover/item:text-[#38BDF2] transition-colors tracking-tight">
+                            {org.organizerName}
+                          </p>
+                          <p className="text-[9px] font-bold text-black uppercase tracking-[0.1em]">
+                            {org.followersCount || 0} Followers
+                          </p>
+                        </div>
+                        <ICONS.ChevronRight className="w-3.5 h-3.5 text-black group-hover/item:text-[#38BDF2] group-hover/item:translate-x-0.5 transition-all" />
+                      </button>
                     ))}
-                    <div className="w-10 h-10 rounded-full border-[3px] border-white bg-[#E8E8E8] flex items-center justify-center text-[11px] font-black text-black shadow-sm ring-1 ring-black/5">
-                      +{organizerCount > 3 ? organizerCount - 3 : 5}
-                    </div>
                   </div>
-                  <div className="space-y-0.5" onClick={() => navigate('/organizers/discover')}>
-                    <p className="text-[9px] font-black uppercase tracking-[0.05em] text-black leading-tight">Active Organizers</p>
-                    <p className="text-[17px] font-black text-black leading-tight hover:text-[#38BDF2] transition-colors tracking-tight">
-                      8+ Trusted Leaders
-                    </p>
-                  </div>
-
-                  {/* Dropdown list of organizers */}
-                  <div className={`absolute bottom-[calc(100%-10px)] left-0 w-64 bg-[#F2F2F2] border border-black/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden transition-all duration-300 origin-bottom-left pb-3 ${showOrgDropdown ? 'opacity-100 scale-100 translate-y-[-10px]' : 'opacity-0 scale-95 pointer-events-none translate-y-0'}`}>
-                    <div className="p-5 border-b border-black/5 bg-black/[0.02]">
-                      <h5 className="text-[10px] font-black text-black uppercase tracking-[0.25em]">Our Partners</h5>
-                    </div>
-                    <div className="max-h-[238px] overflow-y-auto custom-scrollbar p-2.5 space-y-1">
-                      {organizers.map((org) => (
-                        <button
-                          key={org.organizerId}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/organizer/${org.organizerId}`);
-                          }}
-                          className="w-full flex items-center gap-3.5 p-2.5 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-300 text-left group/item border border-transparent hover:border-black/5"
-                        >
-                          <div className="w-9 h-9 rounded-xl overflow-hidden border-2 border-white shadow-sm bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] flex items-center justify-center shrink-0">
-                            {org.profileImageUrl ? (
-                              <img src={getImageUrl(org.profileImageUrl)} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <span className="text-white text-[11px] font-black uppercase drop-shadow-sm">
-                                {(org.organizerName || 'O').charAt(0)}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[11px] font-black text-black truncate group-hover/item:text-[#38BDF2] transition-colors tracking-tight">
-                              {org.organizerName}
-                            </p>
-                            <p className="text-[9px] font-bold text-black uppercase tracking-[0.1em]">
-                              {org.followersCount || 0} Followers
-                            </p>
-                          </div>
-                          <ICONS.ChevronRight className="w-3.5 h-3.5 text-black group-hover/item:text-[#38BDF2] group-hover/item:translate-x-0.5 transition-all" />
-                        </button>
-                      ))}
-                    </div>
-                    <div className="px-4 py-3 bg-[#F2F2F2] border-t border-black/5 text-center">
-                      <div className="flex items-center justify-center gap-2 text-[9px] font-black text-[#38BDF2] uppercase tracking-[0.2em] opacity-40 hover:opacity-100 transition-opacity cursor-default">
-                        <div className="w-1 h-1 rounded-full bg-[#38BDF2] animate-pulse" />
-                        Verified Community
-                      </div>
+                  <div className="px-4 py-3 bg-[#F2F2F2] border-t border-black/5 text-center">
+                    <div className="flex items-center justify-center gap-2 text-[9px] font-black text-[#38BDF2] uppercase tracking-[0.2em] opacity-40 hover:opacity-100 transition-opacity cursor-default">
+                      <div className="w-1 h-1 rounded-full bg-[#38BDF2] animate-pulse" />
+                      Verified Community
                     </div>
                   </div>
                 </div>
@@ -1273,7 +1264,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 <h2 className="text-[16px] font-black tracking-tight text-black">Event smart categories</h2>
               </div>
               <div
-                className="py-2 relative overflow-hidden outline-none cursor-grab active:cursor-grabbing select-none"
+                className="category-marquee py-2 relative overflow-hidden outline-none cursor-grab active:cursor-grabbing select-none"
                 tabIndex={0}
                 onMouseEnter={() => setIsMarqueePaused(true)}
                 onMouseLeave={handleMouseUpOrLeave}
@@ -1283,7 +1274,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               >
                 <div
                   ref={categoriesScrollRef}
-                  className="flex items-center gap-6 overflow-x-hidden whitespace-nowrap"
+                  className="category-marquee__track flex items-center gap-6 whitespace-nowrap"
+                  style={{ animationPlayState: (isMarqueePaused || isDraggingRef.current) ? 'paused' : 'running' }}
                 >
                   {[...categories, ...categories].map((category, index) => (
                     <button
@@ -1304,7 +1296,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           </div>
 
           {/* Promoted Events Carousel Section */}
-          {promotedEvents.length > 0 && (
+          {(loadingPromoted || promotedEvents.length > 0) && (
             <div className="w-full mt-44 mb-44 animate-in fade-in slide-in-from-bottom-4 duration-700 px-1">
               {/* Header Section */}
               <div className="mb-12 text-center flex flex-col items-center">
@@ -1323,7 +1315,9 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 </p>
               </div>
 
-              {!loadingPromoted && promotedEvents.length > 0 ? (
+              {loadingPromoted ? (
+                <PromotedEventSkeleton />
+              ) : promotedEvents.length > 0 ? (
                 <div className="relative">
                   {/* Carousel Container - More visible border and rounded corners */}
                   <div className="rounded-2xl overflow-hidden border border-black/15 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] group">
@@ -1335,8 +1329,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                           <div
                             key={event.eventId}
                             className={`absolute inset-0 transition-all duration-[600ms] ease-in-out transform cursor-pointer ${idx === currentPromotedIndex
-                                ? 'opacity-100 translate-x-0 z-10 pointer-events-auto'
-                                : 'opacity-0 translate-x-full z-0 pointer-events-none invisible'
+                              ? 'opacity-100 translate-x-0 z-10 pointer-events-auto'
+                              : 'opacity-0 translate-x-full z-0 pointer-events-none invisible'
                               }`}
                             aria-hidden={idx !== currentPromotedIndex}
                             onClick={() => navigate(`/events/${event.slug || event.eventId}`)}
@@ -1380,8 +1374,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
                                       {/* Event Title */}
                                       <h3 className={`font-black tracking-tighter leading-[1.1] text-white drop-shadow-sm animate-in fade-in slide-in-from-left-6 duration-1000 delay-100 line-clamp-2 ${(event.eventName || '').length > 40
-                                          ? 'text-xl sm:text-2xl md:text-3xl'
-                                          : 'text-2xl sm:text-3xl md:text-5xl'
+                                        ? 'text-xl sm:text-2xl md:text-3xl'
+                                        : 'text-2xl sm:text-3xl md:text-5xl'
                                         }`}>
                                         {event.eventName}
                                       </h3>
@@ -1462,8 +1456,6 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                         <ICONS.ChevronRight className="w-5 h-5" />
                       </button>
                     </div>
-
-
                   </div>
                 </div>
               ) : null}
@@ -1773,7 +1765,9 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                     <h3 className="text-xl font-black text-black tracking-tight uppercase">Most Liked in {selectedLocation}</h3>
                     <div className="h-px bg-black/5 flex-1" />
                   </div>
-                  <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`}>
+                  <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`} style={{ zoom: 0.95 }}>
+
+
                     {displayEvents.slice(0, 3).map((event) => (
                       <EventCard
                         key={`featured-${event.eventId}`}
@@ -1796,7 +1790,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                         <h3 className="text-xl font-black text-black tracking-tight uppercase">Other Events</h3>
                         <div className="h-px bg-black/5 flex-1" />
                       </div>
-                      <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`}>
+                      <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`} style={{ zoom: 0.95 }}>
+
                         {displayEvents.slice(3).map((event) => (
                           <EventCard
                             key={`other-${event.eventId}`}
@@ -1820,7 +1815,9 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               {/* Standard Grid Display (Fallbacks) */}
               {((isLanding || selectedLocation === DEFAULT_LOCATION) || loading) && (
                 <>
-                  <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8'} pt-10 ${displayEvents.length > 0 ? 'min-h-[400px]' : 'min-h-0'}`}>
+                  <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8'} pt-10 ${displayEvents.length > 0 ? 'min-h-[400px]' : 'min-h-0'}`} style={{ zoom: 0.95 }}>
+
+
                     {loading ? (
                       Array.from({ length: isLandingAllListing ? 3 : 6 }).map((_, idx) => (
                         <div key={idx} className={!isLanding ? 'h-[190px]' : ''}>

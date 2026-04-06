@@ -414,19 +414,19 @@ export const ArchiveEvents: React.FC = () => {
                   <button 
                     onClick={handleBulkRestore}
                     disabled={isBulkActionLoading}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white border-2 border-green-500 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-sm disabled:opacity-50 h-[32px]"
+                    className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-green-500 !text-green-500 px-4 py-2 text-[11px] hover:!bg-green-500 hover:!text-white flex items-center gap-2 group h-[38px]"
                   >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                    Restore
+                    <svg className="w-3.5 h-3.5 text-green-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    RESTORE ({selectedRows.size})
                   </button>
-<button 
-  onClick={() => setBulkDeleteConfirm(true)}
-  disabled={isBulkActionLoading}
-  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white border-2 border-red-500 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-sm disabled:opacity-50 h-[32px]"
->
-  <ICONS.Trash className="w-3.5 h-3.5" />
-  Delete
-</button>
+                  <button 
+                    onClick={() => setBulkDeleteConfirm(true)}
+                    disabled={isBulkActionLoading}
+                    className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-red-500 !text-red-500 px-4 py-2 text-[11px] hover:!bg-red-500 hover:!text-white flex items-center gap-2 group h-[38px]"
+                  >
+                    <ICONS.Trash className="w-3.5 h-3.5 text-red-500 group-hover:text-white transition-colors" />
+                    DELETE ({selectedRows.size})
+                  </button>
                 </div>
               )}
               {activeTab === 'support' && (

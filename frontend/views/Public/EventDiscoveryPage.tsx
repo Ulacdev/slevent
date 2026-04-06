@@ -411,7 +411,7 @@ export const EventDiscoveryPage: React.FC = () => {
                                         style={{ animationDelay: `${idx * 50}ms` }}
                                     >
                                         {/* Featured Badge - Show only for promoted events */}
-                                        {event.isPromoted && (
+                                        {(event.isPromoted || event.is_promoted) && (
                                             <div className="group/promoted relative absolute -top-4 left-4 z-10">
                                                 <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.15em] border border-[#38BDF2]/30 whitespace-nowrap cursor-help">
                                                     <ICONS.Info className="w-3.5 h-3.5" strokeWidth={3} />

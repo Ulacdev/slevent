@@ -215,13 +215,29 @@ export const getAdminSupportTickets = async (req, res) => {
   try {
     const adminId = req.user?.id;
 
-    // Fetch all notifications of type SUPPORT_TICKET meant for this admin
-    const { data, error } = await supabase
+    // IMPORTANT: authMiddleware only provides auth details. 
+    // We must fetch the custom role from our users table.
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('userId', adminId)
+      .maybeSingle();
+
+    const userRole = userData?.role || req.user?.role;
+
+    let query = supabase
       .from('notifications')
       .select('*, actor:users!actor_user_id(name, email), organizer:organizers!organizer_id("organizerId", "profileImageUrl", "organizerName")')
-      .eq('type', 'SUPPORT_TICKET')
-      .eq('recipient_user_id', adminId)
+      .in('type', ['SUPPORT_TICKET', 'EVENT_REPORT'])
       .order('created_at', { ascending: false });
+
+    // If superadmin or staff, show all tickets regardless of intended recipient
+    // (Tickets are technically 'assigned' to the first admin by default)
+    if (userRole !== 'ADMIN' && userRole !== 'STAFF') {
+       query = query.eq('recipient_user_id', adminId);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
        console.error('[Support] Fetch error:', error);
@@ -238,29 +254,56 @@ export const getAdminSupportTickets = async (req, res) => {
 export const resolveSupportTicket = async (req, res) => {
   try {
     const { id } = req.params;
-    const adminId = req.user?.id;
+    const userId = req.user?.id || req.user?.userId;
 
+    // 1. Get user role
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('userId', userId)
+      .maybeSingle();
+
+    const isAdmin = userData?.role === 'ADMIN' || userData?.role === 'STAFF';
+
+    // 2. Fetch current metadata to avoid nested spread issues
+    const { data: ticket } = await supabase
+      .from('notifications')
+      .select('metadata, recipient_user_id')
+      .eq('notification_id', id)
+      .maybeSingle();
+
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found.' });
+
+    // 3. Security Check: Only allow if recipient or if admin
+    if (!isAdmin && ticket.recipient_user_id !== userId) {
+      return res.status(403).json({ error: 'Unauthorized to resolve this ticket.' });
+    }
+
+    // 4. Update
     const { data, error } = await supabase
       .from('notifications')
       .update({
         metadata: { 
-          ...((await supabase.from('notifications').select('metadata').eq('notification_id', id).single()).data?.metadata || {}),
-          status: 'resolved' 
+          ...(ticket.metadata || {}),
+          status: 'resolved',
+          resolvedBy: userId,
+          resolvedAt: new Date().toISOString()
         },
         is_read: true,
         read_at: new Date().toISOString()
       })
       .eq('notification_id', id)
-      .eq('recipient_user_id', adminId)
       .select('*')
       .single();
 
     if (error) {
+       console.error('[Support] Resolve error:', error);
        return res.status(500).json({ error: 'Failed to resolve ticket.' });
     }
     
     res.json(data);
   } catch (error) {
+    console.error('[Support] Resolve crash:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
