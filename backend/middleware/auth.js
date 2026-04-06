@@ -49,7 +49,19 @@ export const authMiddleware = async (req, res, next) => {
       try {
         const user = await resolveUserFromAccess(bearerToken);
         req.user = user;
-        req.isMobileRequest = true;
+        req.isMobileRequest = false; // We can set cookies here for web browsers
+
+        // If cookies are missing (first time after OAuth), seed the access_token cookie
+        if (!req.cookies?.access_token) {
+          const isProd = process.env.NODE_ENV === "production";
+          res.cookie("access_token", bearerToken, {
+            httpOnly: true,
+            sameSite: isProd ? "None" : "Lax",
+            secure: isProd ? true : false,
+            path: "/",
+            maxAge: 60 * 60 * 1000,
+          });
+        }
         return next();
       } catch (err) {
         return res.status(401).json({ error: err.message || "Invalid access token" });

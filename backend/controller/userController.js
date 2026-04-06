@@ -249,28 +249,45 @@ export const whoAmI = async (req, res) => {
         canreceivenotifications: true
       };
 
-      const { data: newData, error: insertError } = await db
-        .from('users')
-        .insert(insertData)
-        .select('*')
-        .maybeSingle();
+      // --- EMAIL RECONCILIATION ---
+      // If we don't find this userId but the email exists, it means the user's ID changed (e.g. social login)
+      const { data: emailMatch } = await db.from('users').select('*').eq('email', insertData.email).maybeSingle();
+      
+      if (emailMatch) {
+         console.log(`[whoAmI] Linking identity for ${insertData.email} from ${emailMatch.userId} to ${insertData.userId}`);
+         const oldId = emailMatch.userId || emailMatch.id;
+         
+         // Update users table
+         await db.from('users').update({ userId: insertData.userId }).eq('email', insertData.email);
+         
+         // Update organizers table
+         await db.from('organizers').update({ ownerUserId: insertData.userId }).eq('ownerUserId', oldId);
+         
+         // Update events table (Fix createdBy link)
+         await db.from('events').update({ createdBy: insertData.userId }).eq('createdBy', oldId);
 
-      if (insertError) {
-        // If it's a conflict, maybe someone just created it, try to fetch again
-        if (insertError.code === '23505') {
-            const { data: secondTry } = await db.from('users').select('*').eq('userId', userId).maybeSingle();
-            if (secondTry) {
-               data = secondTry;
-            } else {
-               return res.status(500).json({ error: "Failed to sync profile (conflict)" });
-            }
-        } else {
-            console.error("[whoAmI] JIT creation failed:", insertError.message);
-            return res.status(500).json({ error: "Failed to initialize user profile due to security policy" });
-        }
+         data = { ...emailMatch, userId: insertData.userId };
       } else {
-        data = newData;
-        console.log(`[whoAmI] Successfully created JIT user record for ${data.email}`);
+        const { data: newData, error: insertError } = await db
+          .from('users')
+          .insert(insertData)
+          .select('*')
+          .maybeSingle();
+
+        if (insertError) {
+          // If it's a conflict, maybe someone just created it, try to fetch again
+          // --- SELF-HEALING: Ensure user and organizer profiles exist ---
+          let { data: secondTry } = await db.from('users').select('*').eq('userId', userId).maybeSingle();
+          if (secondTry) {
+             data = secondTry;
+          } else {
+              console.error("[whoAmI] JIT creation failed:", insertError.message);
+              return res.status(500).json({ error: "Failed to initialize user profile due to security policy" });
+          }
+        } else {
+          data = newData;
+          console.log(`[whoAmI] Successfully created JIT user record for ${data.email}`);
+        }
       }
     }
 

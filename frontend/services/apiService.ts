@@ -673,7 +673,7 @@ export const apiService = {
 
   // GET /api/payments/status?sessionId=...
   getPaymentStatus: async (orderId: string): Promise<Order | null> => {
-    const res = await fetch(`${API_BASE}/api/payments/status?sessionId=${encodeURIComponent(orderId)}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/payments/status?sessionId=${encodeURIComponent(orderId)}`, {
       credentials: 'include',
       cache: 'no-store'
     });
@@ -684,7 +684,7 @@ export const apiService = {
 
   // GET /api/tickets/order/:orderId
   getTicketsByOrder: async (orderId: string) => {
-    const res = await fetch(`${API_BASE}/api/tickets/order/${encodeURIComponent(orderId)}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/tickets/order/${encodeURIComponent(orderId)}`, {
       credentials: 'include'
     });
     if (!res.ok) throw new Error(`Failed to load tickets: ${res.status}`);
@@ -700,7 +700,7 @@ export const apiService = {
     inquiryType: string;
     message: string;
   }) => {
-    const res = await fetch(`${API_BASE}/api/contact`, {
+    const res = await apiService._fetch(`${API_BASE}/api/contact`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -720,7 +720,7 @@ export const apiService = {
     description: string;
     imageUrl?: string;
   }) => {
-    const res = await fetch(`${API_BASE}/api/reports/event`, {
+    const res = await apiService._fetch(`${API_BASE}/api/reports/event`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -736,7 +736,7 @@ export const apiService = {
   uploadReportImage: async (file: File) => {
     const formData = new FormData();
     formData.append('image', file);
-    const res = await fetch(`${API_BASE}/api/reports/upload`, {
+    const res = await apiService._fetch(`${API_BASE}/api/reports/upload`, {
       method: 'POST',
       body: formData,
       credentials: 'include'
@@ -750,7 +750,7 @@ export const apiService = {
 
   // GET /api/tickets/:ticketId
   getTicketDetails: async (id: string): Promise<RegistrationView | null> => {
-    const res = await fetch(`${API_BASE}/api/tickets/${encodeURIComponent(id)}`);
+    const res = await apiService._fetch(`${API_BASE}/api/tickets/${encodeURIComponent(id)}`);
     if (!res.ok) return null;
     const data = await res.json();
     // Map backend ticket fields to RegistrationView for UI
@@ -783,7 +783,7 @@ export const apiService = {
 
   // GET /api/ticket-types?eventId=...
   getTicketTypes: async (eventId: string): Promise<TicketType[]> => {
-    const res = await fetch(`${API_BASE}/api/ticket-types?eventId=${encodeURIComponent(eventId)}`);
+    const res = await apiService._fetch(`${API_BASE}/api/ticket-types?eventId=${encodeURIComponent(eventId)}`);
     if (!res.ok) throw new Error(`Failed to load ticket types: ${res.status}`);
     const data = await res.json();
     return data.map(apiService._mapTicketType);
@@ -793,12 +793,11 @@ export const apiService = {
   createTicketType: async (data: Partial<TicketType>): Promise<TicketType> => {
     // Remove createdBy if present
     const { createdBy, ...clean } = data;
-    const res = await fetch(`${API_BASE}/api/ticket-types`, {
+    const res = await apiService._fetch(`${API_BASE}/api/ticket-types`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(clean)
-
     });
     if (!res.ok) throw new Error(`Failed to create ticket type: ${res.status}`);
     const result = await res.json();
@@ -985,13 +984,13 @@ export const apiService = {
     return { ...data, ticketTypes: data?.ticketTypes || eventData.ticketTypes || [] } as Event;
   },
 
-  // DELETE /api/admin/events/:id (Archives event - soft delete)
-  deleteEvent: async (id: string, reason?: string): Promise<{ archived?: boolean; permanent?: boolean; message?: string }> => {
+  // DELETE /api/admin/events/:id (Archives event by default, or permanent delete if flag set)
+  deleteEvent: async (id: string, permanent = false, reason?: string): Promise<{ archived?: boolean; permanent?: boolean; message?: string }> => {
     const res = await fetch(`${API_BASE}/api/admin/events/${encodeURIComponent(id)}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: reason ? JSON.stringify({ reason }) : undefined
+      body: JSON.stringify({ permanent, reason })
     });
     if (!res.ok) {
       const error = await res.json().catch(() => ({}));
@@ -1319,30 +1318,30 @@ export const apiService = {
 
   // POST /api/tickets/checkin
   checkInTicket: async (code: string): Promise<any> => {
-    const res = await fetch(`${API_BASE}/api/tickets/checkin`, {
+    const res = await apiService._fetch(`${API_BASE}/api/tickets/checkin`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code })
     });
     if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      throw new Error(text || `Check-in failed: ${res.status}`);
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.error || `Check-in failed: ${res.status}`);
     }
     return res.json();
   },
 
   // PUT /api/users/:id/permissions
   updateUserPermissions: async (userId: string, payload: { canViewEvents: boolean; canEditEvents: boolean; canManualCheckIn: boolean; canReceiveNotifications: boolean }) => {
-    const res = await fetch(`${API_BASE}/api/users/${encodeURIComponent(userId)}/permissions`, {
+    const res = await apiService._fetch(`${API_BASE}/api/users/${encodeURIComponent(userId)}/permissions`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify(payload)
     });
     if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      throw new Error(text || `Failed to update permissions: ${res.status}`);
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.error || `Failed to update permissions: ${res.status}`);
     }
     return res.json();
   },
@@ -1353,47 +1352,48 @@ export const apiService = {
 
   // GET /api/notifications/me - Get current user's notifications
   getMyNotifications: async (limit = 25): Promise<{ notifications: any[], unreadCount: number }> => {
-    const res = await fetch(`${API_BASE}/api/notifications/me?limit=${limit}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/notifications/me?limit=${limit}`, {
       credentials: 'include'
     });
     if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      throw new Error(text || `Failed to load notifications: ${res.status}`);
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.error || `Failed to load notifications: ${res.status}`);
     }
     return res.json();
   },
 
   // PATCH /api/notifications/:id/read - Mark a notification as read
   markNotificationRead: async (notificationId: string): Promise<any> => {
-    const res = await fetch(`${API_BASE}/api/notifications/${encodeURIComponent(notificationId)}/read`, {
+    const res = await apiService._fetch(`${API_BASE}/api/notifications/${encodeURIComponent(notificationId)}/read`, {
       method: 'PATCH',
       credentials: 'include'
     });
     if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      throw new Error(text || `Failed to mark notification as read: ${res.status}`);
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.error || `Failed to mark notification as read: ${res.status}`);
     }
     return res.json();
   },
 
   // PATCH /api/notifications/read-all - Mark all notifications as read
   markAllNotificationsRead: async (): Promise<{ success: boolean }> => {
-    const res = await fetch(`${API_BASE}/api/notifications/read-all`, {
+    const res = await apiService._fetch(`${API_BASE}/api/notifications/read-all`, {
       method: 'PATCH',
       credentials: 'include'
     });
     if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      throw new Error(text || `Failed to mark all notifications as read: ${res.status}`);
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.error || `Failed to mark all notifications as read: ${res.status}`);
     }
     return res.json();
   },
   // --- Promotion APIs ---
   validatePromotion: async (eventId: string, code: string): Promise<any> => {
-    const res = await fetch(`${API_BASE}/api/promotions/validate`, {
+    const res = await apiService._fetch(`${API_BASE}/api/promotions/validate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ eventId, code })
+      body: JSON.stringify({ eventId, code }),
+      credentials: 'include'
     });
     if (!res.ok) {
       const error = await res.json().catch(() => ({}));

@@ -368,6 +368,24 @@ export const deleteUserEvent = async (req, res) => {
       return res.status(ownership.status).json({ error: ownership.message });
     }
 
+    return archiveEvent(req, res);
+  } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
+
+export const deleteUserEventPermanently = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+    const ownership = await ensureEventOwnership(id, userId);
+    if (ownership.status !== 200) {
+      if (ownership.error) return res.status(500).json({ error: ownership.error.message });
+      return res.status(ownership.status).json({ error: ownership.message });
+    }
+
     return deleteEvent(req, res);
   } catch (err) {
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
@@ -679,8 +697,11 @@ export const resolveEventReports = async (req, res) => {
 export const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.userId;
+    const userId = req.user?.id || req.user?.userId;
 
+    // Security Check: Ensure either creator OR admin (Admins handled by route middleware usually)
+    // Here we focus on the hard delete aspect.
+    
     // Hard delete - remove all related data first
     await supabase.from('tickets').delete().eq('eventId', id);
     await supabase.from('ticketTypes').delete().eq('eventId', id);
@@ -701,6 +722,38 @@ export const deleteEvent = async (req, res) => {
     });
 
     return res.status(200).json({ message: 'Event permanently deleted from system', permanent: true });
+  } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
+
+export const archiveEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id || req.user?.userId;
+
+    const { data, error } = await supabase
+      .from('events')
+      .update({
+        is_archived: true,
+        deleted_at: new Date().toISOString(),
+        archived_by: userId,
+        updated_at: new Date().toISOString()
+      })
+      .eq('eventId', id)
+      .select('*')
+      .single();
+
+    if (error) return res.status(500).json({ error: error.message });
+    if (!data) return res.status(404).json({ error: 'Event not found' });
+
+    await logAudit({
+      actionType: 'EVENT_ARCHIVED',
+      details: { eventId: id, archivedBy: userId },
+      req
+    });
+
+    return res.status(200).json({ message: 'Event moved to archive', archived: true, event: data });
   } catch (err) {
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }

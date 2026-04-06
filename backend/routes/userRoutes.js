@@ -7,7 +7,8 @@ import {
   createUserEvent,
   updateUserEvent,
   uploadUserEventImage,
-  deleteEvent,
+  deleteUserEvent,
+  deleteUserEventPermanently,
   restoreEvent,
   listArchivedEvents,
   cancelEvent,
@@ -56,7 +57,7 @@ router.post('/user/events/:id/image', authMiddleware, upload.single('image'), (r
 
 // ─── Archive system for organizers ───
 // DELETE /user/events/:id - Archive (soft delete) event
-router.delete('/user/events/:id', authMiddleware, deleteEvent);
+router.delete('/user/events/:id', authMiddleware, deleteUserEvent);
 
 // PATCH /user/events/:id/cancel - Cancel event and notify attendees
 router.patch('/user/events/:id/cancel', authMiddleware, cancelEvent);
@@ -69,6 +70,9 @@ router.get('/user/events/archived', authMiddleware, listArchivedEvents);
 
 // POST /user/events/:id/restore - Restore archived event
 router.post('/user/events/:id/restore', authMiddleware, restoreEvent);
+
+// DELETE /user/events/:id/permanent - Permanent delete event
+router.delete('/user/events/:id/permanent', authMiddleware, deleteUserEventPermanently);
 
 // ─── Support System ───
 router.post('/user/support', authMiddleware, submitSupportTicket);

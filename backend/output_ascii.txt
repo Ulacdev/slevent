@@ -1,0 +1,16 @@
+[dotenv@17.2.3] injecting env (17) from .env -- tip: ??????  override existing env vars with { override: true }
+--- User List ---
+- kenayson.startuplab@gmail.com (142f1c6c-3b96-4eb3-828c-911a8d36b9e4)
+- neilkenjijavier.startuplab@gmail.com (7a17ca9b-9b9d-41ff-80e3-9b23ae37c71c)
+- johncarloaganan26@gmail.com (9d41b01d-d272-44da-b1a0-08115527a476)
+- johncarloagaaganan08@gmail.com (15ad86c4-bb16-4882-ad83-1fb0b4dd7baa)
+- kenjijavier1@gmail.com (3368d6bf-a5c8-4963-b850-44ab91eeced6)
+- ubeeeyk@gmail.com (df413e5a-f873-4953-8ef5-02fb3bb84246)
+- bbekkawit@gmail.com (0946cfb0-d1c6-4146-bf64-3bc0c6a043d9)
+- rmsntmlnrvck@gmail.com (b2113be6-d484-44de-9d11-adc1c01197f2)
+- rovickromasanta.startuplab@gmail.com (d6e6eeaa-c793-44bd-8698-c42044cb0fb1)
+- jabano120@gmail.com (7053421f-51e8-4d2e-aedc-4bd447a7efab)
+- johnaganan.startuplab@gmail.com (8da25ac5-a71e-4116-bc43-369dde10e45d)
+- rvckmlnrmsnt@gmail.com (bbd61324-84b6-49c9-8f42-3bf6debcc3eb)
+--- Duplicate Email Check ---
+--- End Check ---

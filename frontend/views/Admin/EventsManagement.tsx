@@ -325,12 +325,12 @@ export const EventsManagement: React.FC = () => {
       const finalReason = deleteReason === 'OTHER' ? customReason : deleteReason;
       
       if (isBulkMode) {
-        await Promise.all(selectedIds.map(id => apiService.deleteEvent(id, finalReason)));
+        await Promise.all(selectedIds.map(id => apiService.deleteEvent(id, true, finalReason)));
         setNotification({ message: `${selectedIds.length} events have been permanently deleted.`, type: 'success' });
         setSelectedIds([]);
         setIsBulkMode(false);
       } else if (deleteConfirm) {
-        await apiService.deleteEvent(deleteConfirm.eventId, finalReason);
+        await apiService.deleteEvent(deleteConfirm.eventId, true, finalReason);
         setNotification({ message: `"${deleteConfirm.eventName}" has been permanently deleted from the system.`, type: 'success' });
         setDeleteConfirm(null);
       }

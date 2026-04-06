@@ -315,7 +315,46 @@ export const login = async (req, res) => {
     }
 
     // --- SELF-HEALING: Ensure user and organizer profiles exist ---
-    const { data: dbUser } = await db.from('users').select('*').eq('userId', user.id).maybeSingle();
+    let { data: dbUser } = await db.from('users').select('*').eq('userId', user.id).maybeSingle();
+
+    if (!dbUser) {
+      // B.1 Check if user with this email exists under a different userId (Identity Migration)
+      const { data: userByEmail } = await db.from('users').select('*').eq('email', user.email?.toLowerCase().trim()).maybeSingle();
+      
+      if (userByEmail) {
+        console.log(`[Auth] Linking existing record for ${user.email} to new identity ID: ${user.id}`);
+        const oldId = userByEmail.userId || userByEmail.id;
+        
+        // Update users table
+        await db.from('users').update({ userId: user.id }).eq('email', user.email?.toLowerCase().trim());
+        
+        // Update organizers table
+        await db.from('organizers').update({ ownerUserId: user.id }).eq('ownerUserId', oldId);
+        
+        // 3. Update events table (Fix createdBy link)
+        await db.from('events').update({ createdBy: user.id }).eq('createdBy', oldId);
+        
+        // 4. Also ensure any events created by this email (regardless of ID) are linked to the organizer
+        const { data: currentOrg } = await db.from('organizers').select('organizerId').eq('ownerUserId', user.id).maybeSingle();
+        if (currentOrg) {
+           await db.from('events').update({ organizerId: currentOrg.organizerId }).eq('createdBy', user.id).is('organizerId', null);
+        }
+        
+        dbUser = { ...userByEmail, userId: user.id };
+      } else {
+        console.log(`[Auth] Syncing missing DB user: ${user.email}`);
+        const { data: insertedUser, error: insertError } = await db.from('users').insert({
+          userId: user.id,
+          email: user.email?.toLowerCase().trim(),
+          name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+          role: ORGANIZER_ROLE,
+        }).select('*').single();
+        
+        if (!insertError) dbUser = insertedUser;
+      }
+    }
+
+    // Now evaluate role and status after potential sync/reconciliation
     let finalRole = dbUser?.role || ORGANIZER_ROLE;
 
     if (dbUser && dbUser.status === 'Inactive') {
@@ -326,15 +365,6 @@ export const login = async (req, res) => {
       return res.status(403).json({ message: "Your account is currently INACTIVE. Please contact support or your organization administrator for assistance." });
     }
 
-    if (!dbUser) {
-      console.log(`[Auth] Syncing missing DB user: ${user.email}`);
-      await db.from('users').insert({
-        userId: user.id,
-        email: user.email?.toLowerCase().trim(),
-        name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-        role: ORGANIZER_ROLE,
-      });
-    }
 
     const { data: orgData } = await db.from('organizers').select('organizerId, isOnboarded').eq('ownerUserId', user.id).maybeSingle();
     let isOnboarded = orgData?.isOnboarded || false;

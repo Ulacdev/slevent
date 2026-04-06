@@ -1,0 +1,17 @@
+--- ALL EVENTS MAP (Manual Map) ---
+- [2895432e-8297-4602-ab9f-5e56659d27f8] NKJ test event colors
+  CreatedBy: 3368d6bf-a5c8-4963-b850-44ab91eeced6 (kenjijavier1@gmail.com)
+- [88e2b8f7-61af-4825-a75a-7aa50ac81f09] Startup Bootcamp 101: Your Numbers Tell a Story. Learn to Read It.
+  CreatedBy: d6e6eeaa-c793-44bd-8698-c42044cb0fb1 (rovickromasanta.startuplab@gmail.com)
+- [d2bd2041-496e-4b73-81a2-c7a3f00688c9] The Founder’s Playbook: Mastering the 5 Lenses of High-Impact Positioning
+  CreatedBy: d6e6eeaa-c793-44bd-8698-c42044cb0fb1 (rovickromasanta.startuplab@gmail.com)
+- [ade6643a-ea64-43af-95dd-7053aa25cfc4] Bible Study
+  CreatedBy: 0946cfb0-d1c6-4146-bf64-3bc0c6a043d9 (bbekkawit@gmail.com)
+- [0478ef9e-6595-47be-bcfa-24e029e80e21] Graphic Design Theory Training
+  CreatedBy: d6e6eeaa-c793-44bd-8698-c42044cb0fb1 (rovickromasanta.startuplab@gmail.com)
+- [9d012920-3d82-41a4-9500-549c788dd45e] Training the Team for the AI Era
+  CreatedBy: d6e6eeaa-c793-44bd-8698-c42044cb0fb1 (rovickromasanta.startuplab@gmail.com)
+- [9fe98ba3-3d46-4fee-97c6-0ecfae176238] Testing Event 4
+  CreatedBy: 7a17ca9b-9b9d-41ff-80e3-9b23ae37c71c (neilkenjijavier.startuplab@gmail.com)
+- [04690130-26ea-4336-b5cf-1efa3b05a5ed] From Idea to Investor-Ready: Preparing a Whitepaper for Your Startup
+  CreatedBy: d6e6eeaa-c793-44bd-8698-c42044cb0fb1 (rovickromasanta.startuplab@gmail.com)

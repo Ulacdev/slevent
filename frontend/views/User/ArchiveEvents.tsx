@@ -251,7 +251,7 @@ export const ArchiveEvents: React.FC = () => {
       try {
         const ids = Array.from(selectedRows);
         if (activeTab === 'events') {
-          await Promise.all(ids.map(id => apiService.deleteEvent(id)));
+          await Promise.all(ids.map(id => apiService.deleteEvent(id, true)));
           setEvents(events.filter(e => !selectedRows.has(e.eventId)));
         } else if (activeTab === 'transactions') {
           await Promise.all(ids.map(id => apiService.deleteTransaction(id)));
@@ -275,7 +275,7 @@ export const ArchiveEvents: React.FC = () => {
     try {
       setActionLoading(idToDelete);
       if (activeTab === 'events') {
-        await apiService.deleteEvent(idToDelete);
+        await apiService.deleteEvent(idToDelete, true);
         setEvents(events.filter(e => e.eventId !== idToDelete));
       } else if (activeTab === 'transactions') {
         await apiService.deleteTransaction(idToDelete);

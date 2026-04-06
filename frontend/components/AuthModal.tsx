@@ -332,7 +332,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                 type="button"
                 onClick={handleGoogleAuth}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-3.5 bg-white border border-[#2E2E2F]/10 rounded-2xl hover:bg-gray-50 transition-all shadow-sm group disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-3 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/15 rounded-2xl hover:bg-black/5 transition-all shadow-sm group disabled:opacity-50"
               >
                 <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-all" />
                 <span className="text-[13px] font-black text-[#2E2E2F]">Google Account</span>
@@ -460,7 +460,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                 type="button"
                 onClick={handleGoogleAuth}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-3.5 bg-white border border-[#2E2E2F]/10 rounded-2xl hover:bg-gray-50 transition-all shadow-sm group disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-3 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/15 rounded-2xl hover:bg-black/5 transition-all shadow-sm group disabled:opacity-50"
               >
                 <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-all" />
                 <span className="text-[13px] font-black text-[#2E2E2F]">Google Account</span>

@@ -24,6 +24,10 @@ const LEGAL_LINKS: Array<{ label: string; path: string }> = [
   { label: 'About Us', path: '/about-us' },
   { label: 'Events', path: '/browse-events' },
   { label: 'Contact Us', path: '/contact-us' },
+  { label: 'Privacy Policy', path: '/privacy-policy' },
+  { label: 'Terms of Service', path: '/terms-of-service' },
+  { label: 'FAQ', path: '/faq' },
+  { label: 'Refund Policy', path: '/refund-policy' },
 ];
 
 const DEFAULT_HERO_IMAGE =
@@ -38,33 +42,35 @@ const InfoPageLayout: React.FC<InfoPageProps> = ({
   highlights = [],
   heroImage = DEFAULT_HERO_IMAGE,
   heroAlt = 'Event operations',
-  articleClassName = 'bg-white'
+  articleClassName = 'bg-[#F2F2F2]'
 }) => {
   const location = useLocation();
   return (
-    <div className="bg-[#F2F2F2]">
+    <div className="bg-[#F2F2F2] min-h-screen">
       <div className="max-w-[88rem] mx-auto px-6 py-12 sm:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8 lg:gap-10">
-          <article className={`rounded-xl border border-[#2E2E2F]/10 p-6 sm:p-8 lg:p-10 ${articleClassName}`}>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#38BDF2] mb-4">{eyebrow}</p>
-            <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-[#2E2E2F] mb-4">{title}</h1>
-            <p className="text-[#2E2E2F] text-sm sm:text-base leading-relaxed mb-8">{intro}</p>
-            <div className="mb-8 overflow-hidden rounded-xl border border-[#2E2E2F]/10">
+          <article className={`rounded-2xl border border-[#2E2E2F]/10 p-6 sm:p-8 lg:p-12 ${articleClassName} shadow-sm`}>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#38BDF2] mb-6">{eyebrow}</p>
+            <h1 className="text-3xl lg:text-5xl font-black tracking-tight text-[#2E2E2F] mb-6 leading-tight">{title}</h1>
+            <p className="text-[#2E2E2F]/80 text-sm sm:text-lg leading-relaxed mb-10 max-w-3xl">{intro}</p>
+            
+            <div className="mb-12 overflow-hidden rounded-2xl border border-[#2E2E2F]/10 shadow-lg">
               <img
                 src={heroImage}
                 alt={heroAlt}
-                className="w-full h-[220px] sm:h-[280px] object-cover"
+                className="w-full h-[240px] sm:h-[320px] object-cover hover:scale-105 transition-transform duration-700"
                 loading="lazy"
               />
             </div>
+
             {highlights.length > 0 && (
-              <div className="mb-8 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-4 sm:p-5">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] mb-3">Platform Scope</p>
-                <div className="flex flex-wrap gap-2">
+              <div className="mb-12 rounded-2xl border border-[#2E2E2F]/10 bg-[#2E2E2F]/5 p-5 sm:p-6">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/60 mb-4">Core Principles</p>
+                <div className="flex flex-wrap gap-3">
                   {highlights.map((item) => (
                     <span
                       key={item}
-                      className="inline-flex items-center rounded-full border border-[#2E2E2F]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-[#2E2E2F] bg-white"
+                      className="inline-flex items-center rounded-xl border border-[#2E2E2F]/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#2E2E2F] bg-[#F2F2F2]"
                     >
                       {item}
                     </span>
@@ -73,22 +79,22 @@ const InfoPageLayout: React.FC<InfoPageProps> = ({
               </div>
             )}
 
-            <div className="space-y-8">
+            <div className="space-y-12">
               {sections.map((section) => (
-                <section key={section.title}>
-                  <h2 className="text-xl sm:text-2xl font-black tracking-tight text-[#2E2E2F] mb-3">{section.title}</h2>
-                  <div className="space-y-3">
+                <section key={section.title} className="group">
+                  <h2 className="text-xl sm:text-2xl font-black tracking-tight text-[#2E2E2F] mb-5 group-hover:text-[#38BDF2] transition-colors">{section.title}</h2>
+                  <div className="space-y-4">
                     {section.paragraphs.map((paragraph) => (
-                      <p key={paragraph} className="text-[13px] sm:text-sm text-[#2E2E2F] leading-relaxed">
+                      <p key={paragraph} className="text-[14px] sm:text-[15px] text-[#2E2E2F]/70 leading-relaxed font-medium">
                         {paragraph}
                       </p>
                     ))}
                   </div>
                   {section.bullets && section.bullets.length > 0 && (
-                    <ul className="mt-4 space-y-2">
+                    <ul className="mt-6 space-y-3">
                       {section.bullets.map((item) => (
-                        <li key={item} className="text-[13px] sm:text-sm text-[#2E2E2F] leading-relaxed flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 mt-1.5 rounded-full bg-[#38BDF2] shrink-0" />
+                        <li key={item} className="text-[14px] sm:text-[15px] text-[#2E2E2F]/70 leading-relaxed flex items-start gap-3">
+                          <span className="w-2 h-2 mt-2 rounded-full bg-[#38BDF2] shrink-0" />
                           <span>{item}</span>
                         </li>
                       ))}
@@ -98,23 +104,26 @@ const InfoPageLayout: React.FC<InfoPageProps> = ({
               ))}
             </div>
 
-            <p className="mt-10 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">
-              Last Updated: {updated}
-            </p>
+            <div className="mt-16 pt-8 border-t border-[#2E2E2F]/10">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40">
+                Last Updated: {updated}
+              </p>
+            </div>
           </article>
 
-          <aside className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-5 h-fit lg:sticky lg:top-28">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] mb-4">Related Pages</p>
-            <div className="space-y-2.5">
+          <aside className="rounded-2xl border border-[#2E2E2F]/10 bg-[#E5E7EB]/50 p-6 h-fit lg:sticky lg:top-28">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/60 mb-6">Navigation</p>
+            <div className="space-y-3">
               {LEGAL_LINKS.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`block rounded-xl border px-3 py-2 text-xs font-bold transition-colors ${location.pathname === link.path
-                    ? 'border-[#38BDF2]/40 text-[#38BDF2] bg-white'
-                    : 'border-[#2E2E2F]/10 text-[#2E2E2F] hover:text-[#38BDF2] hover:border-[#38BDF2]/40'
+                  className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${location.pathname === link.path
+                    ? 'border-[#38BDF2] text-[#38BDF2] bg-[#38BDF2]/5 shadow-sm'
+                    : 'border-[#2E2E2F]/5 text-[#2E2E2F]/60 hover:text-[#2E2E2F] hover:border-[#2E2E2F]/20 hover:bg-black/5'
                     }`}
                 >
+                  <span className={`w-1.5 h-1.5 rounded-full ${location.pathname === link.path ? 'bg-[#38BDF2]' : 'bg-[#2E2E2F]/20'}`} />
                   {link.label}
                 </Link>
               ))}
@@ -294,7 +303,6 @@ export const FaqPage: React.FC = () => (
     title="Frequently Asked Questions"
     intro="Quick guidance for the most common organizer and attendee workflows in StartupLab Ticketing."
     updated="March 3, 2026"
-    articleClassName="bg-[#F2F2F2]"
     highlights={['Event Setup', 'Checkout', 'Check-In', 'Refunds']}
     heroImage="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1400&q=80"
     heroAlt="Frequently asked questions workspace"
@@ -376,4 +384,3 @@ export const RefundPolicyPage: React.FC = () => (
 );
 
 export const PublicEventsPage: React.FC = () => <EventList />;
-

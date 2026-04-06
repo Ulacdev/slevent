@@ -1,0 +1,11 @@
+--- Audit for rovickromasanta.startuplab@gmail.com ---
+User DB ID: d6e6eeaa-c793-44bd-8698-c42044cb0fb1, Role: ADMIN
+Organizers found: 1
+  - OrganizerId: 0d1b69b6-b2f7-4af8-9ccd-97f9f881cba2, Name: My Organization
+Events by createdBy (d6e6eeaa-c793-44bd-8698-c42044cb0fb1): 5
+  - EventId: 88e2b8f7-61af-4825-a75a-7aa50ac81f09, Name: Startup Bootcamp 101: Your Numbers Tell a Story. Learn to Read It., Status: PUBLISHED, OrgID: 0d1b69b6-b2f7-4af8-9ccd-97f9f881cba2
+  - EventId: d2bd2041-496e-4b73-81a2-c7a3f00688c9, Name: The Founder’s Playbook: Mastering the 5 Lenses of High-Impact Positioning, Status: PUBLISHED, OrgID: 0d1b69b6-b2f7-4af8-9ccd-97f9f881cba2
+  - EventId: 0478ef9e-6595-47be-bcfa-24e029e80e21, Name: Graphic Design Theory Training, Status: PUBLISHED, OrgID: 0d1b69b6-b2f7-4af8-9ccd-97f9f881cba2
+  - EventId: 9d012920-3d82-41a4-9500-549c788dd45e, Name: Training the Team for the AI Era, Status: PUBLISHED, OrgID: 0d1b69b6-b2f7-4af8-9ccd-97f9f881cba2
+  - EventId: 04690130-26ea-4336-b5cf-1efa3b05a5ed, Name: From Idea to Investor-Ready: Preparing a Whitepaper for Your Startup, Status: PUBLISHED, OrgID: 0d1b69b6-b2f7-4af8-9ccd-97f9f881cba2
+Events by Organizer (0d1b69b6-b2f7-4af8-9ccd-97f9f881cba2): 5

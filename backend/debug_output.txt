@@ -1,0 +1,20 @@
+[dotenv@17.2.3] injecting env (17) from .env -- tip: ??????  write to custom object with { processEnv: myObject }
+--- Database Consistency Check ---
+
+Found 12 users, 9 organizers, 8 events.
+
+--- Linkage Analysis ---
+
+--- Event Analysis ---
+[Event] NKJ test event colors (CreatedBy: kenjijavier1@gmail.com, Organizer: NKJ)
+[Event] Startup Bootcamp 101: Your Numbers Tell a Story. Learn to Read It. (CreatedBy: rovickromasanta.startuplab@gmail.com, Organizer: NONE)
+[Event] The Founder???s Playbook: Mastering the 5 Lenses of High-Impact Positioning (CreatedBy: rovickromasanta.startuplab@gmail.com, Organizer: NONE)
+[Event] Bible Study (CreatedBy: bbekkawit@gmail.com, Organizer: Bible Baptist Ekklesia of Kawit)
+[Event] From Idea to Investor-Ready: Preparing a Whitepaper for Your Startup (CreatedBy: rovickromasanta.startuplab@gmail.com, Organizer: NONE)
+[Event] Graphic Design Theory Training (CreatedBy: rovickromasanta.startuplab@gmail.com, Organizer: NONE)
+[Event] Training the Team for the AI Era (CreatedBy: rovickromasanta.startuplab@gmail.com, Organizer: NONE)
+[Event] Testing Event 4 (CreatedBy: neilkenjijavier.startuplab@gmail.com, Organizer: kenji javier)
+
+--- Duplicate Email Check ---
+
+--- End Analysis ---

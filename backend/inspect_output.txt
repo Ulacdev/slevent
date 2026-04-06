@@ -1,0 +1,41 @@
+[dotenv@17.2.3] injecting env (17) from .env -- tip: ??????  write to custom object with { processEnv: myObject }
+Inspecting rovickromasanta.startuplab@gmail.com
+
+--- Supabase Auth Check ---
+Found 1 auth identities:
+- d6e6eeaa-c793-44bd-8698-c42044cb0fb1 (rovickromasanta.startuplab@gmail.com) provider: email
+
+--- DB Users Check ---
+Found 1 users in 'users' table:
+- d6e6eeaa-c793-44bd-8698-c42044cb0fb1 (rovickromasanta.startuplab@gmail.com) role: ADMIN
+Organizer: {
+  "organizerId": "0d1b69b6-b2f7-4af8-9ccd-97f9f881cba2",
+  "ownerUserId": "d6e6eeaa-c793-44bd-8698-c42044cb0fb1",
+  "organizerName": "My Organization",
+  "websiteUrl": null,
+  "bio": null,
+  "eventPageDescription": null,
+  "facebookId": null,
+  "twitterHandle": null,
+  "emailOptIn": false,
+  "profileImageUrl": null,
+  "followersCount": 0,
+  "created_at": "2026-04-01T08:08:37.202702+00:00",
+  "updated_at": "2026-04-01T08:08:37.202702+00:00",
+  "currentPlanId": null,
+  "subscriptionStatus": "free",
+  "planExpiresAt": null,
+  "brandColor": "#38BDF2",
+  "isOnboarded": false,
+  "coverImageUrl": null,
+  "timezone": "Asia/Manila",
+  "dailyEmailQuota": 500,
+  "emailsSentToday": 0,
+  "lastEmailResetDate": "2026-04-01"
+}
+Found 5 events for Rovick:
+- Startup Bootcamp 101: Your Numbers Tell a Story. Learn to Read It. (id: 88e2b8f7-61af-4825-a75a-7aa50ac81f09, creator: d6e6eeaa-c793-44bd-8698-c42044cb0fb1, orgId: 0d1b69b6-b2f7-4af8-9ccd-97f9f881cba2)
+- The Founder???s Playbook: Mastering the 5 Lenses of High-Impact Positioning (id: d2bd2041-496e-4b73-81a2-c7a3f00688c9, creator: d6e6eeaa-c793-44bd-8698-c42044cb0fb1, orgId: 0d1b69b6-b2f7-4af8-9ccd-97f9f881cba2)
+- Graphic Design Theory Training (id: 0478ef9e-6595-47be-bcfa-24e029e80e21, creator: d6e6eeaa-c793-44bd-8698-c42044cb0fb1, orgId: 0d1b69b6-b2f7-4af8-9ccd-97f9f881cba2)
+- Training the Team for the AI Era (id: 9d012920-3d82-41a4-9500-549c788dd45e, creator: d6e6eeaa-c793-44bd-8698-c42044cb0fb1, orgId: 0d1b69b6-b2f7-4af8-9ccd-97f9f881cba2)
+- From Idea to Investor-Ready: Preparing a Whitepaper for Your Startup (id: 04690130-26ea-4336-b5cf-1efa3b05a5ed, creator: d6e6eeaa-c793-44bd-8698-c42044cb0fb1, orgId: 0d1b69b6-b2f7-4af8-9ccd-97f9f881cba2)
