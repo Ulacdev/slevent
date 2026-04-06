@@ -212,4 +212,7 @@ export const ICONS = {
   User: (props: any) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
   ),
+  Google: (props: any) => (
+    <svg viewBox="0 0 24 24" {...props}><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c3.04 0 5.59-1 7.45-2.71l-3.57-2.77c-1.05.7-2.39 1.11-3.88 1.11-2.99 0-5.51-2.02-6.42-4.73H1.93v2.87A11.993 11.993 0 0 0 12 23z" fill="#34A853"/><path d="M5.58 13.91c-.24-.71-.38-1.46-.38-2.25s.14-1.54.38-2.25V6.54h-3.65c-.82 1.61-1.28 3.42-1.28 5.31s.46 3.7 1.28 5.31l3.65-2.77z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15A11.954 11.954 0 0 0 12 1c-3.97 0-7.39 2.2-9.14 5.43l3.66 2.76C7.4 5.38 10.02 5.38 12 5.38z" fill="#EA4335"/></svg>
+  ),
 };

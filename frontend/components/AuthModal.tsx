@@ -43,6 +43,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotMessage, setForgotMessage] = useState('');
 
+  const handleGoogleAuth = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      if (authError) throw authError;
+    } catch (err: any) {
+      setError(err.message || 'Failed to connect to Google.');
+      showToast('error', 'Google Auth Error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       setView(initialView);
@@ -300,6 +319,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                 {loading ? 'Wait...' : 'Sign In'}
               </Button>
 
+              <div className="relative my-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-[#2E2E2F]/10"></div>
+                </div>
+                <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest">
+                  <span className="bg-[#F2F2F2] px-3 text-[#2E2E2F]/40">Or continue with</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGoogleAuth}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 py-3.5 bg-white border border-[#2E2E2F]/10 rounded-2xl hover:bg-gray-50 transition-all shadow-sm group disabled:opacity-50"
+              >
+                <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-all" />
+                <span className="text-[13px] font-black text-[#2E2E2F]">Google Account</span>
+              </button>
+
               <div className="mt-4 pt-4 border-t border-[#2E2E2F]/10 text-center">
                 <p className="text-[#2E2E2F] text-[13px] font-medium">
                   Don't have an account?{' '}
@@ -408,6 +446,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
               >
                 {loading ? 'Creating...' : 'Create Account'}
               </Button>
+
+              <div className="relative my-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-[#2E2E2F]/10"></div>
+                </div>
+                <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest">
+                  <span className="bg-[#F2F2F2] px-3 text-[#2E2E2F]/40">Or sign up with</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGoogleAuth}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 py-3.5 bg-white border border-[#2E2E2F]/10 rounded-2xl hover:bg-gray-50 transition-all shadow-sm group disabled:opacity-50"
+              >
+                <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-all" />
+                <span className="text-[13px] font-black text-[#2E2E2F]">Google Account</span>
+              </button>
 
               <div className="mt-4 pt-4 border-t border-[#2E2E2F]/10 text-center">
                 <p className="text-[#2E2E2F] text-[13px] font-medium">
