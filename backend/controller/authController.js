@@ -408,6 +408,11 @@ export const login = async (req, res) => {
         employerIdRaw: dbUser?.employerId || dbUser?.employerid || null,
         employerLogoUrl: null,
         employerName: null,
+      },
+      session: {
+        access_token: finalAccessToken,
+        refresh_token: finalRefreshToken,
+        expires_at: Math.floor(Date.now() / 1000) + (60 * 60) // 1 hour
       }
     };
 

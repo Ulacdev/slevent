@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { maskPassword } from '../../utils/authUtils';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, Button, Input } from '../../components/Shared';
 import { ICONS } from '../../constants';
@@ -33,7 +34,7 @@ export const AcceptInvite: React.FC = () => {
     const res = await fetch(`${API}/api/invite/accept-invite`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, password: "B64:" + btoa(unescape(encodeURIComponent(password))), name: name.trim() })
+      body: JSON.stringify({ token, password: maskPassword(password), name: name.trim() })
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
@@ -45,7 +46,7 @@ export const AcceptInvite: React.FC = () => {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center bg-[#F2F2F2] px-4 overflow-hidden relative"
       style={{ zoom: 0.8 }}
     >

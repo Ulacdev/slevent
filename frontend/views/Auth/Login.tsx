@@ -7,6 +7,7 @@ import { useUser } from '../../context/UserContext';
 import { useToast } from '../../context/ToastContext';
 import { UserRole, normalizeUserRole } from '../../types';
 import { apiService } from '../../services/apiService';
+import { maskPassword } from '../../utils/authUtils';
 
 const API = import.meta.env.VITE_API_BASE;
 
@@ -43,10 +44,10 @@ export const LoginPerspective: React.FC = () => {
       const normalizedRole = normalizeUserRole(profile?.role || 'ORGANIZER');
       const isOnboarded = !!profile?.isOnboarded;
 
-      setUser({ 
-        userId: user.id, 
-        role: normalizedRole as UserRole, 
-        email: user.email!, 
+      setUser({
+        userId: user.id || user.userId, // Support both formats
+        role: normalizedRole as UserRole,
+        email: user.email!,
         name: profile?.name || user.email?.split('@')[0],
         imageUrl: profile?.imageUrl || null,
         isOnboarded,
@@ -60,14 +61,17 @@ export const LoginPerspective: React.FC = () => {
       });
 
       if (!user.email_confirmed_at && user.app_metadata?.provider === 'email') {
-        setLoading(false);
-        showToast('info', 'Please confirm your email address first.');
-        return;
+        const isEmailConfirmed = !!user.email_confirmed_at;
+        if (!isEmailConfirmed) {
+          setLoading(false);
+          showToast('info', 'Please confirm your email address first.');
+          return;
+        }
       }
 
       setLoading(false);
       showToast('success', 'Logged in successfully!');
-      
+
       // Redirect based on role
       if (normalizedRole === UserRole.ADMIN) navigate('/dashboard');
       else if (normalizedRole === UserRole.STAFF) navigate('/events');
@@ -105,25 +109,44 @@ export const LoginPerspective: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      const { data, error: loginError } = await supabase.auth.signInWithPassword({
-        email,
-        password
+      // 🚀 Using backend login with masked password for payload obfuscation
+      const res = await fetch(`${API}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: email.trim().toLowerCase(), 
+          password: maskPassword(password) 
+        })
       });
 
-      if (loginError) {
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
         setLoading(false);
-        const msg = loginError.message || "Incorrect email or password.";
+        const msg = data.message || "Incorrect email or password.";
         setError(msg);
         showToast('error', msg);
         return;
       }
 
       if (data.user && data.session) {
+        // 🔥 Synchronize Supabase JS Client with backend-generated session tokens
+        // This ensures subsequent client-side Supabase calls work as expected
+        const { error: syncError } = await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token
+        });
+
+        if (syncError) {
+           console.warn("[Auth] Failed to sync session in client client:", syncError.message);
+        }
+
         await handleLoginSuccess(data.user, data.session);
       } else {
-        throw new Error("Auth session missing");
+        throw new Error("Auth session missing in server response");
       }
     } catch (err: any) {
+      console.error("[Auth] Login error:", err);
       setLoading(false);
       setError("Unable to connect to security server.");
       showToast('error', 'Connection error.');
@@ -131,7 +154,7 @@ export const LoginPerspective: React.FC = () => {
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 flex flex-col items-center justify-center py-4 px-[5px] overflow-y-auto bg-[#F2F2F2]"
     >
       {/* Decorative side elements */}
@@ -164,56 +187,56 @@ export const LoginPerspective: React.FC = () => {
           </div>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
-              <div className="space-y-4">
-                <div className="space-y-1.5 w-full">
-                  <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
-                  <div className="relative group/input">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10">
-                      <ICONS.Mail className="w-5 h-5" />
-                    </div>
-                    <input
-                      type="email"
-                      placeholder="e.g. you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="w-full pl-12 pr-4 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[14px]"
-                    />
+            <div className="space-y-4">
+              <div className="space-y-1.5 w-full">
+                <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
+                <div className="relative group/input">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10">
+                    <ICONS.Mail className="w-5 h-5" />
                   </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
-                  <div className="space-y-2">
-                    <PasswordInput
-                      value={password}
-                      onChange={(e: any) => setPassword(e.target.value)}
-                      required
-                      icon={<ICONS.Lock className="w-5 h-5" />}
-                      className="!rounded-2xl"
-                    />
-                    <div className="flex justify-end pr-1">
-                      <button
-                        type="button"
-                        onClick={() => navigate('/forgot-password')}
-                        className="text-[11px] font-bold text-[#38BDF2] hover:text-[#2E2E2F] transition-colors"
-                      >
-                        Forgot password?
-                      </button>
-                    </div>
-                  </div>
+                  <input
+                    type="email"
+                    placeholder="e.g. you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full pl-12 pr-4 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[14px]"
+                  />
                 </div>
               </div>
 
-              <div className="mt-1">
-                <Button
-                  className="w-full py-4 text-[13px] font-black uppercase tracking-[0.2em] rounded-2xl"
-                  type="submit"
-                  disabled={loading}
-                >
-                  {loading ? 'Signing you in...' : 'Sign In'}
-                </Button>
+              <div className="space-y-1.5">
+                <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
+                <div className="space-y-2">
+                  <PasswordInput
+                    value={password}
+                    onChange={(e: any) => setPassword(e.target.value)}
+                    required
+                    icon={<ICONS.Lock className="w-5 h-5" />}
+                    className="!rounded-2xl"
+                  />
+                  <div className="flex justify-end pr-1">
+                    <button
+                      type="button"
+                      onClick={() => navigate('/forgot-password')}
+                      className="text-[11px] font-bold text-[#38BDF2] hover:text-[#2E2E2F] transition-colors"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                </div>
               </div>
+            </div>
+
+            <div className="mt-1">
+              <Button
+                className="w-full py-4 text-[13px] font-black uppercase tracking-[0.2em] rounded-2xl"
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? 'Signing you in...' : 'Sign In'}
+              </Button>
+            </div>
 
             {error && (
               <div className="mt-1 p-3 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-[11px] font-bold text-center">
@@ -264,7 +287,3 @@ export const LoginPerspective: React.FC = () => {
     </div>
   );
 };
-
-
-
-

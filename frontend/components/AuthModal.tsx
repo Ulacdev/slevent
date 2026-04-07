@@ -8,6 +8,7 @@ import { useToast } from '../context/ToastContext';
 import { UserRole, normalizeUserRole } from '../types';
 import { validatePassword } from '../utils/passwordValidation';
 import { apiService } from '../services/apiService';
+import { maskPassword } from '../utils/authUtils';
 
 const API = import.meta.env.VITE_API_BASE;
 
@@ -73,29 +74,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
 
   if (!isOpen) return null;
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      console.log(`DEBUG: [Modal] Calling Supabase login for ${email}...`);
-      const { data, error: loginError } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (loginError) {
-        setLoading(false);
-        const msg = loginError.message || "Incorrect email or password.";
-        setError(msg);
-        showToast('error', msg);
-        return;
-      }
-
-      const { user, session } = data;
-      if (!user || !session) throw new Error("Auth session missing");
-
+  const handleLoginSuccess = async (user: any, session: any) => {
       // Fetch enriched profile from our backend JIT whoAmI
       const profileRes = await apiService._fetch(`${API}/api/whoAmI`, { cache: 'no-store' });
       const profile = await profileRes.json().catch(() => ({}));
@@ -103,10 +82,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
       const normalizedRole = normalizeUserRole(profile?.role || 'ORGANIZER');
       const isOnboarded = !!profile?.isOnboarded;
 
-      setUser({ 
-        userId: user.id, 
-        role: normalizedRole as UserRole, 
-        email: user.email!, 
+      setUser({
+        userId: user.id || user.userId,
+        role: normalizedRole as UserRole,
+        email: user.email!,
         name: profile?.name || user.email?.split('@')[0],
         imageUrl: profile?.imageUrl || null,
         isOnboarded,
@@ -122,13 +101,50 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
       setLoading(false);
       showToast('success', 'Logged in successfully!');
       onClose();
-      
+
       // Redirect based on role
       if (normalizedRole === UserRole.ADMIN) navigate('/dashboard');
       else if (normalizedRole === UserRole.STAFF) navigate('/events');
       else if (normalizedRole === UserRole.ORGANIZER) navigate(isOnboarded ? '/user-home' : '/onboarding');
       else if (normalizedRole === UserRole.ATTENDEE) navigate('/browse-events');
+  };
 
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      // 🚀 Using backend login with masked password
+      const res = await fetch(`${API}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: email.trim().toLowerCase(), 
+          password: maskPassword(password) 
+        })
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setLoading(false);
+        const msg = data.message || "Incorrect email or password.";
+        setError(msg);
+        showToast('error', msg);
+        return;
+      }
+
+      if (data.user && data.session) {
+        // Sync Supabase client
+        await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token
+        });
+        await handleLoginSuccess(data.user, data.session);
+      } else {
+        throw new Error("Auth session missing");
+      }
     } catch (err: any) {
       setLoading(false);
       setError("Unable to connect to security server.");
@@ -167,7 +183,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
         body: JSON.stringify({
           name: signupData.name.trim(),
           email: signupData.email.trim().toLowerCase(),
-          password: "B64:" + btoa(unescape(encodeURIComponent(signupData.password)))
+          password: maskPassword(signupData.password)
         })
       });
 

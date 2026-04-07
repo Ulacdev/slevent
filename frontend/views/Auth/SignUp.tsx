@@ -5,6 +5,7 @@ import { useToast } from '../../context/ToastContext';
 import { ICONS } from '../../constants';
 import { validatePassword } from '../../utils/passwordValidation';
 import { supabase } from "../../supabase/supabaseClient.js";
+import { maskPassword } from '../../utils/authUtils';
 
 const API = import.meta.env.VITE_API_BASE;
 
@@ -80,7 +81,7 @@ export const SignUpView: React.FC = () => {
         body: JSON.stringify({
           name: formData.name.trim(),
           email: formData.email.trim().toLowerCase(),
-          password: "B64:" + btoa(unescape(encodeURIComponent(formData.password)))
+          password: maskPassword(formData.password)
         })
       });
 
@@ -106,7 +107,7 @@ export const SignUpView: React.FC = () => {
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 flex flex-col items-center justify-center py-4 px-[5px] overflow-y-auto bg-[#F2F2F2]"
       style={{ zoom: 0.8 }}
     >
@@ -209,17 +210,17 @@ export const SignUpView: React.FC = () => {
                 />
                 <span className="text-[11px] text-[#2E2E2F] font-medium leading-relaxed mt-0.5">
                   I agree to the{' '}
-                  <button 
+                  <button
                     type="button"
-                    onClick={() => setShowTermsModal(true)} 
+                    onClick={() => setShowTermsModal(true)}
                     className="text-[#38BDF2] font-bold hover:underline"
                   >
                     Terms of Service
                   </button>
                   {' '}and{' '}
-                  <button 
+                  <button
                     type="button"
-                    onClick={() => setShowPrivacyModal(true)} 
+                    onClick={() => setShowPrivacyModal(true)}
                     className="text-[#38BDF2] font-bold hover:underline"
                   >
                     Privacy Policy
@@ -254,17 +255,17 @@ export const SignUpView: React.FC = () => {
 
           <div className="mt-4 mb-2">
             <button
-               onClick={() => handleSocialLogin('google')}
-               disabled={!!socialLoading}
-               title="Sign up with Google"
-               className="w-full flex items-center justify-center gap-3 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl hover:bg-black/5 hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
-             >
-               {socialLoading === 'google' ? (
-                 <div className="w-5 h-5 border-2 border-[#4285F4]/20 border-t-[#4285F4] rounded-full animate-spin" />
-               ) : (
-                 <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-transform" />
-               )}
-               <span className="text-[13px] font-black text-[#2E2E2F]">Sign up with Google</span>
+              onClick={() => handleSocialLogin('google')}
+              disabled={!!socialLoading}
+              title="Sign up with Google"
+              className="w-full flex items-center justify-center gap-3 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl hover:bg-black/5 hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
+            >
+              {socialLoading === 'google' ? (
+                <div className="w-5 h-5 border-2 border-[#4285F4]/20 border-t-[#4285F4] rounded-full animate-spin" />
+              ) : (
+                <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              )}
+              <span className="text-[13px] font-black text-[#2E2E2F]">Sign up with Google</span>
             </button>
           </div>
 
@@ -297,7 +298,7 @@ export const SignUpView: React.FC = () => {
             <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">1. Acceptance of Terms</h4>
             <p>By creating an account on StartupLab Business Center, you agree to abide by these terms. Our platform provides event ticketing and management services for organizers and attendees.</p>
           </section>
-          
+
           <section>
             <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">2. Organizer Responsibilities</h4>
             <p>Organizers are responsible for the accuracy of event details, ticket pricing, and fulfillment of event promises. StartupLab acts as a facilitator and is not liable for event cancellations or modifications.</p>
@@ -334,7 +335,7 @@ export const SignUpView: React.FC = () => {
             <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">1. Data Collection</h4>
             <p>We collect personal information such as name, email, and billing details to process registrations and maintain your organizer profile. We also collect usage data to improve our platform experience.</p>
           </section>
-          
+
           <section>
             <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">2. How We Use Data</h4>
             <p>Your information is used to facilitate ticket sales, send transactional emails, and provide customer support. We do not sell your personal data to third-party advertisers.</p>
@@ -359,7 +360,3 @@ export const SignUpView: React.FC = () => {
     </div>
   );
 };
-
-
-
-
