@@ -373,7 +373,11 @@ export const EventDetails: React.FC = () => {
 
           // Recommended events (Discovery / Random) - Always show broad discovery content
           apiService.getEvents(1, 50, '', '').then(res => {
-            const allEvents = (res.events || []).filter(e => e.eventId !== data.eventId);
+            // Filter out the CURRENT event AND any other events from the SAME organizer to prevent redundancy
+            const allEvents = (res.events || []).filter(e => 
+              e.eventId !== data.eventId && 
+              e.organizerId !== data.organizerId
+            );
             // Shuffle to ensure true randomness
             const shuffled = [...allEvents].sort(() => 0.5 - Math.random());
             setRecommendedEvents(shuffled.slice(0, 12));
@@ -389,6 +393,12 @@ export const EventDetails: React.FC = () => {
       mounted = false;
     };
   }, [slug, isAuthenticated, role]);
+
+  useEffect(() => {
+    if (event?.eventName) {
+      document.title = `${event.eventName} | StartupLab`;
+    }
+  }, [event?.eventName]);
 
   useEffect(() => {
     if (!slug) return;

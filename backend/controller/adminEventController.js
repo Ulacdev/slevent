@@ -5,6 +5,7 @@ import { getOrCreateOrganizerForUser, getOrganizerByOwnerUserId } from '../utils
 import { logAudit } from '../utils/auditLogger.js';
 import { checkPlanLimits } from '../utils/planValidator.js';
 import { notifyUserByPreference, getAdminSmtpConfig } from '../utils/notificationService.js';
+import { notifySubscribers } from './newsletterController.js';
 
 const STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'startuplab-business-ticketing';
 const ADMIN_ROLES = ['ADMIN', 'STAFF'];
@@ -569,6 +570,16 @@ export const createEvent = async (req, res) => {
       req
     });
 
+    // Notify newsletter subscribers if published immediately
+    if (data?.status === 'PUBLISHED') {
+      notifySubscribers({
+        title: `✨ New Event: ${data.eventName}`,
+        message: data.description || 'A new event has been launched! Check it out and register now.',
+        subject: `New Event: ${data.eventName}`,
+        actionUrl: `${process.env.FRONTEND_URL || 'https://events.moonshotdigital.com.ph'}/events/${data.slug}`
+      }).catch(err => console.error('Newsletter notify err:', err));
+    }
+
     return res.status(201).json(data);
   } catch (err) {
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
@@ -592,6 +603,11 @@ export const updateEvent = async (req, res) => {
     if (updates.eventName && !updates.slug) {
       updates.slug = slugify(updates.eventName);
     }
+
+    // Get previous status for notification transition
+    const { data: oldEvent } = await supabase.from('events').select('status').eq('eventId', id).maybeSingle();
+    const isPublishTransition = updates.status === 'PUBLISHED' && oldEvent?.status !== 'PUBLISHED';
+
     updates.updated_at = new Date().toISOString();
 
     const { data, error } = await supabase
@@ -617,6 +633,16 @@ export const updateEvent = async (req, res) => {
       details: { eventId: data?.eventId, eventName: data?.eventName, updates },
       req
     });
+
+    // Notify newsletter subscribers if just published 
+    if (isPublishTransition) {
+       notifySubscribers({
+            title: `✨ New Event: ${data.eventName}`,
+            message: data.description || 'A new event has been launched! Check it out and register now.',
+            subject: `New Event: ${data.eventName}`,
+            actionUrl: `${process.env.FRONTEND_URL || 'https://events.moonshotdigital.com.ph'}/events/${data.slug}`
+       }).catch(err => console.error('Newsletter notify err:', err));
+    }
 
     return res.json(data);
   } catch (err) {

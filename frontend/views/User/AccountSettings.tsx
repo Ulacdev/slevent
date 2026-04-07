@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, Input } from '../../components/Shared';
 import { ICONS } from '../../constants';
 import { useUser } from '../../context/UserContext';
-import { supabase } from "../../supabase/supabaseClient";
+import { apiService } from '../../services/apiService';
 import { useToast } from '../../context/ToastContext';
+import { UserRole } from '../../types';
 
 const API = import.meta.env.VITE_API_BASE;
 
@@ -28,7 +29,7 @@ const XCircleIcon = (props: any) => (
 );
 
 export const AccountSettings: React.FC = () => {
-    const { userId, name, email, imageUrl, setUser, role } = useUser();
+    const { userId, name, email, imageUrl, setUser, role, canViewEvents, canEditEvents, canManualCheckIn, canReceiveNotifications, isOnboarded, employerId, employerLogoUrl, employerName } = useUser();
     const { showToast } = useToast();
     const [formName, setFormName] = useState(name || '');
     const [previewUrl, setPreviewUrl] = useState<string | null>(imageUrl || null);
@@ -59,16 +60,19 @@ export const AccountSettings: React.FC = () => {
         try {
             const form = new FormData();
             form.append('image', file);
-            const res = await fetch(`${API}/api/user/avatar`, {
+            const res = await apiService._fetch(`${API}/api/user/avatar`, {
                 method: 'POST',
                 credentials: 'include',
                 body: form,
             });
             if (!res.ok) throw new Error('Upload failed');
             const data = await res.json();
-            const newUrl = data.imageUrl || localUrl;
+            const newUrl = data.imageUrl || data.user?.imageUrl || localUrl;
             setPreviewUrl(newUrl);
-            setUser({ userId: userId!, role: role!, email: email!, name: formName || name, imageUrl: newUrl });
+            setUser({ 
+                userId: userId!, role: role!, email: email!, name: formName || name, imageUrl: newUrl,
+                canViewEvents, canEditEvents, canManualCheckIn, canReceiveNotifications, isOnboarded, employerId, employerLogoUrl, employerName
+            });
             showToast('success', 'Profile photo updated!');
         } catch {
             showToast('error', 'Failed to upload photo.');
@@ -82,14 +86,17 @@ export const AccountSettings: React.FC = () => {
         if (!trimmed) return;
         setSaving(true);
         try {
-            const res = await fetch(`${API}/api/user/name`, {
+            const res = await apiService._fetch(`${API}/api/user/name`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ name: trimmed }),
             });
             if (!res.ok) throw new Error('Save failed');
-            setUser({ userId: userId!, role: role!, email: email!, name: trimmed, imageUrl: previewUrl });
+            setUser({ 
+                userId: userId!, role: role!, email: email!, name: trimmed, imageUrl: previewUrl,
+                canViewEvents, canEditEvents, canManualCheckIn, canReceiveNotifications, isOnboarded, employerId, employerLogoUrl, employerName
+            });
             showToast('success', 'Name updated successfully!');
         } catch {
             showToast('error', 'Failed to save name.');
@@ -102,14 +109,14 @@ export const AccountSettings: React.FC = () => {
         if (!email) return;
         setPasswordLoading(true);
         try {
-            const res = await fetch(`${API}/api/auth/forgot-password`, {
+            const res = await apiService._fetch(`${API}/api/auth/forgot-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email }),
             });
 
             if (!res.ok) {
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 throw new Error(data.error || 'Failed to send reset link');
             }
 

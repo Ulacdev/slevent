@@ -4,6 +4,7 @@ import { Card, Button, Input, PasswordInput, PasswordRequirements, Checkbox, Mod
 import { useToast } from '../../context/ToastContext';
 import { ICONS } from '../../constants';
 import { validatePassword } from '../../utils/passwordValidation';
+import { supabase } from "../../supabase/supabaseClient.js";
 
 const API = import.meta.env.VITE_API_BASE;
 
@@ -21,6 +22,26 @@ export const SignUpView: React.FC = () => {
   const [error, setError] = useState('');
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<string | null>(null);
+
+  const handleSocialLogin = async (provider: 'facebook' | 'apple' | 'google') => {
+    setError('');
+    setSocialLoading(provider);
+    try {
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/#/login`
+        }
+      });
+      if (authError) throw authError;
+    } catch (err: any) {
+      setSocialLoading(null);
+      const msg = err.message || `Failed to sign up with ${provider}`;
+      setError(msg);
+      showToast('error', msg);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,6 +242,31 @@ export const SignUpView: React.FC = () => {
               </div>
             )}
           </form>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[#2E2E2F]/10"></div>
+            </div>
+            <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest">
+              <span className="bg-[#F2F2F2] px-4 text-[#2E2E2F]/40">Sign up with</span>
+            </div>
+          </div>
+
+          <div className="mt-4 mb-2">
+            <button
+               onClick={() => handleSocialLogin('google')}
+               disabled={!!socialLoading}
+               title="Sign up with Google"
+               className="w-full flex items-center justify-center gap-3 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl hover:bg-black/5 hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
+             >
+               {socialLoading === 'google' ? (
+                 <div className="w-5 h-5 border-2 border-[#4285F4]/20 border-t-[#4285F4] rounded-full animate-spin" />
+               ) : (
+                 <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-transform" />
+               )}
+               <span className="text-[13px] font-black text-[#2E2E2F]">Sign up with Google</span>
+            </button>
+          </div>
 
           <div className="mt-5 pt-5 border-t border-[#2E2E2F]/10 text-center">
             <p className="text-[#2E2E2F] text-[12px] font-medium">

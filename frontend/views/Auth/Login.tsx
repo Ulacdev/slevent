@@ -6,6 +6,7 @@ import { supabase } from "../../supabase/supabaseClient.js";
 import { useUser } from '../../context/UserContext';
 import { useToast } from '../../context/ToastContext';
 import { UserRole, normalizeUserRole } from '../../types';
+import { apiService } from '../../services/apiService';
 
 const API = import.meta.env.VITE_API_BASE;
 
@@ -17,55 +18,48 @@ export const LoginPerspective: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<string | null>(null);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      console.log(`DEBUG: Calling Backend login for ${email}...`);
-      const loginResponse = await fetch(`${API}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", 
-        body: JSON.stringify({ email, password: "B64:" + btoa(unescape(encodeURIComponent(password))) })
-      });
-
-      console.log(`DEBUG: Response Status: ${loginResponse.status}`);
-      const result = await loginResponse.json().catch(() => ({}));
-
-      if (!loginResponse.ok) {
-        setLoading(false);
-        const msg = result.error || result.message || "Incorrect email or password.";
-        setError(msg);
-        showToast('error', msg);
-        return;
+  // Handle OAuth redirect results
+  React.useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && !loading) {
+        // If we have a session but no user set in context, sync with backend
+        handleLoginSuccess(session.user, session);
       }
+    };
+    checkSession();
+  }, []);
 
-      const { user } = result;
-      if (!user) throw new Error("User data missing in response");
+  const handleLoginSuccess = async (user: any, session: any) => {
+    try {
+      setLoading(true);
+      // Fetch enriched profile from our backend JIT whoAmI
+      // The backend uses the session tokens to identify the user and set cookies
+      const profileRes = await apiService._fetch(`${API}/api/whoAmI`, { cache: 'no-store' });
+      const profile = await profileRes.json().catch(() => ({}));
 
-      // 2. Clear local token
-      localStorage.removeItem("sb-ddkkbtijqrgpitncxylx-auth-token");
-      
-      const normalizedRole = normalizeUserRole(user.role);
-      const isOnboarded = !!user.isOnboarded;
+      const normalizedRole = normalizeUserRole(profile?.role || 'ORGANIZER');
+      const isOnboarded = !!profile?.isOnboarded;
 
       setUser({ 
-        userId: user.userId, 
+        userId: user.id, 
         role: normalizedRole as UserRole, 
-        email, 
+        email: user.email!, 
+        name: profile?.name || user.email?.split('@')[0],
+        imageUrl: profile?.imageUrl || null,
         isOnboarded,
-        canViewEvents: user.canViewEvents,
-        canEditEvents: user.canEditEvents,
-        canManualCheckIn: user.canManualCheckIn,
-        canReceiveNotifications: user.canReceiveNotifications,
-        employerId: user.employerId,
-        employerLogoUrl: user.employerLogoUrl,
-        employerName: user.employerName
+        canViewEvents: profile?.canViewEvents ?? true,
+        canEditEvents: profile?.canEditEvents ?? true,
+        canManualCheckIn: profile?.canManualCheckIn ?? true,
+        canReceiveNotifications: profile?.canReceiveNotifications ?? true,
+        employerId: profile?.employerId || null,
+        employerLogoUrl: profile?.employerLogoUrl || null,
+        employerName: profile?.employerName || null
       });
 
-      if (!user.email_confirmed_at) {
+      if (!user.email_confirmed_at && user.app_metadata?.provider === 'email') {
         setLoading(false);
         showToast('info', 'Please confirm your email address first.');
         return;
@@ -79,7 +73,56 @@ export const LoginPerspective: React.FC = () => {
       else if (normalizedRole === UserRole.STAFF) navigate('/events');
       else if (normalizedRole === UserRole.ORGANIZER) navigate(isOnboarded ? '/user-home' : '/onboarding');
       else if (normalizedRole === UserRole.ATTENDEE) navigate('/browse-events');
+    } catch (err) {
+      setLoading(false);
+      showToast('error', 'Failed to synchronize session.');
+    }
+  };
 
+  const handleSocialLogin = async (provider: 'facebook' | 'apple' | 'google') => {
+    setError('');
+    setSocialLoading(provider);
+    try {
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/#/login`
+        }
+      });
+
+      if (authError) throw authError;
+      // Redirect happens automatically
+    } catch (err: any) {
+      setSocialLoading(null);
+      const msg = err.message || `Failed to sign in with ${provider}`;
+      setError(msg);
+      showToast('error', msg);
+    }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (loginError) {
+        setLoading(false);
+        const msg = loginError.message || "Incorrect email or password.";
+        setError(msg);
+        showToast('error', msg);
+        return;
+      }
+
+      if (data.user && data.session) {
+        await handleLoginSuccess(data.user, data.session);
+      } else {
+        throw new Error("Auth session missing");
+      }
     } catch (err: any) {
       setLoading(false);
       setError("Unable to connect to security server.");
@@ -178,6 +221,31 @@ export const LoginPerspective: React.FC = () => {
               </div>
             )}
           </form>
+
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[#2E2E2F]/10"></div>
+            </div>
+            <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest">
+              <span className="bg-[#F2F2F2] px-4 text-[#2E2E2F]/40">Or continue with</span>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <button
+              onClick={() => handleSocialLogin('google')}
+              disabled={!!socialLoading}
+              title="Sign in with Google"
+              className="w-full flex items-center justify-center gap-3 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl hover:bg-black/5 hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
+            >
+              {socialLoading === 'google' ? (
+                <div className="w-5 h-5 border-2 border-[#4285F4]/20 border-t-[#4285F4] rounded-full animate-spin" />
+              ) : (
+                <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              )}
+              <span className="text-[13px] font-black text-[#2E2E2F]">Continue with Google</span>
+            </button>
+          </div>
 
           <div className="mt-6 pt-6 border-t border-[#2E2E2F]/10 text-center">
             <p className="text-[#2E2E2F] text-[13px] font-medium">

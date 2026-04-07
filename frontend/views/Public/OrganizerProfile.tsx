@@ -110,6 +110,12 @@ export const OrganizerProfilePage: React.FC = () => {
         loadData();
     }, [id]);
 
+    useEffect(() => {
+        if (organizer?.organizerName) {
+            document.title = `${organizer.organizerName} | StartupLab`;
+        }
+    }, [organizer?.organizerName]);
+
     const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
     const now = new Date();
 

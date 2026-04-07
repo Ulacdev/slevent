@@ -256,6 +256,7 @@ export const apiService = {
   // --- Organizer APIs ---
   getMyOrganizer: async (): Promise<OrganizerProfile | null> => {
     const res = await apiService._fetch(`${API_BASE}/api/organizer/me`, {
+      method: 'GET',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       cache: 'no-store'
@@ -526,7 +527,9 @@ export const apiService = {
   // GET /api/events/live
   getLiveEvents: async (): Promise<Event[]> => {
     const res = await apiService._fetch(`${API_BASE}/api/events/live`, {
-      headers: { 'Content-Type': 'application/json' }
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error(`Failed to load live events: ${res.status}`);
     const data = await res.json();
@@ -555,7 +558,9 @@ export const apiService = {
     });
 
     const res = await apiService._fetch(`${API_BASE}/api/events?${query}`, {
-      headers: { 'Content-Type': 'application/json' }
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error(`Failed to load events: ${res.status}`);
     const data = await res.json();
@@ -571,7 +576,9 @@ export const apiService = {
   // GET /api/events/:slug
   getEventBySlug: async (slug: string): Promise<Event | null> => {
     const res = await apiService._fetch(`${API_BASE}/api/events/${encodeURIComponent(slug)}`, {
-      headers: { 'Content-Type': 'application/json' }
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store'
     });
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`Failed to load event: ${res.status}`);
@@ -617,7 +624,9 @@ export const apiService = {
   // GET /api/events/:id/details
   getEventDetails: async (id: string) => {
     const res = await apiService._fetch(`${API_BASE}/api/events/${encodeURIComponent(id)}/details`, {
-      headers: { 'Content-Type': 'application/json' }
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store'
     });
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`Failed to load event details: ${res.status}`);
@@ -806,7 +815,7 @@ export const apiService = {
 
   // PUT /api/ticket-types/:id
   updateTicketType: async (id: string, data: Partial<TicketType>): Promise<TicketType> => {
-    const res = await fetch(`${API_BASE}/api/ticket-types/${encodeURIComponent(id)}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/ticket-types/${encodeURIComponent(id)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -819,7 +828,7 @@ export const apiService = {
 
   // DELETE /api/ticket-types/:id
   deleteTicketType: async (id: string): Promise<void> => {
-    const res = await fetch(`${API_BASE}/api/ticket-types/${encodeURIComponent(id)}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/ticket-types/${encodeURIComponent(id)}`, {
       method: 'DELETE',
       credentials: 'include'
     });
@@ -829,15 +838,17 @@ export const apiService = {
   // --- Admin APIs ---
 
   getAttendeesByEvent: async (eventId: string): Promise<Attendee[]> => {
-    const res = await fetch(`${API_BASE}/api/admin/attendees?eventId=${encodeURIComponent(eventId)}`, {
-      credentials: 'include'
+    const res = await apiService._fetch(`${API_BASE}/api/admin/attendees?eventId=${encodeURIComponent(eventId)}`, {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error(`Failed to load attendees: ${res.status}`);
     return await res.json();
   },
 
   createTicket: async (payload: Partial<Ticket>): Promise<Ticket> => {
-    const res = await fetch(`${API_BASE}/api/admin/tickets`, {
+    const res = await apiService._fetch(`${API_BASE}/api/admin/tickets`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -849,9 +860,11 @@ export const apiService = {
 
   getAdminEvents: async (search = ''): Promise<Event[]> => {
     const searchParam = search ? `?search=${encodeURIComponent(search)}` : '';
-    const res = await fetch(`${API_BASE}/api/admin/events${searchParam}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/admin/events${searchParam}`, {
+      method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include'
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error(`Failed to load admin events: ${res.status}`);
     const data = await res.json();
@@ -864,9 +877,11 @@ export const apiService = {
   // User-specific events (only events created by the logged-in user)
   getUserEvents: async (search = ''): Promise<Event[]> => {
     const searchParam = search ? `?search=${encodeURIComponent(search)}` : '';
-    const res = await fetch(`${API_BASE}/api/user/events${searchParam}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/user/events${searchParam}`, {
+      method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include'
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error(`Failed to load user events: ${res.status}`);
     const data = await res.json();
@@ -877,7 +892,7 @@ export const apiService = {
   },
 
   createUserEvent: async (eventData: Partial<Event>): Promise<Event> => {
-    const res = await fetch(`${API_BASE}/api/user/events`, {
+    const res = await apiService._fetch(`${API_BASE}/api/user/events`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -892,7 +907,7 @@ export const apiService = {
   },
 
   updateUserEvent: async (id: string, eventData: Partial<Event>): Promise<Event> => {
-    const res = await fetch(`${API_BASE}/api/user/events/${encodeURIComponent(id)}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/user/events/${encodeURIComponent(id)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1001,8 +1016,10 @@ export const apiService = {
 
   // GET /api/user/events/archived - Get archived events
   getArchivedEvents: async (page = 1, limit = 20): Promise<{ events: any[]; total: number; page: number; limit: number }> => {
-    const res = await fetch(`${API_BASE}/api/user/events/archived?page=${page}&limit=${limit}`, {
-      credentials: 'include'
+    const res = await apiService._fetch(`${API_BASE}/api/user/events/archived?page=${page}&limit=${limit}`, {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) {
       const text = await res.text().catch(() => '');
@@ -1057,7 +1074,8 @@ export const apiService = {
   },
 
   getEventPromotionStatus: async (eventId: string): Promise<{ promoted: boolean; promotionId?: string; expiresAt?: string; remainingDays?: number }> => {
-    const res = await fetch(`${API_BASE}/api/events/${encodeURIComponent(eventId)}/promotion-status`, {
+    const res = await apiService._fetch(`${API_BASE}/api/events/${encodeURIComponent(eventId)}/promotion-status`, {
+      method: 'GET',
       credentials: 'include',
       cache: 'no-store'
     });
@@ -1088,7 +1106,8 @@ export const apiService = {
   },
 
   getPromotedEvents: async (limit = 10): Promise<{ events: Event[] }> => {
-    const res = await fetch(`${API_BASE}/api/promoted-events?limit=${limit}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/promoted-events?limit=${limit}`, {
+      method: 'GET',
       cache: 'no-store'
     });
     if (!res.ok) throw new Error(`Failed to load promoted events: ${res.status}`);
@@ -1103,8 +1122,10 @@ export const apiService = {
   },
 
   getAnalytics: async (): Promise<AnalyticsSummary> => {
-    const res = await fetch(`${API_BASE}/api/analytics/summary`, {
-      credentials: 'include'
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/summary`, {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) {
       const text = await res.text().catch(() => '');
@@ -1114,8 +1135,10 @@ export const apiService = {
   },
 
   getRecentTransactions: async (page = 1, limit = 10) => {
-    const res = await fetch(`${API_BASE}/api/analytics/transactions?page=${page}&limit=${limit}`, {
-      credentials: 'include'
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/transactions?page=${page}&limit=${limit}`, {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) {
       const text = await res.text().catch(() => '');
@@ -1195,8 +1218,10 @@ export const apiService = {
   },
 
   getRecentOrders: async (page = 1, limit = 10) => {
-    const res = await fetch(`${API_BASE}/api/analytics/orders?page=${page}&limit=${limit}`, {
-      credentials: 'include'
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/orders?page=${page}&limit=${limit}`, {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) {
       const text = await res.text().catch(() => '');
@@ -1260,8 +1285,10 @@ export const apiService = {
   // GET /api/tickets/registrations?eventId=...
   getEventRegistrations: async (eventId: string, search = ''): Promise<RegistrationView[]> => {
     const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
-    const res = await fetch(`${API_BASE}/api/tickets/registrations?eventId=${encodeURIComponent(eventId)}${searchParam}`, {
-      credentials: 'include'
+    const res = await apiService._fetch(`${API_BASE}/api/tickets/registrations?eventId=${encodeURIComponent(eventId)}${searchParam}`, {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error(`Failed to load registrations: ${res.status}`);
     return await res.json();
@@ -1273,8 +1300,10 @@ export const apiService = {
     const url = `${API_BASE}/api/tickets/registrations-all?page=${page}&limit=${limit}${searchParam}`;
     console.log('Making request to:', url);
     try {
-      const res = await fetch(url, {
-        credentials: 'include'
+      const res = await apiService._fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-store'
       });
       console.log('Response status:', res.status);
       if (!res.ok) {
@@ -1403,16 +1432,18 @@ export const apiService = {
   },
 
   listPromotions: async (eventId: string): Promise<any[]> => {
-    const res = await fetch(`${API_BASE}/api/promotions/events/${encodeURIComponent(eventId)}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/promotions/events/${encodeURIComponent(eventId)}`, {
+      method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include'
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error(`Failed to load promotions: ${res.status}`);
     return await res.json();
   },
 
   upsertPromotion: async (payload: any): Promise<any> => {
-    const res = await fetch(`${API_BASE}/api/promotions`, {
+    const res = await apiService._fetch(`${API_BASE}/api/promotions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1426,7 +1457,7 @@ export const apiService = {
   },
 
   deletePromotion: async (promotionId: string): Promise<void> => {
-    const res = await fetch(`${API_BASE}/api/promotions/${encodeURIComponent(promotionId)}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/promotions/${encodeURIComponent(promotionId)}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include'
@@ -1436,7 +1467,7 @@ export const apiService = {
 
   // --- Support API ---
   submitSupportTicket: async (payload: { subject: string, message: string }): Promise<any> => {
-    const res = await fetch(`${API_BASE}/api/support/ticket`, {
+    const res = await apiService._fetch(`${API_BASE}/api/support/ticket`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1450,16 +1481,18 @@ export const apiService = {
   },
 
   getAdminSupportTickets: async (): Promise<any[]> => {
-    const res = await fetch(`${API_BASE}/api/support/admin/tickets`, {
+    const res = await apiService._fetch(`${API_BASE}/api/support/admin/tickets`, {
+      method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include'
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error(`Failed to load support tickets: ${res.status}`);
     return await res.json();
   },
 
   resolveSupportTicket: async (ticketId: string): Promise<any> => {
-    const res = await fetch(`${API_BASE}/api/support/tickets/${encodeURIComponent(ticketId)}/resolve`, {
+    const res = await apiService._fetch(`${API_BASE}/api/support/tickets/${encodeURIComponent(ticketId)}/resolve`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include'
@@ -1469,25 +1502,28 @@ export const apiService = {
   },
 
   getMySupportTickets: async (): Promise<any[]> => {
-    const res = await fetch(`${API_BASE}/api/support/my-tickets`, {
+    const res = await apiService._fetch(`${API_BASE}/api/support/my-tickets`, {
+      method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include'
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error(`Failed to load support history: ${res.status}`);
     return await res.json();
   },
 
   getAllSupportMessages: async (): Promise<any[]> => {
-    const res = await fetch(`${API_BASE}/api/support/admin/tickets`, {
+    const res = await apiService._fetch(`${API_BASE}/api/support/admin/tickets`, {
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include'
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error(`Failed to load support message logs: ${res.status}`);
     return await res.json();
   },
 
   replyToSupportTicket: async (ticketId: string, message: string): Promise<any> => {
-    const res = await fetch(`${API_BASE}/api/support/tickets/${encodeURIComponent(ticketId)}/reply`, {
+    const res = await apiService._fetch(`${API_BASE}/api/support/tickets/${encodeURIComponent(ticketId)}/reply`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1498,16 +1534,17 @@ export const apiService = {
   },
 
   getSupportMessages: async (ticketId: string): Promise<any[]> => {
-    const res = await fetch(`${API_BASE}/api/support/tickets/${encodeURIComponent(ticketId)}/messages`, {
+    const res = await apiService._fetch(`${API_BASE}/api/support/tickets/${encodeURIComponent(ticketId)}/messages`, {
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include'
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error(`Failed to load messages: ${res.status}`);
     return await res.json();
   },
 
   bulkArchiveSupportTickets: async (ids: string[]): Promise<any> => {
-    const res = await fetch(`${API_BASE}/api/user/support/bulk-archive`, {
+    const res = await apiService._fetch(`${API_BASE}/api/user/support/bulk-archive`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1518,7 +1555,7 @@ export const apiService = {
   },
 
   bulkDeleteSupportTickets: async (ids: string[]): Promise<any> => {
-    const res = await fetch(`${API_BASE}/api/user/support/bulk-delete`, {
+    const res = await apiService._fetch(`${API_BASE}/api/user/support/bulk-delete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1529,9 +1566,10 @@ export const apiService = {
   },
 
   getArchivedSupportTickets: async (): Promise<any[]> => {
-    const res = await fetch(`${API_BASE}/api/user/support/archived`, {
+    const res = await apiService._fetch(`${API_BASE}/api/user/support/archived`, {
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include'
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error(`Failed to load archived tickets: ${res.status}`);
     return await res.json();
@@ -1550,7 +1588,7 @@ export const apiService = {
   },
 
   bulkRestoreSupportTickets: async (ids: string[]): Promise<any> => {
-    const res = await fetch(`${API_BASE}/api/user/support/bulk-restore`, {
+    const res = await apiService._fetch(`${API_BASE}/api/user/support/bulk-restore`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1561,8 +1599,9 @@ export const apiService = {
   },
 
   getPlanMetrics: async () => {
-    const res = await fetch(`${API_BASE}/api/analytics/plan-metrics`, {
-      credentials: 'include'
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/plan-metrics`, {
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) {
       const text = await res.text().catch(() => '');
@@ -1572,8 +1611,9 @@ export const apiService = {
   },
 
   getSubscriptionHealth: async () => {
-    const res = await fetch(`${API_BASE}/api/analytics/subscription-health`, {
-      credentials: 'include'
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/subscription-health`, {
+      credentials: 'include',
+      cache: 'no-store'
     });
     if (!res.ok) {
       const text = await res.text().catch(() => '');

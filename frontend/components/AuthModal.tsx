@@ -7,6 +7,7 @@ import { useUser } from '../context/UserContext';
 import { useToast } from '../context/ToastContext';
 import { UserRole, normalizeUserRole } from '../types';
 import { validatePassword } from '../utils/passwordValidation';
+import { apiService } from '../services/apiService';
 
 const API = import.meta.env.VITE_API_BASE;
 
@@ -43,20 +44,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotMessage, setForgotMessage] = useState('');
 
-  const handleGoogleAuth = async () => {
+  const handleSocialAuth = async (provider: 'google' | 'facebook' | 'apple') => {
     setLoading(true);
     setError('');
     try {
       const { error: authError } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider,
         options: {
           redirectTo: window.location.origin
         }
       });
       if (authError) throw authError;
     } catch (err: any) {
-      setError(err.message || 'Failed to connect to Google.');
-      showToast('error', 'Google Auth Error');
+      setError(err.message || `Failed to connect to ${provider}.`);
+      showToast('error', `${provider} Auth Error`);
     } finally {
       setLoading(false);
     }
@@ -78,67 +79,56 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
     setLoading(true);
 
     try {
-      console.log(`DEBUG: [Modal] Calling Backend login for ${email}...`);
-      const loginResponse = await fetch(`${API}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", 
-        body: JSON.stringify({ email, password: "B64:" + btoa(unescape(encodeURIComponent(password))) })
+      console.log(`DEBUG: [Modal] Calling Supabase login for ${email}...`);
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password
       });
 
-      const result = await loginResponse.json().catch(() => ({}));
-
-      if (!loginResponse.ok) {
+      if (loginError) {
         setLoading(false);
-        const msg = result.error || result.message || "Incorrect email or password.";
+        const msg = loginError.message || "Incorrect email or password.";
         setError(msg);
         showToast('error', msg);
         return;
       }
 
-      const { user } = result;
-      if (!user) throw new Error("User data missing in response");
+      const { user, session } = data;
+      if (!user || !session) throw new Error("Auth session missing");
 
-      // 2. Clear local token
-      localStorage.removeItem("sb-ddkkbtijqrgpitncxylx-auth-token");
-      
-      const normalizedRole = normalizeUserRole(user.role);
-      const isOnboarded = !!user.isOnboarded;
+      // Fetch enriched profile from our backend JIT whoAmI
+      const profileRes = await apiService._fetch(`${API}/api/whoAmI`, { cache: 'no-store' });
+      const profile = await profileRes.json().catch(() => ({}));
+
+      const normalizedRole = normalizeUserRole(profile?.role || 'ORGANIZER');
+      const isOnboarded = !!profile?.isOnboarded;
 
       setUser({ 
-        userId: user.userId, 
+        userId: user.id, 
         role: normalizedRole as UserRole, 
-        email, 
+        email: user.email!, 
+        name: profile?.name || user.email?.split('@')[0],
+        imageUrl: profile?.imageUrl || null,
         isOnboarded,
-        canViewEvents: user.canViewEvents,
-        canEditEvents: user.canEditEvents,
-        canManualCheckIn: user.canManualCheckIn,
-        canReceiveNotifications: user.canReceiveNotifications,
-        employerId: user.employerId,
-        employerLogoUrl: user.employerLogoUrl,
-        employerName: user.employerName
+        canViewEvents: profile?.canViewEvents ?? true,
+        canEditEvents: profile?.canEditEvents ?? true,
+        canManualCheckIn: profile?.canManualCheckIn ?? true,
+        canReceiveNotifications: profile?.canReceiveNotifications ?? true,
+        employerId: profile?.employerId || null,
+        employerLogoUrl: profile?.employerLogoUrl || null,
+        employerName: profile?.employerName || null
       });
 
-      if (!user.email_confirmed_at) {
-        setLoading(false);
-        showToast('info', 'Please confirm your email address first.');
-        return;
-      }
-
       setLoading(false);
-      showToast('success', 'Welcome back!');
+      showToast('success', 'Logged in successfully!');
       onClose();
+      
+      // Redirect based on role
+      if (normalizedRole === UserRole.ADMIN) navigate('/dashboard');
+      else if (normalizedRole === UserRole.STAFF) navigate('/events');
+      else if (normalizedRole === UserRole.ORGANIZER) navigate(isOnboarded ? '/user-home' : '/onboarding');
+      else if (normalizedRole === UserRole.ATTENDEE) navigate('/browse-events');
 
-      // Redirection logic
-      if (normalizedRole === UserRole.ADMIN) {
-        navigate('/dashboard');
-      } else if (normalizedRole === UserRole.STAFF) {
-        navigate('/events');
-      } else if (normalizedRole === UserRole.ORGANIZER) {
-        navigate(isOnboarded ? '/user-home' : '/onboarding');
-      } else if (normalizedRole === UserRole.ATTENDEE) {
-        navigate('/browse-events');
-      }
     } catch (err: any) {
       setLoading(false);
       setError("Unable to connect to security server.");
@@ -328,15 +318,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleGoogleAuth}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/15 rounded-2xl hover:bg-black/5 transition-all shadow-sm group disabled:opacity-50"
-              >
-                <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-all" />
-                <span className="text-[13px] font-black text-[#2E2E2F]">Google Account</span>
-              </button>
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => handleSocialAuth('google')}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/15 rounded-2xl hover:bg-black/5 hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
+                >
+                  <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-all" />
+                  <span className="text-[13px] font-black text-[#2E2E2F]">Google Account</span>
+                </button>
+              </div>
 
               <div className="mt-4 pt-4 border-t border-[#2E2E2F]/10 text-center">
                 <p className="text-[#2E2E2F] text-[13px] font-medium">
@@ -456,15 +448,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleGoogleAuth}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/15 rounded-2xl hover:bg-black/5 transition-all shadow-sm group disabled:opacity-50"
-              >
-                <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-all" />
-                <span className="text-[13px] font-black text-[#2E2E2F]">Google Account</span>
-              </button>
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => handleSocialAuth('google')}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/15 rounded-2xl hover:bg-black/5 hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
+                >
+                  <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-all" />
+                  <span className="text-[13px] font-black text-[#2E2E2F]">Google Account</span>
+                </button>
+              </div>
 
               <div className="mt-4 pt-4 border-t border-[#2E2E2F]/10 text-center">
                 <p className="text-[#2E2E2F] text-[13px] font-medium">

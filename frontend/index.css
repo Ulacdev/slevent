@@ -62,6 +62,31 @@ body {
   body {
     font-size: 15px;
   }
+
+  /* Mobile viewport improvements */
+  .mobile-safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .mobile-safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+
+  /* Horizontal scroll container for mobile */
+  .horizontal-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .horizontal-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Better tap highlight */
+  * {
+    -webkit-tap-highlight-color: rgba(56, 189, 242, 0.2);
+  }
 }
 
 /* Ensure all text elements inherit Helvetica */

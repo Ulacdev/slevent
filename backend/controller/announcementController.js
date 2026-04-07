@@ -1,5 +1,6 @@
 import supabase from '../database/db.js';
 import { logAudit } from '../utils/auditLogger.js';
+import { notifySubscribers } from './newsletterController.js';
 
 export const listAnnouncements = async (req, res) => {
   try {
@@ -70,6 +71,16 @@ export const createAnnouncement = async (req, res) => {
       details: { announcementId: data?.id, title: data?.title },
       req
     });
+
+    // Notify newsletter subscribers if published
+    if (data?.is_published) {
+      notifySubscribers({
+        title: `📢 New Announcement: ${data.title}`,
+        message: data.content,
+        subject: `New Announcement: ${data.title}`,
+        actionUrl: `${process.env.FRONTEND_URL || 'https://events.moonshotdigital.com.ph'}/faq` // Example link to announcements/faq
+      }).catch(err => console.error('Newsletter notify err:', err));
+    }
 
     return res.status(201).json(data);
   } catch (err) {

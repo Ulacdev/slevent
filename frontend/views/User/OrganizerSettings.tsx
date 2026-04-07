@@ -52,7 +52,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
   onboardingMode = false,
   onSaved,
 }) => {
-  const { name, setUser, userId, role, email, isOnboarded: currentOnboarded } = useUser();
+  const { name, setUser, userId, role, email, isOnboarded: currentOnboarded, imageUrl, canViewEvents, canEditEvents, canManualCheckIn, canReceiveNotifications, employerId } = useUser();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -228,7 +228,16 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
           userId,
           role,
           email,
+          name: saved.organizerName,
+          imageUrl,
+          canViewEvents,
+          canEditEvents,
+          canManualCheckIn,
+          canReceiveNotifications,
           isOnboarded: saved.isOnboarded || onboardingMode || currentOnboarded,
+          employerId: saved.organizerId || employerId,
+          employerLogoUrl: saved.profileImageUrl,
+          employerName: saved.organizerName,
         });
       }
       onSaved?.(saved);

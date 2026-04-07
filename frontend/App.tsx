@@ -194,7 +194,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   const handleLogout = React.useCallback(async (message?: string) => {
     try {
-      await fetch(`${API}/api/auth/logout`, { method: "POST", credentials: "include" });
+      await apiService._fetch(`${API}/api/auth/logout`, { method: "POST", credentials: "include" });
       await supabase.auth.signOut();
       localStorage.removeItem('sb-ddkkbtijqrgpitncxylx-auth-token');
       localStorage.removeItem('hideUpgradeModal');
@@ -388,10 +388,11 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             email: data.email,
             name: data.name ?? null,
             imageUrl: data.imageUrl ?? null,
-            canViewEvents: data.canViewEvents,
-            canEditEvents: data.canEditEvents,
-            canManualCheckIn: data.canManualCheckIn,
-            canReceiveNotifications: data.canReceiveNotifications,
+            canViewEvents: data.canViewEvents ?? true,
+            canEditEvents: data.canEditEvents ?? true,
+            canManualCheckIn: data.canManualCheckIn ?? true,
+            canReceiveNotifications: data.canReceiveNotifications ?? true,
+            isOnboarded: !!data.isOnboarded,
             employerId: data.employerId || null,
             employerLogoUrl: data.employerLogoUrl || null,
             employerName: data.employerName || null,
@@ -431,7 +432,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       if (avatarFile) {
         const formData = new FormData();
         formData.append('image', avatarFile);
-        const res = await fetch(`${API}/api/user/avatar`, {
+        const res = await apiService._fetch(`${API}/api/user/avatar`, {
           method: 'POST',
           credentials: 'include',
           body: formData
@@ -447,7 +448,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       }
 
       if (trimmedName !== (name || '')) {
-        const res = await fetch(`${API}/api/user/name`, {
+        const res = await apiService._fetch(`${API}/api/user/name`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -1107,6 +1108,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     isAttendingView,
     setPublicMode,
   } = useEngagement();
+  const { showToast } = useToast();
   const location = useLocation();
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
@@ -1121,6 +1123,37 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const headerLocationMenuRef = React.useRef<HTMLDivElement | null>(null);
   const [hasLiveEvents, setHasLiveEvents] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
+  const [newsletterEmail, setNewsletterEmail] = React.useState('');
+  const [isSubscribing, setIsSubscribing] = React.useState(false);
+
+  const handleNewsletterSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newsletterEmail)) {
+      showToast('error', 'Please enter a valid email address.');
+      return;
+    }
+
+    setIsSubscribing(true);
+    try {
+      const res = await fetch(`${API}/api/newsletter/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newsletterEmail }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        showToast('success', data.message || 'Thank you for subscribing!');
+        setNewsletterEmail('');
+      } else {
+        showToast('error', data.message || 'Failed to subscribe.');
+      }
+    } catch (error) {
+      showToast('error', 'Something went wrong. Please try again later.');
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -1420,7 +1453,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       <header className={`sticky top-0 z-[1000] px-4 lg:px-10 h-20 bg-[#F2F2F2]/90 backdrop-blur-xl transition-all duration-500 ${scrolled
         ? 'shadow-[0_10px_30px_-10px_rgba(46,46,47,0.15)] border-b border-[#2E2E2F]/10'
         : 'shadow-none border-b border-transparent'
-        }`}>
+        }`} style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
         <div className="max-w-full w-full h-full flex flex-wrap lg:flex-nowrap items-center gap-2 lg:gap-4">
           {/* Left: Branding Segment - Logo on mobile, hidden on lg */}
           <div className="flex lg:hidden flex-none items-center">
@@ -1607,7 +1640,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
             {/* Mobile Menu Button - Shown only on mobile */}
             <button
-              className="lg:hidden p-2 rounded-xl text-[#2E2E2F] hover:bg-[#38BDF2]/10 transition-colors"
+              className="lg:hidden p-3 min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -1858,46 +1891,46 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           {showHeaderSearchBar && (
             <div className="w-full lg:hidden">
               <form onSubmit={handleHeaderSearchSubmit} className="space-y-2">
-                <div className="flex items-center h-12 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.12)] focus-within:border-[#38BDF2]/50 transition-all">
+                <div className="flex items-center min-h-[48px] rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.12)] focus-within:border-[#38BDF2]/50 transition-all">
                   <label className="flex items-center gap-3 px-4 min-w-0 flex-1">
-                    <ICONS.Search className="w-4 h-4 text-[#2E2E2F] shrink-0" />
+                    <ICONS.Search className="w-5 h-5 text-[#2E2E2F] shrink-0" />
                     <input
                       type="text"
                       value={headerSearchTerm}
                       onChange={(event) => setHeaderSearchTerm(event.target.value)}
                       placeholder={animatedPlaceholder || 'Find your events'}
-                      className="w-full bg-transparent text-[13px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F] outline-none"
+                      className="w-full bg-transparent text-[14px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F] outline-none"
                     />
                   </label>
                   <button
                     type="submit"
-                    className="w-12 h-12 flex items-center justify-center text-[#2E2E2F] hover:bg-[#38BDF2]/12 hover:text-[#38BDF2] transition-colors"
+                    className="w-14 min-h-[48px] flex items-center justify-center text-[#2E2E2F] hover:bg-[#38BDF2]/12 hover:text-[#38BDF2] active:bg-[#38BDF2]/20 transition-colors"
                     aria-label="Find events"
                   >
-                    <ICONS.Search className="w-4 h-4" />
+                    <ICONS.Search className="w-5 h-5" />
                   </button>
                 </div>
 
-                <div className="relative" ref={headerLocationMenuRef}>
-                  <div className="flex items-center h-12 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.12)]">
+                <div className="relative">
+                  <div className="flex items-center min-h-[48px] rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.12)]">
                     <button
                       type="button"
-                      className="flex min-w-0 flex-1 items-center gap-3 px-4 text-left text-[13px] font-bold text-[#2E2E2F] hover:bg-[#38BDF2]/5 transition-colors"
+                      className="flex min-w-0 flex-1 items-center gap-3 px-4 text-left text-[14px] font-bold text-[#2E2E2F] hover:bg-[#38BDF2]/5 active:bg-[#38BDF2]/10 transition-colors min-h-[48px]"
                       onClick={() => {
                         setHeaderLocationMenuOpen((prev) => !prev);
                         setHeaderLocationError('');
                       }}
                     >
-                      <ICONS.MapPin className="w-4 h-4 shrink-0 text-[#2E2E2F]" />
+                      <ICONS.MapPin className="w-5 h-5 shrink-0 text-[#2E2E2F]" />
                       <span className={`truncate ${hasHeaderExplicitLocation ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]'}`}>
                         {hasHeaderExplicitLocation ? headerLocationTerm : DEFAULT_HEADER_LOCATION}
                       </span>
                     </button>
                     <button
                       type="button"
-                      className={`mr-1 flex h-10 w-10 items-center justify-center rounded-xl transition-all ${headerLocating
+                      className={`mr-1 flex min-h-[48px] min-w-[48px] p-2 items-center justify-center rounded-xl transition-all ${headerLocating
                         ? 'text-[#38BDF2] animate-pulse'
-                        : 'text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
+                        : 'text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] active:bg-[#38BDF2]/20'
                         }`}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -1921,7 +1954,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-50 overflow-hidden rounded-xl border border-[#2E2E2F]/10 bg-white shadow-[0_24px_48px_-20px_rgba(46,46,47,0.35)] animate-in fade-in slide-in-from-top-2 duration-200">
                       <button
                         type="button"
-                        className="flex w-full items-center gap-4 border-b border-[#2E2E2F]/5 px-5 py-4 text-left text-[#2E2E2F] transition-colors hover:bg-[#38BDF2]/5 disabled:opacity-60"
+                        className="flex w-full items-center gap-4 border-b border-[#2E2E2F]/5 px-5 py-4 text-left text-[#2E2E2F] transition-colors hover:bg-[#38BDF2]/5 active:bg-[#38BDF2]/10 disabled:opacity-60 min-h-[56px]"
                         onClick={(event) => {
                           event.preventDefault();
                           handleUseCurrentLocationInHeader();
@@ -1993,7 +2026,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       {mobileMenuOpen && (
         <>
           <div className="lg:hidden fixed inset-0 bg-black/30 z-[95]" onClick={() => setMobileMenuOpen(false)} />
-          <div className={`lg:hidden fixed right-0 z-[100] w-[min(21rem,calc(100vw-0.75rem))] overflow-y-auto rounded-l-[1.75rem] border border-[#2E2E2F]/10 bg-[#F2F2F2] shadow-[0_24px_60px_-22px_rgba(46,46,47,0.35)] animate-in slide-in-from-right-3 duration-200 ${mobileMenuPanelClass}`}>
+          <div className={`lg:hidden fixed right-0 z-[100] w-[min(21rem,calc(100vw-0.75rem))] overflow-y-auto rounded-l-[1.75rem] border border-[#2E2E2F]/10 bg-[#F2F2F2] shadow-[0_24px_60px_-22px_rgba(46,46,47,0.35)] animate-in slide-in-from-right-3 duration-200 ${mobileMenuPanelClass}`} style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
             {!isAuthenticated && (
               <div className="border-b border-[#2E2E2F]/8 px-3 pt-3 pb-2">
                 <p className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">Explore StartupLab</p>
@@ -2002,7 +2035,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     <Link
                       key={link.path}
                       to={link.path}
-                      className="flex items-center gap-3 rounded-xl px-4 py-3 text-xs font-semibold text-[#2E2E2F] transition-colors hover:bg-white hover:text-[#38BDF2]"
+                      className="flex items-center gap-3 rounded-xl px-4 py-4 text-sm font-semibold text-[#2E2E2F] transition-colors hover:bg-white hover:text-[#38BDF2] active:bg-[#38BDF2]/10"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <span className="shrink-0 opacity-70">{link.icon}</span>
@@ -2117,18 +2150,23 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         </>
       )}
       <main className="flex-1">{children}</main>
-      <footer className="bg-[#0F172A] text-white py-12 px-4 lg:px-10 border-t border-white/10 relative overflow-hidden">
+      <footer className="bg-[#0F172A] text-white py-12 px-4 lg:px-10 border-t border-white/10 relative overflow-hidden" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
         {/* Subtle Background Glow */}
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#38BDF2]/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
         
+        {/* Logo Watermark */}
+        <div className="absolute top-1/2 right-0 -translate-y-1/2 opacity-[0.03] pointer-events-none select-none">
+          <img src="/lgo-footer.png" className="w-[800px] h-auto object-contain" alt="" />
+        </div>
+
         <div className="max-w-full mx-auto relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1px_1.8fr] gap-6 lg:gap-10">
             {/* Left Section: Branding & Newsletter */}
             <div className="flex flex-col items-start text-left">
-              <img src="/lgo-footer.png" className="h-16 w-auto mb-1" alt="StartupLab" />
+              <img src="/lgo-footer.png" className="h-20 w-auto mb-1" alt="StartupLab" />
               <h3 className="mt-3 text-lg font-black text-white">Build. Connect. Launch.</h3>
               <p className="mt-2 text-xs font-medium max-w-sm text-gray-400 leading-relaxed">
-                Your gateway to StartupLab events — from internal workshops to public showcases, 
+                Your gateway to StartupLab events — from internal workshops to public showcases,
                 this platform delivers seamless registration for every gathering.
               </p>
 
@@ -2150,14 +2188,25 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
               {/* Newsletter */}
               <div className="mt-6 max-w-[320px] w-full">
-                <form className="flex focus-within:ring-2 focus-within:ring-[#38BDF2]/30 rounded-xl overflow-hidden transition-all shadow-sm" onSubmit={(e) => e.preventDefault()}>
-                  <input 
-                    type="email" 
-                    placeholder="Email" 
-                    className="flex-1 px-3 py-2.5 bg-white/5 text-white placeholder:text-gray-500 outline-none text-xs font-medium"
+                <form className="flex focus-within:ring-2 focus-within:ring-[#38BDF2]/30 rounded-xl overflow-hidden transition-all shadow-sm" onSubmit={handleNewsletterSubscribe}>
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    disabled={isSubscribing}
+                    className="flex-1 px-3 py-2.5 bg-white/5 text-white placeholder:text-gray-500 outline-none text-xs font-medium border-r border-white/10 disabled:opacity-50"
+                    required
                   />
-                  <button className="bg-[#38BDF2] text-white px-4 py-2.5 text-xs font-black transition-colors hover:bg-[#38BDF2]/90">
-                    Join
+                  <button 
+                    type="submit" 
+                    disabled={isSubscribing}
+                    className="bg-[#38BDF2] text-white px-5 py-2.5 text-xs font-black transition-colors hover:bg-[#38BDF2]/90 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isSubscribing ? (
+                      <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : null}
+                    {isSubscribing ? '...' : 'Subscribe'}
                   </button>
                 </form>
               </div>
@@ -2167,41 +2216,41 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             <div className="hidden lg:block bg-white/10 w-[1px] h-full" />
 
             {/* Right Section: Multi-column Links */}
-            <div className="flex flex-col justify-center">
+            <div className="flex flex-col">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                 {/* Column 1: Platform */}
                 <div>
-                  <h4 className="font-black text-white text-[11px] uppercase tracking-[0.2em] mb-3">Platform</h4>
+                  <h4 className="font-black text-white text-[14px] mb-3">Platform</h4>
                   <nav className="flex flex-col gap-2.5">
-                    <Link to="/" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Home</Link>
-                    <Link to="/live" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Live</Link>
-                    <Link to="/browse-events" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Events</Link>
-                    <Link to="/organizers/discover" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Explore</Link>
-                    <button onClick={() => openAuthModal && openAuthModal('login')} className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors text-left uppercase tracking-tighter">Login</button>
+                    <Link to="/" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Home</Link>
+                    <Link to="/live" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Live</Link>
+                    <Link to="/browse-events" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Events</Link>
+                    <Link to="/organizers/discover" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Explore</Link>
+                    <button onClick={() => openAuthModal && openAuthModal('login')} className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors text-left">Login</button>
                   </nav>
                 </div>
 
                 {/* Column 2: Company */}
                 <div>
-                  <h4 className="font-black text-white text-[11px] uppercase tracking-[0.2em] mb-3">Company</h4>
+                  <h4 className="font-black text-white text-[14px] mb-3">Company</h4>
                   <nav className="flex flex-col gap-2.5">
-                    <Link to="/about-us" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">About</Link>
-                    <Link to="/pricing" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Pricing</Link>
-                    <a href="mailto:hello@startuplab.ph" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Partner</a>
+                    <Link to="/about-us" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">About</Link>
+                    <Link to="/pricing" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Pricing</Link>
+                    <a href="mailto:hello@startuplab.ph" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Partner</a>
                   </nav>
                 </div>
 
                 {/* Column 3: Support */}
                 <div>
-                  <h4 className="font-black text-white text-[11px] uppercase tracking-[0.2em] mb-3">Support</h4>
+                  <h4 className="font-black text-white text-[14px] mb-3">Support</h4>
                   <nav className="flex flex-col gap-2.5">
-                    <Link to="/contact-us" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Contact</Link>
-                    <Link to="/faq" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">FAQ</Link>
-                    <button 
+                    <Link to="/contact-us" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Contact</Link>
+                    <Link to="/faq" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Faq</Link>
+                    <button
                       onClick={() => setIsSupportModalOpen(true)}
-                      className="text-[#38BDF2] hover:text-white font-bold text-[9px] uppercase tracking-widest mt-1 flex items-center gap-1.5"
+                      className="text-[#38BDF2] hover:text-white font-bold text-[14px] mt-1 flex items-center gap-1.5"
                     >
-                      <ICONS.AlertTriangle className="w-3 h-3" />
+                      <ICONS.AlertTriangle className="w-3.5 h-3.5" />
                       Support
                     </button>
                   </nav>
@@ -2209,11 +2258,11 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
                 {/* Column 4: Legal */}
                 <div>
-                  <h4 className="font-black text-white text-[11px] uppercase tracking-[0.2em] mb-3">Legal</h4>
+                  <h4 className="font-black text-white text-[14px] mb-3">Legal</h4>
                   <nav className="flex flex-col gap-2.5">
-                    <Link to="/privacy-policy" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Privacy</Link>
-                    <Link to="/terms-of-service" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Terms</Link>
-                    <Link to="/refund-policy" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[11px] transition-colors">Refund</Link>
+                    <Link to="/privacy-policy" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Privacy</Link>
+                    <Link to="/terms-of-service" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Terms</Link>
+                    <Link to="/refund-policy" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Refund</Link>
                   </nav>
                 </div>
               </div>
@@ -2225,10 +2274,9 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             <div className="text-[10px] font-bold text-gray-400">
               © 2026 <span className="font-black text-white">StartupLab</span> Business Center
             </div>
-            <div className="flex items-center gap-3 text-[10px] font-bold">
-              <Link to="/privacy-policy" className="text-gray-400 hover:text-[#38BDF2] transition-colors">Privacy</Link>
-              <span className="text-white/20">|</span>
-              <Link to="/terms-of-service" className="text-gray-400 hover:text-[#38BDF2] transition-colors">Terms</Link>
+            <div className="flex items-center gap-3">
+              <span className="text-[8px] font-black text-gray-500 uppercase tracking-[0.2em]">Secure Payments by</span>
+              <img src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/images/hitpay.png" alt="HitPay" className="h-3.5 w-auto grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all cursor-pointer" />
             </div>
           </div>
         </div>
@@ -2256,10 +2304,8 @@ const DashboardWrapper: React.FC = () => {
 const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { userId, role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canViewEvents, canEditEvents, canManualCheckIn, canReceiveNotifications, hasResolvedSession } = useUser();
+  const { userId, role, email, name, imageUrl, isAuthenticated, clearUser, setUser, canViewEvents, canEditEvents, canManualCheckIn, canReceiveNotifications, hasResolvedSession, employerLogoUrl, employerName } = useUser();
   const { isAttendingView, setPublicMode } = useEngagement();
-  const [organizerSidebarLogoUrl, setOrganizerSidebarLogoUrl] = React.useState('');
-  const [organizerSidebarName, setOrganizerSidebarName] = React.useState('');
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
@@ -2352,13 +2398,9 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   React.useEffect(() => {
     if (location.pathname === '/user-settings') setSettingsOpen(true);
   }, [location.pathname]);
-  const [hasPrioritySupport, setHasPrioritySupport] = React.useState<boolean | null>(null);
-
   const displayName = email?.trim() || name?.trim() || 'User';
   const roleLabel = getRoleLabel(role);
   const initials = (email?.split('@')[0] || name?.trim() || displayName || 'U').split(' ').filter(Boolean).map((p) => p[0]).join('').slice(0, 2).toUpperCase();
-  const hasOrganizerSidebarLogo = Boolean(organizerSidebarLogoUrl);
-  const organizerSidebarLogoAlt = organizerSidebarName || 'Organizer logo';
   const organizerProfilePath = '/user-settings?tab=organizer';
 
   React.useEffect(() => {
@@ -2371,7 +2413,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
       if (!isUserPortalRoute || hasResolvedSession) return;
 
       try {
-        const res = await fetch(`${API}/api/whoAmI`, { credentials: 'include', cache: 'no-store' });
+        const res = await apiService._fetch(`${API}/api/whoAmI`, { credentials: 'include', cache: 'no-store' });
         if (!res.ok) {
           clearUser();
           navigate('/login', { replace: true });
@@ -2394,48 +2436,33 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
           canEditEvents: me.canEditEvents ?? true,
           canManualCheckIn: me.canManualCheckIn ?? true,
           canReceiveNotifications: me.canReceiveNotifications ?? true,
-          isOnboarded: !!me.isOnboarded
+          isOnboarded: !!me.isOnboarded,
+          employerId: me.employerId || null,
+          employerLogoUrl: me.employerLogoUrl || null,
+          employerName: me.employerName || null,
         });
       } catch {
-        // clearUser(); // Don't clear on every error to avoid flashes
-        // navigate('/login', { replace: true });
+        // fail silent? or clear?
       }
     };
     syncSession();
   }, [clearUser, hasResolvedSession, location.pathname, navigate, setUser]);
 
+  // Priority support flag for use in help/contact widgets
+  const [hasPrioritySupport, setHasPrioritySupport] = React.useState<boolean | null>(null);
+
   React.useEffect(() => {
     let isMounted = true;
-
-    const loadOrganizerSidebarBrand = async () => {
-      if (role !== UserRole.ORGANIZER && role !== UserRole.STAFF) {
-        if (isMounted) {
-          setOrganizerSidebarLogoUrl('');
-          setOrganizerSidebarName('');
-        }
-        return;
-      }
-
+    const fetchPrioritySupport = async () => {
+      if (role !== UserRole.ORGANIZER && role !== UserRole.STAFF) return;
       try {
         const organizer = await apiService.getMyOrganizer();
-        if (!isMounted) return;
-        setOrganizerSidebarLogoUrl(organizer?.profileImageUrl || '');
-        setOrganizerSidebarName((organizer?.organizerName || '').trim());
-        setHasPrioritySupport(!!(organizer?.plan?.features?.priority_support || organizer?.plan?.features?.enable_priority_support));
-      } catch {
-        if (isMounted) {
-          setOrganizerSidebarLogoUrl('');
-          setOrganizerSidebarName('');
-          setHasPrioritySupport(null);
-        }
-      }
+        if (isMounted) setHasPrioritySupport(!!(organizer?.plan?.features?.priority_support));
+      } catch { }
     };
-
-    loadOrganizerSidebarBrand();
-    return () => {
-      isMounted = false;
-    };
-  }, [role, location.pathname, name]);
+    fetchPrioritySupport();
+    return () => { isMounted = false; };
+  }, [role, isAuthenticated]);
 
   // No longer needed as handled by RequireRoleRoute
   /*
@@ -2449,7 +2476,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
 
   const handleLogout = async () => {
     try {
-      await fetch(`${API}/api/auth/logout`, { method: "POST", credentials: "include" });
+      await apiService._fetch(`${API}/api/auth/logout`, { method: "POST", credentials: "include" });
       await supabase.auth.signOut();
       clearUser();
       showToast('success', 'Logged out successfully. See you soon!');
@@ -2532,11 +2559,11 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
       >
         <div className={`flex items-center justify-center border-b border-[#D1D5DB] shrink-0 h-24`}>
           <Link to="/user-home" className="flex items-center justify-center group transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98]">
-            {organizerSidebarLogoUrl ? (
+            {employerLogoUrl ? (
               <img
-                src={organizerSidebarLogoUrl}
-                alt={organizerSidebarLogoAlt}
-                className={desktopSidebarOpen ? "h-20 w-auto max-w-full object-contain px-4" : "h-12 w-12 object-contain rounded-lg border border-[#E5E7EB]"}
+                src={employerLogoUrl}
+                alt={employerName || 'Logo'}
+                className={desktopSidebarOpen ? "h-20 w-auto max-w-full object-contain px-4 font-black" : "h-12 w-12 object-contain rounded-lg border border-[#E5E7EB]"}
               />
             ) : (
               desktopSidebarOpen ? (
@@ -2867,10 +2894,10 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             <aside className="relative w-[min(18.5rem,calc(100vw-1rem))] bg-[#F2F2F2] border-r border-[#E5E7EB] flex flex-col h-full z-50 animate-in slide-in-from-left duration-300 shadow-2xl">
               <div className="p-8 pb-3 flex items-center justify-between border-b border-[#E5E7EB]">
                 <Link to="/user-home" onClick={() => setSidebarOpen(false)} className="flex flex-col items-start gap-2 group transition-all duration-500">
-                  {organizerSidebarLogoUrl ? (
+                  {employerLogoUrl ? (
                     <img
-                      src={organizerSidebarLogoUrl}
-                      alt={organizerSidebarName || 'Logo'}
+                      src={employerLogoUrl}
+                      alt={employerName || 'Logo'}
                       className="h-12 w-auto max-w-[168px] object-contain"
                     />
                   ) : (
@@ -2880,9 +2907,9 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                       className="h-10 w-10 object-contain shadow-sm border border-[#E5E7EB] rounded-lg"
                     />
                   )}
-                  {organizerSidebarName && (
+                  {employerName && (
                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] ml-0.5">
-                      {organizerSidebarName}
+                      {employerName}
                     </span>
                   )}
                 </Link>
@@ -2993,12 +3020,57 @@ const ScrollToTop: React.FC = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Scroll to top whenever the path changes
+    // 1. Scroll to top whenever the path changes
     window.scrollTo({
       top: 0,
       left: 0,
       behavior: 'smooth'
     });
+
+    // 2. Dynamic Browser Titles
+    const path = location.pathname;
+    const baseTitle = 'StartupLab';
+    
+    // Explicit mappings
+    const titleMap: { [key: string]: string } = {
+      '/': `${baseTitle} | Build. Connect. Launch.`,
+      '/live': `Watch Live | ${baseTitle} Events`,
+      '/browse-events': `Explore Events | ${baseTitle}`,
+      '/about-us': `About Us | ${baseTitle}`,
+      '/contact-us': `Contact Us | ${baseTitle}`,
+      '/pricing': `Pricing | ${baseTitle}`,
+      '/user-home': `Organizer Portal | ${baseTitle}`,
+      '/my-events': `My Events | ${baseTitle}`,
+      '/dashboard': `Platform Dashboard | ${baseTitle}`,
+      '/onboarding': `Startup Onboarding | ${baseTitle}`,
+      '/faq': `FAQ | ${baseTitle}`,
+      '/privacy-policy': `Privacy Policy | ${baseTitle}`,
+      '/terms-of-service': `Terms of Service | ${baseTitle}`,
+      '/my-tickets': `My Tickets | ${baseTitle}`,
+      '/liked': `Liked Events | ${baseTitle}`,
+      '/followings': `Followings | ${baseTitle}`,
+      '/organizer-support': `Support | ${baseTitle}`,
+      '/user-settings': `Account Settings | ${baseTitle}`,
+      '/onboarding-complete': `Welcome Ready | ${baseTitle}`,
+    };
+
+    // Handle dynamic patterns
+    if (path.startsWith('/events/')) {
+        const slug = path.split('/')[2];
+        if (path.endsWith('/register')) {
+            document.title = `Register for Event | ${baseTitle}`;
+        } else {
+            // Title will be updated by EventDetails component if it fetches data, 
+            // but we provide a solid fallback here.
+            document.title = `Event Details | ${baseTitle}`;
+        }
+    } else if (path.startsWith('/organizer/')) {
+        document.title = `Organizer Profile | ${baseTitle}`;
+    } else if (path.startsWith('/tickets/')) {
+        document.title = `Your Ticket | ${baseTitle}`;
+    } else {
+        document.title = titleMap[path] || baseTitle;
+    }
   }, [location.pathname]);
 
   return null;
@@ -3027,8 +3099,6 @@ const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ childr
   const location = useLocation();
 
   React.useEffect(() => {
-    if (hasResolvedSession) return;
-
     let cancelled = false;
 
     const sync = async () => {
@@ -3042,8 +3112,8 @@ const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ childr
               userId: me.userId || me.id,
               role: normalizedRole,
               email: me.email,
-              name: me.name,
-              imageUrl: me.imageUrl,
+              name: me.name ?? null,
+              imageUrl: me.imageUrl ?? null,
               isOnboarded: !!me.isOnboarded,
               canViewEvents: me.canViewEvents ?? true,
               canEditEvents: me.canEditEvents ?? true,
@@ -3064,9 +3134,25 @@ const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ childr
         clearUser();
       }
     };
-    sync();
+
+    // 1. Initial sync if not resolved
+    if (!hasResolvedSession) {
+      sync();
+    }
+
+    // 2. Listen for auth changes (Login/Logout) to trigger re-sync
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled) return;
+      if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || (event === 'INITIAL_SESSION' && session)) {
+        sync();
+      } else if (event === 'SIGNED_OUT') {
+        clearUser();
+      }
+    });
+
     return () => {
       cancelled = true;
+      subscription.unsubscribe();
     };
   }, [clearUser, hasResolvedSession, setUser]);
 

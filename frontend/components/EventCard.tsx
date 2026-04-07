@@ -55,7 +55,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick, layou
       style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
     >
       {/* Image Container */}
-      <div className={`relative overflow-hidden bg-[#F2F2F2] shrink-0 ${isHorizontal ? 'w-[280px] h-[190px] rounded-xl' : 'h-64 md:h-72 w-full'}`}>
+      <div className={`relative overflow-hidden bg-[#F2F2F2] shrink-0 ${isHorizontal ? 'w-[280px] h-[190px] rounded-xl' : 'h-48 md:h-72 w-full'}`}>
         {event.image_url ? (
           <img
             src={event.image_url}
@@ -82,7 +82,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick, layou
 
       {/* Content */}
       <div className={`flex flex-col ${isHorizontal ? 'flex-1 py-1 text-black' : 'p-5 space-y-3 bg-[#1A1A1A]'}`}>
-        <h3 className={`font-black text-2xl line-clamp-2 transition-colors leading-tight ${isHorizontal ? 'text-black group-hover:text-[#38BDF2]' : 'text-white group-hover:text-[#38BDF2]'}`}>
+        <h3 className={`font-black text-lg md:text-2xl line-clamp-2 transition-colors leading-tight ${isHorizontal ? 'text-black group-hover:text-[#38BDF2]' : 'text-white group-hover:text-[#38BDF2]'}`}>
           {event.eventName}
         </h3>
 

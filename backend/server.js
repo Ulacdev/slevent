@@ -12,6 +12,7 @@ import eventRoutes from "./routes/eventRoutes.js";
 import adminEventRoutes from "./routes/adminEventRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import inviteRoutes from "./routes/inviteRoutes.js";
+import newsletterRoutes from "./routes/newsletterRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import { authMiddleware } from "./middleware/auth.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
@@ -138,6 +139,7 @@ app.use("/api", orderRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/invite", inviteRoutes); // Removed authLimiter from the whole dashboard
+app.use("/api/newsletter", newsletterRoutes);
 app.use("/api", analyticsRoutes);
 app.use("/api", userRoutes);
 app.use("/api", organizerRoutes);
