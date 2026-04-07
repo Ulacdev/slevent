@@ -299,7 +299,7 @@ export const SupportTickets: React.FC = () => {
   return (
     <div className="space-y-6 max-w-7xl pb-20 relative min-h-[600px]">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 px-2">
-        <div>
+        <div className="hidden">
           <h1 className="text-3xl font-bold text-[#2E2E2F] tracking-tight">Support Inbox</h1>
           <p className="text-[#2E2E2F] font-medium text-sm mt-1">Manage administrative inquiries and investigation reports.</p>
         </div>
