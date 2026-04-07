@@ -1091,12 +1091,14 @@ export const UserEvents: React.FC = () => {
                 setWizardStep(4);
                 setIsTicketModalOpen(false);
                 setIsModalOpen(true);
-                showToast('success', 'Tickets saved. Final step: set the event status.');
+            showToast('success', 'Tickets saved. Final step: set the event status.');
                 fetchEvents();
                 return;
             }
 
-            showToast('success', 'Ticket inventory updated.');
+            if (updatedTickets.length > 0) {
+                showToast('success', `${updatedTickets.length} ticket tier(s) updated successfully.`);
+            }
             setIsTicketModalOpen(false);
             fetchEvents();
         } catch {
@@ -2032,6 +2034,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
     const [tickets, setTickets] = useState<TicketType[]>([]);
     const [expandedTicketId, setExpandedTicketId] = useState<string | null>(null);
     const [isPaymentRestrictionOpen, setIsPaymentRestrictionOpen] = useState(false);
+    const [hasInvalidTickets, setHasInvalidTickets] = useState(false);
 
     useEffect(() => {
         const fetchTickets = async () => {
@@ -2066,48 +2069,12 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
         status: true
     });
 
-    const addTicket = () => {
-        if (!newTicket.name) return;
-
-        const newTotalCap = totalGuestCapacity + (newTicket.quantityTotal * (newTicket.capacityPerTicket || 1));
-        if (newTotalCap > maxEventCapacity) {
-            showToast('error', `Adding this ticket would exceed your plan limit of ${maxEventCapacity} guests.`);
-            return;
-        }
-
-        if (newTicket.priceAmount > 0 && !isPaymentReady) {
-            setIsPaymentRestrictionOpen(true);
-            return;
-        }
-        const item: TicketType = {
-            ticketTypeId: `tk-${Math.random().toString(36).substr(2, 9)}`,
-            eventId: event?.eventId || '',
-            name: newTicket.name,
-            description: newTicket.description || undefined,
-            priceAmount: newTicket.priceAmount,
-            saleDiscountPercent: newTicket.saleDiscountPercent,
-            currency: newTicket.currency || 'PHP',
-            quantityTotal: newTicket.quantityTotal,
-            quantitySold: 0,
-            capacityPerTicket: newTicket.capacityPerTicket,
-            salesStartAt: newTicket.salesStartAt || undefined,
-            salesEndAt: newTicket.salesEndAt || undefined,
-            status: newTicket.status
-        };
-        setTickets([...tickets, item]);
-        setNewTicket({
-            name: '',
-            description: '',
-            priceAmount: 0,
-            saleDiscountPercent: 0,
-            currency: 'PHP',
-            quantityTotal: 100,
-            capacityPerTicket: 1,
-            salesStartAt: '',
-            salesEndAt: '',
-            status: true
-        });
-    };
+    const isNewTicketDirty = (newTicket.name?.trim() || '') !== '' || (newTicket.description?.trim() || '') !== '';
+    const isNewTicketComplete = (newTicket.name?.trim() || '') !== '' && (newTicket.description?.trim() || '') !== '';
+    const isInventoryValid = (tickets.length > 0 || isNewTicketComplete) && !hasInvalidTickets && (!isNewTicketDirty || isNewTicketComplete);
+    
+    // Check if we have at least one ticket
+    const hasAtLeastOneTicket = tickets.length > 0 || isNewTicketComplete;
 
     const removeTicket = async (id: string) => {
         const ticket = tickets.find(t => t.ticketTypeId === id);
@@ -2133,7 +2100,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
     };
 
     return (
-        <div className="flex flex-col lg:grid lg:grid-cols-[380px_1fr] gap-10 items-start">
+        <div className="flex flex-col lg:grid lg:grid-cols-[380px_1fr] gap-10 items-start" style={{ zoom: '0.8' }}>
             {/* Left Column: Form */}
             <div className="space-y-6 w-full lg:sticky lg:top-0">
                 <div className="bg-[#F2F2F2] p-6 rounded-3xl border-2 border-[#2E2E2F]/15">
@@ -2277,9 +2244,49 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                         )}
                         <Button
                             onClick={() => {
-                                addTicket();
+                                // 1. Check for partially filled new ticket
+                                if (isNewTicketDirty && !isNewTicketComplete) {
+                                    showToast('error', 'Please provide BOTH a name and a description for your new ticket tier before saving.');
+                                    return;
+                                }
+
+                                const newTotalCap = totalGuestCapacity + (newTicket.quantityTotal * (newTicket.capacityPerTicket || 1));
+                                if (newTotalCap > maxEventCapacity) {
+                                    showToast('error', `Adding this ticket would exceed your plan limit of ${maxEventCapacity} guests.`);
+                                    return;
+                                }
+
+                                const newId = `tk-${Date.now()}`;
+                                const item: TicketType = {
+                                    ticketTypeId: newId,
+                                    eventId: event?.eventId || '',
+                                    name: newTicket.name.trim(),
+                                    description: newTicket.description?.trim(),
+                                    priceAmount: newTicket.priceAmount,
+                                    saleDiscountPercent: newTicket.saleDiscountPercent,
+                                    currency: newTicket.currency || 'PHP',
+                                    quantityTotal: newTicket.quantityTotal,
+                                    quantitySold: 0,
+                                    capacityPerTicket: newTicket.capacityPerTicket,
+                                    salesStartAt: newTicket.salesStartAt || undefined,
+                                    salesEndAt: newTicket.salesEndAt || undefined,
+                                    status: true
+                                };
+                                setTickets([...tickets, item]);
+                                setNewTicket({
+                                    name: '',
+                                    description: '',
+                                    priceAmount: 0,
+                                    saleDiscountPercent: 0,
+                                    currency: 'PHP',
+                                    quantityTotal: 100,
+                                    capacityPerTicket: 1,
+                                    salesStartAt: '',
+                                    salesEndAt: '',
+                                    status: true
+                                });
                             }}
-                            disabled={totalGuestCapacity + (newTicket.quantityTotal * (newTicket.capacityPerTicket || 1)) > maxEventCapacity}
+                            disabled={totalGuestCapacity + (newTicket.quantityTotal * (newTicket.capacityPerTicket || 1)) > maxEventCapacity || !isNewTicketComplete}
                             className={`w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${totalGuestCapacity + (newTicket.quantityTotal * (newTicket.capacityPerTicket || 1)) > maxEventCapacity
                                 ? 'bg-[#2E2E2F] text-white/40 cursor-not-allowed'
                                 : 'bg-[#38BDF2] text-[#F2F2F2] hover:text-[#F2F2F2]'
@@ -2321,16 +2328,59 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                         </div>
                     )}
 
-                    <Button
-                        onClick={() => onSave(tickets)}
-                        disabled={submitting || isOverCapacity}
-                        className={`w-full mt-4 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${isOverCapacity
-                            ? 'bg-[#2E2E2F] text-white/40 cursor-not-allowed opacity-80'
-                            : 'bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]'
-                            }`}
-                    >
-                        {submitting ? 'Updating...' : isOverCapacity ? 'Over Plan Capacity' : 'Commit Inventory Changes'}
-                    </Button>
+                    { (expandedTicketId !== null || isNewTicketDirty) && (
+                        <Button
+                            onClick={() => {
+                                // 1. Check for partially filled new ticket
+                                if (isNewTicketDirty && !isNewTicketComplete) {
+                                    showToast('error', 'Please provide BOTH a name and a description for your new ticket tier before saving.');
+                                    return;
+                                }
+
+                                if (hasInvalidTickets) {
+                                    showToast('error', 'One or more existing tickets are updated incorrectly.');
+                                    return;
+                                }
+
+                                let finalTickets = [...tickets];
+                                
+                                // 2. AUTO-ADD: If the user filled out the new ticket form completely but didn't click "Add"
+                                if (isNewTicketComplete) {
+                                    const newId = `tk-${Date.now()}`;
+                                    const item: TicketType = {
+                                        ticketTypeId: newId,
+                                        eventId: event?.eventId || '',
+                                        name: newTicket.name.trim(),
+                                        description: newTicket.description?.trim(),
+                                        priceAmount: newTicket.priceAmount,
+                                        saleDiscountPercent: newTicket.saleDiscountPercent,
+                                        currency: newTicket.currency || 'PHP',
+                                        quantityTotal: newTicket.quantityTotal,
+                                        quantitySold: 0,
+                                        capacityPerTicket: newTicket.capacityPerTicket,
+                                        salesStartAt: newTicket.salesStartAt || undefined,
+                                        salesEndAt: newTicket.salesEndAt || undefined,
+                                        status: true
+                                    };
+                                    finalTickets = [...finalTickets, item];
+                                }
+
+                                if (finalTickets.length === 0) {
+                                    showToast('error', 'You must have at least one ticket tier before saving.');
+                                    return;
+                                }
+
+                                onSave(finalTickets);
+                            }}
+                            disabled={submitting || isOverCapacity || !isInventoryValid}
+                            className={`w-full mt-4 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${ (isOverCapacity || !isInventoryValid)
+                                ? 'bg-[#2E2E2F] text-white/40 cursor-not-allowed opacity-80'
+                                : 'bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]'
+                                }`}
+                        >
+                            {submitting ? 'Updating...' : isOverCapacity ? 'Over Plan Capacity' : !hasAtLeastOneTicket ? 'Add a Ticket First' : !isInventoryValid ? 'Complete Ticket Details' : 'Commit Inventory Changes'}
+                        </Button>
+                    )}
                 </div>
             </div>
 

@@ -323,7 +323,7 @@ export const EventsManagement: React.FC = () => {
     setSubmitting(true);
     try {
       const finalReason = deleteReason === 'OTHER' ? customReason : deleteReason;
-      
+
       if (isBulkMode) {
         await Promise.all(selectedIds.map(id => apiService.deleteEvent(id, true, finalReason)));
         setNotification({ message: `${selectedIds.length} events have been permanently deleted.`, type: 'success' });
@@ -334,7 +334,7 @@ export const EventsManagement: React.FC = () => {
         setNotification({ message: `"${deleteConfirm.eventName}" has been permanently deleted from the system.`, type: 'success' });
         setDeleteConfirm(null);
       }
-      
+
       setDeleteReason('DUPLICATE');
       setCustomReason('');
       fetchEvents();
@@ -348,11 +348,11 @@ export const EventsManagement: React.FC = () => {
   const handleTogglePromotion = async (event: Event) => {
     try {
       const result = await apiService.toggleEventPromotion(event.eventId);
-      setNotification({ 
-        message: result.promoted 
-          ? `"${event.eventName}" is now promoted on the discovery feed.` 
-          : `Promotion removed for "${event.eventName}".`, 
-        type: 'success' 
+      setNotification({
+        message: result.promoted
+          ? `"${event.eventName}" is now promoted on the discovery feed.`
+          : `Promotion removed for "${event.eventName}".`,
+        type: 'success'
       });
       fetchEvents();
     } catch (err) {
@@ -381,8 +381,8 @@ export const EventsManagement: React.FC = () => {
     <div className="space-y-8" style={{ zoom: 0.85 }}>
       {notification && (
         <div className="fixed top-24 right-8 z-[120] animate-in fade-in slide-in-from-top-4 duration-500">
-          <Card className={`flex items-center gap-4 px-6 py-4 rounded-xl border-2 shadow-2xl ${notification.type === 'success' 
-            ? 'bg-green-50 border-green-200 text-green-800' 
+          <Card className={`flex items-center gap-4 px-6 py-4 rounded-xl border-2 shadow-2xl ${notification.type === 'success'
+            ? 'bg-green-50 border-green-200 text-green-800'
             : 'bg-red-50 border-red-200 text-red-800'
             }`}>
             <div className={`p-2 rounded-xl ${notification.type === 'success' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
@@ -413,28 +413,28 @@ export const EventsManagement: React.FC = () => {
           </div>
           {selectedIds.length > 0 && (
             <div className="flex items-center gap-3 animate-in fade-in slide-in-from-right-4">
-              <Button 
-                onClick={() => { setIsBulkMode(true); setDeleteReason('DUPLICATE'); }} 
+              <Button
+                onClick={() => { setIsBulkMode(true); setDeleteReason('DUPLICATE'); }}
                 className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-red-500 !text-red-500 px-6 py-2.5 text-[13px] hover:!bg-red-500 hover:!text-white flex items-center gap-2 group"
               >
                 <ICONS.Trash className="w-5 h-5 text-red-500 group-hover:text-white transition-colors" />
                 MODERATE REMOVAL ({selectedIds.length})
               </Button>
-              <Button 
+              <Button
                 onClick={async () => {
-                   if (!confirm(`Dismiss reports for ${selectedIds.length} events?`)) return;
-                   setSubmitting(true);
-                   try {
-                     await Promise.all(selectedIds.map(id => apiService.bulkResolveEventReports(id)));
-                     setNotification({ message: 'Safety records cleared for selected events.', type: 'success' });
-                     setSelectedIds([]);
-                     fetchEvents();
-                   } catch (err) {
-                     setNotification({ message: 'Failed to clear records.', type: 'error' });
-                   } finally {
-                     setSubmitting(false);
-                   }
-                }} 
+                  if (!confirm(`Dismiss reports for ${selectedIds.length} events?`)) return;
+                  setSubmitting(true);
+                  try {
+                    await Promise.all(selectedIds.map(id => apiService.bulkResolveEventReports(id)));
+                    setNotification({ message: 'Safety records cleared for selected events.', type: 'success' });
+                    setSelectedIds([]);
+                    fetchEvents();
+                  } catch (err) {
+                    setNotification({ message: 'Failed to clear records.', type: 'error' });
+                  } finally {
+                    setSubmitting(false);
+                  }
+                }}
                 className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-[#38BDF2] !text-[#38BDF2] px-6 py-2.5 text-[13px] hover:!bg-[#38BDF2] hover:!text-white flex items-center gap-2 group"
               >
                 <ICONS.CheckCircle className="w-5 h-5 text-[#38BDF2] group-hover:text-white transition-colors" />
@@ -452,9 +452,9 @@ export const EventsManagement: React.FC = () => {
               <tr>
                 <th className="px-8 py-5">
                   <div className="flex items-center">
-                    <input 
-                      type="checkbox" 
-                      className="w-4 h-4 rounded border-[#2E2E2F]/20 accent-[#38BDF2]" 
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 rounded border-[#2E2E2F]/20 accent-[#38BDF2]"
                       checked={selectedIds.length === currentItems.length && currentItems.length > 0}
                       onChange={toggleSelectAll}
                     />
@@ -470,9 +470,9 @@ export const EventsManagement: React.FC = () => {
               {currentItems.map(event => (
                 <tr key={event.eventId} className={`hover:bg-[#38BDF2]/10 transition-colors group ${selectedIds.includes(event.eventId) ? 'bg-[#38BDF2]/5' : ''}`}>
                   <td className="px-8 py-7">
-                    <input 
-                      type="checkbox" 
-                      className="w-4 h-4 rounded border-[#2E2E2F]/20 accent-[#38BDF2]" 
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 rounded border-[#2E2E2F]/20 accent-[#38BDF2]"
                       checked={selectedIds.includes(event.eventId)}
                       onChange={() => toggleSelect(event.eventId)}
                     />
@@ -530,7 +530,7 @@ export const EventsManagement: React.FC = () => {
                       >
                         <ICONS.Star className={`w-[1.2rem] h-[1.2rem] group-hover/btn:scale-110 ${event.is_promoted || event.isPromoted ? 'fill-current' : ''}`} strokeWidth={2.2} />
                       </button>
-                      
+
                       <button
                         onClick={() => { setIsBulkMode(false); setDeleteConfirm(event); }}
                         className="text-red-500 hover:text-red-600 transition-all p-2 hover:bg-red-50 rounded-lg group/btn"
@@ -848,8 +848,8 @@ export const EventsManagement: React.FC = () => {
             <div>
               <h3 className="text-sm font-black text-red-900 uppercase tracking-tight">Permanent Removal Zone</h3>
               <p className="text-xs font-semibold text-red-800/70 mt-1 leading-relaxed">
-                {isBulkMode 
-                  ? `You are about to PERMANENTLY DELETE ${selectedIds.length} events from the entire system. ` 
+                {isBulkMode
+                  ? `You are about to PERMANENTLY DELETE ${selectedIds.length} events from the entire system. `
                   : `You are about to PERMANENTLY DELETE "${deleteConfirm?.eventName}" from the entire system. `}
                 This action is irreversible and will remove all associated ticket data.
               </p>

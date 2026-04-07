@@ -6,7 +6,7 @@ async function check() {
   if (error) {
     console.error('Error:', error);
   } else {
-    console.log('Events columns:', JSON.stringify(Object.keys(events[0] || {}), null, 2));
+    console.log('Sample Event Data:', JSON.stringify(events[0] || {}, null, 2));
   }
   process.exit(0);
 }

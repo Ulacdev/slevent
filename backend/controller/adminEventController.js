@@ -1,7 +1,7 @@
 import supabase from '../database/db.js';
 import crypto from 'crypto';
 import path from 'path';
-import { getOrCreateOrganizerForUser, getOrganizerByOwnerUserId } from '../utils/organizerData.js';
+import { getOrCreateOrganizerForUser, getOrganizerByOwnerUserId, getOrganizerByUserId } from '../utils/organizerData.js';
 import { logAudit } from '../utils/auditLogger.js';
 import { checkPlanLimits } from '../utils/planValidator.js';
 import { notifyUserByPreference, getAdminSmtpConfig } from '../utils/notificationService.js';
@@ -89,7 +89,7 @@ async function resolvePersonalProfileReadiness(userId) {
   const lookupByColumn = async (columnName) => (
     supabase
       .from('users')
-      .select('name')
+      .select('name, role, employerId')
       .eq(columnName, userId)
       .maybeSingle()
   );
@@ -110,17 +110,19 @@ async function resolvePersonalProfileReadiness(userId) {
     };
   }
 
+  // STAFF-AWARE: If the user is STAFF, we allow them to proceed if their NAME is set 
+  // OR if their employer's name is available. But usually, we just check their own name.
   const profileName = String(data?.name || '').trim();
   if (!profileName) {
     return {
       ok: false,
       status: 409,
-      error: 'Complete your personal profile before creating events.',
+      error: 'Complete your personal profile (Set your name) before creating events.',
       code: 'USER_PROFILE_REQUIRED',
     };
   }
 
-  return { ok: true };
+  return { ok: true, user: data };
 }
 
 export const listAdminEvents = async (req, res) => {
@@ -211,12 +213,44 @@ export const listUserEvents = async (req, res) => {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
 
+    console.log(`🔍 [AdminEvent] Listing events for user: ${userId}`);
+
+    // STAFF-AWARE: Fetch relevant organizer to see shared events
+    let organizer = null;
+    try {
+      organizer = await getOrganizerByUserId(userId);
+      console.log(`🔍 [AdminEvent] Organizer resolved: ${organizer?.organizerId ? 'FOUND (' + organizer.organizerId + ')' : 'NOT FOUND'}`);
+    } catch (orgErr) {
+      console.error('❌ [AdminEvent] Failed to resolve organizer:', orgErr.message);
+      // We don't fail here, we fallback to createdBy check
+    }
+
     const search = (req.query?.search || '').toString().trim();
+
     let query = supabase
       .from('events')
-      .select('*, ticketTypes(*)')
-      .eq('createdBy', userId)
-      .eq('is_archived', false) // Exclude archived events
+      .select('*, ticketTypes(*)');
+
+    if (organizer?.organizerId) {
+      const ownerId = organizer.ownerUserId;
+      console.log(`🔍 [AdminEvent] Querying by organizerId: ${organizer.organizerId} OR ownerId: ${ownerId} OR userId: ${userId}`);
+      
+      // Build conditions array to avoid formatting issues
+      const conditions = [];
+      if (organizer.organizerId) conditions.push(`organizerId.eq.${organizer.organizerId}`);
+      if (ownerId) conditions.push(`createdBy.eq.${ownerId}`);
+      if (userId) conditions.push(`createdBy.eq.${userId}`);
+      
+      if (conditions.length > 0) {
+        query = query.or(conditions.join(','));
+      }
+    } else {
+      console.log(`🔍 [AdminEvent] Falling back to createdBy only for userId: ${userId}`);
+      query = query.eq('createdBy', userId);
+    }
+
+    query = query
+      .eq('is_archived', false)
       .order('created_at', { ascending: false });
 
     if (search) {
@@ -224,9 +258,15 @@ export const listUserEvents = async (req, res) => {
     }
 
     const { data, error } = await query;
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) {
+      console.error('❌ [AdminEvent] Supabase error listing events:', error.message);
+      return res.status(500).json({ error: error.message });
+    }
+
+    console.log(`✅ [AdminEvent] Successfully fetched ${(data || []).length} events for user ${userId}`);
     return res.json(data || []);
   } catch (err) {
+    console.error('💥 [AdminEvent] Unexpected crash in listUserEvents:', err);
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }
 };
@@ -501,9 +541,8 @@ export const createEvent = async (req, res) => {
     const enforceExistingOrganizer = req.enforceExistingOrganizer === true;
     if (req.user?.id) {
       try {
-        const organizer = enforceExistingOrganizer
-          ? await getOrganizerByOwnerUserId(req.user.id)
-          : await getOrCreateOrganizerForUser(req.user.id);
+        const organizer = await getOrganizerByUserId(req.user.id);
+        
         if (enforceExistingOrganizer && !organizer?.organizerId) {
           return res.status(409).json({
             error: 'Complete your organization profile before creating events.',

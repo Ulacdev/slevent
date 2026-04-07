@@ -3097,6 +3097,7 @@ const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ childr
   const { role, isOnboarded, isAuthenticated, setUser, clearUser, hasResolvedSession, authModal, closeAuthModal } = useUser();
   const { isAttendingView } = useEngagement();
   const location = useLocation();
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     let cancelled = false;
@@ -3156,9 +3157,6 @@ const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   }, [clearUser, hasResolvedSession, setUser]);
 
-  if (!hasResolvedSession) return <PageLoader label="Standardizing Platform..." variant="viewport" />;
-
-
   const isAuthPage = ['/login', '/signup', '/forgot-password', '/reset-password', '/accept-invite'].includes(location.pathname);
   const isOnboardingPage = location.pathname === '/onboarding';
 
@@ -3173,12 +3171,30 @@ const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ childr
     (p) => location.pathname === p || location.pathname.startsWith(p + '/')
   );
 
-  // 1. Force redirection if trying to access portal routes (Setup required)
+  // 1. Automatic redirection from home to portal for logged-in users
+  useEffect(() => {
+    const isPortalUser = role === UserRole.ADMIN || role === UserRole.STAFF;
+    const shouldRedirect = hasResolvedSession && isAuthenticated && location.pathname === '/' && (isPortalUser || !isAttendingView);
+
+    if (shouldRedirect) {
+      if (role === UserRole.ADMIN) {
+        navigate('/dashboard', { replace: true });
+      } else if (role === UserRole.STAFF) {
+        navigate('/events', { replace: true });
+      } else if (role === UserRole.ORGANIZER) {
+        navigate(isOnboarded ? '/user-home' : '/onboarding', { replace: true });
+      }
+    }
+  }, [hasResolvedSession, isAuthenticated, isAttendingView, location.pathname, role, isOnboarded, navigate]);
+
+  if (!hasResolvedSession) return <PageLoader label="Standardizing Platform..." variant="viewport" />;
+
+  // 2. Force redirection if trying to access portal routes (Setup required)
   if (isAuthenticated && role === UserRole.ORGANIZER && isOnboarded === false && isOrganizerPortalPage && !isOnboardingPage && !isAuthPage) {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // 2. Force redirection from ANY other page back to welcome view if not in attending mode
+  // 3. Force redirection from ANY other page back to welcome view if not in attending mode
   // (This ensures they stay on Onboarding/Welcome unless they explicitly choose "Browse Events")
   if (isAuthenticated && role === UserRole.ORGANIZER && isOnboarded === false && !isAttendingView && !isOnboardingPage && !isAuthPage) {
     return <Navigate to="/onboarding" replace />;

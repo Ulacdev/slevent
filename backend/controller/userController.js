@@ -257,8 +257,16 @@ export const whoAmI = async (req, res) => {
          console.log(`[whoAmI] Linking identity for ${insertData.email} from ${emailMatch.userId} to ${insertData.userId}`);
          const oldId = emailMatch.userId || emailMatch.id;
          
-         // Update users table
-         await db.from('users').update({ userId: insertData.userId }).eq('email', insertData.email);
+         // Update users table with ID AND social metadata if missing
+         const linkUpdates = { userId: insertData.userId };
+         if (!emailMatch.name || emailMatch.name === emailMatch.email.split('@')[0]) {
+           linkUpdates.name = insertData.name;
+         }
+         if (!emailMatch.imageUrl) {
+           linkUpdates.imageUrl = insertData.imageUrl;
+         }
+
+         await db.from('users').update(linkUpdates).eq('email', insertData.email);
          
          // Update organizers table
          await db.from('organizers').update({ ownerUserId: insertData.userId }).eq('ownerUserId', oldId);
@@ -300,8 +308,17 @@ export const whoAmI = async (req, res) => {
       const newName = metadata.full_name || metadata.name;
       const newAvatar = metadata.avatar_url || metadata.picture;
 
-      if (!data.name && newName) updates.name = newName;
-      if (!data.imageUrl && newAvatar) updates.imageUrl = newAvatar;
+      // Update name if currently empty OR if it looks like an email-based fallback (e.g. "john.doe") 
+      // and we have a proper Full Name from social login.
+      const isEmailFallback = data.name && data.email && (data.name === data.email.split('@')[0]);
+      if (newName && (!data.name || isEmailFallback)) {
+        if (data.name !== newName) updates.name = newName;
+      }
+
+      // Always update avatar if current is empty and new is available
+      if (!data.imageUrl && newAvatar) {
+        updates.imageUrl = newAvatar;
+      }
 
       if (Object.keys(updates).length > 0) {
         console.log(`[whoAmI] Auto-syncing profile for ${data.email}: ${Object.keys(updates).join(', ')}`);
