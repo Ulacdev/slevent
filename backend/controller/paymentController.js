@@ -134,6 +134,43 @@ export const createHitpayCheckoutSession = async (req, res) => {
       apiKeyPrefix: credentials?.apiKey?.substring(0, 10) + '...'
     });
 
+    // MOCK SANDBOX BYPASS: If in sandbox mode and no API key is found, or a LIVE key is being used in sandbox
+    const isLiveKey = credentials.apiKey?.startsWith('live_');
+    const isSandboxMode = credentials.mode === 'sandbox';
+
+    if (isSandboxMode && (!credentials.apiKey || credentials.apiKey.trim() === '' || isLiveKey)) {
+      console.log(`[Mock Sandbox] Auto-succeeding sandbox transaction (Reason: ${isLiveKey ? 'Live key in sandbox' : 'No key'})...`);
+      
+      // 1. Create a mock payment transaction record
+      const hitpayReferenceId = `MOCK-SANDBOX-${order.orderId}-${Date.now()}`;
+      const { data: tx, error: txErr } = await supabase.from('paymentTransactions').insert({
+        orderId: order.orderId,
+        gateway: { name: 'HITPAY_MOCK' },
+        hitpayReferenceId,
+        amount: order.totalAmount,
+        currency: order.currency,
+        status: 'SUCCEEDED',
+        rawPayload: { mock: true, mode: 'sandbox', timestamp: new Date().toISOString() }
+      }).select().single();
+
+      if (txErr) throw txErr;
+
+      // 2. TRIGGER FULL SUCCESS LOGIC (Tickets + QR + Email)
+      await processOrderSuccess(order, tx, req);
+
+      // 3. Log Audit
+      await logAudit({
+        actionType: 'MOCK_CHECKOUT_COMPLETED',
+        orderId: order.orderId,
+        details: { gateway: 'HITPAY_MOCK', mode: 'sandbox', amount: order.totalAmount },
+        req
+      });
+
+      // 4. Return success URL
+      const successUrl = `${FRONTEND_URL}/#/payment/status?sessionId=${order.orderId}&mock=true`;
+      return res.status(200).json({ checkoutUrl: successUrl, hitpayReferenceId, isMock: true });
+    }
+
     if (!credentials || !credentials.apiKey || !credentials.salt) {
       console.error('[HitPay Checkout] Missing API keys for order:', order.orderId);
       return res.status(500).json({ error: 'Payment gateway configuration is missing.' });
@@ -784,206 +821,7 @@ export const hitpayWebhook = async (req, res) => {
       .eq('paymentTransactionId', resolvedTx.paymentTransactionId)
 
     if (newStatus === 'SUCCEEDED') {
-      // mark order paid
-      await supabase.from('orders').update({ status: 'PAID' }).eq('orderId', resolvedTx.orderId)
-
-      // Notify Organizer about New Paid Order
-      try {
-        const { data: eventRow } = await supabase
-          .from('events')
-          .select('eventName, slug, organizerId, createdBy')
-          .eq('eventId', order.eventId)
-          .maybeSingle();
-
-        if (eventRow) {
-          let recipientUserId = eventRow.createdBy;
-          if (eventRow.organizerId) {
-            const { data: org } = await supabase
-              .from('organizers')
-              .select('ownerUserId')
-              .eq('organizerId', eventRow.organizerId)
-              .maybeSingle();
-            if (org?.ownerUserId) recipientUserId = org.ownerUserId;
-          }
-
-          if (recipientUserId) {
-            const recipientProfile = await getUserProfileByAuthId(recipientUserId);
-            const amountStr = `${order.currency} ${order.totalAmount}`;
-            const message = `Great news! ${order.buyerName} just purchased tickets for "${eventRow.eventName}". Total: ${amountStr}`;
-
-            await notifyTeamByPreference({
-              recipientUserId,
-              recipientFallbackEmail: recipientProfile?.email || '',
-              actorEmail: order.buyerEmail,
-              eventId: order.eventId,
-              organizerId: eventRow.organizerId,
-              type: 'ORDER_PLACED',
-              title: 'New Ticket Sale!',
-              message,
-              metadata: {
-                eventName: eventRow.eventName,
-                tag: 'NEW SALE',
-                actionLabel: 'VIEW ORDER',
-                actionUrl: process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL.replace(/\/$/, '')}/orders/${order.orderId}` : null,
-              }
-            });
-          }
-        }
-      } catch (err) {
-        console.error('[Payments] Organizer notification failed:', err.message);
-      }
-
-      // issue tickets only if not already issued
-      const { count: existingTickets, error: ticketCountErr } = await supabase
-        .from('tickets')
-        .select('ticketId', { count: 'exact', head: true })
-        .eq('orderId', resolvedTx.orderId)
-      if (ticketCountErr) return respondWithError(500, ticketCountErr.message)
-
-      if (!existingTickets || existingTickets === 0) {
-        let issuedCount = 0
-        const notificationPromises = []
-
-        // 1. Fetch event details and ticket types to get bundle capacities
-        const { data: event } = await supabase
-          .from('events')
-          .select('eventName, description, startAt, endAt, locationText, locationType, imageUrl, streamingPlatform, organizerId')
-          .eq('eventId', order.eventId)
-          .maybeSingle()
-
-        const ttIds = [...new Set((orderItems || []).map(oi => oi.ticketTypeId))]
-        const { data: ticketTypes } = await supabase
-          .from('ticketTypes')
-          .select('ticketTypeId, capacity_per_ticket')
-          .in('ticketTypeId', ttIds)
-        const ttMap = new Map((ticketTypes || []).map(tt => [tt.ticketTypeId, tt]))
-
-        let guestIdx = 0
-        const extraGuests = order.metadata?.extraGuests || []
-
-        for (const item of orderItems || []) {
-          const { ticketTypeId, quantity } = item
-          const tt = ttMap.get(ticketTypeId)
-          const capacityPerTicket = tt?.capacity_per_ticket || 1
-          const totalGuestsToIssue = quantity * capacityPerTicket
-
-          for (let i = 0; i < totalGuestsToIssue; i++) {
-            const isPrimary = guestIdx === 0
-            const guestInfo = isPrimary ? null : (extraGuests[guestIdx - 1])
-
-            const { data: attendee, error: attErr } = await supabase
-              .from('attendees')
-              .insert({
-                eventId: order.eventId,
-                orderId: order.orderId,
-                name: isPrimary ? order.buyerName : (guestInfo?.name || `${order.buyerName} (Guest ${guestIdx + 1})`),
-                email: isPrimary ? order.buyerEmail : (guestInfo?.email || order.buyerEmail),
-                phoneNumber: isPrimary ? (order.buyerPhone || null) : null,
-                company: order.metadata?.company || null,
-                consent: true
-              })
-              .select('*')
-              .single()
-            if (attErr) return respondWithError(500, attErr.message)
-
-            const ticketCode = randomUUID()
-            const { data: ticketData, error: ticketErr } = await supabase
-              .from('tickets')
-              .insert({
-                eventId: order.eventId,
-                ticketTypeId,
-                orderId: order.orderId,
-                attendeeId: attendee?.attendeeId,
-                ticketCode,
-                qrPayload: ticketCode,
-                status: 'ISSUED'
-              })
-              .select('ticketId')
-              .maybeSingle()
-            if (ticketErr) return respondWithError(500, ticketErr.message)
-
-            await logAudit({
-              actionType: 'TICKET_ISSUED',
-              orderId: order.orderId,
-              ticketId: ticketData?.ticketId || null,
-              details: {
-                ticketTypeId,
-                source: 'PAID_ORDER',
-                guestIndex: guestIdx + 1,
-                isBundle: capacityPerTicket > 1
-              },
-              req
-            })
-
-            issuedCount += 1
-            guestIdx++
-
-            // 2. Queue notifications to be sent in parallel
-            // Send to the Attendee (Guest or Buyer)
-            const deliveryPromise = notifyUserByPreference({
-              name: attendee.name,
-              recipientFallbackEmail: attendee.email,
-              eventId: order.eventId,
-              organizerId: event?.organizerId,
-              type: 'TICKET_DELIVERY',
-              title: `Your Ticket Confirmed: ${event?.eventName || 'the event'}!`,
-              message: `Thank you for your order! Your ticket for "${event?.eventName}" is attached below.`,
-              metadata: {
-                eventId: order.eventId,
-                orderId: order.orderId,
-                eventName: event?.eventName || '',
-                eventDescription: event?.description || '',
-                eventStartAt: event?.startAt ? new Date(event.startAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '',
-                eventEndAt: event?.endAt ? new Date(event.endAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '',
-                eventLocation: event?.locationText || '',
-                locationType: event?.locationType || '',
-                eventImageUrl: event?.imageUrl || '',
-                streamingPlatform: event?.streamingPlatform || '',
-                ticket: { ticketCode, qrPayload: ticketCode, status: 'ISSUED' }
-              }
-            }).catch(err => {
-              console.error('[Payments] Attendee notification failed:', err.message);
-            });
-            notificationPromises.push(deliveryPromise);
-
-            // Also send a copy to the Buyer if it's a guest
-            if (attendee.email !== order.buyerEmail) {
-              const buyerCopyPromise = notifyUserByPreference({
-                name: order.buyerName,
-                recipientFallbackEmail: order.buyerEmail,
-                eventId: order.eventId,
-                organizerId: event?.organizerId,
-                type: 'TICKET_DELIVERY',
-                title: `Guest Ticket: ${attendee.name} - ${event?.eventName}`,
-                message: `This is a copy of the ticket sent to your guest, ${attendee.name}.`,
-                metadata: {
-                  eventId: order.eventId,
-                  orderId: order.orderId,
-                  eventName: event?.eventName || '',
-                  eventDescription: event?.description || '',
-                  eventStartAt: event?.startAt ? new Date(event.startAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '',
-                  eventEndAt: event?.endAt ? new Date(event.endAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '',
-                  eventLocation: event?.locationText || '',
-                  locationType: event?.locationType || '',
-                  eventImageUrl: event?.imageUrl || '',
-                  streamingPlatform: event?.streamingPlatform || '',
-                  ticket: { ticketCode, qrPayload: ticketCode, status: 'ISSUED' }
-                }
-              }).catch(err => {
-                console.error('[Payments] Buyer copy notification failed:', err.message);
-              });
-              notificationPromises.push(buyerCopyPromise);
-            }
-          }
-        }
-
-        // Wait for all notifications to complete
-        await Promise.all(notificationPromises);
-
-        if (issuedCount > 0) {
-          console.log('[Tickets] Issued after payment', { orderId: order.orderId, count: issuedCount })
-        }
-      }
+      await processOrderSuccess(order, resolvedTx, req);
     } else if (newStatus === 'FAILED') {
       // mark order failed
       await supabase.from('orders').update({ status: 'FAILED' }).eq('orderId', resolvedTx.orderId)
@@ -1037,5 +875,221 @@ export const hitpayWebhook = async (req, res) => {
     await markWebhookStatus('FAILED')
     console.error('hitpayWebhook error', err)
     return res.status(500).json({ error: err?.message || 'Unexpected error' })
+  }
+}
+
+/**
+ * REUSABLE SUCCESS LOGIC
+ * marking order paid, notifying organizer, issuing tickets + QR, and sending emails
+ */
+async function processOrderSuccess(order, resolvedTx, req) {
+  const { orderId } = order;
+  console.log(`[Order Success] Finalizing order: ${orderId}`);
+
+  // 1. Mark order as PAID
+  await supabase.from('orders').update({ status: 'PAID' }).eq('orderId', orderId);
+
+  // 2. Notify Organizer about New Paid Order
+  try {
+    const { data: eventRow } = await supabase
+      .from('events')
+      .select('eventName, slug, organizerId, createdBy')
+      .eq('eventId', order.eventId)
+      .maybeSingle();
+
+    if (eventRow) {
+      let recipientUserId = eventRow.createdBy;
+      if (eventRow.organizerId) {
+        const { data: org } = await supabase
+          .from('organizers')
+          .select('ownerUserId')
+          .eq('organizerId', eventRow.organizerId)
+          .maybeSingle();
+        if (org?.ownerUserId) recipientUserId = org.ownerUserId;
+      }
+
+      if (recipientUserId) {
+        const recipientProfile = await getUserProfileByAuthId(recipientUserId);
+        const amountStr = `${order.currency} ${order.totalAmount}`;
+        const message = `Great news! ${order.buyerName} just purchased tickets for "${eventRow.eventName}". Total: ${amountStr}`;
+
+        await notifyTeamByPreference({
+          recipientUserId,
+          recipientFallbackEmail: recipientProfile?.email || '',
+          actorEmail: order.buyerEmail,
+          eventId: order.eventId,
+          organizerId: eventRow.organizerId,
+          type: 'ORDER_PLACED',
+          title: 'New Ticket Sale!',
+          message,
+          metadata: {
+            eventName: eventRow.eventName,
+            tag: 'NEW SALE',
+            actionLabel: 'VIEW ORDER',
+            actionUrl: process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL.replace(/\/$/, '')}/orders/${orderId}` : null,
+          }
+        });
+      }
+    }
+  } catch (err) {
+    console.error('[Payments] Organizer notification failed:', err.message);
+  }
+
+  // 3. Issue tickets only if not already issued
+  const { count: existingTickets, error: ticketCountErr } = await supabase
+    .from('tickets')
+    .select('ticketId', { count: 'exact', head: true })
+    .eq('orderId', orderId);
+  
+  if (ticketCountErr) throw ticketCountErr;
+
+  if (!existingTickets || existingTickets === 0) {
+    let issuedCount = 0;
+    const notificationPromises = [];
+
+    // Fetch event details
+    const { data: event } = await supabase
+      .from('events')
+      .select('eventName, description, startAt, endAt, locationText, locationType, imageUrl, streamingPlatform, organizerId')
+      .eq('eventId', order.eventId)
+      .maybeSingle();
+
+    // Fetch order items (ticket types)
+    const { data: orderItems } = await supabase
+      .from('orderItems')
+      .select('ticketTypeId, quantity, price')
+      .eq('orderId', orderId);
+
+    const ttIds = [...new Set((orderItems || []).map(oi => oi.ticketTypeId))];
+    const { data: ticketTypes } = await supabase
+      .from('ticketTypes')
+      .select('ticketTypeId, capacity_per_ticket')
+      .in('ticketTypeId', ttIds);
+    const ttMap = new Map((ticketTypes || []).map(tt => [tt.ticketTypeId, tt]));
+
+    let guestIdx = 0;
+    const extraGuests = order.metadata?.extraGuests || [];
+
+    for (const item of orderItems || []) {
+      const { ticketTypeId, quantity } = item;
+      const tt = ttMap.get(ticketTypeId);
+      const capacityPerTicket = tt?.capacity_per_ticket || 1;
+      const totalGuestsToIssue = quantity * capacityPerTicket;
+
+      for (let i = 0; i < totalGuestsToIssue; i++) {
+        const isPrimary = guestIdx === 0;
+        const guestInfo = isPrimary ? null : (extraGuests[guestIdx - 1]);
+
+        const { data: attendee, error: attErr } = await supabase
+          .from('attendees')
+          .insert({
+            eventId: order.eventId,
+            orderId: orderId,
+            name: isPrimary ? order.buyerName : (guestInfo?.name || `${order.buyerName} (Guest ${guestIdx + 1})`),
+            email: isPrimary ? order.buyerEmail : (guestInfo?.email || order.buyerEmail),
+            phoneNumber: isPrimary ? (order.buyerPhone || null) : null,
+            company: order.metadata?.company || null,
+            consent: true
+          })
+          .select('*')
+          .single();
+        if (attErr) throw attErr;
+
+        const ticketCode = randomUUID();
+        const { data: ticketData, error: ticketErr } = await supabase
+          .from('tickets')
+          .insert({
+            eventId: order.eventId,
+            ticketTypeId,
+            orderId: orderId,
+            attendeeId: attendee?.attendeeId,
+            ticketCode,
+            qrPayload: ticketCode,
+            status: 'ISSUED'
+          })
+          .select('ticketId')
+          .maybeSingle();
+        if (ticketErr) throw ticketErr;
+
+        await logAudit({
+          actionType: 'TICKET_ISSUED',
+          orderId: orderId,
+          ticketId: ticketData?.ticketId || null,
+          details: {
+            ticketTypeId,
+            source: 'PAID_ORDER',
+            guestIndex: guestIdx + 1,
+            isBundle: capacityPerTicket > 1
+          },
+          req
+        });
+
+        issuedCount += 1;
+        guestIdx++;
+
+        // Send confirmation to Attendee
+        const deliveryPromise = notifyUserByPreference({
+          name: attendee.name,
+          recipientFallbackEmail: attendee.email,
+          eventId: order.eventId,
+          organizerId: event?.organizerId,
+          type: 'TICKET_DELIVERY',
+          title: `Your Ticket Confirmed: ${event?.eventName || 'the event'}!`,
+          message: `Thank you for your order! Your ticket for "${event?.eventName}" is attached below.`,
+          metadata: {
+            eventId: order.eventId,
+            orderId,
+            eventName: event?.eventName || '',
+            eventDescription: event?.description || '',
+            eventStartAt: event?.startAt ? new Date(event.startAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '',
+            eventEndAt: event?.endAt ? new Date(event.endAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '',
+            eventLocation: event?.locationText || '',
+            locationType: event?.locationType || '',
+            eventImageUrl: event?.imageUrl || '',
+            streamingPlatform: event?.streamingPlatform || '',
+            ticket: { ticketCode, qrPayload: ticketCode, status: 'ISSUED' }
+          }
+        }).catch(err => {
+          console.error('[Payments] Attendee notification failed:', err.message);
+        });
+        notificationPromises.push(deliveryPromise);
+
+        // Also send copy to Buyer if it's a guest
+        if (attendee.email !== order.buyerEmail) {
+          const buyerCopyPromise = notifyUserByPreference({
+            name: order.buyerName,
+            recipientFallbackEmail: order.buyerEmail,
+            eventId: order.eventId,
+            organizerId: event?.organizerId,
+            type: 'TICKET_DELIVERY',
+            title: `Guest Ticket: ${attendee.name} - ${event?.eventName}`,
+            message: `This is a copy of the ticket sent to your guest, ${attendee.name}.`,
+            metadata: {
+              eventId: order.eventId,
+              orderId,
+              eventName: event?.eventName || '',
+              eventDescription: event?.description || '',
+              eventStartAt: event?.startAt ? new Date(event.startAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '',
+              eventEndAt: event?.endAt ? new Date(event.endAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '',
+              eventLocation: event?.locationText || '',
+              locationType: event?.locationType || '',
+              eventImageUrl: event?.imageUrl || '',
+              streamingPlatform: event?.streamingPlatform || '',
+              ticket: { ticketCode, qrPayload: ticketCode, status: 'ISSUED' }
+            }
+          }).catch(err => {
+            console.error('[Payments] Buyer copy notification failed:', err.message);
+          });
+          notificationPromises.push(buyerCopyPromise);
+        }
+      }
+    }
+
+    // Wait for all notifications to complete
+    await Promise.all(notificationPromises);
+
+    if (issuedCount > 0) {
+      console.log('[Tickets] Issued after payment', { orderId, count: issuedCount });
+    }
   }
 }

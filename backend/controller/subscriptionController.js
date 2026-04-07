@@ -485,25 +485,45 @@ const sendAdminSubscriptionNotification = async (subscription, plan, organizer) 
 };
 
 const createHitPayPayment = async (req, amount, currency, organizerName, planName, subscriptionId) => {
-  const { data: adminUser, error: adminError } = await supabase
+  // Find any admin who has HitPay settings configured
+  const { data: allAdmins } = await supabase
     .from('users')
     .select('userId')
-    .eq('role', 'ADMIN')
-    .limit(1)
-    .maybeSingle();
+    .eq('role', 'ADMIN');
 
-  if (adminError || !adminUser) {
+  if (!allAdmins || allAdmins.length === 0) {
     throw new Error('Platform admin not found. Cannot process payment.');
   }
 
-  const { data: settings, error: settingsError } = await supabase
-    .from('settings')
-    .select('key, value')
-    .eq('user_id', adminUser.userId)
-    .in('key', ['hitpay_api_key', 'hitpay_enabled', 'hitpay_mode']);
+  let adminUser = null;
+  let settings = null;
 
-  if (settingsError || !settings) {
-    throw new Error('Failed to fetch platform payment settings');
+  // Search through admins to find one with HitPay settings
+  for (const admin of allAdmins) {
+    const { data: adminSettings } = await supabase
+      .from('settings')
+      .select('key, value')
+      .eq('user_id', admin.userId)
+      .in('key', ['hitpay_api_key', 'hitpay_enabled', 'hitpay_mode']);
+
+    const hasApiKey = adminSettings?.find(s => s.key === 'hitpay_api_key')?.value;
+    if (hasApiKey) {
+      adminUser = admin;
+      settings = adminSettings;
+      console.log(`[HitPay] Found configured settings for admin: ${admin.userId}`);
+      break;
+    }
+  }
+
+  // Fallback to first admin if none have settings (will default to mock/sandbox)
+  if (!adminUser) {
+    adminUser = allAdmins[0];
+    const { data: firstAdminSettings } = await supabase
+      .from('settings')
+      .select('key, value')
+      .eq('user_id', adminUser.userId)
+      .in('key', ['hitpay_api_key', 'hitpay_enabled', 'hitpay_mode']);
+    settings = firstAdminSettings;
   }
 
   const mapped = {};
@@ -515,12 +535,24 @@ const createHitPayPayment = async (req, amount, currency, organizerName, planNam
 
   const encryptedApiKey = mapped['hitpay_api_key'];
   const mode = mapped['hitpay_mode'] || 'sandbox';
+  const hitPayApiKey = encryptedApiKey ? decryptString(encryptedApiKey) : null;
+  const isLiveKey = hitPayApiKey?.startsWith('live_');
 
-  if (!encryptedApiKey) {
+  // MOCK SANDBOX BYPASS: If in sandbox mode and no API key is found, or it's a LIVE key
+  if (mode === 'sandbox' && (!hitPayApiKey || hitPayApiKey.trim() === '' || isLiveKey)) {
+    console.log(`[Mock Sandbox] Auto-succeeding platform subscription (Mock Mode - Reason: ${isLiveKey ? 'Live key in sandbox' : 'No key'})...`);
+    return {
+      id: `MOCK-SUB-${subscriptionId}-${Date.now()}`,
+      status: 'completed',
+      url: `${(process.env.FRONTEND_URL || 'https://startuplab-event-creation.vercel.app').replace(/\/$/, '')}/#/subscription/success?reference_id=${encodeURIComponent(subscriptionId)}&mock=true`,
+      isMock: true
+    };
+  }
+
+  if (!hitPayApiKey) {
     throw new Error('Platform HitPay API Key is not configured in settings');
   }
 
-  const hitPayApiKey = decryptString(encryptedApiKey);
   const hitPayUrl = mode === 'live'
     ? 'https://api.hit-pay.com/v1'
     : 'https://api.sandbox.hit-pay.com/v1';
@@ -732,6 +764,23 @@ export const createSubscription = async (req, res) => {
     if (subError) throw subError;
 
     const payment = await createHitPayPayment(req, priceAmount, plan.currency, organizer.organizerName, plan.name, subscription.subscriptionId);
+
+    // MOCK SANDBOX BYPASS: If it's a mock payment, activate it immediately
+    if (payment?.isMock) {
+      console.log(`[Mock Sandbox] Activating subscription instantly for order: ${subscription.subscriptionId}`);
+      
+      // 1. Fetch the subscription with plans details (required by activateSubscription)
+      const subWithPlan = await fetchSubscriptionWithPlan('subscriptionId', subscription.subscriptionId);
+      
+      // 2. Activate the subscription (This marks it active, notifies organizer, and sends email)
+      await activateSubscription(subWithPlan, req);
+      
+      return res.status(201).json({ 
+        subscription: { ...subscription, status: 'active' }, 
+        paymentUrl: payment.url,
+        isMock: true
+      });
+    }
 
     await supabase
       .from('organizersubscriptions')
