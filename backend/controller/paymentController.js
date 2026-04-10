@@ -76,14 +76,31 @@ export const getHitpayCredentials = async (orderId) => {
     
     data?.forEach(item => mapped[item.key] = item.value);
 
-    // HYBRID MODEL LOGIC: If organizer has enabled Managed Payouts, we USE Admin credentials instead
+    // 1. Standard DIRECT logic: Use organizer's own HitPay if they've configured it
+    const directEnabled = mapped['hitpay_enabled'] === 'true';
+    if (directEnabled && mapped['hitpay_api_key'] && mapped['hitpay_salt']) {
+      console.log('[HitPay Credentials] Using Organizer DIRECT HitPay credentials.');
+      return {
+        apiKey: decryptString(mapped['hitpay_api_key']),
+        salt: decryptString(mapped['hitpay_salt']),
+        mode: mapped['hitpay_mode'] || 'live',
+        isManaged: false
+      };
+    }
+
+    // 2. HYBRID MODEL LOGIC (Managed Payout): Only if they haven't set up their own HitPay
     if (mapped['payout_is_managed'] === 'true') {
       console.log('[HitPay Credentials] Organizer opted for Managed Payout. Searching for a configured Admin...');
       
       // Look for settings belonging to ANY user with role ADMIN
       const { data: adminSettingsData } = await supabase
         .from('settings')
-        .select('key, value, user_id, users!inner(role)')
+        .select(`
+          key, 
+          value, 
+          user_id,
+          users:user_id(role)
+        `)
         .eq('users.role', 'ADMIN')
         .in('key', ['hitpay_api_key', 'hitpay_salt', 'hitpay_enabled', 'hitpay_mode']);
 
@@ -103,7 +120,7 @@ export const getHitpayCredentials = async (orderId) => {
 
         if (validAdminId) {
           const adminMapped = settingsByUser[validAdminId];
-          console.log(`[HitPay Credentials] Using configured Admin (${validAdminId}) HitPay credentials.`);
+          console.log(`[HitPay Credentials] Using configured Admin (${validAdminId}) HitPay credentials for Managed Payout.`);
           return {
             apiKey: decryptString(adminMapped['hitpay_api_key']),
             salt: decryptString(adminMapped['hitpay_salt']),
@@ -118,23 +135,11 @@ export const getHitpayCredentials = async (orderId) => {
           };
         }
       }
-      console.warn('[HitPay Credentials] No ADMIN has configured HitPay settings yet.');
-    }
-
-    // Standard DIRECT logic: Use organizer's own HitPay if enabled
-    const enabled = mapped['hitpay_enabled'] === 'true';
-    if (enabled && mapped['hitpay_api_key'] && mapped['hitpay_salt']) {
-      console.log('[HitPay Credentials] Using Organizer DIRECT HitPay credentials.');
-      return {
-        apiKey: decryptString(mapped['hitpay_api_key']),
-        salt: decryptString(mapped['hitpay_salt']),
-        mode: mapped['hitpay_mode'] || 'live',
-        isManaged: false
-      };
+      console.warn('[HitPay Credentials] Organizer requested Managed Payout but no ADMIN has configured HitPay yet.');
     }
   }
 
-  console.log('[HitPay Credentials] No stored credentials found for chosen mode, using platform env fallback');
+  console.log('[HitPay Credentials] No specific credentials found (Direct or Managed), using platform fallback');
   return {
     apiKey: process.env.HITPAY_API_KEY || null,
     salt: process.env.HITPAY_SALT || null,

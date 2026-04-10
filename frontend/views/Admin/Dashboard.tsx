@@ -483,8 +483,11 @@ export const AdminDashboard: React.FC = () => {
                     <p className="text-[9px] font-bold text-[#38BDF2]">
                       System Cut: ₱{(order.metadata?.payout?.breakdown?.platformFee || order.metadata?.payout?.platformFee || 0).toLocaleString()}
                     </p>
-                    <Badge type={order.metadata?.payout?.status === 'DISTRIBUTED' ? 'success' : 'neutral'} className="text-[8px] px-1.5 py-0.5 uppercase">
-                      {order.metadata?.payout?.status === 'DISTRIBUTED' ? 'Distributed' : 'Processing'}
+                    <Badge 
+                      type={order.metadata?.payout?.status === 'DISTRIBUTED' ? 'success' : order.metadata?.payout?.status === 'FAILED' ? 'danger' : 'neutral'} 
+                      className="text-[8px] px-1.5 py-0.5 uppercase"
+                    >
+                      {order.metadata?.payout?.status === 'DISTRIBUTED' ? 'Distributed' : order.metadata?.payout?.status === 'FAILED' ? 'Failed' : 'Pending'}
                     </Badge>
                   </div>
                   <p className="text-[9px] font-bold text-[#1E293B]/30 truncate max-w-[200px]">
