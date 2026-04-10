@@ -1188,8 +1188,6 @@ async function triggerAutomaticPayout(order, credentials, req) {
   if (!payout || !payout.isManaged) return;
   if (payout.status === 'DISTRIBUTED') return;
 
-  console.log(`[Auto-Payout] Triggering distribution for Order ${order.orderId}...`);
-  
   const netAmount = payout.breakdown?.netOrganizerAmount || 0;
   const details = payout.payoutDetails || {};
   
@@ -1198,22 +1196,63 @@ async function triggerAutomaticPayout(order, credentials, req) {
       return;
   }
 
+  console.log(`[Auto-Payout] Triggering distribution of ₱${netAmount} for Order ${order.orderId}...`);
+
   try {
-    // Determine if we are in Mock or Live mode
     const isSandbox = credentials.mode === 'sandbox';
+    const hitpayApiUrl = isSandbox ? 'https://api.sandbox.hit-pay.com' : 'https://api.hit-pay.com';
+    let payoutReference = `AUTO-${order.orderId}-${Date.now().toString().slice(-6)}`;
     
+    let payoutResult = null;
+
     if (isSandbox) {
-      console.log('[Auto-Payout][SANDBOX] Simulating instant GCash/Bank transfer...');
-      // Success simulation
+      console.log('[Auto-Payout][SANDBOX] Simulating instant transfer...');
+      payoutResult = { status: 'success', reference: payoutReference };
     } else {
-      console.log('[Auto-Payout][LIVE] Initiating HitPay Payout API call...');
-      /* 
-         Actual HitPay Payout API call would go here:
-         const response = await fetch('https://api.hit-pay.com/v1/payouts', { ... })
-      */
+      console.log(`[Auto-Payout][LIVE] Initiating HitPay Transfer to ${details.method || 'unknown'}...`);
+      
+      const payoutMethodMap = {
+        'gcash': 'gcash',
+        'maya': 'paymaya',
+        'bank_transfer': 'bank_transfer',
+        'bank': 'bank_transfer'
+      };
+
+      const payload = {
+        source_currency: 'php',
+        payment_amount: Number(netAmount.toFixed(2)),
+        reference: payoutReference,
+        beneficiary: {
+          country: 'ph',
+          transfer_method: payoutMethodMap[String(details.method).toLowerCase()] || 'gcash',
+          transfer_type: 'local',
+          currency: 'php',
+          holder_type: 'individual',
+          holder_name: details.accountName || 'Organizer',
+          account_number: details.accountNumber || ''
+        }
+      };
+
+      const response = await fetch(`${hitpayApiUrl}/v1/transfers`, {
+        method: 'POST',
+        headers: {
+          'X-BUSINESS-API-KEY': credentials.apiKey,
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(`HitPay Transfer Error: ${data.message || response.statusText}`);
+      }
+      
+      payoutResult = data;
+      console.log('[Auto-Payout][LIVE] HitPay Payout response:', data);
     }
 
-    // UPDATE DATABASE AUTOMATICALLY
     const updatedMetadata = { 
         ...metadata, 
         payout: { 
@@ -1221,18 +1260,14 @@ async function triggerAutomaticPayout(order, credentials, req) {
             status: 'DISTRIBUTED', 
             distributedAt: new Date().toISOString(),
             distributionMethod: details.method || 'AUTOMATIC_API',
-            referenceId: `AUTO-${order.orderId}-${Date.now().toString().slice(-6)}`
+            referenceId: payoutResult.reference || payoutReference,
+            gatewayResponse: payoutResult
         } 
     };
 
-    const { error: updErr } = await supabase
-        .from('orders')
-        .update({ metadata: updatedMetadata })
-        .eq('orderId', order.orderId);
+    await supabase.from('orders').update({ metadata: updatedMetadata }).eq('orderId', order.orderId);
 
-    if (updErr) throw updErr;
-
-    console.log(`[Auto-Payout] SUCCESS: ₱${netAmount} distributed to organizer.`);
+    console.log(`[Auto-Payout] SUCCESS: ₱${netAmount} distributed to organizer via ${details.method}.`);
 
     await logAudit({
       actionType: 'PAYOUT_DISTRIBUTED_AUTO',
@@ -1240,14 +1275,32 @@ async function triggerAutomaticPayout(order, credentials, req) {
       details: {
         amount: netAmount,
         method: details.method,
-        isSandbox
+        isSandbox,
+        referenceId: payoutResult.reference || payoutReference
       },
       req
     });
 
   } catch (err) {
     console.error('[Auto-Payout] FAILED:', err.message);
-    // We don't throw here to avoid breaking the main checkout flow, 
-    // but the Admin will see it as PENDING in the history log.
+    
+    const failedMetadata = {
+      ...metadata,
+      payout: {
+        ...payout,
+        status: 'FAILED',
+        lastError: err.message,
+        failedAt: new Date().toISOString()
+      }
+    };
+    
+    await supabase.from('orders').update({ metadata: failedMetadata }).eq('orderId', order.orderId);
+    
+    await logAudit({
+      actionType: 'PAYOUT_FAILED_AUTO',
+      orderId: order.orderId,
+      details: { error: err.message, amount: netAmount },
+      req
+    });
   }
 }
