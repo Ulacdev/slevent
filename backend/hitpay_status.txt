@@ -1,0 +1,4 @@
+[dotenv@17.2.3] injecting env (17) from .env -- tip: ???????  run anywhere with `dotenvx run -- yourcommand`
+??????? [Encryption] Using ENCRYPTION_KEY from environment (Custom key).
+Checking settings for admin user ID: df413e5a-f873-4953-8ef5-02fb3bb84246
+No settings found for this user

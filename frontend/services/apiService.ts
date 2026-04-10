@@ -253,6 +253,27 @@ export const apiService = {
     if (!res.ok) throw new Error(data?.error || `Failed to delete plan: ${res.status}`);
   },
 
+  // --- Admin Revenue & Payouts ---
+  getManagedPayouts: async (): Promise<{ items: any[]; count: number }> => {
+    const res = await apiService._fetch(`${API_BASE}/api/orders/managed-payouts`, {
+      credentials: 'include',
+      cache: 'no-store'
+    });
+    if (!res.ok) throw new Error(`Failed to load managed payouts: ${res.status}`);
+    return await res.json();
+  },
+
+  updatePayoutStatus: async (orderId: string, payload: { status: string; referenceId?: string; notes?: string }) => {
+    const res = await apiService._fetch(`${API_BASE}/api/orders/${encodeURIComponent(orderId)}/payout-status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`Failed to update payout status: ${res.status}`);
+    return await res.json();
+  },
+
   // --- Organizer APIs ---
   getMyOrganizer: async (): Promise<OrganizerProfile | null> => {
     const res = await apiService._fetch(`${API_BASE}/api/organizer/me`, {
@@ -796,6 +817,36 @@ export const apiService = {
     if (!res.ok) throw new Error(`Failed to load ticket types: ${res.status}`);
     const data = await res.json();
     return data.map(apiService._mapTicketType);
+  },
+
+  // --- Payout Settings APIs ---
+  getPayoutSettings: async (): Promise<{ method: 'GCASH' | 'MAYA' | 'BANK' | null; accountName: string; accountNumber: string; bankName: string | null; isManaged: boolean }> => {
+    const res = await apiService._fetch(`${API_BASE}/api/settings/payout`, {
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      cache: 'no-store'
+    });
+    if (res.status === 204) return { method: null, accountName: '', accountNumber: '', bankName: null, isManaged: false };
+    if (!res.ok) {
+      if (res.status === 404) return { method: null, accountName: '', accountNumber: '', bankName: null, isManaged: false };
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to load payout settings: ${res.status}`);
+    }
+    return await res.json();
+  },
+
+  updatePayoutSettings: async (payload: any): Promise<any> => {
+    const res = await apiService._fetch(`${API_BASE}/api/settings/payout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to save payout settings: ${res.status}`);
+    }
+    return await res.json();
   },
 
   // POST /api/ticket-types

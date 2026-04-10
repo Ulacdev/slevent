@@ -237,17 +237,19 @@ export async function updateHitPaySettings(req, res) {
             { user_id: userId, key: 'hitpay_mode', value: mode === 'sandbox' ? 'sandbox' : 'live' }
         ];
 
-        // Handle API key: if provided and not empty, save it.
-        if (typeof hitpayApiKey === 'string' && hitpayApiKey.trim() !== '') {
-            const encrypted = encryptString(hitpayApiKey.trim());
-            console.log('[HitPay Settings] API Key encrypted:', !!encrypted);
+        // Handle API key: if empty string provided, save empty (clears it)
+        if (typeof hitpayApiKey === 'string') {
+            const val = hitpayApiKey.trim();
+            const encrypted = val !== '' ? encryptString(val) : '';
+            console.log('[HitPay Settings] API Key updated (is empty:', val === '', ')');
             settings.push({ user_id: userId, key: 'hitpay_api_key', value: encrypted });
         }
 
-        // Handle salt: if provided and not empty, save it.
-        if (typeof hitpaySalt === 'string' && hitpaySalt.trim() !== '') {
-            const encrypted = encryptString(hitpaySalt.trim());
-            console.log('[HitPay Settings] Salt encrypted:', !!encrypted);
+        // Handle salt: if empty string provided, save empty (clears it)
+        if (typeof hitpaySalt === 'string') {
+            const val = hitpaySalt.trim();
+            const encrypted = val !== '' ? encryptString(val) : '';
+            console.log('[HitPay Settings] Salt updated (is empty:', val === '', ')');
             settings.push({ user_id: userId, key: 'hitpay_salt', value: encrypted });
         }
 
@@ -260,7 +262,7 @@ export async function updateHitPaySettings(req, res) {
         // Notification removed as per user request
 
 
-        const { data: updatedData } = await supabase.from('settings').select('key, value').eq('user_id', userId).in('key', ['hitpay_api_key', 'hitpay_salt', 'hitpay_enabled', 'hitpay_mode']);
+        const { data: updatedData } = await supabase.from('settings').select('key, value').eq('user_id', userId).in('key', ['hitpay_api_key', 'hitpay_salt', 'hitpay_enabled', 'hitpay_mode', 'payout_is_managed']);
 
         const mapped = {};
         updatedData?.forEach(item => mapped[item.key] = item.value);
@@ -285,7 +287,7 @@ export async function updateHitPaySettings(req, res) {
                 hitpaySalt: decryptedSalt,
                 maskedHitpayApiKey: decryptedApiKey ? maskString(decryptedApiKey) : (rawApiKey ? '••••••••••••••••' : null),
                 maskedHitpaySalt: decryptedSalt ? maskString(decryptedSalt) : (rawSalt ? '••••••••••••••••' : null),
-                isConfigured: mapped['hitpay_enabled'] === 'true',
+                isConfigured: mapped['hitpay_enabled'] === 'true' || mapped['payout_is_managed'] === 'true',
                 updatedAt: new Date().toISOString()
             }
         });
@@ -311,7 +313,7 @@ export async function getHitPaySettings(req, res) {
             .from('settings')
             .select('key, value, updated_at')
             .eq('user_id', userId)
-            .in('key', ['hitpay_api_key', 'hitpay_salt', 'hitpay_enabled', 'hitpay_mode']);
+            .in('key', ['hitpay_api_key', 'hitpay_salt', 'hitpay_enabled', 'hitpay_mode', 'payout_is_managed']);
 
         if (error) throw error;
 
@@ -340,7 +342,7 @@ export async function getHitPaySettings(req, res) {
             hitpaySalt: decryptedSalt,
             maskedHitpayApiKey: decryptedApiKey ? maskString(decryptedApiKey) : (rawApiKey ? '••••••••••••••••' : null),
             maskedHitpaySalt: decryptedSalt ? maskString(decryptedSalt) : (rawSalt ? '••••••••••••••••' : null),
-            isConfigured: !!mapped['hitpay_enabled'],
+            isConfigured: mapped['hitpay_enabled'] === 'true' || mapped['payout_is_managed'] === 'true',
             updatedAt: latestUpdate
         };
 
@@ -348,5 +350,86 @@ export async function getHitPaySettings(req, res) {
     } catch (error) {
         console.error('[HitPay Settings] Fetch failed:', error.message);
         return res.status(500).json({ error: 'Failed to fetch HitPay settings.' });
+    }
+}
+
+/**
+ * Update Payout Settings (GCASH, MAYA, BANK)
+ */
+export async function updatePayoutSettings(req, res) {
+    try {
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+        const { isManaged, method, accountName, accountNumber, bankName, gcash, maya, bank } = req.body;
+
+        const settings = [
+            { user_id: userId, key: 'payout_is_managed', value: isManaged === true ? 'true' : 'false' },
+            { user_id: userId, key: 'payout_method', value: method || '' },
+            { user_id: userId, key: 'payout_account_name', value: accountName || '' },
+            { user_id: userId, key: 'payout_account_number', value: accountNumber || '' },
+            { user_id: userId, key: 'payout_bank_name', value: bankName || '' },
+            // Independent wallet data
+            { user_id: userId, key: 'payout_gcash_data', value: gcash ? JSON.stringify(gcash) : '' },
+            { user_id: userId, key: 'payout_maya_data', value: maya ? JSON.stringify(maya) : '' },
+            { user_id: userId, key: 'payout_bank_data', value: bank ? JSON.stringify(bank) : '' }
+        ];
+
+        const { error } = await supabase
+            .from('settings')
+            .upsert(settings, { onConflict: 'user_id,key' });
+
+        if (error) throw error;
+
+        await logAudit({
+            actionType: 'PAYOUT_SETTINGS_UPDATED',
+            details: { userId, isManaged, method },
+            req
+        });
+
+        return res.json({ message: 'Payout settings updated successfully' });
+    } catch (error) {
+        console.error('[Payout Settings] Update failed:', error.message);
+        return res.status(500).json({ error: 'Failed to save payout settings.' });
+    }
+}
+
+/**
+ * Get Payout Settings
+ */
+export async function getPayoutSettings(req, res) {
+    try {
+        const userId = req.user?.id;
+        if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+        const { data, error } = await supabase
+            .from('settings')
+            .select('key, value')
+            .eq('user_id', userId)
+            .ilike('key', 'payout_%');
+
+        if (error) throw error;
+
+        const mapped = {};
+        data.forEach(item => mapped[item.key] = item.value);
+
+        const tryParse = (str) => {
+            try { return str ? JSON.parse(str) : null; }
+            catch (e) { return null; }
+        };
+
+        return res.json({
+            isManaged: mapped['payout_is_managed'] === 'true',
+            method: mapped['payout_method'] || null,
+            accountName: mapped['payout_account_name'] || '',
+            accountNumber: mapped['payout_account_number'] || '',
+            bankName: mapped['payout_bank_name'] || '',
+            gcash: tryParse(mapped['payout_gcash_data']),
+            maya: tryParse(mapped['payout_maya_data']),
+            bank: tryParse(mapped['payout_bank_data'])
+        });
+    } catch (error) {
+        console.error('[Payout Settings] Fetch failed:', error.message);
+        return res.status(500).json({ error: 'Failed to fetch payout settings.' });
     }
 }

@@ -1,0 +1,7 @@
+[dotenv@17.2.3] injecting env (17) from .env -- tip: ??? audit secrets and track compliance: https://dotenvx.com/ops
+??????? [Encryption] Using ENCRYPTION_KEY from environment (Custom key).
+HitPay Settings for Organizer (0946cfb0-d1c6-4146-bf64-3bc0c6a043d9):
+- hitpay_enabled: true
+- hitpay_mode: live
+- hitpay_api_key: live_...
+- hitpay_salt: LkV0X...

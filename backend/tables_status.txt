@@ -1,0 +1,3 @@
+[dotenv@17.2.3] injecting env (17) from .env -- tip: ??????  suppress all logs with { quiet: true }
+Total orders: 44 Orders with null eventId: 0
+Transactions columns: []

@@ -1,0 +1,4 @@
+[dotenv@17.2.3] injecting env (17) from .env -- tip: ???? sync secrets across teammates & machines: https://dotenvx.com/ops
+User details for 0946cfb0-d1c6-4146-bf64-3bc0c6a043d9:
+- Email: bbekkawit@gmail.com
+- Role: organizer

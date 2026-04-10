@@ -1,0 +1,7 @@
+[dotenv@17.2.3] injecting env (17) from .env -- tip: ??????  specify custom .env file path with { path: '/custom/path/.env' }
+??????? [Encryption] Using ENCRYPTION_KEY from environment (Custom key).
+HitPay Settings for Rovick (d6e6eeaa-c793-44bd-8698-c42044cb0fb1):
+- hitpay_enabled: true
+- hitpay_mode: live
+- hitpay_api_key: live_...
+- hitpay_salt: LkV0X...

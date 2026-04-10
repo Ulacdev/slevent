@@ -318,7 +318,20 @@ export const getSummary = async (req, res) => {
     }
 
     const paidOrders = (orders || []).filter(o => o.status === 'PAID');
+    
+    // Revenue calculations (Gross and Net)
     const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+    const totalNetRevenue = paidOrders.reduce((sum, o) => {
+      const payout = o.metadata?.payout;
+      if (payout?.netOrganizerAmount !== undefined) {
+        return sum + Number(payout.netOrganizerAmount);
+      }
+      // Fallback calculation for older orders or those without metadata
+      const platformFee = (o.totalAmount || 0) * 0.05;
+      const processingFee = (o.totalAmount || 0) * 0.03 + 15; // HitPay estimate
+      return sum + Math.max(0, (o.totalAmount || 0) - platformFee - processingFee);
+    }, 0);
+
     const paymentSuccessRate = (orders || []).length
       ? (paidOrders.length / orders.length) * 100
       : 0;
@@ -329,9 +342,18 @@ export const getSummary = async (req, res) => {
     const startIso = today.toISOString();
 
     const ticketsSoldToday = (tickets || []).filter(t => t.issuedAt && t.issuedAt >= startIso).length;
-    const revenueToday = paidOrders
-      .filter(o => o.created_at && o.created_at >= startIso)
-      .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+    
+    const paidOrdersToday = paidOrders.filter(o => o.created_at && o.created_at >= startIso);
+    const revenueToday = paidOrdersToday.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+    const netRevenueToday = paidOrdersToday.reduce((sum, o) => {
+        const payout = o.metadata?.payout;
+        if (payout?.netOrganizerAmount !== undefined) {
+          return sum + Number(payout.netOrganizerAmount);
+        }
+        const platformFee = (o.totalAmount || 0) * 0.05;
+        const processingFee = (o.totalAmount || 0) * 0.03 + 15;
+        return sum + Math.max(0, (o.totalAmount || 0) - platformFee - processingFee);
+      }, 0);
 
     // To accurately count "paid" events, we need to know which events have paid tickets.
     const { data: ticketTypes, error: ttErr } = await supabase
@@ -371,7 +393,9 @@ export const getSummary = async (req, res) => {
       totalRegistrations,
       ticketsSoldToday,
       totalRevenue,
+      netRevenue: totalNetRevenue,
       revenueToday,
+      netRevenueToday: netRevenueToday,
       attendanceRate,
       paymentSuccessRate,
       totalPaidEvents,
@@ -443,18 +467,31 @@ export const getRecentTransactions = async (req, res) => {
       eventMap = new Map((eventRows || []).map(row => [row.eventId, row.eventName]));
     }
 
-    const enrichedOrderItems = items.map(item => ({
-      orderId: item.orderId,
-      eventId: item.eventId,
-      customerName: item.buyerName,
-      customerEmail: item.buyerEmail || null,
-      amount: item.totalAmount,
-      currency: item.currency,
-      paymentStatus: item.status,
-      createdAt: item.created_at,
-      eventName: eventMap.get(item.eventId) || null,
-      kind: 'order'
-    }));
+    const enrichedOrderItems = items.map(item => {
+      let netAmount = item.totalAmount;
+      const payout = item.metadata?.payout;
+      if (payout?.netOrganizerAmount !== undefined) {
+        netAmount = Number(payout.netOrganizerAmount);
+      } else {
+        const platformFee = (item.totalAmount || 0) * 0.05;
+        const processingFee = (item.totalAmount || 0) * 0.03 + 15;
+        netAmount = Math.max(0, (item.totalAmount || 0) - platformFee - processingFee);
+      }
+
+      return {
+        orderId: item.orderId,
+        eventId: item.eventId,
+        customerName: item.buyerName,
+        customerEmail: item.buyerEmail || null,
+        amount: item.totalAmount,
+        netAmount: netAmount,
+        currency: item.currency,
+        paymentStatus: item.status,
+        createdAt: item.created_at,
+        eventName: eventMap.get(item.eventId) || null,
+        kind: 'order'
+      };
+    });
 
     // Include organizer subscription purchases for Admin view
     let subscriptionItems = [];
@@ -490,6 +527,7 @@ export const getRecentTransactions = async (req, res) => {
           customerName: sub.organizers?.organizerName || 'Organizer Plan',
           customerEmail: ownerEmailMap.get(sub.organizers?.ownerUserId) || null,
           amount: Number(sub.priceAmount || 0),
+          netAmount: Number(sub.priceAmount || 0),
           currency: sub.currency || 'PHP',
           paymentStatus: (sub.status || '').toUpperCase() === 'ACTIVE' ? 'PAID' : (sub.status || '').toUpperCase(),
           createdAt: sub.created_at,
@@ -659,10 +697,23 @@ export const getRecentOrders = async (req, res) => {
       eventMap = new Map((eventRows || []).map(row => [row.eventId, row.eventName]));
     }
 
-    const enrichedItems = items.map(item => ({
-      ...item,
-      eventName: eventMap.get(item.eventId) || null
-    }));
+    const enrichedItems = items.map(item => {
+      let netAmount = item.totalAmount;
+      const payout = item.metadata?.payout;
+      if (payout?.netOrganizerAmount !== undefined) {
+        netAmount = Number(payout.netOrganizerAmount);
+      } else {
+        const platformFee = (item.totalAmount || 0) * 0.05;
+        const processingFee = (item.totalAmount || 0) * 0.03 + 15;
+        netAmount = Math.max(0, (item.totalAmount || 0) - platformFee - processingFee);
+      }
+
+      return {
+        ...item,
+        netAmount,
+        eventName: eventMap.get(item.eventId) || null
+      };
+    });
     return res.json({
       items: enrichedItems,
       pagination: buildPagination(page, limit, total)

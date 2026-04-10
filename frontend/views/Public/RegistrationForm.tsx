@@ -48,11 +48,12 @@ export const RegistrationForm: React.FC = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState<string | null>(null);
-  const [paymentMethodId, setPaymentMethodId] = useState(PAYMENT_METHODS[0].id);
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<any>(null);
   const [promoError, setPromoError] = useState<string | null>(null);
   const [validatingPromo, setValidatingPromo] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -146,14 +147,15 @@ export const RegistrationForm: React.FC = () => {
   }
 
   const discountedSubtotal = Math.max(0, subtotal - discountAmount);
-  const selectedPayment = PAYMENT_METHODS.find((method) => method.id === paymentMethodId) ?? PAYMENT_METHODS[0];
 
   let paymentFee = 0;
+  let platformFee = 0;
   if (discountedSubtotal > 0) {
-    paymentFee = roundCurrency(discountedSubtotal * selectedPayment.feeRate);
+    paymentFee = roundCurrency(discountedSubtotal * 0.023);
+    platformFee = roundCurrency(discountedSubtotal * 0.05);
   }
 
-  const totalPayable = roundCurrency(discountedSubtotal + paymentFee);
+  const totalPayable = roundCurrency(discountedSubtotal + paymentFee + platformFee);
   const hasPaid = totalPayable > 0;
   const brandColor = event?.organizer?.brandColor || '#38BDF2';
 
@@ -394,26 +396,24 @@ export const RegistrationForm: React.FC = () => {
 
                     <div className="md:col-span-2 pt-8 border-t border-[#2E2E2F]/10 space-y-4">
                       <div className="flex items-center justify-between">
-                        <p className="text-[12px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Payment Method</p>
-                      </div>
-                      <div className="space-y-3">
-                        <select
-                          className="w-full p-3 rounded-xl border border-[#2E2E2F]/20 bg-[#F2F2F2] text-[13px] font-normal text-[#2E2E2F] focus:border-[#38BDF2]/40 outline-none disabled:opacity-60"
-                          value={paymentMethodId}
-                          onChange={e => setPaymentMethodId(e.target.value)}
-                          aria-label="Select payment method"
-                          disabled={subtotal === 0}
-                        >
-                          {PAYMENT_METHODS.map((method) => (
-                            <option key={method.id} value={method.id}>
-                              {method.label} — {method.description}
-                            </option>
-                          ))}
-                        </select>
-                        <div className={`mt-2 text-xs font-medium ${subtotal === 0 ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]'}`}>
-                          Fee: <span style={{ color: brandColor }}>{selectedPayment.feeLabel}</span>
-                          {subtotal === 0 && <span className="ml-2">(No payment required for free ticket)</span>}
+                        <p className="text-[12px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Secure Transaction</p>
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#38BDF2]/10 border border-[#38BDF2]/20">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#38BDF2] animate-pulse"></div>
+                          <span className="text-[9px] font-black text-[#38BDF2] uppercase tracking-wider">StartupLab System Platform</span>
                         </div>
+                      </div>
+                      
+                      <div className="p-4 rounded-xl border border-[#2E2E2F]/10 bg-white/50 flex items-center justify-between group hover:border-[#38BDF2]/30 transition-all">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]">
+                            <ICONS.Shield className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="text-[13px] font-bold text-[#2E2E2F]">Instant Checkout</p>
+                            <p className="text-[10px] text-[#2E2E2F]/60 font-medium uppercase tracking-widest">GCash • Maya • Cards • etc.</p>
+                          </div>
+                        </div>
+                        <img src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/images/hitpay.png" alt="HitPay" className="h-4 opacity-70 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </div>
 
@@ -424,11 +424,32 @@ export const RegistrationForm: React.FC = () => {
                         size="lg"
                         label={
                           <span className="text-sm font-medium text-[#2E2E2F] leading-relaxed group-hover:text-[#2E2E2F] transition-colors">
-                            I acknowledge that I have read and agree to the <a href="#" className="text-[#2E2E2F] font-bold hover:underline" style={{ color: brandColor }}>Terms and Conditions</a> and <a href="#" className="text-[#2E2E2F] font-bold hover:underline" style={{ color: brandColor }}>Privacy Policy</a> governing this event session.
+                            I acknowledge that I have read and agree to the {' '}
+                            <button
+                              type="button"
+                              onClick={() => setShowTermsModal(true)}
+                              className="font-bold hover:underline transition-all"
+                              style={{ color: brandColor }}
+                            >
+                              Terms and Conditions
+                            </button>
+                            {' '} and {' '}
+                            <button
+                              type="button"
+                              onClick={() => setShowPrivacyModal(true)}
+                              className="font-bold hover:underline transition-all"
+                              style={{ color: brandColor }}
+                            >
+                              Privacy Policy
+                            </button> governing this event session.
                           </span>
                         }
                       />
-                      {errors.terms && <p className="text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide pl-12">{errors.terms}</p>}
+                      {errors.terms && (
+                        <p className="text-[11px] font-black text-red-500 uppercase tracking-widest pl-10 animate-pulse">
+                          {errors.terms}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -592,6 +613,25 @@ export const RegistrationForm: React.FC = () => {
                         <span className="text-[11px] sm:text-[12px] font-bold tracking-wide">- PHP {formatCurrency(discountAmount)}</span>
                       </div>
                     )}
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-wide">StartupLab Platform Fee</span>
+                      {subtotal === 0 ? (
+                        <span className="text-[10px] font-semibold text-[#2E2E2F] border px-2.5 py-0.5 rounded-xl tracking-wide bg-[#38BDF2]/10" style={{ borderColor: `${brandColor}66`, backgroundColor: `${brandColor}1A` }}>
+                          WAIVED
+                        </span>
+                      ) : (
+                        <div className="text-right">
+                          <span className="text-[11px] sm:text-[12px] font-semibold tracking-wide text-[#2E2E2F] block">
+                            PHP {formatCurrency(roundCurrency(discountedSubtotal * 0.05))}
+                          </span>
+                          <span className="text-[9px] font-medium text-[#2E2E2F] uppercase tracking-wide block mt-1">
+                            5% Platform Fee
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-wide">HitPay Service Fee</span>
                       {subtotal === 0 ? (
@@ -604,7 +644,7 @@ export const RegistrationForm: React.FC = () => {
                             PHP {formatCurrency(paymentFee)}
                           </span>
                           <span className="text-[9px] font-medium text-[#2E2E2F] uppercase tracking-wide block mt-1">
-                            {selectedPayment.feeLabel}
+                            2.3% Processing Fee
                           </span>
                         </div>
                       )}
@@ -653,6 +693,49 @@ export const RegistrationForm: React.FC = () => {
 
         </div>
       </div>
+      {/* Terms of Service Modal */}
+      <Modal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        title="Terms of Service"
+        subtitle="Last updated: March 2026"
+        size="lg"
+      >
+        <div className="space-y-6 text-[#2E2E2F] text-[13px] leading-relaxed max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">1. Registration and Attendance</h4>
+            <p>By registering for this event, you agree to provide accurate information. Participation is subject to the organizer's rules and capacity limits.</p>
+          </section>
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">2. Payments and Refunds</h4>
+            <p>Tickets are non-refundable unless otherwise specified by the event organizer. Service fees collected by StartupLab are non-refundable in the event of a cancellation.</p>
+          </section>
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">3. Prohibited Conduct</h4>
+            <p>Attendees must follow safety guidelines and respect other participants. Failure to do so may result in removal from the event without a refund.</p>
+          </section>
+        </div>
+      </Modal>
+
+      {/* Privacy Policy Modal */}
+      <Modal
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+        title="Privacy Policy"
+        subtitle="How we handle your data"
+        size="lg"
+      >
+        <div className="space-y-6 text-[#2E2E2F] text-[13px] leading-relaxed max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">1. Data Usage</h4>
+            <p>We collect your name, email, and contact details to process your registration and provide you with event-related updates.</p>
+          </section>
+          <section>
+            <h4 className="font-bold text-[#2E2E2F] uppercase text-[10px] tracking-widest mb-2">2. Data Sharing</h4>
+            <p>Your attendee information will be shared with the event organizer to facilitate check-in and communication about the session.</p>
+          </section>
+        </div>
+      </Modal>
     </div>
   );
 };

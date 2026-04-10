@@ -35,12 +35,22 @@ export const register = async (req, res) => {
     }
 
     // --- GET DEFAULT PLAN ---
-    const { data: defaultPlan } = await db
+    let { data: defaultPlan } = await db
       .from('plans')
-      .select('planId, trialDays, monthlyPrice, currency')
+      .select('planId, trialDays, monthlyPrice, currency, planName')
       .eq('isDefault', true)
       .eq('isActive', true)
       .maybeSingle();
+
+    // Fallback: If no default, try to find 'Casual'
+    if (!defaultPlan) {
+      const { data: casualPlan } = await db
+        .from('plans')
+        .select('planId, trialDays, monthlyPrice, currency, planName')
+        .ilike('planName', 'Casual')
+        .maybeSingle();
+      if (casualPlan) defaultPlan = casualPlan;
+    }
 
     // Create signup verification link in Supabase Auth
     // Use the custom domain if available, otherwise fallback.
@@ -146,6 +156,15 @@ export const register = async (req, res) => {
       })
       .select()
       .single();
+
+    // AUTO-ENABLE MANAGED PAYOUTS FOR NEW ORGANIZERS
+    if (!orgError) {
+      console.log(`[Auth] Initializing Managed Payout settings for new user: ${userId}`);
+      await db.from('settings').insert([
+        { user_id: userId, key: 'payout_is_managed', value: 'true' },
+        { user_id: userId, key: 'payout_method', value: 'GCASH' } // Default method
+      ]);
+    }
 
     if (orgError) {
       console.log("❌ Failed to create organizer profile:", orgError.message);

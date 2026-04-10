@@ -115,15 +115,15 @@ export const OrganizerDashboard: React.FC = () => {
                     icon={<ICONS.CheckCircle />}
                 />
                 <HeroCard
-                    title="Total Revenue"
-                    value={`PHP ${(analytics?.totalRevenue || 0).toLocaleString()}`}
-                    sub="Gross earnings"
+                    title="Total Net Revenue"
+                    value={`PHP ${(analytics?.netRevenue || 0).toLocaleString()}`}
+                    sub="Actual take-home"
                     icon={<ICONS.TrendingUp />}
                 />
                 <HeroCard
-                    title="Revenue Today"
-                    value={`PHP ${(analytics?.revenueToday || 0).toLocaleString()}`}
-                    sub="24h collection"
+                    title="Net Revenue Today"
+                    value={`PHP ${(analytics?.netRevenueToday || 0).toLocaleString()}`}
+                    sub="24h collection (Net)"
                     icon={<ICONS.CreditCard />}
                 />
             </div>
@@ -176,7 +176,8 @@ export const OrganizerDashboard: React.FC = () => {
                                 </div>
                                 <div className="text-right">
                                     <span className="text-[9px] font-bold bg-[#38BDF2]/10 text-[#38BDF2] px-2 py-1 rounded-md mb-2 inline-block">PAID</span>
-                                    <p className="font-bold text-sm text-[#2E2E2F]">PHP {Number(tx.amount || 0).toLocaleString()}</p>
+                                    <p className="font-bold text-sm text-[#2E2E2F]">PHP {Number(tx.netAmount || tx.amount || 0).toLocaleString()}</p>
+                                    <p className="text-[10px] font-bold text-[#1E293B]/30 tracking-tight">Net Payout</p>
                                 </div>
                             </div>
                         ))}
@@ -210,7 +211,8 @@ export const OrganizerDashboard: React.FC = () => {
                                 </div>
                                 <div className="text-right">
                                     <span className="text-[9px] font-bold bg-[#38BDF2]/10 text-[#38BDF2] px-2 py-1 rounded-md mb-2 inline-block">PAID</span>
-                                    <p className="font-bold text-sm text-[#2E2E2F]">PHP {Number(order.totalAmount || 0).toLocaleString()}</p>
+                                    <p className="font-bold text-sm text-[#2E2E2F]">PHP {Number(order.netAmount || order.totalAmount || 0).toLocaleString()}</p>
+                                    <p className="text-[10px] font-bold text-[#1E293B]/30 tracking-tight">Net Payout</p>
                                 </div>
                             </div>
                         ))}
@@ -307,17 +309,17 @@ export const OrganizerDashboard: React.FC = () => {
 
                         <div className="p-5 bg-white rounded-2xl border border-[#E0E0E0] space-y-4">
                             <div className="flex justify-between items-center">
-                                <span className="text-sm font-bold text-[#2E2E2F]">Payment Mode</span>
-                                <span className="text-sm font-bold text-[#2E2E2F]">{selectedTx.paymentMethod || 'HitPay'}</span>
+                                <span className="text-sm font-bold text-[#2E2E2F]">Order Gross</span>
+                                <span className="text-sm font-bold text-[#2E2E2F]">PHP {Number(selectedTx.amount || 0).toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-sm font-bold text-[#2E2E2F]">Subscription Plan</span>
-                                <span className="text-sm font-bold text-[#38BDF2]">{selectedTx.planName || 'Ai Automation'}</span>
+                                <span className="text-sm font-bold text-[#2E2E2F]">Net Payout</span>
+                                <span className="text-sm font-bold text-[#38BDF2]">PHP {Number(selectedTx.netAmount || selectedTx.amount || 0).toLocaleString()}</span>
                             </div>
                             <div className="h-[1px] bg-[#E0E0E0]" />
                             <div className="flex justify-between items-center pt-2">
-                                <span className="text-base font-bold text-[#2E2E2F]">Total Amount</span>
-                                <span className="text-xl font-black text-[#2E2E2F]">PHP {Number(selectedTx.amount || 0).toLocaleString()}</span>
+                                <span className="text-base font-bold text-[#2E2E2F]">Your Earnings</span>
+                                <span className="text-xl font-black text-[#2E2E2F]">PHP {Number(selectedTx.netAmount || selectedTx.amount || 0).toLocaleString()}</span>
                             </div>
                         </div>
 
@@ -339,8 +341,9 @@ export const OrganizerDashboard: React.FC = () => {
                     <div className="space-y-6">
                         <div className="p-6 bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl flex justify-between items-center shadow-sm">
                             <div>
-                                <p className="text-[10px] font-bold text-[#2E2E2F] mb-1">Order Total</p>
-                                <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tight">PHP {Number(selectedOrder.totalAmount || 0).toLocaleString()}</h2>
+                                <p className="text-[10px] font-bold text-[#2E2E2F] mb-1">Net Payout</p>
+                                <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tight">PHP {(selectedOrder.netAmount || selectedOrder.totalAmount || 0).toLocaleString()}</h2>
+                                <p className="text-[10px] font-bold text-[#2E2E2F]/40 mt-1">From gross PHP {Number(selectedOrder.totalAmount || 0).toLocaleString()}</p>
                             </div>
                             <div className="bg-[#38BDF2]/10 px-3 py-1.5 rounded-lg border border-[#38BDF2]/20">
                                 <span className="text-xs font-bold text-[#38BDF2]">PAID</span>

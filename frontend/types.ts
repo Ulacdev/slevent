@@ -55,6 +55,16 @@ export interface OrganizerProfile {
   recentFollowers?: { userId: string; name: string | null; imageUrl: string | null }[];
   created_at?: string;
   updated_at?: string;
+  payoutSettings?: PayoutSettings | null;
+}
+
+export interface PayoutSettings {
+  method: 'GCASH' | 'MAYA' | 'BANK' | null;
+  accountName: string;
+  accountNumber: string;
+  bankName?: string | null;
+  isManaged: boolean;
+  updatedAt?: string | null;
 }
 
 export interface HitPaySettings {
@@ -254,6 +264,7 @@ export interface RegistrationView {
   orderId: string;
   amountPaid: number;
   currency: string;
+  metadata?: any;
   streamingPlatform?: string | null;
   registrationDate?: string;
   checkInTimestamp?: string;

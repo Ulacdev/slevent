@@ -1,0 +1,15 @@
+[dotenv@17.2.3] injecting env (17) from .env -- tip: ???? sync secrets across teammates & machines: https://dotenvx.com/ops
+??????? [Encryption] Using ENCRYPTION_KEY from environment (Custom key).
+Found 8 HitPay setting records for 2 users:
+
+User: rovickromasanta.startuplab@gmail.com (d6e6eeaa-c793-44bd-8698-c42044cb0fb1)
+  - hitpay_enabled: true
+  - hitpay_mode: live
+  - hitpay_api_key: live_0522f...
+  - hitpay_salt: LkV0XqMP2p...
+
+User: bbekkawit@gmail.com (0946cfb0-d1c6-4146-bf64-3bc0c6a043d9)
+  - hitpay_enabled: true
+  - hitpay_mode: live
+  - hitpay_api_key: live_0522f...
+  - hitpay_salt: LkV0XqMP2p...

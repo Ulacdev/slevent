@@ -113,7 +113,7 @@ export const getRegistrationsByEvent = async (req, res) => {
         ? supabase.from('attendees').select('attendeeId, name, email, phoneNumber, company').in('attendeeId', attendeeIds)
         : { data: [], error: null },
       orderIds.length
-        ? supabase.from('orders').select('orderId, totalAmount, currency, status').in('orderId', orderIds)
+        ? supabase.from('orders').select('orderId, totalAmount, currency, status, metadata').in('orderId', orderIds)
         : { data: [], error: null },
       ticketTypeIds.length
         ? supabase.from('ticketTypes').select('ticketTypeId, name').in('ticketTypeId', ticketTypeIds)
@@ -151,6 +151,7 @@ export const getRegistrationsByEvent = async (req, res) => {
         orderId: t.orderId,
         amountPaid: order.totalAmount || 0,
         currency: order.currency || 'PHP',
+        metadata: order.metadata || null,
         streamingPlatform: evResp.data?.streamingPlatform || null,
         locationType: evResp.data?.locationType || null,
         registrationDate: t.issuedAt || t.created_at || null,
@@ -320,7 +321,7 @@ export const getAllRegistrations = async (req, res) => {
         ? supabase.from('attendees').select('attendeeId, name, email, phoneNumber, company').in('attendeeId', attendeeIds)
         : { data: [], error: null },
       orderIds.length
-        ? supabase.from('orders').select('orderId, totalAmount, currency, status').in('orderId', orderIds)
+        ? supabase.from('orders').select('orderId, totalAmount, currency, status, metadata').in('orderId', orderIds)
         : { data: [], error: null },
       ticketTypeIds.length
         ? supabase.from('ticketTypes').select('ticketTypeId, name').in('ticketTypeId', ticketTypeIds)
@@ -361,6 +362,7 @@ export const getAllRegistrations = async (req, res) => {
         orderId: t.orderId,
         amountPaid: order.totalAmount || 0,
         currency: order.currency || 'PHP',
+        metadata: order.metadata || null,
         streamingPlatform: event.streamingPlatform || null,
         locationType: event.locationType || null,
         registrationDate: t.issuedAt || t.created_at || null,
@@ -551,7 +553,7 @@ export const getTicketById = async (req, res) => {
         ? supabase.from('attendees').select('attendeeId, name, email, phoneNumber, company').eq('attendeeId', ticket.attendeeId).maybeSingle()
         : { data: null, error: null },
       ticket.orderId
-        ? supabase.from('orders').select('orderId, totalAmount, currency, status').eq('orderId', ticket.orderId).maybeSingle()
+        ? supabase.from('orders').select('orderId, totalAmount, currency, status, metadata').eq('orderId', ticket.orderId).maybeSingle()
         : { data: null, error: null },
       ticket.ticketTypeId
         ? supabase.from('ticketTypes').select('ticketTypeId, name').eq('ticketTypeId', ticket.ticketTypeId).maybeSingle()
@@ -583,7 +585,8 @@ export const getTicketById = async (req, res) => {
       ticketName: ttResp.data?.name || '',
       paymentStatus: ordResp.data?.status || '',
       amountPaid: ordResp.data?.totalAmount || 0,
-      currency: ordResp.data?.currency || 'PHP'
+      currency: ordResp.data?.currency || 'PHP',
+      metadata: ordResp.data?.metadata || null
     });
   } catch (err) {
     return res.status(500).json({ error: err?.message || 'Unexpected error' });

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { AnalyticsSummary, UserRole, AdminPlan, OrganizerProfile } from '../../types';
-import { Card, PageLoader, Modal } from '../../components/Shared';
+import { Card, PageLoader, Modal, Button, Badge } from '../../components/Shared';
 import { ICONS } from '../../constants';
 import { useUser } from '../../context/UserContext';
 import { CreatePlanModal } from '../../components/CreatePlanModal';
@@ -81,6 +81,7 @@ export const AdminDashboard: React.FC = () => {
   const [supportTickets, setSupportTickets] = useState<any[]>([]);
   const [recentTx, setRecentTx] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [payouts, setPayouts] = useState<any[]>([]);
   const [selectedTx, setSelectedTx] = useState<any | null>(null);
   const [selectedLog, setSelectedLog] = useState<any | null>(null);
   const [isCreatePlanOpen, setIsCreatePlanOpen] = useState(false);
@@ -88,7 +89,7 @@ export const AdminDashboard: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [analytics, pm, h, adminPlans, orgs, txData, logs] = await Promise.allSettled([
+        const [analytics, pm, h, adminPlans, orgs, txData, logs, mp] = await Promise.allSettled([
           apiService.getAnalytics(),
           apiService.getPlanMetrics(),
           apiService.getSubscriptionHealth(),
@@ -96,6 +97,7 @@ export const AdminDashboard: React.FC = () => {
           apiService.getOrganizers(),
           apiService.getRecentTransactions(1, 5),
           apiService.getAuditLogs(1, 15),
+          apiService.getManagedPayouts()
         ]);
         let supportResult: any[] = [];
         try { const s = await (apiService.getAdminSupportTickets as any)(); supportResult = Array.isArray(s) ? s : s?.tickets || []; } catch {}
@@ -110,6 +112,9 @@ export const AdminDashboard: React.FC = () => {
           const l = logs.value;
           setAuditLogs((l as any)?.items || (l as any)?.data || (l as any)?.logs || (Array.isArray(l) ? l : []));
         }
+        if (mp.status === 'fulfilled') {
+          setPayouts((mp.value as any)?.items || []);
+        }
       } catch (e) {
         console.warn(e);
       } finally {
@@ -118,6 +123,27 @@ export const AdminDashboard: React.FC = () => {
     };
     load();
   }, []);
+
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const handleMarkPaid = async (orderId: string) => {
+    const ref = window.prompt("Enter payment reference (optional):");
+    if (ref === null) return;
+    try {
+      setUpdatingId(orderId);
+      await apiService.updatePayoutStatus(orderId, {
+        status: 'DISTRIBUTED',
+        referenceId: ref,
+        notes: `Platform distribution confirmed on ${new Date().toLocaleDateString()}`
+      });
+      // Refresh
+      const mpResp = await apiService.getManagedPayouts();
+      setPayouts(mpResp.items || []);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   if (loading) return <PageLoader variant="page" label="Loading Dashboard..."/>;
 
@@ -128,6 +154,12 @@ export const AdminDashboard: React.FC = () => {
   const activePlans = plans.filter(p => p.isActive).length;
   const totalPlans = plans.length;
   const pendingSupport = supportTickets.filter(t => t.status === 'open' || t.status === 'OPEN' || !t.resolvedAt).length;
+
+  const totalTicketingFees = payouts.reduce((sum, p) => {
+    const b = p.metadata?.payout?.breakdown;
+    // Show only the actual Platform/System Commission to Admin
+    return sum + (b ? Number(b.platformFee || 0) : 0);
+  }, 0);
   const planDist = health?.planDistribution || planMetrics?.revenueByPlan.map(p => ({ name: p.name, count: 0 })) || [];
   const barData = planMetrics?.dailyMetrics?.slice(-10).map(d => d.count) || [3, 6, 4, 8, 5, 9, 4, 6, 10, 7];
   const barMax = Math.max(...barData, 1);
@@ -161,7 +193,7 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* ── Row 1: Hero Stats ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
         <HeroCard
           title="Total Organizers"
           value={totalOrganizers}
@@ -194,6 +226,14 @@ export const AdminDashboard: React.FC = () => {
           iconBg="bg-[#38BDF2]"
           trendColor="text-[#38BDF2]"
         />
+        <HeroCard
+          title="System Commission"
+          value={`₱${totalTicketingFees.toLocaleString()}`}
+          sub="Pure platform profit"
+          icon={<ICONS.Shield />}
+          iconBg="bg-[#38BDF2]"
+          trendColor="text-[#38BDF2]"
+        />
       </div>
 
 
@@ -215,8 +255,8 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex gap-3 h-[260px]">
             {/* Y axis */}
             <div className="flex flex-col justify-between text-[9px] font-bold text-[#1E293B]/30 text-right pr-2 pb-6 pt-1">
-              {[barMax, Math.round(barMax * 0.75), Math.round(barMax * 0.5), Math.round(barMax * 0.25), 0].map(l => (
-                <span key={l}>{l}</span>
+              {[barMax, Math.round(barMax * 0.75), Math.round(barMax * 0.5), Math.round(barMax * 0.25), 0].map((l, i) => (
+                <span key={`y-axis-${l}-${i}`}>{l}</span>
               ))}
             </div>
             {/* Bars */}
@@ -318,8 +358,8 @@ export const AdminDashboard: React.FC = () => {
 
       </div>
 
-      {/* ── Row 4: Recent Transactions & Plans ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      {/* ── Row 4: Activity Command Center ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
 
         {/* Recent Plan Transactions */}
         <Card className="bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm overflow-hidden flex flex-col">
@@ -358,6 +398,11 @@ export const AdminDashboard: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-sm font-black text-[#1E293B]">₱{Number(tx.amount || 0).toLocaleString()}</p>
+                    {tx.kind === 'order' && (
+                        <p className="text-[9px] font-bold text-orange-500 mt-0.5">
+                            Ticketing Cut: ₱{(Number(tx.amount || 0) - Number(tx.netAmount || tx.amount || 0)).toLocaleString()}
+                        </p>
+                    )}
                   </div>
                 </div>
               );
@@ -412,6 +457,52 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </Card>
 
+        {/* Automated Payout History */}
+        <Card className="bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-[#2E2E2F]/5 flex justify-between items-center bg-[#F2F2F2]">
+            <div>
+              <h3 className="text-base font-black text-[#1E293B]">Automated Payout History</h3>
+              <p className="text-[10px] font-bold text-[#1E293B]/40 mt-1">Logs of automated distributions to organizers</p>
+            </div>
+            <ICONS.CreditCard className="w-5 h-5 text-[#38BDF2]" />
+          </div>
+          <div className="divide-y divide-[#2E2E2F]/5 h-full max-h-[500px] overflow-y-auto custom-scrollbar">
+            {payouts.length === 0 && (
+              <div className="p-10 text-center">
+                <p className="text-xs font-bold text-[#1E293B]/40">No payouts logged yet.</p>
+              </div>
+            )}
+            {payouts.map((order, i) => (
+              <div key={order.orderId || i} className="p-5 flex items-center justify-between hover:bg-[#38BDF2]/5 transition-colors">
+                <div className="space-y-1">
+                  <p className="font-black text-sm text-[#1E293B]">{order.metadata?.payout?.payoutDetails?.accountName || order.buyerName || 'Organizer'}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[10px] font-bold text-[#1E293B]/40">
+                      Amount: <span className="text-green-600 font-black">₱{Math.max(0, Number(order.metadata?.payout?.breakdown?.netOrganizerAmount || order.metadata?.payout?.netOrganizerAmount || (Number(order.totalAmount || order.amount || 0) * 0.92 - 15))).toLocaleString()}</span>
+                    </p>
+                    <p className="text-[9px] font-bold text-[#38BDF2]">
+                      System Cut: ₱{(order.metadata?.payout?.breakdown?.platformFee || order.metadata?.payout?.platformFee || 0).toLocaleString()}
+                    </p>
+                    <Badge type={order.metadata?.payout?.status === 'DISTRIBUTED' ? 'success' : 'neutral'} className="text-[8px] px-1.5 py-0.5 uppercase">
+                      {order.metadata?.payout?.status === 'DISTRIBUTED' ? 'Distributed' : 'Processing'}
+                    </Badge>
+                  </div>
+                  <p className="text-[9px] font-bold text-[#1E293B]/30 truncate max-w-[200px]">
+                    Ref: {order.metadata?.payout?.referenceId || `Order #${order.orderId.slice(-6)}`}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[9px] font-black text-[#38BDF2] uppercase tracking-widest">Automatic</p>
+                  <p className="text-[9px] font-bold text-[#1E293B]/20 mt-1">{order.metadata?.payout?.distributedAt ? new Date(order.metadata.payout.distributedAt).toLocaleDateString() : 'Instant'}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="p-4 border-t border-[#2E2E2F]/5 bg-[#F2F2F2]/50 text-center">
+            <p className="text-[10px] font-bold text-[#2E2E2F] italic">Automated distribution tracking active</p>
+          </div>
+        </Card>
+
       </div>
 
       {/* Transaction Detail Modal */}
@@ -434,21 +525,33 @@ export const AdminDashboard: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-[#F2F2F2] rounded-xl border border-[#E0E0E0]">
-                <p className="text-[10px] font-black text-[#1E293B]/30 mb-1">Plan Subscribed</p>
-                <p className="text-sm font-black text-[#1E293B]">{selectedTx.planName || 'Standard Plan'}</p>
+                <p className="text-[10px] font-black text-[#1E293B]/30 mb-1">Source / Event</p>
+                <p className="text-sm font-black text-[#1E293B] truncate">{selectedTx.planName || selectedTx.eventName || 'N/A'}</p>
               </div>
               <div className="p-4 bg-[#F2F2F2] rounded-xl border border-[#E0E0E0]">
-                <p className="text-[10px] font-black text-[#1E293B]/30 mb-1">Amount Paid</p>
-                <p className="text-sm font-black text-[#38BDF2]">₱{Number(selectedTx.amount || 0).toLocaleString()}</p>
+                <p className="text-[10px] font-black text-[#1E293B]/30 mb-1 tracking-tight">Date</p>
+                <p className="text-xs font-black text-[#1E293B]">{new Date(selectedTx.createdAt || selectedTx.created_at).toLocaleString()}</p>
               </div>
-              <div className="p-4 bg-[#F2F2F2] rounded-xl border border-[#E0E0E0]">
-                <p className="text-[10px] font-black text-[#1E293B]/30 mb-1">Date</p>
-                <p className="text-sm font-bold text-[#1E293B]">{new Date(selectedTx.createdAt || selectedTx.created_at).toLocaleString()}</p>
-              </div>
-              <div className="p-4 bg-[#F2F2F2] rounded-xl border border-[#E0E0E0]">
-                <p className="text-[10px] font-black text-[#1E293B]/30 mb-1">Order ID</p>
-                <p className="text-[10px] font-mono font-bold text-[#1E293B]/60 truncate">{selectedTx.orderId || 'N/A'}</p>
-              </div>
+            </div>
+
+            <div className="p-5 bg-white rounded-2xl border border-[#E0E0E0] space-y-4">
+                <div className="flex justify-between items-center text-sm">
+                    <span className="font-bold text-[#1E293B]/50">Gross Amount</span>
+                    <span className="font-black text-[#1E293B]">₱{Number(selectedTx.amount || 0).toLocaleString()}</span>
+                </div>
+                {selectedTx.kind === 'order' && (
+                    <div className="flex justify-between items-center text-sm">
+                        <span className="font-bold text-orange-500">Ticketing Cut</span>
+                        <span className="font-black text-orange-500">- ₱{(Number(selectedTx.amount || 0) - Number(selectedTx.netAmount || selectedTx.amount || 0)).toLocaleString()}</span>
+                    </div>
+                )}
+                <div className="h-px bg-[#F2F2F2]" />
+                <div className="flex justify-between items-center">
+                    <span className="text-base font-black text-[#1E293B]">{selectedTx.kind === 'order' ? 'Organizer Payout' : 'Net Total'}</span>
+                    <span className={`text-xl font-black ${selectedTx.kind === 'order' ? 'text-[#1E293B]' : 'text-[#38BDF2]'}`}>
+                        ₱{Number(selectedTx.netAmount || selectedTx.amount || 0).toLocaleString()}
+                    </span>
+                </div>
             </div>
 
             <div className="p-4 bg-[#F2F2F2] rounded-xl border border-[#E0E0E0]">

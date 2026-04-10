@@ -9,13 +9,35 @@ import { useUser } from '../../context/UserContext';
 import { useToast } from '../../context/ToastContext';
 import QRCode from 'react-qr-code';
 
+const getPayoutInfo = (reg: RegistrationView) => {
+    if (reg.metadata?.payout) {
+        const p = reg.metadata.payout;
+        const b = p.breakdown || {};
+        // Check for both nested breakdown (new) and top-level (legacy)
+        const net = b.netOrganizerAmount ?? p.netOrganizerAmount ?? p.organizer_payout ?? 0;
+        const fee = b.platformFee ?? p.platformFee ?? p.system_cut ?? 0;
+        return {
+            net: Number(net),
+            systemCut: Number(fee),
+            isEstimated: false
+        };
+    }
+    if ((reg.amountPaid ?? 0) <= 0) return { net: 0, systemCut: 0, isEstimated: false };
+    const net = Math.max(0, (reg.amountPaid * 0.92) - 15);
+    const systemCut = Math.max(0, reg.amountPaid - net);
+    return { net, systemCut, isEstimated: true };
+};
+
 const RegistrationMobileCard = React.memo<{
     reg: RegistrationView;
     isCheckedIn: boolean;
     onSelect: () => void;
     onCheckIn: (e: React.MouseEvent) => void;
     canManualCheckIn: boolean;
-}>(({ reg, isCheckedIn, onSelect, onCheckIn, canManualCheckIn }) => (
+    isOrganizer: boolean;
+}>(({ reg, isCheckedIn, onSelect, onCheckIn, canManualCheckIn, isOrganizer }) => {
+    const { net, systemCut } = getPayoutInfo(reg);
+    return (
     <Card
         className="p-5 border-[#2E2E2F]/10 hover:border-[#38BDF2]/40 transition-colors cursor-pointer"
         onClick={onSelect}
@@ -54,8 +76,19 @@ const RegistrationMobileCard = React.memo<{
             </div>
             <div className="flex items-center justify-between pt-1">
                 <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest">Payment</span>
-                    <span className="text-[14px] font-black text-[#2E2E2F]">{reg.currency} {(reg.amountPaid ?? 0).toFixed(2)}</span>
+                    <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest">
+                        {isOrganizer ? 'Net Payout' : 'Amount Paid'}
+                    </span>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-[14px] font-black text-[#2E2E2F]">
+                            {reg.currency} {(isOrganizer ? net : (reg.amountPaid ?? 0)).toFixed(2)}
+                        </span>
+                        {isOrganizer && systemCut > 0 && (
+                            <span className="text-[10px] font-bold text-[#2E2E2F]/40 italic">
+                                Fee: {reg.currency}{systemCut.toFixed(0)}
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
@@ -70,7 +103,8 @@ const RegistrationMobileCard = React.memo<{
             </button>
         )}
     </Card>
-));
+    );
+});
 
 const RegistrationTableRow = React.memo<{
     reg: RegistrationView;
@@ -81,7 +115,10 @@ const RegistrationTableRow = React.memo<{
     onCheckIn: (e: React.MouseEvent) => void;
     actionLoading: boolean;
     canManualCheckIn: boolean;
-}>(({ reg, isCheckedIn, isSelected, onSelect, onToggleRow, onCheckIn, actionLoading, canManualCheckIn }) => (
+    isOrganizer: boolean;
+}>(({ reg, isCheckedIn, isSelected, onSelect, onToggleRow, onCheckIn, actionLoading, canManualCheckIn, isOrganizer }) => {
+    const { net, systemCut } = getPayoutInfo(reg);
+    return (
     <tr
         className={`hover:bg-[#38BDF2]/10 transition-colors cursor-pointer ${isSelected ? 'bg-[#38BDF2]/10' : ''}`}
         onClick={onSelect}
@@ -113,8 +150,12 @@ const RegistrationTableRow = React.memo<{
         </td>
         <td className="px-8 py-6">
             <div className="flex flex-col">
-                <span className="text-[14px] font-bold text-[#2E2E2F]">{reg.currency} {(reg.amountPaid ?? 0).toFixed(2)}</span>
-                <span className="text-[11px] text-[#2E2E2F]/60 font-medium mt-0.5">{reg.attendeePhone || 'N/A'}</span>
+                <span className="text-[14px] font-bold text-[#2E2E2F]">
+                    {reg.currency} {(isOrganizer ? net : (reg.amountPaid ?? 0)).toFixed(2)}
+                </span>
+                <span className="text-[11px] text-[#2E2E2F]/60 font-medium mt-0.5 truncate max-w-[120px]">
+                    {isOrganizer && systemCut > 0 ? `Net (Fee: ${reg.currency}${systemCut.toFixed(0)})` : (reg.attendeePhone || 'N/A')}
+                </span>
             </div>
         </td>
         <td className="px-8 py-6">
@@ -136,7 +177,8 @@ const RegistrationTableRow = React.memo<{
             )}
         </td>
     </tr>
-));
+    );
+});
 
 export const RegistrationsList: React.FC = () => {
   const [regs, setRegs] = useState<RegistrationView[]>([]);
@@ -154,6 +196,7 @@ export const RegistrationsList: React.FC = () => {
   const { role, canManualCheckIn } = useUser();
   const { showToast } = useToast();
   const isStaff = role === UserRole.STAFF;
+  const isOrganizer = role === UserRole.ORGANIZER;
   const eventId = searchParams.get('eventId');
   const itemsPerPage = 10;
   const isServerPaged = !eventId;
@@ -413,6 +456,7 @@ export const RegistrationsList: React.FC = () => {
             onSelect={() => setSelectedReg(reg)}
             onCheckIn={(e) => { e.stopPropagation(); handleCheckIn(reg); }}
             canManualCheckIn={!isStaff || canManualCheckIn}
+            isOrganizer={isOrganizer}
           />
         ))}
       </div>
@@ -463,7 +507,7 @@ export const RegistrationsList: React.FC = () => {
                 <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Attendee</th>
                 <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Ticket Information</th>
                 <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Status</th>
-                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Transaction & Phone</th>
+                <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">{isOrganizer ? 'Net Payout' : 'Transaction & Phone'}</th>
                 <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Registered On</th>
                 <th className="px-8 py-5 text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-right">Operations</th>
               </tr>
@@ -484,6 +528,7 @@ export const RegistrationsList: React.FC = () => {
                   }}
                   actionLoading={isBulkActionLoading || actionLoading === (reg.id || reg.ticketCode)}
                   canManualCheckIn={!isStaff || canManualCheckIn}
+                  isOrganizer={isOrganizer}
                 />
               ))}
             </tbody>
@@ -532,11 +577,29 @@ export const RegistrationsList: React.FC = () => {
                 <div className="space-y-2">
                   <h3 className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.3em] mb-2">Payment & Status</h3>
                   <div className="bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl p-5 grid grid-cols-1 gap-2">
-                    <div className="flex items-center gap-4">
-                      <span className={`px-3 py-1 rounded-xl text-[11px] font-black uppercase tracking-widest ${selectedReg.paymentStatus === 'PAID' ? 'bg-[#38BDF2]/20 text-[#2E2E2F]' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'}`}>{selectedReg.paymentStatus || '—'}</span>
-                      <span className="text-[13px] font-black text-[#2E2E2F]">{selectedReg.currency} {Number(selectedReg.amountPaid ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-4">
+                        <span className={`px-3 py-1 rounded-xl text-[11px] font-black uppercase tracking-widest ${selectedReg.paymentStatus === 'PAID' ? 'bg-[#38BDF2]/20 text-[#2E2E2F]' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'}`}>{selectedReg.paymentStatus || '—'}</span>
+                        <span className="text-[13px] font-black text-[#2E2E2F]">Gross: {selectedReg.currency} {Number(selectedReg.amountPaid ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
+                      
+                      {(() => {
+                        const { net, systemCut } = getPayoutInfo(selectedReg);
+                        return (
+                          <div className="flex flex-col gap-1 border-t border-[#2E2E2F]/10 pt-2 mt-1">
+                            <div className="flex justify-between text-[13px]">
+                                <span className="font-bold text-[#2E2E2F]/60">Platform Fee:</span>
+                                <span className="font-black text-red-500">-{selectedReg.currency} {systemCut.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-[14px]">
+                                <span className="font-black text-[#38BDF2]">Your Net Payout:</span>
+                                <span className="font-black text-[#38BDF2]">{selectedReg.currency} {net.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 mt-2">
                       <span className={`px-3 py-1 rounded-xl text-[11px] font-black uppercase tracking-widest ${selectedReg.status === 'USED' ? 'bg-[#38BDF2]/20 text-[#2E2E2F]' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'}`}>{selectedReg.status}</span>
                       <span className="text-[13px] text-[#2E2E2F] font-bold">Check-in: {formatTimestamp(selectedReg.checkInTimestamp)}</span>
                     </div>

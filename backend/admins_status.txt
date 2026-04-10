@@ -1,0 +1,4 @@
+[dotenv@17.2.3] injecting env (17) from .env -- tip: ???? encrypt with Dotenvx: https://dotenvx.com
+Admin Users:
+- ubeeeyk@gmail.com (df413e5a-f873-4953-8ef5-02fb3bb84246)
+- rovickromasanta.startuplab@gmail.com (d6e6eeaa-c793-44bd-8698-c42044cb0fb1)

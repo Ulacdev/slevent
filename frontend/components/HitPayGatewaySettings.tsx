@@ -72,8 +72,8 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
   const [showApiKey, setShowApiKey] = React.useState(false);
   const [showSalt, setShowSalt] = React.useState(false);
 
-  const [editingApiKey, setEditingApiKey] = React.useState(true);
-  const [editingSalt, setEditingSalt] = React.useState(true);
+  const [editingApiKey, setEditingApiKey] = React.useState(false);
+  const [editingSalt, setEditingSalt] = React.useState(false);
   const { showToast } = useToast();
 
   const hasStoredApiKey = !!storedSettings?.maskedHitpayApiKey;
@@ -119,56 +119,15 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
   const handleSave = async (updatedData?: Partial<FormState>) => {
     const currentData = { ...formData, ...updatedData };
 
-    if (currentData.enabled) {
-      const requiresApiKey = (!hasStoredApiKey || editingApiKey);
-      const requiresSalt = (!hasStoredSalt || editingSalt);
-
-      if (requiresApiKey && !currentData.hitpayApiKey.trim()) {
-        showToast('error', 'API Key is required.');
-        // Rever back the toggle if we were just trying to enable it
-        if (updatedData?.enabled === true) {
-          setFormData(prev => ({ ...prev, enabled: false }));
-        }
-        return;
-      }
-
-      if (requiresSalt && !currentData.hitpaySalt.trim()) {
-        showToast('error', 'Webhook salt is required.');
-        if (updatedData?.enabled === true) {
-          setFormData(prev => ({ ...prev, enabled: false }));
-        }
-        return;
-      }
-    }
-
-    if (!backendReady) {
-      showToast('error', 'Backend not ready. Cannot save securely.');
-      return;
-    }
-
     try {
       setSaving(true);
 
-      // Determine if we need to send new API key/salt values
-      // Always send if there's a non-empty value in the form that differs from stored
-      const apiKeyToSave = currentData.hitpayApiKey.trim() || undefined;
-      const saltToSave = currentData.hitpaySalt.trim() || undefined;
-
-      // Only send the actual values if they have content (new or updated)
       const payload: any = {
         enabled: currentData.enabled,
         mode: currentData.mode,
+        hitpayApiKey: currentData.hitpayApiKey,
+        hitpaySalt: currentData.hitpaySalt,
       };
-
-      // Send API key if user provided one (whether editing or not)
-      if (apiKeyToSave) {
-        payload.hitpayApiKey = apiKeyToSave;
-      }
-
-      // Send salt if user provided one (whether editing or not)
-      if (saltToSave) {
-        payload.hitpaySalt = saltToSave;
-      }
 
       const response = await apiService.updateHitPaySettings(scope, payload);
 
@@ -181,8 +140,8 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
       const nextSettings: HitPaySettings = response.settings || {
         enabled: currentData.enabled,
         mode: currentData.mode,
-        maskedHitpayApiKey: editingApiKey ? maskValue(currentData.hitpayApiKey.trim()) : storedSettings?.maskedHitpayApiKey,
-        maskedHitpaySalt: editingSalt ? maskValue(currentData.hitpaySalt.trim()) : storedSettings?.maskedHitpaySalt,
+        maskedHitpayApiKey: maskValue(currentData.hitpayApiKey.trim()),
+        maskedHitpaySalt: maskValue(currentData.hitpaySalt.trim()),
         isConfigured: currentData.enabled,
         updatedAt: new Date().toISOString(),
       };
@@ -191,7 +150,6 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
       showToast('success', 'Settings saved.');
     } catch (error) {
       showToast('error', extractErrorMessage(error, 'Failed to save settings.'));
-      // Revert toggle on fail
       if (updatedData?.enabled !== undefined) {
         setFormData(prev => ({ ...prev, enabled: !updatedData.enabled }));
       }
@@ -206,7 +164,6 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
 
   const handleModeChange = (val: 'live' | 'sandbox') => {
     setFormData(prev => ({ ...prev, mode: val }));
-    // Removed automatic save on mode change
   };
 
   const renderInput = (
@@ -221,9 +178,6 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
     hasStored: boolean
   ) => {
 
-    const onFocusInput = () => {
-    };
-
     const handleEditClick = () => {
       setIsEditing(true);
       setFormData(prev => ({ ...prev, [field]: '' }));
@@ -234,16 +188,15 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
         <label className="block text-sm font-semibold text-gray-800 mb-1.5">{label}</label>
         <div className="relative group">
           <input
-            type={isEditing ? "text" : (show ? "text" : "password")}
-            value={value || (!isEditing && hasStored ? maskedValue || '' : '')}
+            type={isEditing ? (show ? "text" : "password") : (show ? "text" : "password")}
+            value={isEditing ? value : (hasStored ? (show ? value || '••••••••' : maskedValue || '') : '')}
             onChange={(e) => handleInputChange(field, e.target.value)}
-            onFocus={onFocusInput}
             placeholder={hasStored && !isEditing ? "••••••••••••••••" : "Enter credential..."}
             className={`w-full text-sm font-mono border border-[#2E2E2F]/10 rounded-xl py-2.5 pl-3 pr-10 focus:outline-none focus:border-[#38BDF2] focus:ring-1 focus:ring-[#38BDF2] text-gray-800 transition-colors bg-[#F2F2F2]`}
             disabled={!formData.enabled}
-            readOnly={!isEditing && hasStored}
+            readOnly={!isEditing && hasStored && !show}
           />
-          {!isEditing && hasStored && (
+          {hasStored && !isEditing && (
             <button
               type="button"
               onClick={() => setShow(!show)}
@@ -253,11 +206,20 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
               {show ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
             </button>
           )}
+          {isEditing && (
+            <button
+              type="button"
+              onClick={() => setShow(!show)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+            >
+               {show ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+            </button>
+          )}
         </div>
         {hasStored && !isEditing && formData.enabled && (
-          <p className="mt-1.5 text-[10px] font-black uppercase tracking-widest text-[#38BDF2] cursor-pointer hover:text-[#2E2E2F] transition-colors flex items-center gap-1.5" onClick={handleEditClick}>
+          <p className="mt-1.5 text-[10px] font-black uppercase tracking-widest text-[#38BDF2] cursor-pointer hover:text-gray-600 transition-colors flex items-center gap-1.5" onClick={handleEditClick}>
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-            Edit Credential
+            Edit / Clear Credential
           </p>
         )}
       </div>
@@ -284,7 +246,7 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
           <button
             type="button"
             onClick={() => handleToggle(!formData.enabled)}
-            className={`w-11 h-6 rounded-full flex items-center px-[3px] transition-colors duration-200 ease-in-out focus:outline-none ${formData.enabled ? 'bg-[#3A82F6]' : 'bg-gray-200'}`}
+            className={`w-11 h-6 rounded-full flex items-center px-[3px] transition-colors duration-200 ease-in-out focus:outline-none ${formData.enabled ? 'bg-black' : 'bg-gray-200'}`}
           >
             <div className={`w-[18px] h-[18px] bg-white rounded-full shadow-sm transform transition-transform duration-200 ease-in-out ${formData.enabled ? 'translate-x-[20px]' : 'translate-x-0'}`}></div>
           </button>
@@ -313,8 +275,8 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
                       checked={formData.mode === 'sandbox'}
                       onChange={() => handleModeChange('sandbox')}
                     />
-                    <div className="w-4 h-4 rounded-full border border-gray-300 peer-checked:border-[#38BDF2] flex items-center justify-center transition-colors">
-                      {formData.mode === 'sandbox' && <div className="w-2 h-2 rounded-full bg-[#38BDF2]"></div>}
+                    <div className="w-4 h-4 rounded-full border border-gray-300 peer-checked:border-black flex items-center justify-center transition-colors">
+                      {formData.mode === 'sandbox' && <div className="w-2 h-2 rounded-full bg-black"></div>}
                     </div>
                   </div>
                   Sandbox
@@ -329,8 +291,8 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
                       checked={formData.mode === 'live'}
                       onChange={() => handleModeChange('live')}
                     />
-                    <div className="w-4 h-4 rounded-full border border-gray-300 peer-checked:border-[#38BDF2] flex items-center justify-center transition-colors">
-                      {formData.mode === 'live' && <div className="w-2 h-2 rounded-full bg-[#38BDF2]"></div>}
+                    <div className="w-4 h-4 rounded-full border border-gray-300 peer-checked:border-black flex items-center justify-center transition-colors">
+                      {formData.mode === 'live' && <div className="w-2 h-2 rounded-full bg-black"></div>}
                     </div>
                   </div>
                   Live
@@ -366,11 +328,11 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
         )}
 
         {/* Global Save Button for HitPay Gateway */}
-        <div className="px-6 py-4 bg-[#F2F2F2] border-t border-gray-100 flex justify-end">
+        <div className="px-6 py-5 bg-[#F2F2F2] border-t border-[#2E2E2F]/5 flex justify-end">
           <button
             onClick={() => handleSave()}
             disabled={saving}
-            className="px-5 py-2 bg-[#38BDF2] hover:bg-[#2E2E2F] text-white text-sm font-medium rounded-xl transition-colors shadow-sm disabled:opacity-50"
+            className="px-8 py-3 bg-[#38BDF2] hover:bg-[#2E2E2F] text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Save HitPay Settings'}
           </button>

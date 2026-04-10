@@ -616,3 +616,71 @@ export const getOrderById = async (req, res) => {
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }
 };
+
+// GET /api/orders/managed-payouts - [ADMIN ONLY] Fetch all orders that need managed distribution
+export const getManagedPayouts = async (req, res) => {
+  try {
+    // Only fetch PAID orders that have the payout metadata
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('*, events(eventName, organizerId)')
+      .eq('status', 'PAID')
+      .gt('totalAmount', 0)
+      .not('metadata->payout', 'is', null)
+      .order('created_at', { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+    
+    // Sort logic: We want to find orders where metadata->payout->isManaged is true
+    const managedOrders = (orders || []).filter(o => o.metadata?.payout?.isManaged === true);
+
+    return res.status(200).json({ items: managedOrders, count: managedOrders.length });
+  } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};
+
+// PATCH /api/orders/:orderId/payout-status - [ADMIN ONLY] Mark a payout as distributed
+export const updatePayoutStatus = async (req, res) => {
+  const { orderId } = req.params;
+  const { status, referenceId, notes } = req.body; // status: 'DISTRIBUTED' | 'PENDING'
+
+  try {
+    const { data: order, error: fetchErr } = await supabase
+      .from('orders')
+      .select('metadata')
+      .eq('orderId', orderId)
+      .maybeSingle();
+
+    if (fetchErr) return res.status(500).json({ error: fetchErr.message });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+
+    const metadata = order.metadata || {};
+    if (!metadata.payout) {
+      return res.status(400).json({ error: 'Order is not a managed payout' });
+    }
+
+    metadata.payout.status = status || 'DISTRIBUTED';
+    metadata.payout.distributedAt = new Date().toISOString();
+    metadata.payout.distributionReference = referenceId || null;
+    metadata.payout.distributionNotes = notes || null;
+
+    const { error: updErr } = await supabase
+      .from('orders')
+      .update({ metadata })
+      .eq('orderId', orderId);
+
+    if (updErr) return res.status(500).json({ error: updErr.message });
+
+    await logAudit({
+        actionType: 'PAYOUT_DISTRIBUTED',
+        orderId,
+        details: { status, referenceId },
+        req
+    });
+
+    return res.status(200).json({ message: 'Payout status updated', status: metadata.payout.status || 'DISTRIBUTED' });
+  } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
+  }
+};

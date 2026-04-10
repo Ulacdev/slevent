@@ -1927,6 +1927,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
         {isLanding && <FAQSection />}
       </div>
 
+
       {/* Modern Announcement Modal */}
       <Modal
         isOpen={showAnnouncement}
@@ -2236,8 +2237,3 @@ const FeaturedOrganizers: React.FC = () => {
     </section>
   );
 };
-
-
-
-
-
