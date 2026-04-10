@@ -189,15 +189,11 @@ export const createHitpayCheckoutSession = async (req, res) => {
     if (credentials.isManaged) {
         const total = Number(order.totalAmount);
         
-        // Accurate deduction logic:
-        // 1. System/Platform Fee (e.g. 5%)
-        const platformFee = Math.round(total * 0.05 * 100) / 100;
-        
-        // 2. Processing Fee (HitPay Estimate: e.g. 3% + ₱15 for standard card)
-        const processingFee = Math.round((total * 0.03 + 15) * 100) / 100;
+        // 2. Processing Fee (HitPay Estimate: 2.3%)
+        const processingFee = Math.round((total * 0.023) * 100) / 100;
         
         // 3. Organizer's Net Home Pay
-        const netAmount = Math.max(0, Math.round((total - platformFee - processingFee) * 100) / 100);
+        const netAmount = Math.max(0, Math.round((total - processingFee) * 100) / 100);
 
         updatedMetadata.payout = {
             isManaged: true,
@@ -1214,48 +1210,56 @@ async function triggerAutomaticPayout(order, credentials, req) {
       console.log('[Auto-Payout][SANDBOX] Simulating instant transfer...');
       payoutResult = { status: 'success', reference: payoutReference };
     } else {
-      console.log(`[Auto-Payout][LIVE] Initiating HitPay Transfer to ${details.method || 'unknown'}...`);
-      
-      const payoutMethodMap = {
-        'gcash': 'gcash',
-        'maya': 'paymaya',
-        'bank_transfer': 'bank_transfer',
-        'bank': 'bank_transfer'
-      };
+      const methodKey = String(details.method).toLowerCase();
+      const isManualMethod = ['gcash', 'maya', 'bank_transfer', 'bank'].includes(methodKey);
 
-      const payload = {
-        source_currency: 'php',
-        payment_amount: Number(netAmount.toFixed(2)),
-        reference: payoutReference,
-        beneficiary: {
-          country: 'ph',
-          transfer_method: payoutMethodMap[String(details.method).toLowerCase()] || 'gcash',
-          transfer_type: 'local',
-          currency: 'php',
-          holder_type: 'individual',
-          holder_name: details.accountName || 'Organizer',
-          account_number: details.accountNumber || ''
-        }
-      };
+      if (isManualMethod) {
+          console.log(`[Auto-Payout] Method ${methodKey} is currently set to MANUAL. Skipping HitPay API transfer but logging as successful.`);
+          payoutResult = { status: 'success', reference: payoutReference, note: 'Manual/Internal distribution' };
+      } else {
+          console.log(`[Auto-Payout][LIVE] Initiating HitPay Transfer to ${details.method || 'unknown'}...`);
+          
+          const payoutMethodMap = {
+            'gcash': 'gcash',
+            'maya': 'paymaya',
+            'bank_transfer': 'bank_transfer',
+            'bank': 'bank_transfer'
+          };
 
-      const response = await fetch(`${hitpayApiUrl}/v1/transfers`, {
-        method: 'POST',
-        headers: {
-          'X-BUSINESS-API-KEY': credentials.apiKey,
-          'X-Requested-With': 'XMLHttpRequest',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
+          const payload = {
+            source_currency: 'php',
+            payment_amount: Number(netAmount.toFixed(2)),
+            reference: payoutReference,
+            beneficiary: {
+              country: 'ph',
+              transfer_method: payoutMethodMap[methodKey] || 'gcash',
+              transfer_type: 'local',
+              currency: 'php',
+              holder_type: 'individual',
+              holder_name: details.accountName || 'Organizer',
+              account_number: details.accountNumber || ''
+            }
+          };
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(`HitPay Transfer Error: ${data.message || response.statusText}`);
+          const response = await fetch(`${hitpayApiUrl}/v1/transfers`, {
+            method: 'POST',
+            headers: {
+              'X-BUSINESS-API-KEY': credentials.apiKey,
+              'X-Requested-With': 'XMLHttpRequest',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(`HitPay Transfer Error: ${data.message || response.statusText}`);
+          }
+          
+          payoutResult = data;
+          console.log('[Auto-Payout][LIVE] HitPay Payout response:', data);
       }
-      
-      payoutResult = data;
-      console.log('[Auto-Payout][LIVE] HitPay Payout response:', data);
     }
 
     const updatedMetadata = { 

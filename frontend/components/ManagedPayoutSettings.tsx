@@ -1,6 +1,6 @@
 import React from 'react';
 import { ICONS } from '../constants';
-import { GcashIcon, MayaIcon, BankIcon } from './PayoutLogos';
+import { BankIcon } from './PayoutLogos';
 import { apiService } from '../services/apiService';
 import { useToast } from '../context/ToastContext';
 
@@ -10,19 +10,14 @@ const AlertCircleIcon = (props: any) => (
 
 const BANK_OPTIONS = [
   'BDO Unibank', 'BPI', 'Metrobank', 'Landbank', 'UnionBank',
-  'Security Bank', 'PNB', 'China Bank', 'EastWest Bank', 'RCBC', 'Digital Bank (Maya/GCash/etc)'
+  'Security Bank', 'PNB', 'China Bank', 'EastWest Bank', 'RCBC', 'Other Bank'
 ];
 
 export const ManagedPayoutSettings: React.FC = () => {
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [isManaged, setIsManaged] = React.useState(false);
-  const [method, setMethod] = React.useState<'GCASH' | 'MAYA' | 'BANK' | null>(null);
-  
-  // Independent data for each "Wallet"
-  const [gcashDetails, setGcashDetails] = React.useState({ accountName: '', accountNumber: '' });
-  const [mayaDetails, setMayaDetails] = React.useState({ accountName: '', accountNumber: '' });
-  const [bankDetails, setBankDetails] = React.useState({ accountName: '', accountNumber: '', bankName: '' });
+  const [payoutDetails, setPayoutDetails] = React.useState({ accountName: '', accountNumber: '', bankName: '' });
 
   const { showToast } = useToast();
 
@@ -32,20 +27,11 @@ export const ManagedPayoutSettings: React.FC = () => {
         setLoading(true);
         const settings = await apiService.getPayoutSettings() as any;
         setIsManaged(settings.isManaged);
-        setMethod(settings.method);
-        
-        // Load independent data if available
-        if (settings.gcash) setGcashDetails(settings.gcash);
-        if (settings.maya) setMayaDetails(settings.maya);
-        if (settings.bank) setBankDetails(settings.bank);
-
-        // Fallback for legacy single-field data
-        if (settings.method === 'GCASH' && !settings.gcash) {
-           setGcashDetails({ accountName: (settings as any).accountName || '', accountNumber: (settings as any).accountNumber || '' });
-        } else if (settings.method === 'MAYA' && !settings.maya) {
-           setMayaDetails({ accountName: (settings as any).accountName || '', accountNumber: (settings as any).accountNumber || '' });
-        } else if (settings.method === 'BANK' && !settings.bank) {
-           setBankDetails({ accountName: (settings as any).accountName || '', accountNumber: (settings as any).accountNumber || '', bankName: (settings as any).bankName || '' });
+        if (settings.gcash) setPayoutDetails(settings.gcash);
+        else if (settings.maya) setPayoutDetails(settings.maya);
+        else if (settings.bank) setPayoutDetails(settings.bank);
+        else {
+           setPayoutDetails({ accountName: (settings as any).accountName || '', accountNumber: (settings as any).accountNumber || '', bankName: (settings as any).bankName || '' });
         }
       } catch (error) {
         console.error('Failed to load payout settings:', error);
@@ -55,23 +41,14 @@ export const ManagedPayoutSettings: React.FC = () => {
     };
     loadPayoutSettings();
   }, []);
-
   const handleSave = async () => {
-    const currentDetails = method === 'GCASH' ? gcashDetails : method === 'MAYA' ? mayaDetails : bankDetails;
-
     try {
       setSaving(true);
       await apiService.updatePayoutSettings({
         isManaged,
-        method,
-        // Send everyone's details so we save all "Wallets"
-        gcash: gcashDetails,
-        maya: mayaDetails,
-        bank: bankDetails,
-        // Legacy support
-        accountName: currentDetails.accountName,
-        accountNumber: currentDetails.accountNumber,
-        bankName: method === 'BANK' ? bankDetails.bankName : null
+        accountName: payoutDetails.accountName,
+        accountNumber: payoutDetails.accountNumber,
+        bankName: payoutDetails.bankName
       });
       showToast('success', 'Payout settings updated successfully.');
     } catch (error: any) {
@@ -94,7 +71,7 @@ export const ManagedPayoutSettings: React.FC = () => {
             <ICONS.CreditCard className="w-5 h-5 text-gray-700" />
             <div className="flex flex-col">
               <span className="font-bold text-gray-800 text-sm">StartupLab Managed Payouts</span>
-              <span className="text-[10px] text-gray-500 font-medium">Earn through GCash, Maya, or Bank</span>
+              <span className="text-[10px] text-gray-500 font-medium">Configure where you want to receive your funds</span>
             </div>
           </div>
 
@@ -115,130 +92,46 @@ export const ManagedPayoutSettings: React.FC = () => {
                 <p className="text-sm text-black font-bold">How it works</p>
                 <p className="text-xs text-black/70 font-medium leading-relaxed">
                   Attendees pay through StartupLab's gateway. We collect the funds and send them to your provided account after the event. 
-                  <span className="block mt-2 font-black text-black uppercase tracking-tight text-[10px]">Managed payouts are subject to a 5% platform fee.</span>
                 </p>
               </div>
             </div>
 
             <div className="space-y-4">
-              <label className="block text-sm font-semibold text-gray-800 tracking-tight">Select Payout Method</label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { 
-                    id: 'GCASH', 
-                    name: 'GCash', 
-                    component: <GcashIcon className="w-20 h-20" /> 
-                  },
-                  { 
-                    id: 'MAYA', 
-                    name: 'Maya', 
-                    component: <MayaIcon className="w-20 h-20" />
-                  },
-                  { 
-                    id: 'BANK', 
-                    name: 'Bank Transfer', 
-                    component: <BankIcon className="w-20 h-20" /> 
-                  }
-                ].map((item: any) => {
-                  const isActive = method === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setMethod(item.id as any)}
-                      className={`relative flex flex-col items-center justify-center p-8 rounded-xl border-4 transition-all min-h-[160px] ${
-                        isActive 
-                          ? 'border-[#38BDF2] bg-[#F2F2F2] shadow-2xl scale-[1.05] z-10' 
-                          : 'border-[#2E2E2F]/5 bg-[#F2F2F2] hover:border-gray-300 opacity-60'
-                      }`}
-                    >
-                      {/* Selection Indicator Badge */}
-                      {isActive && (
-                        <div className="absolute top-2 right-2 bg-[#38BDF2]/20 text-[#38BDF2] text-[9px] font-black px-2.5 py-1 rounded shadow-sm border border-[#38BDF2]/30 flex items-center gap-1 animate-in zoom-in duration-300">
-                          <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" />
-                          </svg>
-                          ACTIVE
-                        </div>
-                      )}
-
-                      <div className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'} flex flex-col items-center gap-4`}>
-                        <div className={
-                           item.id === 'BANK' 
-                             ? isActive 
-                               ? 'text-black' 
-                               : 'text-[#2E2E2F]'
-                             : ''
-                         }>
-                          {item.component}
-                       </div>
-                       <span className={`text-[10px] font-black uppercase tracking-widest ${isActive ? 'text-black' : 'text-[#2E2E2F]/40'}`}>
-                         {item.name}
-                       </span>
-                    </div>
-                  </button>
-                  );
-                })}
-              </div>
+               <label className="block text-sm font-semibold text-gray-800 tracking-tight text-center">Payout Account Details</label>
             </div>
 
-            {method && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                {method === 'BANK' && (
-                  <div className="md:col-span-2 space-y-1.5">
-                    <label className="block text-xs font-black text-black uppercase tracking-wider">Bank Name</label>
-                    <select
-                      value={bankDetails.bankName}
-                      onChange={(e) => setBankDetails({ ...bankDetails, bankName: e.target.value })}
-                      className="w-full text-sm font-medium border border-[#2E2E2F]/20 rounded-xl py-3 px-4 focus:outline-none focus:border-[#2E2E2F] focus:ring-1 focus:ring-[#2E2E2F] text-black transition-all bg-[#F2F2F2]"
-                    >
-                      <option value="">Select Bank...</option>
-                      {BANK_OPTIONS.map(bank => <option key={bank} value={bank}>{bank}</option>)}
-                    </select>
-                  </div>
-                )}
+                <div className="md:col-span-2 space-y-1.5">
+                  <label className="block text-xs font-black text-black uppercase tracking-wider">Bank or E-Wallet Name</label>
+                  <input
+                    type="text"
+                    value={payoutDetails.bankName}
+                    onChange={(e) => setPayoutDetails({ ...payoutDetails, bankName: e.target.value })}
+                    placeholder="e.g. BDO, UnionBank, Digital Bank"
+                    className="w-full text-sm font-medium border border-[#2E2E2F]/20 rounded-xl py-3 px-4 focus:outline-none focus:border-[#2E2E2F] focus:ring-1 focus:ring-[#2E2E2F] text-black transition-all bg-[#F2F2F2]"
+                  />
+                </div>
                 <div className="space-y-1.5">
                   <label className="block text-xs font-black text-black uppercase tracking-wider">Account Name</label>
                   <input
                     type="text"
-                    value={
-                      method === 'GCASH' ? gcashDetails.accountName : 
-                      method === 'MAYA' ? mayaDetails.accountName : 
-                      bankDetails.accountName
-                    }
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (method === 'GCASH') setGcashDetails({ ...gcashDetails, accountName: val });
-                      else if (method === 'MAYA') setMayaDetails({ ...mayaDetails, accountName: val });
-                      else setBankDetails({ ...bankDetails, accountName: val });
-                    }}
+                    value={payoutDetails.accountName}
+                    onChange={(e) => setPayoutDetails({ ...payoutDetails, accountName: e.target.value })}
                     placeholder="Enter full name"
                     className="w-full text-sm font-medium border border-[#2E2E2F]/20 rounded-xl py-3 px-4 focus:outline-none focus:border-[#2E2E2F] focus:ring-1 focus:ring-[#2E2E2F] text-black transition-all bg-[#F2F2F2]"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-black text-black uppercase tracking-wider">
-                    {method === 'BANK' ? 'Account Number' : 'Mobile Number'}
-                  </label>
+                  <label className="block text-xs font-black text-black uppercase tracking-wider">Account / Mobile Number</label>
                   <input
                     type="text"
-                    value={
-                      method === 'GCASH' ? gcashDetails.accountNumber : 
-                      method === 'MAYA' ? mayaDetails.accountNumber : 
-                      bankDetails.accountNumber
-                    }
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (method === 'GCASH') setGcashDetails({ ...gcashDetails, accountNumber: val });
-                      else if (method === 'MAYA') setMayaDetails({ ...mayaDetails, accountNumber: val });
-                      else setBankDetails({ ...bankDetails, accountNumber: val });
-                    }}
-                    placeholder={method === 'BANK' ? "0000 0000 00" : "0917 XXX XXXX"}
+                    value={payoutDetails.accountNumber}
+                    onChange={(e) => setPayoutDetails({ ...payoutDetails, accountNumber: e.target.value })}
+                    placeholder="Enter account number"
                     className="w-full text-sm font-mono border border-[#2E2E2F]/20 rounded-xl py-3 px-4 focus:outline-none focus:border-[#2E2E2F] focus:ring-1 focus:ring-[#2E2E2F] text-black transition-all bg-[#F2F2F2]"
                   />
                 </div>
               </div>
-            )}
           </div>
         )}
 

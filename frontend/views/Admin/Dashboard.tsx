@@ -193,7 +193,7 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* ── Row 1: Hero Stats ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <HeroCard
           title="Total Organizers"
           value={totalOrganizers}
@@ -226,14 +226,7 @@ export const AdminDashboard: React.FC = () => {
           iconBg="bg-[#38BDF2]"
           trendColor="text-[#38BDF2]"
         />
-        <HeroCard
-          title="System Commission"
-          value={`₱${totalTicketingFees.toLocaleString()}`}
-          sub="Pure platform profit"
-          icon={<ICONS.Shield />}
-          iconBg="bg-[#38BDF2]"
-          trendColor="text-[#38BDF2]"
-        />
+
       </div>
 
 
@@ -359,7 +352,7 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* ── Row 4: Activity Command Center ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
         {/* Recent Plan Transactions */}
         <Card className="bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm overflow-hidden flex flex-col">
@@ -457,54 +450,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </Card>
 
-        {/* Automated Payout History */}
-        <Card className="bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-[#2E2E2F]/5 flex justify-between items-center bg-[#F2F2F2]">
-            <div>
-              <h3 className="text-base font-black text-[#1E293B]">Automated Payout History</h3>
-              <p className="text-[10px] font-bold text-[#1E293B]/40 mt-1">Logs of automated distributions to organizers</p>
-            </div>
-            <ICONS.CreditCard className="w-5 h-5 text-[#38BDF2]" />
-          </div>
-          <div className="divide-y divide-[#2E2E2F]/5 h-full max-h-[500px] overflow-y-auto custom-scrollbar">
-            {payouts.length === 0 && (
-              <div className="p-10 text-center">
-                <p className="text-xs font-bold text-[#1E293B]/40">No payouts logged yet.</p>
-              </div>
-            )}
-            {payouts.map((order, i) => (
-              <div key={order.orderId || i} className="p-5 flex items-center justify-between hover:bg-[#38BDF2]/5 transition-colors">
-                <div className="space-y-1">
-                  <p className="font-black text-sm text-[#1E293B]">{order.metadata?.payout?.payoutDetails?.accountName || order.buyerName || 'Organizer'}</p>
-                  <div className="flex items-center gap-2">
-                    <p className="text-[10px] font-bold text-[#1E293B]/40">
-                      Amount: <span className="text-green-600 font-black">₱{Math.max(0, Number(order.metadata?.payout?.breakdown?.netOrganizerAmount || order.metadata?.payout?.netOrganizerAmount || (Number(order.totalAmount || order.amount || 0) * 0.92 - 15))).toLocaleString()}</span>
-                    </p>
-                    <p className="text-[9px] font-bold text-[#38BDF2]">
-                      System Cut: ₱{(order.metadata?.payout?.breakdown?.platformFee || order.metadata?.payout?.platformFee || 0).toLocaleString()}
-                    </p>
-                    <Badge 
-                      type={order.metadata?.payout?.status === 'DISTRIBUTED' ? 'success' : order.metadata?.payout?.status === 'FAILED' ? 'danger' : 'neutral'} 
-                      className="text-[8px] px-1.5 py-0.5 uppercase"
-                    >
-                      {order.metadata?.payout?.status === 'DISTRIBUTED' ? 'Distributed' : order.metadata?.payout?.status === 'FAILED' ? 'Failed' : 'Pending'}
-                    </Badge>
-                  </div>
-                  <p className="text-[9px] font-bold text-[#1E293B]/30 truncate max-w-[200px]">
-                    Ref: {order.metadata?.payout?.referenceId || `Order #${order.orderId.slice(-6)}`}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[9px] font-black text-[#38BDF2] uppercase tracking-widest">Automatic</p>
-                  <p className="text-[9px] font-bold text-[#1E293B]/20 mt-1">{order.metadata?.payout?.distributedAt ? new Date(order.metadata.payout.distributedAt).toLocaleDateString() : 'Instant'}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="p-4 border-t border-[#2E2E2F]/5 bg-[#F2F2F2]/50 text-center">
-            <p className="text-[10px] font-bold text-[#2E2E2F] italic">Automated distribution tracking active</p>
-          </div>
-        </Card>
+
 
       </div>
 

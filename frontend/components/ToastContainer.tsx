@@ -4,87 +4,131 @@ import { ICONS } from '../constants';
 
 // Animation keyframes as inline styles
 const toastStyles = `
-  @keyframes slideIn {
-    0% { transform: translateX(120%); opacity: 0; }
-    100% { transform: translateX(0); opacity: 1; }
+  @keyframes toastEnter {
+    0% { transform: translateX(100%) scale(0.9); opacity: 0; }
+    100% { transform: translateX(0) scale(1); opacity: 1; }
   }
-  @keyframes bounceIn {
-    0% { transform: scale(0); opacity: 0; }
-    50% { transform: scale(1.3); }
-    100% { transform: scale(1); opacity: 1; }
+  @keyframes toastExit {
+    0% { transform: translateX(0) scale(1); opacity: 1; }
+    100% { transform: translateX(100%) scale(0.9); opacity: 0; }
+  }
+  .toast-blur {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
 `;
 
 export const ToastContainer: React.FC = () => {
   const { toasts, removeToast } = useToast();
 
-  console.log('📺 ToastContainer rendering. Count:', toasts.length, toasts);
-
   if (!toasts.length) return null;
 
   return (
     <>
       <style>{toastStyles}</style>
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          style={{
-            position: 'fixed',
-            top: '16px',
-            right: '16px',
-            zIndex: 999999,
-            width: '360px',
-            maxWidth: 'calc(100% - 32px)',
-            animation: 'slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
-            backgroundColor: toast.type === 'success' ? '#22c55e' : toast.type === 'error' ? '#ef4444' : '#3b82f6',
-            borderColor: toast.type === 'success' ? '#16a34a' : toast.type === 'error' ? '#dc2626' : '#2563eb',
-            color: '#FFFFFF',
-            borderWidth: '2px',
-            borderStyle: 'solid',
-            borderRadius: '16px',
-            padding: '16px 20px',
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '12px',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          }}
-        >
-          <div
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              backgroundColor: toast.type === 'success' ? '#16a34a' : toast.type === 'error' ? '#dc2626' : '#2563eb',
-              color: 'white',
-              animation: 'bounceIn 0.6s cubic-bezier(0.68, -0.6, 0.32, 1.6) forwards',
-              animationDelay: '0.15s',
-            }}
-          >
-            {toast.type === 'success' ? <ICONS.CheckCircle style={{ width: 24, height: 24 }} /> : toast.type === 'error' ? <ICONS.XCircle style={{ width: 24, height: 24 }} /> : <ICONS.Info style={{ width: 24, height: 24 }} />}
-          </div>
-          <div style={{ flex: 1, fontSize: '14px', fontWeight: 600, lineHeight: 1.4 }}>{toast.message}</div>
-          <button
-            onClick={() => removeToast(toast.id)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '20px',
-              fontWeight: 'bold',
-              opacity: 0.6,
-              color: 'inherit',
-              padding: 0,
-              lineHeight: 1,
-            }}
-          >
-            ×
-          </button>
-        </div>
-      ))}
+      <div
+        id="toast-container"
+        style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          pointerEvents: 'none',
+          zIndex: 9999999,
+          gap: '12px',
+        }}
+      >
+        {toasts.map((toast) => {
+          const isError = toast.type === 'error';
+          const isSuccess = toast.type === 'success';
+
+          return (
+            <div
+              key={toast.id}
+              role="alert"
+              className="toast-blur"
+              style={{
+                pointerEvents: 'auto',
+                width: '380px',
+                maxWidth: '92vw',
+                backgroundColor: 'rgba(254, 242, 242, 0.95)',
+                border: `1px solid ${isError ? 'rgba(239, 68, 68, 0.4)' : isSuccess ? 'rgba(34, 197, 94, 0.4)' : 'rgba(56, 189, 242, 0.4)'}`,
+                borderLeft: `4px solid ${isError ? '#EF4444' : isSuccess ? '#22C55E' : '#38BDF2'}`,
+                borderRadius: '12px',
+                padding: '12px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                boxShadow: '0 15px 30px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
+                animation: 'toastEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                position: 'relative',
+                transition: 'all 0.4s ease',
+              }}
+            >
+              <div
+                style={{
+                  flexShrink: 0,
+                  color: isError ? '#EF4444' : isSuccess ? '#10B981' : '#3B82F6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {isError ? (
+                  <ICONS.AlertCircle style={{ width: 24, height: 24 }} strokeWidth={2.5} />
+                ) : isSuccess ? (
+                  <ICONS.CheckCircle style={{ width: 24, height: 24 }} strokeWidth={2.5} />
+                ) : (
+                  <ICONS.Info style={{ width: 24, height: 24 }} strokeWidth={2.5} />
+                )}
+              </div>
+
+              <div
+                style={{
+                  flex: 1,
+                  color: isError ? '#991B1B' : isSuccess ? '#166534' : '#075985',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  lineHeight: 1.4,
+                  wordBreak: 'break-word',
+                  letterSpacing: '0.01em',
+                }}
+              >
+                {toast.message}
+              </div>
+
+              <button
+                onClick={() => removeToast(toast.id)}
+                aria-label="Close"
+                style={{
+                  flexShrink: 0,
+                  color: '#9CA3AF',
+                  padding: '4px',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'background-color 0.2s, color 0.2s',
+                  cursor: 'pointer',
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)';
+                  e.currentTarget.style.color = '#4B5563';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#9CA3AF';
+                }}
+              >
+                <ICONS.X style={{ width: 20, height: 20 }} />
+              </button>
+            </div>
+          );
+        })}
+      </div>
     </>
   );
 };
+

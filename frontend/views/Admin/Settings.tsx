@@ -9,6 +9,7 @@ import { AdminPaymentSettings } from './AdminPaymentSettings';
 import { SubscriptionPlans } from './SubscriptionPlans';
 import { SupportTickets } from './SupportTickets';
 import { useUser } from '../../context/UserContext';
+import { useToast } from '../../context/ToastContext';
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
@@ -52,17 +53,19 @@ export const SettingsView: React.FC = () => {
   const handleSaveName = async () => {
     try {
       await apiService.updateProfile({ name: userName });
-      setNotification({ message: 'Name updated successfully.', type: 'success' });
+      showToast('success', 'Name updated successfully.');
     } catch (err: any) {
-      setNotification({ message: err.message || 'Failed to update name.', type: 'error' });
+      showToast('error', err.message || 'Failed to update name.');
     }
   };
 
-  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  // Removed local notification state in favor of global useToast
+  // const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeSubTab, setActiveSubTab] = useState<'directory' | 'permissions'>('directory');
 
   const { role } = useUser();
+  const { showToast } = useToast();
 
   const TABS = role === UserRole.STAFF ? [
     { id: 'profile', label: 'Profile & Security', description: 'Personal security' }
@@ -98,9 +101,9 @@ export const SettingsView: React.FC = () => {
         body: JSON.stringify({ email: adminEmail })
       });
       if (!res.ok) throw new Error('Failed to send reset email');
-      setNotification({ message: 'Password reset email sent!', type: 'success' });
+      showToast('success', 'Password reset email sent!');
     } catch (err: any) {
-      setNotification({ message: err.message || 'Failed to send reset email.', type: 'error' });
+      showToast('error', err.message || 'Failed to send reset email.');
     } finally {
       setPasswordLoading(false);
     }
@@ -245,9 +248,9 @@ export const SettingsView: React.FC = () => {
     try {
       await apiService.updateUserStatus(userId, newStatus);
       setTeamMembers(prev => prev.map(m => m.id === userId ? { ...m, status: newStatus as any } : m));
-      setNotification({ message: `Account status for user ${userId} updated to ${newStatus}.`, type: 'success' });
+      showToast('success', `Account status for user ${userId} updated to ${newStatus}.`);
     } catch (err: any) {
-      setNotification({ message: err.message || 'Failed to update account status.', type: 'error' });
+      showToast('error', err.message || 'Failed to update account status.');
     }
   };
 
@@ -279,7 +282,7 @@ export const SettingsView: React.FC = () => {
     setTeamMembers(prev => [...prev, newMember]);
     setInviteData({ email: '', role: 'STAFF', perspective: UserRole.STAFF, permissions: ['view_events'] });
     setIsInviteModalOpen(false);
-    setNotification({ message: 'Invitation sent successfully.', type: 'success' });
+    showToast('success', 'Invitation sent successfully.');
   };
 
   const PermissionShield: React.FC<{ active?: boolean, onClick?: () => void, disabled?: boolean, iconType?: 'shield' | 'bell' }> = ({ active = false, onClick, disabled = false, iconType = 'shield' }) => (
@@ -305,17 +308,7 @@ export const SettingsView: React.FC = () => {
 
   return (
     <div className="pb-16 space-y-6">
-      {notification && (
-        <div className={`fixed top-10 right-10 z-[2000] p-5 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-top border-2 flex items-center gap-4 ${
-          notification.type === 'success' ? 'bg-[#22C55E] border-[#22C55E]/20 text-[#F2F2F2]' : 'bg-red-500 border-red-500/20 text-[#F2F2F2]'
-        }`}>
-            <div className={`p-2 rounded-xl ${notification.type === 'success' ? 'bg-white/20 text-white' : 'bg-white/20 text-white'}`}>
-              {notification.type === 'success' ? <ICONS.CheckCircle className="w-5 h-5" /> : <ICONS.Layout className="w-5 h-5" />}
-            </div>
-            <p className="font-black text-sm tracking-tight">{notification.message}</p>
-            <button onClick={() => setNotification(null)} className="ml-4 text-white/50 hover:text-white text-xl font-black transition-colors">&times;</button>
-        </div>
-      )}
+      {/* Local notification JSX removed */}
       <div className="px-2 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">{activeTabMeta.label}</h1>
@@ -489,7 +482,7 @@ export const SettingsView: React.FC = () => {
           </div>
         )}
         {activeTab === 'plans' && <SubscriptionPlans />}
-        {activeTab === 'email' && <AdminEmailSettings setNotification={setNotification} />}
+        {activeTab === 'email' && <AdminEmailSettings />}
         {activeTab === 'payments' && <AdminPaymentSettings />}
         {activeTab === 'support' && <SupportTickets />}
         {activeTab === 'profile' && (
@@ -586,7 +579,8 @@ export const SettingsView: React.FC = () => {
   );
 };
 
-const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotification }) => {
+const AdminEmailSettings: React.FC = () => {
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -621,6 +615,7 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
     loadSettings();
   }, []);
 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -630,9 +625,9 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
     try {
       setSaving(true);
       await apiService.updateSmtpSettings(formData);
-      setNotification({ message: 'Email settings saved successfully!', type: 'success' });
+      showToast('success', 'Email settings saved successfully!');
     } catch (err: any) {
-      setNotification({ message: err.message || 'Failed to save settings', type: 'error' });
+      showToast('error', err.message || 'Failed to save settings');
     } finally {
       setSaving(false);
     }
@@ -640,15 +635,15 @@ const AdminEmailSettings: React.FC<{ setNotification: any }> = ({ setNotificatio
 
   const handleTest = async () => {
     if (!testRecipient) {
-      setNotification({ message: 'Please enter a recipient email for the test.', type: 'error' });
+      showToast('error', 'Please enter a recipient email for the test.');
       return;
     }
     try {
       setTesting(true);
       await apiService.testSmtpSettings({ ...formData, recipientEmail: testRecipient });
-      setNotification({ message: 'Test email sent! Please check your inbox.', type: 'success' });
+      showToast('success', 'Test email sent! Please check your inbox.');
     } catch (err: any) {
-      setNotification({ message: err.message || 'SMTP test failed.', type: 'error' });
+      showToast('error', err.message || 'SMTP test failed.');
     } finally {
       setTesting(false);
     }

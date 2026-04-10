@@ -584,16 +584,18 @@ export const RegistrationsList: React.FC = () => {
                       </div>
                       
                       {(() => {
-                        const { net, systemCut } = getPayoutInfo(selectedReg);
+                        const b = selectedReg.metadata?.payout?.breakdown;
+                        const net = b?.netOrganizerAmount ?? selectedReg.amountPaid;
+                        const fee = b?.processingFee ?? (Number(selectedReg.amountPaid || 0) * 0.023);
                         return (
                           <div className="flex flex-col gap-1 border-t border-[#2E2E2F]/10 pt-2 mt-1">
                             <div className="flex justify-between text-[13px]">
-                                <span className="font-bold text-[#2E2E2F]/60">Platform Fee:</span>
-                                <span className="font-black text-red-500">-{selectedReg.currency} {systemCut.toFixed(2)}</span>
+                                <span className="font-bold text-[#2E2E2F]/60">Gateway Processing:</span>
+                                <span className="font-black text-red-500">-{selectedReg.currency} {Number(fee).toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between text-[14px]">
-                                <span className="font-black text-[#38BDF2]">Your Net Payout:</span>
-                                <span className="font-black text-[#38BDF2]">{selectedReg.currency} {net.toFixed(2)}</span>
+                                <span className="font-black text-[#38BDF2]">Predicted Payout:</span>
+                                <span className="font-black text-[#38BDF2]">{selectedReg.currency} {Number(net).toFixed(2)}</span>
                             </div>
                           </div>
                         );

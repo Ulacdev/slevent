@@ -6,6 +6,7 @@ import { Event, UserRole, TicketType, RegistrationView, EventStatus, Ticket } fr
 import { Card, Badge, Button, Modal, Input, PageLoader } from '../../components/Shared';
 import { OnsiteLocationAssistant } from '../../components/OnsiteLocationAssistant';
 import { ICONS } from '../../constants';
+import { useToast } from '../../context/ToastContext';
 import { useUser } from '../../context/UserContext';
 
 // Helper to handle JSONB image format
@@ -28,7 +29,8 @@ export const EventsManagement: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentEventId, setCurrentEventId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  // Removed local notification state in favor of global useToast
+  // const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState<Event | null>(null);
   const [isBulkMode, setIsBulkMode] = useState(false);
@@ -44,6 +46,7 @@ export const EventsManagement: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { role, canEditEvents } = useUser();
+  const { showToast } = useToast();
   const isStaff = role === UserRole.STAFF;
 
   const initialFormData = {
@@ -137,12 +140,15 @@ export const EventsManagement: React.FC = () => {
     }
   }, [searchParams, isStaff]);
 
+  // Removed local notification effect
+  /*
   useEffect(() => {
     if (notification) {
       const timer = setTimeout(() => setNotification(null), 4000);
       return () => clearTimeout(timer);
     }
   }, [notification]);
+  */
 
   useEffect(() => {
     setCurrentPage(1);
@@ -220,7 +226,7 @@ export const EventsManagement: React.FC = () => {
       const { publicUrl } = await apiService.uploadEventImage(file, currentEventId || undefined);
       setFormData(prev => ({ ...prev, imageUrl: publicUrl }));
     } catch (err) {
-      setNotification({ message: 'Image upload failed. Please retry.', type: 'error' });
+      showToast('error', 'Image upload failed. Please retry.');
     } finally {
       setSubmitting(false);
     }
@@ -257,16 +263,16 @@ export const EventsManagement: React.FC = () => {
 
       if (isEditMode && currentEventId) {
         await apiService.updateEvent(currentEventId, payload);
-        setNotification({ message: 'Changes synchronized successfully.', type: 'success' });
+        showToast('success', 'Changes synchronized successfully.');
       } else {
         await apiService.createEvent(payload);
-        setNotification({ message: 'Event successfully launched.', type: 'success' });
+        showToast('success', 'Event successfully launched.');
       }
 
       setIsModalOpen(false);
       fetchEvents();
     } catch (err) {
-      setNotification({ message: 'Sync failed. Please retry.', type: 'error' });
+      showToast('error', 'Sync failed. Please retry.');
     } finally {
       setSubmitting(false);
     }
@@ -308,9 +314,9 @@ export const EventsManagement: React.FC = () => {
       // Refresh tickets from backend
       const ticketTypes = await apiService.getTicketTypes(selectedEvent.eventId);
       setSelectedEvent(ev => ev ? { ...ev, ticketTypes } : ev);
-      setNotification({ message: 'Ticket inventory updated.', type: 'success' });
+      showToast('success', 'Ticket inventory updated.');
     } catch (err) {
-      setNotification({ message: 'Failed to update ticket inventory.', type: 'error' });
+      showToast('error', 'Failed to update ticket inventory.');
     } finally {
       setSubmitting(false);
       setIsTicketModalOpen(false);
@@ -326,12 +332,12 @@ export const EventsManagement: React.FC = () => {
 
       if (isBulkMode) {
         await Promise.all(selectedIds.map(id => apiService.deleteEvent(id, true, finalReason)));
-        setNotification({ message: `${selectedIds.length} events have been permanently deleted.`, type: 'success' });
+        showToast('success', `${selectedIds.length} events have been permanently deleted.`);
         setSelectedIds([]);
         setIsBulkMode(false);
       } else if (deleteConfirm) {
         await apiService.deleteEvent(deleteConfirm.eventId, true, finalReason);
-        setNotification({ message: `"${deleteConfirm.eventName}" has been permanently deleted from the system.`, type: 'success' });
+        showToast('success', `"${deleteConfirm.eventName}" has been permanently deleted from the system.`);
         setDeleteConfirm(null);
       }
 
@@ -339,7 +345,7 @@ export const EventsManagement: React.FC = () => {
       setCustomReason('');
       fetchEvents();
     } catch (err) {
-      setNotification({ message: 'Failed to complete moderation removal. Please retry.', type: 'error' });
+      showToast('error', 'Failed to complete moderation removal. Please retry.');
     } finally {
       setSubmitting(false);
     }
@@ -348,15 +354,12 @@ export const EventsManagement: React.FC = () => {
   const handleTogglePromotion = async (event: Event) => {
     try {
       const result = await apiService.toggleEventPromotion(event.eventId);
-      setNotification({
-        message: result.promoted
+      showToast('success', result.promoted
           ? `"${event.eventName}" is now promoted on the discovery feed.`
-          : `Promotion removed for "${event.eventName}".`,
-        type: 'success'
-      });
+          : `Promotion removed for "${event.eventName}".`);
       fetchEvents();
     } catch (err) {
-      setNotification({ message: 'Failed to update promotion status.', type: 'error' });
+      showToast('error', 'Failed to update promotion status.');
     }
   };
 
@@ -379,19 +382,7 @@ export const EventsManagement: React.FC = () => {
 
   return (
     <div className="space-y-8" style={{ zoom: 0.85 }}>
-      {notification && (
-        <div className="fixed top-24 right-8 z-[120] animate-in fade-in slide-in-from-top-4 duration-500">
-          <Card className={`flex items-center gap-4 px-6 py-4 rounded-xl border-2 shadow-2xl ${notification.type === 'success'
-            ? 'bg-green-50 border-green-200 text-green-800'
-            : 'bg-red-50 border-red-200 text-red-800'
-            }`}>
-            <div className={`p-2 rounded-xl ${notification.type === 'success' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-              {notification.type === 'success' ? <ICONS.CheckCircle className="w-5 h-5" /> : <ICONS.AlertTriangle className="w-5 h-5" />}
-            </div>
-            <p className="font-bold text-sm tracking-tight">{notification.message}</p>
-          </Card>
-        </div>
-      )}
+      {/* Local notification JSX removed */}
 
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-2">
         <div>
@@ -426,11 +417,11 @@ export const EventsManagement: React.FC = () => {
                   setSubmitting(true);
                   try {
                     await Promise.all(selectedIds.map(id => apiService.bulkResolveEventReports(id)));
-                    setNotification({ message: 'Safety records cleared for selected events.', type: 'success' });
+                    showToast('success', 'Safety records cleared for selected events.');
                     setSelectedIds([]);
                     fetchEvents();
                   } catch (err) {
-                    setNotification({ message: 'Failed to clear records.', type: 'error' });
+                    showToast('error', 'Failed to clear records.');
                   } finally {
                     setSubmitting(false);
                   }
@@ -776,7 +767,6 @@ export const EventsManagement: React.FC = () => {
           event={selectedEvent}
           onSave={handleSaveTickets}
           submitting={submitting}
-          setNotification={setNotification}
         />
       </Modal>
 
@@ -921,10 +911,10 @@ interface TicketManagerProps {
   event: Event | null;
   onSave: (tickets: TicketType[]) => void;
   submitting: boolean;
-  setNotification: (n: { message: string; type: 'success' | 'error' }) => void;
 }
 
-const TicketManager: React.FC<TicketManagerProps> = ({ event, onSave, submitting, setNotification }) => {
+const TicketManager: React.FC<TicketManagerProps> = ({ event, onSave, submitting }) => {
+  const { showToast } = useToast();
   const [tickets, setTickets] = useState<TicketType[]>([]);
   const [expandedTicketId, setExpandedTicketId] = useState<string | null>(null);
 
@@ -990,7 +980,7 @@ const TicketManager: React.FC<TicketManagerProps> = ({ event, onSave, submitting
           setTickets(updated);
         }
       } catch (err) {
-        setNotification({ message: 'Failed to delete ticket type.', type: 'error' });
+        showToast('error', 'Failed to delete ticket type.');
       }
     } else {
       setTickets(tickets.filter(t => t.ticketTypeId !== id));

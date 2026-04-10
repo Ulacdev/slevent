@@ -1,7 +1,8 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
+import { useToast } from '../../context/ToastContext';
 import { apiService } from '../../services/apiService';
 import { Event, TicketType, EventStatus } from '../../types';
 import { Card, Button, Modal, Input } from '../../components/Shared';
@@ -18,12 +19,13 @@ const getImageUrl = (img: any): string => {
 };
 
 export const UserHome: React.FC = () => {
+    const { showToast } = useToast();
     const navigate = useNavigate();
     const { name, email } = useUser();
     const displayName = name?.trim() || email?.split('@')[0] || 'there';
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    // const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [emailQuota, setEmailQuota] = useState<{ remaining: number; limit: number; sent: number; canSend: boolean; quotaStatus: string } | null>(null);
     const [isSupportCenterOpen, setIsSupportCenterOpen] = useState(false);
@@ -98,12 +100,14 @@ export const UserHome: React.FC = () => {
         fetchData();
     }, []);
 
+    /* Removed local notification effect
     React.useEffect(() => {
         if (notification) {
             const t = setTimeout(() => setNotification(null), 4000);
             return () => clearTimeout(t);
         }
     }, [notification]);
+    */
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -113,7 +117,7 @@ export const UserHome: React.FC = () => {
             const { publicUrl } = await apiService.uploadUserEventImage(file);
             setFormData(prev => ({ ...prev, imageUrl: publicUrl }));
         } catch {
-            setNotification({ message: 'Image upload failed.', type: 'error' });
+            showToast('error', 'Image upload failed.');
         } finally {
             setSubmitting(false);
         }
@@ -147,12 +151,12 @@ export const UserHome: React.FC = () => {
                 regCloseAt: formData.regCloseDate || null,
                 streamingPlatform: formData.streamingPlatform
             });
-            setNotification({ message: 'Event created successfully!', type: 'success' });
+            showToast('success', 'Event created successfully!');
             setIsModalOpen(false);
             setFormData(initialFormData);
             setTimeout(() => navigate('/my-events'), 1200);
         } catch (err: any) {
-            setNotification({ message: err.message || 'Failed to create event.', type: 'error' });
+            showToast('error', err.message || 'Failed to create event.');
         } finally {
             setSubmitting(false);
         }
@@ -173,18 +177,7 @@ export const UserHome: React.FC = () => {
 
     return (
         <div className="space-y-12 max-w-6xl mx-auto pt-10 -mt-4">
-            {notification && (
-                <div className="fixed top-8 right-8 z-[120] animate-in slide-in-from-top-4 duration-300">
-                    <Card className={`flex items-center gap-4 px-6 py-4 rounded-xl border-2 shadow-xl ${notification.type === 'success'
-                        ? 'bg-[#38BDF2]/10 border-[#38BDF2]/40 text-[#2E2E2F]'
-                        : 'bg-red-50 border-red-500/40 text-red-700'}`}>
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${notification.type === 'success' ? 'bg-[#38BDF2] text-white' : 'bg-red-500 text-white'}`}>
-                            {notification.type === 'success' ? <ICONS.CheckCircle className="w-5 h-5" /> : <ICONS.AlertTriangle className="w-5 h-5" />}
-                        </div>
-                        <p className="font-bold text-sm tracking-tight">{notification.message}</p>
-                    </Card>
-                </div>
-            )}
+            {/* Local notification JSX removed */}
 
             {/* Welcome Section */}
             <div className="bg-[#38BDF2] border-2 border-[#38BDF2] rounded-xl p-10 md:p-14 mb-4 shadow-[0_20px_40px_-10px_rgba(56,189,242,0.3)]">
@@ -526,7 +519,7 @@ export const UserHome: React.FC = () => {
                 organizerName={organizerProfile?.organizerName || ''}
                 currentPlanId={organizerProfile?.currentPlanId}
                 onSubscribeSuccess={() => {
-                    setNotification({ message: 'Plan upgraded successfully!', type: 'success' });
+                    showToast('success', 'Plan upgraded successfully!');
                     // Refresh data after upgrade
                     setTimeout(() => window.location.reload(), 1500);
                 }}

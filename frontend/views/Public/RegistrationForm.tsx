@@ -5,6 +5,7 @@ import { Event, TicketType } from '../../types';
 import { Card, Badge, Button, Input, Modal, Checkbox, PageLoader } from '../../components/Shared';
 import { ICONS } from '../../constants';
 import { useUser } from '../../context/UserContext';
+import { useToast } from '../../context/ToastContext';
 
 const PAYMENT_METHODS = [
   {
@@ -47,7 +48,8 @@ export const RegistrationForm: React.FC = () => {
   const [extraGuests, setExtraGuests] = useState<{ name: string; email: string }[]>([]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [apiError, setApiError] = useState<string | null>(null);
+  const { showToast } = useToast();
+  // const [apiError, setApiError] = useState<string | null>(null);
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<any>(null);
   const [promoError, setPromoError] = useState<string | null>(null);
@@ -151,8 +153,8 @@ export const RegistrationForm: React.FC = () => {
   let paymentFee = 0;
   let platformFee = 0;
   if (discountedSubtotal > 0) {
-    paymentFee = roundCurrency(discountedSubtotal * 0.023);
-    platformFee = roundCurrency(discountedSubtotal * 0.05);
+    paymentFee = roundCurrency(discountedSubtotal * 0.023); // Standard HitPay Processing Fee
+    platformFee = 0; // StartupLab Platform Fee remains 0
   }
 
   const totalPayable = roundCurrency(discountedSubtotal + paymentFee + platformFee);
@@ -193,7 +195,6 @@ export const RegistrationForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setApiError(null);
     if (!validate() || !event || selectedItems.length === 0) return;
 
     setSubmitting(true);
@@ -229,7 +230,7 @@ export const RegistrationForm: React.FC = () => {
       if (data?.message) {
         message = `${message}: ${data.message}`;
       }
-      setApiError(message);
+      showToast('error', message);
     } finally {
       setSubmitting(false);
     }
@@ -286,14 +287,7 @@ export const RegistrationForm: React.FC = () => {
                     <div className="w-12 h-px bg-[#2E2E2F]/10"></div>
                   </div>
 
-                  {apiError && (
-                    <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 flex items-center gap-3 text-red-600">
-                      <ICONS.AlertTriangle className="w-5 h-5 shrink-0" />
-                      <p className="text-xs font-semibold uppercase tracking-wide leading-relaxed">
-                        {apiError}
-                      </p>
-                    </div>
-                  )}
+                  {/* Local apiError JSX removed */}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 sm:gap-x-6 gap-y-5 sm:gap-y-6">
                     <div className="space-y-2">
@@ -445,6 +439,7 @@ export const RegistrationForm: React.FC = () => {
                           </span>
                         }
                       />
+                      {/* Payout breakdown removed as per request */}
                       {errors.terms && (
                         <p className="text-[11px] font-black text-red-500 uppercase tracking-widest pl-10 animate-pulse">
                           {errors.terms}
@@ -615,25 +610,7 @@ export const RegistrationForm: React.FC = () => {
                     )}
                     
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-wide">StartupLab Platform Fee</span>
-                      {subtotal === 0 ? (
-                        <span className="text-[10px] font-semibold text-[#2E2E2F] border px-2.5 py-0.5 rounded-xl tracking-wide bg-[#38BDF2]/10" style={{ borderColor: `${brandColor}66`, backgroundColor: `${brandColor}1A` }}>
-                          WAIVED
-                        </span>
-                      ) : (
-                        <div className="text-right">
-                          <span className="text-[11px] sm:text-[12px] font-semibold tracking-wide text-[#2E2E2F] block">
-                            PHP {formatCurrency(roundCurrency(discountedSubtotal * 0.05))}
-                          </span>
-                          <span className="text-[9px] font-medium text-[#2E2E2F] uppercase tracking-wide block mt-1">
-                            5% Platform Fee
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-wide">HitPay Service Fee</span>
+                      <span className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-wide">Gateway Processing Fee</span>
                       {subtotal === 0 ? (
                         <span className="text-[10px] font-semibold text-[#2E2E2F] border px-2.5 py-0.5 rounded-xl tracking-wide bg-[#38BDF2]/10" style={{ borderColor: `${brandColor}66`, backgroundColor: `${brandColor}1A` }}>
                           WAIVED
@@ -644,7 +621,7 @@ export const RegistrationForm: React.FC = () => {
                             PHP {formatCurrency(paymentFee)}
                           </span>
                           <span className="text-[9px] font-medium text-[#2E2E2F] uppercase tracking-wide block mt-1">
-                            2.3% Processing Fee
+                            HitPay Service Fee (2.3%)
                           </span>
                         </div>
                       )}

@@ -275,11 +275,10 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       setNotifications(data.notifications || []);
       setUnreadCount(data.unreadCount || 0);
     } catch (err: any) {
-      console.error('Failed to fetch notifications:', err);
-      if (err?.message?.includes('401')) {
-        clearUser();
-        navigate('/login', { replace: true });
+      if (err?.message?.includes('session missing') || err?.message?.includes('401')) {
+        return; 
       }
+      console.error('Failed to fetch notifications:', err);
     } finally {
       setNotificationsLoading(false);
     }
@@ -1680,8 +1679,8 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           <span className="font-semibold text-xs text-[#2E2E2F]">{initials}</span>
                         )}
                       </div>
-                      <div className="hidden sm:block text-left leading-tight">
-                        <p className="text-xs font-semibold text-[#2E2E2F] truncate max-w-[120px]">{displayName}</p>
+                      <div className="hidden sm:block text-left leading-tight min-w-0">
+                        <p className="text-xs font-semibold text-[#2E2E2F] whitespace-nowrap">{displayName}</p>
                         <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-0.5">{roleLabel}</p>
                       </div>
                       <svg className="w-4 h-4 text-[#2E2E2F]" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -1694,7 +1693,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl shadow-xl z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
                           <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
                             <p className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-widest mb-0.5">Account</p>
-                            <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
+                            <p className="text-xs font-semibold text-[#2E2E2F]">{displayName}</p>
                             <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-1">{roleLabel}</p>
                           </div>
                           {isOrganizer ? (
