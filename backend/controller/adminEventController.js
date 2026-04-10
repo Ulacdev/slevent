@@ -165,7 +165,8 @@ export const listAdminEvents = async (req, res) => {
     // 2) Query events
     let query = supabase
       .from('events')
-      .select('*, ticketTypes(*)')
+      .select('*, ticketTypes(*), promoted_events(promotion_id, expires_at)')
+      .is('is_archived', false)
       .order('created_at', { ascending: false });
 
     if (search) {
@@ -174,6 +175,13 @@ export const listAdminEvents = async (req, res) => {
 
     const { data: events, error } = await query;
     if (error) return res.status(500).json({ error: error.message });
+
+    const now = new Date().toISOString();
+    (events || []).forEach(e => {
+        const activePromo = (e.promoted_events || []).find(p => p.expires_at > now);
+        e.is_promoted = !!activePromo;
+        e.isPromoted = !!activePromo;
+    });
 
     // 3) Fetch report counts for these events
     const { data: reportNotifs, error: reportErr } = await supabase
@@ -229,7 +237,7 @@ export const listUserEvents = async (req, res) => {
 
     let query = supabase
       .from('events')
-      .select('*, ticketTypes(*)');
+      .select('*, ticketTypes(*), promoted_events(promotion_id, expires_at)');
 
     if (organizer?.organizerId) {
       const ownerId = organizer.ownerUserId;
@@ -262,6 +270,13 @@ export const listUserEvents = async (req, res) => {
       console.error('❌ [AdminEvent] Supabase error listing events:', error.message);
       return res.status(500).json({ error: error.message });
     }
+
+    const now = new Date().toISOString();
+    (data || []).forEach(e => {
+        const activePromo = (e.promoted_events || []).find(p => p.expires_at > now);
+        e.is_promoted = !!activePromo;
+        e.isPromoted = !!activePromo;
+    });
 
     console.log(`✅ [AdminEvent] Successfully fetched ${(data || []).length} events for user ${userId}`);
     return res.json(data || []);

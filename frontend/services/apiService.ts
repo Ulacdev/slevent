@@ -1016,7 +1016,7 @@ export const apiService = {
       ? `${API_BASE}/api/user/events/${encodeURIComponent(eventId)}/image`
       : `${API_BASE}/api/user/events/image`;
 
-    const res = await fetch(endpoint, {
+    const res = await apiService._fetch(endpoint, {
       method: 'POST',
       credentials: 'include',
       body: formData
@@ -1027,7 +1027,7 @@ export const apiService = {
   },
 
   createEvent: async (eventData: Partial<Event>): Promise<Event> => {
-    const res = await fetch(`${API_BASE}/api/admin/events`, {
+    const res = await apiService._fetch(`${API_BASE}/api/admin/events`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1039,7 +1039,7 @@ export const apiService = {
   },
 
   updateEvent: async (id: string, eventData: Partial<Event>): Promise<Event> => {
-    const res = await fetch(`${API_BASE}/api/admin/events/${encodeURIComponent(id)}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/admin/events/${encodeURIComponent(id)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1052,7 +1052,7 @@ export const apiService = {
 
   // DELETE /api/admin/events/:id (Archives event by default, or permanent delete if flag set)
   deleteEvent: async (id: string, permanent = false, reason?: string): Promise<{ archived?: boolean; permanent?: boolean; message?: string }> => {
-    const res = await fetch(`${API_BASE}/api/admin/events/${encodeURIComponent(id)}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/admin/events/${encodeURIComponent(id)}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1081,7 +1081,7 @@ export const apiService = {
 
   // POST /api/user/events/:id/restore - Restore archived event
   restoreEvent: async (id: string): Promise<{ message: string; event: any }> => {
-    const res = await fetch(`${API_BASE}/api/user/events/${encodeURIComponent(id)}/restore`, {
+    const res = await apiService._fetch(`${API_BASE}/api/user/events/${encodeURIComponent(id)}/restore`, {
       method: 'POST',
       credentials: 'include'
     });
@@ -1101,7 +1101,7 @@ export const apiService = {
       ? `${API_BASE}/api/admin/events/${encodeURIComponent(eventId)}/image`
       : `${API_BASE}/api/admin/events/image`;
 
-    const res = await fetch(endpoint, {
+    const res = await apiService._fetch(endpoint, {
       method: 'POST',
       credentials: 'include',
       body: formData
@@ -1114,7 +1114,7 @@ export const apiService = {
   // --- Event Promotion APIs ---
 
   toggleEventPromotion: async (eventId: string): Promise<{ promoted: boolean; promotionId?: string; expiresAt?: string; message: string }> => {
-    const res = await fetch(`${API_BASE}/api/events/${encodeURIComponent(eventId)}/toggle-promotion`, {
+    const res = await apiService._fetch(`${API_BASE}/api/events/${encodeURIComponent(eventId)}/toggle-promotion`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include'
@@ -1148,7 +1148,7 @@ export const apiService = {
   },
 
   getPromotionQuota: async (): Promise<{ limit: number; used: number; remaining: number; durationDays: number; canPromote: boolean }> => {
-    const res = await fetch(`${API_BASE}/api/promotion-quota`, {
+    const res = await apiService._fetch(`${API_BASE}/api/promotion-quota`, {
       credentials: 'include',
       cache: 'no-store'
     });
@@ -1199,7 +1199,7 @@ export const apiService = {
   },
 
   archiveTransaction: async (orderId: string): Promise<void> => {
-    const res = await fetch(`${API_BASE}/api/analytics/transactions/${encodeURIComponent(orderId)}/archive`, {
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/transactions/${encodeURIComponent(orderId)}/archive`, {
       method: 'POST',
       credentials: 'include'
     });
@@ -1210,7 +1210,7 @@ export const apiService = {
   },
 
   restoreTransaction: async (orderId: string): Promise<void> => {
-    const res = await fetch(`${API_BASE}/api/analytics/transactions/${encodeURIComponent(orderId)}/restore`, {
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/transactions/${encodeURIComponent(orderId)}/restore`, {
       method: 'POST',
       credentials: 'include'
     });
@@ -1221,7 +1221,7 @@ export const apiService = {
   },
 
   bulkArchiveTransactions: async (orderIds: string[]): Promise<void> => {
-    const res = await fetch(`${API_BASE}/api/analytics/transactions/bulk-archive`, {
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/transactions/bulk-archive`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1234,7 +1234,7 @@ export const apiService = {
   },
 
   bulkRestoreTransactions: async (orderIds: string[]): Promise<void> => {
-    const res = await fetch(`${API_BASE}/api/analytics/transactions/bulk-restore`, {
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/transactions/bulk-restore`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1247,7 +1247,7 @@ export const apiService = {
   },
 
   deleteTransaction: async (orderId: string): Promise<void> => {
-    const res = await fetch(`${API_BASE}/api/analytics/transactions/${encodeURIComponent(orderId)}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/transactions/${encodeURIComponent(orderId)}`, {
       method: 'DELETE',
       credentials: 'include'
     });
@@ -1258,7 +1258,7 @@ export const apiService = {
   },
 
   getArchivedTransactions: async () => {
-    const res = await fetch(`${API_BASE}/api/analytics/transactions/archived`, {
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/transactions/archived`, {
       credentials: 'include'
     });
     if (!res.ok) {
@@ -1282,7 +1282,7 @@ export const apiService = {
   },
 
   getAuditLogs: async (page = 1, limit = 10) => {
-    const res = await fetch(`${API_BASE}/api/analytics/audit-logs?page=${page}&limit=${limit}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/audit-logs?page=${page}&limit=${limit}`, {
       credentials: 'include'
     });
     if (!res.ok) {
@@ -1293,7 +1293,7 @@ export const apiService = {
   },
 
   getTransactionDetail: async (orderId: string) => {
-    const res = await fetch(`${API_BASE}/api/analytics/transactions/${encodeURIComponent(orderId)}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/transactions/${encodeURIComponent(orderId)}`, {
       credentials: 'include'
     });
     if (!res.ok) {
@@ -1304,7 +1304,7 @@ export const apiService = {
   },
 
   getOrderDetail: async (orderId: string) => {
-    const res = await fetch(`${API_BASE}/api/analytics/orders/${encodeURIComponent(orderId)}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/orders/${encodeURIComponent(orderId)}`, {
       credentials: 'include'
     });
     if (!res.ok) {
@@ -1315,7 +1315,7 @@ export const apiService = {
   },
 
   getAuditLogDetail: async (auditLogId: string) => {
-    const res = await fetch(`${API_BASE}/api/analytics/audit-logs/${encodeURIComponent(auditLogId)}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/analytics/audit-logs/${encodeURIComponent(auditLogId)}`, {
       credentials: 'include'
     });
     if (!res.ok) {
