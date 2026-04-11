@@ -188,6 +188,8 @@ export const createHitpayCheckoutSession = async (req, res) => {
     let updatedMetadata = { ...(order.metadata || {}) };
     if (credentials.isManaged) {
         const total = Number(order.totalAmount);
+        // 1. Platform Fee (Set to 0 as per user request)
+        const platformFee = 0;
         
         // 2. Processing Fee (HitPay Estimate: 2.3%)
         const processingFee = Math.round((total * 0.023) * 100) / 100;

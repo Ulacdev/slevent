@@ -327,8 +327,8 @@ export const getSummary = async (req, res) => {
         return sum + Number(payout.netOrganizerAmount);
       }
       // Fallback calculation for older orders or those without metadata
-      const platformFee = (o.totalAmount || 0) * 0.05;
-      const processingFee = (o.totalAmount || 0) * 0.03 + 15; // HitPay estimate
+      const platformFee = 0;
+      const processingFee = (o.totalAmount || 0) * 0.023; // HitPay Estimate (2.3%)
       return sum + Math.max(0, (o.totalAmount || 0) - platformFee - processingFee);
     }, 0);
 
@@ -350,8 +350,8 @@ export const getSummary = async (req, res) => {
         if (payout?.netOrganizerAmount !== undefined) {
           return sum + Number(payout.netOrganizerAmount);
         }
-        const platformFee = (o.totalAmount || 0) * 0.05;
-        const processingFee = (o.totalAmount || 0) * 0.03 + 15;
+        const platformFee = 0;
+        const processingFee = (o.totalAmount || 0) * 0.023;
         return sum + Math.max(0, (o.totalAmount || 0) - platformFee - processingFee);
       }, 0);
 
@@ -439,9 +439,9 @@ export const getRecentTransactions = async (req, res) => {
     const { data, error, count } = Array.isArray(filteredEventIds) && filteredEventIds.length
       ? await supabase
         .from('orders')
-        .select('orderId, eventId, buyerName, buyerEmail, totalAmount, currency, status, created_at, deleted_at', { count: 'exact' })
+        .select('orderId, eventId, buyerName, buyerEmail, totalAmount, currency, status, created_at', { count: 'exact' })
         .in('eventId', filteredEventIds)
-        .is('deleted_at', null)
+        .eq('status', 'PAID')
         .order('created_at', { ascending: false })
         .range(from, to)
       : { data: [], error: null, count: 0 };
@@ -473,8 +473,8 @@ export const getRecentTransactions = async (req, res) => {
       if (payout?.netOrganizerAmount !== undefined) {
         netAmount = Number(payout.netOrganizerAmount);
       } else {
-        const platformFee = (item.totalAmount || 0) * 0.05;
-        const processingFee = (item.totalAmount || 0) * 0.03 + 15;
+        const platformFee = 0;
+        const processingFee = (item.totalAmount || 0) * 0.023; // HitPay Estimate (2.3%)
         netAmount = Math.max(0, (item.totalAmount || 0) - platformFee - processingFee);
       }
 
@@ -703,8 +703,8 @@ export const getRecentOrders = async (req, res) => {
       if (payout?.netOrganizerAmount !== undefined) {
         netAmount = Number(payout.netOrganizerAmount);
       } else {
-        const platformFee = (item.totalAmount || 0) * 0.05;
-        const processingFee = (item.totalAmount || 0) * 0.03 + 15;
+        const platformFee = 0;
+        const processingFee = (item.totalAmount || 0) * 0.023; // HitPay Estimate (2.3%)
         netAmount = Math.max(0, (item.totalAmount || 0) - platformFee - processingFee);
       }
 

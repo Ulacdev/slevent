@@ -377,7 +377,7 @@ export const EventCard: React.FC<EventCardProps> = ({
 
   return (
     <Card
-      className={`group relative flex flex-col h-full border ${isTrending ? 'border-[#38BDF2] ring-1 ring-[#38BDF2]' : 'border-black/5'} rounded-[5px] bg-[#F2F2F2] transition-all duration-500 cursor-pointer hover:shadow-xl hover:translate-y-[-4px]`}
+      className="group relative flex flex-col h-full border border-black/5 rounded-[5px] bg-[#F2F2F2] transition-all duration-500 cursor-pointer hover:shadow-xl hover:translate-y-[-4px]"
       onClick={() => navigate(`/events/${event.slug || event.eventId}`)}
       style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
     >
@@ -385,15 +385,7 @@ export const EventCard: React.FC<EventCardProps> = ({
       <div className="relative h-44 sm:h-52 overflow-hidden rounded-t-[5px]">
         {/* Tags Overlay (Trending & Promoted) */}
         <div className="absolute bottom-4 left-4 z-30 flex flex-col gap-2 items-start">
-          {isTrending && (
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2 bg-[#38BDF2] text-white text-[11px] font-black uppercase tracking-[0.12em] shadow-xl border border-white/20 transition-all hover:scale-110 active:scale-95 whitespace-nowrap"
-            >
-              <ICONS.Star className="w-3.5 h-3.5 fill-current text-white" />
-              #{trendingRank} Trending
-            </div>
-          )}
-          {!isTrending && (event.is_promoted || (event as any).isPromoted) && (
+          {!isLanding && (event.is_promoted || (event as any).isPromoted) && (
             <div className="group/promoted relative">
               <div className="inline-flex items-center gap-2 rounded-full px-4 py-1 bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.15em] border border-[#38BDF2]/30 transition-all hover:scale-105 active:scale-95 whitespace-nowrap cursor-help">
                 <ICONS.Info className="w-3.5 h-3.5" strokeWidth={3} />
@@ -1076,7 +1068,11 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   }
 
   return (
-    <div className={`${isLanding ? 'max-w-[88rem] mx-auto px-4 sm:px-10 pt-6 sm:pt-12' : 'max-w-full px-6 sm:px-10 pt-0'} pb-16`}>
+    <>
+      <div 
+        className={`${isLanding ? 'max-w-[88rem] mx-auto px-4 sm:px-10 pt-6 sm:pt-12' : 'max-w-full px-6 sm:px-10 pt-0'} pb-16`}
+        style={isLanding ? { zoom: 0.9 } : {}}
+      >
       {isLanding && (
         <>
           {/* Premium Hero Section */}
@@ -1927,8 +1923,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
         {isLanding && <FAQSection />}
       </div>
 
-
-      {/* Modern Announcement Modal */}
+      </div>
+      {/* Modern Announcement Modal - Outside zoom div */}
       <Modal
         isOpen={showAnnouncement}
         onClose={dismissAnnouncement}
@@ -2002,7 +1998,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           </div>
         </div>
       </Modal>
-    </div>
+    </>
   );
 };
 

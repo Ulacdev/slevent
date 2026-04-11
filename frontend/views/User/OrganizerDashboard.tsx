@@ -171,7 +171,7 @@ export const OrganizerDashboard: React.FC = () => {
                                 <div className="space-y-1">
                                     <p className="font-bold text-sm text-[#2E2E2F] group-hover/item:text-[#38BDF2] transition-colors">{tx.customerName || tx.buyerName || 'Organizer'}</p>
                                     <p className="text-[10px] font-bold text-[#2E2E2F]">
-                                        {tx.planName || 'Ai Automation'} • {new Date(tx.createdAt || tx.created_at).toLocaleString()}
+                                        {tx.planName || tx.eventName || 'Ticket Purchase'} • {new Date(tx.createdAt || tx.created_at).toLocaleString()}
                                     </p>
                                 </div>
                                 <div className="text-right">

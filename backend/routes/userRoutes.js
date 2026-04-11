@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
-import { getUser, getAllUsers, getRole, getRoleByEmail, whoAmI, updatePermissions, updateUserName, updateUserAvatar, updateUserProfile, updateUserStatus } from "../controller/userController.js"
+import { getUser, getAllUsers, getRole, getRoleByEmail, whoAmI, updatePermissions, deleteStaff, updateUserName, updateUserAvatar, updateUserProfile, updateUserStatus } from "../controller/userController.js"
+import { deleteInvite } from "../controller/inviteController.js";
 import { authMiddleware } from "../middleware/auth.js";
 import {
   listUserEvents,
@@ -39,11 +40,21 @@ router.get('/user/role', authMiddleware, getRole);
 router.get('/role-by-email', getRoleByEmail);
 // Alias to match frontend path /api/user/role-by-email
 router.get('/user/role-by-email', getRoleByEmail);
+
+// User Permissions Management
 router.put('/users/:id/permissions', authMiddleware, updatePermissions);
+router.put('/user/:id/permissions', authMiddleware, updatePermissions); // Singular alias for safety
+router.get('/users/router-debug', (req, res) => res.json({ status: 'ok', router: 'userRoutes' }));
+
+router.delete('/users/:id', authMiddleware, deleteStaff);
+router.delete('/user/:id', authMiddleware, deleteStaff); // Singular alias
+router.delete('/invite/:id', authMiddleware, deleteInvite); // Revoke pending invite
+
 router.patch('/user/name', authMiddleware, updateUserName);
 router.patch('/user/profile', authMiddleware, updateUserProfile);
 router.post('/user/avatar', authMiddleware, upload.single('image'), updateUserAvatar);
 router.put('/users/:id/status', authMiddleware, updateUserStatus);
+router.put('/user/:id/status', authMiddleware, updateUserStatus); // Singular alias for status too
 
 // ─── User events (only events created by this user) ───
 router.post('/user/events', authMiddleware, createUserEvent);

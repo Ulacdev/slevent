@@ -6,10 +6,17 @@ import { checkPlanLimits } from '../utils/planValidator.js';
 import { getOrganizerByUserId } from '../utils/organizerData.js';
 import { decodeAuthPassword } from '../utils/encryption.js';
 
+// Roles for new signups default to ORGANIZER
 const normalizeRole = (role) => {
   const normalized = String(role || '').toUpperCase();
   if (!normalized || normalized === 'USER') return 'ORGANIZER';
   return normalized;
+};
+
+// Roles for invitations (staff, admin, etc.)
+const normalizeInviteRole = (role) => {
+  const normalized = String(role || '').toUpperCase();
+  return normalized || 'STAFF'; 
 };
 
 const normalizeEmail = (value) => String(value || '').trim().toLowerCase();
@@ -54,7 +61,7 @@ export async function inviteUser(req, res) {
   const { email, role, name } = req.body || {};
   const normalizedEmail = normalizeEmail(email);
   if (!normalizedEmail) return res.status(400).json({ error: 'Email required' });
-  const inviteRole = normalizeRole(role);
+  const inviteRole = normalizeInviteRole(role);
 
   // --- CHECK STAFF LIMIT ---
   const organizer = await getOrganizerByUserId(inviterUserId);
@@ -195,87 +202,194 @@ export async function createInviteAndSend(req, res) {
   }
 }
 
+// Check invite validity and if account already exists
+export async function checkInvite(req, res) {
+  try {
+    const { token } = req.query;
+    if (!token) return res.status(400).json({ error: 'Token required' });
+
+    const normalizedToken = String(token || '').trim().replace(/[?.,;:!]+$/, '');
+    console.log(`[checkInvite] 🔍 Checking token: ${normalizedToken.substring(0, 8)}...`);
+    
+    // First, find the token ANYWAY to see if it even exists
+    const { data: allInvites, error: fetchErr } = await db
+      .from('invites')
+      .select('*')
+      .eq('token', normalizedToken);
+
+    if (fetchErr) {
+      console.error('[checkInvite] ❌ Fetch Error:', fetchErr.message);
+      return res.status(500).json({ error: fetchErr.message });
+    }
+
+    if (!allInvites || allInvites.length === 0) {
+      console.warn(`[checkInvite] ❌ Token ${normalizedToken.substring(0, 8)}... NOT FOUND in database.`);
+      return res.status(404).json({ error: 'Invalid invitation link' });
+    }
+
+    const invite = allInvites[0];
+    const now = new Date();
+    const expiry = new Date(invite.expiresAt);
+
+    if (expiry < now) {
+      console.warn(`[checkInvite] ❌ Token found but EXPIRED. (Expiry: ${expiry.toISOString()}, Now: ${now.toISOString()})`);
+      return res.status(404).json({ error: 'Invitation has expired' });
+    }
+
+    const { data: existingUser } = await db
+      .from('users')
+      .select('userId, id, email')
+      .eq('email', invite.email)
+      .maybeSingle();
+
+    console.log(`[checkInvite] ✅ Token Valid. Email: ${invite.email}, Exists: ${!!existingUser}`);
+    
+    return res.json({
+      email: invite.email,
+      role: normalizeInviteRole(invite.role),
+      accountExists: !!existingUser,
+      name: invite.name || ''
+    });
+  } catch (err) {
+    console.error('[checkInvite] 💥 Fatal Exception:', err);
+    return res.status(500).json({ error: err.message });
+  }
+}
+
 // Accept invite and set password
 export async function acceptInvite(req, res) {
   try {
     let { token, password, name } = req.body;
-    password = decodeAuthPassword(password);
     const normalizedToken = String(token || '').trim().replace(/[?.,;:!]+$/, '');
-    const { data: invites, error } = await db.from('invites').select('*').eq('token', normalizedToken).gt('expiresAt', new Date().toISOString());
-    if (error || !invites.length) return res.status(400).json({ error: 'Invalid or expired invite' });
+    
+    const { data: invites, error } = await db
+      .from('invites')
+      .select('*')
+      .eq('token', normalizedToken)
+      .gt('expiresAt', new Date().toISOString());
+
+    if (error || !invites?.length) {
+      return res.status(400).json({ error: 'Invalid or expired invite' });
+    }
+
     const invite = invites[0];
-    const normalizedInviteRole = normalizeRole(invite.role);
+    const targetRole = normalizeInviteRole(invite.role);
+    console.log(`[invite/acceptInvite] Token matched. Target Role for ${invite.email}: ${targetRole}`);
+    const emailToUpdate = String(invite.email || '').trim().toLowerCase();
 
-    let userId;
-
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email: invite.email,
-      password,
-      email_confirm: true,
-    });
-
-    if (!authError && authData?.user?.id) {
-      userId = authData.user.id;
-    }
-
-    if (!userId) {
-      const authErrorMessage = authError?.message || '';
-      if (!authErrorMessage.toLowerCase().includes('already')) {
-        return res.status(500).json({ error: authErrorMessage || 'Failed to create auth user' });
-      }
-
-      const { data: existingUser, error: existingUserError } = await db
-        .from('users')
-        .select('userId')
-        .eq('email', invite.email)
-        .maybeSingle();
-
-      if (existingUserError) {
-        return res.status(500).json({ error: existingUserError.message });
-      }
-
-      if (!existingUser?.userId) {
-        return res.status(409).json({ error: 'Account already exists. Please log in.' });
-      }
-
-      userId = existingUser.userId;
-    }
-
-    const finalName = (name || invite.name || '').trim();
-    let userUpsertError = null;
-
-    // Resolve organization owner to ensure consistent hierarchy
+    // Resolve organization owner early
     const inviterOrg = await getOrganizerByUserId(invite.invitedBy);
     const orgOwnerId = inviterOrg?.ownerUserId || invite.invitedBy || null;
 
-    console.log('[invite/acceptInvite] Attempting upsert for user:', { userId, email: invite.email, finalName, orgOwnerId });
-    let upsertResp = await db
-      .from('users')
-      .upsert({ userId, email: invite.email, role: normalizedInviteRole, name: finalName, employerId: orgOwnerId, employerid: orgOwnerId }, { onConflict: 'userId' });
-    userUpsertError = upsertResp.error;
+    let userId = null;
 
-    if (userUpsertError && userUpsertError.message?.includes('column "userId"')) {
-      console.log('[invite/acceptInvite] Retrying upsert by id column');
-      upsertResp = await db
-        .from('users')
-        .upsert({ id: userId, email: invite.email, role: normalizedInviteRole, name: finalName, employerId: orgOwnerId, employerid: orgOwnerId }, { onConflict: 'id' });
-      userUpsertError = upsertResp.error;
+    // 1. Check if user already exists in Auth/DB
+    const { data: existingUser } = await db
+      .from('users')
+      .select('userId, id')
+      .eq('email', emailToUpdate)
+      .maybeSingle();
+
+    if (existingUser) {
+      userId = existingUser.userId || existingUser.id;
+      console.log(`[invite/acceptInvite] User ${emailToUpdate} already exists (ID: ${userId}). Skipping Auth creation.`);
+    } else {
+      // 2. Create new user in Auth
+      if (!password) {
+        return res.status(400).json({ error: 'Password required for new accounts' });
+      }
+      
+      const decodedPassword = decodeAuthPassword(password);
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: invite.email,
+        password: decodedPassword,
+        email_confirm: true,
+      });
+
+      if (authError) {
+        // [HEALING] If they already exist in Auth but not in our users table yet
+        if (authError.message?.toLowerCase().includes('already')) {
+          console.log(`[invite/acceptInvite] User already exists in Auth. Updating password and resolving ID...`);
+          const { data: authUsers, error: listError } = await supabase.auth.admin.listUsers();
+          const targetAuth = (authUsers?.users || []).find(u => u.email?.toLowerCase() === emailToUpdate);
+          
+          if (targetAuth) {
+            userId = targetAuth.id;
+            console.log(`[invite/acceptInvite] Recovered ID from Auth: ${userId}. Forced password update.`);
+            await supabase.auth.admin.updateUserById(userId, { password: decodedPassword });
+          } else {
+            // Last resort: Check users table again in case of race condition
+            const { data: retryFetch } = await db.from('users').select('userId, id').eq('email', emailToUpdate).maybeSingle();
+            userId = retryFetch?.userId || retryFetch?.id || null;
+            if (userId) {
+               await supabase.auth.admin.updateUserById(userId, { password: decodedPassword });
+            }
+          }
+        } else {
+          console.error('[invite/acceptInvite] Auth Creation Error:', authError.message);
+          return res.status(500).json({ error: authError.message });
+        }
+      } else {
+        userId = authData?.user?.id;
+      }
     }
 
-    // Always update the user's name by email to guarantee it is set
-    const emailToUpdate = (invite.email || '').trim().toLowerCase();
-    await db
-      .from('users')
-      .update({ name: finalName, employerId: orgOwnerId, employerid: orgOwnerId })
-      .eq('email', emailToUpdate);
-
-    if (userUpsertError && !/duplicate key|unique/i.test(userUpsertError.message || '')) {
-      return res.status(500).json({ error: userUpsertError.message });
+    if (!userId) {
+      console.error('[invite/acceptInvite] ❌ FAILED to resolve user ID for', emailToUpdate);
+      return res.status(500).json({ error: 'Failed to resolve user ID after Auth check' });
     }
 
-    await db.from('invites').delete().eq('token', token);
+    const finalName = (name || invite.name || '').trim();
+    const userPayload = {
+      userId,
+      email: emailToUpdate,
+      role: targetRole,
+      name: finalName,
+      employerId: orgOwnerId,   
+      employerid: orgOwnerId,
+      status: 'Active',
+      canviewevents: invite.canViewEvents ?? invite.canviewevents ?? true,
+      caneditevents: invite.canEditEvents ?? invite.caneditevents ?? false,
+      canmanualcheckin: invite.canManualCheckIn ?? invite.canmanualcheckin ?? false,
+      canreceivenotifications: invite.canReceiveNotifications ?? invite.canreceivenotifications ?? false
+    };
+
+    console.log(`[invite/acceptInvite] [Checkpoint 4] Finalizing links for ${emailToUpdate} as ${targetRole}...`);
+    
+    // PRIMARY SAVE
+    const { error: upsertErr } = await db.from('users').upsert(userPayload, { onConflict: 'userId' });
+    
+    if (upsertErr) {
+      console.warn('[invite/acceptInvite] Primary save error:', upsertErr.message);
+      // Fallback for missing employer columns if any
+      if (upsertErr.message?.includes('employer')) {
+        const strippedPayload = { ...userPayload };
+        delete strippedPayload.employerId; delete strippedPayload.employerid;
+        await db.from('users').upsert(strippedPayload, { onConflict: 'userId' });
+      } else {
+        throw upsertErr;
+      }
+    }
+
+    // [Checkpoint 5] Explicit update to handle casing variances in various envs
+    await db.from('users').update({ 
+      role: targetRole, 
+      employerId: orgOwnerId, 
+      employerid: orgOwnerId,
+      status: 'Active',
+      canviewevents: userPayload.canviewevents,
+      caneditevents: userPayload.caneditevents,
+      canmanualcheckin: userPayload.canmanualcheckin,
+      canreceivenotifications: userPayload.canreceivenotifications
+    }).eq('email', emailToUpdate);
+
+    // HEALING ANCHOR: Mark as accepted
+    await db.from('invites').update({ accepted: true }).eq('token', normalizedToken);
+    
+    console.log(`[invite/acceptInvite] Success: ${emailToUpdate} accepted.`);
     return res.json({ message: 'Invitation accepted successfully' });
   } catch (err) {
+    console.error('[invite/acceptInvite] Fatal Error:', err);
     return res.status(500).json({ error: err.message });
   }
 }
@@ -340,5 +454,41 @@ export async function checkStaffLimitEndpoint(req, res) {
     return res.json(limitCheck);
   } catch (err) {
     return res.status(500).json({ error: err.message });
+  }
+}
+export async function deleteInvite(req, res) {
+  try {
+    const { id } = req.params;
+    const requesterId = req.user?.id;
+    const requesterRole = normalizeRole(req.user?.role || '');
+
+    // 1. Fetch target invite
+    const { data: invite, error: inviteError } = await db
+      .from('invites')
+      .select('*')
+      .or(`inviteId.eq.${id},token.eq.${id}`)
+      .maybeSingle();
+
+    if (inviteError) return res.status(500).json({ error: inviteError.message });
+    if (!invite) return res.status(404).json({ error: 'Invite not found' });
+
+    // 2. Permission Check
+    if (requesterRole !== 'ADMIN') {
+      if (String(invite.invitedBy) !== String(requesterId)) {
+        return res.status(403).json({ error: 'Forbidden: You did not send this invite' });
+      }
+    }
+
+    // 3. Delete
+    const { error: delErr } = await db
+      .from('invites')
+      .delete()
+      .eq('inviteId', invite.inviteId);
+
+    if (delErr) return res.status(500).json({ error: delErr.message });
+
+    return res.json({ message: 'Invitation revoked successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 }

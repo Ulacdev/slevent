@@ -1,7 +1,7 @@
 import supabase from '../database/db.js';
 import crypto from 'crypto';
 import path from 'path';
-import { getOrCreateOrganizerForUser, getOrganizerByOwnerUserId, getOrganizerByUserId } from '../utils/organizerData.js';
+import { getOrCreateOrganizerForUser, getOrganizerByOwnerUserId, getOrganizerByUserId, enrichEventsWithOrganizer } from '../utils/organizerData.js';
 import { logAudit } from '../utils/auditLogger.js';
 import { checkPlanLimits } from '../utils/planValidator.js';
 import { notifyUserByPreference, getAdminSmtpConfig } from '../utils/notificationService.js';
@@ -129,38 +129,16 @@ export const listAdminEvents = async (req, res) => {
   try {
     const search = (req.query?.search || '').toString().trim();
 
-    // 1) Build set of allowed creator IDs based on requester role
-    const { data: userRows, error: userErr } = await supabase
-      .from('users')
-      .select('userId, role, employerId');
-    if (userErr) return res.status(500).json({ error: userErr.message });
-
     const requesterId = req.user?.id;
-    const requester = userRows.find((u) => String(u.userId) === String(requesterId));
+    const { data: requester, error: reqErr } = await supabase
+      .from('users')
+      .select('userId, role, employerId')
+      .eq('userId', requesterId)
+      .maybeSingle();
+
+    if (reqErr) return res.status(500).json({ error: reqErr.message });
     const requesterRole = String(requester?.role || req.user?.role || '').toUpperCase();
-
-    const allowedCreatorIds = new Set();
-
-    if (requesterRole === 'STAFF') {
-      // Staff sees their own events, events from their employer, and events from organizers they invited
-      allowedCreatorIds.add(requesterId);
-      if (requester?.employerId) {
-        allowedCreatorIds.add(String(requester.employerId));
-      }
-      for (const u of userRows) {
-        const empId = String(u.employerId || '');
-        if (empId === String(requesterId)) {
-          allowedCreatorIds.add(String(u.userId));
-        }
-      }
-    } else {
-      // Default Admin behavior: see all ADMIN and STAFF events
-      for (const u of userRows) {
-        if (ADMIN_ROLES.includes(String(u.role || '').toUpperCase())) {
-          allowedCreatorIds.add(String(u.userId || u.id));
-        }
-      }
-    }
+    const empId = requester?.employerId || requester?.employerid;
 
     // 2) Query events
     let query = supabase
@@ -168,6 +146,32 @@ export const listAdminEvents = async (req, res) => {
       .select('*, ticketTypes(*), promoted_events(promotion_id, expires_at)')
       .is('is_archived', false)
       .order('created_at', { ascending: false });
+
+    if (requesterRole === 'STAFF' && empId) {
+      // Resolve the organizerId for the staff's employer
+      const { data: empOrg } = await supabase.from('organizers').select('organizerId').eq('ownerUserId', empId).maybeSingle();
+      const employerOrgId = empOrg?.organizerId;
+      
+      // Staff sees their own events + employer events (by owner ID OR organizer UUID)
+      let filterStr = `createdBy.eq.${requesterId},createdBy.eq.${empId}`;
+      if (employerOrgId) {
+        filterStr += `,organizerId.eq.${employerOrgId}`;
+      }
+      query = query.or(filterStr);
+    } else if (requesterRole === 'STAFF') {
+      // Staff with no employer yet just sees their own
+      query = query.eq('createdBy', requesterId);
+    } else if (requesterRole === 'ORGANIZER') {
+      // Organizer sees their own events. 
+      // We also check if they are the owner of an organizerId linked to the event.
+      const { data: org } = await supabase.from('organizers').select('organizerId').eq('ownerUserId', requesterId).maybeSingle();
+      if (org?.organizerId) {
+        query = query.or(`createdBy.eq.${requesterId},organizerId.eq.${org.organizerId}`);
+      } else {
+        query = query.eq('createdBy', requesterId);
+      }
+    }
+    // ADMIN sees everything (no additional filter unless search)
 
     if (search) {
       query = query.or(`eventName.ilike.%${search}%,locationText.ilike.%${search}%,description.ilike.%${search}%`);
@@ -177,7 +181,10 @@ export const listAdminEvents = async (req, res) => {
     if (error) return res.status(500).json({ error: error.message });
 
     const now = new Date().toISOString();
-    (events || []).forEach(e => {
+    // 2.5) Enrich events with organizer branding
+    const enrichedEvents = await enrichEventsWithOrganizer(events || []);
+    
+    (enrichedEvents || []).forEach(e => {
         const activePromo = (e.promoted_events || []).find(p => p.expires_at > now);
         e.is_promoted = !!activePromo;
         e.isPromoted = !!activePromo;
@@ -198,18 +205,12 @@ export const listAdminEvents = async (req, res) => {
           reportMap[eventId] = (reportMap[eventId] || 0) + 1;
         }
       });
-      events.forEach(e => {
+      enrichedEvents.forEach(e => {
         e.reportCount = reportMap[e.eventId] || 0;
       });
     }
 
-    // 4) Enforce creator-role filtering for STAFF; ADMINs see EVERYTHING
-    if (requesterRole === 'ADMIN') {
-      return res.json(events || []);
-    }
-
-    const filtered = (events || []).filter((event) => allowedCreatorIds.has(String(event.createdBy)));
-    return res.json(filtered);
+    return res.json(enrichedEvents || []);
   } catch (err) {
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }
@@ -219,42 +220,54 @@ export const listAdminEvents = async (req, res) => {
 export const listUserEvents = async (req, res) => {
   try {
     const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-
-    console.log(`🔍 [AdminEvent] Listing events for user: ${userId}`);
-
-    // STAFF-AWARE: Fetch relevant organizer to see shared events
-    let organizer = null;
-    try {
-      organizer = await getOrganizerByUserId(userId);
-      console.log(`🔍 [AdminEvent] Organizer resolved: ${organizer?.organizerId ? 'FOUND (' + organizer.organizerId + ')' : 'NOT FOUND'}`);
-    } catch (orgErr) {
-      console.error('❌ [AdminEvent] Failed to resolve organizer:', orgErr.message);
-      // We don't fail here, we fallback to createdBy check
+    if (!userId) {
+      console.warn('[listUserEvents] 🚫 Missing userId in request');
+      return res.status(401).json({ error: 'Not authenticated' });
     }
 
+    console.log(`[listUserEvents] 🔍 Fetching events for: ${userId} (${req.user?.role || 'USER'})`);
+
+    // 1) Fetch requester identity to handle STAFF role correctly
+    let { data: requester, error: reqErr } = await supabase
+      .from('users')
+      .select('userId, role, employerId')
+      .eq('userId', userId)
+      .maybeSingle();
+
+    if (reqErr || !requester) {
+      const fallback = await supabase
+        .from('users')
+        .select('userId, role, employerId')
+        .eq('id', userId)
+        .maybeSingle();
+      requester = fallback.data;
+      if (fallback.error && !reqErr) reqErr = fallback.error;
+    }
+
+    if (reqErr) {
+      console.error('[listUserEvents] ❌ Identity resolution failed:', reqErr.message);
+      return res.status(500).json({ error: reqErr.message });
+    }
+
+    const requesterRole = String(requester?.role || req.user?.role || 'AUTHENTICATED').toUpperCase();
+    const empId = requester?.employerId || requester?.employerid;
     const search = (req.query?.search || '').toString().trim();
 
     let query = supabase
       .from('events')
       .select('*, ticketTypes(*), promoted_events(promotion_id, expires_at)');
 
-    if (organizer?.organizerId) {
-      const ownerId = organizer.ownerUserId;
-      console.log(`🔍 [AdminEvent] Querying by organizerId: ${organizer.organizerId} OR ownerId: ${ownerId} OR userId: ${userId}`);
+    if (requesterRole === 'STAFF' && empId) {
+      const { data: empOrg } = await supabase.from('organizers').select('organizerId').eq('ownerUserId', empId).maybeSingle();
+      const employerOrgId = empOrg?.organizerId;
       
-      // Build conditions array to avoid formatting issues
-      const conditions = [];
-      if (organizer.organizerId) conditions.push(`organizerId.eq.${organizer.organizerId}`);
-      if (ownerId) conditions.push(`createdBy.eq.${ownerId}`);
-      if (userId) conditions.push(`createdBy.eq.${userId}`);
-      
-      if (conditions.length > 0) {
-        query = query.or(conditions.join(','));
-      }
+      let filterStr = `createdBy.eq.${userId},createdBy.eq.${empId}`;
+      if (employerOrgId) filterStr += `,organizerId.eq.${employerOrgId}`;
+      query = query.or(filterStr);
+    } else if (requesterRole === 'ORGANIZER' || requesterRole === 'AUTHENTICATED') {
+       query = query.eq('createdBy', userId);
     } else {
-      console.log(`🔍 [AdminEvent] Falling back to createdBy only for userId: ${userId}`);
-      query = query.eq('createdBy', userId);
+       query = query.eq('createdBy', userId);
     }
 
     query = query
@@ -265,23 +278,30 @@ export const listUserEvents = async (req, res) => {
       query = query.or(`eventName.ilike.%${search}%,locationText.ilike.%${search}%,description.ilike.%${search}%`);
     }
 
+    console.log(`[listUserEvents] 🚀 Querying for role: ${requesterRole}, userId: ${userId}`);
     const { data, error } = await query;
     if (error) {
-      console.error('❌ [AdminEvent] Supabase error listing events:', error.message);
+      console.error('[listUserEvents] ❌ Supabase query failed:', error.message);
       return res.status(500).json({ error: error.message });
     }
 
+    // ENRICHMENT: Ensure organizer branding and promotion flags are attached
+    const enrichedEvents = await enrichEventsWithOrganizer(data || []);
     const now = new Date().toISOString();
-    (data || []).forEach(e => {
+    
+    const finalData = enrichedEvents.map(e => {
         const activePromo = (e.promoted_events || []).find(p => p.expires_at > now);
-        e.is_promoted = !!activePromo;
-        e.isPromoted = !!activePromo;
+        return {
+          ...e,
+          is_promoted: !!activePromo,
+          isPromoted: !!activePromo
+        };
     });
 
-    console.log(`✅ [AdminEvent] Successfully fetched ${(data || []).length} events for user ${userId}`);
-    return res.json(data || []);
+    console.log(`[listUserEvents] ✅ Returned ${finalData.length} enriched events`);
+    return res.json(finalData);
   } catch (err) {
-    console.error('💥 [AdminEvent] Unexpected crash in listUserEvents:', err);
+    console.error('[listUserEvents] 💥 Fatal Exception:', err);
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }
 };

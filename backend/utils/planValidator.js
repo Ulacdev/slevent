@@ -218,7 +218,7 @@ export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 
                 staffIds.push(ownerUserId); // Include owner to find their invites too
 
                 // 2. Count current staff (excluding owner if they aren't counted as staff)
-                const currentCount = (staffUsers || []).length;
+                const confirmedCount = (staffUsers || []).length;
 
                 // 3. Count pending invites from anyone in the organization
                 const { count: inviteCount } = await supabase
@@ -226,18 +226,23 @@ export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 
                     .select('*', { count: 'exact', head: true })
                     .in('invitedBy', staffIds);
 
-                const totalStaffPotential = currentCount + (inviteCount || 0);
+                const totalStaffPotential = confirmedCount + (inviteCount || 0);
                 const limitValue = (limits.max_staff_accounts ?? 2);
 
-                if (currentCount >= limitValue) {
+                if (totalStaffPotential >= limitValue) {
                     return {
                         allowed: false,
                         message: `Staff account limit reached. Your current plan allows up to ${limitValue} staff accounts.`,
                         limit: limitValue,
-                        current: currentCount
+                        current: totalStaffPotential
                     };
                 }
-                break;
+                
+                return {
+                    allowed: true,
+                    limit: limitValue,
+                    current: totalStaffPotential
+                };
             }
 
             case 'monthly_attendees': {

@@ -195,10 +195,14 @@ export const EventDiscoveryPage: React.FC = () => {
         const promotedIds = new Set(promotedEvents.map(e => e.eventId));
         const nonPromotedFiltered = filteredEvents.filter(e => !promotedIds.has(e.eventId));
 
-        // Add promoted flag to each promoted event
-        const markedPromotedEvents = promotedEvents.map(e => ({ ...e, is_promoted: true }));
-
-        return [...markedPromotedEvents, ...nonPromotedFiltered];
+        const markedPromotedEvents = promotedEvents.map(e => ({ ...e, is_promoted: true, isPromoted: true }));
+        const combined = [...markedPromotedEvents, ...nonPromotedFiltered];
+        return combined.map(event => {
+            if (promotedIds.has(event.eventId)) {
+                return { ...event, is_promoted: true, isPromoted: true };
+            }
+            return event;
+        });
     }, [promotedEvents, filteredEvents]);
 
     const toggleCategory = (catKey: string) => {
@@ -411,23 +415,7 @@ export const EventDiscoveryPage: React.FC = () => {
                                         className="relative animate-in fade-in slide-in-from-bottom-4 duration-700"
                                         style={{ animationDelay: `${idx * 50}ms` }}
                                     >
-                                        {/* Featured Badge - Show only for promoted events */}
-                                        {(event.isPromoted || event.is_promoted) && (
-                                            <div className="group/promoted relative absolute -top-4 left-4 z-10">
-                                                <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.15em] border border-[#38BDF2]/30 whitespace-nowrap cursor-help">
-                                                    <ICONS.Info className="w-3.5 h-3.5" strokeWidth={3} />
-                                                    PROMOTED
-                                                </div>
-                                                {/* Tooltip Overlay */}
-                                                <div className="absolute bottom-full left-0 mb-3 opacity-0 group-hover/promoted:opacity-100 pointer-events-none transition-all duration-300 translate-y-1 group-hover/promoted:translate-y-0 z-50">
-                                                    <div className="bg-black text-white text-[9px] font-bold px-3 py-1.5 rounded-xl whitespace-nowrap shadow-2xl border border-white/10 uppercase tracking-widest text-center leading-tight">
-                                                        Featured: Highlighted via<br />Organizer Subscription
-                                                    </div>
-                                                    <div className="w-2 h-2 bg-black rotate-45 absolute -bottom-1 left-4 border-r border-b border-white/10"></div>
-                                                </div>
-                                            </div>
-                                        )}
-                                        <EventCard event={event} onActionNotice={setInteractionNotice} />
+                                        <EventCard event={event} onActionNotice={setInteractionNotice} isLanding={false} />
                                     </div>
                                 ))}
                             </div>

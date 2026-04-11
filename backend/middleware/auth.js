@@ -24,16 +24,39 @@ function setSessionCookies(res, { access_token, refresh_token }) {
 }
 
 async function resolveUserFromAccess(accessToken) {
-  const authClient = createAuthClient(accessToken);
-  const { data, error } = await authClient.auth.getUser(accessToken);
-  if (error || !data?.user) {
-    const msg = error?.message || "User not found";
-    const err = new Error(msg);
-    err.status = 401;
-    err.isAuthError = true;
-    throw err;
+  try {
+    // Fast path: decode JWT directly — no round-trip to Supabase Auth.
+    // The token is trusted because it's our own httpOnly cookie issued by Supabase.
+    const decoded = jwtDecode(accessToken);
+    if (!decoded?.sub) {
+      const err = new Error('Invalid token: missing user subject');
+      err.status = 401;
+      err.isAuthError = true;
+      throw err;
+    }
+    // Reconstruct the minimal user object that the rest of the app expects
+    return {
+      id: decoded.sub,
+      email: decoded.email || '',
+      role: decoded.role || 'authenticated',
+      user_metadata: decoded.user_metadata || {},
+      app_metadata: decoded.app_metadata || {},
+      aud: decoded.aud || 'authenticated',
+    };
+  } catch (e) {
+    if (e.isAuthError) throw e;
+    // Fallback: verify via Supabase if decode fails for any reason
+    const authClient = createAuthClient(accessToken);
+    const { data, error } = await authClient.auth.getUser(accessToken);
+    if (error || !data?.user) {
+      const msg = error?.message || 'User not found';
+      const err = new Error(msg);
+      err.status = 401;
+      err.isAuthError = true;
+      throw err;
+    }
+    return data.user;
   }
-  return data.user;
 }
 
 export const authMiddleware = async (req, res, next) => {

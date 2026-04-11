@@ -2727,7 +2727,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
     return (
         <div className={`flex flex-col h-full w-full ${previewDevice === 'desktop' ? 'bg-[#F2F2F2]' : 'bg-[#F2F2F2] pb-32'}`}>
             {/* Mobile Header Bar */}
-            {previewDevice === 'mobile' && (
+            {(previewDevice as string) === 'mobile' && (
                 <div className="flex items-center justify-between flex-shrink-0 px-5 pt-5">
                     <button
                         type="button"
@@ -2742,14 +2742,14 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                             <button
                                 type="button"
                                 onClick={() => setPreviewDevice('mobile')}
-                                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${previewDevice === 'mobile' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
+                                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
                             >
                                 <MobilePreviewIcon className="w-4 h-4" />
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setPreviewDevice('desktop')}
-                                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${previewDevice === 'desktop' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
+                                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
                             >
                                 <DesktopPreviewIcon className="w-4 h-4" />
                             </button>
@@ -2759,7 +2759,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
             )}
 
 
-            {previewDevice === 'desktop' ? (
+            {(previewDevice as string) === 'desktop' ? (
                 <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center pt-32 pb-12 px-6">
                     {/* Centered Browser Window Frame - Scaled to 75% POV */}
                     <div 
@@ -2787,14 +2787,14 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                     <button
                                         type="button"
                                         onClick={() => setPreviewDevice('mobile')}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${previewDevice === 'mobile' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
                                     >
                                         <MobilePreviewIcon className="w-3.5 h-3.5" />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setPreviewDevice('desktop')}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${previewDevice === 'desktop' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
                                     >
                                         <DesktopPreviewIcon className="w-3.5 h-3.5" />
                                     </button>

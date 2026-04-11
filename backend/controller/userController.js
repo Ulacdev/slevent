@@ -184,6 +184,7 @@ export const getRole = async (req, res) => {
 }
 
 export const whoAmI = async (req, res) => {
+  console.log(`🚀 [whoAmI] Incoming request for ID: ${req.user?.id || 'Unknown'}`);
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
@@ -353,7 +354,7 @@ export const whoAmI = async (req, res) => {
       }
     }
 
-    // Normalize response with permissive defaults for staff unless explicitly false
+    // Standardize the result based on what we've resolved
     const result = {
       userId: data.userId || data.id,
       name: data.name,
@@ -371,33 +372,38 @@ export const whoAmI = async (req, res) => {
     };
 
     if (role === 'STAFF') {
-      let empId = String(data.employerId || data.employerid || '').trim();
+      let empId = data.employerId || data.employerid;
+      console.log(`[whoAmI] Staff Resolve: Name=${data.name}, ID=${data.userId}, DatabaseEmpID=${empId}`);
       
-      // AUTO-HEALING: If employerId is missing for STAFF, try to deduce it from invitations or activity
+      // Try to find empId from invites if missing (check both pending and accepted)
       if (!empId) {
-        try {
-          const { data: recentInvite } = await db.from('invites').select('invitedBy').eq('email', data.email?.toLowerCase().trim()).maybeSingle();
-          if (recentInvite?.invitedBy) empId = recentInvite.invitedBy;
-        } catch (e) { /* ignore */ }
+        console.log(`[whoAmI] Missing EmpID. Scanning invites for ${result.email}...`);
+        const { data: invite } = await db.from('invites').select('invitedBy, role').eq('email', result.email?.toLowerCase()).limit(1).maybeSingle();
+        empId = invite?.invitedBy;
+        if (empId) {
+          console.log(`[whoAmI] Recovered EmpID from Invite: ${empId}`);
+          result.role = invite.role || result.role;
+        }
       }
 
       if (empId) {
-        // Ultimate resilient lookup: Try ownerUserId, organizerId, AND then name coincidence if all fails
-        let { data: orgData } = await db.from('organizers').select('profileImageUrl, organizerName').eq('ownerUserId', empId).maybeSingle();
-        if (!orgData) {
-          const { data: orgData2 } = await db.from('organizers').select('profileImageUrl, organizerName').eq('organizerId', empId).maybeSingle();
-          orgData = orgData2;
-        }
-        
-        if (orgData) {
-          result.employerLogoUrl = orgData.profileImageUrl;
-          result.employerName = orgData.organizerName;
+        result.employerId = empId;
+        const { data: org, error: orgErr } = await db.from('organizers').select('organizerName, profileImageUrl').eq('ownerUserId', empId).maybeSingle();
+        if (org) {
+          result.employerName = org.organizerName || org.organizername;
+          result.employerLogoUrl = org.profileImageUrl || org.profileimageurl;
+          console.log(`[whoAmI] Branding Resolved: ${result.employerName}`);
           
-          // Persistence: Heal the user record if it was missing the employerId
-          if (!data.employerId && result.userId) {
-            await db.from('users').update({ employerId: empId }).eq('userId', result.userId);
+          // Background healing
+          if (!data.employerId && !data.employerid) {
+            console.log(`[whoAmI] Persisting recovered link to DB...`);
+            db.from('users').update({ employerId: empId }).eq('userId', result.userId).then(() => {});
           }
+        } else {
+          console.warn(`[whoAmI] No organizer found for ownerUserId=${empId}. Error:`, orgErr?.message);
         }
+      } else {
+        console.warn(`[whoAmI] No employer link found for staff: ${result.email}`);
       }
     }
 
@@ -466,7 +472,7 @@ export const getAllUsers = async (req, res) => {
           data = data.filter(
             (u) =>
               isRequesterRecord(u) ||
-              String(u.employerId || u.employerid || '') === String(requesterId || '')
+              String(u.employerId || '') === String(requesterId || '')
           );
         }
       } else {
@@ -483,14 +489,24 @@ export const getAllUsers = async (req, res) => {
 
     if (shouldScopeToRequesterTeam) {
       filtered = filtered.filter((user) => {
-        const employerId = user?.employerId || user?.employerid || null;
-        return isRequesterRecord(user) || String(employerId || '') === String(organizationOwnerId || '');
+        const userId = user?.userId || user?.id || null;
+        const employerId = user?.employerId || null;
+        
+        // Rules for visibility:
+        // 1. It's the user themselves
+        // 2. The user has the SAME employer (colleagues)
+        // 3. The user IS the employer (the owner/organizer)
+        return isRequesterRecord(user) || 
+               (organizationOwnerId && String(employerId || '') === String(organizationOwnerId)) ||
+               (organizationOwnerId && String(userId || '') === String(organizationOwnerId));
       });
     }
 
     if (requesterRole === 'ADMIN' && !teamOnlyRequested) {
+      // Only apply broad ADMIN privacy filter when NOT in teamOnly mode.
+      // When teamOnly=true, shouldScopeToRequesterTeam already scopes to the right users.
       filtered = filtered.filter((user) => {
-        const employerId = user?.employerId || user?.employerid || null;
+        const employerId = user?.employerId || null;
         // Keep users not tied to any organizer team, or tied to this admin's own scoped team.
         return !employerId || String(employerId) === String(requesterId || '');
       });
@@ -508,6 +524,53 @@ export const getAllUsers = async (req, res) => {
     })));
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const deleteStaff = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const requesterId = req.user?.id;
+    const requesterRole = normalizeRole(req.user?.role || '');
+
+    // 1. Fetch target user
+    const { data: target, error: targetError } = await db
+      .from('users')
+      .select('userId, employerId, role')
+      .eq('userId', id)
+      .maybeSingle();
+
+    if (targetError) return res.status(500).json({ error: targetError.message });
+    if (!target) return res.status(404).json({ error: 'User not found' });
+
+    // 2. Permission Check
+    if (requesterRole !== 'ADMIN') {
+      const employerId = target.employerId || target.employerid;
+      if (String(employerId) !== String(requesterId)) {
+        return res.status(403).json({ error: 'Forbidden: You do not own this staff member' });
+      }
+    }
+
+    // 3. Delete from DB Permanently
+    const { error: updErr } = await db
+      .from('users')
+      .delete()
+      .eq('userId', id);
+
+    if (updErr) return res.status(500).json({ error: updErr.message });
+
+    // 4. Force Remove from Supabase Auth
+    try {
+      if (db.auth && db.auth.admin) {
+        await db.auth.admin.deleteUser(id);
+      }
+    } catch (authError) {
+      console.log(`[deleteStaff] Auth deletion error for ${id}:`, authError.message);
+    }
+
+    return res.json({ message: 'Staff member removed successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -542,40 +605,49 @@ export const updatePermissions = async (req, res) => {
     const { canViewEvents = false, canEditEvents = false, canManualCheckIn = false, canReceiveNotifications = false } = req.body || {};
 
     // Resolve target user ownership to enforce privacy boundaries.
-    let target = null;
-    let targetError = null;
-
-    let targetResp = await db
+    let { data: target, error: targetError } = await db
       .from('users')
       .select('userId, role, employerId')
       .eq('userId', id)
       .maybeSingle();
-    target = targetResp.data;
-    targetError = targetResp.error;
 
-    if ((!target && !targetError) || (targetError && targetError.message?.includes('column "userId"'))) {
-      targetResp = await db
-        .from('users')
-        .select('id, role, employerId')
-        .eq('userId', id)
+    if (!target && !targetError) {
+      console.log(`[updatePermissions] 🔍 User ${id} not in 'users'. Checking 'invites'...`);
+      // Try finding in invites (strip 'pending-' prefix if present)
+      const cleanId = id.startsWith('pending-') ? id.replace('pending-', '') : id;
+      
+      const { data: invite, error: inviteErr } = await db
+        .from('invites')
+        .select('*')
+        .or(`inviteId.eq.${cleanId},token.eq.${cleanId},email.eq.${cleanId}`)
         .maybeSingle();
-      target = targetResp.data;
-      targetError = targetResp.error;
-    }
 
-    if (targetError && targetError.message?.includes('column')) {
-      targetResp = await db.from('users').select('*').eq('userId', id).maybeSingle();
-      target = targetResp.data;
-      targetError = targetResp.error;
-      if ((!target && !targetError) || (targetError && targetError.message?.includes('column "userId"'))) {
-        targetResp = await db.from('users').select('*').eq('userId', id).maybeSingle();
-        target = targetResp.data;
-        targetError = targetResp.error;
+      if (invite) {
+        console.log(`[updatePermissions] 🎫 Found pending invite for ${invite.email}. Updating invite permissions.`);
+        const { error: updErr } = await db.from('invites').update({
+          canViewEvents,
+          canEditEvents,
+          canManualCheckIn,
+          canReceiveNotifications
+        }).eq('inviteId', invite.inviteId);
+        
+        if (updErr) {
+          console.error('[updatePermissions] ❌ Invite Update Error:', updErr.message);
+          return res.status(500).json({ error: 'Failed to update invite permissions: ' + updErr.message });
+        }
+        return res.json({ message: 'Pending invitation permissions updated' });
       }
     }
 
-    if (targetError) return res.status(500).json({ error: targetError.message });
-    if (!target) return res.status(404).json({ error: 'User not found' });
+    if (targetError) {
+      console.error('[updatePermissions] ❌ Lookup Error:', targetError.message);
+      return res.status(500).json({ error: targetError.message });
+    }
+    
+    if (!target) {
+      console.warn(`[updatePermissions] ⚠️ User ${id} not found in database.`);
+      return res.status(404).json({ error: 'User or Invitation not found' });
+    }
 
     const targetEmployerId = target.employerId || target.employerid || null;
     const targetRole = normalizeRole(target.role);

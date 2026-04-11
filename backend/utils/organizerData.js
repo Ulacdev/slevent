@@ -252,30 +252,44 @@ export async function getOrganizerByOwnerUserId(ownerUserId) {
 export async function getOrganizerByUserId(userId) {
   if (!userId) return null;
 
+  console.log(`🔍 [organizerData] getOrganizerByUserId looking up user: ${userId}`);
+
   // 1. Try if user is an owner
   const byOwner = await getOrganizerByOwnerUserId(userId);
-  if (byOwner) return byOwner;
+  if (byOwner) {
+    console.log(`✅ [organizerData] User ${userId} is an organizer owner.`);
+    return byOwner;
+  }
 
   // 2. Try if user is staff (fetch employerId)
-  // Logic: Some tables use "userId" column, others "id".
+  // Logic: Selective fetch to avoid schema cache issues with Case-Sensitivity
   let userQuery = await supabase
     .from('users')
-    .select('employerId')
+    .select('*') // Fetching * is safer when column casing is uncertain
     .eq('userId', userId)
     .maybeSingle();
 
   if (!userQuery.data && !userQuery.error) {
     userQuery = await supabase
       .from('users')
-      .select('employerId')
+      .select('*')
       .eq('id', userId)
       .maybeSingle();
   }
 
-  if (userQuery.data?.employerId) {
-    return getOrganizerByOwnerUserId(userQuery.data.employerId);
+  if (userQuery.error) {
+    console.error(`❌ [organizerData] User lookup error:`, userQuery.error.message);
   }
 
+  const userData = userQuery.data;
+  const empId = userData?.employerId || userData?.employerid;
+  
+  if (empId) {
+    console.log(`✅ [organizerData] User ${userId} is staff for employer: ${empId}`);
+    return getOrganizerByOwnerUserId(empId);
+  }
+
+  console.log(`⚠️ [organizerData] No organizer linked to user: ${userId}`);
   return null;
 }
 

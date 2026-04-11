@@ -628,8 +628,8 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     <div className="min-h-screen flex flex-col md:flex-row bg-[#F2F2F2] font-sans selection:bg-[#38BDF2]/30">
       {/* Sidebar for desktop */}
       <aside
-        className={`bg-[#F2F2F2] border-r border-[#D1D5DB] hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-52' : 'w-16'}`}
-        style={{ overflow: desktopSidebarOpen ? 'hidden' : 'visible' }}
+        className={`bg-[#F2F2F2] border-r border-[#D1D5DB] hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-80' : 'w-24'}`}
+        style={{ overflow: desktopSidebarOpen ? 'hidden' : 'visible', zoom: 0.8 }}
       >
         <div className={`flex items-center justify-center border-b border-[#D1D5DB] shrink-0 h-24`}>
           <Link to={role === UserRole.ADMIN ? "/dashboard" : (role === UserRole.STAFF ? "/events" : "/user-home")} className="flex items-center justify-center group transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98]">
@@ -646,8 +646,8 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             )}
           </Link>
         </div>
-        <nav className={`flex-1 pt-6 pb-6 ${desktopSidebarOpen ? 'px-0' : 'px-2'} flex flex-col gap-0.5 overflow-y-auto overflow-x-visible scrollbar-none scroll-smooth`}
-          style={{ width: desktopSidebarOpen ? '100%' : '220px', paddingRight: desktopSidebarOpen ? '0' : '150px' }}>
+        <nav className={`flex-1 pt-6 pb-6 ${desktopSidebarOpen ? 'px-0 overflow-y-auto' : 'px-2 overflow-visible'} flex flex-col gap-1 scrollbar-none scroll-smooth`}
+          style={{ width: '100%' }}>
           {menuItems.map((item: any, idx) => {
             const isActive = checkIsActiveAdmin(item.path);
 
@@ -665,7 +665,6 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                       ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20'
                       : 'text-[#000000]/90 hover:bg-[#D1D5DB]/50 hover:text-[#000000]'
                     }`}
-                  title={!desktopSidebarOpen ? item.label : undefined}
                 >
                   <div className="relative shrink-0 flex items-center justify-center">
                     {React.cloneElement(item.icon as React.ReactElement<any>, {
@@ -675,7 +674,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   </div>
 
                   {desktopSidebarOpen ? (
-                    <span className={`text-[13px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#000000]'}`}>
+                    <span className={`text-[15px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#000000]'}`}>
                       {item.label}
                     </span>
                   ) : (
@@ -692,9 +691,9 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       </aside>
 
       <main
-        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-52' : 'md:pl-16'}`}
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}
       >
-        <header className="h-24 !bg-[#F2F2F2] border-b border-[#D1D5DB] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-[500] w-full">
+        <header className="h-24 !bg-[#F2F2F2] border-b border-[#D1D5DB] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-[500] w-full" style={{ zoom: 0.8 }}>
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
@@ -877,7 +876,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   )}
                 </div>
                 <div className="hidden sm:block text-left leading-tight">
-                  <p className="text-xs font-semibold text-[#2E2E2F] truncate max-w-[120px]">{displayName}</p>
+                  <p className="text-xs font-semibold text-[#2E2E2F]">{displayName}</p>
                   <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-0.5">{roleLabel}</p>
                 </div>
                 <svg className="w-4 h-4 text-[#2E2E2F]" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -1035,7 +1034,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         )}
 
         <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto" style={{ fontSize: '1.1rem' }}>
             {(noStaffPerms && location.pathname !== '/attendees') ? (
               <div className="flex flex-col items-center justify-center min-h-[40vh]">
                 <div className="text-2xl font-black text-[#2E2E2F] mb-4">No Access</div>
@@ -2550,11 +2549,11 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F2F2F2] selection:bg-[#38BDF2]/30">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#F2F2F2] font-sans selection:bg-[#38BDF2]/30">
       {/* Sidebar for desktop */}
       <aside
-        className={`bg-[#F2F2F2] border-r border-[#D1D5DB] hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-52' : 'w-16'}`}
-        style={{ overflow: desktopSidebarOpen ? 'hidden' : 'visible' }}
+        className={`bg-[#F2F2F2] border-r border-[#D1D5DB] hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-80' : 'w-24'}`}
+        style={{ overflow: desktopSidebarOpen ? 'hidden' : 'visible', zoom: 0.8 }}
       >
         <div className={`flex items-center justify-center border-b border-[#D1D5DB] shrink-0 h-24`}>
           <Link to="/user-home" className="flex items-center justify-center group transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98]">
@@ -2573,8 +2572,8 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             )}
           </Link>
         </div>
-        <nav className={`flex-1 pt-6 pb-6 ${desktopSidebarOpen ? 'px-0' : 'px-2'} flex flex-col gap-0.5 overflow-y-auto overflow-x-visible scrollbar-none scroll-smooth`}
-          style={{ width: desktopSidebarOpen ? '100%' : '220px', paddingRight: desktopSidebarOpen ? '0' : '150px' }}>
+        <nav className={`flex-1 pt-6 pb-6 ${desktopSidebarOpen ? 'px-0 overflow-y-auto' : 'px-2 overflow-visible'} flex flex-col gap-1 scrollbar-none scroll-smooth`}
+          style={{ width: '100%' }}>
           {menuItems.map((item: any, idx) => {
             const isActive = checkIsActive(item.path);
 
@@ -2592,7 +2591,6 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                       ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20'
                       : 'text-[#000000]/90 hover:bg-[#D1D5DB]/50 hover:text-[#000000]'
                     }`}
-                  title={!desktopSidebarOpen ? item.label : undefined}
                 >
                   <div className="relative shrink-0 flex items-center justify-center">
                     {React.cloneElement(item.icon as React.ReactElement<any>, {
@@ -2602,7 +2600,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   </div>
 
                   {desktopSidebarOpen ? (
-                    <span className={`text-[13px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#000000]'}`}>
+                    <span className={`text-[15px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#000000]'}`}>
                       {item.label}
                     </span>
                   ) : (
@@ -2619,9 +2617,9 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
       </aside>
 
       <main
-        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-52' : 'md:pl-16'}`}
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}
       >
-        <header className="h-24 bg-[#F2F2F2] border-b border-[#D1D5DB] px-4 sm:px-8 flex items-center justify-between gap-4 sm:gap-6 sticky top-0 z-[500] w-full">
+        <header className="h-24 !bg-[#F2F2F2] border-b border-[#D1D5DB] px-4 sm:px-8 flex items-center justify-between gap-4 sm:gap-6 sticky top-0 z-[500] w-full" style={{ zoom: 0.8 }}>
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
@@ -2769,7 +2767,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 )}
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-[13px] font-bold text-[#111827] truncate max-w-[100px] leading-none">{displayName}</p>
+                <p className="text-[13px] font-bold text-[#111827] leading-none">{displayName}</p>
                 <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide mt-1">{roleLabel}</p>
               </div>
               <svg className="w-4 h-4 text-[#9CA3AF]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -2948,7 +2946,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
         )}
 
         <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-          <div className="max-w-7xl mx-auto w-full">
+          <div className="max-w-7xl mx-auto w-full" style={{ fontSize: '1.1rem' }}>
             {children}
           </div>
         </div>

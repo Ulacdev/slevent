@@ -23,9 +23,10 @@ const getPayoutInfo = (reg: RegistrationView) => {
         };
     }
     if ((reg.amountPaid ?? 0) <= 0) return { net: 0, systemCut: 0, isEstimated: false };
-    const net = Math.max(0, (reg.amountPaid * 0.92) - 15);
-    const systemCut = Math.max(0, reg.amountPaid - net);
-    return { net, systemCut, isEstimated: true };
+    const platformFee = 0;
+    const processingFee = reg.amountPaid * 0.023;
+    const net = Math.max(0, reg.amountPaid - platformFee - processingFee);
+    return { net, systemCut: platformFee, isEstimated: true };
 };
 
 const RegistrationMobileCard = React.memo<{
