@@ -674,7 +674,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   </div>
 
                   {desktopSidebarOpen ? (
-                    <span className={`text-[15px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#000000]'}`}>
+                    <span className={`text-[16px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#000000]'}`}>
                       {item.label}
                     </span>
                   ) : (
@@ -2600,7 +2600,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   </div>
 
                   {desktopSidebarOpen ? (
-                    <span className={`text-[15px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#000000]'}`}>
+                    <span className={`text-[16px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#000000]'}`}>
                       {item.label}
                     </span>
                   ) : (
