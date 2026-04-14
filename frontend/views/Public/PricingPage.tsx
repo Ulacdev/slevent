@@ -79,7 +79,7 @@ export const PricingPage: React.FC = () => {
                         showBillingToggle
                         onPlanAction={() => {
                             if (!isAuthenticated) {
-                                openAuthModal('signup');
+                                navigate('/signup');
                             } else {
                                 navigate('/subscription');
                             }

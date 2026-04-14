@@ -107,181 +107,205 @@ export const SignUpView: React.FC = () => {
   };
 
   return (
-    <div
-      className="fixed inset-0 flex flex-col items-center justify-center py-4 px-[5px] overflow-y-auto bg-[#F2F2F2]"
-      style={{ zoom: 0.8 }}
-    >
-      {/* Decorative side elements */}
-      <div className="hidden lg:block absolute left-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
-        <ICONS.Zap className="w-64 h-64 text-[#2E2E2F]" />
-      </div>
-      <div className="hidden lg:block absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
-        <ICONS.Calendar className="w-64 h-64 text-[#2E2E2F]" />
-      </div>
-      <button
-        onClick={() => navigate('/')}
-        className="absolute top-6 left-6 p-2 rounded-full text-[#2E2E2F] hover:text-[#38BDF2] hover:bg-white shadow-sm transition-all group"
-        title="Go to Home"
-      >
-        <ICONS.Home className="w-6 h-6" />
-      </button>
-
-      <div className="max-w-[540px] w-full relative z-10 origin-center flex flex-col items-center">
-        <Card className="p-6 sm:p-10 border-[#2E2E2F]/10 border-[1.5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-xl overflow-hidden">
-          <div className="text-center flex flex-col items-center mb-2">
+    <div className="min-h-screen flex bg-white overflow-hidden">
+      {/* LEFT COLUMN: Branding & Value Prop (Hidden on Mobile) */}
+      <div className="hidden lg:flex w-[60%] bg-[#F2F2F2] flex-col relative p-16 justify-between border-r border-[#2E2E2F]/10">
+        <div>
+          {/* Logo Section */}
+          <div className="flex items-center gap-3 mb-12">
             <img
               src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
-              alt="StartupLab Business Center Logo"
-              className="mx-auto mb-2 w-[160px] h-auto"
+              alt="StartupLab Logo"
+              className="w-48 h-auto"
               style={{ objectFit: 'contain' }}
             />
-            <p className="text-[#2E2E2F] text-[14px] font-medium">Create your account</p>
-            <div className="w-16 h-1 bg-[#38BDF2] mx-auto mt-2 rounded-full"></div>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="space-y-3">
-              <div className="space-y-1 w-full">
-                <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Full Name <span className="text-red-500">*</span></label>
-                <div className="relative group/input">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10">
-                    <ICONS.Users className="w-4 h-4" />
-                  </div>
+          <div className="max-w-[540px]">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-widest mb-6 border border-[#38BDF2]/20">
+              Join the creator revolution
+            </span>
+            <h1 className="text-6xl font-black text-[#2E2E2F] leading-[1.1] tracking-tight mb-8">
+              Start building your <span className="text-[#38BDF2]">digital empire.</span>
+            </h1>
+            <p className="text-lg text-[#2E2E2F]/60 font-medium leading-relaxed max-w-[480px]">
+              The all-in-one platform for Filipino creators to monetize their skills through events, courses, and communities.
+            </p>
+          </div>
+        </div>
+
+        {/* Feature Cards Bottom */}
+        <div className="flex gap-6 mt-12">
+          <div className="flex-1 p-6 bg-white rounded-3xl border border-[#2E2E2F]/10 shadow-sm">
+            <h4 className="font-black text-[#2E2E2F] text-sm uppercase tracking-tight mb-2">Build once, earn forever</h4>
+            <p className="text-[12px] text-[#2E2E2F]/50 leading-relaxed">Systematize your knowledge into recurring revenue streams.</p>
+          </div>
+          <div className="flex-1 p-6 bg-white rounded-3xl border border-[#2E2E2F]/10 shadow-sm">
+            <h4 className="font-black text-[#2E2E2F] text-sm uppercase tracking-tight mb-2">Grow your tribe</h4>
+            <p className="text-[12px] text-[#2E2E2F]/50 leading-relaxed">Engage with your fans and build a lasting community of learners.</p>
+          </div>
+        </div>
+
+        {/* Decorative Absolutes */}
+        <ICONS.Zap className="absolute bottom-24 right-12 w-64 h-64 text-[#38BDF2] opacity-[0.03] rotate-12" />
+      </div>
+
+      {/* RIGHT COLUMN: Auth Form */}
+      <div className="w-full lg:w-[40%] flex flex-col items-center justify-center p-8 sm:p-12 relative overflow-y-auto bg-white">
+        {/* Mobile Logo Only */}
+        <div className="lg:hidden absolute top-8 left-8">
+          <img
+            src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
+            alt="StartupLab Logo"
+            className="w-32 h-auto"
+          />
+        </div>
+
+        <button
+          onClick={() => navigate('/')}
+          className="absolute top-8 right-8 p-3 rounded-2xl bg-[#F2F2F2] text-[#2E2E2F] hover:bg-[#38BDF2] hover:text-white transition-all group shadow-sm z-50"
+          title="Back to Home"
+        >
+          <ICONS.Home className="w-5 h-5" />
+        </button>
+
+        <div className="w-full max-w-[440px] pt-12 lg:pt-0">
+          <div className="mb-8">
+            <span className="text-[#38BDF2] text-[11px] font-black uppercase tracking-widest mb-2 block">Get Started</span>
+            <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tight">Create your account.</h2>
+            <p className="text-[#2E2E2F]/40 text-sm font-medium mt-1">Join thousands of creators building on StartupLab.</p>
+          </div>
+
+          <div className="bg-[#F2F2F2]/50 p-6 sm:p-8 rounded-[2.5rem] border border-[#2E2E2F]/5 backdrop-blur-sm shadow-sm scale-[0.95] origin-top">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              <div className="space-y-4">
+                <div className="space-y-1.5 w-full">
+                  <label className="block text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest ml-1 opacity-60">Full Name</label>
                   <input
                     placeholder="e.g. John Doe"
                     required
                     value={formData.name}
                     onChange={(e: any) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full pl-11 pr-4 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[13px]"
+                    className="w-full px-5 py-3.5 bg-white border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/30 focus:outline-none focus:ring-4 focus:ring-[#38BDF2]/10 focus:border-[#38BDF2] transition-all font-semibold text-sm shadow-sm"
                   />
                 </div>
-              </div>
 
-              <div className="space-y-1 w-full">
-                <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email <span className="text-red-500">*</span></label>
-                <div className="relative group/input">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10">
-                    <ICONS.Mail className="w-4 h-4" />
-                  </div>
+                <div className="space-y-1.5 w-full">
+                  <label className="block text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest ml-1 opacity-60">Email Address</label>
                   <input
                     type="email"
                     placeholder="you@example.com"
                     required
                     value={formData.email}
                     onChange={(e: any) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full pl-11 pr-4 py-2 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[13px]"
+                    className="w-full px-5 py-3.5 bg-white border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/30 focus:outline-none focus:ring-4 focus:ring-[#38BDF2]/10 focus:border-[#38BDF2] transition-all font-semibold text-sm shadow-sm"
                   />
                 </div>
-              </div>
 
-              <div className="space-y-1">
-                <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest ml-1 opacity-60">Password</label>
                   <PasswordInput
                     placeholder="••••••••"
                     required
                     value={formData.password}
                     onChange={(e: any) => setFormData({ ...formData, password: e.target.value })}
-                    icon={<ICONS.Lock className="w-4 h-4" />}
-                    className="!rounded-2xl"
+                    className="!rounded-2xl !py-3.5 !bg-white !shadow-sm !border-[#2E2E2F]/10"
                   />
                   <PasswordRequirements password={formData.password} />
                 </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest ml-1 opacity-60">Confirm Password</label>
+                  <PasswordInput
+                    placeholder="••••••••"
+                    required
+                    value={formData.confirmPassword}
+                    onChange={(e: any) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    className="!rounded-2xl !py-3.5 !bg-white !shadow-sm !border-[#2E2E2F]/10"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Confirm Password <span className="text-red-500">*</span></label>
-                <PasswordInput
-                  placeholder="••••••••"
-                  required
-                  value={formData.confirmPassword}
-                  onChange={(e: any) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  icon={<ICONS.Lock className="w-4 h-4" />}
-                  className="!rounded-2xl"
-                />
+              <div className="flex flex-col gap-4 mt-2">
+                <div className="flex items-start gap-3 px-1 group">
+                  <Checkbox
+                    checked={agreedToTerms}
+                    onChange={setAgreedToTerms}
+                  />
+                  <span className="text-[11px] text-[#2E2E2F] font-medium leading-relaxed">
+                    I agree to the{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowTermsModal(true)}
+                      className="text-[#38BDF2] font-black hover:underline"
+                    >
+                      Terms
+                    </button>
+                    {' '}and{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowPrivacyModal(true)}
+                      className="text-[#38BDF2] font-black hover:underline"
+                    >
+                      Privacy Policy
+                    </button>.
+                  </span>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full py-4 text-[14px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-[#38BDF2]/20 hover:shadow-xl transition-all border-none bg-[#38BDF2]"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Creating Account...' : 'Create Account'}
+                </Button>
+              </div>
+
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-[11px] font-bold text-center">
+                  {error}
+                </div>
+              )}
+            </form>
+
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[#2E2E2F]/10"></div>
+              </div>
+              <div className="relative flex justify-center text-[9px] uppercase font-black tracking-[0.2em] text-[#2E2E2F]/30">
+                <span className="bg-[#F2F2F2] px-4">Or sign up with</span>
               </div>
             </div>
 
-            <div className="flex flex-col gap-4 mt-2">
-              <div className="flex items-start gap-3 px-1 group">
-                <Checkbox
-                  checked={agreedToTerms}
-                  onChange={setAgreedToTerms}
-                />
-                <span className="text-[11px] text-[#2E2E2F] font-medium leading-relaxed mt-0.5">
-                  I agree to the{' '}
-                  <button
-                    type="button"
-                    onClick={() => setShowTermsModal(true)}
-                    className="text-[#38BDF2] font-bold hover:underline"
-                  >
-                    Terms of Service
-                  </button>
-                  {' '}and{' '}
-                  <button
-                    type="button"
-                    onClick={() => setShowPrivacyModal(true)}
-                    className="text-[#38BDF2] font-bold hover:underline"
-                  >
-                    Privacy Policy
-                  </button>.
-                </span>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full py-4 text-[13px] font-black uppercase tracking-[0.2em] rounded-2xl"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Creating Account...' : 'Create Account'}
-              </Button>
-            </div>
-
-            {error && (
-              <div className="mt-1 p-3 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-[11px] font-bold text-center">
-                {error}
-              </div>
-            )}
-          </form>
-
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#2E2E2F]/10"></div>
-            </div>
-            <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest">
-              <span className="bg-[#F2F2F2] px-4 text-[#2E2E2F]/40">Sign up with</span>
-            </div>
-          </div>
-
-          <div className="mt-4 mb-2">
             <button
               onClick={() => handleSocialLogin('google')}
               disabled={!!socialLoading}
-              title="Sign up with Google"
-              className="w-full flex items-center justify-center gap-3 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl hover:bg-black/5 hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-3 py-4 bg-white border border-[#2E2E2F]/5 rounded-2xl hover:bg-white hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
             >
               {socialLoading === 'google' ? (
-                <div className="w-5 h-5 border-2 border-[#4285F4]/20 border-t-[#4285F4] rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-[#4285F4]/20 border-t-[#4285F4] rounded-full animate-spin" />
               ) : (
-                <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <ICONS.Google className="w-4 h-4 group-hover:scale-110 transition-transform" />
               )}
-              <span className="text-[13px] font-black text-[#2E2E2F]">Sign up with Google</span>
+              <span className="text-[12px] font-bold text-[#2E2E2F]">Sign up with Google</span>
             </button>
           </div>
 
-          <div className="mt-5 pt-5 border-t border-[#2E2E2F]/10 text-center">
-            <p className="text-[#2E2E2F] text-[12px] font-medium">
+          <div className="mt-8 text-center space-y-3">
+            <p className="text-[#2E2E2F]/60 text-[13px] font-medium">
               Already have an account?{' '}
               <button
-                className="text-[#38BDF2] font-black hover:text-[#2E2E2F] transition-colors ml-1"
+                className="text-[#38BDF2] font-black hover:underline ml-1"
                 onClick={() => navigate('/login')}
               >
                 Sign In
               </button>
             </p>
+            <p className="text-[#2E2E2F]/40 text-[11px] font-medium">
+              Need help? Contact us at <a href="mailto:hello@upskwela.com" className="hover:text-[#38BDF2] transition-colors">hello@upskwela.com</a>
+            </p>
           </div>
-        </Card>
-
+        </div>
       </div>
 
       {/* Terms of Service Modal */}

@@ -9,12 +9,19 @@ export const MobileBottomNav: React.FC = () => {
     const location = useLocation();
     const { role, isAuthenticated, openAuthModal } = useUser();
 
-    const navItems = !isAuthenticated
+    interface NavItem {
+        label: string;
+        path: string;
+        icon: React.ReactNode;
+        action?: () => void;
+    }
+
+    const navItems: NavItem[] = !isAuthenticated
         ? [
             { label: 'Explore', path: '/', icon: <ICONS.Home className="w-6 h-6" /> },
             { label: 'Browse', path: '/browse-events', icon: <ICONS.Search className="w-6 h-6" /> },
             { label: 'Tickets', path: '/my-tickets', icon: <ICONS.Ticket className="w-6 h-6" /> },
-            { label: 'Login', path: '#', icon: <ICONS.User className="w-6 h-6" />, action: () => openAuthModal && openAuthModal('login') },
+            { label: 'Login', path: '/login', icon: <ICONS.User className="w-6 h-6" /> },
         ]
         : role === UserRole.STAFF
         ? [

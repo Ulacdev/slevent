@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, PasswordInput, PasswordRequirements, Checkbox, Modal } from './Shared';
+import { Button, PasswordInput, PasswordRequirements, Checkbox, Modal } from './Shared';
 import { ICONS } from '../constants';
 import { supabase } from "../supabase/supabaseClient.js";
 import { useUser } from '../context/UserContext';
@@ -75,7 +75,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
   if (!isOpen) return null;
 
   const handleLoginSuccess = async (user: any, session: any) => {
-      // Fetch enriched profile from our backend JIT whoAmI
       const profileRes = await apiService._fetch(`${API}/api/whoAmI`, { cache: 'no-store' });
       const profile = await profileRes.json().catch(() => ({}));
 
@@ -102,7 +101,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
       showToast('success', 'Logged in successfully!');
       onClose();
 
-      // Redirect based on role
       if (normalizedRole === UserRole.ADMIN) navigate('/dashboard');
       else if (normalizedRole === UserRole.STAFF) navigate('/events');
       else if (normalizedRole === UserRole.ORGANIZER) navigate(isOnboarded ? '/user-home' : '/onboarding');
@@ -115,7 +113,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
     setLoading(true);
 
     try {
-      // 🚀 Using backend login with masked password
       const res = await fetch(`${API}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -136,7 +133,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
       }
 
       if (data.user && data.session) {
-        // Sync Supabase client
         await supabase.auth.setSession({
           access_token: data.session.access_token,
           refresh_token: data.session.refresh_token
@@ -235,320 +231,292 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
 
   return (
     <div
-      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center py-4 px-4 sm:px-6 overflow-y-auto bg-black/40 backdrop-blur-sm animate-in fade-in duration-300"
+      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-300 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      {/* Decorative side elements */}
-      <div className="hidden lg:block absolute left-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
-        <ICONS.Zap className="w-64 h-64 text-[#2E2E2F]" />
-      </div>
-      <div className="hidden lg:block absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
-        <ICONS.Calendar className="w-64 h-64 text-[#2E2E2F]" />
-      </div>
-
       <div
-        className="max-w-[540px] w-full relative origin-center animate-in duration-300 transform"
-        style={{ transform: 'scale(0.8)' }}
+        className="max-w-[480px] w-full relative origin-center animate-in zoom-in-95 slide-in-from-bottom-4 duration-500"
         onClick={(e) => e.stopPropagation()}
       >
-        <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[1.5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-xl overflow-hidden relative">
+        <div className="bg-white p-8 sm:p-12 border border-[#2E2E2F]/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] rounded-[3rem] overflow-hidden relative">
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 p-2 rounded-full text-[#2E2E2F] hover:text-[#38BDF2] hover:bg-white shadow-sm transition-all"
+            className="absolute top-8 right-8 p-3 rounded-2xl bg-[#F2F2F2] text-[#2E2E2F] hover:bg-[#38BDF2] hover:text-white transition-all group shadow-sm z-50"
           >
             <ICONS.X className="w-5 h-5" />
           </button>
 
-          <div className="text-center flex flex-col items-center mb-8">
+          {/* Header Section */}
+          <div className="text-center mb-10 pt-2">
             <img
               src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
               alt="Logo"
-              className="mx-auto mb-4 w-[180px] max-w-full h-auto"
+              className="mx-auto mb-8 w-44 h-auto"
               style={{ objectFit: 'contain' }}
             />
-            <p className="text-[#2E2E2F] text-base font-medium">
-              {view === 'login' ? 'Sign in to your account' : view === 'signup' ? 'Create a new account' : 'Reset your password'}
-            </p>
-            <div className="w-16 h-1 bg-[#38BDF2] mx-auto mt-3 rounded-full"></div>
+            {view === 'login' && (
+              <div className="space-y-1">
+                <span className="text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.2em] block mb-2">Authenticated Access</span>
+                <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tight">Welcome back.</h2>
+                <p className="text-[#2E2E2F]/40 text-sm font-medium">Log in to manage your offerings.</p>
+              </div>
+            )}
+            {view === 'signup' && (
+              <div className="space-y-1">
+                <span className="text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.2em] block mb-2">Creator Journey</span>
+                <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tight">Create account.</h2>
+                <p className="text-[#2E2E2F]/40 text-sm font-medium">Join our network of Filipino experts.</p>
+              </div>
+            )}
+            {view === 'forgot-password' && (
+              <div className="space-y-1">
+                <span className="text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.2em] block mb-2">Security Hub</span>
+                <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tight">Reset password.</h2>
+                <p className="text-[#2E2E2F]/40 text-sm font-medium">Enter email to recover access.</p>
+              </div>
+            )}
           </div>
 
-          {view === 'login' && (
-            <form onSubmit={handleLogin} className="flex flex-col gap-4">
-              <div className="space-y-4">
-                <div className="space-y-1.5 w-full">
-                  <label className="block text-[13px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
-                  <div className="relative group/input">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10">
-                      <ICONS.Mail className="w-5 h-5" />
-                    </div>
+          <div className="bg-[#F2F2F2]/50 p-6 sm:p-8 rounded-[2.5rem] border border-[#2E2E2F]/5 relative">
+            {view === 'login' && (
+              <form onSubmit={handleLogin} className="flex flex-col gap-5">
+                <div className="space-y-4">
+                  <div className="space-y-2 w-full text-left">
+                    <label className="block text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest ml-1 opacity-60">Email Address</label>
                     <input
                       type="email"
                       placeholder="e.g. you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="w-full pl-12 pr-4 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[13px]"
+                      className="w-full px-5 py-4 bg-white border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/30 focus:outline-none focus:ring-4 focus:ring-[#38BDF2]/10 focus:border-[#38BDF2] transition-all font-semibold text-sm shadow-sm"
                     />
                   </div>
-                </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-[13px] font-bold text-[#2E2E2F] tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
-                  <div className="space-y-2">
+                  <div className="space-y-2 text-left">
+                    <label className="block text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest ml-1 opacity-60">Password</label>
                     <PasswordInput
                       value={password}
                       onChange={(e: any) => setPassword(e.target.value)}
                       required
-                      icon={<ICONS.Lock className="w-5 h-5" />}
-                      className="!rounded-2xl !text-[13px]"
+                      placeholder="Enter password"
+                      className="!rounded-2xl !py-4 !bg-white !shadow-sm !border-[#2E2E2F]/10 !text-sm"
                     />
                     <div className="flex justify-end pr-1">
                       <button
                         type="button"
                         onClick={() => setView('forgot-password')}
-                        className="text-[13px] font-bold text-[#38BDF2] hover:text-[#2E2E2F] transition-colors"
+                        className="text-[11px] font-bold text-[#38BDF2] hover:text-[#2E2E2F] transition-colors"
                       >
                         Forgot password?
                       </button>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <Button
-                className="w-full py-4 text-[13px] font-black uppercase tracking-[0.2em] rounded-2xl"
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? 'Wait...' : 'Sign In'}
-              </Button>
-
-              <div className="relative my-2">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[#2E2E2F]/10"></div>
+                <div className="pt-2">
+                  <Button
+                    className="w-full py-5 text-[14px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-[#38BDF2]/20 hover:shadow-xl transition-all border-none bg-[#38BDF2]"
+                    type="submit"
+                    disabled={loading}
+                  >
+                    {loading ? 'Authenticating...' : 'Sign In'}
+                  </Button>
                 </div>
-                <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest">
-                  <span className="bg-[#F2F2F2] px-3 text-[#2E2E2F]/40">Or continue with</span>
-                </div>
-              </div>
 
-              <div className="mt-4">
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-[#2E2E2F]/10"></div>
+                  </div>
+                  <div className="relative flex justify-center text-[9px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/30">
+                    <span className="bg-[#F2F2F2] px-3">Or continue with</span>
+                  </div>
+                </div>
+
                 <button
                   type="button"
                   onClick={() => handleSocialAuth('google')}
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/15 rounded-2xl hover:bg-black/5 hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-3 py-4 bg-white border border-[#2E2E2F]/5 rounded-2xl hover:bg-white hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
                 >
-                  <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-all" />
-                  <span className="text-[13px] font-black text-[#2E2E2F]">Google Account</span>
+                  <ICONS.Google className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <span className="text-[12px] font-bold text-[#2E2E2F]">Google Account</span>
                 </button>
-              </div>
 
-              <div className="mt-4 pt-4 border-t border-[#2E2E2F]/10 text-center">
-                <p className="text-[#2E2E2F] text-[13px] font-medium">
-                  Don't have an account?{' '}
-                  <button
-                    type="button"
-                    className="text-[#38BDF2] font-black hover:text-[#2E2E2F] transition-colors ml-1"
-                    onClick={() => setView('signup')}
-                  >
-                    Create Account
-                  </button>
-                </p>
-              </div>
-            </form>
-          )}
+                <div className="mt-4 pt-6 border-t border-[#2E2E2F]/5 text-center">
+                  <p className="text-[#2E2E2F]/60 text-[13px] font-medium">
+                    New here?{' '}
+                    <button
+                      type="button"
+                      className="text-[#38BDF2] font-black hover:underline ml-1"
+                      onClick={() => setView('signup')}
+                    >
+                      Join now for free
+                    </button>
+                  </p>
+                </div>
+              </form>
+            )}
 
-          {view === 'signup' && (
-            <form onSubmit={handleSignup} className="flex flex-col gap-4">
-              <div className="space-y-3">
-                <div className="space-y-1 w-full">
-                  <label className="block text-[13px] font-bold text-[#2E2E2F] tracking-tight ml-1">Full Name <span className="text-red-500">*</span></label>
-                  <div className="relative group/input">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10">
-                      <ICONS.Users className="w-4 h-4" />
-                    </div>
+            {view === 'signup' && (
+              <form onSubmit={handleSignup} className="flex flex-col gap-4">
+                <div className="space-y-4 max-h-[400px] overflow-y-auto px-1 custom-scrollbar">
+                  <div className="space-y-1.5 w-full text-left">
+                    <label className="block text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest ml-1 opacity-60">Full Name</label>
                     <input
                       placeholder="e.g. John Doe"
                       required
                       value={signupData.name}
                       onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-                      className="w-full pl-11 pr-4 py-2.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[13px]"
+                      className="w-full px-5 py-3.5 bg-white border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/30 focus:outline-none focus:ring-4 focus:ring-[#38BDF2]/10 focus:border-[#38BDF2] transition-all font-semibold text-sm shadow-sm"
                     />
                   </div>
-                </div>
 
-                <div className="space-y-1 w-full">
-                  <label className="block text-[13px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
-                  <div className="relative group/input">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10">
-                      <ICONS.Mail className="w-4 h-4" />
-                    </div>
+                  <div className="space-y-1.5 w-full text-left">
+                    <label className="block text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest ml-1 opacity-60">Email Address</label>
                     <input
                       type="email"
                       placeholder="you@example.com"
                       required
                       value={signupData.email}
                       onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-                      className="w-full pl-11 pr-4 py-2.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[13px]"
+                      className="w-full px-5 py-3.5 bg-white border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/30 focus:outline-none focus:ring-4 focus:ring-[#38BDF2]/10 focus:border-[#38BDF2] transition-all font-semibold text-sm shadow-sm"
                     />
+                  </div>
+
+                  <div className="space-y-1.5 text-left">
+                    <label className="block text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest ml-1 opacity-60">Password</label>
+                    <PasswordInput
+                      placeholder="••••••••"
+                      required
+                      value={signupData.password}
+                      onChange={(e: any) => setSignupData({ ...signupData, password: e.target.value })}
+                      className="!rounded-2xl !py-3.5 !bg-white !shadow-sm !border-[#2E2E2F]/10 !text-sm"
+                    />
+                    <PasswordRequirements password={signupData.password} />
+                  </div>
+
+                  <div className="space-y-1.5 text-left">
+                    <label className="block text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest ml-1 opacity-60">Confirm Password</label>
+                    <PasswordInput
+                      placeholder="••••••••"
+                      required
+                      value={signupData.confirmPassword}
+                      onChange={(e: any) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
+                      className="!rounded-2xl !py-3.5 !bg-white !shadow-sm !border-[#2E2E2F]/10 !text-sm"
+                    />
+                  </div>
+
+                  <div className="flex items-start gap-3 px-1 mt-6">
+                    <Checkbox
+                      checked={agreedToTerms}
+                      onChange={setAgreedToTerms}
+                    />
+                    <span className="text-[11px] text-[#2E2E2F] font-medium leading-relaxed">
+                      I agree to the{' '}
+                      <button
+                        type="button"
+                        onClick={() => setShowTermsModal(true)}
+                        className="text-[#38BDF2] font-black hover:underline"
+                      >
+                        Terms
+                      </button>
+                      {' '}and{' '}
+                      <button
+                        type="button"
+                        onClick={() => setShowPrivacyModal(true)}
+                        className="text-[#38BDF2] font-black hover:underline"
+                      >
+                        Privacy Policy
+                      </button>.
+                    </span>
                   </div>
                 </div>
 
-                <div className="space-y-1 w-full">
-                  <label className="block text-[13px] font-bold text-[#2E2E2F] tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
-                  <PasswordInput
-                    placeholder="••••••••"
-                    required
-                    value={signupData.password}
-                    onChange={(e: any) => setSignupData({ ...signupData, password: e.target.value })}
-                    icon={<ICONS.Lock className="w-4 h-4" />}
-                    className="!rounded-2xl py-2.5 !text-[13px]"
-                  />
-                </div>
-                <PasswordRequirements password={signupData.password} />
-                <div className="space-y-1 w-full">
-                  <label className="block text-[13px] font-bold text-[#2E2E2F] tracking-tight ml-1">Confirm Password <span className="text-red-500">*</span></label>
-                  <PasswordInput
-                    placeholder="••••••••"
-                    required
-                    value={signupData.confirmPassword}
-                    onChange={(e: any) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
-                    icon={<ICONS.Lock className="w-4 h-4" />}
-                    className="!rounded-2xl py-2.5 !text-[13px]"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 px-1 group">
-                <Checkbox
-                  checked={agreedToTerms}
-                  onChange={setAgreedToTerms}
-                />
-                <span className="text-[13px] text-[#2E2E2F] font-medium leading-relaxed mt-0.5">
-                  I agree to the{' '}
-                  <button
-                    type="button"
-                    onClick={() => setShowTermsModal(true)}
-                    className="text-[#38BDF2] font-bold hover:underline"
+                <div className="pt-2">
+                  <Button
+                    type="submit"
+                    className="w-full py-5 text-[14px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-[#38BDF2]/20 hover:shadow-xl transition-all border-none bg-[#38BDF2]"
+                    disabled={loading}
                   >
-                    Terms of Service
-                  </button>
-                  {' '}and{' '}
+                    {loading ? 'Creating Account...' : 'Create Account'}
+                  </Button>
+                </div>
+
+                <div className="pt-6 border-t border-[#2E2E2F]/5 text-center">
                   <button
                     type="button"
-                    onClick={() => setShowPrivacyModal(true)}
-                    className="text-[#38BDF2] font-bold hover:underline"
-                  >
-                    Privacy Policy
-                  </button>.
-                </span>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full py-4 text-[13px] font-black uppercase tracking-[0.2em] rounded-2xl"
-                disabled={loading}
-              >
-                {loading ? 'Creating...' : 'Create Account'}
-              </Button>
-
-              <div className="relative my-2">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[#2E2E2F]/10"></div>
-                </div>
-                <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest">
-                  <span className="bg-[#F2F2F2] px-3 text-[#2E2E2F]/40">Or sign up with</span>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <button
-                  type="button"
-                  onClick={() => handleSocialAuth('google')}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/15 rounded-2xl hover:bg-black/5 hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
-                >
-                  <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-all" />
-                  <span className="text-[13px] font-black text-[#2E2E2F]">Google Account</span>
-                </button>
-              </div>
-
-              <div className="mt-4 pt-4 border-t border-[#2E2E2F]/10 text-center">
-                <p className="text-[#2E2E2F] text-[13px] font-medium">
-                  Already have an account?{' '}
-                  <button
-                    type="button"
-                    className="text-[#38BDF2] font-black hover:text-[#2E2E2F] transition-colors ml-1"
+                    className="text-[#2E2E2F]/60 text-[13px] font-medium hover:text-[#38BDF2] transition-colors"
                     onClick={() => setView('login')}
                   >
-                    Sign In
+                    Already have an account? <span className="text-[#38BDF2] font-black hover:underline">Sign In</span>
                   </button>
-                </p>
-              </div>
-            </form>
-          )}
+                </div>
+              </form>
+            )}
 
-          {view === 'forgot-password' && (
-            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-              {!forgotMessage ? (
-                <form onSubmit={handleForgotRequest} className="flex flex-col gap-5">
-                  <p className="text-[#2E2E2F] text-[13px] font-medium text-center leading-relaxed">
-                    Enter your email and we'll send you a link to reset your password.
-                  </p>
-                  <div className="space-y-1.5 w-full text-left">
-                    <label className="block text-[13px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
-                    <div className="relative group/input">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-all z-10">
-                        <ICONS.Mail className="w-5 h-5" />
-                      </div>
+            {view === 'forgot-password' && (
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                {!forgotMessage ? (
+                  <form onSubmit={handleForgotRequest} className="flex flex-col gap-6">
+                    <p className="text-[#2E2E2F]/60 text-[13px] font-medium text-center leading-relaxed">
+                      Enter your email and we'll send you a secure link to reset your password.
+                    </p>
+                    <div className="space-y-2 w-full text-left">
+                      <label className="block text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest ml-1 opacity-60">Registered Email</label>
                       <input
                         type="email"
                         placeholder="you@example.com"
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
                         required
-                        className="w-full pl-12 pr-4 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[13px]"
+                        className="w-full px-5 py-4 bg-white border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/30 focus:outline-none focus:ring-4 focus:ring-[#38BDF2]/10 focus:border-[#38BDF2] transition-all font-semibold text-sm shadow-sm"
                       />
                     </div>
+                    <Button
+                      className="w-full py-5 text-[14px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-[#38BDF2]/20 hover:shadow-xl transition-all border-none bg-[#38BDF2]"
+                      type="submit"
+                      disabled={loading}
+                    >
+                      {loading ? 'Sending link...' : 'Send Recovery Link'}
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={() => setView('login')}
+                      className="text-[12px] font-black text-[#2E2E2F]/40 hover:text-[#38BDF2] transition-colors"
+                    >
+                      Return to Sign In
+                    </button>
+                  </form>
+                ) : (
+                  <div className="text-center py-4 px-2">
+                    <div className="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-[#38BDF2] text-white shadow-xl shadow-[#38BDF2]/30 rotate-3 transition-transform">
+                      <ICONS.Check className="w-10 h-10" strokeWidth={4} />
+                    </div>
+                    <h3 className="text-2xl font-black text-[#2E2E2F] mb-2 tracking-tight">Recovery Sent.</h3>
+                    <p className="text-[#2E2E2F]/60 font-medium text-sm mb-8 leading-relaxed">
+                      Check your inbox for a link to securely reset your password.
+                    </p>
+                    <Button
+                      className="w-full py-4 text-[12px] font-black uppercase tracking-widest rounded-2xl"
+                      onClick={() => setView('login')}
+                    >
+                      Back to Login
+                    </Button>
                   </div>
-                  <Button
-                    className="w-full py-4 text-[13px] font-black uppercase tracking-[0.2em] rounded-2xl"
-                    type="submit"
-                    disabled={loading}
-                  >
-                    {loading ? 'Wait...' : 'Send Link'}
-                  </Button>
-                  <button
-                    type="button"
-                    onClick={() => setView('login')}
-                    className="text-[13px] font-bold text-[#2E2E2F] hover:text-[#38BDF2] transition-colors"
-                  >
-                    Back to Sign In
-                  </button>
-                </form>
-              ) : (
-                <div className="text-center py-4">
-                  <p className="text-[#2E2E2F] font-bold text-[13px] mb-6">{forgotMessage}</p>
-                  <Button
-                    className="w-full py-4 text-[13px] font-black uppercase tracking-widest rounded-[5px]"
-                    onClick={() => setView('login')}
-                  >
-                    Back to Sign In
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
+          </div>
 
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-[13px] font-bold text-center animate-in shake duration-300">
+            <div className="mt-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-[11px] font-bold text-center leading-relaxed animate-in shake duration-300">
               {error}
             </div>
           )}
-        </Card>
+        </div>
       </div>
 
       {/* Terms of Service Modal */}

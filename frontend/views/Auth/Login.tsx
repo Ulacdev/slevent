@@ -154,135 +154,191 @@ export const LoginPerspective: React.FC = () => {
   };
 
   return (
-    <div
-      className="fixed inset-0 flex flex-col items-center justify-center py-4 px-[5px] overflow-y-auto bg-[#F2F2F2]"
-    >
-      {/* Decorative side elements */}
-      <div className="hidden lg:block absolute left-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
-        <ICONS.Zap className="w-64 h-64 text-[#2E2E2F]" />
-      </div>
-      <div className="hidden lg:block absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
-        <ICONS.Calendar className="w-64 h-64 text-[#2E2E2F]" />
-      </div>
-
-      <button
-        onClick={() => navigate('/')}
-        className="absolute top-6 left-6 p-2 rounded-full text-[#2E2E2F] hover:text-[#38BDF2] hover:bg-white shadow-sm transition-all group"
-        title="Go to Home"
-      >
-        <ICONS.Home className="w-6 h-6" />
-      </button>
-
-      <div className="max-w-[540px] w-full relative z-10 origin-center flex flex-col items-center" style={{ transform: 'scale(0.8)', transformOrigin: 'center' }}>
-        <Card className="p-8 sm:p-10 border-[#2E2E2F]/10 border-[1.5px] flex flex-col w-full bg-[#F2F2F2] shadow-2xl rounded-xl overflow-hidden">
-          <div className="text-center flex flex-col items-center mb-6">
+    <div className="min-h-screen flex bg-white overflow-hidden">
+      {/* LEFT COLUMN: Branding & Value Prop (Hidden on Mobile) */}
+      <div className="hidden lg:flex w-[60%] bg-[#F2F2F2] flex-col relative p-16 justify-between border-r border-[#2E2E2F]/10">
+        <div>
+          {/* Logo Section */}
+          <div className="flex items-center gap-3 mb-12">
             <img
               src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
-              alt="StartupLab Business Center Logo"
-              className="mx-auto mb-3 w-[180px] h-auto"
+              alt="StartupLab Logo"
+              className="w-48 h-auto"
               style={{ objectFit: 'contain' }}
             />
-            <p className="text-[#2E2E2F] text-base font-medium">Sign in to your account</p>
-            <div className="w-16 h-1 bg-[#38BDF2] mx-auto mt-3 rounded-full"></div>
           </div>
 
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            <div className="space-y-4">
-              <div className="space-y-1.5 w-full">
-                <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Email Address <span className="text-red-500">*</span></label>
-                <div className="relative group/input">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10">
-                    <ICONS.Mail className="w-5 h-5" />
-                  </div>
-                  <input
-                    type="email"
-                    placeholder="e.g. you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="w-full pl-12 pr-4 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-semibold text-[14px]"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-[10.5px] font-bold text-[#2E2E2F] tracking-tight ml-1">Password <span className="text-red-500">*</span></label>
-                <div className="space-y-2">
-                  <PasswordInput
-                    value={password}
-                    onChange={(e: any) => setPassword(e.target.value)}
-                    required
-                    icon={<ICONS.Lock className="w-5 h-5" />}
-                    className="!rounded-2xl"
-                  />
-                  <div className="flex justify-end pr-1">
-                    <button
-                      type="button"
-                      onClick={() => navigate('/forgot-password')}
-                      className="text-[11px] font-bold text-[#38BDF2] hover:text-[#2E2E2F] transition-colors"
-                    >
-                      Forgot password?
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-1">
-              <Button
-                className="w-full py-4 text-[13px] font-black uppercase tracking-[0.2em] rounded-2xl"
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? 'Signing you in...' : 'Sign In'}
-              </Button>
-            </div>
-
-            {error && (
-              <div className="mt-1 p-3 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-[11px] font-bold text-center">
-                {error}
-              </div>
-            )}
-          </form>
-
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#2E2E2F]/10"></div>
-            </div>
-            <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest">
-              <span className="bg-[#F2F2F2] px-4 text-[#2E2E2F]/40">Or continue with</span>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <button
-              onClick={() => handleSocialLogin('google')}
-              disabled={!!socialLoading}
-              title="Sign in with Google"
-              className="w-full flex items-center justify-center gap-3 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl hover:bg-black/5 hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
-            >
-              {socialLoading === 'google' ? (
-                <div className="w-5 h-5 border-2 border-[#4285F4]/20 border-t-[#4285F4] rounded-full animate-spin" />
-              ) : (
-                <ICONS.Google className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              )}
-              <span className="text-[13px] font-black text-[#2E2E2F]">Continue with Google</span>
-            </button>
-          </div>
-
-          <div className="mt-6 pt-6 border-t border-[#2E2E2F]/10 text-center">
-            <p className="text-[#2E2E2F] text-[13px] font-medium">
-              Don't have an account?{' '}
-              <button
-                className="text-[#38BDF2] font-black hover:text-[#2E2E2F] transition-colors ml-1"
-                onClick={() => navigate('/signup')}
-              >
-                Create Account
-              </button>
+          <div className="max-w-[540px]">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-widest mb-6 border border-[#38BDF2]/20">
+              Built for creators, mentors, and communities
+            </span>
+            <h1 className="text-6xl font-black text-[#2E2E2F] leading-[1.1] tracking-tight mb-8">
+              Turn your expertise into <span className="text-[#38BDF2]">steady income.</span>
+            </h1>
+            <p className="text-lg text-[#2E2E2F]/60 font-medium leading-relaxed max-w-[480px]">
+              Launch memberships, courses, paid events, and digital offers in one place, with local payments that work for Filipino creators.
             </p>
           </div>
-        </Card>
+        </div>
 
+        {/* Feature Cards Bottom */}
+        <div className="flex gap-6 mt-12">
+          <div className="flex-1 p-6 bg-white rounded-3xl border border-[#2E2E2F]/10 shadow-sm hover:shadow-md transition-shadow">
+            <h4 className="font-black text-[#2E2E2F] text-sm uppercase tracking-tight mb-2">Teach with structure</h4>
+            <p className="text-[12px] text-[#2E2E2F]/50 leading-relaxed">Bring your audience into courses, live sessions, and private communities.</p>
+          </div>
+          <div className="flex-1 p-6 bg-white rounded-3xl border border-[#2E2E2F]/10 shadow-sm hover:shadow-md transition-shadow">
+            <h4 className="font-black text-[#2E2E2F] text-sm uppercase tracking-tight mb-2">Get paid locally</h4>
+            <p className="text-[12px] text-[#2E2E2F]/50 leading-relaxed">Accept GCash and Maya while keeping your offers simple to manage.</p>
+          </div>
+        </div>
+
+        {/* Decorative Absolutes */}
+        <ICONS.Zap className="absolute bottom-24 right-12 w-64 h-64 text-[#38BDF2] opacity-[0.03] rotate-12" />
+      </div>
+
+      {/* RIGHT COLUMN: Auth Form */}
+      <div className="w-full lg:w-[40%] flex flex-col items-center justify-center p-8 sm:p-12 relative overflow-y-auto bg-white">
+        {/* Mobile Logo Only */}
+        <div className="lg:hidden absolute top-8 left-8">
+          <img
+            src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
+            alt="StartupLab Logo"
+            className="w-32 h-auto"
+          />
+        </div>
+
+        <button
+          onClick={() => navigate('/')}
+          className="absolute top-8 right-8 p-3 rounded-2xl bg-[#F2F2F2] text-[#2E2E2F] hover:bg-[#38BDF2] hover:text-white transition-all group shadow-sm"
+          title="Back to Home"
+        >
+          <ICONS.Home className="w-5 h-5" />
+        </button>
+
+        <div className="w-full max-w-[420px]">
+          <div className="mb-10 lg:mt-0 mt-12">
+            <span className="text-[#38BDF2] text-[11px] font-black uppercase tracking-widest mb-2 block">Welcome back</span>
+            <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tight">Log in to continue building.</h2>
+            <p className="text-[#2E2E2F]/40 text-sm font-medium mt-1">Access your community, courses, and creator tools from one account.</p>
+          </div>
+
+          <div className="bg-[#F2F2F2]/50 p-8 rounded-[2.5rem] border border-[#2E2E2F]/5 backdrop-blur-sm">
+            <form onSubmit={handleLogin} className="flex flex-col gap-6">
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label className="block text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest ml-1 opacity-60">Email address or username</label>
+                  <div className="relative group">
+                    <input
+                      type="email"
+                      placeholder="john@example.com or username"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="w-full px-5 py-4 bg-white border border-[#2E2E2F]/10 rounded-2xl text-[#2E2E2F] placeholder-[#2E2E2F]/30 focus:outline-none focus:ring-4 focus:ring-[#38BDF2]/10 focus:border-[#38BDF2] transition-all font-semibold text-sm shadow-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center ml-1">
+                    <label className="block text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest opacity-60">Password</label>
+                  </div>
+                  <div className="relative">
+                    <PasswordInput
+                      value={password}
+                      onChange={(e: any) => setPassword(e.target.value)}
+                      required
+                      placeholder="Enter your password"
+                      className="!rounded-2xl !py-4 !bg-white !shadow-sm !border-[#2E2E2F]/10"
+                    />
+                    <div className="flex justify-end mt-2 px-1">
+                      <button
+                        type="button"
+                        onClick={() => navigate('/forgot-password')}
+                        className="text-[11px] font-bold text-[#38BDF2] hover:text-[#2E2E2F] transition-colors"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <Button
+                  className="w-full py-5 text-[14px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-[#38BDF2]/20 hover:shadow-xl hover:shadow-[#38BDF2]/30 transition-all border-none bg-[#38BDF2]"
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? 'Authenticating...' : 'Login'}
+                </Button>
+              </div>
+
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-[11px] font-bold text-center leading-relaxed">
+                  {error}
+                </div>
+              )}
+            </form>
+
+            <div className="relative my-10">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[#2E2E2F]/10"></div>
+              </div>
+              <div className="relative flex justify-center text-[9px] uppercase font-black tracking-[0.2em] text-[#2E2E2F]/30">
+                <span className="bg-[#F2F2F2] px-4">Or continue with</span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => {}} // Placeholder for Send Login Link if exists
+                className="w-full flex items-center justify-center gap-3 py-4 bg-white border border-[#2E2E2F]/5 rounded-2xl hover:bg-white hover:border-[#38BDF2]/40 transition-all shadow-sm group"
+              >
+                <ICONS.Mail className="w-4 h-4 text-[#2E2E2F]/40" />
+                <span className="text-[12px] font-bold text-[#2E2E2F]">Send Login Link</span>
+              </button>
+
+              <button
+                onClick={() => handleSocialLogin('google')}
+                disabled={!!socialLoading}
+                className="w-full flex items-center justify-center gap-3 py-4 bg-white border border-[#2E2E2F]/5 rounded-2xl hover:bg-white hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
+              >
+                {socialLoading === 'google' ? (
+                  <div className="w-4 h-4 border-2 border-[#4285F4]/20 border-t-[#4285F4] rounded-full animate-spin" />
+                ) : (
+                  <ICONS.Google className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                )}
+                <span className="text-[12px] font-bold text-[#2E2E2F]">Continue with Google</span>
+              </button>
+
+              <button
+                onClick={() => handleSocialLogin('apple')}
+                disabled={!!socialLoading}
+                className="w-full flex items-center justify-center gap-3 py-4 bg-white border border-[#2E2E2F]/5 rounded-2xl hover:bg-white hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
+              >
+                <ICONS.Apple className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                <span className="text-[12px] font-bold text-[#2E2E2F]">Continue with Apple</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-10 text-center space-y-3">
+            <p className="text-[#2E2E2F]/60 text-[13px] font-medium">
+              Don't have an account?{' '}
+              <button
+                className="text-[#38BDF2] font-black hover:underline ml-1"
+                onClick={() => navigate('/signup')}
+              >
+                Sign up here for free
+              </button>
+            </p>
+            <p className="text-[#2E2E2F]/40 text-[11px] font-medium">
+              Need help? Contact us at <a href="mailto:hello@upskwela.com" className="hover:text-[#38BDF2] transition-colors">hello@upskwela.com</a>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -196,11 +196,7 @@ export const EventCard: React.FC<EventCardProps> = ({
   const organizerRestricted = isAuthenticated && role === UserRole.ORGANIZER && !isAttendingView;
 
   const gotoSignup = () => {
-    if (openAuthModal) {
-      openAuthModal('signup');
-    } else {
-      navigate('/signup'); // fallback
-    }
+    navigate('/signup');
   };
 
   const handleLike = async (eventClick: React.MouseEvent<HTMLButtonElement>) => {
@@ -525,11 +521,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   const initialLoadRef = useRef(true);
   const requestIdRef = useRef(0);
   const gotoSignup = () => {
-    if (openAuthModal) {
-      openAuthModal('signup');
-    } else {
-      navigate('/signup');
-    }
+    navigate('/signup');
   };
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');

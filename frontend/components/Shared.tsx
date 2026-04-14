@@ -130,9 +130,10 @@ export const PasswordInput: React.FC<{
   placeholder?: string;
   required?: boolean;
   className?: string;
+  inputClassName?: string;
   icon?: React.ReactNode;
   hideEye?: boolean;
-}> = ({ value, onChange, placeholder, required, className = '', icon, hideEye }) => {
+}> = ({ value, onChange, placeholder, required, className = '', inputClassName = '', icon, hideEye }) => {
   const [showPassword, setShowPassword] = React.useState(false);
 
   // Use a local copy of ICONS since it's not exported from Shared.tsx
@@ -156,7 +157,7 @@ export const PasswordInput: React.FC<{
         value={value}
         onChange={onChange}
         required={required}
-        className={`w-full min-h-[48px] sm:min-h-[44px] text-base sm:text-[14px] ${icon ? 'pl-12' : 'pl-4'} ${hideEye ? 'pr-4' : 'pr-12'} py-3 sm:py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal`}
+        className={`w-full min-h-[48px] sm:min-h-[44px] text-base sm:text-[14px] ${icon ? 'pl-12' : 'pl-4'} ${hideEye ? 'pr-4' : 'pr-12'} py-3 sm:py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal ${inputClassName}`}
       />
       {!hideEye && (
         <button

@@ -82,10 +82,9 @@ const SubscriptionPlans = React.lazy(() => import('./views/Admin/SubscriptionPla
 const CategoryManagement = React.lazy(() => import('./views/Admin/CategoryManagement').then(module => ({ default: module.CategoryManagement })));
 const DiscoveryHub = React.lazy(() => import('./views/Admin/DiscoveryHub').then(module => ({ default: module.DiscoveryHub })));
 const Announcements = React.lazy(() => import('./views/Admin/Announcements'));
-const LoginPerspective = React.lazy(() => import('./views/Auth/Login').then(module => ({ default: module.LoginPerspective })));
-const SignUpView = React.lazy(() => import('./views/Auth/SignUp').then(module => ({ default: module.SignUpView })));
+const AuthPage = React.lazy(() => import('./views/Auth/AuthPage').then(module => ({ default: module.AuthPage })));
 const AcceptInvite = React.lazy(() => import('./views/Auth/AcceptInvite').then(module => ({ default: module.AcceptInvite })));
-const ForgotPassword = React.lazy(() => import('./views/Auth/ForgotPassword').then(module => ({ default: module.ForgotPassword })));
+const ForgotPassword = AuthPage;
 const ResetPassword = React.lazy(() => import('./views/Auth/ResetPassword').then(module => ({ default: module.ResetPassword })));
 const UserSettings = React.lazy(() => import('./views/User/UserSettings').then(module => ({ default: module.UserSettings })));
 const UserEvents = React.lazy(() => import('./views/User/UserEvents').then(module => ({ default: module.UserEvents })));
@@ -1867,7 +1866,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               ) : (
                 <>
                   <button
-                    onClick={() => openAuthModal('login')}
+                    onClick={() => navigate('/login')}
                     className={`hidden lg:flex ${landingLoginButtonClass}`}
                   >
                     Login
@@ -2055,14 +2054,14 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               {!isAuthenticated ? (
                 <>
                   <button
-                    onClick={() => { setMobileMenuOpen(false); openAuthModal('signup'); }}
+                    onClick={() => { setMobileMenuOpen(false); navigate('/signup'); }}
                     className="flex items-center gap-3 px-4 py-3 text-[#38BDF2] hover:bg-white transition-colors text-xs font-semibold w-full [&>span:first-child]:hidden text-left"
                   >
                     <span>▶</span>
                     <span>Get Started</span>
                   </button>
                   <button
-                    onClick={() => { setMobileMenuOpen(false); openAuthModal('login'); }}
+                    onClick={() => { setMobileMenuOpen(false); navigate('/login'); }}
                     className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white transition-colors text-xs font-semibold w-full border-t border-[#2E2E2F]/5 text-left"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2224,7 +2223,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     <Link to="/live" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Live</Link>
                     <Link to="/browse-events" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Events</Link>
                     <Link to="/organizers/discover" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Explore</Link>
-                    <button onClick={() => openAuthModal && openAuthModal('login')} className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors text-left">Login</button>
+                    <button onClick={() => navigate('/login')} className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors text-left">Login</button>
                   </nav>
                 </div>
 
@@ -3223,9 +3222,9 @@ const App: React.FC = () => (
     <GlobalOnboardingGuard>
       <React.Suspense fallback={<div className="suspense-progress"><div className="suspense-progress-bar" /></div>}>
         <Routes>
-          <Route path="/login" element={<Navigate to="/" replace />} />
-          <Route path="/signup" element={<Navigate to="/" replace />} />
-          <Route path="/forgot-password" element={<Navigate to="/" replace />} />
+          <Route path="/login" element={<AuthPage />} />
+          <Route path="/signup" element={<AuthPage />} />
+          <Route path="/forgot-password" element={<AuthPage />} />
           <Route path="/welcome" element={<WelcomeView />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/accept-invite" element={<AcceptInvite />} />
