@@ -143,7 +143,7 @@ export const listAdminEvents = async (req, res) => {
     // 2) Query events
     let query = supabase
       .from('events')
-      .select('*, ticketTypes(*), promoted_events(promotion_id, expires_at)')
+      .select('*, ticketTypes(*), promoted_events(promotion_id, expires_at, created_by)')
       .is('is_archived', false)
       .order('created_at', { ascending: false });
 
@@ -184,30 +184,52 @@ export const listAdminEvents = async (req, res) => {
     // 2.5) Enrich events with organizer branding
     const enrichedEvents = await enrichEventsWithOrganizer(events || []);
     
+    // 2.5b) Determine if promoted by admin or organizer
+    const { data: adminRows } = await supabase.from('users').select('userId').in('role', ADMIN_ROLES);
+    const adminIds = new Set((adminRows || []).map(a => String(a.userId)));
+
     (enrichedEvents || []).forEach(e => {
         const activePromo = (e.promoted_events || []).find(p => p.expires_at > now);
         e.is_promoted = !!activePromo;
         e.isPromoted = !!activePromo;
+        
+        if (activePromo) {
+           // 1. Check explicit created_by user ID
+           const promoterId = activePromo.created_by;
+           if (promoterId) {
+              e.promotedByOrganizer = !adminIds.has(String(promoterId));
+           } else {
+              // 2. Fallback for legacy data: Check if the organizer who owns the event is an admin
+              // If not an admin, we assume it's an organizer promotion.
+              const ownerId = e.organizer?.ownerUserId;
+              e.promotedByOrganizer = ownerId ? !adminIds.has(String(ownerId)) : false;
+           }
+        } else {
+           e.promotedByOrganizer = false;
+        }
     });
 
-    // 3) Fetch report counts for these events
-    const { data: reportNotifs, error: reportErr } = await supabase
-      .from('notifications')
-      .select('notification_id, metadata')
-      .eq('type', 'EVENT_REPORT')
-      .is('deleted_at', null);
-    
-    if (!reportErr && reportNotifs) {
-      const reportMap = {};
-      reportNotifs.forEach(n => {
-        const eventId = n.metadata?.eventId;
-        if (eventId) {
-          reportMap[eventId] = (reportMap[eventId] || 0) + 1;
-        }
-      });
-      enrichedEvents.forEach(e => {
-        e.reportCount = reportMap[e.eventId] || 0;
-      });
+    // 3) Fetch report counts only for the fetched events
+    if (enrichedEvents.length > 0) {
+      const eventIds = enrichedEvents.map(e => e.eventId);
+      const { data: reportNotifs, error: reportErr } = await supabase
+        .from('notifications')
+        .select('notification_id, metadata')
+        .eq('type', 'EVENT_REPORT')
+        .is('deleted_at', null);
+      
+      if (!reportErr && reportNotifs) {
+        const reportMap = {};
+        reportNotifs.forEach(n => {
+          const eId = n.metadata?.eventId;
+          if (eId && eventIds.includes(eId)) {
+            reportMap[eId] = (reportMap[eId] || 0) + 1;
+          }
+        });
+        enrichedEvents.forEach(e => {
+          e.reportCount = reportMap[e.eventId] || 0;
+        });
+      }
     }
 
     return res.json(enrichedEvents || []);
@@ -799,9 +821,14 @@ export const deleteEvent = async (req, res) => {
     const { id } = req.params;
     const userId = req.user?.id || req.user?.userId;
 
-    // Security Check: Ensure either creator OR admin (Admins handled by route middleware usually)
-    // Here we focus on the hard delete aspect.
+    const { permanent, reason } = req.body || {};
+
+    if (!permanent) {
+       console.log(`🛡️ [AdminEvent] Soft-deleting (archiving) event: ${id}`);
+       return archiveEvent(req, res);
+    }
     
+    console.log(`🛡️ [AdminEvent] Hard-deleting event: ${id}`);
     // Hard delete - remove all related data first
     await supabase.from('tickets').delete().eq('eventId', id);
     await supabase.from('ticketTypes').delete().eq('eventId', id);
@@ -817,7 +844,7 @@ export const deleteEvent = async (req, res) => {
 
     await logAudit({
       actionType: 'EVENT_PERMANENTLY_DELETED',
-      details: { eventId: id },
+      details: { eventId: id, reason },
       req
     });
 

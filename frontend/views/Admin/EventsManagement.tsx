@@ -100,10 +100,7 @@ export const EventsManagement: React.FC = () => {
       if (requestId !== requestIdRef.current) return;
       setEvents(data);
 
-      const allRegsPromises = data.map(e => apiService.getEventRegistrations(e.eventId));
-      const allRegsResults = await Promise.all(allRegsPromises);
-      if (requestId !== requestIdRef.current) return;
-      setAttendees(allRegsResults.flat());
+      setEvents(data);
     } catch (err) {
       if (requestId !== requestIdRef.current) return;
     } finally {
@@ -173,6 +170,14 @@ export const EventsManagement: React.FC = () => {
     const endDT = formatDateForInput(event.endAt || '');
     const openDT = formatDateForInput(event.regOpenAt || '');
     const closeDT = formatDateForInput(event.regCloseAt || '');
+
+    // Fetch attendees specifically for this event to populate stats
+    apiService.getEventRegistrations(event.eventId).then(regs => {
+      setAttendees(prev => {
+        const otherRegs = prev.filter(r => r.eventId !== event.eventId);
+        return [...otherRegs, ...regs];
+      });
+    });
 
     setFormData({
       eventName: event.eventName,
@@ -482,8 +487,12 @@ export const EventsManagement: React.FC = () => {
                         <p className="text-[10px] font-bold text-[#2E2E2F]/40 uppercase tracking-widest mt-0.5 flex items-center gap-2">
                           Status: {event.status}
                           {(event.is_promoted || event.isPromoted) && (
-                            <span className="flex items-center gap-1 text-[#38BDF2] bg-[#38BDF2]/10 px-1.5 py-0.5 rounded-md border border-[#38BDF2]/20 text-[9px] animate-pulse uppercase">
-                              PROMOTED
+                            <span className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] animate-pulse uppercase ${
+                              event.promotedByOrganizer 
+                                ? 'text-emerald-600 bg-emerald-50 border-emerald-200' 
+                                : 'text-[#38BDF2] bg-[#38BDF2]/10 border-[#38BDF2]/20'
+                            }`}>
+                              {event.promotedByOrganizer ? 'PROMOTED BY ORGANIZER' : 'PROMOTED'}
                             </span>
                           )}
                         </p>

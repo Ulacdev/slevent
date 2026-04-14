@@ -165,6 +165,7 @@ export interface Event {
   // Promoted flag
   isPromoted?: boolean;
   is_promoted?: boolean;
+  promotedByOrganizer?: boolean;
 }
 
 export interface TicketType {

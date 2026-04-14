@@ -178,6 +178,7 @@ export const toggleEventPromotion = async (req, res) => {
       .insert({
         eventId,
         organizerId,
+        created_by: userId,
         createdAt: now.toISOString(),
         expires_at: expiresAt.toISOString(),
         duration_days: promotionDurationDays
