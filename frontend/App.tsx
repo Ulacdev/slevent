@@ -3226,8 +3226,8 @@ const App: React.FC = () => (
           <Route path="/signup" element={<AuthPage />} />
           <Route path="/forgot-password" element={<AuthPage />} />
           <Route path="/welcome" element={<WelcomeView />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/accept-invite" element={<AcceptInvite />} />
+          <Route path="/reset-password" element={<AuthPage />} />
+          <Route path="/accept-invite" element={<AuthPage />} />
           <Route path="/" element={<PublicLayout><EventList /></PublicLayout>} />
           <Route path="/live" element={<PublicLayout><LivePage /></PublicLayout>} />
           <Route path="/categories/:categoryKey" element={<PublicLayout><CategoryEvents /></PublicLayout>} />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Button, PasswordInput, Checkbox } from '../../components/Shared';
+import { useNavigate, useLocation, Link, useSearchParams } from 'react-router-dom';
+import { Button, PasswordInput, Checkbox, PasswordRequirements } from '../../components/Shared';
 import { ICONS } from '../../constants';
 import { supabase } from "../../supabase/supabaseClient.js";
 import { useUser } from '../../context/UserContext';
@@ -8,6 +8,7 @@ import { useToast } from '../../context/ToastContext';
 import { UserRole, normalizeUserRole } from '../../types';
 import { apiService } from '../../services/apiService';
 import { maskPassword } from '../../utils/authUtils';
+import { validatePassword } from '../../utils/passwordValidation';
 
 const EnvelopeIcon = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /><rect width="20" height="16" x="2" y="4" rx="2" /></svg>
@@ -46,7 +47,8 @@ export const AuthPage: React.FC = () => {
   const { setUser } = useUser();
   const { showToast } = useToast();
 
-  const [view, setView] = useState<'login' | 'signup' | 'forgot-password'>('login');
+  const [searchParams] = useSearchParams();
+  const [view, setView] = useState<'login' | 'signup' | 'forgot-password' | 'reset-password' | 'accept-invite'>('login');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
@@ -59,12 +61,155 @@ export const AuthPage: React.FC = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [forgotMessage, setForgotMessage] = useState('');
 
+  // Reset/Invite States
+  const [inviteInfo, setInviteInfo] = useState<{ email: string; role: string; accountExists: boolean; name: string } | null>(null);
+  const [recoveryVerified, setRecoveryVerified] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
   // Sync view with URL
   useEffect(() => {
     if (location.pathname === '/signup') setView('signup');
     else if (location.pathname === '/forgot-password') setView('forgot-password');
+    else if (location.pathname === '/reset-password') setView('reset-password');
+    else if (location.pathname === '/accept-invite') setView('accept-invite');
     else setView('login');
   }, [location.pathname]);
+
+  // Fetch Invite Info
+  useEffect(() => {
+    if (view === 'accept-invite') {
+      const rawToken = searchParams.get('token') || '';
+      const token = rawToken.trim().replace(/[?.,;:!]+$/, '');
+      if (!token) return;
+
+      const fetchInfo = async () => {
+        setLoading(true);
+        try {
+          const res = await fetch(`${API}/api/invite/check-invite?token=${token}`);
+          if (!res.ok) throw new Error('Invite not found or expired.');
+          const data = await res.json();
+          setInviteInfo(data);
+          if (data.name) setName(data.name);
+        } catch (err: any) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchInfo();
+    }
+  }, [view, searchParams]);
+
+  const parseResetParams = () => {
+    const merged = new URLSearchParams(window.location.search);
+    const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+    const segments = hash.split('#').filter(Boolean);
+    for (const segment of segments) {
+      const queryPart = segment.includes('?') ? segment.split('?').slice(1).join('?') : segment;
+      if (!queryPart.includes('=')) continue;
+      const params = new URLSearchParams(queryPart);
+      params.forEach((value, key) => { if (!merged.has(key)) merged.set(key, value); });
+    }
+    return merged;
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    const passError = validatePassword(password);
+    if (passError) {
+      setError(passError);
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      if (!recoveryVerified) {
+        const resetParams = parseResetParams();
+        const tokenHash = resetParams.get('token_hash');
+        const accessToken = resetParams.get('access_token');
+        const refreshToken = resetParams.get('refresh_token');
+        const code = resetParams.get('code');
+
+        if (tokenHash) {
+          const { error: verifyErr } = await supabase.auth.verifyOtp({ type: 'recovery', token_hash: tokenHash });
+          if (verifyErr) throw verifyErr;
+        } else if (accessToken && refreshToken) {
+          const { error: sessionErr } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+          if (sessionErr) throw sessionErr;
+        } else if (code) {
+          const { error: codeErr } = await supabase.auth.exchangeCodeForSession(code);
+          if (codeErr) throw codeErr;
+        } else {
+          throw new Error('Reset link is invalid or expired. Please request a new one.');
+        }
+        setRecoveryVerified(true);
+      }
+
+      const { error: resetError } = await supabase.auth.updateUser({ password });
+      if (resetError) throw resetError;
+
+      setSuccessMessage('Your password has been successfully updated.');
+      setTimeout(() => navigate('/login'), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to update password.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAcceptInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    const rawToken = searchParams.get('token') || '';
+    const token = rawToken.trim().replace(/[?.,;:!]+$/, '');
+
+    if (!name.trim()) {
+      setError('Name is required');
+      return;
+    }
+
+    const needsPassword = !inviteInfo?.accountExists;
+    if (needsPassword) {
+      if (!password || password.length < 8) {
+        setError('Password must be at least 8 characters');
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError('Passwords do not match');
+        return;
+      }
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/api/invite/accept-invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          token, 
+          password: needsPassword ? maskPassword(password) : undefined, 
+          name: name.trim() 
+        })
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to accept invitation');
+      }
+      setSuccessMessage(needsPassword ? 'Account created! Redirecting...' : 'Organization joined! Redirecting...');
+      setTimeout(() => navigate('/login'), 2000);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLoginSuccess = async (user: any, session: any) => {
     try {
@@ -389,10 +534,14 @@ export const AuthPage: React.FC = () => {
               <span>New: Advanced QR ticketing & analytics launched!</span>
             </div>
             <h1 className="text-[2.2rem] font-bold text-black leading-[1.1] tracking-tight mb-2 max-w-[450px]">
-              Empower your event business <span className="text-[#38BDF2]">instantly.</span>
+              {view === 'reset-password' ? 'Secure your access' : 
+               view === 'accept-invite' ? 'Join your team' : 
+               'Empower your event business'} <span className="text-[#38BDF2]">{view === 'reset-password' ? 'instantly.' : view === 'accept-invite' ? 'today.' : 'instantly.'}</span>
             </h1>
             <p className="text-black/60 text-[13px] font-bold leading-relaxed max-w-[400px]">
-              Trusted by over 1,000+ Filipino creators to host, manage, and sell out events.
+              {view === 'reset-password' ? 'Set a strong password to protect your event management portal.' :
+               view === 'accept-invite' ? 'Complete your profile to start collaborating with your organization.' :
+               'Trusted by over 1,000+ Filipino creators to host, manage, and sell out events.'}
             </p>
 
             {/* Feature Cards Group - Moved up next to headline */}
@@ -434,15 +583,25 @@ export const AuthPage: React.FC = () => {
 
             <div className="text-left mb-4">
               <span className="text-[#38BDF2] text-[11px] font-black mb-1.5 block">
-                {view === 'login' ? 'Returning user' : 'New creator'}
+                {view === 'login' ? 'Returning user' : 
+                 view === 'signup' ? 'New creator' :
+                 view === 'forgot-password' ? 'Security help' :
+                 view === 'reset-password' ? 'New Access' :
+                 'Join Organization'}
               </span>
               <h2 className="text-2xl font-black text-black tracking-tight leading-tight mb-1">
-                {view === 'login' ? 'Welcome back 👋' : 'Join StartupLab'}
+                {view === 'login' ? 'Welcome back 👋' : 
+                 view === 'signup' ? 'Join StartupLab' :
+                 view === 'forgot-password' ? 'Trouble signing in?' :
+                 view === 'reset-password' ? 'Setup your password' :
+                 (inviteInfo?.accountExists ? 'Join Organization' : 'Create your account')}
               </h2>
               <p className="text-[11px] text-black/40 font-bold max-w-[280px] leading-relaxed">
-                {view === 'login'
-                  ? "Let's get your events running."
-                  : 'Scale your event business effortlessly with our tools.'}
+                {view === 'login' ? "Let's get your events running." : 
+                 view === 'signup' ? 'Scale your event business effortlessly with our tools.' :
+                 view === 'forgot-password' ? "Enter your email and we'll send you a link to get back into your account." :
+                 view === 'reset-password' ? 'Please enter a new password that you haven\'t used before.' :
+                 `Invited as ${inviteInfo?.email || 'new member'}`}
               </p>
             </div>
 
@@ -558,7 +717,32 @@ export const AuthPage: React.FC = () => {
               {view === 'forgot-password' && (
                 <div className="space-y-4">
                   {!forgotMessage ? (
-                    <form onSubmit={async (e) => { e.preventDefault(); setLoading(true); setForgotMessage('Success'); setLoading(false); }} className="space-y-3">
+                    <form 
+                      onSubmit={async (e) => { 
+                        e.preventDefault(); 
+                        setError('');
+                        setLoading(true); 
+                        try {
+                          const res = await fetch(`${API}/api/auth/forgot-password`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: email.trim().toLowerCase() })
+                          });
+                          const data = await res.json().catch(() => ({}));
+                          if (!res.ok) {
+                            setError(data.error || 'Failed to send reset link.');
+                          } else {
+                            setForgotMessage('Success');
+                            showToast('success', 'Reset link sent! Please check your email inbox.');
+                          }
+                        } catch (err) {
+                          setError('Connection error. Please try again.');
+                        } finally {
+                          setLoading(false);
+                        }
+                      }} 
+                      className="space-y-3"
+                    >
                       <div className="space-y-0.5">
                         <label className="text-[11px] font-bold text-black/40 ml-0.5">Account Email</label>
                         <IconInput
@@ -570,12 +754,127 @@ export const AuthPage: React.FC = () => {
                           icon={<EnvelopeIcon className="w-4 h-4" />}
                         />
                       </div>
-                      <Button type="submit" className="w-full py-2.5 bg-[#38BDF2] rounded-[5px] font-black border-none text-white mt-2" disabled={loading}>Send Link</Button>
+                      
+                      {error && (
+                        <div className="p-2.5 bg-red-50 border border-red-100 rounded-[5px] flex items-center gap-2 animate-in fade-in slide-in-from-top-1 duration-300">
+                           <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                           <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
+                        </div>
+                      )}
+
+                      <Button type="submit" className="w-full py-2.5 bg-[#38BDF2] rounded-[5px] font-black border-none text-white mt-2" disabled={loading}>
+                        {loading ? 'Wait...' : 'Send Link'}
+                      </Button>
                     </form>
                   ) : (
                     <div className="text-center py-2 text-[10px] font-bold text-black">Check your email for reset instructions.</div>
                   )}
-                  <button type="button" onClick={() => setView('login')} className="w-full text-center text-[11px] font-black text-black/40 hover:text-[#38BDF2] transition-colors">Back to login</button>
+                  <button type="button" onClick={() => { setView('login'); setError(''); }} className="w-full text-center text-[11px] font-black text-black/40 hover:text-[#38BDF2] transition-colors">Back to login</button>
+                </div>
+              )}
+
+              {view === 'reset-password' && (
+                <div className="space-y-4">
+                   {!successMessage ? (
+                      <form onSubmit={handleResetPassword} className="space-y-3">
+                        <div className="space-y-0.5">
+                            <label className="text-[11px] font-bold text-black/40 ml-0.5">New Password *</label>
+                            <PasswordInput 
+                                value={password} 
+                                onChange={(e: any) => setPassword(e.target.value)} 
+                                required 
+                                placeholder="••••••••"
+                                icon={<LockIcon className="w-4 h-4" />}
+                                inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" 
+                            />
+                            <PasswordRequirements password={password} />
+                        </div>
+                        <div className="space-y-0.5">
+                            <label className="text-[11px] font-bold text-black/40 ml-0.5">Confirm New Password *</label>
+                            <PasswordInput 
+                                value={confirmPassword} 
+                                onChange={(e: any) => setConfirmPassword(e.target.value)} 
+                                required 
+                                placeholder="••••••••"
+                                icon={<LockIcon className="w-4 h-4" />}
+                                inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" 
+                            />
+                        </div>
+
+                        {error && (
+                            <div className="p-2.5 bg-red-50 border border-red-100 rounded-[5px] flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                                <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
+                            </div>
+                        )}
+
+                        <Button type="submit" className="w-full py-2.5 bg-[#38BDF2] rounded-[5px] font-black border-none text-white mt-1" disabled={loading}>
+                            {loading ? 'Updating...' : 'Update Password'}
+                        </Button>
+                      </form>
+                   ) : (
+                      <div className="text-center py-4 text-[11px] font-black text-[#38BDF2]">{successMessage}</div>
+                   )}
+                </div>
+              )}
+
+              {view === 'accept-invite' && (
+                <div className="space-y-4">
+                   {!successMessage ? (
+                      <form onSubmit={handleAcceptInvite} className="space-y-3">
+                        <div className="space-y-0.5">
+                            <label className="text-[11px] font-bold text-black/40 ml-0.5">Full Name *</label>
+                            <IconInput
+                                placeholder="e.g. John Doe"
+                                value={name}
+                                onChange={(e: any) => setName(e.target.value)}
+                                required
+                                icon={<UserIcon className="w-4 h-4" />}
+                            />
+                        </div>
+
+                        {!inviteInfo?.accountExists && (
+                            <>
+                                <div className="space-y-0.5">
+                                    <label className="text-[11px] font-bold text-black/40 ml-0.5">Create Password *</label>
+                                    <PasswordInput 
+                                        value={password} 
+                                        onChange={(e: any) => setPassword(e.target.value)} 
+                                        required 
+                                        placeholder="••••••••"
+                                        icon={<LockIcon className="w-4 h-4" />}
+                                        inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" 
+                                    />
+                                    <PasswordRequirements password={password} />
+                                </div>
+                                <div className="space-y-0.5">
+                                    <label className="text-[11px] font-bold text-black/40 ml-0.5">Confirm Password *</label>
+                                    <PasswordInput 
+                                        value={confirmPassword} 
+                                        onChange={(e: any) => setConfirmPassword(e.target.value)} 
+                                        required 
+                                        placeholder="••••••••"
+                                        icon={<LockIcon className="w-4 h-4" />}
+                                        inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" 
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {error && (
+                            <div className="p-2.5 bg-red-50 border border-red-100 rounded-[5px] flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                                <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
+                            </div>
+                        )}
+
+                        <Button type="submit" className="w-full py-2.5 bg-[#38BDF2] rounded-[5px] font-black border-none text-white mt-1" disabled={loading}>
+                            {loading ? 'Wait...' : (inviteInfo?.accountExists ? 'Join Organization' : 'Create & Join')}
+                        </Button>
+                      </form>
+                   ) : (
+                      <div className="text-center py-4 text-[11px] font-black text-[#38BDF2]">{successMessage}</div>
+                   )}
                 </div>
               )}
             </div>

@@ -163,7 +163,7 @@ export const PasswordInput: React.FC<{
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors p-2 z-10 min-h-[48px] sm:min-h-[44px] w-auto flex items-center justify-center active:scale-95"
+          className="absolute right-2 top-0 bottom-1.5 flex items-center justify-center text-[#2E2E2F]/40 hover:text-[#38BDF2] transition-colors px-2 z-10 active:scale-95"
         >
           {showPassword ? <EyeOffIcon /> : <EyeIcon />}
         </button>
@@ -174,23 +174,22 @@ export const PasswordInput: React.FC<{
 
 export const PasswordRequirements: React.FC<{ password: string }> = ({ password }) => {
   const requirements = [
-    { label: 'At least 8 characters', test: password.length >= 8 },
-    { label: 'At least 1 uppercase letter (A-Z)', test: /[A-Z]/.test(password) },
-    { label: 'At least 1 lowercase letter (a-z)', test: /[a-z]/.test(password) },
-    { label: 'At least 1 number (0-9)', test: /[0-9]/.test(password) },
-    { label: 'At least 1 special character (!@#$%^&*)', test: /[!@#$%^&*]/.test(password) },
+    { label: '8+ characters', test: password.length >= 8 },
+    { label: 'Uppercase & Lowercase', test: /[A-Z]/.test(password) && /[a-z]/.test(password) },
+    { label: 'Includes numbers', test: /[0-9]/.test(password) },
+    { label: 'Special character', test: /[!@#$%^&*]/.test(password) },
   ];
 
   const hasPassword = password.length > 0;
 
   return (
-    <div className={`mt-2 space-y-1.5 p-3 bg-[#F2F2F2] rounded-[5px] border border-[#2E2E2F]/5 transition-all duration-300 ${hasPassword ? 'opacity-100 translate-y-0 max-h-[300px]' : 'opacity-0 -translate-y-2 pointer-events-none max-h-0 !mt-0 !p-0 border-0 overflow-hidden'}`}>
-      <p className="text-[13px] font-black uppercase tracking-widest text-[#2E2E2F] mb-2">Password Requirements</p>
-      <div className="grid grid-cols-1 gap-y-1.5">
+    <div className={`mt-1 space-y-1 p-2 bg-[#F2F2F2] rounded-[4px] border border-black/5 transition-all duration-300 ${hasPassword ? 'opacity-100 translate-y-0 max-h-[300px]' : 'opacity-0 -translate-y-2 pointer-events-none max-h-0 !mt-0 !p-0 border-0 overflow-hidden'}`}>
+      <p className="text-[9px] font-black uppercase tracking-widest text-black/30 mb-1">Passcode Security</p>
+      <div className="grid grid-cols-1 gap-y-0.5">
         {requirements.map((req, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <div className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${req.test ? 'bg-[#38BDF2] shadow-[0_0_8px_rgba(56,189,242,0.6)] scale-110' : 'bg-[#2E2E2F]/10'}`} />
-            <span className={`text-[13px] font-bold tracking-tight transition-colors duration-300 ${req.test ? 'text-[#38BDF2]' : 'text-[#2E2E2F]'}`}>
+          <div key={i} className="flex items-center gap-1.5">
+            <div className={`w-1 h-1 rounded-full transition-all duration-300 ${req.test ? 'bg-[#38BDF2] scale-110' : 'bg-black/10'}`} />
+            <span className={`text-[9px] font-bold tracking-tight transition-colors duration-300 ${req.test ? 'text-[#38BDF2]' : 'text-black/30'}`}>
               {req.label}
             </span>
           </div>
