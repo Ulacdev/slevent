@@ -9,6 +9,35 @@ import { UserRole, normalizeUserRole } from '../../types';
 import { apiService } from '../../services/apiService';
 import { maskPassword } from '../../utils/authUtils';
 
+const EnvelopeIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /><rect width="20" height="16" x="2" y="4" rx="2" /></svg>
+);
+
+const UserIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /></svg>
+);
+
+const LockIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+);
+
+const IconInput = (props: any) => {
+  const { icon, ...inputProps } = props;
+  return (
+    <div className="relative group/input w-full">
+      {icon && (
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20 group-focus-within/input:text-[#38BDF2] transition-colors z-10 w-4 h-4 flex items-center justify-center">
+          {icon}
+        </div>
+      )}
+      <input
+        {...inputProps}
+        className={`w-full px-4 py-2.5 bg-[#F2F2F2] border border-black/10 rounded-[5px] text-[10px] font-medium text-black outline-none focus:border-[#38BDF2] transition-all ${icon ? 'pl-11' : 'pl-4'}`}
+      />
+    </div>
+  );
+};
+
 const API = import.meta.env.VITE_API_BASE;
 
 export const AuthPage: React.FC = () => {
@@ -129,9 +158,224 @@ export const AuthPage: React.FC = () => {
 
   return (
     <>
-      <div className="fixed inset-0 h-[100dvh] w-full flex bg-[#F2F2F2] overflow-y-auto lg:overflow-hidden font-sans select-none">
+      <div className="fixed inset-0 h-[100dvh] w-full flex bg-[#F2F2F2] lg:overflow-hidden font-sans select-none">
         {/* LEFT: Branding (55%) */}
-        <div className="hidden lg:flex w-[55%] h-full flex-col px-10 pt-4 justify-between bg-[#F2F2F2] border-r border-black/5 relative">
+        <div className="hidden lg:flex w-[60%] h-full flex-col pl-10 pr-4 pt-4 justify-between bg-[#F2F2F2] border-r border-black/5 relative overflow-hidden isolate">
+
+          {/* Mockup Display: Laptop + Phone Composite */}
+          <div className="absolute left-[74%] -translate-x-1/2 top-[45%] -translate-y-1/2 z-0 pointer-events-none transform scale-[0.6] lg:scale-[0.75] opacity-[0.9]">
+
+            {/* Laptop Mockup (90 POV / Flat) */}
+            <div className="relative w-[700px] h-[450px] transform rotate-0">
+              {/* Screen Frame */}
+              <div className="absolute inset-0 bg-black rounded-[2rem] border-[12px] border-black overflow-hidden">
+                {/* Dashboard Content */}
+                <div className="w-full h-full bg-[#F2F2F2] flex flex-col font-sans">
+                  {/* Webpage Header (Real-time Layout) */}
+                  <div className="h-12 border-b border-black/5 flex items-center px-4 justify-between bg-[#F2F2F2] shrink-0">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1.5 grayscale opacity-60">
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+                      </div>
+                      <div className="h-4 w-px bg-black/10 mx-2" />
+                      <div className="flex items-center gap-1.5 transition-opacity hover:opacity-70 cursor-pointer">
+                        <div className="w-4 h-4 bg-[#38BDF2] rounded-md flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full opacity-40" />
+                        </div>
+                        <span className="text-[10px] font-black tracking-tight text-black">StartupLab / <span className="text-black/40">Events</span></span>
+                      </div>
+                    </div>
+                    <div className="flex gap-4 items-center">
+                      <div className="flex items-center gap-2 px-2 py-1 bg-black/[0.03] rounded-md">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        <div className="w-12 h-1.5 bg-black/10 rounded-full" />
+                      </div>
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-gray-200 to-gray-300 border border-white" />
+                    </div>
+                  </div>
+
+                  {/* Dashboard Body */}
+                  <div className="flex-1 p-5 grid grid-cols-12 gap-5 overflow-hidden bg-[#F2F2F2]">
+                    {/* Sidebar (Real Pages - Enhanced Visibility with Accurate Icons) */}
+                    <div className="col-span-3 border-r border-black/[0.03] pr-2 h-full flex flex-col gap-0.5 pt-1 overflow-hidden transform scale-[1.1] origin-top-left">
+                      {[
+                        { name: 'Home', icon: ICONS.Home },
+                        { name: 'Dashboard', icon: ICONS.Activity },
+                        { name: 'Events Management', icon: ICONS.Calendar },
+                        { name: 'Attendees', icon: ICONS.Users },
+                        { name: 'Check In', icon: ICONS.CheckCircle },
+                        { name: 'Reports', icon: ICONS.BarChart },
+                        { name: 'Archive', icon: ICONS.Archive },
+                        { name: 'Plans', icon: ICONS.CreditCard },
+                        { name: 'Organization Profile', icon: ICONS.Layout },
+                        { name: 'Team and Access', icon: ICONS.Shield },
+                        { name: 'Email Settings', icon: ICONS.Mail },
+                        { name: 'Payment Settings', icon: ICONS.CreditCard },
+                        { name: 'Support', icon: ICONS.Info },
+                        { name: 'Account Settings', icon: ICONS.Settings }
+                      ].map((item, i) => (
+                        <div key={i} className={`flex items-center gap-2 px-2 py-0.5 rounded-md transition-colors ${item.name === 'Dashboard' ? 'bg-[#38BDF2]/10' : ''}`}>
+                          <item.icon className={`w-3 h-3 ${item.name === 'Dashboard' ? 'text-[#38BDF2]' : 'text-black/30'}`} />
+                          <span className={`text-[9.5px] font-black tracking-tight whitespace-nowrap ${item.name === 'Dashboard' ? 'text-[#38BDF2]' : 'text-black/60'}`}>
+                            {item.name}
+                          </span>
+                        </div>
+                      ))}
+
+                      <div className="mt-auto mb-2 p-2 bg-[#F2F2F2] border border-black/5 rounded-lg flex items-center justify-between">
+                        <div className="w-4 h-4 rounded-full bg-[#38BDF2]/20" />
+                        <div className="w-10 h-1 bg-black/10 rounded-full" />
+                      </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="col-span-9 space-y-5">
+                      {/* Stats Cards */}
+                      <div className="grid grid-cols-3 gap-4">
+                        {[
+                          { val: '3.59', label: 'Total Sales', color: '#38BDF2' },
+                          { val: '328', label: 'Attendees', color: '#000000' },
+                          { val: '3.00', label: 'Conversion', color: '#000000' }
+                        ].map((stat, i) => (
+                          <div key={i} className="p-4 bg-[#F2F2F2] border border-black/5 rounded-2xl transition-shadow">
+                            <div className="text-[8px] font-bold text-black/30 uppercase tracking-widest mb-1">{stat.label}</div>
+                            <div className="text-2xl font-black" style={{ color: stat.color }}>{stat.val}</div>
+                            <div className="flex items-center gap-1 mt-1">
+                              <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                              <div className="h-1 w-8 bg-black/5 rounded-full" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Chart Area */}
+                      <div className="h-36 w-full bg-[#F2F2F2] border border-black/5 rounded-2xl p-6 flex flex-col gap-4">
+                        <div className="flex justify-between items-center">
+                          <div className="h-2.5 w-24 bg-black/5 rounded-full" />
+                          <div className="flex gap-2">
+                            <div className="w-8 h-4 bg-black/[0.02] rounded-lg" />
+                            <div className="w-8 h-4 bg-[#38BDF2]/10 rounded-lg" />
+                          </div>
+                        </div>
+                        <div className="flex items-end justify-between flex-1 gap-2 pt-2 border-l border-b border-black/[0.03]">
+                          {[40, 70, 45, 90, 65, 80, 50, 95, 60, 75, 85, 45].map((h, i) => (
+                            <div key={i} className="flex-1 bg-gradient-to-t from-[#38BDF2]/30 to-[#38BDF2]/50 rounded-t-lg transition-all hover:scale-x-110" style={{ height: `${h}%` }} />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Recent Activities */}
+                      <div className="bg-[#F2F2F2] border border-black/5 rounded-2xl p-4">
+                        <div className="h-2.5 w-32 bg-black/5 rounded-full mb-4" />
+                        <div className="space-y-3">
+                          {[1, 2].map(i => (
+                            <div key={i} className="flex items-center justify-between py-2 border-b border-black/[0.03] last:border-0">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-black/5" />
+                                <div className="space-y-1">
+                                  <div className="h-2 w-24 bg-black/10 rounded-full" />
+                                  <div className="h-1.5 w-32 bg-black/5 rounded-full" />
+                                </div>
+                              </div>
+                              <div className="h-8 w-16 bg-black/[0.02] rounded-lg" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Laptop Base Hinges Removed for Flat Style */}
+
+            </div>
+
+            {/* Smartphone Mockup (Foreground Overlap - 90 POV) */}
+            <div className="absolute right-4 -bottom-14 z-10 transform rotate-0 scale-[0.6] origin-bottom-right">
+              <div className="w-[300px] h-[600px] bg-[#F2F2F2] rounded-[3.5rem] border-[10px] border-black relative overflow-hidden flex flex-col p-6">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-b-2xl"></div>
+
+                {/* Digital Ticket Layout */}
+                <div className="mt-12 flex flex-col gap-0.5">
+                  {/* Ticket Info Area (Live Context) */}
+                  <div className="bg-[#F2F2F2] border border-black/5 rounded-t-3xl p-5 space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] font-black text-[#38BDF2] tracking-wider uppercase">StartupLab Live</span>
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#38BDF2] animate-pulse" />
+                          <span className="text-[9px] font-black text-black/20 uppercase">In Session</span>
+                        </div>
+                      </div>
+                      <div className="px-3 py-1 bg-black text-white text-[8px] font-black rounded-full uppercase tracking-widest">VIP PASS</div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <div className="text-[14px] font-black text-black leading-tight">Tech Founders Summit 2024</div>
+                        <div className="flex items-center gap-2">
+                          <div className="h-3 w-16 bg-black/5 rounded-md" />
+                          <div className="h-3 w-20 bg-black/5 rounded-md" />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 pt-2">
+                        <div className="p-2 border border-black/5 rounded-xl">
+                          <span className="text-[7px] font-black text-black/20 block uppercase">Section</span>
+                          <span className="text-[10px] font-black text-[#38BDF2]">A-12</span>
+                        </div>
+                        <div className="p-2 border border-black/5 rounded-xl">
+                          <span className="text-[7px] font-black text-black/20 block uppercase">Seat</span>
+                          <span className="text-[10px] font-black text-[#38BDF2]">VIP-04</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Perforation Effect */}
+                  <div className="relative h-6 flex items-center justify-between px-[-10px]">
+                    <div className="absolute left-[-15px] w-6 h-6 rounded-full bg-[#F2F2F2] border border-black/5" />
+                    <div className="flex-1 border-t-2 border-dashed border-black/5 mx-6" />
+                    <div className="absolute right-[-15px] w-6 h-6 rounded-full bg-[#F2F2F2] border border-black/5" />
+                  </div>
+
+                  {/* QR Validation Area (Real-time Sync) */}
+                  <div className="bg-[#F2F2F2] border border-black/5 rounded-b-3xl p-6 flex flex-col items-center gap-4 relative">
+                    <div className="absolute top-2 right-4 flex items-center gap-1 opacity-20">
+                      <span className="text-[6px] font-black uppercase">Valid Ticket</span>
+                    </div>
+
+                    <div className="flex items-center gap-4 w-full">
+                      {/* Side Scanning Line */}
+                      <div className="w-2 h-32 bg-black/[0.03] rounded-full relative overflow-hidden">
+                        <div className="absolute inset-x-0 h-8 bg-[#38BDF2] shadow-[0_0_12px_rgba(56,189,242,0.8)] animate-bounce" />
+                      </div>
+                      <div className="flex-1 p-2 bg-[#F2F2F2] relative">
+                        <img
+                          src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=StartupLab-Business-Center-Validation-2024"
+                          alt="QR Validation"
+                          className="w-full h-full mix-blend-multiply transition-opacity"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="text-[10px] font-black text-black leading-none opacity-20">SCAN TO CHECK IN</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-auto flex justify-center pb-2">
+                  <div className="w-20 h-1 bg-black/10 rounded-full"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Top Branding Section */}
           <div className="z-10 transform origin-top-left scale-[0.9] flex flex-col items-start">
             <Link to="/" className="inline-block hover:opacity-80 transition-opacity">
               <img
@@ -141,22 +385,42 @@ export const AuthPage: React.FC = () => {
               />
             </Link>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#38BDF2] text-white text-[10px] font-black mb-2 shadow-lg shadow-[#38BDF2]/20 animate-in fade-in slide-in-from-top-4 duration-700">
-               <ICONS.Megaphone className="w-3 h-3 text-white" />
-               <span>New: Advanced QR ticketing & analytics launched!</span>
+              <ICONS.Megaphone className="w-3 h-3 text-white" />
+              <span>New: Advanced QR ticketing & analytics launched!</span>
             </div>
-            <h1 className="text-[3rem] font-bold text-black leading-[1.1] tracking-tight mb-2 max-w-[500px]">
+            <h1 className="text-[2.2rem] font-bold text-black leading-[1.1] tracking-tight mb-2 max-w-[450px]">
               Empower your event business <span className="text-[#38BDF2]">instantly.</span>
             </h1>
-            <p className="text-black/60 text-base font-medium leading-relaxed max-w-[400px]">
-              The complete workspace for Pinoy creators to host events, courses, and communities.
+            <p className="text-black/60 text-[13px] font-bold leading-relaxed max-w-[400px]">
+              Trusted by over 1,000+ Filipino creators to host, manage, and sell out events.
             </p>
+
+            {/* Feature Cards Group - Moved up next to headline */}
+            <div className="flex flex-col gap-6 max-w-[360px] z-10 mt-8 relative items-start">
+              {[
+                { title: 'Create events easily', desc: 'Quickly set up and automate your event workflows.', icon: ICONS.Megaphone },
+                { title: 'Manage attendees', desc: 'Track check-ins and engagement in real-time.', icon: ICONS.CheckCircle },
+                { title: 'Sell tickets effortlessly', desc: 'Boost sales with seamless QR code ticketing.', icon: ICONS.Zap }
+              ].map((card, i) => (
+                <div key={i} className="bg-[#F2F2F2] p-4 rounded-xl border border-black/5 flex items-center gap-4 hover:border-[#38BDF2]/20 transition-all shadow-xl shadow-black/5 animate-in fade-in slide-in-from-left duration-700 delay-[200ms]">
+                  <div className="w-10 h-10 rounded-full bg-[#38BDF2] flex items-center justify-center flex-shrink-0">
+                    <card.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-[14px] font-black text-black leading-tight mb-1">{card.title}</h3>
+                    <p className="text-[11px] text-black/40 font-bold leading-tight max-w-[200px]">{card.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
+
         </div>
 
         {/* RIGHT: Auth Forms (45%) */}
-        <div className="w-full lg:w-[45%] lg:h-full flex flex-col items-center justify-center p-8 bg-[#F2F2F2] overflow-y-auto relative">
-          <div className="w-full max-w-[340px] transform lg:-translate-y-20">
-            
+        <div className="w-full lg:w-[40%] h-full flex flex-col items-center justify-center p-8 bg-[#F2F2F2] overflow-y-auto relative custom-scrollbar">
+          <div className="w-full max-w-[340px] py-10 lg:py-0 lg:-translate-y-28">
+
             {/* MOBILE ONLY LOGO */}
             <div className="lg:hidden flex justify-center mb-6">
               <Link to="/" className="inline-block hover:opacity-80 transition-opacity">
@@ -169,38 +433,45 @@ export const AuthPage: React.FC = () => {
             </div>
 
             <div className="text-left mb-4">
-               <span className="text-[#38BDF2] text-[11px] font-black mb-1.5 block">
-                 {view === 'login' ? 'Returning user' : 'New creator'}
-               </span>
-               <h2 className="text-2xl font-black text-black tracking-tight leading-tight mb-1">
-                 {view === 'login' ? 'Login' : 'Sign up'}
-               </h2>
-               <p className="text-[11px] text-black/40 font-bold max-w-[280px] leading-relaxed">
-                 {view === 'login' 
-                   ? 'Welcome back! Enter your details to manage your events.' 
-                   : 'Join a community of Pinoy creators and start monetizing your skills.'}
-               </p>
+              <span className="text-[#38BDF2] text-[11px] font-black mb-1.5 block">
+                {view === 'login' ? 'Returning user' : 'New creator'}
+              </span>
+              <h2 className="text-2xl font-black text-black tracking-tight leading-tight mb-1">
+                {view === 'login' ? 'Welcome back 👋' : 'Join StartupLab'}
+              </h2>
+              <p className="text-[11px] text-black/40 font-bold max-w-[280px] leading-relaxed">
+                {view === 'login'
+                  ? "Let's get your events running."
+                  : 'Scale your event business effortlessly with our tools.'}
+              </p>
             </div>
 
             <div className="bg-[#F2F2F2] p-6 rounded-[5px] border border-black/10">
               {view === 'login' && (
                 <form onSubmit={handleLogin} className="flex flex-col gap-3 items-stretch">
                   <div className="space-y-3">
-                    <div className="space-y-0.5 text-left">
+                    <div className="space-y-0.5 text-left relative">
                       <label className="text-[11px] font-bold text-black/40 ml-0.5">Email address *</label>
-                      <input type="email" placeholder="you@domain.com" value={email} onChange={(e) => setEmail(e.target.value)} required 
-                      className="w-full px-4 py-2.5 bg-[#F2F2F2] border border-black/10 rounded-[5px] text-[10px] font-medium text-black outline-none focus:border-[#38BDF2] transition-all" />
+                      <IconInput
+                        type="email"
+                        placeholder="you@domain.com"
+                        value={email}
+                        onChange={(e: any) => setEmail(e.target.value)}
+                        required
+                        icon={<EnvelopeIcon className="w-4 h-4" />}
+                      />
                     </div>
-                    <div className="space-y-0.5 text-left">
+                    <div className="space-y-0.5 text-left relative">
                       <label className="text-[11px] font-bold text-black/40 ml-0.5">Password *</label>
-                      <PasswordInput value={password} onChange={(e: any) => setPassword(e.target.value)} required placeholder="••••••••" 
-                      inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
+                      <PasswordInput value={password} onChange={(e: any) => setPassword(e.target.value)} required placeholder="••••••••"
+                        icon={<LockIcon className="w-4 h-4" />}
+                        inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
                       <button type="button" onClick={() => setView('forgot-password')} className="text-[11px] font-bold text-[#38BDF2] hover:underline mt-1 flex justify-end w-full">Forgot password?</button>
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full py-2.5 text-[10px] font-black rounded-[5px] border-none bg-[#38BDF2] text-white" disabled={loading}>
-                    {loading ? 'Wait...' : 'Sign in'}
+                  <Button type="submit" className="w-full py-3 text-[11px] font-black rounded-lg border-none bg-gradient-to-r from-[#38BDF2] to-[#2DAADF] text-white shadow-lg shadow-[#38BDF2]/25 hover:shadow-xl transition-all" disabled={loading}>
+                    {loading ? 'Wait...' : 'Continue to StartupLab'}
                   </Button>
 
                   <div className="relative my-0.5">
@@ -222,53 +493,66 @@ export const AuthPage: React.FC = () => {
               )}
 
               {view === 'signup' && (
-                 <form onSubmit={handleSignup} className="flex flex-col gap-3">
-                    <div className="space-y-0.5">
-                      <label className="text-[11px] font-bold text-black/40 ml-0.5">Full Name *</label>
-                      <input placeholder="Juan Dela Cruz" required value={name} onChange={(e) => setName(e.target.value)} 
-                      className="w-full px-4 py-2.5 bg-[#F2F2F2] border border-black/10 rounded-[5px] text-[11px] font-medium text-black outline-none focus:border-[#38BDF2] transition-all" />
-                    </div>
-                    <div className="space-y-0.5">
-                      <label className="text-[11px] font-bold text-black/40 ml-0.5">Email Address *</label>
-                      <input type="email" placeholder="you@domain.com" required value={email} onChange={(e) => setEmail(e.target.value)} 
-                      className="w-full px-4 py-2.5 bg-[#F2F2F2] border border-black/10 rounded-[5px] text-[11px] font-medium text-black outline-none focus:border-[#38BDF2] transition-all" />
-                    </div>
-                    <div className="space-y-0.5">
-                      <label className="text-[11px] font-bold text-black/40 ml-0.5">Password *</label>
-                      <PasswordInput placeholder="Create password" required value={password} onChange={(e: any) => setPassword(e.target.value)}
+                <form onSubmit={handleSignup} className="flex flex-col gap-3">
+                  <div className="space-y-0.5">
+                    <label className="text-[11px] font-bold text-black/40 ml-0.5">Full Name *</label>
+                    <IconInput
+                      placeholder="Juan Dela Cruz"
+                      required
+                      value={name}
+                      onChange={(e: any) => setName(e.target.value)}
+                      icon={<UserIcon className="w-4 h-4" />}
+                    />
+                  </div>
+                  <div className="space-y-0.5">
+                    <label className="text-[11px] font-bold text-black/40 ml-0.5">Email Address *</label>
+                    <IconInput
+                      type="email"
+                      placeholder="you@domain.com"
+                      required
+                      value={email}
+                      onChange={(e: any) => setEmail(e.target.value)}
+                      icon={<EnvelopeIcon className="w-4 h-4" />}
+                    />
+                  </div>
+                  <div className="space-y-0.5">
+                    <label className="text-[11px] font-bold text-black/40 ml-0.5">Password *</label>
+                    <PasswordInput placeholder="Create password" required value={password} onChange={(e: any) => setPassword(e.target.value)}
+                      icon={<LockIcon className="w-4 h-4" />}
                       inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[11px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
-                    </div>
-                    <div className="space-y-0.5">
-                      <label className="text-[11px] font-bold text-black/40 ml-0.5">Confirm Password *</label>
-                      <PasswordInput placeholder="Confirm password" required value={confirmPassword} onChange={(e: any) => setConfirmPassword(e.target.value)}
+                  </div>
+                  <div className="space-y-0.5">
+                    <label className="text-[11px] font-bold text-black/40 ml-0.5">Confirm Password *</label>
+                    <PasswordInput placeholder="Confirm password" required value={confirmPassword} onChange={(e: any) => setConfirmPassword(e.target.value)}
+                      icon={<LockIcon className="w-4 h-4" />}
                       inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[11px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
-                    </div>
-                    <div className="flex items-center gap-2 p-1 bg-black/[0.01] rounded-[5px] mt-0.5">
-                      <Checkbox checked={agreedToTerms} onChange={setAgreedToTerms} />
-                      <span className="text-[11px] text-black/70 font-bold leading-tight">
-                        I agree to the <button type="button" onClick={() => setShowTerms(true)} className="text-[#38BDF2] hover:underline">Terms of Service</button> and <button type="button" onClick={() => setShowPrivacy(true)} className="text-[#38BDF2] hover:underline">Privacy Policy</button>.
-                      </span>
-                    </div>
-                    <Button type="submit" className="w-full py-2.5 text-[11px] font-black bg-[#38BDF2] rounded-[5px] border-none text-white mt-1" disabled={loading}>
-                      {loading ? 'Wait...' : 'Create account'}
-                    </Button>
-                    
-                    <div className="relative my-0.5">
-                      <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-black/5"></div></div>
-                      <div className="relative flex justify-center text-[11px] font-bold text-black/20"><span className="bg-[#F2F2F2] px-3">Or sign up with</span></div>
-                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 p-1 bg-black/[0.01] rounded-[5px] mt-0.5">
+                    <Checkbox checked={agreedToTerms} onChange={setAgreedToTerms} />
+                    <span className="text-[11px] text-black/70 font-bold leading-tight">
+                      I agree to the <button type="button" onClick={() => setShowTerms(true)} className="text-[#38BDF2] hover:underline">Terms of Service</button> and <button type="button" onClick={() => setShowPrivacy(true)} className="text-[#38BDF2] hover:underline">Privacy Policy</button>.
+                    </span>
+                  </div>
+                  <Button type="submit" className="w-full py-2.5 text-[11px] font-black bg-[#38BDF2] rounded-[5px] border-none text-white mt-1" disabled={loading}>
+                    {loading ? 'Wait...' : 'Create account'}
+                  </Button>
 
-                    <button type="button" onClick={() => handleSocialLogin('google')} disabled={!!socialLoading}
-                      className="flex items-center justify-center gap-3 w-full py-2.5 bg-[#F2F2F2] border border-black/10 rounded-[5px] hover:bg-black/[0.04] transition-all"
-                    >
-                      <ICONS.Google className="w-3 h-3" />
-                      <span className="text-[11px] font-bold text-black">Google account</span>
-                    </button>
+                  <div className="relative my-0.5">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-black/5"></div></div>
+                    <div className="relative flex justify-center text-[11px] font-bold text-black/20"><span className="bg-[#F2F2F2] px-3">Or sign up with</span></div>
+                  </div>
 
-                    <p className="text-black/40 text-[11px] font-bold text-center mt-1">
-                      Already have an account? <button type="button" onClick={() => setView('login')} className="text-[#38BDF2] hover:underline">Sign In</button>
-                    </p>
-                 </form>
+                  <button type="button" onClick={() => handleSocialLogin('google')} disabled={!!socialLoading}
+                    className="flex items-center justify-center gap-3 w-full py-2.5 bg-[#F2F2F2] border border-black/10 rounded-[5px] hover:bg-black/[0.04] transition-all"
+                  >
+                    <ICONS.Google className="w-3 h-3" />
+                    <span className="text-[11px] font-bold text-black">Google account</span>
+                  </button>
+
+                  <p className="text-black/40 text-[11px] font-bold text-center mt-1">
+                    Already have an account? <button type="button" onClick={() => setView('login')} className="text-[#38BDF2] hover:underline">Sign In</button>
+                  </p>
+                </form>
               )}
 
               {view === 'forgot-password' && (
@@ -277,8 +561,14 @@ export const AuthPage: React.FC = () => {
                     <form onSubmit={async (e) => { e.preventDefault(); setLoading(true); setForgotMessage('Success'); setLoading(false); }} className="space-y-3">
                       <div className="space-y-0.5">
                         <label className="text-[11px] font-bold text-black/40 ml-0.5">Account Email</label>
-                        <input type="email" placeholder="you@domain.com" value={email} onChange={(e) => setEmail(e.target.value)} required 
-                        className="w-full px-4 py-2.5 bg-[#F2F2F2] border border-black/10 rounded-[5px] text-[11px] font-medium text-black outline-none focus:border-[#38BDF2] transition-all" />
+                        <IconInput
+                          type="email"
+                          placeholder="you@domain.com"
+                          value={email}
+                          onChange={(e: any) => setEmail(e.target.value)}
+                          required
+                          icon={<EnvelopeIcon className="w-4 h-4" />}
+                        />
                       </div>
                       <Button type="submit" className="w-full py-2.5 bg-[#38BDF2] rounded-[5px] font-black border-none text-white mt-2" disabled={loading}>Send Link</Button>
                     </form>

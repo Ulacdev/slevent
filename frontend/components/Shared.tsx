@@ -147,7 +147,7 @@ export const PasswordInput: React.FC<{
   return (
     <div className={`relative group/input ${className}`}>
       {icon && (
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F] group-focus-within/input:text-[#38BDF2] transition-colors z-10 w-5 h-5 flex items-center justify-center">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/20 group-focus-within/input:text-[#38BDF2] transition-colors z-10 w-5 h-5 flex items-center justify-center">
           {icon}
         </div>
       )}
