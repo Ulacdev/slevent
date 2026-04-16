@@ -100,6 +100,17 @@ export const AuthPage: React.FC = () => {
     }
   }, [view, searchParams]);
 
+  useEffect(() => {
+    const titleMap: Record<string, string> = {
+      'login': 'Login | StartupLab Business Center',
+      'signup': 'Create Account | StartupLab Business Center',
+      'forgot-password': 'Forgot Password | StartupLab Business Center',
+      'reset-password': 'Setup New Password | StartupLab Business Center',
+      'accept-invite': 'Join Organization | StartupLab Business Center'
+    };
+    document.title = titleMap[view] || 'Authentication | StartupLab Business Center';
+  }, [view]);
+
   const parseResetParams = () => {
     const merged = new URLSearchParams(window.location.search);
     const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
