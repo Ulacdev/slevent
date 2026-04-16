@@ -185,11 +185,63 @@ export const RegistrationForm: React.FC = () => {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name) newErrors.name = 'Full name is required';
-    if (!formData.email) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email format';
-    if (!formData.termsAccepted) newErrors.terms = 'You must accept the terms';
+    
+    // Full Name
+    const nameRegex = /^[a-zA-Z\s.\-']+$/;
+    if (!formData.name.trim()) {
+      newErrors.name = 'Full name is required';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Full name must be at least 2 characters';
+    } else if (!nameRegex.test(formData.name.trim())) {
+      newErrors.name = 'Full name should only contain letters and basic symbols (. - \')';
+    } else if (/\d/.test(formData.name)) {
+      newErrors.name = 'Full name cannot contain numbers';
+    }
+
+    // Email Address
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!formData.email) {
+      newErrors.email = 'Email address is required';
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    // Contact Number
+    // Supports: +639..., 09..., 9... (Philippine mobile) or general 7-15 digit numbers
+    const phoneClean = formData.phone.replace(/[\s\-\(\)]/g, '');
+    if (!formData.phone) {
+      newErrors.phone = 'Contact number is required';
+    } else if (!/^(0|63|\+63)?9\d{9}$/.test(phoneClean) && !/^\+?\d{7,15}$/.test(phoneClean)) {
+      newErrors.phone = 'Please enter a valid contact number (e.g. 09123456789)';
+    }
+
+    // Extra Guests Validation
+    extraGuests.forEach((guest, index) => {
+      if (!guest.name.trim()) {
+        newErrors[`guest_${index}_name`] = 'Guest name is required';
+      } else if (guest.name.trim().length < 2) {
+        newErrors[`guest_${index}_name`] = 'Guest name is too short';
+      } else if (!nameRegex.test(guest.name.trim())) {
+        newErrors[`guest_${index}_name`] = 'Guest name has invalid characters';
+      }
+
+      if (!guest.email) {
+        newErrors[`guest_${index}_email`] = 'Guest email is required';
+      } else if (!emailRegex.test(guest.email)) {
+        newErrors[`guest_${index}_email`] = 'Invalid guest email';
+      }
+    });
+
+    if (!formData.termsAccepted) {
+      newErrors.terms = 'You must accept the terms and conditions';
+    }
+
     setErrors(newErrors);
+    
+    if (Object.keys(newErrors).length > 0) {
+      showToast('error', 'Please correct the errors in the form before proceeding.');
+    }
+    
     return Object.keys(newErrors).length === 0;
   };
 
@@ -297,7 +349,10 @@ export const RegistrationForm: React.FC = () => {
                         className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-xl text-[14px]"
                         style={{ '--tw-ring-color': brandColor } as any}
                         value={formData.name}
-                        onChange={(e: any) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e: any) => {
+                          const val = e.target.value.replace(/\d/g, ''); // Block numbers while typing
+                          setFormData({ ...formData, name: val });
+                        }}
                         error={errors.name}
                       />
                     </div>
@@ -314,13 +369,24 @@ export const RegistrationForm: React.FC = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[13px] font-medium text-[#2E2E2F] ml-1">Contact Number</label>
-                      <Input
-                        placeholder="+63 ...."
-                        className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-xl text-[14px]"
-                        value={formData.phone}
-                        onChange={(e: any) => setFormData({ ...formData, phone: e.target.value })}
-                      />
+                      <label className="text-[13px] font-medium text-[#2E2E2F] ml-1">Contact Number *</label>
+                      <div className="relative group/phone">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] font-bold text-[#2E2E2F]/40 pointer-events-none z-10 transition-colors group-focus-within/phone:text-[#38BDF2]">
+                          +63
+                        </div>
+                        <Input
+                          type="tel"
+                          placeholder="9XX XXX XXXX"
+                          className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-xl text-[14px] pl-12"
+                          style={{ '--tw-ring-color': brandColor } as any}
+                          value={formData.phone}
+                          onChange={(e: any) => {
+                            const val = e.target.value.replace(/\D/g, '').slice(0, 10); // Only digits, max 10 for PH
+                            setFormData({ ...formData, phone: val });
+                          }}
+                          error={errors.phone}
+                        />
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <label className="text-[13px] font-medium text-[#2E2E2F] ml-1">Company</label>
@@ -351,23 +417,24 @@ export const RegistrationForm: React.FC = () => {
                                 <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest">Additional Guest</span>
                               </div>
                               
-                                <div className="space-y-4">
                                   <div className="space-y-1.5">
-                                    <label className="text-[11px] font-medium text-[#2E2E2F] ml-1">Guest Full Name</label>
+                                    <label className="text-[11px] font-medium text-[#2E2E2F] ml-1">Guest Full Name *</label>
                                     <Input
                                       placeholder="Full name as per identification"
                                       className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-xl text-[14px]"
                                       style={{ '--tw-ring-color': brandColor } as any}
                                       value={guest.name}
                                       onChange={(e: any) => {
+                                        const val = e.target.value.replace(/\d/g, ''); // Block numbers while typing
                                         const newGuests = [...extraGuests];
-                                        newGuests[index] = { ...newGuests[index], name: e.target.value };
+                                        newGuests[index] = { ...newGuests[index], name: val };
                                         setExtraGuests(newGuests);
                                       }}
+                                      error={errors[`guest_${index}_name`]}
                                     />
                                   </div>
                                   <div className="space-y-1.5">
-                                    <label className="text-[11px] font-medium text-[#2E2E2F] ml-1">Guest Email Address</label>
+                                    <label className="text-[11px] font-medium text-[#2E2E2F] ml-1">Guest Email Address *</label>
                                     <Input
                                       type="email"
                                       placeholder="name@organization.com"
@@ -379,9 +446,9 @@ export const RegistrationForm: React.FC = () => {
                                         newGuests[index] = { ...newGuests[index], email: e.target.value };
                                         setExtraGuests(newGuests);
                                       }}
+                                      error={errors[`guest_${index}_email`]}
                                     />
                                   </div>
-                                </div>
                             </div>
                           ))}
                         </div>

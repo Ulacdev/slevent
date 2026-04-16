@@ -339,7 +339,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                   type="button"
                   onClick={() => handleSocialAuth('google')}
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 py-4 bg-white border border-[#2E2E2F]/5 rounded-2xl hover:bg-white hover:border-[#38BDF2]/40 transition-all shadow-sm group disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-3 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl hover:bg-black/[0.04] transition-all border-[1px]"
                 >
                   <ICONS.Google className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   <span className="text-[12px] font-bold text-[#2E2E2F]">Google Account</span>

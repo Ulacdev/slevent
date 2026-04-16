@@ -26,7 +26,7 @@ import { HashRouter as Router, Routes, Route, Link, useLocation, useSearchParams
 
 
 
-import { AuthModal } from './components/AuthModal';
+
 
 
 
@@ -3201,11 +3201,6 @@ const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ childr
   return (
     <>
       {children}
-      <AuthModal
-        isOpen={authModal.isOpen}
-        onClose={closeAuthModal}
-        initialView={authModal.view}
-      />
     </>
   );
 };

@@ -120,7 +120,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const openAuthModal = React.useCallback((view: 'login' | 'signup' | 'forgot-password' = 'login') => {
-    setAuthModal({ isOpen: true, view });
+    // Transitioning from Modal to Page-based Auth
+    if (view === 'signup') window.location.assign('#/signup');
+    else if (view === 'forgot-password') window.location.assign('#/forgot-password');
+    else window.location.assign('#/login');
   }, []);
 
   const closeAuthModal = React.useCallback(() => {

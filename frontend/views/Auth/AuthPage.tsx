@@ -33,7 +33,7 @@ const IconInput = (props: any) => {
       )}
       <input
         {...inputProps}
-        className={`w-full px-4 py-2.5 bg-[#F2F2F2] border border-black/10 rounded-[5px] text-[10px] font-medium text-black outline-none focus:border-[#38BDF2] transition-all ${icon ? 'pl-11' : 'pl-4'}`}
+        className={`w-full px-5 py-3 bg-[#F2F2F2] border border-black/[0.03] rounded-[16px] text-[10px] font-medium text-black outline-none focus:border-[#38BDF2] transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] ${icon ? 'pl-11' : 'pl-4'}`}
       />
     </div>
   );
@@ -191,10 +191,10 @@ export const AuthPage: React.FC = () => {
       const res = await fetch(`${API}/api/invite/accept-invite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          token, 
-          password: needsPassword ? maskPassword(password) : undefined, 
-          name: name.trim() 
+        body: JSON.stringify({
+          token,
+          password: needsPassword ? maskPassword(password) : undefined,
+          name: name.trim()
         })
       });
 
@@ -307,15 +307,25 @@ export const AuthPage: React.FC = () => {
         {/* LEFT: Branding (55%) */}
         <div className="hidden lg:flex w-[60%] h-full flex-col pl-10 pr-4 pt-4 justify-between bg-[#F2F2F2] border-r border-black/5 relative overflow-hidden isolate">
 
-          {/* Mockup Display: Laptop + Phone Composite */}
-          <div className="absolute left-[74%] -translate-x-1/2 top-[45%] -translate-y-1/2 z-0 pointer-events-none transform scale-[0.6] lg:scale-[0.75] opacity-[0.9]">
+          {/* Mockup Display: Premium Dark Shells */}
+          <div className="absolute left-[74%] -translate-x-1/2 top-[40%] -translate-y-1/2 z-0 pointer-events-none transform scale-[0.6] lg:scale-[0.75] opacity-[0.9] transition-opacity duration-700">
 
-            {/* Laptop Mockup (90 POV / Flat) */}
-            <div className="relative w-[700px] h-[450px] transform rotate-0">
-              {/* Screen Frame */}
-              <div className="absolute inset-0 bg-black rounded-[2rem] border-[12px] border-black overflow-hidden">
-                {/* Dashboard Content */}
-                <div className="w-full h-full bg-[#F2F2F2] flex flex-col font-sans">
+            {/* Laptop Mockup (Clay Blue Shell - Off Axis 1 Left) */}
+            <div
+              className="relative w-[700px] h-[450px]"
+              style={{
+                transform: 'perspective(2000px) rotateX(15deg) rotateY(30deg) rotateZ(-5deg)',
+                transformStyle: 'preserve-3d'
+              }}
+            >
+              {/* Screen Frame (Clay Blue Shell) */}
+              <div className="absolute inset-0 bg-[#38BDF2] rounded-[2.5rem] shadow-[0_40px_100px_rgba(56,189,242,0.2),inset_0_-12px_24px_rgba(0,0,0,0.1),inset_0_12px_24px_rgba(255,255,255,0.4)] border border-white/20 p-3.5"
+                style={{ transform: 'translateZ(1px)', transformStyle: 'preserve-3d' }}>
+                {/* Macbook-style Lip Indentation */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-[#2daade]/40 rounded-b-lg border-b border-white/10 z-20" />
+                {/* Internal Screen Area */}
+                <div className="w-full h-full rounded-[1.8rem] overflow-visible border border-black/[0.05] relative z-10 flex flex-col font-sans"
+                  style={{ transform: 'translateZ(0)', WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
                   {/* Webpage Header (Real-time Layout) */}
                   <div className="h-12 border-b border-black/5 flex items-center px-4 justify-between bg-[#F2F2F2] shrink-0">
                     <div className="flex items-center gap-3">
@@ -433,88 +443,104 @@ export const AuthPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              {/* Laptop Base Hinges Removed for Flat Style */}
-
             </div>
 
-            {/* Smartphone Mockup (Foreground Overlap - 90 POV) */}
-            <div className="absolute right-4 -bottom-14 z-10 transform rotate-0 scale-[0.6] origin-bottom-right">
-              <div className="w-[300px] h-[600px] bg-[#F2F2F2] rounded-[3.5rem] border-[10px] border-black relative overflow-hidden flex flex-col p-6">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-b-2xl"></div>
+            {/* Smartphone Mockup (Clay Blue Shell) */}
+            <div
+              className="absolute right-16 bottom-0 z-10 transform origin-bottom-right hover:-translate-y-4 transition-transform duration-700 ease-in-out"
+              style={{
+                transform: 'scale(0.6) perspective(2000px) rotateX(15deg) rotateY(-30deg) rotateZ(2deg)',
+                transformStyle: 'preserve-3d'
+              }}
+            >
+              <div className="w-[320px] h-[640px] bg-[#38BDF2] rounded-[4.5rem] p-3.5 shadow-[20px_40px_100px_rgba(56,189,242,0.2),inset_0_-20px_40px_rgba(0,0,0,0.1),inset_0_20px_40px_rgba(255,255,255,0.4)] border border-white/20 relative overflow-visible flex flex-col items-stretch"
+                style={{ transformStyle: 'preserve-3d' }}>
 
-                {/* Digital Ticket Layout */}
-                <div className="mt-12 flex flex-col gap-0.5">
-                  {/* Ticket Info Area (Live Context) */}
-                  <div className="bg-[#F2F2F2] border border-black/5 rounded-t-3xl p-5 space-y-4">
-                    <div className="flex justify-between items-center">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-black text-[#38BDF2] tracking-wider uppercase">StartupLab Live</span>
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-1.5 h-1.5 rounded-full bg-[#38BDF2] animate-pulse" />
-                          <span className="text-[9px] font-black text-black/20 uppercase">In Session</span>
+                {/* FRONT FACE (Inner F2F2F2 Screen Area) */}
+                <div className="w-full h-full bg-[#F2F2F2] rounded-[3.5rem] border border-black/5 relative overflow-visible flex flex-col"
+                  style={{ backfaceVisibility: 'hidden' }}>
+
+                  {/* Notch (Clay Blue) */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 bg-[#38BDF2] rounded-b-3xl shadow-[inset_0_-2px_4px_rgba(0,0,0,0.1),inset_0_2px_4px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2 z-20">
+                    <div className="w-2 h-2 rounded-full bg-white/20 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]" />
+                    <div className="w-12 h-1 bg-white/20 rounded-full shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]" />
+                  </div>
+
+                  {/* Digital Ticket Layout */}
+                  <div className="mt-10 flex flex-col gap-0.5 px-0">
+                    {/* Ticket Info Area (Live Context) */}
+                    <div className="bg-[#F2F2F2] border border-black/5 rounded-t-3xl p-5 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] font-black text-[#38BDF2] tracking-wider uppercase">StartupLab Live</span>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#38BDF2] animate-pulse" />
+                            <span className="text-[9px] font-black text-black/20 uppercase">In Session</span>
+                          </div>
+                        </div>
+                        <div className="px-3 py-1 bg-black text-white text-[8px] font-black rounded-full uppercase tracking-widest">VIP PASS</div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="space-y-1.5">
+                          <div className="text-[14px] font-black text-black leading-tight">Tech Founders Summit 2024</div>
+                          <div className="flex items-center gap-2">
+                            <div className="h-3 w-16 bg-black/5 rounded-md" />
+                            <div className="h-3 w-20 bg-black/5 rounded-md" />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 pt-2">
+                          <div className="p-2 border border-black/5 rounded-xl">
+                            <span className="text-[7px] font-black text-black/20 block uppercase">Section</span>
+                            <span className="text-[10px] font-black text-[#38BDF2]">A-12</span>
+                          </div>
+                          <div className="p-2 border border-black/5 rounded-xl">
+                            <span className="text-[7px] font-black text-black/20 block uppercase">Seat</span>
+                            <span className="text-[10px] font-black text-[#38BDF2]">VIP-04</span>
+                          </div>
                         </div>
                       </div>
-                      <div className="px-3 py-1 bg-black text-white text-[8px] font-black rounded-full uppercase tracking-widest">VIP PASS</div>
                     </div>
 
-                    <div className="space-y-3">
-                      <div className="space-y-1.5">
-                        <div className="text-[14px] font-black text-black leading-tight">Tech Founders Summit 2024</div>
-                        <div className="flex items-center gap-2">
-                          <div className="h-3 w-16 bg-black/5 rounded-md" />
-                          <div className="h-3 w-20 bg-black/5 rounded-md" />
+                    {/* Perforation Effect */}
+                    <div className="relative h-6 flex items-center justify-between px-[-10px]">
+                      <div className="absolute left-[-15px] w-6 h-6 rounded-full bg-[#F2F2F2] border border-black/5" />
+                      <div className="flex-1 border-t-2 border-dashed border-black/5 mx-6" />
+                      <div className="absolute right-[-15px] w-6 h-6 rounded-full bg-[#F2F2F2] border border-black/5" />
+                    </div>
+
+                    {/* QR Validation Area (Real-time Sync) */}
+                    <div className="bg-[#F2F2F2] border border-black/5 rounded-b-3xl p-6 flex flex-col items-center gap-4 relative">
+                      <div className="absolute top-2 right-4 flex items-center gap-1 opacity-20">
+                        <span className="text-[6px] font-black uppercase">Valid Ticket</span>
+                      </div>
+
+                      <div className="flex items-center gap-4 w-full">
+                        {/* Side Scanning Line */}
+                        <div className="w-2 h-32 bg-black/[0.03] rounded-full relative overflow-hidden">
+                          <div className="absolute inset-x-0 h-8 bg-[#38BDF2] shadow-[0_0_12px_rgba(56,189,242,0.8)] animate-bounce" />
+                        </div>
+                        <div className="flex-1 p-2 bg-[#F2F2F2] relative">
+                          <img
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=StartupLab-Business-Center-Validation-2024"
+                            alt="QR Validation"
+                            className="w-full h-full mix-blend-multiply transition-opacity"
+                          />
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3 pt-2">
-                        <div className="p-2 border border-black/5 rounded-xl">
-                          <span className="text-[7px] font-black text-black/20 block uppercase">Section</span>
-                          <span className="text-[10px] font-black text-[#38BDF2]">A-12</span>
-                        </div>
-                        <div className="p-2 border border-black/5 rounded-xl">
-                          <span className="text-[7px] font-black text-black/20 block uppercase">Seat</span>
-                          <span className="text-[10px] font-black text-[#38BDF2]">VIP-04</span>
-                        </div>
+                      <div className="flex flex-col items-center gap-1.5">
+                        <div className="text-[10px] font-black text-black leading-none opacity-20">SCAN TO CHECK IN</div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Perforation Effect */}
-                  <div className="relative h-6 flex items-center justify-between px-[-10px]">
-                    <div className="absolute left-[-15px] w-6 h-6 rounded-full bg-[#F2F2F2] border border-black/5" />
-                    <div className="flex-1 border-t-2 border-dashed border-black/5 mx-6" />
-                    <div className="absolute right-[-15px] w-6 h-6 rounded-full bg-[#F2F2F2] border border-black/5" />
+                  <div className="mt-auto flex justify-center pb-2">
+                    <div className="w-20 h-1 bg-black/10 rounded-full"></div>
                   </div>
+                </div> {/* Closes Inner F2F2F2 Screen Area */}
 
-                  {/* QR Validation Area (Real-time Sync) */}
-                  <div className="bg-[#F2F2F2] border border-black/5 rounded-b-3xl p-6 flex flex-col items-center gap-4 relative">
-                    <div className="absolute top-2 right-4 flex items-center gap-1 opacity-20">
-                      <span className="text-[6px] font-black uppercase">Valid Ticket</span>
-                    </div>
-
-                    <div className="flex items-center gap-4 w-full">
-                      {/* Side Scanning Line */}
-                      <div className="w-2 h-32 bg-black/[0.03] rounded-full relative overflow-hidden">
-                        <div className="absolute inset-x-0 h-8 bg-[#38BDF2] shadow-[0_0_12px_rgba(56,189,242,0.8)] animate-bounce" />
-                      </div>
-                      <div className="flex-1 p-2 bg-[#F2F2F2] relative">
-                        <img
-                          src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=StartupLab-Business-Center-Validation-2024"
-                          alt="QR Validation"
-                          className="w-full h-full mix-blend-multiply transition-opacity"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col items-center gap-1.5">
-                      <div className="text-[10px] font-black text-black leading-none opacity-20">SCAN TO CHECK IN</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-auto flex justify-center pb-2">
-                  <div className="w-20 h-1 bg-black/10 rounded-full"></div>
-                </div>
               </div>
             </div>
 
@@ -526,7 +552,7 @@ export const AuthPage: React.FC = () => {
               <img
                 src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
                 alt="StartupLab"
-                className="h-[8.5rem] w-auto mb-2.5"
+                className="h-[7.1rem] w-auto mb-4"
               />
             </Link>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#38BDF2] text-white text-[10px] font-black mb-2 shadow-lg shadow-[#38BDF2]/20 animate-in fade-in slide-in-from-top-4 duration-700">
@@ -534,36 +560,35 @@ export const AuthPage: React.FC = () => {
               <span>New: Advanced QR ticketing & analytics launched!</span>
             </div>
             <h1 className="text-[2.2rem] font-bold text-black leading-[1.1] tracking-tight mb-2 max-w-[450px]">
-              {view === 'reset-password' ? 'Secure your access' : 
-               view === 'accept-invite' ? 'Join your team' : 
-               'Empower your event business'} <span className="text-[#38BDF2]">{view === 'reset-password' ? 'instantly.' : view === 'accept-invite' ? 'today.' : 'instantly.'}</span>
+              {view === 'reset-password' ? 'Secure your access' :
+                view === 'accept-invite' ? 'Join your team' :
+                  'Empower your event business'} <span className="text-[#38BDF2]">{view === 'reset-password' ? 'instantly.' : view === 'accept-invite' ? 'today.' : 'instantly.'}</span>
             </h1>
             <p className="text-black/60 text-[13px] font-bold leading-relaxed max-w-[400px]">
               {view === 'reset-password' ? 'Set a strong password to protect your event management portal.' :
-               view === 'accept-invite' ? 'Complete your profile to start collaborating with your organization.' :
-               'Trusted by over 1,000+ Filipino creators to host, manage, and sell out events.'}
+                view === 'accept-invite' ? 'Complete your profile to start collaborating with your organization.' :
+                  'Trusted by over 1,000+ Filipino creators to host, manage, and sell out events.'}
             </p>
 
-            {/* Feature Cards Group - Moved up next to headline */}
-            <div className="flex flex-col gap-6 max-w-[360px] z-10 mt-8 relative items-start">
+            {/* Feature Cards Group - Claymorphic Style */}
+            <div className="flex flex-col gap-5 max-w-[360px] z-10 mt-8 relative items-start">
               {[
                 { title: 'Create events easily', desc: 'Quickly set up and automate your event workflows.', icon: ICONS.Megaphone },
                 { title: 'Manage attendees', desc: 'Track check-ins and engagement in real-time.', icon: ICONS.CheckCircle },
                 { title: 'Sell tickets effortlessly', desc: 'Boost sales with seamless QR code ticketing.', icon: ICONS.Zap }
               ].map((card, i) => (
-                <div key={i} className="bg-[#F2F2F2] p-4 rounded-xl border border-black/5 flex items-center gap-4 hover:border-[#38BDF2]/20 transition-all shadow-xl shadow-black/5 animate-in fade-in slide-in-from-left duration-700 delay-[200ms]">
-                  <div className="w-10 h-10 rounded-full bg-[#38BDF2] flex items-center justify-center flex-shrink-0">
-                    <card.icon className="w-5 h-5 text-white" />
+                <div key={i} className="w-full bg-[#F2F2F2] p-4 rounded-[1.2rem] border border-black/[0.02] flex items-center gap-4 transition-transform hover:scale-[1.02] shadow-[0_15px_30px_rgba(0,0,0,0.04),inset_0_-6px_12px_rgba(0,0,0,0.04),inset_0_6px_12px_rgba(255,255,255,0.9)] animate-in fade-in slide-in-from-left duration-700 cursor-default" style={{ animationDelay: `${i * 150 + 200}ms` }}>
+                  <div className="w-11 h-11 rounded-[14px] bg-[#38BDF2] flex items-center justify-center flex-shrink-0 shadow-[0_4px_12px_rgba(56,189,242,0.3),inset_0_-2px_4px_rgba(0,0,0,0.1),inset_0_2px_4px_rgba(255,255,255,0.4)]">
+                    <card.icon className="w-5 h-5 text-white drop-shadow-sm" />
                   </div>
                   <div>
-                    <h3 className="text-[14px] font-black text-black leading-tight mb-1">{card.title}</h3>
-                    <p className="text-[11px] text-black/40 font-bold leading-tight max-w-[200px]">{card.desc}</p>
+                    <h3 className="text-[13.5px] font-black text-black leading-tight mb-0.5">{card.title}</h3>
+                    <p className="text-[10.5px] text-black/50 font-bold leading-tight max-w-[220px]">{card.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-
         </div>
 
         {/* RIGHT: Auth Forms (45%) */}
@@ -576,36 +601,36 @@ export const AuthPage: React.FC = () => {
                 <img
                   src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
                   alt="StartupLab"
-                  className="h-28 w-auto"
+                  className="h-16 w-auto"
                 />
               </Link>
             </div>
 
             <div className="text-left mb-4">
               <span className="text-[#38BDF2] text-[11px] font-black mb-1.5 block">
-                {view === 'login' ? 'Returning user' : 
-                 view === 'signup' ? 'New creator' :
-                 view === 'forgot-password' ? 'Security help' :
-                 view === 'reset-password' ? 'New Access' :
-                 'Join Organization'}
+                {view === 'login' ? 'Returning user' :
+                  view === 'signup' ? 'New creator' :
+                    view === 'forgot-password' ? 'Security help' :
+                      view === 'reset-password' ? 'New Access' :
+                        'Join Organization'}
               </span>
               <h2 className="text-2xl font-black text-black tracking-tight leading-tight mb-1">
-                {view === 'login' ? 'Welcome back 👋' : 
-                 view === 'signup' ? 'Join StartupLab' :
-                 view === 'forgot-password' ? 'Trouble signing in?' :
-                 view === 'reset-password' ? 'Setup your password' :
-                 (inviteInfo?.accountExists ? 'Join Organization' : 'Create your account')}
+                {view === 'login' ? 'Welcome back 👋' :
+                  view === 'signup' ? 'Join StartupLab' :
+                    view === 'forgot-password' ? 'Trouble signing in?' :
+                      view === 'reset-password' ? 'Setup your password' :
+                        (inviteInfo?.accountExists ? 'Join Organization' : 'Create your account')}
               </h2>
               <p className="text-[11px] text-black/40 font-bold max-w-[280px] leading-relaxed">
-                {view === 'login' ? "Let's get your events running." : 
-                 view === 'signup' ? 'Scale your event business effortlessly with our tools.' :
-                 view === 'forgot-password' ? "Enter your email and we'll send you a link to get back into your account." :
-                 view === 'reset-password' ? 'Please enter a new password that you haven\'t used before.' :
-                 `Invited as ${inviteInfo?.email || 'new member'}`}
+                {view === 'login' ? "Let's get your events running." :
+                  view === 'signup' ? 'Scale your event business effortlessly with our tools.' :
+                    view === 'forgot-password' ? "Enter your email and we'll send you a link to get back into your account." :
+                      view === 'reset-password' ? 'Please enter a new password that you haven\'t used before.' :
+                        `Invited as ${inviteInfo?.email || 'new member'}`}
               </p>
             </div>
 
-            <div className="bg-[#F2F2F2] p-6 rounded-[5px] border border-black/10">
+            <div className="bg-[#F2F2F2] p-8 rounded-[24px] border border-black/[0.03] shadow-[0_20px_40px_rgba(0,0,0,0.05),inset_0_-8px_16px_rgba(0,0,0,0.05),inset_0_8px_16px_rgba(255,255,255,0.8)]">
               {view === 'login' && (
                 <form onSubmit={handleLogin} className="flex flex-col gap-3 items-stretch">
                   <div className="space-y-3">
@@ -624,13 +649,13 @@ export const AuthPage: React.FC = () => {
                       <label className="text-[11px] font-bold text-black/40 ml-0.5">Password *</label>
                       <PasswordInput value={password} onChange={(e: any) => setPassword(e.target.value)} required placeholder="••••••••"
                         icon={<LockIcon className="w-4 h-4" />}
-                        inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
+                        inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[11px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
                       <button type="button" onClick={() => setView('forgot-password')} className="text-[11px] font-bold text-[#38BDF2] hover:underline mt-1 flex justify-end w-full">Forgot password?</button>
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full py-3 text-[11px] font-black rounded-lg border-none bg-gradient-to-r from-[#38BDF2] to-[#2DAADF] text-white shadow-lg shadow-[#38BDF2]/25 hover:shadow-xl transition-all" disabled={loading}>
-                    {loading ? 'Wait...' : 'Continue to StartupLab'}
+                  <Button type="submit" className="w-full py-4 text-[11px] font-black rounded-[16px] border-none bg-gradient-to-r from-[#38BDF2] to-[#2DAADF] text-white shadow-[0_10px_20px_rgba(56,189,242,0.2),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" disabled={loading}>
+                    {loading ? 'Wait...' : 'Login'}
                   </Button>
 
                   <div className="relative my-0.5">
@@ -639,10 +664,10 @@ export const AuthPage: React.FC = () => {
                   </div>
 
                   <button type="button" onClick={() => handleSocialLogin('google')} disabled={!!socialLoading}
-                    className="flex items-center justify-center gap-3 w-full py-2.5 bg-[#F2F2F2] border border-black/10 rounded-[5px] hover:bg-black/[0.04] transition-all"
+                    className="flex items-center justify-center gap-3 w-full py-3 bg-[#F2F2F2] !border-[1px] !border-solid !border-black/[0.05] rounded-[16px] shadow-[inset_0_-2px_6px_rgba(0,0,0,0.02),inset_0_2px_6px_rgba(255,255,255,0.7),0_4px_12px_rgba(0,0,0,0.03)] hover:scale-[1.02] transition-all"
                   >
-                    <ICONS.Google className="w-3 h-3" />
-                    <span className="text-[11px] font-bold text-black">Google account</span>
+                    <ICONS.Google className="w-4 h-4" />
+                    <span className="text-[11px] font-bold text-black/80">Continue with Google</span>
                   </button>
 
                   <p className="text-black/40 text-[10px] font-bold text-center mt-3">
@@ -678,21 +703,21 @@ export const AuthPage: React.FC = () => {
                     <label className="text-[11px] font-bold text-black/40 ml-0.5">Password *</label>
                     <PasswordInput placeholder="Create password" required value={password} onChange={(e: any) => setPassword(e.target.value)}
                       icon={<LockIcon className="w-4 h-4" />}
-                      inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[11px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
+                      inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[11px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
                   </div>
                   <div className="space-y-0.5">
                     <label className="text-[11px] font-bold text-black/40 ml-0.5">Confirm Password *</label>
                     <PasswordInput placeholder="Confirm password" required value={confirmPassword} onChange={(e: any) => setConfirmPassword(e.target.value)}
                       icon={<LockIcon className="w-4 h-4" />}
-                      inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[11px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
+                      inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[11px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
                   </div>
-                  <div className="flex items-center gap-2 p-1 bg-black/[0.01] rounded-[5px] mt-0.5">
+                  <div className="flex items-center gap-2 p-1 bg-black/[0.01] rounded-[11px] mt-0.5">
                     <Checkbox checked={agreedToTerms} onChange={setAgreedToTerms} />
                     <span className="text-[11px] text-black/70 font-bold leading-tight">
                       I agree to the <button type="button" onClick={() => setShowTerms(true)} className="text-[#38BDF2] hover:underline">Terms of Service</button> and <button type="button" onClick={() => setShowPrivacy(true)} className="text-[#38BDF2] hover:underline">Privacy Policy</button>.
                     </span>
                   </div>
-                  <Button type="submit" className="w-full py-2.5 text-[11px] font-black bg-[#38BDF2] rounded-[5px] border-none text-white mt-1" disabled={loading}>
+                  <Button type="submit" className="w-full py-4 text-[11px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" disabled={loading}>
                     {loading ? 'Wait...' : 'Create account'}
                   </Button>
 
@@ -702,10 +727,10 @@ export const AuthPage: React.FC = () => {
                   </div>
 
                   <button type="button" onClick={() => handleSocialLogin('google')} disabled={!!socialLoading}
-                    className="flex items-center justify-center gap-3 w-full py-2.5 bg-[#F2F2F2] border border-black/10 rounded-[5px] hover:bg-black/[0.04] transition-all"
+                    className="flex items-center justify-center gap-3 w-full py-3 bg-[#F2F2F2] !border-[1px] !border-solid !border-black/[0.05] rounded-[16px] shadow-[inset_0_-2px_6px_rgba(0,0,0,0.02),inset_0_2px_6px_rgba(255,255,255,0.7),0_4px_12px_rgba(0,0,0,0.03)] hover:scale-[1.02] transition-all"
                   >
-                    <ICONS.Google className="w-3 h-3" />
-                    <span className="text-[11px] font-bold text-black">Google account</span>
+                    <ICONS.Google className="w-4 h-4" />
+                    <span className="text-[11px] font-bold text-black/80">Continue with Google</span>
                   </button>
 
                   <p className="text-black/40 text-[11px] font-bold text-center mt-1">
@@ -717,11 +742,11 @@ export const AuthPage: React.FC = () => {
               {view === 'forgot-password' && (
                 <div className="space-y-4">
                   {!forgotMessage ? (
-                    <form 
-                      onSubmit={async (e) => { 
-                        e.preventDefault(); 
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
                         setError('');
-                        setLoading(true); 
+                        setLoading(true);
                         try {
                           const res = await fetch(`${API}/api/auth/forgot-password`, {
                             method: 'POST',
@@ -740,7 +765,7 @@ export const AuthPage: React.FC = () => {
                         } finally {
                           setLoading(false);
                         }
-                      }} 
+                      }}
                       className="space-y-3"
                     >
                       <div className="space-y-0.5">
@@ -754,127 +779,127 @@ export const AuthPage: React.FC = () => {
                           icon={<EnvelopeIcon className="w-4 h-4" />}
                         />
                       </div>
-                      
+
                       {error && (
-                        <div className="p-2.5 bg-red-50 border border-red-100 rounded-[5px] flex items-center gap-2 animate-in fade-in slide-in-from-top-1 duration-300">
-                           <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                           <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
+                        <div className="p-3 bg-red-50/50 border border-red-100 rounded-[16px] flex items-center gap-2 animate-in fade-in slide-in-from-top-1 duration-300 shadow-[inset_0_2px_4px_rgba(255,0,0,0.02)]">
+                          <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                          <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
                         </div>
                       )}
 
-                      <Button type="submit" className="w-full py-2.5 bg-[#38BDF2] rounded-[5px] font-black border-none text-white mt-2" disabled={loading}>
+                      <Button type="submit" className="w-full py-4 text-[11px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all disabled:opacity-50" disabled={loading}>
                         {loading ? 'Wait...' : 'Send Link'}
                       </Button>
                     </form>
                   ) : (
-                    <div className="text-center py-2 text-[10px] font-bold text-black">Check your email for reset instructions.</div>
+                    <div className="text-center py-6 bg-green-50/30 rounded-[16px] border border-green-100/50 text-[11px] font-bold text-green-600 shadow-sm">Check your email for reset instructions.</div>
                   )}
-                  <button type="button" onClick={() => { setView('login'); setError(''); }} className="w-full text-center text-[11px] font-black text-black/40 hover:text-[#38BDF2] transition-colors">Back to login</button>
+                  <button type="button" onClick={() => { setView('login'); setError(''); }} className="w-full text-center text-[11px] font-black text-black/40 hover:text-[#38BDF2] transition-colors mt-2">Back to login</button>
                 </div>
               )}
 
               {view === 'reset-password' && (
                 <div className="space-y-4">
-                   {!successMessage ? (
-                      <form onSubmit={handleResetPassword} className="space-y-3">
-                        <div className="space-y-0.5">
-                            <label className="text-[11px] font-bold text-black/40 ml-0.5">New Password *</label>
-                            <PasswordInput 
-                                value={password} 
-                                onChange={(e: any) => setPassword(e.target.value)} 
-                                required 
-                                placeholder="••••••••"
-                                icon={<LockIcon className="w-4 h-4" />}
-                                inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" 
-                            />
-                            <PasswordRequirements password={password} />
-                        </div>
-                        <div className="space-y-0.5">
-                            <label className="text-[11px] font-bold text-black/40 ml-0.5">Confirm New Password *</label>
-                            <PasswordInput 
-                                value={confirmPassword} 
-                                onChange={(e: any) => setConfirmPassword(e.target.value)} 
-                                required 
-                                placeholder="••••••••"
-                                icon={<LockIcon className="w-4 h-4" />}
-                                inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" 
-                            />
-                        </div>
+                  {!successMessage ? (
+                    <form onSubmit={handleResetPassword} className="space-y-3">
+                      <div className="space-y-0.5">
+                        <label className="text-[11px] font-bold text-black/40 ml-0.5">New Password *</label>
+                        <PasswordInput
+                          value={password}
+                          onChange={(e: any) => setPassword(e.target.value)}
+                          required
+                          placeholder="••••••••"
+                          icon={<LockIcon className="w-4 h-4" />}
+                          inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[10px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0"
+                        />
+                        <PasswordRequirements password={password} />
+                      </div>
+                      <div className="space-y-0.5">
+                        <label className="text-[11px] font-bold text-black/40 ml-0.5">Confirm New Password *</label>
+                        <PasswordInput
+                          value={confirmPassword}
+                          onChange={(e: any) => setConfirmPassword(e.target.value)}
+                          required
+                          placeholder="••••••••"
+                          icon={<LockIcon className="w-4 h-4" />}
+                          inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[10px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0"
+                        />
+                      </div>
 
-                        {error && (
-                            <div className="p-2.5 bg-red-50 border border-red-100 rounded-[5px] flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                                <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
-                            </div>
-                        )}
+                      {error && (
+                        <div className="p-2.5 bg-red-50 border border-red-100 rounded-[16px] flex items-center gap-2 shadow-[inset_0_2px_4px_rgba(255,0,0,0.02)]">
+                          <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                          <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
+                        </div>
+                      )}
 
-                        <Button type="submit" className="w-full py-2.5 bg-[#38BDF2] rounded-[5px] font-black border-none text-white mt-1" disabled={loading}>
-                            {loading ? 'Updating...' : 'Update Password'}
-                        </Button>
-                      </form>
-                   ) : (
-                      <div className="text-center py-4 text-[11px] font-black text-[#38BDF2]">{successMessage}</div>
-                   )}
+                      <Button type="submit" className="w-full py-4 bg-[#38BDF2] rounded-[16px] font-black border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all" disabled={loading}>
+                        {loading ? 'Updating...' : 'Update Password'}
+                      </Button>
+                    </form>
+                  ) : (
+                    <div className="text-center py-4 text-[11px] font-black text-[#38BDF2]">{successMessage}</div>
+                  )}
                 </div>
               )}
 
               {view === 'accept-invite' && (
                 <div className="space-y-4">
-                   {!successMessage ? (
-                      <form onSubmit={handleAcceptInvite} className="space-y-3">
-                        <div className="space-y-0.5">
-                            <label className="text-[11px] font-bold text-black/40 ml-0.5">Full Name *</label>
-                            <IconInput
-                                placeholder="e.g. John Doe"
-                                value={name}
-                                onChange={(e: any) => setName(e.target.value)}
-                                required
-                                icon={<UserIcon className="w-4 h-4" />}
+                  {!successMessage ? (
+                    <form onSubmit={handleAcceptInvite} className="space-y-3">
+                      <div className="space-y-0.5">
+                        <label className="text-[11px] font-bold text-black/40 ml-0.5">Full Name *</label>
+                        <IconInput
+                          placeholder="e.g. John Doe"
+                          value={name}
+                          onChange={(e: any) => setName(e.target.value)}
+                          required
+                          icon={<UserIcon className="w-4 h-4" />}
+                        />
+                      </div>
+
+                      {!inviteInfo?.accountExists && (
+                        <>
+                          <div className="space-y-0.5">
+                            <label className="text-[11px] font-bold text-black/40 ml-0.5">Create Password *</label>
+                            <PasswordInput
+                              value={password}
+                              onChange={(e: any) => setPassword(e.target.value)}
+                              required
+                              placeholder="••••••••"
+                              icon={<LockIcon className="w-4 h-4" />}
+                              inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[10px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0"
                             />
+                            <PasswordRequirements password={password} />
+                          </div>
+                          <div className="space-y-0.5">
+                            <label className="text-[11px] font-bold text-black/40 ml-0.5">Confirm Password *</label>
+                            <PasswordInput
+                              value={confirmPassword}
+                              onChange={(e: any) => setConfirmPassword(e.target.value)}
+                              required
+                              placeholder="••••••••"
+                              icon={<LockIcon className="w-4 h-4" />}
+                              inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[10px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0"
+                            />
+                          </div>
+                        </>
+                      )}
+
+                      {error && (
+                        <div className="p-2.5 bg-red-50 border border-red-100 rounded-[16px] flex items-center gap-2 shadow-[inset_0_2px_4px_rgba(255,0,0,0.02)]">
+                          <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                          <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
                         </div>
+                      )}
 
-                        {!inviteInfo?.accountExists && (
-                            <>
-                                <div className="space-y-0.5">
-                                    <label className="text-[11px] font-bold text-black/40 ml-0.5">Create Password *</label>
-                                    <PasswordInput 
-                                        value={password} 
-                                        onChange={(e: any) => setPassword(e.target.value)} 
-                                        required 
-                                        placeholder="••••••••"
-                                        icon={<LockIcon className="w-4 h-4" />}
-                                        inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" 
-                                    />
-                                    <PasswordRequirements password={password} />
-                                </div>
-                                <div className="space-y-0.5">
-                                    <label className="text-[11px] font-bold text-black/40 ml-0.5">Confirm Password *</label>
-                                    <PasswordInput 
-                                        value={confirmPassword} 
-                                        onChange={(e: any) => setConfirmPassword(e.target.value)} 
-                                        required 
-                                        placeholder="••••••••"
-                                        icon={<LockIcon className="w-4 h-4" />}
-                                        inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[5px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" 
-                                    />
-                                </div>
-                            </>
-                        )}
-
-                        {error && (
-                            <div className="p-2.5 bg-red-50 border border-red-100 rounded-[5px] flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                                <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
-                            </div>
-                        )}
-
-                        <Button type="submit" className="w-full py-2.5 bg-[#38BDF2] rounded-[5px] font-black border-none text-white mt-1" disabled={loading}>
-                            {loading ? 'Wait...' : (inviteInfo?.accountExists ? 'Join Organization' : 'Create & Join')}
-                        </Button>
-                      </form>
-                   ) : (
-                      <div className="text-center py-4 text-[11px] font-black text-[#38BDF2]">{successMessage}</div>
-                   )}
+                      <Button type="submit" className="w-full py-4 bg-[#38BDF2] rounded-[16px] font-black border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all" disabled={loading}>
+                        {loading ? 'Wait...' : (inviteInfo?.accountExists ? 'Join Organization' : 'Create & Join')}
+                      </Button>
+                    </form>
+                  ) : (
+                    <div className="text-center py-4 text-[11px] font-black text-[#38BDF2]">{successMessage}</div>
+                  )}
                 </div>
               )}
             </div>

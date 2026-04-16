@@ -66,7 +66,11 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
   const [localPreviewUrl, setLocalPreviewUrl] = React.useState('');
   const [localCoverPreviewUrl, setLocalCoverPreviewUrl] = React.useState('');
 
-  const canCustomBrand = !!(profile?.plan?.features?.enable_custom_branding || profile?.plan?.features?.custom_branding);
+  const planFeatures: any = profile?.plan?.features || {};
+  const hasPlan = !!profile?.plan;
+  const canCustomBrand = hasPlan 
+    ? !!(planFeatures.enable_custom_branding || planFeatures.custom_branding)
+    : true; // The Default Free plan includes custom branding
 
   React.useEffect(() => {
     let isMounted = true;

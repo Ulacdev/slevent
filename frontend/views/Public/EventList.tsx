@@ -340,7 +340,7 @@ export const EventCard: React.FC<EventCardProps> = ({
           {/* Promoted / Bottom Area */}
           <div className="mt-auto pt-6 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              {!isTrending && (event.is_promoted || (event as any).isPromoted) && (
+              {!isLanding && (event.is_promoted || (event as any).isPromoted) && (
                 <div className="group/promoted relative">
                   <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-[0.15em] border border-[#38BDF2]/30 whitespace-nowrap cursor-help transition-all hover:bg-[#38BDF2]/20">
                     <ICONS.Info className="w-3.5 h-3.5" strokeWidth={3} />
@@ -615,7 +615,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   useEffect(() => {
     const fetchData = async () => {
       const requestId = ++requestIdRef.current;
-      const pageSize = isSpecialListing ? 200 : (isLandingAllListing ? 3 : 12);
+      const pageSize = isSpecialListing ? 200 : (isLandingAllListing ? 12 : 12);
       const requestedPage = (isSpecialListing || isLandingAllListing) ? 1 : currentPage;
       if (initialLoadRef.current) {
         setLoading(true);
@@ -981,8 +981,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
   const displayEvents = useMemo(() => {
     if (isLandingAllListing) {
-      // Show top 3 events by popular demand (including promoted if they have likes)
-      return orderedEvents.slice(0, 3);
+      // Show exclusively events that have likes, maintaining ranked order
+      return orderedEvents.filter(e => Number(e.likesCount || 0) > 0);
     }
 
     // For Browse Events (main catalog), always show promoted events first and unfiltered
@@ -1078,7 +1078,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 </div>
 
                 <h1 className="text-[2.8rem] sm:text-5xl lg:text-[60px] font-bold text-black tracking-tight leading-[1.05] mb-5">
-                  Smart Events for<br />
+                  Modern Events for<br />
                   Philippine<br />
                   Organizers
                 </h1>
@@ -1307,7 +1307,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 <PromotedEventSkeleton />
               ) : promotedEvents.length > 0 ? (
                 <div className="relative">
-                  {/* Carousel Container - More visible border and rounded corners */}
+                  {/* Carousel Container */}
                   <div className="rounded-2xl overflow-hidden border border-black/15 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] group">
                     <div className="relative h-[280px] sm:h-[400px] lg:h-[500px] overflow-hidden bg-white">
                       {/* Carousel Images */}
@@ -1323,34 +1323,23 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                             aria-hidden={idx !== currentPromotedIndex}
                             onClick={() => navigate(`/events/${event.slug || event.eventId}`)}
                           >
-                            {/* Main Image - Full width with hover scale */}
                             <img
                               src={imageUrl}
                               alt={event.eventName}
                               className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.05] z-10"
                             />
 
-                            {/* Info Overlay Panel */}
                             <div className="absolute inset-0 z-20 flex flex-col justify-center">
-                              {/* Dark gradient on left half for text readability */}
                               <div className="absolute inset-0 z-[1] bg-gradient-to-r from-black/85 via-black/60 via-[40%] to-transparent" />
 
-                              {/* Content Area */}
                               <div className="relative z-30 p-8 sm:p-12 animate-in fade-in slide-in-from-left-4 duration-700">
                                 {(() => {
                                   const totalSlots = (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0);
                                   const soldSlots = (event as any).registrationCount ?? (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantitySold || 0), 0);
-                                  const isDone = new Date(event.endAt) < new Date();
-                                  const minPrice = (event?.ticketTypes || []).length > 0
-                                    ? Math.min(...event!.ticketTypes!.map((t: any) => Number(t.priceAmount || 0)))
-                                    : 0;
-                                  const org = event.organizer || organizers.find((o: any) => o.organizerId === event.organizerId);
-
                                   return (
                                     <div className="flex flex-col gap-3 sm:gap-4 text-white max-w-xl">
-                                      {/* Category Badge */}
                                       <div className="flex items-center gap-3 group/badge shrink-0">
-                                        <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-white shadow-lg animate-in zoom-in duration-1000">
+                                        <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-white shadow-lg">
                                           <ICONS.Check className="w-4 h-4" strokeWidth={5} />
                                         </div>
                                         <div className="flex flex-col">
@@ -1360,21 +1349,19 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                                         </div>
                                       </div>
 
-                                      {/* Event Title */}
-                                      <h3 className={`font-black tracking-tighter leading-[1.1] text-white drop-shadow-sm animate-in fade-in slide-in-from-left-6 duration-1000 delay-100 line-clamp-2 ${(event.eventName || '').length > 40
+                                      <h3 className={`font-black tracking-tighter leading-[1.1] text-white drop-shadow-sm line-clamp-2 ${(event.eventName || '').length > 40
                                         ? 'text-xl sm:text-2xl md:text-3xl'
                                         : 'text-2xl sm:text-3xl md:text-5xl'
                                         }`}>
                                         {event.eventName}
                                       </h3>
 
-                                      {/* Event Details Grid - White text on dark bg */}
-                                      <div className="space-y-2 sm:space-y-2.5 pt-1 animate-in fade-in slide-in-from-left-8 duration-1000 delay-200">
+                                      <div className="space-y-2 sm:space-y-2.5 pt-1">
                                         <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-white">
                                           <div className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-lg">
                                             <ICONS.Heart className="w-5 h-5" strokeWidth={2} />
                                           </div>
-                                          <span>3 likes</span>
+                                          <span>{event.likesCount || 0} likes</span>
                                         </div>
 
                                         <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-white">
@@ -1399,8 +1386,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                                         </div>
                                       </div>
 
-                                      {/* Action Button */}
-                                      <div className="pt-6 sm:pt-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
+                                      <div className="pt-6 sm:pt-8">
                                         <button
                                           onClick={(e) => {
                                             e.stopPropagation();
@@ -1421,7 +1407,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                         );
                       })}
 
-                      {/* Navigation Arrows - Using a darker, more defined style for visibility on white */}
+                      {/* Navigation Arrows */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1449,6 +1435,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               ) : null}
             </div>
           )}
+
         </>
       )}
 
@@ -1778,7 +1765,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                         <h3 className="text-xl font-black text-black tracking-tight uppercase">Other Events</h3>
                         <div className="h-px bg-black/5 flex-1" />
                       </div>
-                      <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`} style={{ zoom: 0.95 }}>
+                      <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`} style={{ zoom: 0.9 }}>
 
                         {displayEvents.slice(3).map((event) => (
                           <EventCard
@@ -1803,7 +1790,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               {/* Standard Grid Display (Fallbacks) */}
               {((isLanding || selectedLocation === DEFAULT_LOCATION) || loading) && (
                 <>
-                  <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8'} pt-10 ${displayEvents.length > 0 ? 'min-h-[400px]' : 'min-h-0'}`} style={{ zoom: 0.95 }}>
+                  <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8'} pt-10 ${displayEvents.length > 0 ? 'min-h-[400px]' : 'min-h-0'}`} style={{ zoom: 0.9 }}>
 
 
                     {loading ? (
