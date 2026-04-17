@@ -703,17 +703,6 @@ export const AuthPage: React.FC = () => {
                       />
                     </div>
 
-                    {showLoginCaptcha && (
-                      <div className="flex justify-center my-2 overflow-visible">
-                        <ReCAPTCHA
-                          ref={recaptchaRef}
-                          sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'}
-                          onChange={(val) => setCaptchaValue(val)}
-                          theme="light"
-                        />
-                      </div>
-                    )}
-
                     <div className="space-y-0.5 text-left relative">
                       <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Password <span className="text-red-500">*</span></label>
                       <PasswordInput value={password} onChange={(e: any) => setPassword(e.target.value)} required placeholder="••••••••"
@@ -722,6 +711,17 @@ export const AuthPage: React.FC = () => {
                       <button type="button" onClick={() => setView('forgot-password')} className="text-[11px] font-bold text-[#38BDF2] hover:underline mt-1 flex justify-end w-full">Forgot password?</button>
                     </div>
                   </div>
+
+                  {showLoginCaptcha && (
+                    <div className="flex justify-center my-2 overflow-visible">
+                      <ReCAPTCHA
+                        ref={recaptchaRef}
+                        sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'}
+                        onChange={(val) => setCaptchaValue(val)}
+                        theme="light"
+                      />
+                    </div>
+                  )}
 
                   <Button type="submit" className="w-full py-4 text-[11px] font-black rounded-[16px] border-none bg-gradient-to-r from-[#38BDF2] to-[#2DAADF] text-white shadow-[0_10px_20px_rgba(56,189,242,0.2),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" disabled={loading}>
                     {loading ? 'Wait...' : 'Login'}
