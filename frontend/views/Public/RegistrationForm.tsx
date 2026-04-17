@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import ReCAPTCHA from "react-google-recaptcha";
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { Event, TicketType } from '../../types';
@@ -46,17 +47,19 @@ export const RegistrationForm: React.FC = () => {
   });
 
   const [extraGuests, setExtraGuests] = useState<{ name: string; email: string }[]>([]);
-
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { showToast } = useToast();
-  // const [apiError, setApiError] = useState<string | null>(null);
+  
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<any>(null);
   const [promoError, setPromoError] = useState<string | null>(null);
   const [validatingPromo, setValidatingPromo] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const [captchaValue, setCaptchaValue] = useState<string | null>(null);
 
+  // Sync user info when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       setFormData(prev => ({
@@ -67,10 +70,11 @@ export const RegistrationForm: React.FC = () => {
     }
   }, [isAuthenticated, userName, userEmail]);
 
+  // Fetch event data
   useEffect(() => {
     if (slug) {
       apiService.getEventBySlug(slug).then(data => {
-        setEvent(data);
+        setEvent(data as any);
         if (data) {
           try {
             const selectionRaw = searchParams.get('selections');
@@ -83,6 +87,7 @@ export const RegistrationForm: React.FC = () => {
               setSelectedItems(items);
             }
           } catch (e) {
+            console.error('Failed to parse selections');
           }
         }
         setLoading(false);
@@ -91,22 +96,22 @@ export const RegistrationForm: React.FC = () => {
   }, [slug, searchParams]);
 
   const now = new Date();
-  
+
   // Calculate effective price for each item (applying discount if within sales window)
   const getEffectivePrice = (ticket: any) => {
     if (ticket.priceAmount === 0) return 0;
-    
+
     if (ticket.saleDiscountPercent && ticket.saleDiscountPercent > 0) {
       const salesStart = ticket.salesStartAt ? new Date(ticket.salesStartAt) : null;
       const salesEnd = ticket.salesEndAt ? new Date(ticket.salesEndAt) : null;
-      
+
       // Apply discount only if we're within the sales window
       const isInSalesWindow = (!salesStart || now >= salesStart) && (!salesEnd || now <= salesEnd);
       if (isInSalesWindow) {
         return Math.round(ticket.priceAmount * (100 - ticket.saleDiscountPercent) / 100);
       }
     }
-    
+
     return ticket.priceAmount;
   };
 
@@ -118,11 +123,11 @@ export const RegistrationForm: React.FC = () => {
   const regOpen = event?.regOpenAt ? new Date(event.regOpenAt) : null;
   const regClose = event?.regCloseAt ? new Date(event.regCloseAt) : null;
   const isRegistrationOpen = (!regOpen || now >= regOpen) && (!regClose || now <= regClose);
-  const registrationStatus = regOpen && now < regOpen 
+  const registrationStatus = regOpen && now < regOpen
     ? `Registration opens on ${regOpen.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
     : regClose && now > regClose
-    ? 'Registration has closed'
-    : null;
+      ? 'Registration has closed'
+      : null;
 
   // Sync extraGuests array size with totalGuests - 1
   useEffect(() => {
@@ -185,7 +190,7 @@ export const RegistrationForm: React.FC = () => {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    
+
     // Full Name
     const nameRegex = /^[a-zA-Z\s.\-']+$/;
     if (!formData.name.trim()) {
@@ -237,11 +242,11 @@ export const RegistrationForm: React.FC = () => {
     }
 
     setErrors(newErrors);
-    
+
     if (Object.keys(newErrors).length > 0) {
       showToast('error', 'Please correct the errors in the form before proceeding.');
     }
-    
+
     return Object.keys(newErrors).length === 0;
   };
 
@@ -249,8 +254,15 @@ export const RegistrationForm: React.FC = () => {
     e.preventDefault();
     if (!validate() || !event || selectedItems.length === 0) return;
 
+    if (!captchaValue) {
+      showToast('error', 'Please complete the reCAPTCHA verification.');
+      return;
+    }
+
     setSubmitting(true);
     try {
+      const gToken = captchaValue;
+      
       const { orderId } = await apiService.createOrderTransaction({
         eventId: event.eventId,
         buyerName: formData.name,
@@ -261,7 +273,8 @@ export const RegistrationForm: React.FC = () => {
         totalAmount: totalPayable,
         currency: selectedItems[0]?.ticket.currency || 'PHP',
         promoCode: appliedPromo?.code || null,
-        extraGuests: extraGuests // Pass extra guest details
+        extraGuests: extraGuests,
+        captchaToken: gToken as any
       });
       if (!hasPaid) {
         navigate(`/payment/status?sessionId=${orderId}`); // Free order also goes to status page for confirmation
@@ -288,7 +301,7 @@ export const RegistrationForm: React.FC = () => {
     }
   };
 
-    if (loading) return <PageLoader label="Syncing your access..." variant="page" />;
+  if (loading) return <PageLoader label="Syncing your access..." variant="page" />;
 
   if (!event || selectedItems.length === 0) return (
     <div className="min-h-screen flex items-center justify-center bg-[#F2F2F2]">
@@ -343,7 +356,7 @@ export const RegistrationForm: React.FC = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 sm:gap-x-6 gap-y-5 sm:gap-y-6">
                     <div className="space-y-2">
-                      <label className="text-[13px] font-medium text-[#2E2E2F] ml-1">Full Name *</label>
+                      <label className="text-[10px] font-bold text-[#2E2E2F] ml-1 uppercase tracking-wider">Full Name <span className="text-red-500">*</span></label>
                       <Input
                         placeholder="Full name as per identification"
                         className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-xl text-[14px]"
@@ -357,7 +370,7 @@ export const RegistrationForm: React.FC = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[13px] font-medium text-[#2E2E2F] ml-1">Email Address *</label>
+                      <label className="text-[10px] font-bold text-[#2E2E2F] ml-1 uppercase tracking-wider">Email Address <span className="text-red-500">*</span></label>
                       <Input
                         type="email"
                         placeholder="name@organization.com"
@@ -369,7 +382,7 @@ export const RegistrationForm: React.FC = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[13px] font-medium text-[#2E2E2F] ml-1">Contact Number *</label>
+                      <label className="text-[10px] font-bold text-[#2E2E2F] ml-1 uppercase tracking-wider">Contact Number <span className="text-red-500">*</span></label>
                       <div className="relative group/phone">
                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] font-bold text-[#2E2E2F]/40 pointer-events-none z-10 transition-colors group-focus-within/phone:text-[#38BDF2]">
                           +63
@@ -389,7 +402,7 @@ export const RegistrationForm: React.FC = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[13px] font-medium text-[#2E2E2F] ml-1">Company</label>
+                      <label className="text-[10px] font-bold text-[#2E2E2F] ml-1 uppercase tracking-wider">Company</label>
                       <Input
                         placeholder="Organization / Entity"
                         className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-xl text-[14px]"
@@ -406,7 +419,7 @@ export const RegistrationForm: React.FC = () => {
                           <h3 className="text-[12px] font-semibold text-[#2E2E2F] uppercase tracking-wide whitespace-nowrap text-center">Guest Information ({extraGuests.length} additional)</h3>
                           <div className="w-12 h-px bg-[#2E2E2F]/10"></div>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                           {extraGuests.map((guest, index) => (
                             <div key={index} className="p-6 border border-[#2E2E2F]/10 rounded-xl bg-[#F2F2F2] transition-all">
@@ -416,39 +429,39 @@ export const RegistrationForm: React.FC = () => {
                                 </div>
                                 <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest">Additional Guest</span>
                               </div>
-                              
-                                  <div className="space-y-1.5">
-                                    <label className="text-[11px] font-medium text-[#2E2E2F] ml-1">Guest Full Name *</label>
-                                    <Input
-                                      placeholder="Full name as per identification"
-                                      className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-xl text-[14px]"
-                                      style={{ '--tw-ring-color': brandColor } as any}
-                                      value={guest.name}
-                                      onChange={(e: any) => {
-                                        const val = e.target.value.replace(/\d/g, ''); // Block numbers while typing
-                                        const newGuests = [...extraGuests];
-                                        newGuests[index] = { ...newGuests[index], name: val };
-                                        setExtraGuests(newGuests);
-                                      }}
-                                      error={errors[`guest_${index}_name`]}
-                                    />
-                                  </div>
-                                  <div className="space-y-1.5">
-                                    <label className="text-[11px] font-medium text-[#2E2E2F] ml-1">Guest Email Address *</label>
-                                    <Input
-                                      type="email"
-                                      placeholder="name@organization.com"
-                                      className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-xl text-[14px]"
-                                      style={{ '--tw-ring-color': brandColor } as any}
-                                      value={guest.email}
-                                      onChange={(e: any) => {
-                                        const newGuests = [...extraGuests];
-                                        newGuests[index] = { ...newGuests[index], email: e.target.value };
-                                        setExtraGuests(newGuests);
-                                      }}
-                                      error={errors[`guest_${index}_email`]}
-                                    />
-                                  </div>
+
+                              <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-[#2E2E2F] ml-1 uppercase tracking-wider">Guest Full Name <span className="text-red-500">*</span></label>
+                                <Input
+                                  placeholder="Full name as per identification"
+                                  className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-xl text-[14px]"
+                                  style={{ '--tw-ring-color': brandColor } as any}
+                                  value={guest.name}
+                                  onChange={(e: any) => {
+                                    const val = e.target.value.replace(/\d/g, ''); // Block numbers while typing
+                                    const newGuests = [...extraGuests];
+                                    newGuests[index] = { ...newGuests[index], name: val };
+                                    setExtraGuests(newGuests);
+                                  }}
+                                  error={errors[`guest_${index}_name`]}
+                                />
+                              </div>
+                              <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-[#2E2E2F] ml-1 uppercase tracking-wider">Guest Email Address <span className="text-red-500">*</span></label>
+                                <Input
+                                  type="email"
+                                  placeholder="name@organization.com"
+                                  className="sm:min-h-auto font-normal bg-[#F2F2F2] rounded-xl text-[14px]"
+                                  style={{ '--tw-ring-color': brandColor } as any}
+                                  value={guest.email}
+                                  onChange={(e: any) => {
+                                    const newGuests = [...extraGuests];
+                                    newGuests[index] = { ...newGuests[index], email: e.target.value };
+                                    setExtraGuests(newGuests);
+                                  }}
+                                  error={errors[`guest_${index}_email`]}
+                                />
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -463,7 +476,7 @@ export const RegistrationForm: React.FC = () => {
                           <span className="text-[9px] font-black text-[#38BDF2] uppercase tracking-wider">StartupLab System Platform</span>
                         </div>
                       </div>
-                      
+
                       <div className="p-4 rounded-xl border border-[#2E2E2F]/10 bg-white/50 flex items-center justify-between group hover:border-[#38BDF2]/30 transition-all">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]">
@@ -512,6 +525,15 @@ export const RegistrationForm: React.FC = () => {
                           {errors.terms}
                         </p>
                       )}
+
+                      <div className="flex justify-center my-6 overflow-hidden rounded-xl">
+                        <ReCAPTCHA
+                          ref={recaptchaRef}
+                          sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'}
+                          onChange={(val) => setCaptchaValue(val)}
+                          theme="light"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -675,7 +697,7 @@ export const RegistrationForm: React.FC = () => {
                         <span className="text-[11px] sm:text-[12px] font-bold tracking-wide">- PHP {formatCurrency(discountAmount)}</span>
                       </div>
                     )}
-                    
+
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-wide">Gateway Processing Fee</span>
                       {subtotal === 0 ? (

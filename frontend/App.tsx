@@ -1,5 +1,6 @@
 
 import React, { useEffect } from 'react';
+// import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { HashRouter as Router, Routes, Route, Link, useLocation, useSearchParams, useNavigate, Navigate } from 'react-router-dom';
 
 
@@ -3211,73 +3212,73 @@ const EventsPortal = () => {
 };
 
 const App: React.FC = () => (
-  <Router>
-    <ScrollToTop />
-    <HashBypassBridge />
-    <GlobalOnboardingGuard>
-      <React.Suspense fallback={<div className="suspense-progress"><div className="suspense-progress-bar" /></div>}>
-        <Routes>
-          <Route path="/login" element={<AuthPage />} />
-          <Route path="/signup" element={<AuthPage />} />
-          <Route path="/forgot-password" element={<AuthPage />} />
-          <Route path="/welcome" element={<WelcomeView />} />
-          <Route path="/reset-password" element={<AuthPage />} />
-          <Route path="/accept-invite" element={<AuthPage />} />
-          <Route path="/" element={<PublicLayout><EventList /></PublicLayout>} />
-          <Route path="/live" element={<PublicLayout><LivePage /></PublicLayout>} />
-          <Route path="/categories/:categoryKey" element={<PublicLayout><CategoryEvents /></PublicLayout>} />
-          <Route path="/events/:slug" element={<PublicLayout><EventDetails /></PublicLayout>} />
-          <Route path="/organizer/:id" element={<PublicLayout><OrganizerProfilePage /></PublicLayout>} />
-          <Route path="/events/:slug/register" element={<PublicLayout><RegistrationForm /></PublicLayout>} />
-          <Route path="/payment/status" element={<PublicLayout><PaymentStatusView /></PublicLayout>} />
-          <Route path="/tickets/:ticketId" element={<PublicLayout><TicketView /></PublicLayout>} />
-          <Route path="/about-us" element={<PublicLayout><AboutUsPage /></PublicLayout>} />
-          <Route path="/browse-events" element={<PublicLayout><PublicEventsPage /></PublicLayout>} />
-          <Route path="/liked" element={<PublicLayout><LikedEventsPage /></PublicLayout>} />
-          <Route path="/followings" element={<PublicLayout><FollowingsEventsPage /></PublicLayout>} />
-          <Route path="/my-tickets" element={<PublicLayout><MyTicketsPage /></PublicLayout>} />
-          <Route path="/privacy-policy" element={<PublicLayout><PrivacyPolicyPage /></PublicLayout>} />
-          <Route path="/terms-of-service" element={<PublicLayout><TermsOfServicePage /></PublicLayout>} />
-          <Route path="/contact-us" element={<PublicLayout><ContactUsPage /></PublicLayout>} />
-          <Route path="/pricing" element={<PublicLayout><PricingPage /></PublicLayout>} />
-          <Route path="/organizers/discover" element={<PublicLayout><OrganizerDiscoveryPage /></PublicLayout>} />
-          <Route path="/faq" element={<PublicLayout><FaqPage /></PublicLayout>} />
-          <Route path="/refund-policy" element={<PublicLayout><RefundPolicyPage /></PublicLayout>} />
-          <Route path="/onboarding" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><WelcomeView /></RequireRoleRoute>} />
+    <Router>
+      <ScrollToTop />
+      <HashBypassBridge />
+      <GlobalOnboardingGuard>
+        <React.Suspense fallback={<div className="suspense-progress"><div className="suspense-progress-bar" /></div>}>
+          <Routes>
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/signup" element={<AuthPage />} />
+            <Route path="/forgot-password" element={<AuthPage />} />
+            <Route path="/welcome" element={<WelcomeView />} />
+            <Route path="/reset-password" element={<AuthPage />} />
+            <Route path="/accept-invite" element={<AuthPage />} />
+            <Route path="/" element={<PublicLayout><EventList /></PublicLayout>} />
+            <Route path="/live" element={<PublicLayout><LivePage /></PublicLayout>} />
+            <Route path="/categories/:categoryKey" element={<PublicLayout><CategoryEvents /></PublicLayout>} />
+            <Route path="/events/:slug" element={<PublicLayout><EventDetails /></PublicLayout>} />
+            <Route path="/organizer/:id" element={<PublicLayout><OrganizerProfilePage /></PublicLayout>} />
+            <Route path="/events/:slug/register" element={<PublicLayout><RegistrationForm /></PublicLayout>} />
+            <Route path="/payment/status" element={<PublicLayout><PaymentStatusView /></PublicLayout>} />
+            <Route path="/tickets/:ticketId" element={<PublicLayout><TicketView /></PublicLayout>} />
+            <Route path="/about-us" element={<PublicLayout><AboutUsPage /></PublicLayout>} />
+            <Route path="/browse-events" element={<PublicLayout><PublicEventsPage /></PublicLayout>} />
+            <Route path="/liked" element={<PublicLayout><LikedEventsPage /></PublicLayout>} />
+            <Route path="/followings" element={<PublicLayout><FollowingsEventsPage /></PublicLayout>} />
+            <Route path="/my-tickets" element={<PublicLayout><MyTicketsPage /></PublicLayout>} />
+            <Route path="/privacy-policy" element={<PublicLayout><PrivacyPolicyPage /></PublicLayout>} />
+            <Route path="/terms-of-service" element={<PublicLayout><TermsOfServicePage /></PublicLayout>} />
+            <Route path="/contact-us" element={<PublicLayout><ContactUsPage /></PublicLayout>} />
+            <Route path="/pricing" element={<PublicLayout><PricingPage /></PublicLayout>} />
+            <Route path="/organizers/discover" element={<PublicLayout><OrganizerDiscoveryPage /></PublicLayout>} />
+            <Route path="/faq" element={<PublicLayout><FaqPage /></PublicLayout>} />
+            <Route path="/refund-policy" element={<PublicLayout><RefundPolicyPage /></PublicLayout>} />
+            <Route path="/onboarding" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><WelcomeView /></RequireRoleRoute>} />
 
-          {/* User Portal Routes */}
-          <Route path="/user-home" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserHome /></UserPortalLayout></RequireRoleRoute>} />
-          <Route path="/my-events" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserEvents /></UserPortalLayout></RequireRoleRoute>} />
-          <Route path="/my-events/create" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserEvents /></UserPortalLayout></RequireRoleRoute>} />
-          <Route path="/my-events/edit/:eventId" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserEvents /></UserPortalLayout></RequireRoleRoute>} />
-          <Route path="/user-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserSettings /></UserPortalLayout></RequireRoleRoute>} />
-          <Route path="/organizer-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><Navigate to="/user-settings?tab=organizer" replace /></RequireRoleRoute>} />
-          <Route path="/payment-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><Navigate to="/user-settings?tab=payments" replace /></RequireRoleRoute>} />
-          <Route path="/account-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><Navigate to="/user-settings?tab=account" replace /></RequireRoleRoute>} />
-          <Route path="/user/attendees" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><RegistrationsList /></UserPortalLayout></RequireRoleRoute>} />
-          <Route path="/user/checkin" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><CheckIn /></UserPortalLayout></RequireRoleRoute>} />
-          <Route path="/user/archive" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><ArchiveEvents /></UserPortalLayout></RequireRoleRoute>} />
-          <Route path="/user/reports" element={<RequireRoleRoute allow={[UserRole.ORGANIZER, UserRole.STAFF]}><UserPortalLayout><OrganizerReports /></UserPortalLayout></RequireRoleRoute>} />
-          <Route path="/subscription" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerSubscription /></UserPortalLayout></RequireRoleRoute>} />
-          <Route path="/organizer-support" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerSupport /></UserPortalLayout></RequireRoleRoute>} />
-          <Route path="/organizer-support/archive" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><ArchiveSupport /></UserPortalLayout></RequireRoleRoute>} />
-          <Route path="/subscription/success" element={<PublicLayout><SubscriptionSuccess /></PublicLayout>} />
+            {/* User Portal Routes */}
+            <Route path="/user-home" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserHome /></UserPortalLayout></RequireRoleRoute>} />
+            <Route path="/my-events" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserEvents /></UserPortalLayout></RequireRoleRoute>} />
+            <Route path="/my-events/create" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserEvents /></UserPortalLayout></RequireRoleRoute>} />
+            <Route path="/my-events/edit/:eventId" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserEvents /></UserPortalLayout></RequireRoleRoute>} />
+            <Route path="/user-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserSettings /></UserPortalLayout></RequireRoleRoute>} />
+            <Route path="/organizer-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><Navigate to="/user-settings?tab=organizer" replace /></RequireRoleRoute>} />
+            <Route path="/payment-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><Navigate to="/user-settings?tab=payments" replace /></RequireRoleRoute>} />
+            <Route path="/account-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><Navigate to="/user-settings?tab=account" replace /></RequireRoleRoute>} />
+            <Route path="/user/attendees" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><RegistrationsList /></UserPortalLayout></RequireRoleRoute>} />
+            <Route path="/user/checkin" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><CheckIn /></UserPortalLayout></RequireRoleRoute>} />
+            <Route path="/user/archive" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><ArchiveEvents /></UserPortalLayout></RequireRoleRoute>} />
+            <Route path="/user/reports" element={<RequireRoleRoute allow={[UserRole.ORGANIZER, UserRole.STAFF]}><UserPortalLayout><OrganizerReports /></UserPortalLayout></RequireRoleRoute>} />
+            <Route path="/subscription" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerSubscription /></UserPortalLayout></RequireRoleRoute>} />
+            <Route path="/organizer-support" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerSupport /></UserPortalLayout></RequireRoleRoute>} />
+            <Route path="/organizer-support/archive" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><ArchiveSupport /></UserPortalLayout></RequireRoleRoute>} />
+            <Route path="/subscription/success" element={<PublicLayout><SubscriptionSuccess /></PublicLayout>} />
 
-          {/* Admin Portal Routes */}
-          <Route path="/dashboard" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.ORGANIZER]}><DashboardWrapper /></RequireRoleRoute>} />
-          <Route path="/events" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><EventsPortal /></PortalLayout></RequireRoleRoute>} />
-          <Route path="/attendees" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><RegistrationsList /></PortalLayout></RequireRoleRoute>} />
-          <Route path="/checkin" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><CheckIn /></PortalLayout></RequireRoleRoute>} />
-          <Route path="/admin/categories" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><CategoryManagement /></PortalLayout></RequireRoleRoute>} />
-          <Route path="/admin/discovery" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><DiscoveryHub /></PortalLayout></RequireRoleRoute>} />
-          <Route path="/admin/announcements" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><Announcements /></PortalLayout></RequireRoleRoute>} />
-          <Route path="/settings" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><SettingsView /></PortalLayout></RequireRoleRoute>} />
+            {/* Admin Portal Routes */}
+            <Route path="/dashboard" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.ORGANIZER]}><DashboardWrapper /></RequireRoleRoute>} />
+            <Route path="/events" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><EventsPortal /></PortalLayout></RequireRoleRoute>} />
+            <Route path="/attendees" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><RegistrationsList /></PortalLayout></RequireRoleRoute>} />
+            <Route path="/checkin" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><CheckIn /></PortalLayout></RequireRoleRoute>} />
+            <Route path="/admin/categories" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><CategoryManagement /></PortalLayout></RequireRoleRoute>} />
+            <Route path="/admin/discovery" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><DiscoveryHub /></PortalLayout></RequireRoleRoute>} />
+            <Route path="/admin/announcements" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><Announcements /></PortalLayout></RequireRoleRoute>} />
+            <Route path="/settings" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><SettingsView /></PortalLayout></RequireRoleRoute>} />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </React.Suspense>
-    </GlobalOnboardingGuard>
-  </Router>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </React.Suspense>
+      </GlobalOnboardingGuard>
+    </Router>
 );
 export default App;
 

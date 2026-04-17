@@ -114,7 +114,7 @@ export const Input: React.FC<{
 
   return (
     <div className="space-y-2 w-full">
-      {label && <label className="block text-[13px] sm:text-sm font-semibold text-[#2E2E2F] mb-1">{label}</label>}
+      {label && <label className="block text-[10px] font-bold text-[#2E2E2F] mb-1 uppercase tracking-wider">{label}</label>}
       <input
         className={`block w-full px-4 py-3 bg-[#F2F2F2] border text-base sm:text-sm min-h-[48px] sm:min-h-[44px] ${error ? 'border-red-500' : 'border-[#2E2E2F]/20'} rounded-xl focus:outline-none focus:ring-2 ${error ? 'focus:ring-red-300/40' : 'focus:ring-[#38BDF2]/40'} transition-colors font-normal ${className}`}
         {...inputProps}
@@ -157,7 +157,7 @@ export const PasswordInput: React.FC<{
         value={value}
         onChange={onChange}
         required={required}
-        className={`w-full min-h-[48px] sm:min-h-[44px] text-base sm:text-[14px] ${icon ? 'pl-12' : 'pl-4'} ${hideEye ? 'pr-4' : 'pr-12'} py-3 sm:py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal ${inputClassName}`}
+        className={`w-full min-h-[48px] sm:min-h-[44px] text-[14px] ${icon ? 'pl-12' : 'pl-4'} ${hideEye ? 'pr-4' : 'pr-12'} py-3 sm:py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal ${inputClassName}`}
       />
       {!hideEye && (
         <button

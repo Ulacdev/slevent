@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import ReCAPTCHA from "react-google-recaptcha";
 import { useNavigate, useLocation, Link, useSearchParams } from 'react-router-dom';
-import { Button, PasswordInput, Checkbox, PasswordRequirements } from '../../components/Shared';
+import { Button, PasswordInput, Checkbox, PasswordRequirements, Modal } from '../../components/Shared';
 import { ICONS } from '../../constants';
 import { supabase } from "../../supabase/supabaseClient.js";
 import { useUser } from '../../context/UserContext';
@@ -33,7 +34,7 @@ const IconInput = (props: any) => {
       )}
       <input
         {...inputProps}
-        className={`w-full px-5 py-3 bg-[#F2F2F2] border border-black/[0.03] rounded-[16px] text-[10px] font-medium text-black outline-none focus:border-[#38BDF2] transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] ${icon ? 'pl-11' : 'pl-4'}`}
+        className={`w-full px-5 py-3 bg-[#F2F2F2] border border-black/[0.03] rounded-[16px] text-[14px] font-medium text-black outline-none focus:border-[#38BDF2] transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] ${icon ? 'pl-11' : 'pl-4'} ${inputProps.className || ''}`}
       />
     </div>
   );
@@ -60,6 +61,8 @@ export const AuthPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [forgotMessage, setForgotMessage] = useState('');
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const [captchaValue, setCaptchaValue] = useState<string | null>(null);
 
   // Reset/Invite States
   const [inviteInfo, setInviteInfo] = useState<{ email: string; role: string; accountExists: boolean; name: string } | null>(null);
@@ -196,16 +199,18 @@ export const AuthPage: React.FC = () => {
         return;
       }
     }
-
+    if (!name.trim()) { setError('Full Name is required.'); return; }
+    if (!inviteInfo?.accountExists && !password) { setError('Password is required.'); return; }
+    
     setLoading(true);
     try {
       const res = await fetch(`${API}/api/invite/accept-invite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token,
-          password: needsPassword ? maskPassword(password) : undefined,
-          name: name.trim()
+        body: JSON.stringify({ 
+          token, 
+          name: name.trim(), 
+          password: !inviteInfo?.accountExists ? maskPassword(password) : undefined
         })
       });
 
@@ -288,14 +293,22 @@ export const AuthPage: React.FC = () => {
       const res = await fetch(`${API}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), email: email.trim().toLowerCase(), password: maskPassword(password) })
+        body: JSON.stringify({ 
+          name: name.trim(), 
+          email: email.trim().toLowerCase(), 
+          password: maskPassword(password)
+        })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { setError(data.message || 'Failed to register.'); setLoading(false); return; }
       showToast('success', 'Account created! Please verify email.');
       setView('login');
       setPassword(''); setEmail('');
-    } catch (err) { setError('Failed to register.'); } finally { setLoading(false); }
+    } catch (err) { 
+      setError('Failed to register.'); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   const handleSocialLogin = async (provider: 'google') => {
@@ -604,8 +617,8 @@ export const AuthPage: React.FC = () => {
 
         {/* RIGHT: Auth Forms (45%) */}
         <div className="w-full lg:w-[40%] h-full flex flex-col items-center justify-center p-8 bg-[#F2F2F2] overflow-y-auto relative custom-scrollbar">
-          <div className="w-full max-w-[340px] py-10 lg:py-0 lg:-translate-y-28">
-
+          <div className="w-full max-w-[380px] py-10 lg:py-0 lg:-translate-y-28">
+            
             {/* MOBILE ONLY LOGO */}
             <div className="lg:hidden flex justify-center mb-6">
               <Link to="/" className="inline-block hover:opacity-80 transition-opacity">
@@ -646,7 +659,7 @@ export const AuthPage: React.FC = () => {
                 <form onSubmit={handleLogin} className="flex flex-col gap-3 items-stretch">
                   <div className="space-y-3">
                     <div className="space-y-0.5 text-left relative">
-                      <label className="text-[11px] font-bold text-black/40 ml-0.5">Email address *</label>
+                      <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Email Address <span className="text-red-500">*</span></label>
                       <IconInput
                         type="email"
                         placeholder="you@domain.com"
@@ -657,7 +670,7 @@ export const AuthPage: React.FC = () => {
                       />
                     </div>
                     <div className="space-y-0.5 text-left relative">
-                      <label className="text-[11px] font-bold text-black/40 ml-0.5">Password *</label>
+                      <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Password <span className="text-red-500">*</span></label>
                       <PasswordInput value={password} onChange={(e: any) => setPassword(e.target.value)} required placeholder="••••••••"
                         icon={<LockIcon className="w-4 h-4" />}
                         inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[11px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
@@ -688,19 +701,22 @@ export const AuthPage: React.FC = () => {
               )}
 
               {view === 'signup' && (
-                <form onSubmit={handleSignup} className="flex flex-col gap-3">
+                <div className="w-full" style={{ zoom: 0.8 }}>
+                  <form onSubmit={handleSignup} className="flex flex-col gap-3 pb-10">
+                    <div className="space-y-3">
                   <div className="space-y-0.5">
-                    <label className="text-[11px] font-bold text-black/40 ml-0.5">Full Name *</label>
+                    <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Full Name <span className="text-red-500">*</span></label>
                     <IconInput
                       placeholder="Juan Dela Cruz"
                       required
                       value={name}
                       onChange={(e: any) => setName(e.target.value)}
                       icon={<UserIcon className="w-4 h-4" />}
+                      inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[12px] !py-2.5 !text-[14px] !font-medium"
                     />
                   </div>
                   <div className="space-y-0.5">
-                    <label className="text-[11px] font-bold text-black/40 ml-0.5">Email Address *</label>
+                    <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Email Address <span className="text-red-500">*</span></label>
                     <IconInput
                       type="email"
                       placeholder="you@domain.com"
@@ -708,27 +724,35 @@ export const AuthPage: React.FC = () => {
                       value={email}
                       onChange={(e: any) => setEmail(e.target.value)}
                       icon={<EnvelopeIcon className="w-4 h-4" />}
+                      inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[12px] !py-2.5 !text-[14px] !font-medium"
                     />
                   </div>
                   <div className="space-y-0.5">
-                    <label className="text-[11px] font-bold text-black/40 ml-0.5">Password *</label>
+                    <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Password <span className="text-red-500">*</span></label>
                     <PasswordInput placeholder="Create password" required value={password} onChange={(e: any) => setPassword(e.target.value)}
                       icon={<LockIcon className="w-4 h-4" />}
-                      inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[11px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
+                      inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[12px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all" />
                   </div>
                   <div className="space-y-0.5">
-                    <label className="text-[11px] font-bold text-black/40 ml-0.5">Confirm Password *</label>
+                    <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Confirm Password <span className="text-red-500">*</span></label>
                     <PasswordInput placeholder="Confirm password" required value={confirmPassword} onChange={(e: any) => setConfirmPassword(e.target.value)}
                       icon={<LockIcon className="w-4 h-4" />}
-                      inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[11px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
+                      inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[12px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all" />
+                    </div>
                   </div>
+                  
                   <div className="flex items-center gap-2 p-1 bg-black/[0.01] rounded-[11px] mt-0.5">
                     <Checkbox checked={agreedToTerms} onChange={setAgreedToTerms} />
                     <span className="text-[11px] text-black/70 font-bold leading-tight">
                       I agree to the <button type="button" onClick={() => setShowTerms(true)} className="text-[#38BDF2] hover:underline">Terms of Service</button> and <button type="button" onClick={() => setShowPrivacy(true)} className="text-[#38BDF2] hover:underline">Privacy Policy</button>.
                     </span>
                   </div>
-                  <Button type="submit" className="w-full py-4 text-[11px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" disabled={loading}>
+
+                  <Button 
+                    type="submit" 
+                    className="w-full py-4 text-[11px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" 
+                    disabled={loading}
+                  >
                     {loading ? 'Wait...' : 'Create account'}
                   </Button>
 
@@ -748,6 +772,7 @@ export const AuthPage: React.FC = () => {
                     Already have an account? <button type="button" onClick={() => setView('login')} className="text-[#38BDF2] hover:underline">Sign In</button>
                   </p>
                 </form>
+                </div>
               )}
 
               {view === 'forgot-password' && (
@@ -780,14 +805,14 @@ export const AuthPage: React.FC = () => {
                       className="space-y-3"
                     >
                       <div className="space-y-0.5">
-                        <label className="text-[11px] font-bold text-black/40 ml-0.5">Account Email</label>
+                        <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Account Email <span className="text-red-500">*</span></label>
                         <IconInput
                           type="email"
                           placeholder="you@domain.com"
                           value={email}
                           onChange={(e: any) => setEmail(e.target.value)}
                           required
-                          icon={<EnvelopeIcon className="w-4 h-4" />}
+                        icon={<EnvelopeIcon className="w-4 h-4" />}
                         />
                       </div>
 
@@ -814,7 +839,7 @@ export const AuthPage: React.FC = () => {
                   {!successMessage ? (
                     <form onSubmit={handleResetPassword} className="space-y-3">
                       <div className="space-y-0.5">
-                        <label className="text-[11px] font-bold text-black/40 ml-0.5">New Password *</label>
+                        <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">New Password <span className="text-red-500">*</span></label>
                         <PasswordInput
                           value={password}
                           onChange={(e: any) => setPassword(e.target.value)}
@@ -826,7 +851,7 @@ export const AuthPage: React.FC = () => {
                         <PasswordRequirements password={password} />
                       </div>
                       <div className="space-y-0.5">
-                        <label className="text-[11px] font-bold text-black/40 ml-0.5">Confirm New Password *</label>
+                        <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Confirm New Password <span className="text-red-500">*</span></label>
                         <PasswordInput
                           value={confirmPassword}
                           onChange={(e: any) => setConfirmPassword(e.target.value)}
@@ -859,39 +884,40 @@ export const AuthPage: React.FC = () => {
                   {!successMessage ? (
                     <form onSubmit={handleAcceptInvite} className="space-y-3">
                       <div className="space-y-0.5">
-                        <label className="text-[11px] font-bold text-black/40 ml-0.5">Full Name *</label>
+                        <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Full Name <span className="text-red-500">*</span></label>
                         <IconInput
                           placeholder="e.g. John Doe"
                           value={name}
                           onChange={(e: any) => setName(e.target.value)}
                           required
                           icon={<UserIcon className="w-4 h-4" />}
+                          inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[12px] !py-3 !text-[14px] !font-medium"
                         />
                       </div>
 
                       {!inviteInfo?.accountExists && (
                         <>
                           <div className="space-y-0.5">
-                            <label className="text-[11px] font-bold text-black/40 ml-0.5">Create Password *</label>
+                            <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Create Password <span className="text-red-500">*</span></label>
                             <PasswordInput
                               value={password}
                               onChange={(e: any) => setPassword(e.target.value)}
                               required
                               placeholder="••••••••"
                               icon={<LockIcon className="w-4 h-4" />}
-                              inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[10px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0"
+                              inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[12px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all"
                             />
                             <PasswordRequirements password={password} />
                           </div>
                           <div className="space-y-0.5">
-                            <label className="text-[11px] font-bold text-black/40 ml-0.5">Confirm Password *</label>
+                            <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Confirm Password <span className="text-red-500">*</span></label>
                             <PasswordInput
                               value={confirmPassword}
                               onChange={(e: any) => setConfirmPassword(e.target.value)}
                               required
                               placeholder="••••••••"
                               icon={<LockIcon className="w-4 h-4" />}
-                              inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[10px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0"
+                              inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[12px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all"
                             />
                           </div>
                         </>

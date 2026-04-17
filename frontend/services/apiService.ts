@@ -670,6 +670,7 @@ export const apiService = {
     currency: string;
     promoCode?: string | null;
     extraGuests?: { name: string; email?: string }[];
+    captchaToken?: string | null;
   }): Promise<{ orderId: string }> => {
     const res = await apiService._fetch(`${API_BASE}/api/orders`, {
       method: 'POST',
