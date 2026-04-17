@@ -4,20 +4,17 @@ import axios from 'axios';
  * Middleware to verify Google reCAPTCHA v2/v3 tokens.
  * Expects 'captchaToken' in the request body.
  */
-export const verifyRecaptcha = async (req, res, next) => {
-  const { captchaToken } = req.body;
-
-  // For development, if RECAPTCHA_SECRET is not set, skip verification
+/**
+ * Standalone helper to verify Google reCAPTCHA tokens.
+ */
+export const verifyRecaptchaToken = async (captchaToken) => {
   if (!process.env.RECAPTCHA_SECRET || process.env.RECAPTCHA_SECRET === 'your-recaptcha-secret-key') {
     console.warn('RECAPTCHA_SECRET not found or is default. Skipping verification.');
-    return next();
+    return { success: true };
   }
 
   if (!captchaToken) {
-    return res.status(400).json({ 
-      success: false, 
-      message: 'Please complete the reCAPTCHA verification.' 
-    });
+    return { success: false, message: 'reCAPTCHA token is missing.' };
   }
 
   try {
@@ -28,30 +25,36 @@ export const verifyRecaptcha = async (req, res, next) => {
     const { success, score } = response.data;
 
     if (!success) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'reCAPTCHA verification failed. Please try again.' 
-      });
+      return { success: false, message: 'reCAPTCHA verification failed.' };
     }
 
-    // Support for reCAPTCHA v3 score-based validation
-    if (score !== undefined) {
-      console.log(`🛡️ [Recaptcha] Verification Score: ${score} (Action: ${req.body.captchaAction || 'unknown'})`);
-      if (score < 0.5) {
-        console.warn('[Recaptcha] Low trust score:', score);
-        return res.status(401).json({ 
-          success: false, 
-          message: 'Security check failed. Our system detects suspicious activity.' 
-        });
-      }
+    if (score !== undefined && score < 0.5) {
+      return { success: false, message: 'Low trust score detected.' };
     }
 
-    next();
+    return { success: true };
   } catch (error) {
     console.error('reCAPTCHA Verification Error:', error);
-    return res.status(500).json({ 
-      success: false, 
-      message: 'Internal server error during bot verification.' 
+    return { success: false, message: 'Internal server error during verification.' };
+  }
+};
+
+/**
+ * Middleware to verify Google reCAPTCHA v2/v3 tokens.
+ * Expects 'captchaToken' in the request body.
+ */
+export const verifyRecaptcha = async (req, res, next) => {
+  const { captchaToken } = req.body;
+  const result = await verifyRecaptchaToken(captchaToken);
+
+  if (!result.success) {
+    return res.status(result.message === 'reCAPTCHA token is missing.' ? 400 : 401).json({
+      success: false,
+      message: result.message === 'reCAPTCHA verification failed.' 
+        ? 'reCAPTCHA verification failed. Please try again.' 
+        : result.message
     });
   }
+
+  next();
 };

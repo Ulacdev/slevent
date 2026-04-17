@@ -5,6 +5,7 @@ import { sendMakeNotification } from '../utils/makeWebhook.js';
 import { notifyUserByPreference, getAdminSmtpConfig } from "../utils/notificationService.js";
 import { logAudit } from "../utils/auditLogger.js";
 import { decodeAuthPassword } from "../utils/encryption.js";
+import { verifyRecaptchaToken } from "../middleware/recaptchaMiddleware.js";
 
 const ORGANIZER_ROLE = 'ORGANIZER';
 
@@ -284,6 +285,25 @@ export const login = async (req, res) => {
         });
       }
 
+      // Check if reCAPTCHA is required (if attempts >= 15)
+      const { captchaToken } = req.body;
+      if (lockoutCheck?.failed_login_attempts >= 15) {
+        if (!captchaToken) {
+          return res.status(401).json({ 
+            message: "Too many failed attempts. Please complete the reCAPTCHA verification.",
+            requiresCaptcha: true 
+          });
+        }
+        
+        const captchaResult = await verifyRecaptchaToken(captchaToken);
+        if (!captchaResult.success) {
+          return res.status(401).json({ 
+            message: "reCAPTCHA verification failed. Please try again.",
+            requiresCaptcha: true 
+          });
+        }
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email: email.toLowerCase().trim(), 
         password 
@@ -297,13 +317,21 @@ export const login = async (req, res) => {
           const currentAttempts = (lockoutCheck?.failed_login_attempts || 0) + 1;
           const updates = { failed_login_attempts: currentAttempts };
           
-          if (currentAttempts >= 10) {
+          if (currentAttempts >= 20) {
             updates.locked_until = new Date(Date.now() + 15 * 60 * 1000).toISOString();
           }
 
           await db.from('users')
             .update(updates)
             .eq('email', email.toLowerCase().trim());
+            
+          // If we just hit 15 attempts, inform the frontend it needs reCAPTCHA
+          if (currentAttempts === 15) {
+            return res.status(401).json({ 
+              message: "Too many failed attempts. Please complete the reCAPTCHA next time.",
+              requiresCaptcha: true 
+            });
+          }
         }
 
         return res.status(401).json({ message: error?.message || "Invalid credentials" });

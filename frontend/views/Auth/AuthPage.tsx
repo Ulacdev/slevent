@@ -60,6 +60,8 @@ export const AuthPage: React.FC = () => {
   const [name, setName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [showLoginCaptcha, setShowLoginCaptcha] = useState(false);
   const [forgotMessage, setForgotMessage] = useState('');
   const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [captchaValue, setCaptchaValue] = useState<string | null>(null);
@@ -265,15 +267,46 @@ export const AuthPage: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Require reCAPTCHA after 15 failed attempts
+    if (loginAttempts >= 15 && !captchaValue) {
+      setError('Please complete the reCAPTCHA verification.');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch(`${API}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), password: maskPassword(password) })
+        body: JSON.stringify({ 
+          email: email.trim().toLowerCase(), 
+          password: maskPassword(password),
+          captchaToken: captchaValue || undefined
+        })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) { setError(data.message || "Invalid credentials."); setLoading(false); return; }
+      if (!res.ok) { 
+        if (data.requiresCaptcha) {
+          setShowLoginCaptcha(true);
+          setLoginAttempts(Math.max(loginAttempts, 15));
+        } else {
+          setLoginAttempts(prev => {
+            const next = prev + 1;
+            if (next >= 15) setShowLoginCaptcha(true);
+            return next;
+          });
+        }
+        setError(data.message || "Invalid credentials."); 
+        setLoading(false); 
+        return; 
+      }
+
+      // Reset attempts on success
+      setLoginAttempts(0);
+      setShowLoginCaptcha(false);
+      setCaptchaValue(null);
+
       if (data.user && data.session) {
         await supabase.auth.setSession({ access_token: data.session.access_token, refresh_token: data.session.refresh_token });
         await handleLoginSuccess(data.user, data.session);
@@ -327,9 +360,9 @@ export const AuthPage: React.FC = () => {
 
   return (
     <>
-      <div className="fixed inset-0 h-[100dvh] w-full flex bg-[#F2F2F2] lg:overflow-hidden font-sans select-none">
+      <div className="relative min-h-screen w-full flex bg-[#F2F2F2] lg:overflow-y-auto font-sans">
         {/* LEFT: Branding (55%) */}
-        <div className="hidden lg:flex w-[60%] h-full flex-col pl-10 pr-4 pt-4 justify-between bg-[#F2F2F2] border-r border-black/5 relative overflow-hidden isolate">
+        <div className="hidden lg:flex w-[60%] lg:h-screen lg:sticky lg:top-0 flex-col pl-10 pr-4 pt-4 justify-between bg-[#F2F2F2] border-r border-black/5 relative overflow-hidden isolate">
 
           {/* Mockup Display: Premium Dark Shells */}
           <div className="absolute left-[74%] -translate-x-1/2 top-[40%] -translate-y-1/2 z-0 pointer-events-none transform scale-[0.6] lg:scale-[0.75] opacity-[0.9] transition-opacity duration-700">
@@ -616,8 +649,8 @@ export const AuthPage: React.FC = () => {
         </div>
 
         {/* RIGHT: Auth Forms (45%) */}
-        <div className="w-full lg:w-[40%] h-full flex flex-col items-center justify-center p-8 bg-[#F2F2F2] overflow-y-auto relative custom-scrollbar">
-          <div className="w-full max-w-[380px] py-10 lg:py-0 lg:-translate-y-28">
+        <div className="w-full lg:w-[40%] min-h-full flex flex-col items-center justify-center lg:justify-start lg:pt-[10vh] p-8 bg-[#F2F2F2] overflow-visible relative custom-scrollbar">
+          <div className="w-full max-w-[380px] py-10 lg:py-0">
             
             {/* MOBILE ONLY LOGO */}
             <div className="lg:hidden flex justify-center mb-6">
@@ -654,7 +687,7 @@ export const AuthPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="bg-[#F2F2F2] p-8 rounded-[24px] border border-black/[0.03] shadow-[0_20px_40px_rgba(0,0,0,0.05),inset_0_-8px_16px_rgba(0,0,0,0.05),inset_0_8px_16px_rgba(255,255,255,0.8)]">
+            <div className="bg-[#F2F2F2] p-8 rounded-[24px] border border-black/[0.03] shadow-[0_20px_40px_rgba(0,0,0,0.05),inset_0_-8px_16px_rgba(0,0,0,0.05),inset_0_8px_16px_rgba(255,255,255,0.8)] overflow-visible">
               {view === 'login' && (
                 <form onSubmit={handleLogin} className="flex flex-col gap-3 items-stretch">
                   <div className="space-y-3">
@@ -669,6 +702,18 @@ export const AuthPage: React.FC = () => {
                         icon={<EnvelopeIcon className="w-4 h-4" />}
                       />
                     </div>
+
+                    {showLoginCaptcha && (
+                      <div className="flex justify-center my-2 overflow-visible">
+                        <ReCAPTCHA
+                          ref={recaptchaRef}
+                          sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'}
+                          onChange={(val) => setCaptchaValue(val)}
+                          theme="light"
+                        />
+                      </div>
+                    )}
+
                     <div className="space-y-0.5 text-left relative">
                       <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Password <span className="text-red-500">*</span></label>
                       <PasswordInput value={password} onChange={(e: any) => setPassword(e.target.value)} required placeholder="••••••••"
