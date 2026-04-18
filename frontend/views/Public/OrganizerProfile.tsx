@@ -7,6 +7,7 @@ import { ProfileSkeleton } from '../../components/Shared/Skeleton';
 import { ICONS } from '../../constants';
 import { useUser } from '../../context/UserContext';
 import { useEngagement } from '../../context/EngagementContext';
+import { getImageUrl } from '../../utils/imageUtils';
 
 const getEmbedUrl = (link: string) => {
     if (!link) return null;
@@ -28,12 +29,7 @@ const getEmbedUrl = (link: string) => {
     return null;
 };
 
-// Helper to handle JSONB image format
-const getImageUrl = (img: any): string => {
-    if (!img) return '';
-    if (typeof img === 'string') return img;
-    return img.url || img.path || img.publicUrl || '';
-};
+
 
 const formatDate = (iso: string, timezone?: string, opts?: Intl.DateTimeFormatOptions) => {
     try {

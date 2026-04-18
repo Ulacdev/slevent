@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { apiService } from '../../services/apiService';
+import { apiService, API_BASE } from '../../services/apiService';
 import { Event, TicketType, UserRole } from '../../types';
 import { Button, Card, Modal } from '../../components/Shared';
 import { EventDetailsSkeleton } from '../../components/Shared/Skeleton';
@@ -9,15 +9,11 @@ import { useUser } from '../../context/UserContext';
 import { useEngagement } from '../../context/EngagementContext';
 import { getEventCategoryKeys } from '../../utils/eventCategories';
 import { EventReportModal } from '../../components/Public/EventReportModal';
+import { getImageUrl } from '../../utils/imageUtils';
 
 const BRAND_LOGO_URL = 'https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg';
 
-// Helper to handle JSONB image format
-const getImageUrl = (img: any): string => {
-  if (!img) return 'https://via.placeholder.com/800x400';
-  if (typeof img === 'string') return img;
-  return img.url || img.path || img.publicUrl || 'https://via.placeholder.com/800x400';
-};
+
 
 // Formatting helpers (use event timezone)
 const formatDate = (iso: string, timezone?: string, opts?: Intl.DateTimeFormatOptions) => {

@@ -95,10 +95,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      "img-src": ["'self'", "data:", "http://127.0.0.1:5000", "https://image.pollinations.ai", "https://images.unsplash.com", "https://*.pollinations.ai"],
-      "connect-src": ["'self'", "http://127.0.0.1:5000", "https://xmjdcbzgdfylbqkjoyyb.supabase.co", "https://api.groq.com", "https://generativelanguage.googleapis.com"]
+      "img-src": ["'self'", "data:", "http://127.0.0.1:5000", "http://localhost:5000", "https://image.pollinations.ai", "https://images.unsplash.com", "https://*.pollinations.ai"],
+      "connect-src": ["'self'", "http://127.0.0.1:5000", "http://localhost:5000", "https://xmjdcbzgdfylbqkjoyyb.supabase.co", "https://api.groq.com", "https://generativelanguage.googleapis.com"]
     },
   },
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false,
 }));
 app.use(morgan("dev"));
 

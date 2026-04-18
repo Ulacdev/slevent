@@ -5,14 +5,11 @@ import { Event } from '../../types';
 import { Card, Button, PageLoader } from '../../components/Shared';
 import { EventCardSkeleton } from '../../components/Shared/Skeleton';
 import { ICONS } from '../../constants';
+import { getImageUrl } from '../../utils/imageUtils';
 // Removed static category helpers to use dynamic DB-driven ones
 
 
-const getImageUrl = (img: any): string => {
-  if (!img) return 'https://via.placeholder.com/800x400';
-  if (typeof img === 'string') return img;
-  return img.url || img.path || img.publicUrl || 'https://via.placeholder.com/800x400';
-};
+
 
 const formatDate = (iso: string, timezone?: string, opts?: Intl.DateTimeFormatOptions) => {
   try {

@@ -1,4 +1,5 @@
-// AI REST API — supports Gemini (AIzaSy) and Groq (gsk_) - RESTARTING...
+import axios from 'axios';
+// AI REST API — supports Gemini (AIzaSy) and Groq (gsk_)
 const callGemini = async (prompt) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('No AI API key configured.');
@@ -214,41 +215,89 @@ Respond ONLY with a JSON array of 3 strings (no markdown):
   } catch (err) { return handleErrors(err, res); }
 };
 
+
 /**
  * GET /api/ai/proxy-image?prompt=...&seed=...
- * Proxies the Pollinations image request through the backend to bypass browser-level blocks.
+ * Proxies the Pollinations image request through the backend.
+ * Uses the 'turbo' model (~5-10s) instead of 'flux' (30-45s).
+ * Includes auto-retry with a fresh seed if the first attempt fails.
  */
 export const proxyImage = async (req, res) => {
   const { prompt, seed } = req.query;
   if (!prompt) return res.status(400).send('Prompt is required');
 
-  const targetUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${seed || 42}&model=flux&nologo=true`;
+  const seedNum = parseInt(seed, 10) || Math.floor(Math.random() * 1000000);
 
-  console.log(`[AI Proxy] Fetching image for client: "${prompt.substring(0, 30)}..."`);
-  
-  try {
-    const response = await fetch(targetUrl, {
-      headers: {
-        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) StartupLab-Cloud-Proxy/1.0'
+  // turbo model is 4-6x faster than flux — switches from 45s avg → 5-10s avg
+  const buildUrl = (s) =>
+    `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=576&seed=${s}&model=turbo&nologo=true&enhance=true`;
+
+  const tryFetch = async (s, attempt) => {
+    try {
+      // Rotate models and optimize parameters on retry
+      const model = attempt === 1 ? 'turbo' : 'flux';
+      const width = attempt === 1 ? 1024 : 800;
+      const height = attempt === 1 ? 576 : 450;
+      // Disable 'enhance' on retry to speed up generation and reduce server load
+      const enhance = attempt === 1 ? 'true' : 'false';
+      
+      const modelLabel = model.toUpperCase();
+      console.log(`[AI Proxy] Attempt ${attempt} (${modelLabel}, seed ${s}, ${width}x${height})...`);
+      
+      const response = await axios({
+        method: 'get',
+        url: `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&seed=${s}&model=${model}&nologo=true&enhance=${enhance}`,
+        timeout: 25000, 
+        responseType: 'arraybuffer',
+        headers: {
+          'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+          'User-Agent': `Mozilla/5.0 StartupLab-AI-Proxy/${modelLabel}`,
+        }
+      });
+      
+      const contentType = response.headers['content-type'] || 'image/jpeg';
+      if (!contentType.startsWith('image/')) {
+        console.warn(`[AI Proxy] ${modelLabel} failed: Non-image content-type "${contentType}"`);
+        return { success: false, error: 'Non-image response' };
       }
-    });
+      return { success: true, response };
+    } catch (err) {
+      const errorMsg = err.response ? `Status ${err.response.status}` : err.message;
+      console.warn(`[AI Proxy] Attempt ${attempt} error: ${errorMsg}`);
+      return { success: false, error: errorMsg };
+    }
+  };
 
-    if (!response.ok) {
-      console.error(`[AI Proxy] FAILED to fetch from Pollinations: ${response.status}`);
-      return res.status(response.status).send('External AI server failed');
+  console.log(`[AI Proxy] Generating with turbo: "${prompt.substring(0, 40)}..." seed=${seedNum}`);
+
+  try {
+    // Attempt 1
+    let result = await tryFetch(seedNum, 1);
+
+    // Attempt 2 (Retry)
+    if (!result.success) {
+      const retrySeed = Math.floor(Math.random() * 1000000);
+      console.log(`[AI Proxy] Retrying with fresh seed: ${retrySeed}`);
+      result = await tryFetch(retrySeed, 2);
     }
 
-    const contentType = response.headers.get('content-type') || 'image/png';
-    res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 24h
+    if (!result.success) {
+      console.error(`[AI Proxy] Both attempts failed. Final error: ${result.error}`);
+      const status = result.error.includes('timeout') ? 504 : 502;
+      return res.status(status).json({ error: `AI generation failed: ${result.error}. Try again.` });
+    }
 
-    // Convert to buffer and send
-    const buffer = await response.arrayBuffer();
-    console.log(`[AI Proxy] SUCCESS: Sent image data (${buffer.byteLength} bytes)`);
-    return res.send(Buffer.from(buffer));
+    const { response } = result;
+    const contentType = response.headers['content-type'] || 'image/jpeg';
+    
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+
+    console.log(`[AI Proxy] SUCCESS: ${response.data.byteLength} bytes delivered.`);
+    return res.send(Buffer.from(response.data));
+
   } catch (err) {
-    console.error('[AI Proxy] CRASHED:', err.message);
-    return res.status(500).send('Internal Proxy Error');
+    console.error('[AI Proxy] FATAL ERROR:', err.message);
+    return res.status(500).json({ error: 'Internal proxy error.' });
   }
 };

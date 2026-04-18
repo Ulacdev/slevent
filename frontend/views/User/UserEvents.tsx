@@ -8,12 +8,9 @@ import { OnsiteLocationAssistant } from '../../components/OnsiteLocationAssistan
 import { ICONS } from '../../constants';
 import { useUser } from '../../context/UserContext';
 import { useToast } from '../../context/ToastContext';
+import { getImageUrl } from '../../utils/imageUtils';
 
-const getImageUrl = (img: any): string => {
-    if (!img) return 'https://via.placeholder.com/800x400';
-    if (typeof img === 'string') return img;
-    return img.url || img.path || img.publicUrl || 'https://via.placeholder.com/800x400';
-};
+
 
 const BRAND_LOGO_URL = 'https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg';
 
@@ -59,6 +56,24 @@ const MoreVerticalIcon: React.FC<any> = (props) => (
         <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
         <circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none" />
         <circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+);
+
+const WandIcon: React.FC<any> = (props) => (
+    <svg 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        xmlns="http://www.w3.org/2000/svg"
+        {...props}
+    >
+        {/* Bold Wand Handle */}
+        <path d="M3 21L12.5 11.5" strokeWidth="3.5" strokeLinecap="round" />
+        {/* Main Star at tip */}
+        <path d="M17 2L16.2 4.2L14 5L16.2 5.8L17 8L17.8 5.8L20 5L17.8 4.2L17 2Z" fill="currentColor" stroke="none" />
+        {/* Secondary Sparkles */}
+        <path d="M11 3L10.7 4.1L9.6 4.4L10.7 4.7L11 5.8L11.3 4.7L12.4 4.4L11.3 4.1L11 3Z" fill="currentColor" stroke="none" />
+        <path d="M21 11L20.7 12.1L19.6 12.4L20.7 12.7L21 13.8L21.3 12.7L22.4 12.4L21.3 12.1L21 11Z" fill="currentColor" stroke="none" />
     </svg>
 );
 
@@ -274,9 +289,14 @@ const EventTableRow = React.memo<{
                 </div>
             </td>
             <td className="px-8 py-7">
-                <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-[#2E2E2F]">{event.capacityTotal}</span>
-                    <span className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Slots</span>
+                <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                        <span className="text-base font-black text-[#2E2E2F]">{event.capacityTotal}</span>
+                        <span className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Slots</span>
+                    </div>
+                    <div className="w-[100px] h-1.5 bg-[#2E2E2F]/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#38BDF2]" style={{ width: '100%' }} />
+                    </div>
                 </div>
             </td>
             <td className="px-8 py-7 !overflow-visible align-middle">
@@ -946,18 +966,18 @@ const AISuggestPanel: React.FC<{
                         type="button"
                         onClick={handleGenerate}
                         disabled={loading}
-                        className="w-full py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#38BDF2] to-[#0ea5e9] text-white shadow-md hover:shadow-lg hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        title="AI Design Tool Kit"
+                        className="w-full py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#38BDF2] to-[#0ea5e9] text-white shadow-md hover:shadow-[0_0_20px_rgba(56,189,242,0.6)] hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
                     >
                         {loading ? (
                             <>
                                 <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                <WandIcon className="w-3.5 h-3.5 animate-pulse" />
                                 Generating with AI...
                             </>
                         ) : (
                             <>
-                                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                                </svg>
+                                <WandIcon className="w-3.5 h-3.5 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300" />
                                 Generate 3 Suggestions
                             </>
                         )}
@@ -1124,12 +1144,20 @@ const AIFieldAssist: React.FC<{
                             type="button"
                             onClick={handleGenerate}
                             disabled={!context.trim() || loading}
-                            className="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#38BDF2] to-[#0ea5e9] text-white shadow-md hover:shadow-lg hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            title="AI Design Tool Kit"
+                            className="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#38BDF2] to-[#0ea5e9] text-white shadow-md hover:shadow-[0_0_15px_rgba(56,189,242,0.6)] hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
                         >
                             {loading ? (
-                                <><div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />Generating...</>
+                                <>
+                                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    <WandIcon className="w-3.5 h-3.5 animate-pulse" />
+                                    Generating...
+                                </>
                             ) : (
-                                <><svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>{hasGenerated ? 'Generate Again' : 'Generate 3 Suggestions'}</>
+                                <>
+                                    <WandIcon className="w-3.5 h-3.5 group-hover:rotate-12 group-hover:scale-110 transition-all duration-300" />
+                                    {hasGenerated ? 'Generate Again' : 'Generate 3 Suggestions'}
+                                </>
                             )}
                         </button>
 
@@ -1178,12 +1206,10 @@ const AIFieldAssist: React.FC<{
             <button
                 type="button"
                 onClick={handleOpen}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-gradient-to-r from-[#38BDF2] to-[#0ea5e9] text-white shadow-sm hover:shadow-md hover:opacity-90 active:scale-95 transition-all"
+                title="AI Design Tool Kit"
+                className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-transparent text-[#38BDF2] hover:shadow-[0_0_15px_rgba(56,189,242,0.4)] active:scale-95 transition-all group border border-[#38BDF2]/20 hover:border-[#38BDF2]/40"
             >
-                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-                ✨ AI
+                <WandIcon className="w-6 h-6 group-hover:rotate-12 transition-transform" />
             </button>
             {modal}
         </>
@@ -1264,9 +1290,10 @@ const AIDescriptionGenerator: React.FC<{
             type="button"
             onClick={handleGenerate}
             disabled={!eventName?.trim()}
-            className="text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-white border border-[#38BDF2] px-4 py-2 rounded-xl hover:shadow-lg active:scale-95 disabled:opacity-30 disabled:grayscale transition-all shadow-md"
+            title="AI Content Draft"
+            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-transparent text-[#38BDF2] border-2 border-[#38BDF2]/20 hover:border-[#38BDF2]/60 hover:shadow-[0_0_15px_rgba(56,189,242,0.4)] active:scale-95 disabled:opacity-30 disabled:grayscale transition-all group"
         >
-            ✨ Generate from Title
+            <WandIcon className="w-6 h-6 group-hover:rotate-12 transition-transform" />
         </button>
     );
 };
@@ -1281,25 +1308,56 @@ const AIImageGenerator: React.FC<{
     const [prompt, setPrompt] = React.useState('');
     const [loading, setLoading] = React.useState(false);
     const [previewUrl, setPreviewUrl] = React.useState('');
+    const [imgError, setImgError] = React.useState(false);
+    const loadingTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Clear any pending timeout when the component unmounts
+    React.useEffect(() => {
+        return () => { if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current); };
+    }, []);
 
     const handleGenerate = () => {
         if (!prompt.trim() && !eventName?.trim()) return;
+
+        // Clear any previous stuck timeout
+        if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
+
         setLoading(true);
+        // Reset the preview and error state so React replaces the <img> element and onLoad fires reliably
+        setPreviewUrl('');
+        setImgError(false);
+
+
         const seed = Math.floor(Math.random() * 1000000);
         const finalPrompt = prompt.trim() || `Professional high-quality banner for an event titled "${eventName}" in the Philippines, startup theme, cinematic lighting, 8k resolution`;
         
         // Using backend proxy-image bridge to bypass browser-level blocks
         const sanitizedPrompt = finalPrompt.replace(/#/g, '').substring(0, 1000);
         const timestamp = Date.now();
-        const url = `${API_BASE}/api/ai/proxy-image?prompt=${encodeURIComponent(sanitizedPrompt)}&seed=${seed}&t=${timestamp}`;
+        const relativePath = `/api/ai/proxy-image?prompt=${encodeURIComponent(sanitizedPrompt)}&seed=${seed}&t=${timestamp}`;
+        const fullUrl = `${API_BASE}${relativePath}`;
+        
         console.log(`[AI Generator] Requesting image via backend bridge: "${sanitizedPrompt}"`);
-        console.log(`[AI Generator] Bridge URL: ${url}`);
-        setPreviewUrl(url);
+        console.log(`[AI Generator] Bridge path: ${relativePath}`);
+        console.log(`[AI Generator] Full request URL: ${fullUrl}`);
+
+        // Safety timeout: if onLoad/onError don't fire within 60s (Pollinations turbo with 1 retry),
+        // automatically stop the spinner and show an error so the user isn't stuck forever.
+        loadingTimerRef.current = setTimeout(() => {
+            console.warn('[AI Generator] Timeout: image took too long. Resetting loading state.');
+            setLoading(false);
+            showToast('error', 'AI image took too long. Try again or use a simpler prompt.');
+        }, 60000);
+
+        // Small delay so React re-mounts the <img> element with the new src
+        setTimeout(() => setPreviewUrl(fullUrl), 50);
     };
 
     const handleApply = () => {
-        console.log(`[AI Generator] Applying URL to form: ${previewUrl}`);
-        onApply(previewUrl);
+        // We save the RELATIVE path to the database to ensure portability across dev/prod environments
+        const relativePath = previewUrl.replace(API_BASE, '');
+        console.log(`[AI Generator] Applying relative path to form: ${relativePath}`);
+        onApply(relativePath);
         showToast('success', '✨ AI Cover Image applied!');
         setIsOpen(false);
         setPreviewUrl('');
@@ -1335,28 +1393,24 @@ const AIImageGenerator: React.FC<{
                             />
                         </div>
                         <div className="relative aspect-video rounded-2xl overflow-hidden border-2 border-[#2E2E2F]/10 bg-[#2E2E2F]/05 group">
-                            {previewUrl ? (
+                            {previewUrl && !imgError ? (
                                 <>
                                     <img 
                                         src={previewUrl} 
                                         alt="AI Generated" 
-                                        crossOrigin="use-credentials"
+                                        crossOrigin="anonymous"
                                         className={`w-full h-full object-cover transition-opacity duration-700 ${loading ? 'opacity-30 blur-sm' : 'opacity-100'}`}
                                         onLoad={() => {
                                             console.log('[AI Generator] Image loaded successfully');
+                                            if (loadingTimerRef.current) { clearTimeout(loadingTimerRef.current); loadingTimerRef.current = null; }
                                             setLoading(false);
                                         }}
-                                        onError={(e) => { 
-                                            console.error('[AI Generator] Image failed to load', e);
-                                            // Fallback to a high-quality Unsplash image if AI fails
-                                            if (!previewUrl.includes('unsplash')) {
-                                                const fallback = `https://images.unsplash.com/photo-1540575861501-7ad0582373f3?auto=format&fit=crop&q=80&w=1280&h=720&q=${Date.now()}`;
-                                                console.log('[AI Generator] Falling back to Unsplash photo...');
-                                                setPreviewUrl(fallback);
-                                            } else {
-                                                setLoading(false); 
-                                                showToast('error', 'Generation failed. Try a simpler prompt.'); 
-                                            }
+                                        onError={() => { 
+                                            console.error('[AI Generator] Proxy image failed to load');
+                                            if (loadingTimerRef.current) { clearTimeout(loadingTimerRef.current); loadingTimerRef.current = null; }
+                                            setLoading(false);
+                                            setPreviewUrl('');
+                                            setImgError(true);
                                         }}
                                     />
                                     {!loading && (
@@ -1365,6 +1419,17 @@ const AIImageGenerator: React.FC<{
                                         </div>
                                     )}
                                 </>
+                            ) : imgError ? (
+                                <div className="flex flex-col items-center justify-center h-full gap-3 px-8 text-center">
+                                    <div className="w-10 h-10 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center">
+                                        <ICONS.AlertTriangle className="w-5 h-5 text-red-400" />
+                                    </div>
+                                    <p className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Generation Failed</p>
+                                    <p className="text-[9px] text-[#2E2E2F]/30 font-medium leading-relaxed">Pollinations AI is busy or rate-limited. Try again in a few seconds or use a simpler prompt.</p>
+                                    <button type="button" onClick={() => { setImgError(false); handleGenerate(); }} className="mt-1 px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-white hover:opacity-90 transition-all">
+                                        Retry
+                                    </button>
+                                </div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center h-full gap-3">
                                     <ICONS.Image className="w-8 h-8 text-[#2E2E2F]/15" />
@@ -1375,8 +1440,15 @@ const AIImageGenerator: React.FC<{
                             {loading && (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#F2F2F2]/20 backdrop-blur-[2px]">
                                     <div className="w-10 h-10 border-[3.5px] border-[#38BDF2] border-t-transparent rounded-full animate-spin mb-4" />
-                                    <p className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] animate-pulse">Flux AI is Painting...</p>
+                                    <p className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] animate-pulse">Turbo AI is Painting...</p>
                                     <p className="text-[8px] text-[#2E2E2F]/50 font-bold uppercase tracking-widest mt-1">High-quality banner in progress</p>
+                                    <button
+                                        type="button"
+                                        onClick={() => { if (loadingTimerRef.current) { clearTimeout(loadingTimerRef.current); loadingTimerRef.current = null; } setLoading(false); setPreviewUrl(''); }}
+                                        className="mt-4 px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border border-[#2E2E2F]/20 text-[#2E2E2F]/50 hover:text-red-500 hover:border-red-300 transition-all bg-white/60"
+                                    >
+                                        Cancel
+                                    </button>
                                 </div>
                             )}
                         </div>
@@ -1411,10 +1483,10 @@ const AIImageGenerator: React.FC<{
             <button 
                 type="button" 
                 onClick={(e) => { e.stopPropagation(); setIsOpen(true); }} 
-                className="relative z-[30] text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-white border border-[#38BDF2] px-3 py-1.5 rounded-xl hover:shadow-lg active:scale-95 transition-all shadow-md flex items-center gap-2"
+                title="AI Image Studio"
+                className="relative z-[30] w-10 h-10 flex items-center justify-center rounded-2xl bg-transparent text-[#38BDF2] border-2 border-[#38BDF2]/20 hover:border-[#38BDF2]/60 hover:shadow-[0_0_15px_rgba(56,189,242,0.4)] active:scale-95 transition-all group"
             >
-                <ICONS.Image className="w-3.5 h-3.5" />
-                ✨ AI Image
+                <WandIcon className="w-6 h-6 group-hover:rotate-12 transition-transform" />
             </button>
             {modal}
         </>

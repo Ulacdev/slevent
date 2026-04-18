@@ -12,6 +12,7 @@ import { useUser } from '../../context/UserContext';
 import { useEngagement } from '../../context/EngagementContext';
 import { PricingSection } from '../../components/PricingSection';
 import { DestinationSlider } from '../../components/DestinationSlider';
+import { getImageUrl } from '../../utils/imageUtils';
 
 
 const BRAND_LOGO_URL = 'https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg';
@@ -31,12 +32,7 @@ interface Announcement {
   expires_at?: string | null;
 }
 
-// Helper to handle JSONB image format
-const getImageUrl = (img: any): string => {
-  if (!img) return BRAND_LOGO_URL;
-  if (typeof img === 'string') return img;
-  return img.url || img.path || img.publicUrl || BRAND_LOGO_URL;
-};
+
 
 const generateDefaultAvatarDataUri = (initials: string, bgColor: string = '#38BDF2'): string => {
   const safeInitials = (initials || 'SL').slice(0, 2).toUpperCase();
