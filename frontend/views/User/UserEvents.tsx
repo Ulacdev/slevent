@@ -1,7 +1,7 @@
-
 import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { apiService } from '../../services/apiService';
+import { apiService, API_BASE } from '../../services/apiService';
 import { Event, TicketType, EventStatus, RegistrationView, OrganizerProfile, UserRole } from '../../types';
 import { Card, Badge, Button, Modal, Input, PageLoader, Checkbox } from '../../components/Shared';
 import { OnsiteLocationAssistant } from '../../components/OnsiteLocationAssistant';
@@ -99,7 +99,7 @@ const EventMobileCard = React.memo<{
         >
             <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 border-[#2E2E2F]/15">
-                    <img src={getImageUrl(event.imageUrl)} alt="" className="w-full h-full object-cover" />
+                    <img src={getImageUrl(event.imageUrl)} alt="" crossOrigin="use-credentials" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -232,7 +232,7 @@ const EventTableRow = React.memo<{
             <td className="px-8 py-7">
                 <div className="flex items-center gap-5">
                     <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border-2 border-[#2E2E2F]/15 relative">
-                        <img src={getImageUrl(event.imageUrl)} alt="" className="w-full h-full object-cover" />
+                        <img src={getImageUrl(event.imageUrl)} alt="" crossOrigin="use-credentials" className="w-full h-full object-cover" />
                     </div>
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
@@ -334,6 +334,1523 @@ const EventTableRow = React.memo<{
     );
 });
 
+
+interface EventPreviewProps {
+    previewDevice: 'mobile' | 'desktop';
+    isPreviewMode: boolean;
+    setIsPreviewMode: (val: boolean) => void;
+    setPreviewDevice: (val: 'mobile' | 'desktop') => void;
+    formData: any;
+    organizerProfile: OrganizerProfile | null;
+    events: Event[];
+    brandingEnabled: boolean;
+    name: string;
+}
+
+const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPreviewMode, setIsPreviewMode, setPreviewDevice, formData, organizerProfile, events, brandingEnabled, name }) => {
+
+    const previewAccentColor = brandingEnabled ? formData.brandColor || '#38BDF2' : '#38BDF2';
+
+    const previewDateLabel = React.useMemo(() => {
+        if (!formData.eventDate) return 'Date and time not set';
+        const date = new Date(`${formData.eventDate}T${formData.eventTime || '09:00'}`);
+        if (Number.isNaN(date.getTime())) return 'Date and time not set';
+        return date.toLocaleString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+        });
+    }, [formData.eventDate, formData.eventTime]);
+
+    const previewMapEmbedUrl = (formData.location && import.meta.env.VITE_GOOGLE_MAPS_API_KEY)
+        ? `https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(formData.location)}`
+        : formData.location ? `https://maps.google.com/maps?q=${encodeURIComponent(formData.location.trim())}&z=15&output=embed` : '';
+
+    const hasPreviewPhysicalLocation = formData.locationType !== 'ONLINE' && !!formData.location?.trim();
+    const organizerPreviewInitial = (organizerProfile?.organizerName || name || 'O').charAt(0).toUpperCase();
+
+    return (
+        <div className={`flex flex-col h-full w-full ${previewDevice === 'desktop' ? 'bg-[#F2F2F2]' : 'bg-[#F2F2F2] pb-32'}`}>
+            {/* Mobile Header Bar */}
+            {(previewDevice as string) === 'mobile' && (
+                <div className="flex items-center justify-between flex-shrink-0 px-5 pt-5">
+                    <button
+                        type="button"
+                        onClick={() => setIsPreviewMode(false)}
+                        className="flex items-center gap-2 text-[#2E2E2F] hover:text-black transition-colors"
+                    >
+                        <ICONS.ChevronRight className="w-4 h-4 text-[#2E2E2F]/65" />
+                        <h4 className="text-[30px] font-black text-[#2E2E2F] tracking-tight">Preview</h4>
+                    </button>
+                    <div className="flex items-center gap-2">
+                        <div className="inline-flex items-center rounded-2xl border-2 border-[#2E2E2F]/5 bg-[#F2F2F2] p-1 shadow-sm">
+                            <button
+                                type="button"
+                                onClick={() => setPreviewDevice('mobile')}
+                                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
+                            >
+                                <MobilePreviewIcon className="w-4 h-4" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setPreviewDevice('desktop')}
+                                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
+                            >
+                                <DesktopPreviewIcon className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
+            {(previewDevice as string) === 'desktop' ? (
+                <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center pt-32 pb-12 px-6">
+                    {/* Centered Browser Window Frame - Scaled to 75% POV */}
+                    <div 
+                        className="w-full max-w-[1300px] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.12)] border border-[#2E2E2F]/10 bg-[#F2F2F2] min-h-[90vh] flex flex-col"
+                        style={{ transform: 'scale(0.75)', transformOrigin: 'top center' }}
+                    >
+                        {/* Browser Bar - Integrated Controls */}
+                        <div className="h-12 bg-[#F3F3F3] border-b border-[#2E2E2F]/10 flex items-center px-4 gap-4 shrink-0 overflow-hidden">
+                            <div className="flex gap-1.5 shrink-0">
+                                <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+                                <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+                                <div className="w-3 h-3 rounded-full bg-[#28C840]" />
+                            </div>
+                            
+                            <div className="flex-1">
+                                <div className="bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-lg px-3 py-1 text-[10px] text-[#2E2E2F]/40 font-medium truncate flex items-center gap-1.5 max-w-[400px]">
+                                    <ICONS.Lock className="w-2.5 h-2.5" />
+                                    startuplab.io/{(formData.eventName || 'event').toLowerCase().replace(/\s+/g, '-')}
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 shrink-0">
+                                {/* Integrated Toggle Pill */}
+                                <div className="inline-flex items-center rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setPreviewDevice('mobile')}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                                    >
+                                        <MobilePreviewIcon className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setPreviewDevice('desktop')}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                                    >
+                                        <DesktopPreviewIcon className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+
+                                {/* "Back" / Close Preview Button */}
+                                <button
+                                    type="button"
+                                    onClick={() => setIsPreviewMode(false)}
+                                    className="flex items-center gap-1.5 text-[#2E2E2F]/60 hover:text-black transition-colors group px-2"
+                                >
+                                    <ICONS.ChevronRight className="w-4 h-4 rotate-180 transition-transform group-hover:-translate-x-0.5" />
+                                    <span className="text-[11px] font-bold uppercase tracking-widest">Close Preview</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Internal Site Layout */}
+                        <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#F2F2F2]">
+                            {/* Header - ONLY MOBILE/Internal hidden for clean desktop preview as requested */}
+                            {false && (
+                                <div className="h-14 border-b border-[#2E2E2F]/15 px-6 flex items-center justify-between bg-white sticky top-0 z-10">
+                                    <img
+                                        src={brandingEnabled && organizerProfile?.profileImageUrl ? getImageUrl(organizerProfile.profileImageUrl) : BRAND_LOGO_URL}
+                                        alt="Event Logo"
+                                        className="h-8 w-auto object-contain"
+                                    />
+                                    <div className="flex items-center gap-3 text-[#2E2E2F]/50">
+                                        <ICONS.Users className="w-4 h-4" />
+                                        <ICONS.MoreHorizontal className="w-4 h-4" />
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="p-10">
+                                <div className="max-w-[1240px] mx-auto flex flex-col md:flex-row gap-8 items-start">
+                                    <div className="flex-1 space-y-6">
+                                        <div className="mb-4">
+                                            <div className="flex items-center gap-2 text-[8px] font-black tracking-widest uppercase mb-6" style={{ color: previewAccentColor }}>
+                                                <svg className="w-2.5 h-2.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
+                                                BACK TO EVENTS
+                                            </div>
+
+                                            <div className="flex items-start justify-between gap-4 mb-4">
+                                                <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tighter leading-tight">
+                                                    {formData.eventName || 'Event title'}
+                                                </h2>
+                                                <div className="flex items-center gap-2 shrink-0">
+                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
+                                                        <ICONS.Heart className="w-4 h-4 text-[#2E2E2F]/40" />
+                                                    </div>
+                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
+                                                        <ICONS.Download className="w-4 h-4 text-[#2E2E2F]/40" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="rounded-[2.5rem] overflow-hidden border-2 border-[#2E2E2F]/15 mb-6 shadow-sm">
+                                                <img src={getImageUrl(formData.imageUrl)} alt="Event Preview" crossOrigin="use-credentials" className="w-full aspect-video object-cover" />
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F]/70">
+                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                                    <ICONS.Calendar className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
+                                                    {previewDateLabel}
+                                                </div>
+                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                                    <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
+                                                    {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
+                                                </div>
+                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                                    CAPACITY: {formData.capacityTotal}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15">
+                                            <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
+                                            <p className="text-[#2E2E2F]/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
+                                                {formData.description || 'Provide an executive summary of this event session...'}
+                                            </p>
+                                        </div>
+
+                                        <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15">
+                                            <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
+                                            <div className="rounded-[1.5rem] border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] p-5 flex flex-col gap-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-14 h-14 rounded-full overflow-hidden text-[#F2F2F2] flex items-center justify-center text-xl font-bold shrink-0" style={{ backgroundColor: previewAccentColor }}>
+                                                        {organizerProfile?.profileImageUrl ? (
+                                                            <img src={getImageUrl(organizerProfile.profileImageUrl)} alt={organizerProfile.organizerName || 'Organizer'} crossOrigin="use-credentials" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            organizerPreviewInitial
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-xl font-black text-[#2E2E2F] tracking-tight truncate">
+                                                            {organizerProfile?.organizerName || 'Organizer Profile'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {hasPreviewPhysicalLocation && (
+                                            <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15">
+                                                <div className="flex items-center justify-between gap-3 mb-4">
+                                                    <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-[#38BDF2]">Open in Maps</span>
+                                                </div>
+                                                <p className="text-[13px] text-[#2E2E2F]/70 font-medium mb-5">{formData.location}</p>
+                                                <div className="rounded-2xl overflow-hidden border-2 border-[#2E2E2F]/15 bg-[#F2F2F2]">
+                                                    <iframe src={previewMapEmbedUrl} title="Preview map" className="w-full h-64" loading="lazy" />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="w-[340px] shrink-0 space-y-6 sticky top-0">
+                                        <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15 shadow-sm">
+                                            <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-6">SECURE ACCESS</h3>
+                                            <div className="space-y-4">
+                                                {formData.ticketTypes && formData.ticketTypes.length > 0 ? (
+                                                    formData.ticketTypes.map((ticket: any) => (
+                                                        <div key={ticket.ticketTypeId || ticket.name} className="p-6 rounded-[1.5rem] border-2 bg-[#F2F2F2]" style={{ borderColor: `${previewAccentColor}1A` }}>
+                                                            <div className="flex justify-between items-start mb-1">
+                                                                <p className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-wider">{ticket.name}</p>
+                                                                <span className="text-[9px] font-black px-2 py-0.5 rounded text-white" style={{ backgroundColor: previewAccentColor }}>AVAILABLE</span>
+                                                            </div>
+                                                            <p className="text-[18px] font-black text-[#2E2E2F]">
+                                                                {ticket.priceAmount === 0 ? 'FREE' : `PHP ${ticket.priceAmount.toLocaleString()}.00`}
+                                                            </p>
+                                                            <div className="mt-5 pt-5 border-t border-[#2E2E2F]/5 flex items-center justify-between">
+                                                                <span className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Quantity</span>
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-7 h-7 rounded-xl bg-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F]/20 text-sm">-</div>
+                                                                    <span className="text-sm font-black">1</span>
+                                                                    <div className="w-7 h-7 rounded-xl flex items-center justify-center text-sm text-white" style={{ backgroundColor: previewAccentColor }}>+</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="py-14 text-center border-2 border-dashed border-[#2E2E2F]/10 rounded-[2rem]">
+                                                        <p className="text-[11px] font-bold text-[#2E2E2F]/30 uppercase tracking-widest">No tickets set</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="mt-8 space-y-4">
+                                                <button disabled className="w-full py-5 rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.2em] text-white/50" style={{ backgroundColor: `${previewAccentColor}4D` }}>Secure Checkout</button>
+                                                <div className="flex items-center justify-center gap-2 opacity-20">
+                                                    <ICONS.CreditCard className="w-4 h-4" />
+                                                    <p className="text-[9px] font-black uppercase tracking-widest">HITPAY SECURE</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                /* Mobile Preview Mode - Phone Shell Implementation */
+                <div className="flex-1 w-full bg-[#F2F2F2] flex flex-col items-center">
+                    {/* Centered Phone Shell - Scaled to fit screen */}
+                    <div 
+                        className="relative w-[375px] h-[780px] bg-[#F2F2F2] rounded-[3.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.15)] border-[12px] border-[#F2F2F2] flex flex-col overflow-hidden"
+                        style={{ transform: 'scale(0.8)', transformOrigin: 'top center' }}
+                    >
+                        {/* Status Bar / Notch Area */}
+                        <div className="h-8 bg-[#F2F2F2] flex items-center justify-center relative shrink-0">
+                            <div className="w-24 h-5 bg-[#F2F2F2] rounded-b-2xl absolute top-0" />
+                        </div>
+
+                        {/* Scrollable Content inside Phone */}
+                        <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    <div className="w-full">
+                        <div className="h-14 border-b border-[#2E2E2F]/15 px-5 flex items-center justify-between bg-[#F2F2F2]">
+                            <img
+                                src={brandingEnabled && organizerProfile?.profileImageUrl ? getImageUrl(organizerProfile.profileImageUrl) : BRAND_LOGO_URL}
+                                alt="Event Logo"
+                                className="h-8 w-auto object-contain"
+                            />
+                            <div className="flex items-center gap-3 text-[#2E2E2F]/70">
+                                <ICONS.Users className="w-4 h-4" />
+                                <ICONS.MoreHorizontal className="w-4 h-4" />
+                            </div>
+                        </div>
+
+                        <div className="bg-[#F2F2F2] p-5 space-y-6">
+                            <div className="w-full space-y-6">
+                                <div className="mb-4">
+                                    <div className="flex items-center gap-2 text-[8px] font-black tracking-widest uppercase mb-6" style={{ color: previewAccentColor }}>
+                                        <svg className="w-2.5 h-2.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
+                                        BACK TO EVENTS
+                                    </div>
+
+                                    <div className="flex items-start justify-between gap-4 mb-4">
+                                        <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tighter leading-tight">
+                                            {formData.eventName || 'Event title'}
+                                        </h2>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
+                                                <ICONS.Heart className="w-4 h-4 text-[#2E2E2F]/40" />
+                                            </div>
+                                            <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
+                                                <ICONS.Download className="w-4 h-4 text-[#2E2E2F]/40" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="rounded-[2rem] overflow-hidden border-2 border-[#2E2E2F]/15 mb-6 group">
+                                        <img
+                                            src={getImageUrl(formData.imageUrl)}
+                                            alt="Event Preview"
+                                            crossOrigin="use-credentials"
+                                            className="w-full aspect-video object-cover"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F]/70">
+                                        <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                            <ICONS.Calendar className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
+                                            {previewDateLabel}
+                                        </div>
+                                        <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                            <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
+                                            {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
+                                        </div>
+                                        {formData.streamingPlatform && (
+                                            <div className="flex items-center bg-[#F2F2F2] px-3 py-1.5 rounded-xl border text-[10px] font-black tracking-wide" style={{ color: previewAccentColor, borderColor: `${previewAccentColor}33`, backgroundColor: `${previewAccentColor}0D` }}>
+                                                VIA {formData.streamingPlatform.toUpperCase()}
+                                            </div>
+                                        )}
+                                        <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                            CAPACITY: {formData.capacityTotal}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
+                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
+                                    <p className="text-[#2E2E2F]/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
+                                        {formData.description || 'Provide an executive summary of this event session...'}
+                                    </p>
+                                </div>
+
+                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
+                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
+                                    <div className="rounded-[1.2rem] border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] p-4 flex flex-col gap-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-full overflow-hidden text-[#F2F2F2] flex items-center justify-center text-lg font-bold shrink-0" style={{ backgroundColor: previewAccentColor }}>
+                                                {organizerProfile?.profileImageUrl ? (
+                                                    <img src={getImageUrl(organizerProfile.profileImageUrl)} alt={organizerProfile.organizerName || 'Organizer'} crossOrigin="use-credentials" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    organizerPreviewInitial
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-lg font-black text-[#2E2E2F] tracking-tight truncate">
+                                                    {organizerProfile?.organizerName || 'Organizer Profile'}
+                                                </p>
+                                                <div className="flex items-center gap-4 mt-1">
+                                                    <div>
+                                                        <p className="text-[8px] uppercase tracking-widest font-black text-[#2E2E2F]/40">Followers</p>
+                                                        <p className="text-sm font-black">{organizerProfile?.followersCount || 0}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[14px] font-black">{events.length}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {hasPreviewPhysicalLocation && (
+                                    <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
+                                        <div className="flex items-center justify-between gap-3 mb-4">
+                                            <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-[#38BDF2]">Open in Maps</span>
+                                        </div>
+                                        <p className="text-[12px] text-[#2E2E2F]/70 font-medium mb-4">{formData.location}</p>
+                                        <div className="rounded-xl overflow-hidden border-2 border-[#2E2E2F]/15 bg-[#F2F2F2]">
+                                            <iframe
+                                                src={previewMapEmbedUrl}
+                                                title="Preview map"
+                                                className="w-full h-40"
+                                                loading="lazy"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="w-full flex-col">
+                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15 shadow-sm">
+                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-6">SECURE ACCESS</h3>
+                                    <div className="space-y-4">
+                                        {formData.ticketTypes && formData.ticketTypes.length > 0 ? (
+                                            formData.ticketTypes.map((ticket: any) => (
+                                                <div key={ticket.ticketTypeId || ticket.name} className="p-5 rounded-2xl border-2 bg-[#F2F2F2]" style={{ borderColor: `${previewAccentColor}1A` }}>
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-wider">{ticket.name}</p>
+                                                        <span className="text-[8px] font-black px-2 py-0.5 rounded text-white" style={{ backgroundColor: previewAccentColor }}>AVAILABLE</span>
+                                                    </div>
+                                                    <p className="text-[16px] font-black text-[#2E2E2F]">
+                                                        {ticket.priceAmount === 0 ? 'FREE' : `PHP ${ticket.priceAmount.toLocaleString()}.00`}
+                                                    </p>
+                                                    <div className="mt-4 pt-4 border-t border-[#2E2E2F]/5 flex items-center justify-between">
+                                                        <span className="text-[8px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Quantity</span>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-6 h-6 rounded-lg bg-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F]/20 text-xs">-</div>
+                                                            <span className="text-xs font-black">1</span>
+                                                            <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs text-white" style={{ backgroundColor: previewAccentColor }}>+</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="py-12 text-center border-2 border-dashed border-[#2E2E2F]/5 rounded-[2rem]">
+                                                <p className="text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-widest">No tickets set</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="mt-8 space-y-4">
+                                        <button
+                                            type="button"
+                                            disabled
+                                            className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-white/50"
+                                            style={{ backgroundColor: `${previewAccentColor}4D` }}
+                                        >
+                                            Secure Checkout
+                                        </button>
+                                        <div className="flex items-center justify-center gap-2 opacity-20">
+                                            <ICONS.CreditCard className="w-3.5 h-3.5" />
+                                            <p className="text-[8px] font-black uppercase tracking-widest">HITPAY SECURE</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )}
+</div>
+    );
+});
+
+// ─── AI Suggest Panel ───────────────────────────────────────────────────────
+interface AISuggestion { eventName: string; description: string; }
+
+const AISuggestPanel: React.FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    onApply: (suggestion: AISuggestion) => void;
+    organizerName?: string;
+    locationType?: string;
+}> = ({ isOpen, onClose, onApply, organizerName, locationType }) => {
+    const [category, setCategory] = React.useState('Startup & Entrepreneurship');
+    const [audience, setAudience] = React.useState('Founders & Entrepreneurs');
+    const [tone, setTone] = React.useState('Inspirational');
+    const [loading, setLoading] = React.useState(false);
+    const [suggestions, setSuggestions] = React.useState<AISuggestion[]>([]);
+    const [error, setError] = React.useState('');
+    const [applied, setApplied] = React.useState<number | null>(null);
+
+    const format = locationType || 'ONSITE';
+
+    const handleGenerate = async () => {
+        setLoading(true);
+        setError('');
+        setSuggestions([]);
+        setApplied(null);
+        try {
+            const res = await apiService.suggestEventContent({ category, audience, format, tone, organizerName });
+            setSuggestions(res.suggestions || []);
+        } catch (err: any) {
+            setError(err.message || 'Failed to generate suggestions. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleApply = (idx: number) => {
+        setApplied(idx);
+        onApply(suggestions[idx]);
+        setTimeout(() => { onClose(); setApplied(null); setSuggestions([]); }, 600);
+    };
+
+    React.useEffect(() => {
+        if (!isOpen) { setSuggestions([]); setError(''); setApplied(null); setLoading(false); }
+    }, [isOpen]);
+
+    const panelContent = (
+        <>
+            {/* Backdrop — Portal-rendered at document.body, escapes all parent stacking contexts */}
+            <div
+                className={`fixed inset-0 z-[9998] transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                style={{ background: 'rgba(46,46,47,0.45)' }}
+                onClick={onClose}
+            />
+            {/* Slide-in Panel */}
+            <div
+                className={`fixed top-0 right-0 h-full w-full max-w-[460px] z-[9999] bg-[#F2F2F2] flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                style={{ boxShadow: '-20px 0 60px rgba(0,0,0,0.15)', borderLeft: '1.5px solid rgba(46,46,47,0.10)' }}
+            >
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 pt-7 pb-5 border-b border-[#2E2E2F]/10 shrink-0 bg-[#F2F2F2]">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#38BDF2] to-[#0ea5e9] flex items-center justify-center shadow-md shrink-0">
+                            <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 className="text-[14px] font-black text-[#2E2E2F] tracking-tight leading-none">AI Event Suggestions</h3>
+                            <p className="text-[9px] font-semibold text-[#2E2E2F]/40 uppercase tracking-widest mt-0.5">Powered by StartupLab AI</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="w-8 h-8 rounded-xl border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] flex items-center justify-center text-[#2E2E2F]/40 hover:text-[#2E2E2F] hover:border-[#2E2E2F]/30 transition-colors"
+                    >
+                        <ICONS.X className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+
+                {/* Scrollable Body */}
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 bg-[#F2F2F2]">
+                    {/* Context Inputs */}
+                    <div className="space-y-4">
+                        <p className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em]">Tell the AI about your event</p>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-semibold text-[#2E2E2F]/55 uppercase tracking-wide ml-0.5">Event Category</label>
+                            <select
+                                value={category}
+                                onChange={e => setCategory(e.target.value)}
+                                className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[12px] font-medium outline-none focus:border-[#38BDF2] transition-colors"
+                            >
+                                {['Startup & Entrepreneurship', 'Technology & Innovation', 'Business & Finance', 'Networking & Community', 'Workshop & Training', 'Conference & Summit', 'Product Launch', 'Investment & Funding', 'Marketing & Growth', 'Leadership & Management'].map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-semibold text-[#2E2E2F]/55 uppercase tracking-wide ml-0.5">Target Audience</label>
+                            <select
+                                value={audience}
+                                onChange={e => setAudience(e.target.value)}
+                                className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[12px] font-medium outline-none focus:border-[#38BDF2] transition-colors"
+                            >
+                                {['Founders & Entrepreneurs', 'Business Owners & SMEs', 'Students & Recent Graduates', 'Tech Professionals & Developers', 'Investors & VCs', 'Marketing & Sales Professionals', 'C-Suite & Executives', 'Freelancers & Creatives', 'Non-Profit & Social Enterprises', 'General Public'].map(a => <option key={a} value={a}>{a}</option>)}
+                            </select>
+                        </div>
+
+                        {/* Event Format — read-only display, taken from form */}
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-semibold text-[#2E2E2F]/55 uppercase tracking-wide ml-0.5">Event Format</label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {(['ONSITE', 'ONLINE', 'HYBRID'] as const).map(f => (
+                                    <div
+                                        key={f}
+                                        className={`py-2.5 rounded-xl border-2 text-[9px] font-black uppercase tracking-widest text-center select-none pointer-events-none
+                                            ${format === f
+                                                ? 'border-[#38BDF2]/60 bg-[#38BDF2]/10 text-[#38BDF2]'
+                                                : 'border-[#2E2E2F]/08 bg-[#2E2E2F]/04 text-[#2E2E2F]/20'
+                                            }`}
+                                    >
+                                        {f === 'ONSITE' ? 'In-Person' : f === 'ONLINE' ? 'Online' : 'Hybrid'}
+                                    </div>
+                                ))}
+                            </div>
+                            <p className="text-[11px] text-[#2E2E2F]/40 font-semibold ml-0.5 mt-1">Auto-set from your form · change in Step 2</p>
+                        </div>
+
+                        {/* Tone */}
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-semibold text-[#2E2E2F]/55 uppercase tracking-wide ml-0.5">Tone / Vibe</label>
+                            <div className="grid grid-cols-2 gap-2">
+                                {['Inspirational', 'Professional', 'Casual & Fun', 'Urgent & Exclusive'].map(t => (
+                                    <button
+                                        key={t}
+                                        type="button"
+                                        onClick={() => setTone(t)}
+                                        className={`py-2.5 rounded-xl border-2 text-[9px] font-black uppercase tracking-widest transition-all
+                                            ${tone === t
+                                                ? 'border-[#38BDF2] bg-[#38BDF2]/10 text-[#38BDF2]'
+                                                : 'border-[#2E2E2F]/15 bg-[#F2F2F2] text-[#2E2E2F]/40 hover:border-[#2E2E2F]/25 hover:text-[#2E2E2F]/60'
+                                            }`}
+                                    >
+                                        {t}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Generate Button */}
+                    <button
+                        type="button"
+                        onClick={handleGenerate}
+                        disabled={loading}
+                        className="w-full py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#38BDF2] to-[#0ea5e9] text-white shadow-md hover:shadow-lg hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                        {loading ? (
+                            <>
+                                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                Generating with AI...
+                            </>
+                        ) : (
+                            <>
+                                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                                </svg>
+                                Generate 3 Suggestions
+                            </>
+                        )}
+                    </button>
+
+                    {/* Error */}
+                    {error && (
+                        <div className="p-4 bg-[#F2F2F2] border-2 border-red-200 rounded-2xl flex items-start gap-3">
+                            <ICONS.AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                            <p className="text-[11px] font-semibold text-red-600 leading-relaxed">{error}</p>
+                        </div>
+                    )}
+
+                    {/* Suggestions list */}
+                    {suggestions.length > 0 && (
+                        <div className="space-y-3">
+                            <p className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em]">Click a suggestion to apply it</p>
+                            {suggestions.map((s, idx) => (
+                                <div
+                                    key={idx}
+                                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all group
+                                        ${applied === idx
+                                            ? 'border-[#38BDF2]/40 bg-[#38BDF2]/05 scale-[0.99]'
+                                            : 'border-[#2E2E2F]/12 bg-[#F2F2F2] hover:border-[#38BDF2]/40 hover:shadow-sm'
+                                        }`}
+                                    onClick={() => handleApply(idx)}
+                                >
+                                    <div className="flex items-start justify-between gap-3 mb-2">
+                                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                                            <span className={`w-5 h-5 rounded-lg text-[9px] font-black flex items-center justify-center shrink-0 ${applied === idx ? 'bg-[#38BDF2] text-white' : 'bg-[#38BDF2]/15 text-[#38BDF2]'}`}>
+                                                {applied === idx ? '✓' : idx + 1}
+                                            </span>
+                                            <p className="text-[12px] font-black text-[#2E2E2F] tracking-tight leading-tight truncate">{s.eventName}</p>
+                                        </div>
+                                        <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg shrink-0 transition-all
+                                            ${applied === idx ? 'bg-[#38BDF2] text-white' : 'bg-[#38BDF2]/10 text-[#38BDF2] group-hover:bg-[#38BDF2] group-hover:text-white'}`}>
+                                            {applied === idx ? 'Applied' : 'Use'}
+                                        </span>
+                                    </div>
+                                    <p className="text-[11px] text-[#2E2E2F]/55 font-medium leading-relaxed line-clamp-3 ml-7">{s.description}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Empty state */}
+                    {!loading && suggestions.length === 0 && !error && (
+                        <div className="py-10 text-center border-2 border-dashed border-[#2E2E2F]/08 rounded-2xl">
+                            <div className="w-10 h-10 rounded-2xl bg-[#38BDF2]/10 flex items-center justify-center mx-auto mb-3">
+                                <svg className="w-5 h-5 text-[#38BDF2]/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                                </svg>
+                            </div>
+                            <p className="text-[10px] font-black text-[#2E2E2F]/25 uppercase tracking-widest">Select context above</p>
+                            <p className="text-[9px] text-[#2E2E2F]/20 font-medium mt-1">then click Generate Suggestions</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </>
+    );
+    return createPortal(panelContent, document.body);
+};
+
+// ─── AI Field Assist ─────────────────────────────────────────────────────────
+// Reusable per-field AI button + compact centered modal
+const FIELD_CONFIG: Record<string, { question: string; placeholder: string }> = {
+    eventName:       { question: 'What kind of event are you planning?',         placeholder: 'e.g. A tech conference for startup founders in Manila' },
+    description:     { question: 'Briefly describe your event in your own words', placeholder: 'e.g. A 2-day bootcamp for young entrepreneurs on product-market fit' },
+    location:        { question: 'What type of venue are you looking for?',       placeholder: 'e.g. A rooftop venue in BGC for 100 pax' },
+    streamingPlatform: { question: 'Tell me about your streaming setup',          placeholder: 'e.g. Live stream for 500 online participants with Q&A' },
+    promoCode:       { question: 'What is the promotion about?',                  placeholder: 'e.g. Early bird 30% off for the first 50 sign-ups' },
+};
+
+const AIFieldAssist: React.FC<{
+    field: 'eventName' | 'description' | 'location' | 'streamingPlatform' | 'promoCode';
+    fieldLabel: string;
+    onApply: (value: string) => void;
+    showToast: (type: string, msg: string) => void;
+    organizerName?: string;
+    locationType?: string;
+}> = ({ field, fieldLabel, onApply, showToast, organizerName, locationType }) => {
+    const [isOpen, setIsOpen] = React.useState(false);
+    const [context, setContext] = React.useState('');
+    const [loading, setLoading] = React.useState(false);
+    const [suggestions, setSuggestions] = React.useState<string[]>([]);
+    const [hasGenerated, setHasGenerated] = React.useState(false);
+    const [error, setError] = React.useState('');
+    const cfg = FIELD_CONFIG[field] || { question: 'Describe what you need', placeholder: 'Add context...' };
+
+    const handleOpen = () => { setIsOpen(true); setContext(''); setSuggestions([]); setError(''); setHasGenerated(false); };
+    const handleClose = () => { setIsOpen(false); setSuggestions([]); setError(''); setLoading(false); };
+
+    const handleGenerate = async () => {
+        if (!context.trim()) return;
+        setLoading(true); setError(''); setSuggestions([]);
+        try {
+            const res = await apiService.suggestFieldContent({
+                field,
+                context: context.trim(),
+                organizerName,
+                format: locationType || 'ONSITE',
+            });
+            const s = res.suggestions || [];
+            setSuggestions(s);
+            if (s.length > 0) setHasGenerated(true);
+        } catch (err: any) {
+            setError(err.message || 'Failed to generate. Please try again.');
+        } finally { setLoading(false); }
+    };
+
+    const handleApply = (value: string) => {
+        onApply(value);
+        showToast('success', `✨ AI suggestion applied to ${fieldLabel}!`);
+        handleClose();
+    };
+
+    const modal = isOpen ? createPortal(
+        <>
+            {/* Backdrop */}
+            <div
+                className="fixed inset-0 z-[9998] bg-[#2E2E2F]/50 transition-opacity"
+                onClick={handleClose}
+            />
+            {/* Compact centered modal */}
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-5 pointer-events-none">
+                <div className="w-full max-w-[420px] bg-[#F2F2F2] rounded-3xl shadow-2xl pointer-events-auto animate-in zoom-in-95 fade-in duration-200">
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[#2E2E2F]/10">
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#38BDF2] to-[#0ea5e9] flex items-center justify-center shadow-md shrink-0">
+                                <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-[12px] font-black text-[#2E2E2F] tracking-tight">AI: {fieldLabel}</p>
+                                <p className="text-[9px] font-semibold text-[#2E2E2F]/35 uppercase tracking-widest">StartupLab AI</p>
+                            </div>
+                        </div>
+                        <button type="button" onClick={handleClose} className="w-7 h-7 rounded-lg border border-[#2E2E2F]/15 flex items-center justify-center text-[#2E2E2F]/35 hover:text-[#2E2E2F] transition-colors">
+                            <ICONS.X className="w-3 h-3" />
+                        </button>
+                    </div>
+
+                    {/* Body */}
+                    <div className="px-6 pt-5 pb-6 space-y-4">
+                        {/* Context question */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-[#2E2E2F]/50 uppercase tracking-[0.15em]">{cfg.question}</label>
+                            <textarea
+                                className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl text-[12px] font-medium outline-none resize-none focus:border-[#38BDF2] transition-colors placeholder:text-[#2E2E2F]/25 min-h-[72px]"
+                                placeholder={cfg.placeholder}
+                                value={context}
+                                onChange={e => setContext(e.target.value)}
+                                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleGenerate(); } }}
+                                autoFocus
+                            />
+                            <p className="text-[9px] text-[#2E2E2F]/25 font-medium ml-0.5">Press Enter to generate</p>
+                        </div>
+
+                        {/* Generate */}
+                        <button
+                            type="button"
+                            onClick={handleGenerate}
+                            disabled={!context.trim() || loading}
+                            className="w-full py-3 rounded-xl text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#38BDF2] to-[#0ea5e9] text-white shadow-md hover:shadow-lg hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            {loading ? (
+                                <><div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />Generating...</>
+                            ) : (
+                                <><svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>{hasGenerated ? 'Generate Again' : 'Generate 3 Suggestions'}</>
+                            )}
+                        </button>
+
+                        {/* Error */}
+                        {error && (
+                            <div className="flex items-start gap-2.5 p-3.5 bg-[#F2F2F2] border-2 border-red-200 rounded-2xl">
+                                <ICONS.AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0 mt-0.5" />
+                                <p className="text-[11px] font-semibold text-red-600">{error}</p>
+                            </div>
+                        )}
+
+                        {/* Suggestions */}
+                        {suggestions.length > 0 && (
+                            <div className="space-y-2">
+                                <p className="text-[9px] font-black text-[#2E2E2F]/35 uppercase tracking-[0.15em]">Click to apply</p>
+                                {suggestions.map((s, idx) => (
+                                    <button
+                                        key={idx}
+                                        type="button"
+                                        onClick={() => handleApply(s)}
+                                        className="w-full flex items-start gap-3 p-3.5 rounded-2xl border-2 border-[#2E2E2F]/10 bg-[#F2F2F2] text-left hover:border-[#38BDF2]/50 hover:shadow-sm transition-all group"
+                                    >
+                                        <span className="w-5 h-5 rounded-lg bg-[#38BDF2]/15 text-[#38BDF2] text-[9px] font-black flex items-center justify-center shrink-0 group-hover:bg-[#38BDF2] group-hover:text-white transition-colors mt-0.5">{idx + 1}</span>
+                                        <span className="text-[12px] font-semibold text-[#2E2E2F] leading-relaxed flex-1">{s}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Empty state */}
+                        {!loading && !suggestions.length && !error && (
+                            <div className="py-5 text-center border-2 border-dashed border-[#2E2E2F]/08 rounded-2xl">
+                                <p className="text-[10px] font-black text-[#2E2E2F]/20 uppercase tracking-widest">Add context above</p>
+                                <p className="text-[9px] text-[#2E2E2F]/15 font-medium mt-0.5">then click Generate</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </>,
+        document.body
+    ) : null;
+
+    return (
+        <>
+            <button
+                type="button"
+                onClick={handleOpen}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-gradient-to-r from-[#38BDF2] to-[#0ea5e9] text-white shadow-sm hover:shadow-md hover:opacity-90 active:scale-95 transition-all"
+            >
+                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                ✨ AI
+            </button>
+            {modal}
+        </>
+    );
+};
+
+// ─── Instant Description AI ────────────────────────────────────────────────
+const AIDescriptionGenerator: React.FC<{
+    eventName: string;
+    onApply: (v: string) => void;
+    showToast: (t: string, m: string) => void;
+    organizerName?: string;
+    locationType?: string;
+    currentValue?: string;
+}> = ({ eventName, onApply, showToast, organizerName, locationType, currentValue }) => {
+    const [loading, setLoading] = React.useState(false);
+    const [suggestions, setSuggestions] = React.useState<string[]>([]);
+    
+    const handleGenerate = async () => {
+        if (!eventName?.trim()) {
+            showToast('error', 'Provide an event name first!');
+            return;
+        }
+        console.log(`[AI Text Gen] Requesting suggestions for: "${eventName}"`);
+        setLoading(true);
+        try {
+            const res = await apiService.suggestFieldContent({
+                field: 'description',
+                context: `Generate a short description paragraph for an event titled: "${eventName}"`,
+                organizerName,
+                format: locationType || 'ONSITE'
+            });
+            console.log(`[AI Text Gen] Received ${res.suggestions?.length || 0} suggestions`);
+            setSuggestions(res.suggestions || []);
+        } catch (err: any) {
+            console.error('[AI Text Gen] FAILED', err);
+            showToast('error', 'Generation failed.');
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    if (loading) return <div className="text-[10px] font-black text-[#38BDF2] animate-pulse uppercase tracking-[0.15em] py-1">✨ Drafting...</div>;
+    
+    if (suggestions.length > 0) {
+        return (
+            <div className="flex animate-in fade-in slide-in-from-right-2 duration-300">
+                <div className="flex items-center bg-[#F2F2F2] border border-[#2E2E2F]/15 rounded-xl p-1 gap-1 shadow-sm">
+                    {suggestions.map((s, i) => {
+                        const cleanS = s.replace(/[""]/g, '');
+                        const isSelected = currentValue === cleanS;
+                        return (
+                            <button 
+                                key={i} 
+                                type="button"
+                                onClick={() => onApply(cleanS)} 
+                                className={`text-[9px] font-black px-2.5 py-1.5 rounded-lg border transition-all uppercase tracking-wider ${
+                                    isSelected 
+                                    ? 'bg-[#38BDF2] text-white border-[#38BDF2]' 
+                                    : 'bg-[#38BDF2]/10 text-[#38BDF2] border-[#38BDF2]/20 hover:bg-[#38BDF2] hover:text-white'
+                                }`}
+                            >
+                                {isSelected ? 'Selected' : `Option ${i+1}`}
+                            </button>
+                        );
+                    })}
+                    <div className="w-[1px] h-4 bg-[#2E2E2F]/10 mx-1" />
+                    <button type="button" onClick={() => setSuggestions([])} className="w-7 h-7 flex items-center justify-center text-red-500/50 hover:text-red-500 transition-colors" title="Clear options">
+                        <ICONS.X className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <button 
+            type="button"
+            onClick={handleGenerate}
+            disabled={!eventName?.trim()}
+            className="text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-white border border-[#38BDF2] px-4 py-2 rounded-xl hover:shadow-lg active:scale-95 disabled:opacity-30 disabled:grayscale transition-all shadow-md"
+        >
+            ✨ Generate from Title
+        </button>
+    );
+};
+
+// ─── AI Image Generator ──────────────────────────────────────────────────
+const AIImageGenerator: React.FC<{
+    onApply: (url: string) => void;
+    showToast: (t: string, m: string) => void;
+    eventName?: string;
+}> = ({ onApply, showToast, eventName }) => {
+    const [isOpen, setIsOpen] = React.useState(false);
+    const [prompt, setPrompt] = React.useState('');
+    const [loading, setLoading] = React.useState(false);
+    const [previewUrl, setPreviewUrl] = React.useState('');
+
+    const handleGenerate = () => {
+        if (!prompt.trim() && !eventName?.trim()) return;
+        setLoading(true);
+        const seed = Math.floor(Math.random() * 1000000);
+        const finalPrompt = prompt.trim() || `Professional high-quality banner for an event titled "${eventName}" in the Philippines, startup theme, cinematic lighting, 8k resolution`;
+        
+        // Using backend proxy-image bridge to bypass browser-level blocks
+        const sanitizedPrompt = finalPrompt.replace(/#/g, '').substring(0, 1000);
+        const timestamp = Date.now();
+        const url = `${API_BASE}/api/ai/proxy-image?prompt=${encodeURIComponent(sanitizedPrompt)}&seed=${seed}&t=${timestamp}`;
+        console.log(`[AI Generator] Requesting image via backend bridge: "${sanitizedPrompt}"`);
+        console.log(`[AI Generator] Bridge URL: ${url}`);
+        setPreviewUrl(url);
+    };
+
+    const handleApply = () => {
+        console.log(`[AI Generator] Applying URL to form: ${previewUrl}`);
+        onApply(previewUrl);
+        showToast('success', '✨ AI Cover Image applied!');
+        setIsOpen(false);
+        setPreviewUrl('');
+        setPrompt('');
+    };
+
+    const modal = isOpen ? createPortal(
+        <>
+            <div className="fixed inset-0 z-[10000] bg-[#2E2E2F]/60 backdrop-blur-md transition-opacity" onClick={() => setIsOpen(false)} />
+            <div className="fixed inset-0 z-[10001] flex items-center justify-center p-5 pointer-events-none">
+                <div className="w-full max-w-[500px] bg-[#F2F2F2] rounded-3xl shadow-2xl pointer-events-auto overflow-hidden animate-in zoom-in-95 fade-in duration-200">
+                    <div className="px-6 pt-6 pb-4 border-b border-[#2E2E2F]/10 flex items-center justify-between">
+                        <div>
+                            <h3 className="text-[14px] font-black text-[#2E2E2F] uppercase tracking-tight">AI Image Studio</h3>
+                            <p className="text-[9px] font-semibold text-[#2E2E2F]/35 uppercase tracking-widest mt-0.5">Powered by StartupLab AI</p>
+                        </div>
+                        <button 
+                            type="button"
+                            onClick={() => setIsOpen(false)} 
+                            className="w-8 h-8 rounded-xl border border-[#2E2E2F]/15 flex items-center justify-center text-[#2E2E2F]/35 hover:text-[#2E2E2F] transition-colors"
+                        >
+                            <ICONS.X className="w-4 h-4" />
+                        </button>
+                    </div>
+                    <div className="p-6 space-y-5">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-[#2E2E2F]/50 uppercase tracking-[0.15em] ml-1">What should the image look like?</label>
+                            <textarea
+                                className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl text-[12px] font-medium outline-none resize-none focus:border-[#38BDF2] transition-colors placeholder:text-[#2E2E2F]/25 min-h-[80px]"
+                                placeholder={eventName ? `e.g. A vibrant banner for "${eventName}"...` : "e.g. A futuristic startup hub in BGC, cinematic lighting..."}
+                                value={prompt}
+                                onChange={e => setPrompt(e.target.value)}
+                            />
+                        </div>
+                        <div className="relative aspect-video rounded-2xl overflow-hidden border-2 border-[#2E2E2F]/10 bg-[#2E2E2F]/05 group">
+                            {previewUrl ? (
+                                <>
+                                    <img 
+                                        src={previewUrl} 
+                                        alt="AI Generated" 
+                                        crossOrigin="use-credentials"
+                                        className={`w-full h-full object-cover transition-opacity duration-700 ${loading ? 'opacity-30 blur-sm' : 'opacity-100'}`}
+                                        onLoad={() => {
+                                            console.log('[AI Generator] Image loaded successfully');
+                                            setLoading(false);
+                                        }}
+                                        onError={(e) => { 
+                                            console.error('[AI Generator] Image failed to load', e);
+                                            // Fallback to a high-quality Unsplash image if AI fails
+                                            if (!previewUrl.includes('unsplash')) {
+                                                const fallback = `https://images.unsplash.com/photo-1540575861501-7ad0582373f3?auto=format&fit=crop&q=80&w=1280&h=720&q=${Date.now()}`;
+                                                console.log('[AI Generator] Falling back to Unsplash photo...');
+                                                setPreviewUrl(fallback);
+                                            } else {
+                                                setLoading(false); 
+                                                showToast('error', 'Generation failed. Try a simpler prompt.'); 
+                                            }
+                                        }}
+                                    />
+                                    {!loading && (
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <p className="text-[10px] font-black text-white uppercase tracking-widest">Ready to Use</p>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-full gap-3">
+                                    <ICONS.Image className="w-8 h-8 text-[#2E2E2F]/15" />
+                                    <p className="text-[10px] font-black text-[#2E2E2F]/20 uppercase tracking-widest text-center px-10 leading-relaxed">Your AI Masterpiece will appear here</p>
+                                </div>
+                            )}
+                            
+                            {loading && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#F2F2F2]/20 backdrop-blur-[2px]">
+                                    <div className="w-10 h-10 border-[3.5px] border-[#38BDF2] border-t-transparent rounded-full animate-spin mb-4" />
+                                    <p className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] animate-pulse">Flux AI is Painting...</p>
+                                    <p className="text-[8px] text-[#2E2E2F]/50 font-bold uppercase tracking-widest mt-1">High-quality banner in progress</p>
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex gap-3">
+                            <button 
+                                type="button"
+                                onClick={handleGenerate} 
+                                disabled={loading} 
+                                className="flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[#2E2E2F] text-white hover:bg-[#38BDF2] transition-all disabled:opacity-50"
+                            >
+                                {previewUrl ? 'Regenerate' : 'Generate Image'}
+                            </button>
+                            {previewUrl && (
+                                <button 
+                                    type="button"
+                                    onClick={handleApply} 
+                                    className="flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#38BDF2] to-[#0ea5e9] text-white shadow-lg active:scale-95 transition-all"
+                                >
+                                    Apply to Event
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>,
+        document.body
+    ) : null;
+
+    return (
+        <>
+            <button 
+                type="button" 
+                onClick={(e) => { e.stopPropagation(); setIsOpen(true); }} 
+                className="relative z-[30] text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-white border border-[#38BDF2] px-3 py-1.5 rounded-xl hover:shadow-lg active:scale-95 transition-all shadow-md flex items-center gap-2"
+            >
+                <ICONS.Image className="w-3.5 h-3.5" />
+                ✨ AI Image
+            </button>
+            {modal}
+        </>
+    );
+};
+
+const WizardStepContent = React.memo(({
+    wizardStep,
+    formData,
+    setFormData,
+    organizerProfile,
+    fileInputRef,
+    handleImageUpload,
+    isEditMode,
+    applyLocationValue,
+    maxEventCapacity,
+    activeEventTicketCount,
+    ticketReadinessLoading,
+    canPublishByTicketRule,
+    initialEventStatus,
+    finalStatusDecision,
+    setFinalStatusDecision,
+    isAtActiveLimit,
+    maxActiveEvents,
+    promoForm,
+    setPromoForm,
+    editingPromotion,
+    setEditingPromotion,
+    handleSavePromotion,
+    handleDeletePromotion,
+    promotions,
+    promotionsLoading,
+    showToast,
+    isPersonalProfileReady,
+    isOrganizerProfileReady,
+    navigate,
+    submitting
+}: any) => {
+    return (
+        <div className="animate-in fade-in duration-300">
+            {wizardStep === 1 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+                    <div className="md:col-span-2">
+                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Organizer Name</label>
+                        <select value={organizerProfile?.organizerId || ''} disabled className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[12px] font-semibold tracking-wide outline-none">
+                            {organizerProfile?.organizerId ? <option value={organizerProfile.organizerId}>{organizerProfile.organizerName}</option> : <option value="">No organizer profile set</option>}
+                        </select>
+                    </div>
+                    {/* Event Name with per-field AI */}
+                    <div className="md:col-span-2">
+                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Event Name</label>
+                        <div className="relative">
+                            <Input placeholder="e.g. Founder Growth Summit 2026" value={formData.eventName} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, eventName: e.target.value }))} className="pr-20" />
+                            <div className="absolute right-3 bottom-2.5">
+                                <AIFieldAssist
+                                    field="eventName" fieldLabel="Event Name"
+                                    onApply={v => setFormData((p: any) => ({ ...p, eventName: v }))}
+                                    showToast={showToast}
+                                    organizerName={organizerProfile?.organizerName}
+                                    locationType={formData.locationType}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    {/* Description with Instant AI Generation from Title */}
+                    <div className="md:col-span-2">
+                        <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Description</label>
+                        <div className="relative">
+                            <textarea
+                                className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-[1.5rem] text-sm min-h-[140px] focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors outline-none pb-14"
+                                placeholder="Describe your event... or click ✨ Generate below to draft based on your title!"
+                                value={formData.description}
+                                onChange={(e: any) => setFormData((prev: any) => ({ ...prev, description: e.target.value }))}
+                            />
+                            <div className="absolute right-4 bottom-4">
+                                <AIDescriptionGenerator
+                                    eventName={formData.eventName}
+                                    currentValue={formData.description}
+                                    onApply={v => setFormData((p: any) => ({ ...p, description: v }))}
+                                    showToast={showToast}
+                                    organizerName={organizerProfile?.organizerName}
+                                    locationType={formData.locationType}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="md:col-span-2">
+                        <div className="flex flex-col gap-2 mb-1 px-1">
+                            <div className="flex items-center justify-between">
+                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Brand Color</label>
+                                {!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) && (
+                                    <Badge type="info" className="text-[8px] px-2 py-0.5 bg-[#2E2E2F] text-white">Premium Feature</Badge>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-4 p-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl relative overflow-hidden">
+                                <input
+                                    type="color"
+                                    value={formData.brandColor || '#38BDF2'}
+                                    onChange={(e) => setFormData((prev: any) => ({ ...prev, brandColor: e.target.value }))}
+                                    disabled={!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding)}
+                                    className={`w-12 h-12 rounded-lg cursor-pointer border-none p-0 bg-transparent ${!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) ? 'opacity-30' : ''}`}
+                                />
+                                <div className="flex-1">
+                                    <p className="text-xs font-bold text-[#2E2E2F]">Primary Accent Color</p>
+                                    <p className="text-[10px] text-[#2E2E2F]/50">Used for buttons, links, and highlights on your event page.</p>
+                                </div>
+                                {!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) && (
+                                    <div className="absolute inset-0 bg-[#F2F2F2]/40 backdrop-blur-[1px] flex items-center justify-center">
+                                        <Button variant="outline" className="text-[8px] py-1 px-3 border-[#2E2E2F]/20" onClick={() => navigate('/subscription')}>Upgrade to Unlock</Button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="md:col-span-2">
+                        <div className="flex flex-col gap-2 mb-1 px-1">
+                            <div className="flex items-center justify-between">
+                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Visual Media</label>
+                                <AIImageGenerator
+                                    onApply={url => setFormData((p: any) => ({ ...p, imageUrl: url }))}
+                                    showToast={showToast}
+                                    eventName={formData.eventName}
+                                />
+                            </div>
+                            <div
+                                className="relative group w-full h-44 rounded-[1.5rem] border-2 border-dashed border-[#2E2E2F]/30 bg-[#F2F2F2] flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#38BDF2] hover:bg-[#38BDF2]/10 transition-colors"
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                {formData.imageUrl ? (
+                                    <img 
+                                        src={getImageUrl(formData.imageUrl)} 
+                                        alt="Preview" 
+                                        crossOrigin="use-credentials"
+                                        className="w-full h-full object-cover rounded-[1.5rem]" 
+                                    />
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center w-full h-full">
+                                        <svg className="w-10 h-10 text-[#2E2E2F]/40 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="2.5" /><path d="M21 15l-5-5L5 21" /></svg>
+                                        <span className="text-[12px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Upload Event Image</span>
+                                    </div>
+                                )}
+                                <div className="absolute bottom-3 right-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-lg px-3 py-1 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors pointer-events-none">Browse</div>
+                            </div>
+                            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {wizardStep === 2 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+                    <Input
+                        label="Session Date"
+                        type="date"
+                        value={formData.eventDate}
+                        onChange={(e: any) => {
+                            const val = e.target.value;
+                            const today = new Date().toISOString().split('T')[0];
+                            if (val < today) {
+                                showToast('error', 'Event date cannot be in the past.');
+                                return;
+                            }
+                            setFormData((prev: any) => ({ ...prev, eventDate: val }));
+                        }}
+                    />
+                    <Input label="Start Time" type="time" value={formData.eventTime} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, eventTime: e.target.value }))} />
+                    <Input
+                        label="End Date"
+                        type="date"
+                        value={formData.endDate}
+                        onChange={(e: any) => {
+                            const val = e.target.value;
+                            const today = new Date().toISOString().split('T')[0];
+                            if (val < today) {
+                                showToast('error', 'End date cannot be in the past.');
+                                return;
+                            }
+                            if (formData.eventDate && val < formData.eventDate) {
+                                showToast('error', 'End date cannot be before session date.');
+                                return;
+                            }
+                            setFormData((prev: any) => ({ ...prev, endDate: val }));
+                        }}
+                    />
+                    <Input label="End Time" type="time" value={formData.endTime} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, endTime: e.target.value }))} />
+                    <div>
+                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Location Type</label>
+                        <select
+                            className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]"
+                            value={formData.locationType}
+                            onChange={(e) => setFormData((prev: any) => ({ ...prev, locationType: e.target.value as Event['locationType'] }))}
+                        >
+                            <option value="ONSITE">Onsite</option>
+                            <option value="ONLINE">Online</option>
+                            <option value="HYBRID">Hybrid</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Timezone</label>
+                        <Input value={formData.timezone} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, timezone: e.target.value }))} />
+                    </div>
+                    <div className="md:col-span-2 space-y-8">
+                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/15">
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]"><ICONS.MapPin className="w-4 h-4" /></div>
+                                <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Venue Details</h4>
+                            </div>
+                            <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">{formData.locationType === 'ONLINE' ? 'Physical Hub (Optional)' : 'Venue Address'}</label>
+                            <div className="relative">
+                                <Input placeholder="e.g. Global Tech Center" value={formData.location} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, location: e.target.value }))} className="pr-20" />
+                                <div className="absolute right-3 bottom-2.5">
+                                    <AIFieldAssist
+                                        field="location" fieldLabel="Venue Address"
+                                        onApply={v => applyLocationValue(v)}
+                                        showToast={showToast}
+                                        organizerName={organizerProfile?.organizerName}
+                                        locationType={formData.locationType}
+                                    />
+                                </div>
+                            </div>
+                            <div className="mt-4"><OnsiteLocationAssistant value={formData.location} onChange={applyLocationValue} /></div>
+                        </div>
+                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/15">
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]"><ICONS.Monitor className="w-4 h-4" /></div>
+                                <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Broadcast Settings</h4>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <Input label="Platform Name" placeholder="e.g. YouTube, Google Meet" value={formData.streamingPlatform} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, streamingPlatform: e.target.value }))} />
+                                </div>
+                                <Input label="Connection URL" placeholder="Link to stream or meeting" value={formData.streamingUrl} onChange={(e: any) => applyLocationValue(e.target.value)} />
+                            </div>
+                            {formData.streamingUrl && formData.streamingUrl.startsWith('http') && (
+                                <div className="mt-6 p-6 bg-black rounded-3xl border border-[#F2F2F2]/10 overflow-hidden shadow-xl">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h4 className="text-[12px] font-black text-white uppercase tracking-widest">Stream Preview</h4>
+                                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-red-500/30 bg-red-500/20">
+                                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-white">Live</span>
+                                        </div>
+                                    </div>
+                                    {(formData.streamingUrl.includes('youtube.com') || formData.streamingUrl.includes('youtu.be')) ? (
+                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#F2F2F2]/5 border border-[#F2F2F2]/5">
+                                            {(() => {
+                                                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/|live\/)([^#\&\?]*).*/;
+                                                const match = formData.streamingUrl.match(regExp);
+                                                const videoId = (match && match[2].length === 11) ? match[2] : null;
+                                                return videoId ? (
+                                                    <iframe className="absolute inset-0 w-full h-full" src={`https://www.youtube.com/embed/${videoId}`} title="YouTube Preview" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
+                                                ) : <div className="flex items-center justify-center w-full h-full text-[#F2F2F2]/30 text-xs">Invalid YouTube Link</div>;
+                                            })()}
+                                        </div>
+                                    ) : (formData.streamingUrl.includes('facebook.com') || formData.streamingUrl.includes('fb.watch')) ? (
+                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#F2F2F2]/5 border border-[#F2F2F2]/5">
+                                            <iframe className="absolute inset-0 w-full h-full" src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(formData.streamingUrl)}&show_text=0&width=560&t=0`} title="Facebook Preview" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center p-10 rounded-2xl bg-[#F2F2F2]/5 border border-[#F2F2F2]/5 border-dashed">
+                                            <ICONS.Monitor className="w-8 h-8 text-[#F2F2F2]/20 mb-3" />
+                                            <p className="text-[#F2F2F2]/40 text-[11px] text-center font-medium">This platform doesn't support direct previews, but the link will be provided to attendees.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {wizardStep === 3 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+                    <Input label={`Capacity Total (${formData.capacityTotal}/${maxEventCapacity})`} type="number" min={1} max={maxEventCapacity} value={formData.capacityTotal} onChange={(e: any) => { const val = parseInt(e.target.value, 10) || 1; const nextValue = Math.max(1, Math.min(val, maxEventCapacity)); setFormData((prev: any) => ({ ...prev, capacityTotal: nextValue })); }} error={formData.capacityTotal > maxEventCapacity ? `Capacity exceeds your plan limit (${maxEventCapacity})` : ''} />
+                    <Input label="Registration Open Date" type="date" value={formData.regOpenDate} onChange={(e: any) => { const val = e.target.value; const today = new Date().toISOString().split('T')[0]; if (val < today) { showToast('error', 'Registration open date cannot be in the past.'); return; } setFormData((prev: any) => ({ ...prev, regOpenDate: val })); }} />
+                    <Input label="Registration Open Time" type="time" value={formData.regOpenTime} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, regOpenTime: e.target.value }))} />
+                    <Input label="Registration Close Date" type="date" value={formData.regCloseDate} onChange={(e: any) => { const val = e.target.value; const today = new Date().toISOString().split('T')[0]; if (val < today) { showToast('error', 'Registration close date cannot be in the past.'); return; } if (formData.regOpenDate && val < formData.regOpenDate) { showToast('error', 'Registration close date cannot be before open date.'); return; } setFormData((prev: any) => ({ ...prev, regCloseDate: val })); }} />
+                    <Input label="Registration Close Time" type="time" value={formData.regCloseTime} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, regCloseTime: e.target.value }))} />
+                    <div className="md:col-span-2 space-y-4">
+                        <div className="p-5 rounded-2xl border border-[#2E2E2F]/15 bg-[#F2F2F2] flex items-center justify-between group relative overflow-hidden">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]"><ICONS.CreditCard className="w-5 h-5" /></div>
+                                <div><p className="text-sm font-bold text-[#2E2E2F]">Enable Discount Codes</p><p className="text-[10px] text-[#2E2E2F]/50">Allow promotional codes during checkout.</p></div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) && <Badge type="info" className="text-[8px] font-black bg-[#2E2E2F] text-white">PRO</Badge>}
+                                <input type="checkbox" checked={formData.enableDiscountCodes} onChange={(e) => setFormData((prev: any) => ({ ...prev, enableDiscountCodes: e.target.checked }))} disabled={!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes)} className="w-6 h-6 accent-[#38BDF2] cursor-pointer disabled:opacity-30" />
+                            </div>
+                            {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) && <div className="absolute inset-0 bg-[#F2F2F2]/40 backdrop-blur-[1px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="outline" className="text-[8px] py-1 px-3 border-[#2E2E2F]/20 bg-[#F2F2F2]" onClick={() => navigate('/subscription')}>Upgrade to Unlock</Button></div>}
+                        </div>
+                        <div className="rounded-2xl border border-[#2E2E2F]/15 bg-[#F2F2F2] px-5 py-4">
+                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2E2E2F]/45">Ticket Setup Rule</p>
+                            <p className="mt-2 text-sm font-semibold text-[#2E2E2F]">Publishing is locked until at least one ticket type is configured.</p>
+                            <p className="mt-1 text-[12px] text-[#2E2E2F]/60">Clicking next will save draft and open ticket setup automatically.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {wizardStep === 4 && (
+                <div className="space-y-6">
+                    {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) ? (
+                        <div className="p-10 text-center bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15">
+                            <div className="w-16 h-16 bg-[#2E2E2F] text-white rounded-2xl flex items-center justify-center mx-auto mb-6"><ICONS.Lock className="w-8 h-8" /></div>
+                            <h3 className="text-xl font-black text-[#2E2E2F] tracking-tight">Promotions Locked</h3>
+                            <p className="text-[#2E2E2F]/60 text-sm mt-2 max-w-xs mx-auto">Upgrade to a Pro or Enterprise plan to enable discount codes and boost your ticket sales.</p>
+                            <Button className="mt-6 bg-[#38BDF2]" onClick={() => navigate('/subscription')}>View Plans</Button>
+                        </div>
+                    ) : (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between">
+                                <div><h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Active Promotions</h4><p className="text-[10px] text-[#2E2E2F]/50 mt-1 uppercase tracking-wider">Total: {promotions.length}</p></div>
+                                <Button size="sm" onClick={() => { setEditingPromotion({ new: true }); setPromoForm({ code: '', discountType: 'PERCENTAGE', discountValue: '10', maxUses: '100', validFrom: '', validUntil: '', isActive: true }); }}>Add Code</Button>
+                            </div>
+                            {editingPromotion && (
+                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#38BDF2]/30 space-y-5">
+                                    <div className="flex items-center justify-between">
+                                        <h5 className="text-[11px] font-black uppercase tracking-widest">{editingPromotion.new ? 'New Promotion' : 'Edit Promotion'}</h5>
+                                        <button onClick={() => setEditingPromotion(null)} className="text-[#2E2E2F]/30 hover:text-red-500 transition-colors"><ICONS.X className="w-4 h-4" /></button>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div>
+                                            <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Promo Code</label>
+                                            <div className="relative">
+                                                <Input placeholder="SALE20" value={promoForm.code} onChange={(e: any) => setPromoForm({ ...promoForm, code: e.target.value.toUpperCase() })} className="pr-20" />
+                                                <div className="absolute right-3 bottom-2.5">
+                                                    <AIFieldAssist
+                                                        field="promoCode" fieldLabel="Promo Code"
+                                                        onApply={v => setPromoForm({ ...promoForm, code: v.toUpperCase() })}
+                                                        showToast={showToast}
+                                                        organizerName={organizerProfile?.organizerName}
+                                                        locationType={formData.locationType}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide ml-1">Discount Type</label>
+                                            <select className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none" value={promoForm.discountType} onChange={(e) => setPromoForm({ ...promoForm, discountType: e.target.value })}>
+                                                <option value="PERCENTAGE">Percentage (%)</option>
+                                                <option value="FIXED">Fixed Amount (PHP)</option>
+                                            </select>
+                                        </div>
+                                        <Input label="Discount Value" type="number" value={promoForm.discountValue} onChange={(e: any) => setPromoForm({ ...promoForm, discountValue: e.target.value })} />
+                                        <Input label="Max Uses" type="number" value={promoForm.maxUses} onChange={(e: any) => setPromoForm({ ...promoForm, maxUses: e.target.value })} />
+                                        <Input label="Valid From" type="date" value={promoForm.validFrom} onChange={(e: any) => { const val = e.target.value; const today = new Date().toISOString().split('T')[0]; if (val < today) { showToast('error', 'Promotion valid from date cannot be in the past.'); return; } setPromoForm({ ...promoForm, validFrom: val }); }} />
+                                        <Input label="Valid Until" type="date" value={promoForm.validUntil} onChange={(e: any) => { const val = e.target.value; const today = new Date().toISOString().split('T')[0]; if (val < today) { showToast('error', 'Promotion valid until date cannot be in the past.'); return; } if (promoForm.validFrom && val < promoForm.validFrom) { showToast('error', 'Validation expiry date cannot be before start date.'); return; } setPromoForm({ ...promoForm, validUntil: val }); }} />
+                                        <div className="md:col-span-2 flex items-center gap-3">
+                                            <input type="checkbox" id="isActive" checked={promoForm.isActive} onChange={(e) => setPromoForm({ ...promoForm, isActive: e.target.checked })} className="w-5 h-5 accent-[#38BDF2]" />
+                                            <label htmlFor="isActive" className="text-xs font-bold text-[#2E2E2F]">Active and usable</label>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3 pt-2">
+                                        <Button className="flex-1" onClick={handleSavePromotion}>Save Promotion</Button>
+                                        <Button variant="outline" onClick={() => setEditingPromotion(null)}>Cancel</Button>
+                                    </div>
+                                </div>
+                            )}
+                            <div className="space-y-3">
+                                {promotionsLoading ? <div className="py-10 text-center"><div className="w-6 h-6 border-2 border-[#38BDF2] border-t-transparent rounded-full animate-spin mx-auto"></div></div> : promotions.length === 0 ? <div className="py-10 text-center border-2 border-dashed border-[#2E2E2F]/15 rounded-2xl text-[#2E2E2F]/30 uppercase text-[10px] font-black tracking-widest">No promo codes active</div> : promotions.map(promo => (
+                                    <div key={promo.promotionId} className="flex items-center justify-between p-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl group border-l-4 border-l-[#38BDF2]">
+                                        <div>
+                                            <div className="flex items-center gap-2"><span className="font-black text-[#2E2E2F] tracking-tight">{promo.code}</span><Badge type={promo.isActive ? 'success' : 'neutral'} className="text-[8px] px-1.5 py-0">{promo.isActive ? 'Active' : 'Inactive'}</Badge></div>
+                                            <p className="text-[10px] text-[#2E2E2F]/50 mt-1 uppercase tracking-tight font-bold">{promo.discountType === 'PERCENTAGE' ? `${promo.discountValue}% Off` : `PHP ${promo.discountValue} Off`}<span className="mx-2">•</span>{promo.usedCount || 0} / {promo.maxUses} Uses</p>
+                                        </div>
+                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button onClick={() => { setEditingPromotion(promo); setPromoForm({ code: promo.code, discountType: promo.discountType, discountValue: String(promo.discountValue), maxUses: String(promo.maxUses), validFrom: promo.validFrom ? promo.validFrom.split('T')[0] : '', validUntil: promo.validUntil ? promo.validUntil.split('T')[0] : '', isActive: promo.isActive }); }} className="p-2 hover:bg-[#38BDF2]/10 rounded-lg text-[#2E2E2F]"><ICONS.Edit className="w-4 h-4" /></button>
+                                            <button onClick={() => handleDeletePromotion(promo.promotionId)} className="p-2 hover:bg-red-50 rounded-lg text-red-500"><ICONS.Trash className="w-4 h-4" /></button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {wizardStep === 5 && (
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className={`rounded-2xl border px-4 py-4 ${isPersonalProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Account Profile</p>
+                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{isPersonalProfileReady ? 'Ready' : 'Incomplete'}</p>
+                        </div>
+                        <div className={`rounded-2xl border px-4 py-4 ${isOrganizerProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Organization Profile</p>
+                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{isOrganizerProfileReady ? 'Ready' : 'Incomplete'}</p>
+                        </div>
+                        <div className={`rounded-2xl border px-4 py-4 ${canPublishByTicketRule ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Ticket Setup</p>
+                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{ticketReadinessLoading ? 'Checking...' : isEditMode ? `${activeEventTicketCount} ticket type(s)` : 'Save draft first'}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Event Status</label>
+                        <p className="mb-2 text-[11px] text-[#2E2E2F]/60">Current: <span className="font-bold text-[#2E2E2F]">{initialEventStatus}</span> · Choose final status below.</p>
+                        <select className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]" value={finalStatusDecision} onChange={(e) => { const nextStatus = e.target.value as EventStatus | ''; setFinalStatusDecision(nextStatus); if (nextStatus) { setFormData((prev: any) => ({ ...prev, status: nextStatus as EventStatus })); } }}>
+                            <option value="">Select final status</option>
+                            <option value="DRAFT">Draft / Private</option>
+                            <option value="PUBLISHED" disabled={!canPublishByTicketRule || isAtActiveLimit}>
+                                {!canPublishByTicketRule ? 'Published (Add ticket first)' : isAtActiveLimit ? 'Published (Active Event Limit)' : 'Published'}
+                            </option>
+                            {isEditMode && <option value="CLOSED">Closed</option>}
+                        </select>
+                        {isAtActiveLimit && (
+                            <div className="mt-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
+                                <p className="text-[12px] font-bold text-amber-800 flex items-center gap-2"><ICONS.AlertTriangle className="w-4 h-4" />Active Event Limit Reach (Max: {maxActiveEvents})</p>
+                                <p className="text-[11px] text-amber-700 mt-1">You are currently at the maximum number of active events for your plan. Please close an existing event or upgrade to publish this one.</p>
+                                <Button size="sm" className="mt-2 text-[10px] px-3 py-1 bg-amber-600 text-white hover:bg-black" onClick={() => navigate('/subscription')}>Upgrade Plan</Button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+});
+
+const MobileWizardActions = React.memo(({
+    handleNextWizardStep,
+    handleSubmit,
+    isPreviewMode,
+    setIsPreviewMode,
+    setPreviewDevice
+}: any) => {
+    return (
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#2E2E2F]/15 md:hidden z-50 flex gap-2 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] animate-in slide-in-from-bottom duration-300">
+            <button type="button" onClick={handleNextWizardStep} className="flex-1 py-3 bg-[#38BDF2] text-white rounded-xl font-bold text-sm active:scale-95 transition-transform">Next</button>
+            <button type="button" onClick={handleSubmit} className="flex-1 py-3 bg-[#38BDF2] text-white rounded-xl font-bold text-sm active:scale-95 transition-transform">Save</button>
+            <button type="button" onClick={() => { if (isPreviewMode) { setIsPreviewMode(false); } else { setPreviewDevice('mobile'); setIsPreviewMode(true); } }} className="flex-1 py-3 bg-[#F2F2F2] text-[#3A3247] rounded-xl font-bold text-sm border-2 border-[#2E2E2F]/15 flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                {isPreviewMode ? 'Close' : 'Preview'}
+            </button>
+        </div>
+    );
+});
+
 export const EVENT_SETUP_STEP_DETAIL: Record<EventSetupStep, string> = {
     1: 'Name, story, and visual',
     2: 'Date, time, and location',
@@ -386,6 +1903,7 @@ export const UserEvents: React.FC = () => {
 
     const [previewDevice, setPreviewDevice] = useState<'mobile' | 'desktop'>('mobile');
     const [finalStatusDecision, setFinalStatusDecision] = useState<EventStatus | ''>('');
+    const [isPaymentRestrictionOpen, setIsPaymentRestrictionOpen] = useState(false);
     const [promotions, setPromotions] = useState<any[]>([]);
     const [promotionsLoading, setPromotionsLoading] = useState(false);
     const [editingPromotion, setEditingPromotion] = useState<any | null>(null);
@@ -2687,817 +4205,4 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
     );
 };
 
-interface EventPreviewProps {
-    previewDevice: 'mobile' | 'desktop';
-    isPreviewMode: boolean;
-    setIsPreviewMode: (val: boolean) => void;
-    setPreviewDevice: (val: 'mobile' | 'desktop') => void;
-    formData: any;
-    organizerProfile: OrganizerProfile | null;
-    events: Event[];
-    brandingEnabled: boolean;
-    name: string;
-}
-
-const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPreviewMode, setIsPreviewMode, setPreviewDevice, formData, organizerProfile, events, brandingEnabled, name }) => {
-
-    const previewAccentColor = brandingEnabled ? formData.brandColor || '#38BDF2' : '#38BDF2';
-
-    const previewDateLabel = React.useMemo(() => {
-        if (!formData.eventDate) return 'Date and time not set';
-        const date = new Date(`${formData.eventDate}T${formData.eventTime || '09:00'}`);
-        if (Number.isNaN(date.getTime())) return 'Date and time not set';
-        return date.toLocaleString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-        });
-    }, [formData.eventDate, formData.eventTime]);
-
-    const previewMapEmbedUrl = (formData.location && import.meta.env.VITE_GOOGLE_MAPS_API_KEY)
-        ? `https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(formData.location)}`
-        : formData.location ? `https://maps.google.com/maps?q=${encodeURIComponent(formData.location.trim())}&z=15&output=embed` : '';
-
-    const hasPreviewPhysicalLocation = formData.locationType !== 'ONLINE' && !!formData.location?.trim();
-    const organizerPreviewInitial = (organizerProfile?.organizerName || name || 'O').charAt(0).toUpperCase();
-
-    return (
-        <div className={`flex flex-col h-full w-full ${previewDevice === 'desktop' ? 'bg-[#F2F2F2]' : 'bg-[#F2F2F2] pb-32'}`}>
-            {/* Mobile Header Bar */}
-            {(previewDevice as string) === 'mobile' && (
-                <div className="flex items-center justify-between flex-shrink-0 px-5 pt-5">
-                    <button
-                        type="button"
-                        onClick={() => setIsPreviewMode(false)}
-                        className="flex items-center gap-2 text-[#2E2E2F] hover:text-black transition-colors"
-                    >
-                        <ICONS.ChevronRight className="w-4 h-4 text-[#2E2E2F]/65" />
-                        <h4 className="text-[30px] font-black text-[#2E2E2F] tracking-tight">Preview</h4>
-                    </button>
-                    <div className="flex items-center gap-2">
-                        <div className="inline-flex items-center rounded-2xl border-2 border-[#2E2E2F]/5 bg-[#F2F2F2] p-1 shadow-sm">
-                            <button
-                                type="button"
-                                onClick={() => setPreviewDevice('mobile')}
-                                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
-                            >
-                                <MobilePreviewIcon className="w-4 h-4" />
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setPreviewDevice('desktop')}
-                                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
-                            >
-                                <DesktopPreviewIcon className="w-4 h-4" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-
-            {(previewDevice as string) === 'desktop' ? (
-                <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center pt-32 pb-12 px-6">
-                    {/* Centered Browser Window Frame - Scaled to 75% POV */}
-                    <div 
-                        className="w-full max-w-[1300px] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.12)] border border-[#2E2E2F]/10 bg-[#F2F2F2] min-h-[90vh] flex flex-col"
-                        style={{ transform: 'scale(0.75)', transformOrigin: 'top center' }}
-                    >
-                        {/* Browser Bar - Integrated Controls */}
-                        <div className="h-12 bg-[#F3F3F3] border-b border-[#2E2E2F]/10 flex items-center px-4 gap-4 shrink-0 overflow-hidden">
-                            <div className="flex gap-1.5 shrink-0">
-                                <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
-                                <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
-                                <div className="w-3 h-3 rounded-full bg-[#28C840]" />
-                            </div>
-                            
-                            <div className="flex-1">
-                                <div className="bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-lg px-3 py-1 text-[10px] text-[#2E2E2F]/40 font-medium truncate flex items-center gap-1.5 max-w-[400px]">
-                                    <ICONS.Lock className="w-2.5 h-2.5" />
-                                    startuplab.io/{(formData.eventName || 'event').toLowerCase().replace(/\s+/g, '-')}
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-4 shrink-0">
-                                {/* Integrated Toggle Pill */}
-                                <div className="inline-flex items-center rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-1">
-                                    <button
-                                        type="button"
-                                        onClick={() => setPreviewDevice('mobile')}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
-                                    >
-                                        <MobilePreviewIcon className="w-3.5 h-3.5" />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setPreviewDevice('desktop')}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
-                                    >
-                                        <DesktopPreviewIcon className="w-3.5 h-3.5" />
-                                    </button>
-                                </div>
-
-                                {/* "Back" / Close Preview Button */}
-                                <button
-                                    type="button"
-                                    onClick={() => setIsPreviewMode(false)}
-                                    className="flex items-center gap-1.5 text-[#2E2E2F]/60 hover:text-black transition-colors group px-2"
-                                >
-                                    <ICONS.ChevronRight className="w-4 h-4 rotate-180 transition-transform group-hover:-translate-x-0.5" />
-                                    <span className="text-[11px] font-bold uppercase tracking-widest">Close Preview</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Internal Site Layout */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#F2F2F2]">
-                            {/* Header - ONLY MOBILE/Internal hidden for clean desktop preview as requested */}
-                            {false && (
-                                <div className="h-14 border-b border-[#2E2E2F]/15 px-6 flex items-center justify-between bg-white sticky top-0 z-10">
-                                    <img
-                                        src={brandingEnabled && organizerProfile?.profileImageUrl ? getImageUrl(organizerProfile.profileImageUrl) : BRAND_LOGO_URL}
-                                        alt="Event Logo"
-                                        className="h-8 w-auto object-contain"
-                                    />
-                                    <div className="flex items-center gap-3 text-[#2E2E2F]/50">
-                                        <ICONS.Users className="w-4 h-4" />
-                                        <ICONS.MoreHorizontal className="w-4 h-4" />
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="p-10">
-                                <div className="max-w-[1240px] mx-auto flex flex-col md:flex-row gap-8 items-start">
-                                    <div className="flex-1 space-y-6">
-                                        <div className="mb-4">
-                                            <div className="flex items-center gap-2 text-[8px] font-black tracking-widest uppercase mb-6" style={{ color: previewAccentColor }}>
-                                                <svg className="w-2.5 h-2.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
-                                                BACK TO EVENTS
-                                            </div>
-
-                                            <div className="flex items-start justify-between gap-4 mb-4">
-                                                <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tighter leading-tight">
-                                                    {formData.eventName || 'Event title'}
-                                                </h2>
-                                                <div className="flex items-center gap-2 shrink-0">
-                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
-                                                        <ICONS.Heart className="w-4 h-4 text-[#2E2E2F]/40" />
-                                                    </div>
-                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
-                                                        <ICONS.Download className="w-4 h-4 text-[#2E2E2F]/40" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="rounded-[2.5rem] overflow-hidden border-2 border-[#2E2E2F]/15 mb-6 shadow-sm">
-                                                <img src={getImageUrl(formData.imageUrl)} alt="Event Preview" className="w-full aspect-video object-cover" />
-                                            </div>
-
-                                            <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F]/70">
-                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
-                                                    <ICONS.Calendar className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
-                                                    {previewDateLabel}
-                                                </div>
-                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
-                                                    <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
-                                                    {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
-                                                </div>
-                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
-                                                    CAPACITY: {formData.capacityTotal}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15">
-                                            <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
-                                            <p className="text-[#2E2E2F]/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
-                                                {formData.description || 'Provide an executive summary of this event session...'}
-                                            </p>
-                                        </div>
-
-                                        <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15">
-                                            <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
-                                            <div className="rounded-[1.5rem] border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] p-5 flex flex-col gap-4">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-14 h-14 rounded-full overflow-hidden text-[#F2F2F2] flex items-center justify-center text-xl font-bold shrink-0" style={{ backgroundColor: previewAccentColor }}>
-                                                        {organizerProfile?.profileImageUrl ? (
-                                                            <img src={getImageUrl(organizerProfile.profileImageUrl)} alt={organizerProfile.organizerName || 'Organizer'} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            organizerPreviewInitial
-                                                        )}
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-xl font-black text-[#2E2E2F] tracking-tight truncate">
-                                                            {organizerProfile?.organizerName || 'Organizer Profile'}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {hasPreviewPhysicalLocation && (
-                                            <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15">
-                                                <div className="flex items-center justify-between gap-3 mb-4">
-                                                    <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-[#38BDF2]">Open in Maps</span>
-                                                </div>
-                                                <p className="text-[13px] text-[#2E2E2F]/70 font-medium mb-5">{formData.location}</p>
-                                                <div className="rounded-2xl overflow-hidden border-2 border-[#2E2E2F]/15 bg-[#F2F2F2]">
-                                                    <iframe src={previewMapEmbedUrl} title="Preview map" className="w-full h-64" loading="lazy" />
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="w-[340px] shrink-0 space-y-6 sticky top-0">
-                                        <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15 shadow-sm">
-                                            <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-6">SECURE ACCESS</h3>
-                                            <div className="space-y-4">
-                                                {formData.ticketTypes && formData.ticketTypes.length > 0 ? (
-                                                    formData.ticketTypes.map((ticket: any) => (
-                                                        <div key={ticket.ticketTypeId || ticket.name} className="p-6 rounded-[1.5rem] border-2 bg-[#F2F2F2]" style={{ borderColor: `${previewAccentColor}1A` }}>
-                                                            <div className="flex justify-between items-start mb-1">
-                                                                <p className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-wider">{ticket.name}</p>
-                                                                <span className="text-[9px] font-black px-2 py-0.5 rounded text-white" style={{ backgroundColor: previewAccentColor }}>AVAILABLE</span>
-                                                            </div>
-                                                            <p className="text-[18px] font-black text-[#2E2E2F]">
-                                                                {ticket.priceAmount === 0 ? 'FREE' : `PHP ${ticket.priceAmount.toLocaleString()}.00`}
-                                                            </p>
-                                                            <div className="mt-5 pt-5 border-t border-[#2E2E2F]/5 flex items-center justify-between">
-                                                                <span className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Quantity</span>
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="w-7 h-7 rounded-xl bg-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F]/20 text-sm">-</div>
-                                                                    <span className="text-sm font-black">1</span>
-                                                                    <div className="w-7 h-7 rounded-xl flex items-center justify-center text-sm text-white" style={{ backgroundColor: previewAccentColor }}>+</div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <div className="py-14 text-center border-2 border-dashed border-[#2E2E2F]/10 rounded-[2rem]">
-                                                        <p className="text-[11px] font-bold text-[#2E2E2F]/30 uppercase tracking-widest">No tickets set</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="mt-8 space-y-4">
-                                                <button disabled className="w-full py-5 rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.2em] text-white/50" style={{ backgroundColor: `${previewAccentColor}4D` }}>Secure Checkout</button>
-                                                <div className="flex items-center justify-center gap-2 opacity-20">
-                                                    <ICONS.CreditCard className="w-4 h-4" />
-                                                    <p className="text-[9px] font-black uppercase tracking-widest">HITPAY SECURE</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            ) : (
-                /* Mobile Preview Mode - Phone Shell Implementation */
-                <div className="flex-1 w-full bg-[#F2F2F2] flex flex-col items-center">
-                    {/* Centered Phone Shell - Scaled to fit screen */}
-                    <div 
-                        className="relative w-[375px] h-[780px] bg-[#F2F2F2] rounded-[3.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.15)] border-[12px] border-[#F2F2F2] flex flex-col overflow-hidden"
-                        style={{ transform: 'scale(0.8)', transformOrigin: 'top center' }}
-                    >
-                        {/* Status Bar / Notch Area */}
-                        <div className="h-8 bg-[#F2F2F2] flex items-center justify-center relative shrink-0">
-                            <div className="w-24 h-5 bg-[#F2F2F2] rounded-b-2xl absolute top-0" />
-                        </div>
-
-                        {/* Scrollable Content inside Phone */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar">
-                    <div className="w-full">
-                        <div className="h-14 border-b border-[#2E2E2F]/15 px-5 flex items-center justify-between bg-[#F2F2F2]">
-                            <img
-                                src={brandingEnabled && organizerProfile?.profileImageUrl ? getImageUrl(organizerProfile.profileImageUrl) : BRAND_LOGO_URL}
-                                alt="Event Logo"
-                                className="h-8 w-auto object-contain"
-                            />
-                            <div className="flex items-center gap-3 text-[#2E2E2F]/70">
-                                <ICONS.Users className="w-4 h-4" />
-                                <ICONS.MoreHorizontal className="w-4 h-4" />
-                            </div>
-                        </div>
-
-                        <div className="bg-[#F2F2F2] p-5 space-y-6">
-                            <div className="w-full space-y-6">
-                                <div className="mb-4">
-                                    <div className="flex items-center gap-2 text-[8px] font-black tracking-widest uppercase mb-6" style={{ color: previewAccentColor }}>
-                                        <svg className="w-2.5 h-2.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
-                                        BACK TO EVENTS
-                                    </div>
-
-                                    <div className="flex items-start justify-between gap-4 mb-4">
-                                        <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tighter leading-tight">
-                                            {formData.eventName || 'Event title'}
-                                        </h2>
-                                        <div className="flex items-center gap-2 shrink-0">
-                                            <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
-                                                <ICONS.Heart className="w-4 h-4 text-[#2E2E2F]/40" />
-                                            </div>
-                                            <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
-                                                <ICONS.Download className="w-4 h-4 text-[#2E2E2F]/40" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="rounded-[2rem] overflow-hidden border-2 border-[#2E2E2F]/15 mb-6 group">
-                                        <img
-                                            src={getImageUrl(formData.imageUrl)}
-                                            alt="Event Preview"
-                                            className="w-full aspect-video object-cover"
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F]/70">
-                                        <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
-                                            <ICONS.Calendar className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
-                                            {previewDateLabel}
-                                        </div>
-                                        <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
-                                            <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
-                                            {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
-                                        </div>
-                                        {formData.streamingPlatform && (
-                                            <div className="flex items-center bg-[#F2F2F2] px-3 py-1.5 rounded-xl border text-[10px] font-black tracking-wide" style={{ color: previewAccentColor, borderColor: `${previewAccentColor}33`, backgroundColor: `${previewAccentColor}0D` }}>
-                                                VIA {formData.streamingPlatform.toUpperCase()}
-                                            </div>
-                                        )}
-                                        <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
-                                            CAPACITY: {formData.capacityTotal}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
-                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
-                                    <p className="text-[#2E2E2F]/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
-                                        {formData.description || 'Provide an executive summary of this event session...'}
-                                    </p>
-                                </div>
-
-                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
-                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
-                                    <div className="rounded-[1.2rem] border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] p-4 flex flex-col gap-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-full overflow-hidden text-[#F2F2F2] flex items-center justify-center text-lg font-bold shrink-0" style={{ backgroundColor: previewAccentColor }}>
-                                                {organizerProfile?.profileImageUrl ? (
-                                                    <img src={getImageUrl(organizerProfile.profileImageUrl)} alt={organizerProfile.organizerName || 'Organizer'} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    organizerPreviewInitial
-                                                )}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-lg font-black text-[#2E2E2F] tracking-tight truncate">
-                                                    {organizerProfile?.organizerName || 'Organizer Profile'}
-                                                </p>
-                                                <div className="flex items-center gap-4 mt-1">
-                                                    <div>
-                                                        <p className="text-[8px] uppercase tracking-widest font-black text-[#2E2E2F]/40">Followers</p>
-                                                        <p className="text-sm font-black">{organizerProfile?.followersCount || 0}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[14px] font-black">{events.length}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {hasPreviewPhysicalLocation && (
-                                    <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
-                                        <div className="flex items-center justify-between gap-3 mb-4">
-                                            <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-[#38BDF2]">Open in Maps</span>
-                                        </div>
-                                        <p className="text-[12px] text-[#2E2E2F]/70 font-medium mb-4">{formData.location}</p>
-                                        <div className="rounded-xl overflow-hidden border-2 border-[#2E2E2F]/15 bg-[#F2F2F2]">
-                                            <iframe
-                                                src={previewMapEmbedUrl}
-                                                title="Preview map"
-                                                className="w-full h-40"
-                                                loading="lazy"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="w-full flex-col">
-                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15 shadow-sm">
-                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-6">SECURE ACCESS</h3>
-                                    <div className="space-y-4">
-                                        {formData.ticketTypes && formData.ticketTypes.length > 0 ? (
-                                            formData.ticketTypes.map((ticket: any) => (
-                                                <div key={ticket.ticketTypeId || ticket.name} className="p-5 rounded-2xl border-2 bg-[#F2F2F2]" style={{ borderColor: `${previewAccentColor}1A` }}>
-                                                    <div className="flex justify-between items-start mb-1">
-                                                        <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-wider">{ticket.name}</p>
-                                                        <span className="text-[8px] font-black px-2 py-0.5 rounded text-white" style={{ backgroundColor: previewAccentColor }}>AVAILABLE</span>
-                                                    </div>
-                                                    <p className="text-[16px] font-black text-[#2E2E2F]">
-                                                        {ticket.priceAmount === 0 ? 'FREE' : `PHP ${ticket.priceAmount.toLocaleString()}.00`}
-                                                    </p>
-                                                    <div className="mt-4 pt-4 border-t border-[#2E2E2F]/5 flex items-center justify-between">
-                                                        <span className="text-[8px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Quantity</span>
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-6 h-6 rounded-lg bg-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F]/20 text-xs">-</div>
-                                                            <span className="text-xs font-black">1</span>
-                                                            <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs text-white" style={{ backgroundColor: previewAccentColor }}>+</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <div className="py-12 text-center border-2 border-dashed border-[#2E2E2F]/5 rounded-[2rem]">
-                                                <p className="text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-widest">No tickets set</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="mt-8 space-y-4">
-                                        <button
-                                            type="button"
-                                            disabled
-                                            className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-white/50"
-                                            style={{ backgroundColor: `${previewAccentColor}4D` }}
-                                        >
-                                            Secure Checkout
-                                        </button>
-                                        <div className="flex items-center justify-center gap-2 opacity-20">
-                                            <ICONS.CreditCard className="w-3.5 h-3.5" />
-                                            <p className="text-[8px] font-black uppercase tracking-widest">HITPAY SECURE</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )}
-</div>
-    );
-});
-
-const WizardStepContent = React.memo(({
-    wizardStep,
-    formData,
-    setFormData,
-    organizerProfile,
-    fileInputRef,
-    handleImageUpload,
-    isEditMode,
-    applyLocationValue,
-    maxEventCapacity,
-    activeEventTicketCount,
-    ticketReadinessLoading,
-    canPublishByTicketRule,
-    initialEventStatus,
-    finalStatusDecision,
-    setFinalStatusDecision,
-    isAtActiveLimit,
-    maxActiveEvents,
-    promoForm,
-    setPromoForm,
-    editingPromotion,
-    setEditingPromotion,
-    handleSavePromotion,
-    handleDeletePromotion,
-    promotions,
-    promotionsLoading,
-    showToast,
-    isPersonalProfileReady,
-    isOrganizerProfileReady,
-    navigate,
-    submitting
-}: any) => {
-    return (
-        <div className="animate-in fade-in duration-300">
-            {wizardStep === 1 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-                    <div className="md:col-span-2">
-                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Organizer Name</label>
-                        <select value={organizerProfile?.organizerId || ''} disabled className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[12px] font-semibold tracking-wide outline-none">
-                            {organizerProfile?.organizerId ? <option value={organizerProfile.organizerId}>{organizerProfile.organizerName}</option> : <option value="">No organizer profile set</option>}
-                        </select>
-                    </div>
-                    <div className="md:col-span-2">
-                        <Input label="Event Name" placeholder="e.g. Founder Growth Summit 2026" value={formData.eventName} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, eventName: e.target.value }))} />
-                    </div>
-                    <div className="md:col-span-2">
-                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Description</label>
-                        <textarea className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-[1.5rem] text-sm min-h-[130px] focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors outline-none" value={formData.description} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, description: e.target.value }))} />
-                    </div>
-                    <div className="md:col-span-2">
-                        <div className="flex flex-col gap-2 mb-1 px-1">
-                            <div className="flex items-center justify-between">
-                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Brand Color</label>
-                                {!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) && (
-                                    <Badge type="info" className="text-[8px] px-2 py-0.5 bg-[#2E2E2F] text-white">Premium Feature</Badge>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-4 p-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl relative overflow-hidden">
-                                <input
-                                    type="color"
-                                    value={formData.brandColor || '#38BDF2'}
-                                    onChange={(e) => setFormData((prev: any) => ({ ...prev, brandColor: e.target.value }))}
-                                    disabled={!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding)}
-                                    className={`w-12 h-12 rounded-lg cursor-pointer border-none p-0 bg-transparent ${!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) ? 'opacity-30' : ''}`}
-                                />
-                                <div className="flex-1">
-                                    <p className="text-xs font-bold text-[#2E2E2F]">Primary Accent Color</p>
-                                    <p className="text-[10px] text-[#2E2E2F]/50">Used for buttons, links, and highlights on your event page.</p>
-                                </div>
-                                {!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) && (
-                                    <div className="absolute inset-0 bg-[#F2F2F2]/40 backdrop-blur-[1px] flex items-center justify-center">
-                                        <Button variant="outline" className="text-[8px] py-1 px-3 border-[#2E2E2F]/20" onClick={() => navigate('/subscription')}>Upgrade to Unlock</Button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="md:col-span-2">
-                        <div className="flex flex-col gap-2 mb-1 px-1">
-                            <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Visual Media</label>
-                            <div
-                                className="relative group w-full h-44 rounded-[1.5rem] border-2 border-dashed border-[#2E2E2F]/30 bg-[#F2F2F2] flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#38BDF2] hover:bg-[#38BDF2]/10 transition-colors"
-                                onClick={() => fileInputRef.current?.click()}
-                            >
-                                {formData.imageUrl ? (
-                                    <img src={getImageUrl(formData.imageUrl)} alt="Preview" className="w-full h-full object-cover rounded-[1.5rem]" />
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center w-full h-full">
-                                        <svg className="w-10 h-10 text-[#2E2E2F]/40 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="2.5" /><path d="M21 15l-5-5L5 21" /></svg>
-                                        <span className="text-[12px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Upload Event Image</span>
-                                    </div>
-                                )}
-                                <div className="absolute bottom-3 right-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-lg px-3 py-1 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors pointer-events-none">Browse</div>
-                            </div>
-                            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {wizardStep === 2 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-                    <Input
-                        label="Session Date"
-                        type="date"
-                        value={formData.eventDate}
-                        onChange={(e: any) => {
-                            const val = e.target.value;
-                            const today = new Date().toISOString().split('T')[0];
-                            if (val < today) {
-                                showToast('error', 'Event date cannot be in the past.');
-                                return;
-                            }
-                            setFormData((prev: any) => ({ ...prev, eventDate: val }));
-                        }}
-                    />
-                    <Input label="Start Time" type="time" value={formData.eventTime} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, eventTime: e.target.value }))} />
-                    <Input
-                        label="End Date"
-                        type="date"
-                        value={formData.endDate}
-                        onChange={(e: any) => {
-                            const val = e.target.value;
-                            const today = new Date().toISOString().split('T')[0];
-                            if (val < today) {
-                                showToast('error', 'End date cannot be in the past.');
-                                return;
-                            }
-                            if (formData.eventDate && val < formData.eventDate) {
-                                showToast('error', 'End date cannot be before session date.');
-                                return;
-                            }
-                            setFormData((prev: any) => ({ ...prev, endDate: val }));
-                        }}
-                    />
-                    <Input label="End Time" type="time" value={formData.endTime} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, endTime: e.target.value }))} />
-                    <div>
-                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Location Type</label>
-                        <select
-                            className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]"
-                            value={formData.locationType}
-                            onChange={(e) => setFormData((prev: any) => ({ ...prev, locationType: e.target.value as Event['locationType'] }))}
-                        >
-                            <option value="ONSITE">Onsite</option>
-                            <option value="ONLINE">Online</option>
-                            <option value="HYBRID">Hybrid</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Timezone</label>
-                        <Input value={formData.timezone} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, timezone: e.target.value }))} />
-                    </div>
-                    <div className="md:col-span-2 space-y-8">
-                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/15">
-                            <div className="flex items-center gap-3 mb-5">
-                                <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]"><ICONS.MapPin className="w-4 h-4" /></div>
-                                <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Venue Details</h4>
-                            </div>
-                            <Input label={formData.locationType === 'ONLINE' ? 'Physical Hub (Optional)' : 'Venue Address'} placeholder="e.g. Global Tech Center" value={formData.location} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, location: e.target.value }))} />
-                            <div className="mt-4"><OnsiteLocationAssistant value={formData.location} onChange={applyLocationValue} /></div>
-                        </div>
-                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/15">
-                            <div className="flex items-center gap-3 mb-5">
-                                <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]"><ICONS.Monitor className="w-4 h-4" /></div>
-                                <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Broadcast Settings</h4>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <Input label="Platform Name" placeholder="e.g. YouTube, Google Meet" value={formData.streamingPlatform} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, streamingPlatform: e.target.value }))} />
-                                <Input label="Connection URL" placeholder="Link to stream or meeting" value={formData.streamingUrl} onChange={(e: any) => applyLocationValue(e.target.value)} />
-                            </div>
-                            {formData.streamingUrl && formData.streamingUrl.startsWith('http') && (
-                                <div className="mt-6 p-6 bg-black rounded-3xl border border-[#F2F2F2]/10 overflow-hidden shadow-xl">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h4 className="text-[12px] font-black text-white uppercase tracking-widest">Stream Preview</h4>
-                                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-red-500/30 bg-red-500/20">
-                                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-white">Live</span>
-                                        </div>
-                                    </div>
-                                    {(formData.streamingUrl.includes('youtube.com') || formData.streamingUrl.includes('youtu.be')) ? (
-                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#F2F2F2]/5 border border-[#F2F2F2]/5">
-                                            {(() => {
-                                                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/|live\/)([^#\&\?]*).*/;
-                                                const match = formData.streamingUrl.match(regExp);
-                                                const videoId = (match && match[2].length === 11) ? match[2] : null;
-                                                return videoId ? (
-                                                    <iframe className="absolute inset-0 w-full h-full" src={`https://www.youtube.com/embed/${videoId}`} title="YouTube Preview" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
-                                                ) : <div className="flex items-center justify-center w-full h-full text-[#F2F2F2]/30 text-xs">Invalid YouTube Link</div>;
-                                            })()}
-                                        </div>
-                                    ) : (formData.streamingUrl.includes('facebook.com') || formData.streamingUrl.includes('fb.watch')) ? (
-                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#F2F2F2]/5 border border-[#F2F2F2]/5">
-                                            <iframe className="absolute inset-0 w-full h-full" src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(formData.streamingUrl)}&show_text=0&width=560&t=0`} title="Facebook Preview" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col items-center justify-center p-10 rounded-2xl bg-[#F2F2F2]/5 border border-[#F2F2F2]/5 border-dashed">
-                                            <ICONS.Monitor className="w-8 h-8 text-[#F2F2F2]/20 mb-3" />
-                                            <p className="text-[#F2F2F2]/40 text-[11px] text-center font-medium">This platform doesn't support direct previews, but the link will be provided to attendees.</p>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {wizardStep === 3 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
-                    <Input label={`Capacity Total (${formData.capacityTotal}/${maxEventCapacity})`} type="number" min={1} max={maxEventCapacity} value={formData.capacityTotal} onChange={(e: any) => { const val = parseInt(e.target.value, 10) || 1; const nextValue = Math.max(1, Math.min(val, maxEventCapacity)); setFormData((prev: any) => ({ ...prev, capacityTotal: nextValue })); }} error={formData.capacityTotal > maxEventCapacity ? `Capacity exceeds your plan limit (${maxEventCapacity})` : ''} />
-                    <Input label="Registration Open Date" type="date" value={formData.regOpenDate} onChange={(e: any) => { const val = e.target.value; const today = new Date().toISOString().split('T')[0]; if (val < today) { showToast('error', 'Registration open date cannot be in the past.'); return; } setFormData((prev: any) => ({ ...prev, regOpenDate: val })); }} />
-                    <Input label="Registration Open Time" type="time" value={formData.regOpenTime} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, regOpenTime: e.target.value }))} />
-                    <Input label="Registration Close Date" type="date" value={formData.regCloseDate} onChange={(e: any) => { const val = e.target.value; const today = new Date().toISOString().split('T')[0]; if (val < today) { showToast('error', 'Registration close date cannot be in the past.'); return; } if (formData.regOpenDate && val < formData.regOpenDate) { showToast('error', 'Registration close date cannot be before open date.'); return; } setFormData((prev: any) => ({ ...prev, regCloseDate: val })); }} />
-                    <Input label="Registration Close Time" type="time" value={formData.regCloseTime} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, regCloseTime: e.target.value }))} />
-                    <div className="md:col-span-2 space-y-4">
-                        <div className="p-5 rounded-2xl border border-[#2E2E2F]/15 bg-[#F2F2F2] flex items-center justify-between group relative overflow-hidden">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]"><ICONS.CreditCard className="w-5 h-5" /></div>
-                                <div><p className="text-sm font-bold text-[#2E2E2F]">Enable Discount Codes</p><p className="text-[10px] text-[#2E2E2F]/50">Allow promotional codes during checkout.</p></div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) && <Badge type="info" className="text-[8px] font-black bg-[#2E2E2F] text-white">PRO</Badge>}
-                                <input type="checkbox" checked={formData.enableDiscountCodes} onChange={(e) => setFormData((prev: any) => ({ ...prev, enableDiscountCodes: e.target.checked }))} disabled={!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes)} className="w-6 h-6 accent-[#38BDF2] cursor-pointer disabled:opacity-30" />
-                            </div>
-                            {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) && <div className="absolute inset-0 bg-[#F2F2F2]/40 backdrop-blur-[1px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="outline" className="text-[8px] py-1 px-3 border-[#2E2E2F]/20 bg-[#F2F2F2]" onClick={() => navigate('/subscription')}>Upgrade to Unlock</Button></div>}
-                        </div>
-                        <div className="rounded-2xl border border-[#2E2E2F]/15 bg-[#F2F2F2] px-5 py-4">
-                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2E2E2F]/45">Ticket Setup Rule</p>
-                            <p className="mt-2 text-sm font-semibold text-[#2E2E2F]">Publishing is locked until at least one ticket type is configured.</p>
-                            <p className="mt-1 text-[12px] text-[#2E2E2F]/60">Clicking next will save draft and open ticket setup automatically.</p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {wizardStep === 4 && (
-                <div className="space-y-6">
-                    {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) ? (
-                        <div className="p-10 text-center bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15">
-                            <div className="w-16 h-16 bg-[#2E2E2F] text-white rounded-2xl flex items-center justify-center mx-auto mb-6"><ICONS.Lock className="w-8 h-8" /></div>
-                            <h3 className="text-xl font-black text-[#2E2E2F] tracking-tight">Promotions Locked</h3>
-                            <p className="text-[#2E2E2F]/60 text-sm mt-2 max-w-xs mx-auto">Upgrade to a Pro or Enterprise plan to enable discount codes and boost your ticket sales.</p>
-                            <Button className="mt-6 bg-[#38BDF2]" onClick={() => navigate('/subscription')}>View Plans</Button>
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between">
-                                <div><h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Active Promotions</h4><p className="text-[10px] text-[#2E2E2F]/50 mt-1 uppercase tracking-wider">Total: {promotions.length}</p></div>
-                                <Button size="sm" onClick={() => { setEditingPromotion({ new: true }); setPromoForm({ code: '', discountType: 'PERCENTAGE', discountValue: '10', maxUses: '100', validFrom: '', validUntil: '', isActive: true }); }}>Add Code</Button>
-                            </div>
-                            {editingPromotion && (
-                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#38BDF2]/30 space-y-5">
-                                    <div className="flex items-center justify-between">
-                                        <h5 className="text-[11px] font-black uppercase tracking-widest">{editingPromotion.new ? 'New Promotion' : 'Edit Promotion'}</h5>
-                                        <button onClick={() => setEditingPromotion(null)} className="text-[#2E2E2F]/30 hover:text-red-500 transition-colors"><ICONS.X className="w-4 h-4" /></button>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                        <Input label="Promo Code" placeholder="SALE20" value={promoForm.code} onChange={(e: any) => setPromoForm({ ...promoForm, code: e.target.value.toUpperCase() })} />
-                                        <div className="space-y-2">
-                                            <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide ml-1">Discount Type</label>
-                                            <select className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none" value={promoForm.discountType} onChange={(e) => setPromoForm({ ...promoForm, discountType: e.target.value })}>
-                                                <option value="PERCENTAGE">Percentage (%)</option>
-                                                <option value="FIXED">Fixed Amount (PHP)</option>
-                                            </select>
-                                        </div>
-                                        <Input label="Discount Value" type="number" value={promoForm.discountValue} onChange={(e: any) => setPromoForm({ ...promoForm, discountValue: e.target.value })} />
-                                        <Input label="Max Uses" type="number" value={promoForm.maxUses} onChange={(e: any) => setPromoForm({ ...promoForm, maxUses: e.target.value })} />
-                                        <Input label="Valid From" type="date" value={promoForm.validFrom} onChange={(e: any) => { const val = e.target.value; const today = new Date().toISOString().split('T')[0]; if (val < today) { showToast('error', 'Promotion valid from date cannot be in the past.'); return; } setPromoForm({ ...promoForm, validFrom: val }); }} />
-                                        <Input label="Valid Until" type="date" value={promoForm.validUntil} onChange={(e: any) => { const val = e.target.value; const today = new Date().toISOString().split('T')[0]; if (val < today) { showToast('error', 'Promotion valid until date cannot be in the past.'); return; } if (promoForm.validFrom && val < promoForm.validFrom) { showToast('error', 'Validation expiry date cannot be before start date.'); return; } setPromoForm({ ...promoForm, validUntil: val }); }} />
-                                        <div className="md:col-span-2 flex items-center gap-3">
-                                            <input type="checkbox" id="isActive" checked={promoForm.isActive} onChange={(e) => setPromoForm({ ...promoForm, isActive: e.target.checked })} className="w-5 h-5 accent-[#38BDF2]" />
-                                            <label htmlFor="isActive" className="text-xs font-bold text-[#2E2E2F]">Active and usable</label>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-3 pt-2">
-                                        <Button className="flex-1" onClick={handleSavePromotion}>Save Promotion</Button>
-                                        <Button variant="outline" onClick={() => setEditingPromotion(null)}>Cancel</Button>
-                                    </div>
-                                </div>
-                            )}
-                            <div className="space-y-3">
-                                {promotionsLoading ? <div className="py-10 text-center"><div className="w-6 h-6 border-2 border-[#38BDF2] border-t-transparent rounded-full animate-spin mx-auto"></div></div> : promotions.length === 0 ? <div className="py-10 text-center border-2 border-dashed border-[#2E2E2F]/15 rounded-2xl text-[#2E2E2F]/30 uppercase text-[10px] font-black tracking-widest">No promo codes active</div> : promotions.map(promo => (
-                                    <div key={promo.promotionId} className="flex items-center justify-between p-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl group border-l-4 border-l-[#38BDF2]">
-                                        <div>
-                                            <div className="flex items-center gap-2"><span className="font-black text-[#2E2E2F] tracking-tight">{promo.code}</span><Badge type={promo.isActive ? 'success' : 'neutral'} className="text-[8px] px-1.5 py-0">{promo.isActive ? 'Active' : 'Inactive'}</Badge></div>
-                                            <p className="text-[10px] text-[#2E2E2F]/50 mt-1 uppercase tracking-tight font-bold">{promo.discountType === 'PERCENTAGE' ? `${promo.discountValue}% Off` : `PHP ${promo.discountValue} Off`}<span className="mx-2">•</span>{promo.usedCount || 0} / {promo.maxUses} Uses</p>
-                                        </div>
-                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => { setEditingPromotion(promo); setPromoForm({ code: promo.code, discountType: promo.discountType, discountValue: String(promo.discountValue), maxUses: String(promo.maxUses), validFrom: promo.validFrom ? promo.validFrom.split('T')[0] : '', validUntil: promo.validUntil ? promo.validUntil.split('T')[0] : '', isActive: promo.isActive }); }} className="p-2 hover:bg-[#38BDF2]/10 rounded-lg text-[#2E2E2F]"><ICONS.Edit className="w-4 h-4" /></button>
-                                            <button onClick={() => handleDeletePromotion(promo.promotionId)} className="p-2 hover:bg-red-50 rounded-lg text-red-500"><ICONS.Trash className="w-4 h-4" /></button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {wizardStep === 5 && (
-                <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div className={`rounded-2xl border px-4 py-4 ${isPersonalProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Account Profile</p>
-                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{isPersonalProfileReady ? 'Ready' : 'Incomplete'}</p>
-                        </div>
-                        <div className={`rounded-2xl border px-4 py-4 ${isOrganizerProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Organization Profile</p>
-                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{isOrganizerProfileReady ? 'Ready' : 'Incomplete'}</p>
-                        </div>
-                        <div className={`rounded-2xl border px-4 py-4 ${canPublishByTicketRule ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Ticket Setup</p>
-                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{ticketReadinessLoading ? 'Checking...' : isEditMode ? `${activeEventTicketCount} ticket type(s)` : 'Save draft first'}</p>
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Event Status</label>
-                        <p className="mb-2 text-[11px] text-[#2E2E2F]/60">Current: <span className="font-bold text-[#2E2E2F]">{initialEventStatus}</span> · Choose final status below.</p>
-                        <select className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]" value={finalStatusDecision} onChange={(e) => { const nextStatus = e.target.value as EventStatus | ''; setFinalStatusDecision(nextStatus); if (nextStatus) { setFormData((prev: any) => ({ ...prev, status: nextStatus as EventStatus })); } }}>
-                            <option value="">Select final status</option>
-                            <option value="DRAFT">Draft / Private</option>
-                            <option value="PUBLISHED" disabled={!canPublishByTicketRule || isAtActiveLimit}>
-                                {!canPublishByTicketRule ? 'Published (Add ticket first)' : isAtActiveLimit ? 'Published (Active Event Limit)' : 'Published'}
-                            </option>
-                            {isEditMode && <option value="CLOSED">Closed</option>}
-                        </select>
-                        {isAtActiveLimit && (
-                            <div className="mt-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
-                                <p className="text-[12px] font-bold text-amber-800 flex items-center gap-2"><ICONS.AlertTriangle className="w-4 h-4" />Active Event Limit Reach (Max: {maxActiveEvents})</p>
-                                <p className="text-[11px] text-amber-700 mt-1">You are currently at the maximum number of active events for your plan. Please close an existing event or upgrade to publish this one.</p>
-                                <Button size="sm" className="mt-2 text-[10px] px-3 py-1 bg-amber-600 text-white hover:bg-black" onClick={() => navigate('/subscription')}>Upgrade Plan</Button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-});
-
-const MobileWizardActions = React.memo(({
-    handleNextWizardStep,
-    handleSubmit,
-    isPreviewMode,
-    setIsPreviewMode,
-    setPreviewDevice
-}: any) => {
-    return (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#2E2E2F]/15 md:hidden z-50 flex gap-2 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] animate-in slide-in-from-bottom duration-300">
-            <button type="button" onClick={handleNextWizardStep} className="flex-1 py-3 bg-[#38BDF2] text-white rounded-xl font-bold text-sm active:scale-95 transition-transform">Next</button>
-            <button type="button" onClick={handleSubmit} className="flex-1 py-3 bg-[#38BDF2] text-white rounded-xl font-bold text-sm active:scale-95 transition-transform">Save</button>
-            <button type="button" onClick={() => { if (isPreviewMode) { setIsPreviewMode(false); } else { setPreviewDevice('mobile'); setIsPreviewMode(true); } }} className="flex-1 py-3 bg-[#F2F2F2] text-[#3A3247] rounded-xl font-bold text-sm border-2 border-[#2E2E2F]/15 flex items-center justify-center gap-2 active:scale-95 transition-transform">
-                {isPreviewMode ? 'Close' : 'Preview'}
-            </button>
-        </div>
-    );
-});
-
+export default UserEvents;

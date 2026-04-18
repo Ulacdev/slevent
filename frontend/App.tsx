@@ -2338,6 +2338,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
       setNotifications(data.notifications || []);
       setUnreadCount(data.unreadCount || 0);
     } catch (err: any) {
+      if (err.name === 'AbortError') return;
       console.error('Failed to fetch notifications:', err);
       if (err?.message?.includes('401')) {
         clearUser();

@@ -49,7 +49,7 @@ const getApiBase = () => {
   return envBase.replace(/\/$/, '');
 };
 
-const API_BASE = getApiBase();
+export const API_BASE = getApiBase();
 
 const normalizeHitPaySettingsPayload = (data: any): HitPaySettings | null => {
   if (!data) return null;
@@ -83,7 +83,11 @@ export const apiService = {
 
       const res = await fetch(url, options);
       return res;
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        // Return a mock failed response that won't throw errors
+        return { ok: false, status: 0, json: async () => ({}) } as any;
+      }
       console.error(`[API] Global fetch error for ${url}:`, err);
       throw err;
     }
@@ -974,7 +978,7 @@ export const apiService = {
   },
 
   deleteUserEvent: async (id: string): Promise<void> => {
-    const res = await fetch(`${API_BASE}/api/user/events/${encodeURIComponent(id)}`, {
+    const res = await apiService._fetch(`${API_BASE}/api/user/events/${encodeURIComponent(id)}`, {
       method: 'DELETE',
       credentials: 'include'
     });
@@ -982,7 +986,7 @@ export const apiService = {
   },
 
   cancelUserEvent: async (id: string): Promise<any> => {
-    const res = await fetch(`${API_BASE}/api/user/events/${encodeURIComponent(id)}/cancel`, {
+    const res = await apiService._fetch(`${API_BASE}/api/user/events/${encodeURIComponent(id)}/cancel`, {
       method: 'PATCH',
       credentials: 'include'
     });
@@ -1699,6 +1703,42 @@ export const apiService = {
       throw new Error(errorData.error || `Failed to resolve reports: ${res.status}`);
     }
     return await res.json();
+  },
+
+  // --- AI Event Suggestions ---
+  suggestEventContent: async (payload: {
+    category: string;
+    audience: string;
+    format: string;
+    tone: string;
+    organizerName?: string;
+  }): Promise<{ suggestions: { eventName: string; description: string }[] }> => {
+    const res = await apiService._fetch(`${API_BASE}/api/ai/event-suggest`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || `AI suggestion failed: ${res.status}`);
+    return data;
+  },
+
+  suggestFieldContent: async (payload: {
+    field: 'eventName' | 'description' | 'location' | 'streamingPlatform' | 'promoCode';
+    context: string;
+    organizerName?: string;
+    format?: string;
+  }): Promise<{ suggestions: string[] }> => {
+    const res = await apiService._fetch(`${API_BASE}/api/ai/field-suggest`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || `AI field suggestion failed: ${res.status}`);
+    return data;
   },
 };
 

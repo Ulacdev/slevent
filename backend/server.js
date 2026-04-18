@@ -33,6 +33,7 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import announcementRoutes from "./routes/announcementRoutes.js";
 import discoveryRoutes from "./routes/discoveryRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 const PORT = process.env.BACKEND_PORT
 const app = express();
 
@@ -90,7 +91,15 @@ const generalApiLimiter = rateLimit({
 });
 
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "img-src": ["'self'", "data:", "http://127.0.0.1:5000", "https://image.pollinations.ai", "https://images.unsplash.com", "https://*.pollinations.ai"],
+      "connect-src": ["'self'", "http://127.0.0.1:5000", "https://xmjdcbzgdfylbqkjoyyb.supabase.co", "https://api.groq.com", "https://generativelanguage.googleapis.com"]
+    },
+  },
+}));
 app.use(morgan("dev"));
 
 app.use(cookieParser());
@@ -156,6 +165,7 @@ app.use("/api", categoryRoutes);
 app.use("/api/announcements", announcementRoutes);
 app.use("/api/discovery", discoveryRoutes);
 app.use("/api", reportRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Root endpoint for status check
 app.get("/", (req, res) => {
