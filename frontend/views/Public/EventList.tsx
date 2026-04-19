@@ -353,7 +353,7 @@ export const EventCard: React.FC<EventCardProps> = ({
 
             </div>
 
-            <div className="flex items-center gap-1 -mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="flex items-center gap-1 -mr-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">
               <button type="button" aria-label="Share" onClick={handleShare} className="p-2.5 text-[#4B5563] hover:text-[#111827] hover:bg-black/5 rounded-full transition-colors flex items-center justify-center">
                 <ICONS.Download className="w-4 h-4" />
               </button>
@@ -412,7 +412,7 @@ export const EventCard: React.FC<EventCardProps> = ({
         </div>
 
         {/* Actions Overlay (Hidden initially, visible on hover) */}
-        <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="absolute top-3 right-3 flex items-center gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">
           <button
             type="button"
             onClick={handleLike}
@@ -1083,8 +1083,9 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   Manage registrations, tickets, attendee check-ins, and performance in one simple, compliance-ready event platform — built specifically for growth-focused organizers.
                 </p>
 
-                <div className="flex flex-col sm:flex-row flex-wrap items-center gap-4">
-                  <Button
+                <div className="flex flex-row items-center gap-3 sm:gap-4">
+                  <button
+                    type="button"
                     onClick={() => {
                       if (isAuthenticated) {
                         navigate(role === UserRole.ORGANIZER ? '/user-home' : '/browse-events');
@@ -1092,12 +1093,13 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                         gotoSignup();
                       }
                     }}
-                    className="w-full sm:w-auto px-10 py-4 bg-[#38BDF2] text-white font-black text-[15px] rounded-xl shadow-lg shadow-[#38BDF2]/30 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-[#38BDF2] text-white font-black text-[14px] sm:text-[15px] rounded-xl shadow-lg shadow-[#38BDF2]/30 hover:scale-105 active:scale-95 transition-all flex flex-row items-center justify-center gap-2 whitespace-nowrap"
                   >
                     {isAuthenticated ? (role === UserRole.ORGANIZER ? 'Dashboard' : 'Explore') : 'Get Started'}
-                    <ICONS.ArrowRight className="w-5 h-5" />
-                  </Button>
-                  <Button
+                    <ICONS.ArrowRight className="w-5 h-5 shrink-0" strokeWidth={2.5} />
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => {
                       const pricingSection = document.getElementById('pricing');
                       if (pricingSection) {
@@ -1106,11 +1108,11 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                         navigate('/pricing');
                       }
                     }}
-                    className="w-full sm:w-auto px-10 py-4 !bg-transparent border-2 border-solid border-[#38BDF2] !text-[#38BDF2] font-black text-[15px] rounded-xl hover:!bg-[#38BDF2] hover:!text-white transition-all flex items-center justify-center gap-2 group"
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-transparent border-2 border-solid border-[#38BDF2] text-[#38BDF2] font-black text-[14px] sm:text-[15px] rounded-xl hover:bg-[#38BDF2] hover:text-white transition-all flex flex-row items-center justify-center gap-2 whitespace-nowrap group"
                   >
-                    <ICONS.CreditCard className="w-5 h-5 text-[#38BDF2] group-hover:text-white transition-colors" />
+                    <ICONS.CreditCard className="w-5 h-5 text-[#38BDF2] group-hover:text-white transition-colors shrink-0" strokeWidth={2} />
                     Pricing
-                  </Button>
+                  </button>
                 </div>
               </div>
 
@@ -1305,7 +1307,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 <div className="relative">
                   {/* Carousel Container */}
                   <div className="rounded-2xl overflow-hidden border border-black/15 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] group">
-                    <div className="relative h-[280px] sm:h-[400px] lg:h-[500px] overflow-hidden bg-white">
+                    <div className="relative h-[420px] sm:h-[400px] lg:h-[500px] overflow-hidden bg-white">
                       {/* Carousel Images */}
                       {promotedEvents.map((event, idx) => {
                         const imageUrl = getImageUrl(event.imageUrl);
@@ -1328,7 +1330,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                             <div className="absolute inset-0 z-20 flex flex-col justify-center">
                               <div className="absolute inset-0 z-[1] bg-gradient-to-r from-black/85 via-black/60 via-[40%] to-transparent" />
 
-                              <div className="relative z-30 p-8 sm:p-12 animate-in fade-in slide-in-from-left-4 duration-700">
+                              <div className="relative z-30 p-5 sm:p-12 animate-in fade-in slide-in-from-left-4 duration-700">
                                 {(() => {
                                   const totalSlots = (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0);
                                   const soldSlots = (event as any).registrationCount ?? (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantitySold || 0), 0);
@@ -1606,7 +1608,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           {/* Sidebar Filter - Eventbrite style */}
           {!isLanding && !isSpecialListing && isSidebarVisible && (
             <aside
-              className="w-full lg:w-72 shrink-0 space-y-10 lg:sticky lg:top-28 lg:self-start lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-4 lg:custom-scrollbar animate-in fade-in slide-in-from-left-4 duration-700"
+              className="w-full lg:w-72 shrink-0 lg:sticky lg:top-28 lg:self-start lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-4 lg:custom-scrollbar animate-in fade-in slide-in-from-left-4 duration-700"
               style={{ zoom: 1.1 }}
             >
               {/* Active Filters Header */}
@@ -1627,26 +1629,25 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   </button>
                 )}
               </div>
-
               {/* Category Section */}
-              <div className="space-y-6">
-                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Category</h4>
-                <div className="space-y-3.5">
+              <div className="space-y-3 lg:space-y-6">
+                <h4 className="hidden lg:block text-[11px] font-black uppercase tracking-[0.2em] text-black">Category</h4>
+                <div className="flex flex-row overflow-x-auto gap-2 pb-3 lg:pb-0 lg:flex-col lg:space-y-3.5 lg:overflow-visible custom-scrollbar">
                   {(showCategoriesFull ? categories : categories.slice(0, 6)).map((cat) => (
                     <button
                       key={cat.key}
                       onClick={() => setSelectedCategory(selectedCategory === cat.key ? 'all' : cat.key)}
-                      className={`flex items-center gap-3.5 w-full text-left group transition-all ${selectedCategory === cat.key ? 'text-[#38BDF2]' : 'text-black hover:text-[#38BDF2]'}`}
+                      className={`flex items-center gap-2 lg:gap-3.5 w-auto lg:w-full shrink-0 whitespace-nowrap rounded-full px-4 py-2 lg:px-0 lg:py-0 lg:rounded-none text-left group transition-all ${selectedCategory === cat.key ? 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/30 lg:border-transparent lg:bg-transparent lg:text-[#38BDF2]' : 'bg-[#E5E7EB]/50 border border-black/5 text-[#65676B] hover:text-[#050505] lg:border-none lg:bg-transparent'}`}
                     >
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${selectedCategory === cat.key ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#F2F2F2] border border-black/5 group-hover:bg-[#38BDF2]/10'}`}>
+                      <div className={`hidden lg:flex w-8 h-8 rounded-xl items-center justify-center transition-all ${selectedCategory === cat.key ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#F2F2F2] border border-black/5 group-hover:bg-[#38BDF2]/10'}`}>
                         <cat.Icon className="w-4 h-4" />
                       </div>
-                      <span className={`text-[13px] font-bold tracking-tight ${selectedCategory === cat.key ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'}`}>{cat.label}</span>
+                      <span className={`text-[12px] lg:text-[13px] font-bold tracking-tight ${selectedCategory === cat.key ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'}`}>{cat.label}</span>
                     </button>
                   ))}
                   <button
                     onClick={() => setShowCategoriesFull(!showCategoriesFull)}
-                    className="text-xs font-black text-[#38BDF2] pt-2 hover:underline transition-all flex items-center gap-1"
+                    className="hidden lg:flex text-xs font-black text-[#38BDF2] pt-2 hover:underline transition-all items-center gap-1 shrink-0"
                   >
                     {showCategoriesFull ? 'View less' : 'View more'}
                     <ICONS.ChevronDown className={`w-3.5 h-3.5 transition-transform ${showCategoriesFull ? 'rotate-180' : ''}`} />
@@ -1655,9 +1656,9 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               </div>
 
               {/* Date Section */}
-              <div className="space-y-6">
-                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Date</h4>
-                <div className="space-y-4">
+              <div className="space-y-3 lg:space-y-6">
+                <h4 className="hidden lg:block text-[11px] font-black uppercase tracking-[0.2em] text-black">Date</h4>
+                <div className="flex flex-row overflow-x-auto gap-2 pb-1 lg:pb-0 lg:flex-col lg:space-y-4 lg:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                   {[
                     { id: 'all', label: 'Any time' },
                     { id: 'today', label: 'Today' },
@@ -1667,21 +1668,21 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                     <button
                       key={opt.id}
                       onClick={() => setSelectedDate(opt.id)}
-                      className="flex items-center gap-3 w-full group"
+                      className={`flex items-center gap-2 lg:gap-3 shrink-0 whitespace-nowrap rounded-full px-4 py-2 lg:px-0 lg:py-0 lg:rounded-none w-auto lg:w-full group transition-all ${selectedDate === opt.id ? 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/30 lg:border-transparent lg:bg-transparent lg:text-black' : 'bg-[#E5E7EB]/50 border border-black/5 text-[#65676B] hover:bg-[#E5E7EB] hover:text-[#050505] lg:border-none lg:bg-transparent lg:hover:bg-transparent'}`}
                     >
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedDate === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
+                      <div className={`hidden lg:flex w-4 h-4 rounded-full border-2 items-center justify-center transition-all ${selectedDate === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
                         {selectedDate === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
                       </div>
-                      <span className={`text-[13px] font-bold tracking-tight ${selectedDate === opt.id ? 'text-black' : 'text-black group-hover:text-black'}`}>{opt.label}</span>
+                      <span className={`text-[12px] lg:text-[13px] font-bold tracking-tight ${selectedDate === opt.id ? 'text-[#38BDF2] lg:text-black' : 'text-[#65676B] group-hover:text-black'}`}>{opt.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Price Section */}
-              <div className="space-y-6">
-                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Price</h4>
-                <div className="space-y-4">
+              <div className="space-y-3 lg:space-y-6">
+                <h4 className="hidden lg:block text-[11px] font-black uppercase tracking-[0.2em] text-black">Price</h4>
+                <div className="flex flex-row overflow-x-auto gap-2 pb-1 lg:pb-0 lg:flex-col lg:space-y-4 lg:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                   {[
                     { id: 'all', label: 'All Prices' },
                     { id: 'free', label: 'Free' },
@@ -1690,21 +1691,21 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                     <button
                       key={opt.id}
                       onClick={() => setSelectedPrice(opt.id as any)}
-                      className="flex items-center gap-3 w-full group"
+                      className={`flex items-center gap-2 lg:gap-3 shrink-0 whitespace-nowrap rounded-full px-4 py-2 lg:px-0 lg:py-0 lg:rounded-none w-auto lg:w-full group transition-all ${selectedPrice === opt.id ? 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/30 lg:border-transparent lg:bg-transparent lg:text-black' : 'bg-[#E5E7EB]/50 border border-black/5 text-[#65676B] hover:bg-[#E5E7EB] hover:text-[#050505] lg:border-none lg:bg-transparent lg:hover:bg-transparent'}`}
                     >
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedPrice === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
+                      <div className={`hidden lg:flex w-4 h-4 rounded-full border-2 items-center justify-center transition-all ${selectedPrice === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
                         {selectedPrice === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
                       </div>
-                      <span className={`text-[13px] font-bold tracking-tight ${selectedPrice === opt.id ? 'text-black' : 'text-black group-hover:text-black'}`}>{opt.label}</span>
+                      <span className={`text-[12px] lg:text-[13px] font-bold tracking-tight ${selectedPrice === opt.id ? 'text-[#38BDF2] lg:text-black' : 'text-[#65676B] group-hover:text-black'}`}>{opt.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Format Section */}
-              <div className="space-y-6">
-                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Format</h4>
-                <div className="space-y-4">
+              <div className="space-y-3 lg:space-y-6">
+                <h4 className="hidden lg:block text-[11px] font-black uppercase tracking-[0.2em] text-black">Format</h4>
+                <div className="flex flex-row overflow-x-auto gap-2 pb-1 lg:pb-0 lg:flex-col lg:space-y-4 lg:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                   {[
                     { id: 'all', label: 'All Formats' },
                     { id: 'online', label: 'Online' },
@@ -1713,12 +1714,12 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                     <button
                       key={opt.id}
                       onClick={() => setSelectedFormat(opt.id as any)}
-                      className="flex items-center gap-3 w-full group"
+                      className={`flex items-center gap-2 lg:gap-3 shrink-0 whitespace-nowrap rounded-full px-4 py-2 lg:px-0 lg:py-0 lg:rounded-none w-auto lg:w-full group transition-all ${selectedFormat === opt.id ? 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/30 lg:border-transparent lg:bg-transparent lg:text-black' : 'bg-[#E5E7EB]/50 border border-black/5 text-[#65676B] hover:bg-[#E5E7EB] hover:text-[#050505] lg:border-none lg:bg-transparent lg:hover:bg-transparent'}`}
                     >
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${selectedFormat === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
+                      <div className={`hidden lg:flex w-4 h-4 rounded-full border-2 items-center justify-center transition-all ${selectedFormat === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
                         {selectedFormat === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
                       </div>
-                      <span className={`text-[13px] font-bold tracking-tight ${selectedFormat === opt.id ? 'text-black' : 'text-black group-hover:text-black'}`}>{opt.label}</span>
+                      <span className={`text-[12px] lg:text-[13px] font-bold tracking-tight ${selectedFormat === opt.id ? 'text-[#38BDF2] lg:text-black' : 'text-[#65676B] group-hover:text-black'}`}>{opt.label}</span>
                     </button>
                   ))}
                 </div>

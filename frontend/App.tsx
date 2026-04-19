@@ -95,6 +95,7 @@ const OrganizerSupport = React.lazy(() => import('./views/User/OrganizerSupport'
 const OrganizerDashboard = React.lazy(() => import('./views/User/OrganizerDashboard').then(module => ({ default: module.OrganizerDashboard })));
 const ArchiveSupport = React.lazy(() => import('./views/User/ArchiveSupport').then(module => ({ default: module.ArchiveSupport })));
 const SubscriptionSuccess = React.lazy(() => import('./views/User/SubscriptionSuccess').then(module => ({ default: module.SubscriptionSuccess })));
+const SearchPage = React.lazy(() => import('./views/Public/SearchPage').then(module => ({ default: module.SearchPage })));
 const MyTicketsPage = React.lazy(() => import('./views/Public/MyTicketsPage'));
 const WelcomeView = React.lazy(() => import('./views/User/WelcomeView'));
 const API = import.meta.env.VITE_API_BASE;
@@ -703,13 +704,21 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   setDesktopSidebarOpen(!desktopSidebarOpen);
                 }
               }}
-              className="p-2.5 rounded-lg border border-[#D1D5DB] bg-[#F2F2F2] hover:bg-gray-100 transition-all group active:scale-95"
+              className="p-2 w-16 h-16 md:w-11 md:h-11 flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-[#F2F2F2] hover:bg-gray-100 transition-all group active:scale-95"
               aria-label="Toggle Sidebar"
             >
-              <svg className={`w-5 h-5 transition-transform duration-500 ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-7 h-7 md:w-5 md:h-5 transition-transform duration-500 ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
+            {/* Mobile Logo */}
+            <Link to={role === UserRole.ADMIN ? "/dashboard" : (role === UserRole.STAFF ? "/events" : "/user-home")} className="md:hidden shrink-0 flex items-center">
+              {employerLogoUrl ? (
+                <img src={employerLogoUrl} alt="Logo" className="h-16 w-auto max-w-[180px] object-contain" />
+              ) : (
+                <img src="/lgo.webp" alt="Logo" className="h-16 w-16 object-contain" />
+              )}
+            </Link>
             <div className="hidden sm:block">
               <p className="text-[10px] uppercase font-black text-[#2E2E2F] tracking-[0.2em]">
                 {isStaff ? 'Staff Panel' : role === UserRole.ADMIN ? 'Admin Center' : 'Organizer Portal'}
@@ -1110,7 +1119,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const location = useLocation();
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = React.useState(false);
+  const [mobileUserMenuOpen, setMobileUserMenuOpen] = React.useState(false);
   const [headerSearchTerm, setHeaderSearchTerm] = React.useState('');
   const [animatedPlaceholder, setAnimatedPlaceholder] = React.useState('');
   const fullPlaceholder = 'Find your events';
@@ -1121,6 +1130,8 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const headerLocationMenuRef = React.useRef<HTMLDivElement | null>(null);
   const [hasLiveEvents, setHasLiveEvents] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
+  const [headerVisible, setHeaderVisible] = React.useState(true);
+  const lastScrollY = React.useRef(0);
   const [newsletterEmail, setNewsletterEmail] = React.useState('');
   const [isSubscribing, setIsSubscribing] = React.useState(false);
 
@@ -1155,9 +1166,22 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   React.useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
+      const currentScrollY = window.scrollY;
+      setScrolled(currentScrollY > 10);
+      
+      if (currentScrollY <= 50) {
+        setHeaderVisible(true);
+      } else if (currentScrollY > lastScrollY.current) {
+        // Scrolling down
+        setHeaderVisible(false);
+      } else {
+        // Scrolling up
+        setHeaderVisible(true);
+      }
+      
+      lastScrollY.current = currentScrollY;
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -1340,7 +1364,8 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     }
 
     const query = params.toString();
-    navigate(`/browse-events${query ? `?${query}` : ''}`);
+    // Redirect all searches to the dedicated search page
+    navigate(`/search${trimmedSearch ? `?q=${encodeURIComponent(trimmedSearch)}` : ''}`);
   };
 
   const handleSelectHeaderLocation = (value: string) => {
@@ -1429,11 +1454,16 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     };
   }, [isAuthenticated]);
 
+  const isHomePage = location.pathname === '/';
+  const showMobileNav = true; 
+  const showMainHeader = true;
+
   const navLinks: any[] = [];
   const guestMobileLinks = [
-    { label: 'Home', path: '/', icon: <ICONS.Home className="w-4 h-4" />, isLive: false },
-    { label: 'Contact Us', path: '/contact-us', icon: <ICONS.Mail className="w-4 h-4" />, isLive: false },
-    { label: 'FAQ', path: '/faq', icon: <ICONS.MessageSquare className="w-4 h-4" />, isLive: false },
+    { label: 'About Us', path: '/about-us', icon: <ICONS.Info className="w-[15px] h-[15px]" />, isLive: false },
+    { label: 'Contact Us', path: '/contact-us', icon: <ICONS.Mail className="w-[15px] h-[15px]" />, isLive: false },
+    { label: 'FAQ', path: '/faq', icon: <ICONS.MessageSquare className="w-[15px] h-[15px]" />, isLive: false },
+    { label: 'Privacy Policy', path: '/privacy-policy', icon: <ICONS.Shield className="w-[15px] h-[15px]" />, isLive: false },
   ];
   const trimmedHeaderSearch = headerSearchTerm.trim();
   const trimmedHeaderLocation = headerLocationTerm.trim();
@@ -1442,712 +1472,697 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     trimmedHeaderLocation.toLowerCase() !== DEFAULT_HEADER_LOCATION.toLowerCase()
   );
   const canSubmitHeaderSearch = Boolean(trimmedHeaderSearch || hasHeaderExplicitLocation);
-  const mobileMenuPanelClass = showHeaderSearchBar
-    ? 'top-[7.85rem] max-h-[calc(100vh-7.85rem)]'
-    : 'top-[4.85rem] max-h-[calc(100vh-4.85rem)]';
+  const mobileMenuPanelClass = 'top-0 h-full';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F2F2F2]" style={{ zoom: 0.9 }}>
-      <header className={`sticky top-0 z-[1000] px-4 lg:px-10 h-20 bg-[#F2F2F2]/90 backdrop-blur-xl transition-all duration-500 ${scrolled
-        ? 'shadow-[0_10px_30px_-10px_rgba(46,46,47,0.15)] border-b border-[#2E2E2F]/10'
-        : 'shadow-none border-b border-transparent'
-        }`} style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
-        <div className="max-w-full w-full h-full flex flex-wrap lg:flex-nowrap items-center gap-2 lg:gap-4">
-          {/* Left: Branding Segment - Logo on mobile, hidden on lg */}
-          <div className="flex lg:hidden flex-none items-center">
-            <Link to="/" className="shrink-0 flex items-center gap-2">
-              <Branding className="h-20 w-auto" />
-            </Link>
-          </div>
-          <div className="hidden lg:flex flex-none items-center">
-            <Link to="/" className="shrink-0 flex items-center gap-3">
-              {/* Desktop logo - shown only on desktop */}
-              <span className="hidden lg:block">
-                <Branding className="h-20 w-auto" />
-              </span>
-            </Link>
-          </div>
+      {showMainHeader && (
+        <header className={`fixed top-0 left-0 w-full z-[1000] bg-[#F2F2F2]/90 backdrop-blur-xl transition-all duration-500 ease-in-out ${headerVisible ? 'translate-y-0' : '-translate-y-full'} ${scrolled
+          ? 'border-b border-[#2E2E2F]/10'
+          : 'border-b border-transparent'
+          } shadow-none`} style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
+          <div className="max-w-full w-full flex flex-col">
+            {/* Main Top Row */}
+            <div className="flex items-center px-4 lg:px-10 h-24 lg:h-20 gap-2 lg:gap-4">
+              {/* Left: Branding & Mobile Toggle */}
+              <div className="flex flex-none items-center gap-2 lg:gap-4">
+                {/* Mobile Menu Button - Moved to left before logo */}
+                <button
+                  className="lg:hidden w-16 h-16 flex items-center justify-center rounded-xl text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 transition-colors"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  aria-label="Toggle menu"
+                >
+                  {mobileMenuOpen ? (
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  ) : (
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  )}
+                </button>
 
-          {/* Center Segment: Search bar centered */}
-          <div className="hidden lg:flex flex-1 min-w-0 px-1 sm:px-4">
-            {showHeaderSearchBar && (
-              <form onSubmit={handleHeaderSearchSubmit} className="w-full">
-                <div className="flex items-center h-12 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.1)] focus-within:border-[#38BDF2]/50 focus-within:shadow-[0_15px_35px_-12px_rgba(56,189,242,0.15)] transition-all duration-300">
-                  <label className="flex items-center gap-3 px-5 py-3 min-w-0 flex-1 border-r border-[#2E2E2F]/5 hover:bg-[#38BDF2]/5 transition-colors">
-                    <ICONS.Search className="w-4 h-4 text-[#2E2E2F] shrink-0" />
-                    <input
-                      type="text"
-                      value={headerSearchTerm}
-                      onChange={(event) => setHeaderSearchTerm(event.target.value)}
-                      placeholder={animatedPlaceholder || 'Find your events'}
-                      className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F] outline-none"
-                    />
-                  </label>
-                  <div
-                    className="relative min-w-0 flex-1 border-r border-[#2E2E2F]/5 bg-[#F2F2F2] hover:bg-[#38BDF2]/5 transition-colors"
-                    ref={headerLocationMenuRef}
-                  >
-                    <div className="w-full h-full flex items-center">
-                      <div className="flex-1 min-w-0 flex items-center gap-3 px-5 py-3 cursor-text" onClick={() => setHeaderLocationMenuOpen(true)}>
-                        <ICONS.MapPin className="w-4 h-4 text-[#2E2E2F] shrink-0" />
-                        <input
-                          type="text"
-                          value={hasHeaderExplicitLocation ? headerLocationTerm : ''}
-                          onChange={(event) => {
-                            const next = event.target.value;
-                            setHeaderLocationTerm(next || DEFAULT_HEADER_LOCATION);
-                            setHeaderLocationError('');
-                          }}
-                          onFocus={() => setHeaderLocationMenuOpen(true)}
-                          placeholder="Your Location"
-                          className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F] outline-none"
-                          aria-label="Search location"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        className={`w-11 h-11 flex items-center justify-center transition-all ${headerLocating
-                          ? 'text-[#38BDF2] animate-pulse'
-                          : 'text-[#2E2E2F] hover:text-[#38BDF2] hover:bg-[#38BDF2]/8'
-                          } rounded-xl mr-1 group/gps`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUseCurrentLocationInHeader();
-                        }}
-                        disabled={headerLocating}
-                        title="Search near me"
-                      >
-                        {headerLocating ? (
-                          <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full inline-block animate-spin" />
-                        ) : (
-                          <div className="relative">
-                            <svg fill="none" stroke="currentColor" strokeWidth={2.4} viewBox="0 0 24 24" className="w-5 h-5 group-hover/gps:scale-110 transition-transform">
-                              <circle cx="12" cy="12" r="3" />
-                              <path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
-                            </svg>
-                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#38BDF2] rounded-full opacity-0 group-hover/gps:opacity-100 transition-opacity animate-ping" />
-                          </div>
-                        )}
-                      </button>
-                    </div>
+                <Link to="/" className="shrink-0 flex items-center">
+                  <Branding className="h-16 lg:h-20 w-auto" />
+                </Link>
+              </div>
 
-                    {headerLocationMenuOpen && (
-                      <div className="absolute left-0 right-0 top-[calc(100%+12px)] z-50 w-[320px] rounded-xl border border-[#2E2E2F]/10 bg-white shadow-[0_24px_48px_-20px_rgba(46,46,47,0.35)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+            {/* Center Segment: Search bar centered */}
+            <div className="hidden lg:flex flex-1 min-w-0 px-1 sm:px-4">
+              {showHeaderSearchBar && (
+                <form onSubmit={handleHeaderSearchSubmit} className="w-full">
+                  <div className="flex items-center h-12 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.1)] focus-within:border-[#38BDF2]/50 focus-within:shadow-[0_15px_35px_-12px_rgba(56,189,242,0.15)] transition-all duration-300">
+                    <label className="flex items-center gap-3 px-5 py-3 min-w-0 flex-1 border-r border-[#2E2E2F]/5 hover:bg-[#38BDF2]/5 transition-colors">
+                      <ICONS.Search className="w-4 h-4 text-[#2E2E2F] shrink-0" />
+                      <input
+                        type="text"
+                        value={headerSearchTerm}
+                        onChange={(event) => setHeaderSearchTerm(event.target.value)}
+                        placeholder={animatedPlaceholder || 'Find your events'}
+                        className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F] outline-none"
+                      />
+                    </label>
+                    <div
+                      className="relative min-w-0 flex-1 border-r border-[#2E2E2F]/5 bg-[#F2F2F2] hover:bg-[#38BDF2]/5 transition-colors"
+                      ref={headerLocationMenuRef}
+                    >
+                      <div className="w-full h-full flex items-center">
+                        <div className="flex-1 min-w-0 flex items-center gap-3 px-5 py-3 cursor-text" onClick={() => setHeaderLocationMenuOpen(true)}>
+                          <ICONS.MapPin className="w-4 h-4 text-[#2E2E2F] shrink-0" />
+                          <input
+                            type="text"
+                            value={hasHeaderExplicitLocation ? headerLocationTerm : ''}
+                            onChange={(event) => {
+                              const next = event.target.value;
+                              setHeaderLocationTerm(next || DEFAULT_HEADER_LOCATION);
+                              setHeaderLocationError('');
+                            }}
+                            onFocus={() => setHeaderLocationMenuOpen(true)}
+                            placeholder="Your Location"
+                            className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F] outline-none"
+                            aria-label="Search location"
+                          />
+                        </div>
                         <button
                           type="button"
-                          className="w-full px-5 py-4 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/5 transition-colors border-b border-[#2E2E2F]/5 disabled:opacity-60 group/btn"
+                          className={`w-11 h-11 flex items-center justify-center transition-all ${headerLocating
+                            ? 'text-[#38BDF2] animate-pulse'
+                            : 'text-[#2E2E2F] hover:text-[#38BDF2] hover:bg-[#38BDF2]/8'
+                            } rounded-xl mr-1 group/gps`}
                           onClick={(e) => {
-                            e.preventDefault();
+                            e.stopPropagation();
                             handleUseCurrentLocationInHeader();
                           }}
                           disabled={headerLocating}
+                          title="Search near me"
                         >
-                          <div className={`w-10 h-10 rounded-full border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/btn:bg-[#38BDF2] group-hover/btn:text-[#F2F2F2] transition-all shadow-sm ${headerLocating ? 'animate-pulse' : ''}`}>
-                            {headerLocating ? (
-                              <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full inline-block animate-spin" />
-                            ) : (
-                              <svg fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" className="w-5 h-5">
+                          {headerLocating ? (
+                            <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full inline-block animate-spin" />
+                          ) : (
+                            <div className="relative">
+                              <svg fill="none" stroke="currentColor" strokeWidth={2.4} viewBox="0 0 24 24" className="w-5 h-5 group-hover/gps:scale-110 transition-transform">
                                 <circle cx="12" cy="12" r="3" />
                                 <path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
                               </svg>
-                            )}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-sm font-black text-[#2E2E2F]">Detect My Location</span>
-                            <span className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-wider">Fast GPS Search</span>
-                          </div>
+                              <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#38BDF2] rounded-full opacity-0 group-hover/gps:opacity-100 transition-opacity animate-ping" />
+                            </div>
+                          )}
                         </button>
-
-                        <button
-                          type="button"
-                          className="w-full px-5 py-4 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/5 transition-colors group/online border-b border-[#2E2E2F]/5"
-                          onClick={() => handleSelectHeaderLocation(ONLINE_LOCATION_VALUE)}
-                        >
-                          <div className="w-10 h-10 rounded-xl border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/online:bg-[#38BDF2] group-hover/online:text-[#F2F2F2] transition-all shadow-sm">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16v12H4z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M10 9l5 3-5 3V9z" />
-                            </svg>
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-sm font-black text-[#2E2E2F]">Online Events</span>
-                            <span className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-wider">Virtual Experiences</span>
-                          </div>
-                        </button>
-
-                        <button
-                          type="button"
-                          className="w-full px-5 py-3 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors group/reset"
-                          onClick={() => handleSelectHeaderLocation(DEFAULT_HEADER_LOCATION)}
-                        >
-                          <div className="w-10 h-10 rounded-full border border-current opacity-20 flex items-center justify-center transition-opacity group-hover/reset:opacity-100">
-                            <ICONS.Trash className="w-4 h-4" />
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-[11px] font-black uppercase tracking-widest">Clear Location</span>
-                            <span className="text-[9px] font-bold opacity-70">Reset to all areas</span>
-                          </div>
-                        </button>
-
-                        {headerLocationError && (
-                          <div className="px-5 py-3 text-[11px] font-bold text-red-500 bg-red-50 border-t border-red-100 flex items-center gap-2">
-                            <ICONS.AlertTriangle className="w-3.5 h-3.5" />
-                            {headerLocationError}
-                          </div>
-                        )}
-
-                        <div className="px-5 py-4 bg-[#F8F9FA] border-t border-[#2E2E2F]/5">
-                          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#2E2E2F] italic leading-relaxed">Tip: Type any city name in the input field above for custom filtering.</p>
-                        </div>
                       </div>
-                    )}
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-12 h-11 flex items-center justify-center transition-colors text-[#2E2E2F] hover:bg-[#38BDF2]/12 hover:text-[#38BDF2]"
-                    aria-label="Find events"
-                  >
-                    <ICONS.Search className="w-4 h-4" />
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
 
-          {/* Right Segment: Nav Links and Auth Actions */}
-          <div className="flex items-center justify-end gap-4 lg:gap-6 ml-auto flex-none">
-            {/* Nav Links */}
-            <div className="hidden lg:flex items-center gap-8">
-              {navLinks.map((link: any) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2E2E2F] hover:text-[#38BDF2] transition-colors relative group whitespace-nowrap"
-                >
-                  {link.label}
-                  {link.isLive && (
-                    <span className="relative flex h-2 w-2 ml-1 inline-block -top-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                    </span>
-                  )}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#38BDF2] transition-all group-hover:w-full" />
-                </Link>
-              ))}
+                      {headerLocationMenuOpen && (
+                        <div className="absolute left-0 right-0 top-[calc(100%+12px)] z-50 w-[320px] rounded-xl border border-[#2E2E2F]/10 bg-white shadow-[0_24px_48px_-20px_rgba(46,46,47,0.35)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                          <button
+                            type="button"
+                            className="w-full px-5 py-4 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/5 transition-colors border-b border-[#2E2E2F]/5 disabled:opacity-60 group/btn"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleUseCurrentLocationInHeader();
+                            }}
+                            disabled={headerLocating}
+                          >
+                            <div className={`w-10 h-10 rounded-full border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/btn:bg-[#38BDF2] group-hover/btn:text-[#F2F2F2] transition-all shadow-sm ${headerLocating ? 'animate-pulse' : ''}`}>
+                              {headerLocating ? (
+                                <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full inline-block animate-spin" />
+                              ) : (
+                                <svg fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" className="w-5 h-5">
+                                  <circle cx="12" cy="12" r="3" />
+                                  <path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+                                </svg>
+                              )}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-black text-[#2E2E2F]">Detect My Location</span>
+                              <span className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-wider">Fast GPS Search</span>
+                            </div>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="w-full px-5 py-4 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/5 transition-colors group/online border-b border-[#2E2E2F]/5"
+                            onClick={() => handleSelectHeaderLocation(ONLINE_LOCATION_VALUE)}
+                          >
+                            <div className="w-10 h-10 rounded-xl border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/online:bg-[#38BDF2] group-hover/online:text-[#F2F2F2] transition-all shadow-sm">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16v12H4z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M10 9l5 3-5 3V9z" />
+                              </svg>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-black text-[#2E2E2F]">Online Events</span>
+                              <span className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-wider">Virtual Experiences</span>
+                            </div>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="w-full px-5 py-3 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors group/reset"
+                            onClick={() => handleSelectHeaderLocation(DEFAULT_HEADER_LOCATION)}
+                          >
+                            <div className="w-10 h-10 rounded-full border border-current opacity-20 flex items-center justify-center transition-opacity group-hover/reset:opacity-100">
+                              <ICONS.Trash className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[11px] font-black uppercase tracking-widest">Clear Location</span>
+                              <span className="text-[9px] font-bold opacity-70">Reset to all areas</span>
+                            </div>
+                          </button>
+
+                          {headerLocationError && (
+                            <div className="px-5 py-3 text-[11px] font-bold text-red-500 bg-red-50 border-t border-red-100 flex items-center gap-2">
+                              <ICONS.AlertTriangle className="w-3.5 h-3.5" />
+                              {headerLocationError}
+                            </div>
+                          )}
+
+                          <div className="px-5 py-4 bg-[#F8F9FA] border-t border-[#2E2E2F]/5">
+                            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#2E2E2F] italic leading-relaxed">Tip: Type any city name in the input field above for custom filtering.</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-12 h-11 flex items-center justify-center transition-colors text-[#2E2E2F] hover:bg-[#38BDF2]/12 hover:text-[#38BDF2]"
+                      aria-label="Find events"
+                    >
+                      <ICONS.Search className="w-4 h-4" />
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
 
-            {/* Mobile Menu Button - Shown only on mobile */}
-            <button
-              className="lg:hidden p-3 min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 transition-colors"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              )}
-            </button>
+            {/* Right Segment: Nav Links and Auth Actions */}
+            <div className="flex items-center justify-end gap-2 lg:gap-6 ml-auto flex-none">
+              {/* Mobile Search - Redirect to Search Page */}
+              {/* Create Event Shortcut */}
+              <button
+                onClick={() => navigate(isAuthenticated ? '/my-events/create' : '/signup')}
+                className="lg:hidden w-16 h-16 flex items-center justify-center rounded-xl transition-all text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20"
+                aria-label="Create Event"
+              >
+                <ICONS.Plus className="w-7 h-7" />
+              </button>
 
-            <div className="flex items-center gap-1 shrink-0">
-              {isAuthenticated ? (
-                <>
-                  <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
-                    Watch Live
-                    {hasLiveEvents && (
-                      <span className="relative flex h-2 w-2 ml-0.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+              {showHeaderSearchBar && (
+                <button
+                  onClick={() => navigate('/search')}
+                  className="lg:hidden w-16 h-16 flex items-center justify-center rounded-xl transition-all text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20"
+                  aria-label="Search"
+                >
+                  <ICONS.Search className="w-7 h-7" />
+                </button>
+              )}
+              {/* Nav Links */}
+              <div className="hidden lg:flex items-center gap-8">
+                {navLinks.map((link: any) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2E2E2F] hover:text-[#38BDF2] transition-colors relative group whitespace-nowrap"
+                  >
+                    {link.label}
+                    {link.isLive && (
+                      <span className="relative flex h-2 w-2 ml-1 inline-block -top-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                       </span>
                     )}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#38BDF2] transition-all group-hover:w-full" />
                   </Link>
+                ))}
+              </div>
 
-                  <div className="relative">
-                    <button
-                      className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 transition-colors"
-                      onClick={() => setUserMenuOpen((v) => !v)}
-                    >
-                      <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center">
-                        {imageUrl ? (
-                          <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="font-semibold text-xs text-[#2E2E2F]">{initials}</span>
-                        )}
-                      </div>
-                      <div className="hidden sm:block text-left leading-tight min-w-0">
-                        <p className="text-xs font-semibold text-[#2E2E2F] whitespace-nowrap">{displayName}</p>
-                        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-0.5">{roleLabel}</p>
-                      </div>
-                      <svg className="w-4 h-4 text-[#2E2E2F]" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    {userMenuOpen && (
-                      <>
-                        <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                        <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl shadow-xl z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
-                          <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
-                            <p className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-widest mb-0.5">Account</p>
-                            <p className="text-xs font-semibold text-[#2E2E2F]">{displayName}</p>
-                            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-1">{roleLabel}</p>
-                          </div>
-                          {isOrganizer ? (
-                            isAttendingView ? (
+
+
+              <div className="flex items-center gap-1 shrink-0">
+                {isAuthenticated ? (
+                  <>
+                    <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
+                      Watch Live
+                      {hasLiveEvents && (
+                        <span className="relative flex h-2 w-2 ml-0.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                        </span>
+                      )}
+                    </Link>
+
+                    <div className="relative">
+                      <button
+                        className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 transition-colors"
+                        onClick={() => setUserMenuOpen((v) => !v)}
+                      >
+                        <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center">
+                          {imageUrl ? (
+                            <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="font-semibold text-xs text-[#2E2E2F]">{initials}</span>
+                          )}
+                        </div>
+                        <div className="hidden sm:block text-left leading-tight min-w-0">
+                          <p className="text-xs font-semibold text-[#2E2E2F] whitespace-nowrap">{displayName}</p>
+                          <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-0.5">{roleLabel}</p>
+                        </div>
+                        <svg className="w-4 h-4 text-[#2E2E2F]" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {userMenuOpen && (
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+                          <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl shadow-xl z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
+                            <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
+                              <p className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-widest mb-0.5">Account</p>
+                              <p className="text-xs font-semibold text-[#2E2E2F]">{displayName}</p>
+                              <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-1">{roleLabel}</p>
+                            </div>
+                            {isOrganizer ? (
+                              isAttendingView ? (
+                                <>
+                                  <button
+                                    className={publicUserMenuActionClass}
+                                    onClick={() => {
+                                      setPublicMode('attending');
+                                      setUserMenuOpen(false);
+                                      navigate('/browse-events');
+                                    }}
+                                  >
+                                    <ICONS.Calendar className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                    <span>Browse Events</span>
+                                  </button>
+                                  <button
+                                    className={publicUserMenuActionClass}
+                                    onClick={() => {
+                                      setPublicMode('attending');
+                                      setUserMenuOpen(false);
+                                      navigate('/my-tickets');
+                                    }}
+                                  >
+                                    <ICONS.Ticket className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                    <span>My Tickets</span>
+                                  </button>
+                                  <button
+                                    className={publicUserMenuActionClass}
+                                    onClick={() => {
+                                      setPublicMode('organizer');
+                                      setUserMenuOpen(false);
+                                      navigate('/my-events');
+                                    }}
+                                  >
+                                    <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                    <span>Organize Events</span>
+                                  </button>
+                                  <button
+                                    className={publicUserMenuActionClass}
+                                    onClick={() => {
+                                      setPublicMode('attending');
+                                      setUserMenuOpen(false);
+                                      navigate('/liked');
+                                    }}
+                                  >
+                                    <ICONS.Heart className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                    <span>Liked</span>
+                                  </button>
+                                  <button
+                                    className={publicUserMenuActionClass}
+                                    onClick={() => {
+                                      setPublicMode('attending');
+                                      setUserMenuOpen(false);
+                                      navigate('/followings');
+                                    }}
+                                  >
+                                    <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                    <span>Followings</span>
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    className={publicUserMenuActionClass}
+                                    onClick={() => {
+                                      setPublicMode('organizer');
+                                      setUserMenuOpen(false);
+                                      navigate('/user-settings?tab=organizer');
+                                    }}
+                                  >
+                                    <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                    <span>Organizer Profile</span>
+                                  </button>
+                                  <button
+                                    className={publicUserMenuActionClass}
+                                    onClick={() => {
+                                      setPublicMode('organizer');
+                                      setUserMenuOpen(false);
+                                      navigate('/user-settings?tab=team');
+                                    }}
+                                  >
+                                    <ICONS.Shield className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                    <span>Team & Access</span>
+                                  </button>
+                                  <button
+                                    className={publicUserMenuActionClass}
+                                    onClick={() => {
+                                      setPublicMode('organizer');
+                                      setUserMenuOpen(false);
+                                      navigate('/user-settings?tab=email');
+                                    }}
+                                  >
+                                    <ICONS.Mail className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                    <span>Email Settings</span>
+                                  </button>
+                                  <button
+                                    className={publicUserMenuActionClass}
+                                    onClick={() => {
+                                      setPublicMode('organizer');
+                                      setUserMenuOpen(false);
+                                      navigate('/user-settings?tab=payments');
+                                    }}
+                                  >
+                                    <ICONS.CreditCard className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                    <span>Payment Gateway</span>
+                                  </button>
+                                  <button
+                                    className={publicUserMenuActionClass}
+                                    onClick={() => {
+                                      setPublicMode('organizer');
+                                      setUserMenuOpen(false);
+                                      navigate('/user-settings?tab=account');
+                                    }}
+                                  >
+                                    <ICONS.Settings className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                    <span>Account</span>
+                                  </button>
+                                </>
+                              )
+                            ) : (
                               <>
                                 <button
                                   className={publicUserMenuActionClass}
-                                  onClick={() => {
-                                    setPublicMode('attending');
-                                    setUserMenuOpen(false);
-                                    navigate('/browse-events');
-                                  }}
+                                  onClick={() => { setUserMenuOpen(false); navigate('/browse-events'); }}
                                 >
                                   <ICONS.Calendar className="w-4 h-4 opacity-70 group-hover:opacity-100" />
                                   <span>Browse Events</span>
                                 </button>
                                 <button
                                   className={publicUserMenuActionClass}
-                                  onClick={() => {
-                                    setPublicMode('attending');
-                                    setUserMenuOpen(false);
-                                    navigate('/my-tickets');
-                                  }}
+                                  onClick={() => { setUserMenuOpen(false); navigate('/my-tickets'); }}
                                 >
                                   <ICONS.Ticket className="w-4 h-4 opacity-70 group-hover:opacity-100" />
                                   <span>My Tickets</span>
                                 </button>
                                 <button
                                   className={publicUserMenuActionClass}
-                                  onClick={() => {
-                                    setPublicMode('organizer');
-                                    setUserMenuOpen(false);
-                                    navigate('/my-events');
-                                  }}
-                                >
-                                  <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                  <span>Organize Events</span>
-                                </button>
-                                <button
-                                  className={publicUserMenuActionClass}
-                                  onClick={() => {
-                                    setPublicMode('attending');
-                                    setUserMenuOpen(false);
-                                    navigate('/liked');
-                                  }}
+                                  onClick={() => { setUserMenuOpen(false); navigate('/liked'); }}
                                 >
                                   <ICONS.Heart className="w-4 h-4 opacity-70 group-hover:opacity-100" />
                                   <span>Liked</span>
                                 </button>
                                 <button
                                   className={publicUserMenuActionClass}
-                                  onClick={() => {
-                                    setPublicMode('attending');
-                                    setUserMenuOpen(false);
-                                    navigate('/followings');
-                                  }}
+                                  onClick={() => { setUserMenuOpen(false); navigate('/followings'); }}
                                 >
                                   <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
                                   <span>Followings</span>
                                 </button>
                               </>
-                            ) : (
-                              <>
-                                <button
-                                  className={publicUserMenuActionClass}
-                                  onClick={() => {
-                                    setPublicMode('organizer');
-                                    setUserMenuOpen(false);
-                                    navigate('/user-settings?tab=organizer');
-                                  }}
-                                >
-                                  <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                  <span>Organizer Profile</span>
-                                </button>
-                                <button
-                                  className={publicUserMenuActionClass}
-                                  onClick={() => {
-                                    setPublicMode('organizer');
-                                    setUserMenuOpen(false);
-                                    navigate('/user-settings?tab=team');
-                                  }}
-                                >
-                                  <ICONS.Shield className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                  <span>Team & Access</span>
-                                </button>
-                                <button
-                                  className={publicUserMenuActionClass}
-                                  onClick={() => {
-                                    setPublicMode('organizer');
-                                    setUserMenuOpen(false);
-                                    navigate('/user-settings?tab=email');
-                                  }}
-                                >
-                                  <ICONS.Mail className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                  <span>Email Settings</span>
-                                </button>
-                                <button
-                                  className={publicUserMenuActionClass}
-                                  onClick={() => {
-                                    setPublicMode('organizer');
-                                    setUserMenuOpen(false);
-                                    navigate('/user-settings?tab=payments');
-                                  }}
-                                >
-                                  <ICONS.CreditCard className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                  <span>Payment Gateway</span>
-                                </button>
-                                <button
-                                  className={publicUserMenuActionClass}
-                                  onClick={() => {
-                                    setPublicMode('organizer');
-                                    setUserMenuOpen(false);
-                                    navigate('/user-settings?tab=account');
-                                  }}
-                                >
-                                  <ICONS.Settings className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                  <span>Account</span>
-                                </button>
-                              </>
-                            )
-                          ) : (
-                            <>
+                            )}
+                            <div className="border-t border-[#2E2E2F]/5 mt-1 pt-1">
                               <button
-                                className={publicUserMenuActionClass}
-                                onClick={() => { setUserMenuOpen(false); navigate('/browse-events'); }}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
+                                onClick={() => {
+                                  setUserMenuOpen(false);
+                                  handleLogout();
+                                }}
                               >
-                                <ICONS.Calendar className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                <span>Browse Events</span>
+                                <svg className="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                <span>Logout</span>
                               </button>
-                              <button
-                                className={publicUserMenuActionClass}
-                                onClick={() => { setUserMenuOpen(false); navigate('/my-tickets'); }}
-                              >
-                                <ICONS.Ticket className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                <span>My Tickets</span>
-                              </button>
-                              <button
-                                className={publicUserMenuActionClass}
-                                onClick={() => { setUserMenuOpen(false); navigate('/liked'); }}
-                              >
-                                <ICONS.Heart className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                <span>Liked</span>
-                              </button>
-                              <button
-                                className={publicUserMenuActionClass}
-                                onClick={() => { setUserMenuOpen(false); navigate('/followings'); }}
-                              >
-                                <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                <span>Followings</span>
-                              </button>
-                            </>
-                          )}
-                          <div className="border-t border-[#2E2E2F]/5 mt-1 pt-1">
-                            <button
-                              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
-                              onClick={() => {
-                                setUserMenuOpen(false);
-                                handleLogout();
-                              }}
-                            >
-                              <svg className="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                              </svg>
-                              <span>Logout</span>
-                            </button>
+                            </div>
                           </div>
+                        </>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => navigate('/login')}
+                      className={`hidden lg:flex ${landingLoginButtonClass}`}
+                    >
+                      Login
+                    </button>
+                    <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
+                      Watch Live
+                      {hasLiveEvents && (
+                        <span className="relative flex h-2 w-2 ml-0.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                        </span>
+                      )}
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Mobile search row replaced by /search page navigation */}
+            </div>
+
+            {/* Row 2 (Mobile Quick Links - Persistent) */}
+            {showMobileNav && (
+              <div className="lg:hidden flex items-center justify-around h-20 border-t border-[#2E2E2F]/5 bg-[#F2F2F2]/50 relative">
+                <Link to="/" title="Home" className="w-16 h-16 flex items-center justify-center rounded-2xl text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 transition-all">
+                  <ICONS.Home className="w-7 h-7" />
+                </Link>
+                <Link to="/browse-events" title="Events" className="w-16 h-16 flex items-center justify-center rounded-2xl text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 transition-all">
+                  <ICONS.Calendar className="w-7 h-7" />
+                </Link>
+                <Link to="/organizers/discover" title="Discover" className="w-16 h-16 flex items-center justify-center rounded-2xl text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 transition-all">
+                  <ICONS.Compass className="w-7 h-7" />
+                </Link>
+                <Link to="/pricing" title="Pricing" className="w-16 h-16 flex items-center justify-center rounded-2xl text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 transition-all">
+                  <ICONS.Ticket className="w-7 h-7" />
+                </Link>
+                
+                {isAuthenticated ? (
+                  <div className="relative">
+                    <button 
+                      onClick={() => setMobileUserMenuOpen(!mobileUserMenuOpen)} 
+                      title="Profile" 
+                      className="w-16 h-16 flex items-center justify-center rounded-2xl transition-all overflow-hidden"
+                    >
+                      <div className={`w-10 h-10 rounded-xl overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center border-2 ${mobileUserMenuOpen ? 'border-[#38BDF2]' : 'border-transparent'}`}>
+                        {imageUrl ? (
+                          <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="font-bold text-xs text-[#2E2E2F]">{initials}</span>
+                        )}
+                      </div>
+                    </button>
+
+                    {/* Mobile User Dropdown Popover */}
+                    {mobileUserMenuOpen && (
+                      <>
+                        <div className="fixed inset-0 z-[110]" onClick={() => setMobileUserMenuOpen(false)} />
+                        <div className="absolute top-[calc(100%+0.5rem)] right-[-1rem] w-64 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-[120] p-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                           <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
+                              <p className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-widest mb-0.5">Account</p>
+                              <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
+                              <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-1">{roleLabel}</p>
+                           </div>
+                           
+                           <div className="flex flex-col gap-1 max-h-[60vh] overflow-y-auto">
+                              {isOrganizer ? (
+                                isAttendingView ? (
+                                  <>
+                                    <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('attending'); setMobileUserMenuOpen(false); navigate('/browse-events'); }}>
+                                      <ICONS.Calendar className="w-4 h-4 opacity-70" />
+                                      <span>Browse Events</span>
+                                    </button>
+                                    <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('attending'); setMobileUserMenuOpen(false); navigate('/my-tickets'); }}>
+                                      <ICONS.Ticket className="w-4 h-4 opacity-70" />
+                                      <span>My Tickets</span>
+                                    </button>
+                                    <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('attending'); setMobileUserMenuOpen(false); navigate('/liked'); }}>
+                                      <ICONS.Heart className="w-4 h-4 opacity-70" />
+                                      <span>Liked</span>
+                                    </button>
+                                    <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('attending'); setMobileUserMenuOpen(false); navigate('/followings'); }}>
+                                      <ICONS.Users className="w-4 h-4 opacity-70" />
+                                      <span>Followings</span>
+                                    </button>
+                                    <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('organizer'); setMobileUserMenuOpen(false); navigate('/my-events'); }}>
+                                      <ICONS.Zap className="w-4 h-4 opacity-70" />
+                                      <span>Organize Events</span>
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/user-settings?tab=organizer'); }}>
+                                      <ICONS.Users className="w-4 h-4 opacity-70" />
+                                      <span>Organizer Profile</span>
+                                    </button>
+                                    <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/user-settings?tab=account'); }}>
+                                      <ICONS.Settings className="w-4 h-4 opacity-70" />
+                                      <span>Account</span>
+                                    </button>
+                                  </>
+                                )
+                              ) : (
+                                <>
+                                  <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/browse-events'); }}>
+                                    <ICONS.Calendar className="w-4 h-4 opacity-70" />
+                                    <span>Browse Events</span>
+                                  </button>
+                                  <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/my-tickets'); }}>
+                                    <ICONS.Ticket className="w-4 h-4 opacity-70" />
+                                    <span>My Tickets</span>
+                                  </button>
+                                  <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/liked'); }}>
+                                    <ICONS.Heart className="w-4 h-4 opacity-70" />
+                                    <span>Liked</span>
+                                  </button>
+                                  <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/followings'); }}>
+                                    <ICONS.Users className="w-4 h-4 opacity-70" />
+                                    <span>Followings</span>
+                                  </button>
+                                </>
+                              )}
+                              
+                              <div className="border-t border-[#2E2E2F]/5 mt-1 pt-1">
+                                <button 
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
+                                  onClick={() => { setMobileUserMenuOpen(false); handleLogout(); }}
+                                >
+                                  <svg className="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                                  <span>Logout</span>
+                                </button>
+                              </div>
+                           </div>
                         </div>
                       </>
                     )}
                   </div>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => navigate('/login')}
-                    className={`hidden lg:flex ${landingLoginButtonClass}`}
+                ) : (
+                  <button 
+                    onClick={() => navigate('/login')} 
+                    title="Login" 
+                    className="w-16 h-16 flex items-center justify-center rounded-2xl text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 transition-all"
                   >
-                    Login
+                    <ICONS.User className="w-7 h-7" />
                   </button>
-                  <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
-                    Watch Live
-                    {hasLiveEvents && (
-                      <span className="relative flex h-2 w-2 ml-0.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
-                      </span>
-                    )}
-                  </Link>
-                </>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
-
-          {showHeaderSearchBar && (
-            <div className="w-full lg:hidden">
-              <form onSubmit={handleHeaderSearchSubmit} className="space-y-2">
-                <div className="flex items-center min-h-[48px] rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.12)] focus-within:border-[#38BDF2]/50 transition-all">
-                  <label className="flex items-center gap-3 px-4 min-w-0 flex-1">
-                    <ICONS.Search className="w-5 h-5 text-[#2E2E2F] shrink-0" />
-                    <input
-                      type="text"
-                      value={headerSearchTerm}
-                      onChange={(event) => setHeaderSearchTerm(event.target.value)}
-                      placeholder={animatedPlaceholder || 'Find your events'}
-                      className="w-full bg-transparent text-[14px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F] outline-none"
-                    />
-                  </label>
-                  <button
-                    type="submit"
-                    className="w-14 min-h-[48px] flex items-center justify-center text-[#2E2E2F] hover:bg-[#38BDF2]/12 hover:text-[#38BDF2] active:bg-[#38BDF2]/20 transition-colors"
-                    aria-label="Find events"
-                  >
-                    <ICONS.Search className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <div className="relative">
-                  <div className="flex items-center min-h-[48px] rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.12)]">
-                    <button
-                      type="button"
-                      className="flex min-w-0 flex-1 items-center gap-3 px-4 text-left text-[14px] font-bold text-[#2E2E2F] hover:bg-[#38BDF2]/5 active:bg-[#38BDF2]/10 transition-colors min-h-[48px]"
-                      onClick={() => {
-                        setHeaderLocationMenuOpen((prev) => !prev);
-                        setHeaderLocationError('');
-                      }}
-                    >
-                      <ICONS.MapPin className="w-5 h-5 shrink-0 text-[#2E2E2F]" />
-                      <span className={`truncate ${hasHeaderExplicitLocation ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]'}`}>
-                        {hasHeaderExplicitLocation ? headerLocationTerm : DEFAULT_HEADER_LOCATION}
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`mr-1 flex min-h-[48px] min-w-[48px] p-2 items-center justify-center rounded-xl transition-all ${headerLocating
-                        ? 'text-[#38BDF2] animate-pulse'
-                        : 'text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] active:bg-[#38BDF2]/20'
-                        }`}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleUseCurrentLocationInHeader();
-                      }}
-                      disabled={headerLocating}
-                      title="Search near me"
-                    >
-                      {headerLocating ? (
-                        <span className="inline-block h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
-                      ) : (
-                        <svg fill="none" stroke="currentColor" strokeWidth={2.4} viewBox="0 0 24 24" className="h-5 w-5">
-                          <circle cx="12" cy="12" r="3" />
-                          <path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-
-                  {headerLocationMenuOpen && (
-                    <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-50 overflow-hidden rounded-xl border border-[#2E2E2F]/10 bg-white shadow-[0_24px_48px_-20px_rgba(46,46,47,0.35)] animate-in fade-in slide-in-from-top-2 duration-200">
-                      <button
-                        type="button"
-                        className="flex w-full items-center gap-4 border-b border-[#2E2E2F]/5 px-5 py-4 text-left text-[#2E2E2F] transition-colors hover:bg-[#38BDF2]/5 active:bg-[#38BDF2]/10 disabled:opacity-60 min-h-[56px]"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          handleUseCurrentLocationInHeader();
-                        }}
-                        disabled={headerLocating}
-                      >
-                        <div className={`flex h-10 w-10 items-center justify-center rounded-full border border-[#38BDF2]/30 text-[#38BDF2] ${headerLocating ? 'animate-pulse' : ''}`}>
-                          {headerLocating ? (
-                            <span className="inline-block h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
-                          ) : (
-                            <svg fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" className="h-5 w-5">
-                              <circle cx="12" cy="12" r="3" />
-                              <path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
-                            </svg>
-                          )}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-black text-[#2E2E2F]">Detect My Location</span>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#2E2E2F]">Fast GPS Search</span>
-                        </div>
-                      </button>
-
-                      <button
-                        type="button"
-                        className="flex w-full items-center gap-4 border-b border-[#2E2E2F]/5 px-5 py-4 text-left text-[#2E2E2F] transition-colors hover:bg-[#38BDF2]/5"
-                        onClick={() => handleSelectHeaderLocation(ONLINE_LOCATION_VALUE)}
-                      >
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#38BDF2]/30 text-[#38BDF2]">
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16v12H4z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M10 9l5 3-5 3V9z" />
-                          </svg>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-black text-[#2E2E2F]">Online Events</span>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#2E2E2F]">Virtual Experiences</span>
-                        </div>
-                      </button>
-
-                      <button
-                        type="button"
-                        className="flex w-full items-center gap-4 px-5 py-3 text-left text-[#2E2E2F] transition-colors hover:bg-red-50 hover:text-red-500"
-                        onClick={() => handleSelectHeaderLocation(DEFAULT_HEADER_LOCATION)}
-                      >
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-current opacity-20">
-                          <ICONS.Trash className="w-4 h-4" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[11px] font-black uppercase tracking-widest">Clear Location</span>
-                          <span className="text-[9px] font-bold opacity-70">Reset to all areas</span>
-                        </div>
-                      </button>
-
-                      {headerLocationError && (
-                        <div className="flex items-center gap-2 border-t border-red-100 bg-red-50 px-5 py-3 text-[11px] font-bold text-red-500">
-                          <ICONS.AlertTriangle className="w-3.5 h-3.5" />
-                          {headerLocationError}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </form>
-            </div>
-          )}
-        </div>
-      </header>
+        </header>
+      )}
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <>
-          <div className="lg:hidden fixed inset-0 bg-black/30 z-[95]" onClick={() => setMobileMenuOpen(false)} />
-          <div className={`lg:hidden fixed right-0 z-[100] w-[min(21rem,calc(100vw-0.75rem))] overflow-y-auto rounded-l-[1.75rem] border border-[#2E2E2F]/10 bg-[#F2F2F2] shadow-[0_24px_60px_-22px_rgba(46,46,47,0.35)] animate-in slide-in-from-right-3 duration-200 ${mobileMenuPanelClass}`} style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
+          <div className="lg:hidden fixed inset-0 bg-[#2E2E2F]/40 backdrop-blur-sm z-[2000]" onClick={() => setMobileMenuOpen(false)} />
+          <div className={`lg:hidden fixed left-0 top-0 z-[2001] w-[min(22rem,85vw)] h-full overflow-y-auto bg-[#F2F2F2] shadow-[25px_0_60px_-15px_rgba(0,0,0,0.3)] animate-in slide-in-from-left duration-300 flex flex-col`} style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
+            {/* Drawer Header */}
+            <div className="px-6 py-8 flex items-center justify-between border-b border-[#2E2E2F]/5 bg-[#F2F2F2]">
+              <Branding className="h-14 w-auto" />
+              <button 
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-12 h-12 flex items-center justify-center rounded-2xl bg-black/5 text-[#2E2E2F] hover:bg-black/10 transition-all"
+              >
+                <ICONS.X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
             {!isAuthenticated && (
-              <div className="border-b border-[#2E2E2F]/8 px-3 pt-3 pb-2">
-                <p className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">Explore StartupLab</p>
-                <nav className="mt-2 flex flex-col gap-1">
+              <div className="px-3 pt-6 pb-2">
+                <p className="px-4 text-[10px] font-black uppercase tracking-[0.25em] text-[#2E2E2F]/50 mb-4">Explore StartupLab</p>
+                <nav className="flex flex-col gap-1">
                   {guestMobileLinks.map((link) => (
                     <Link
                       key={link.path}
                       to={link.path}
-                      className="flex items-center gap-3 rounded-xl px-4 py-4 text-sm font-semibold text-[#2E2E2F] transition-colors hover:bg-white hover:text-[#38BDF2] active:bg-[#38BDF2]/10"
+                      className="flex items-center gap-4 rounded-2xl px-5 py-4 text-[15px] font-bold text-[#2E2E2F] transition-all hover:bg-[#38BDF2]/5 hover:text-[#38BDF2] active:scale-[0.98]"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <span className="shrink-0 opacity-70">{link.icon}</span>
+                      <span className="shrink-0 flex items-center justify-center text-current">{link.icon}</span>
                       <span>{link.label}</span>
-                      {link.isLive && hasLiveEvents && (
-                        <span className="relative ml-auto flex h-2 w-2">
-                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75"></span>
-                          <span className="relative inline-flex h-2 w-2 rounded-full bg-red-600"></span>
-                        </span>
-                      )}
                     </Link>
                   ))}
                 </nav>
               </div>
             )}
 
-            {/* Mobile Auth Buttons Dropdown */}
-            <div className="flex flex-col gap-0 py-0 px-0 bg-transparent overflow-hidden">
+            {/* Mobile Auth Buttons Dropdown Area */}
+            <div className="flex flex-col gap-0 px-3">
               {!isAuthenticated ? (
-                <>
+                <div className="mt-4 pt-4 border-t border-[#2E2E2F]/5">
                   <button
                     onClick={() => { setMobileMenuOpen(false); navigate('/signup'); }}
-                    className="flex items-center gap-3 px-4 py-3 text-[#38BDF2] hover:bg-white transition-colors text-xs font-semibold w-full [&>span:first-child]:hidden text-left"
+                    className="flex items-center gap-4 px-5 py-4 text-[#38BDF2] hover:bg-[#38BDF2]/5 rounded-2xl text-[15px] font-bold w-full text-left"
                   >
-                    <span>▶</span>
+                    <ICONS.Zap className="w-5 h-5 shrink-0" />
                     <span>Get Started</span>
                   </button>
                   <button
                     onClick={() => { setMobileMenuOpen(false); navigate('/login'); }}
-                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white transition-colors text-xs font-semibold w-full border-t border-[#2E2E2F]/5 text-left"
+                    className="flex items-center gap-4 px-5 py-4 text-[#2E2E2F] hover:bg-black/5 rounded-2xl text-[15px] font-bold w-full text-left mt-1"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
+                    <ICONS.LogIn className="w-5 h-5 shrink-0" />
                     <span>Login</span>
                   </button>
-
-                </>
+                </div>
               ) : (
-                <>
-                  <div className="px-4 py-3 border-b border-[#2E2E2F]/5">
-                    <p className="text-[9px] font-medium text-[#2E2E2F] uppercase tracking-wider mb-0.5">Account</p>
-                    <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
-                    <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-1">Attending</p>
+                <div className="pt-6">
+                  <div className="px-5 py-6 rounded-2xl bg-[#F2F2F2]/50 border border-[#2E2E2F]/5 mb-6">
+                    <p className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest mb-1">Signed in as</p>
+                    <p className="text-lg font-black text-[#2E2E2F] truncate">{displayName}</p>
+                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase mt-2">
+                       {roleLabel}
+                    </div>
                   </div>
 
-                  <Link
-                    to="/browse-events"
-                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <ICONS.Calendar className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" />
-                    <span>Browse Events</span>
-                  </Link>
-                  <Link
-                    to="/my-tickets"
-                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <ICONS.Ticket className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" />
-                    <span>My Tickets</span>
-                  </Link>
+                  {/* Supplemental links for authenticated users */}
+                  <p className="px-4 text-[10px] font-black uppercase tracking-[0.25em] text-[#2E2E2F]/50 mb-3">Resources</p>
+                  <div className="flex flex-col gap-1">
+                    {guestMobileLinks.map((link) => (
+                      <Link
+                        key={link.path}
+                        to={link.path}
+                        className="flex items-center gap-4 rounded-2xl px-5 py-4 text-[15px] font-bold text-[#2E2E2F] transition-all hover:bg-[#38BDF2]/5 hover:text-[#38BDF2]"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <span className="shrink-0 flex items-center justify-center text-current">{link.icon}</span>
+                        <span>{link.label}</span>
+                      </Link>
+                    ))}
+                  </div>
 
-                  {isOrganizer && (
-                    <Link
-                      to="/user-settings?tab=events"
-                      className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
+                  <div className="mt-8 pt-4 border-t border-[#2E2E2F]/5 px-2">
+                    <button
+                      className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-red-500 hover:bg-red-50 transition-all text-[15px] font-bold text-left group"
                       onClick={() => {
-                        setPublicMode('organizer');
                         setMobileMenuOpen(false);
+                        handleLogout();
                       }}
                     >
-                      <ICONS.Zap className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" />
-                      <span>Organize Events</span>
-                    </Link>
-                  )}
-
-                  <Link
-                    to="/liked"
-                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <ICONS.Heart className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" />
-                    <span>Liked</span>
-                  </Link>
-
-                  <Link
-                    to="/followings"
-                    className="flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-white hover:text-[#2E2E2F] transition-colors text-left group text-xs font-semibold w-full border-t border-[#2E2E2F]/5"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" />
-                    <span>Followings</span>
-                  </Link>
-
-                  <button
-                    className="w-full flex items-center gap-3 px-4 py-3 text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors text-left group text-xs font-semibold border-t border-[#2E2E2F]/5"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      handleLogout();
-                    }}
-                  >
-                    <svg className="w-4 h-4 opacity-70 group-hover:opacity-100 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    <span>Logout</span>
-                  </button>
-                </>
+                      <ICONS.LogOut className="w-5 h-5 shrink-0 group-hover:scale-110 transition-transform" />
+                      <span>Log Out</span>
+                    </button>
+                  </div>
+                </div>
               )}
+            </div>
             </div>
           </div>
         </>
       )}
-      <main className="flex-1">{children}</main>
+      <main className={`flex-1 ${showMainHeader ? (showMobileNav ? 'pt-[184px]' : 'pt-[104px]') : 'pt-0'} lg:pt-28`}>{children}</main>
       <footer className="bg-[#0F172A] text-white py-12 px-4 lg:px-10 border-t border-white/10 relative overflow-hidden" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
         {/* Subtle Background Glow */}
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#38BDF2]/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
@@ -2630,13 +2645,21 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   setDesktopSidebarOpen(!desktopSidebarOpen);
                 }
               }}
-              className="p-2.5 rounded-lg border border-[#D1D5DB] bg-[#F2F2F2] hover:bg-gray-100 transition-all group active:scale-95"
+              className="p-2 w-16 h-16 md:w-11 md:h-11 flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-[#F2F2F2] hover:bg-gray-100 transition-all group active:scale-95"
               aria-label="Toggle Sidebar"
             >
-              <svg className={`w-5 h-5 transition-transform duration-500 ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-7 h-7 md:w-5 md:h-5 transition-transform duration-500 ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
+            {/* Mobile Logo */}
+            <Link to="/user-home" className="md:hidden shrink-0 flex items-center">
+              {employerLogoUrl ? (
+                <img src={employerLogoUrl} alt="Logo" className="h-16 w-auto max-w-[180px] object-contain" />
+              ) : (
+                <img src="/lgo.webp" alt="Logo" className="h-16 w-16 object-contain" />
+              )}
+            </Link>
             <div className="ml-1 hidden sm:block">
               <p className="text-[10px] uppercase font-black text-[#111111] tracking-[0.2em]">
                 Organizer Portal
@@ -3185,7 +3208,7 @@ const GlobalOnboardingGuard: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, [hasResolvedSession, isAuthenticated, isAttendingView, location.pathname, role, isOnboarded, navigate]);
 
-  if (!hasResolvedSession) return <PageLoader label="Standardizing Platform..." variant="viewport" />;
+  if (!hasResolvedSession) return <PageLoader variant="viewport" />;
 
   // 2. Force redirection if trying to access portal routes (Setup required)
   if (isAuthenticated && role === UserRole.ORGANIZER && isOnboarded === false && isOrganizerPortalPage && !isOnboardingPage && !isAuthPage) {
@@ -3225,6 +3248,7 @@ const App: React.FC = () => (
             <Route path="/welcome" element={<WelcomeView />} />
             <Route path="/reset-password" element={<AuthPage />} />
             <Route path="/accept-invite" element={<AuthPage />} />
+            <Route path="/search" element={<SearchPage />} />
             <Route path="/" element={<PublicLayout><EventList /></PublicLayout>} />
             <Route path="/live" element={<PublicLayout><LivePage /></PublicLayout>} />
             <Route path="/categories/:categoryKey" element={<PublicLayout><CategoryEvents /></PublicLayout>} />

@@ -598,6 +598,46 @@ export const apiService = {
     return data;
   },
 
+  // --- Search History APIs ---
+  getSearchHistory: async (): Promise<string[]> => {
+    const res = await apiService._fetch(`${API_BASE}/api/search-history`, {
+      credentials: 'include',
+      cache: 'no-store'
+    });
+    if (!res.ok) return []; // Fallback to empty history if not authenticated or error
+    const data = await res.json();
+    return Array.isArray(data?.history) ? data.history : [];
+  },
+
+  saveSearchHistory: async (query: string): Promise<void> => {
+    if (!query?.trim()) return;
+    const res = await apiService._fetch(`${API_BASE}/api/search-history`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ query: query.trim() })
+    });
+    if (!res.ok) console.warn('[API] Failed to save search history');
+  },
+
+  deleteSearchHistoryEntry: async (query: string): Promise<void> => {
+    const res = await apiService._fetch(`${API_BASE}/api/search-history/entry`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ query })
+    });
+    if (!res.ok) console.warn('[API] Failed to delete search history entry');
+  },
+
+  clearSearchHistory: async (): Promise<void> => {
+    const res = await apiService._fetch(`${API_BASE}/api/search-history`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    if (!res.ok) console.warn('[API] Failed to clear search history');
+  },
+
   // GET /api/events/:slug
   getEventBySlug: async (slug: string): Promise<Event | null> => {
     const res = await apiService._fetch(`${API_BASE}/api/events/${encodeURIComponent(slug)}`, {

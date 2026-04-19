@@ -658,12 +658,12 @@ export const AuthPage: React.FC = () => {
                 <img
                   src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
                   alt="StartupLab"
-                  className="h-16 w-auto"
+                  className="h-24 w-auto"
                 />
               </Link>
             </div>
 
-            <div className="text-left mb-4">
+            <div className="hidden lg:block text-left mb-4">
               <span className="text-[#38BDF2] text-[11px] font-black mb-1.5 block">
                 {view === 'login' ? 'Returning user' :
                   view === 'signup' ? 'New creator' :
@@ -687,9 +687,9 @@ export const AuthPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="bg-[#F2F2F2] p-8 rounded-[24px] border border-black/[0.03] shadow-[0_20px_40px_rgba(0,0,0,0.05),inset_0_-8px_16px_rgba(0,0,0,0.05),inset_0_8px_16px_rgba(255,255,255,0.8)] overflow-visible">
+            <div className="w-full lg:bg-[#F2F2F2] lg:p-8 lg:rounded-[24px] lg:border lg:border-black/[0.03] lg:shadow-[0_20px_40px_rgba(0,0,0,0.05),inset_0_-8px_16px_rgba(0,0,0,0.05),inset_0_8px_16px_rgba(255,255,255,0.8)] overflow-visible">
               {view === 'login' && (
-                <form onSubmit={handleLogin} className="flex flex-col gap-3 items-stretch">
+                <form onSubmit={handleLogin} className="flex flex-col items-stretch">
                   <div className="space-y-3">
                     <div className="space-y-0.5 text-left relative">
                       <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Email Address <span className="text-red-500">*</span></label>
@@ -708,12 +708,12 @@ export const AuthPage: React.FC = () => {
                       <PasswordInput value={password} onChange={(e: any) => setPassword(e.target.value)} required placeholder="••••••••"
                         icon={<LockIcon className="w-4 h-4" />}
                         inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[11px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
-                      <button type="button" onClick={() => setView('forgot-password')} className="text-[11px] font-bold text-[#38BDF2] hover:underline mt-1 flex justify-end w-full">Forgot password?</button>
+                      <button type="button" onClick={() => setView('forgot-password')} className="text-[13px] font-bold text-[#38BDF2] hover:underline mt-0.5 flex justify-end w-full">Forgot password?</button>
                     </div>
                   </div>
 
                   {showLoginCaptcha && (
-                    <div className="flex justify-center my-2 overflow-visible">
+                    <div className="flex justify-center overflow-visible h-[78px] mt-2">
                       <ReCAPTCHA
                         ref={recaptchaRef}
                         sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'}
@@ -723,31 +723,33 @@ export const AuthPage: React.FC = () => {
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full py-4 text-[11px] font-black rounded-[16px] border-none bg-gradient-to-r from-[#38BDF2] to-[#2DAADF] text-white shadow-[0_10px_20px_rgba(56,189,242,0.2),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" disabled={loading}>
-                    {loading ? 'Wait...' : 'Login'}
+                  <Button type="submit" className="mt-1.5 w-full py-3.5 text-[11px] font-black rounded-[16px] border-none bg-gradient-to-r from-[#38BDF2] to-[#2DAADF] text-white shadow-[0_10px_20px_rgba(56,189,242,0.2),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" loading={loading} disabled={loading}>
+                    Login
                   </Button>
 
-                  <div className="relative my-0.5">
-                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-black/5"></div></div>
-                    <div className="relative flex justify-center text-[11px] font-bold text-black/20"><span className="bg-[#F2F2F2] px-3">Or continue with</span></div>
+                  <div className="flex items-center gap-3 mt-2 mb-2">
+                    <div className="h-px bg-black/5 flex-1"></div>
+                    <span className="text-[13px] font-bold text-black/20">Or continue with</span>
+                    <div className="h-px bg-black/5 flex-1"></div>
                   </div>
 
                   <button type="button" onClick={() => handleSocialLogin('google')} disabled={!!socialLoading}
                     className="flex items-center justify-center gap-3 w-full py-3 bg-[#F2F2F2] !border-[1px] !border-solid !border-black/[0.05] rounded-[16px] shadow-[inset_0_-2px_6px_rgba(0,0,0,0.02),inset_0_2px_6px_rgba(255,255,255,0.7),0_4px_12px_rgba(0,0,0,0.03)] hover:scale-[1.02] transition-all"
                   >
                     <ICONS.Google className="w-4 h-4" />
-                    <span className="text-[11px] font-bold text-black/80">Continue with Google</span>
+                    <span className="text-[13px] font-bold text-black/80">Continue with Google</span>
                   </button>
 
-                  <p className="text-black/40 text-[10px] font-bold text-center mt-3">
+                  <p className="text-black/40 text-[13px] font-bold text-center mt-2">
                     Don't have an account? <button type="button" onClick={() => setView('signup')} className="text-[#38BDF2] hover:underline">Create account</button>
                   </p>
                 </form>
+
               )}
 
               {view === 'signup' && (
                 <div className="w-full" style={{ zoom: 0.8 }}>
-                  <form onSubmit={handleSignup} className="flex flex-col gap-3 pb-10">
+                  <form onSubmit={handleSignup} className="flex flex-col pb-10 items-stretch">
                     <div className="space-y-3">
                   <div className="space-y-0.5">
                     <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Full Name <span className="text-red-500">*</span></label>
@@ -786,34 +788,36 @@ export const AuthPage: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 p-1 bg-black/[0.01] rounded-[11px] mt-0.5">
+                  <div className="flex items-center gap-2 p-1 bg-black/[0.01] rounded-[11px] mt-1.5 mb-1">
                     <Checkbox checked={agreedToTerms} onChange={setAgreedToTerms} />
-                    <span className="text-[11px] text-black/70 font-bold leading-tight">
+                    <span className="text-[13px] text-black/70 font-bold leading-tight">
                       I agree to the <button type="button" onClick={() => setShowTerms(true)} className="text-[#38BDF2] hover:underline">Terms of Service</button> and <button type="button" onClick={() => setShowPrivacy(true)} className="text-[#38BDF2] hover:underline">Privacy Policy</button>.
                     </span>
                   </div>
 
                   <Button 
                     type="submit" 
-                    className="w-full py-4 text-[11px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" 
+                    className="mt-1 w-full py-3.5 text-[13px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" 
+                    loading={loading}
                     disabled={loading}
                   >
-                    {loading ? 'Wait...' : 'Create account'}
+                    Create account
                   </Button>
 
-                  <div className="relative my-0.5">
-                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-black/5"></div></div>
-                    <div className="relative flex justify-center text-[11px] font-bold text-black/20"><span className="bg-[#F2F2F2] px-3">Or sign up with</span></div>
+                  <div className="flex items-center gap-3 mt-2 mb-2">
+                    <div className="h-px bg-black/5 flex-1"></div>
+                    <span className="text-[13px] font-bold text-black/20">Or sign up with</span>
+                    <div className="h-px bg-black/5 flex-1"></div>
                   </div>
 
                   <button type="button" onClick={() => handleSocialLogin('google')} disabled={!!socialLoading}
                     className="flex items-center justify-center gap-3 w-full py-3 bg-[#F2F2F2] !border-[1px] !border-solid !border-black/[0.05] rounded-[16px] shadow-[inset_0_-2px_6px_rgba(0,0,0,0.02),inset_0_2px_6px_rgba(255,255,255,0.7),0_4px_12px_rgba(0,0,0,0.03)] hover:scale-[1.02] transition-all"
                   >
                     <ICONS.Google className="w-4 h-4" />
-                    <span className="text-[11px] font-bold text-black/80">Continue with Google</span>
+                    <span className="text-[13px] font-bold text-black/80">Continue with Google</span>
                   </button>
 
-                  <p className="text-black/40 text-[11px] font-bold text-center mt-1">
+                  <p className="text-black/40 text-[13px] font-bold text-center mt-2">
                     Already have an account? <button type="button" onClick={() => setView('login')} className="text-[#38BDF2] hover:underline">Sign In</button>
                   </p>
                 </form>
@@ -868,8 +872,8 @@ export const AuthPage: React.FC = () => {
                         </div>
                       )}
 
-                      <Button type="submit" className="w-full py-4 text-[11px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all disabled:opacity-50" disabled={loading}>
-                        {loading ? 'Wait...' : 'Send Link'}
+                      <Button type="submit" className="w-full py-4 text-[11px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all disabled:opacity-50" loading={loading} disabled={loading}>
+                        Send Link
                       </Button>
                     </form>
                   ) : (
@@ -914,8 +918,8 @@ export const AuthPage: React.FC = () => {
                         </div>
                       )}
 
-                      <Button type="submit" className="w-full py-4 bg-[#38BDF2] rounded-[16px] font-black border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all" disabled={loading}>
-                        {loading ? 'Updating...' : 'Update Password'}
+                      <Button type="submit" className="w-full py-4 bg-[#38BDF2] rounded-[16px] font-black border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all" loading={loading} disabled={loading}>
+                        Update Password
                       </Button>
                     </form>
                   ) : (
@@ -975,8 +979,8 @@ export const AuthPage: React.FC = () => {
                         </div>
                       )}
 
-                      <Button type="submit" className="w-full py-4 bg-[#38BDF2] rounded-[16px] font-black border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all" disabled={loading}>
-                        {loading ? 'Wait...' : (inviteInfo?.accountExists ? 'Join Organization' : 'Create & Join')}
+                      <Button type="submit" className="w-full py-4 bg-[#38BDF2] rounded-[16px] font-black border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all" loading={loading} disabled={loading}>
+                        {inviteInfo?.accountExists ? 'Join Organization' : 'Create & Join'}
                       </Button>
                     </form>
                   ) : (

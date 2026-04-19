@@ -223,7 +223,7 @@ export const CategoryEvents: React.FC = () => {
   }, [events, searchTerm]);
 
   if (loading) {
-    return <PageLoader label={`Syncing ${category?.label || 'category'} sessions...`} variant="page" />;
+    return <PageLoader variant="page" />;
   }
 
   if (!category) {

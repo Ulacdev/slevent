@@ -57,7 +57,8 @@ export const MobileBottomNav: React.FC = () => {
     };
 
     return (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#F2F2F2]/95 backdrop-blur-xl border-t border-black/5 z-[600] pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.1)]">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#F2F2F2]/95 backdrop-blur-xl z-[600] pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.1)]">
+            <div className="h-[2px] w-full bg-[#38BDF2]" />
             <div className="flex items-center justify-around h-16 relative">
                 {navItems.map((item) => {
                     const active = isActive(item.path);

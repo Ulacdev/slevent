@@ -2,15 +2,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ICONS } from '../constants';
 import { OrganizerProfile } from '../types';
-import { useEngagement } from '../context/EngagementContext';
 import { useUser } from '../context/UserContext';
-import { Badge } from './Shared';
 
 // Helper to handle JSONB image format
 const getImageUrl = (img: any): string => {
     if (!img) return '';
     if (typeof img === 'string') return img;
-    return img.url || img.path || img.publicUrl || '';
+    return img.url || img.path || img.publicUrl || img;
 };
 
 interface OrganizerCardProps {
@@ -18,141 +16,118 @@ interface OrganizerCardProps {
     isFollowing: boolean;
     onFollow: (e: React.MouseEvent) => void;
     onClick: () => void;
-    className?: string; // Allow custom classes for carousel sizing
+    className?: string;
     rank?: number;
 }
 
 export const OrganizerCard: React.FC<OrganizerCardProps> = ({ organizer, isFollowing, onFollow, onClick, className = "", rank }) => {
-    const { userId: currentUserId, imageUrl: currentUserImg, name: currentUserName } = useUser();
+    const { name: currentUserName } = useUser();
     const coverImage = getImageUrl(organizer.coverImageUrl);
     const profileImage = getImageUrl(organizer.profileImageUrl);
     const initials = (organizer.organizerName || 'O').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    
+    // Social proof logic
+    const followers = organizer.recentFollowers || [];
+    const firstFollowerName = followers[0]?.name || (isFollowing ? currentUserName : '');
+    const otherFollowersCount = Math.max(0, (organizer.followersCount || 0) - (firstFollowerName ? 1 : 0));
 
     return (
         <div
             onClick={onClick}
-            className={`group relative bg-[#F2F2F2] rounded-xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.08)] border border-[#2E2E2F]/10 cursor-pointer transition-all duration-300 hover:shadow-[0_4px_30px_rgba(0,0,0,0.12)] hover:-translate-y-1 ${className}`}
+            className={`group relative bg-[#F2F2F2] rounded-xl overflow-hidden shadow-sm border border-black/5 cursor-pointer transition-all duration-400 hover:shadow-xl ${className}`}
+            style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
         >
-            {/* Rank Tag */}
-            {rank && (
-                <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-1.5 bg-[#38BDF2] rounded-full text-[9px] font-black uppercase tracking-widest text-[#F2F2F2] shadow-xl border border-white/20 animate-in zoom-in duration-500 scale-100">
-                    <ICONS.Star className="w-3.5 h-3.5 fill-current" />
-                    #{rank} Popular Organizer
-                </div>
-            )}
-
-            {/* Cover Image */}
-            <div className="h-36 w-full bg-[#E5E5E5] relative">
+            {/* Banner/Cover Image */}
+            <div className="relative h-44 w-full bg-[#E5E5E5] overflow-hidden">
                 {coverImage ? (
-                    <img src={coverImage} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <img src={coverImage} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 ) : (
-                    <div className="w-full h-full bg-[#E5E5E5] flex items-center justify-center">
-                        <ICONS.Image className="w-10 h-10 text-[#2E2E2F]" />
+                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                         <div className="opacity-10 grayscale scale-150 transform">
+                             <ICONS.Layout className="w-16 h-16" />
+                         </div>
                     </div>
                 )}
+                <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-500" />
             </div>
 
-            {/* Profile Pic Overlap */}
-            <div className="px-5 pb-6">
-                <div className="relative -mt-9 mb-4 ml-1">
-                    <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full border-[5px] border-[#F2F2F2] overflow-hidden bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] shadow-lg transition-transform duration-300 group-hover:scale-105">
+            {/* Content Area */}
+            <div className="p-4 sm:p-5 flex flex-col items-start gap-4">
+                {/* Profile row */}
+                <div className="flex items-start gap-4 min-w-0 w-full">
+                    <div className="shrink-0 w-16 h-16 rounded-full overflow-hidden border border-black/5 bg-white shadow-sm">
                         {profileImage ? (
                             <img src={profileImage} alt={organizer.organizerName} className="w-full h-full object-cover" />
                         ) : (
-                            <span className="text-3xl font-black text-white flex h-full w-full items-center justify-center drop-shadow-md">{initials}</span>
+                            <div className="w-full h-full bg-[#38BDF2] flex items-center justify-center text-white text-xl font-black">
+                                {initials}
+                            </div>
                         )}
                     </div>
-                </div>
-
-                {/* Info */}
-                <div className="space-y-1.5">
-                    <h3 className="text-lg font-bold text-[#050505] truncate tracking-tight">{organizer.organizerName}</h3>
-                    <div className="flex items-center gap-1.5 h-7">
-                        <Badge type={organizer.isVerified ? 'info' : 'neutral'} className="text-[9px] font-black tracking-[0.1em] border-none shadow-sm flex items-center gap-1.5 h-full px-3">
-                            {organizer.isVerified ? (
-                                <><ICONS.CheckCircle className="w-3.5 h-3.5" strokeWidth={3} /> VERIFIED HUB</>
-                            ) : (
-                                "COMMUNITY HUB"
-                            )}
-                        </Badge>
-                    </div>
-                    <p className="text-[12px] text-[#65676B]/80 font-medium line-clamp-2 min-h-[32px] leading-tight mt-1.5">
-                        {organizer.bio || 'Discover exclusive events and join our growing community.'}
-                    </p>
-
-                    <div className="pt-3 flex items-center gap-2 overflow-hidden">
-                        <div className="flex -space-x-2 shrink-0">
-                            {(() => {
-                                const followers = organizer.recentFollowers || [];
-                                
-                                // Build unique list of displayable avatars
-                                const avatars: Array<{ imageUrl?: string | null; initials: string; id: string }> = [];
-                                
-                                // 1. Current user if following
-                                if (isFollowing) {
-                                    avatars.push({
-                                        id: currentUserId || 'me',
-                                        imageUrl: currentUserImg,
-                                        initials: (currentUserName || 'U').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
-                                    });
-                                }
-                                
-                                // 2. Other recent followers from backend
-                                followers.forEach(f => {
-                                    if (avatars.length < 3 && f.userId !== currentUserId) {
-                                        avatars.push({
-                                            id: f.userId,
-                                            imageUrl: f.imageUrl,
-                                            initials: (f.name || 'U').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
-                                        });
-                                    }
-                                });
-                                
-
-                                return avatars.map((av, idx) => (
-                                    <div 
-                                        key={av.id} 
-                                        className="w-6 h-6 rounded-full border-2 border-[#F2F2F2] bg-[#38BDF2] overflow-hidden flex items-center justify-center shadow-sm z-10"
-                                        style={{ zIndex: 10 - idx }}
-                                    >
-                                        {av.imageUrl ? (
-                                            <img src={av.imageUrl} className="w-full h-full object-cover" alt="" />
-                                        ) : (
-                                            <span className="text-[8px] font-black text-white leading-none">{av.initials}</span>
-                                        )}
-                                    </div>
-                                ));
-                            })()}
-                        </div>
-                        <p className="text-[12px] text-[#65676B] font-medium tracking-tight truncate flex items-center gap-1.5">
-                            <span>{organizer.followersCount ? organizer.followersCount.toLocaleString() : 0} followers</span>
-                            <span className="text-[#2E2E2F]/20">•</span>
-                            <span className="flex items-center gap-1">
-                                <ICONS.Heart className="w-3 h-3 text-[#38BDF2]" />
-                                {organizer.likesCount || 0}
-                            </span>
-                            <span className="text-[#2E2E2F]/20">•</span>
-                            <span className="flex items-center gap-1">
-                                <ICONS.Calendar className="w-3 h-3 text-[#38BDF2]" />
-                                {organizer.eventsHostedCount || 0} Events
-                            </span>
+                    <div className="flex-1 min-w-0">
+                        <h3 className="text-xl font-bold text-black leading-[1.1] truncate tracking-tight mb-0.5">
+                            {organizer.organizerName}
+                        </h3>
+                        <p className="text-[13px] font-bold text-[#65676B] tracking-wide">
+                            Startup Organizer
                         </p>
+                        
+                        {/* Social Proof with Facepile */}
+                        <div className="flex flex-col gap-2 mt-2">
+                             <div className="flex items-center gap-2">
+                                <div className="flex -space-x-1.5">
+                                    {(() => {
+                                        const avatars = followers.slice(0, 3).map(f => ({
+                                            id: f.userId,
+                                            img: f.imageUrl,
+                                            initials: (f.name || 'U').charAt(0).toUpperCase()
+                                        }));
+
+                                        return avatars.map((av, idx) => (
+                                            <div key={av.id} className="w-5 h-5 rounded-full border border-white bg-[#D1D5DB] overflow-hidden flex items-center justify-center shadow-sm" style={{ zIndex: 10 - idx }}>
+                                                {av.img ? (
+                                                    <img src={av.img} className="w-full h-full object-cover" alt="" />
+                                                ) : (
+                                                    <span className="text-[7px] font-black">{av.initials}</span>
+                                                )}
+                                            </div>
+                                        ));
+                                    })()}
+                                </div>
+                                <p className="text-[12.5px] text-[#65676B] leading-tight font-medium">
+                                    {otherFollowersCount > 0 
+                                      ? `${otherFollowersCount.toLocaleString()} others follow this Page`
+                                      : followers.length > 0 ? "Followed by our community" : "Be the first to follow"}
+                                </p>
+                             </div>
+                        </div>
                     </div>
                 </div>
 
                 {/* Follow Button */}
-                <div className="mt-6">
-                    <button
-                        onClick={onFollow}
-                        className={`w-full py-3 px-4 rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm transform hover:brightness-110 bg-[#38BDF2] text-white`}
-                    >
-                        {isFollowing ? (
-                            <><ICONS.CheckCircle className="w-4 h-4 stroke-[2.5px]" /> Following</>
-                        ) : (
-                            <><ICONS.Plus className="w-4 h-4 stroke-[3px]" /> Follow</>
-                        )}
-                    </button>
-                </div>
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onFollow(e);
+                    }}
+                    className={`w-full py-3.5 rounded-xl text-[15px] font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-md transform hover:brightness-105 active:brightness-95 ${
+                        isFollowing 
+                        ? 'bg-[#E5E7EB] text-[#050505] border border-black/5' 
+                        : 'bg-[#38BDF2] text-white shadow-[#38BDF2]/20'
+                    }`}
+                >
+                    {isFollowing ? (
+                        <>
+                            <ICONS.Check className="w-5 h-5 stroke-[3px]" />
+                            <span>Following</span>
+                        </>
+                    ) : (
+                        <>
+                            <ICONS.Plus className="w-5 h-5 stroke-[3px]" />
+                            <span>Follow</span>
+                        </>
+                    )}
+                </button>
             </div>
         </div>
     );

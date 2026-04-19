@@ -34,6 +34,7 @@ import announcementRoutes from "./routes/announcementRoutes.js";
 import discoveryRoutes from "./routes/discoveryRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import searchHistoryRoutes from "./routes/searchHistoryRoutes.js";
 const PORT = process.env.BACKEND_PORT
 const app = express();
 
@@ -168,6 +169,7 @@ app.use("/api/announcements", announcementRoutes);
 app.use("/api/discovery", discoveryRoutes);
 app.use("/api", reportRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/search-history", searchHistoryRoutes);
 
 // Root endpoint for status check
 app.get("/", (req, res) => {

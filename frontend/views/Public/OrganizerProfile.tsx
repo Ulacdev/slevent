@@ -238,7 +238,19 @@ export const OrganizerProfilePage: React.FC = () => {
                             <h1 className="text-3xl md:text-5xl font-black text-[#2E2E2F] tracking-tighter leading-[1.1] mb-4 drop-shadow-sm">
                                 {organizer.organizerName}
                             </h1>
-                            <div className="flex flex-wrap items-center gap-4 text-[#65676B] font-bold text-sm">
+                            {/* Mobile Only Prominent Stats */}
+                            <div className="md:hidden grid grid-cols-2 gap-px bg-[#CED0D4]/50 w-full mt-6 border-y border-[#CED0D4]/50">
+                                <div className="bg-[#F2F2F2] py-4 text-center">
+                                    <p className="text-2xl font-black text-[#050505]">{formatCompactCount(organizer.followersCount)}</p>
+                                    <p className="text-[10px] font-bold text-[#65676B] uppercase tracking-widest mt-1">Active Followers</p>
+                                </div>
+                                <div className="bg-[#F2F2F2] py-4 text-center">
+                                    <p className="text-2xl font-black text-[#050505]">{organizer.eventsHostedCount || 0}</p>
+                                    <p className="text-[10px] font-bold text-[#65676B] uppercase tracking-widest mt-1">Events Hosted</p>
+                                </div>
+                            </div>
+
+                            <div className="hidden md:flex flex-wrap items-center gap-4 text-[#65676B] font-bold text-sm">
                                 <div className="flex items-center gap-2">
                                     <span className="text-[#050505] font-black">{formatCompactCount(organizer.followersCount)}</span>
                                     <span>Active Followers</span>

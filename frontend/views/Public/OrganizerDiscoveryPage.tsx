@@ -217,9 +217,9 @@ export const OrganizerDiscoveryPage: React.FC = () => {
                             </div>
 
                             {/* Following Filter */}
-                            <div className="space-y-6">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">Explore Options</h4>
-                                <div className="space-y-4">
+                            <div className="space-y-4 lg:space-y-6">
+                                <h4 className="hidden lg:block text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">Explore Options</h4>
+                                <div className="flex flex-row overflow-x-auto gap-3 pb-1 lg:flex-col lg:gap-0 lg:space-y-4 lg:pb-0 lg:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                                     {[
                                         { id: 'discover', label: 'Discover Organizers', icon: ICONS.Compass },
                                         { id: 'following', label: 'Organizers You Follow', icon: ICONS.Heart },
@@ -227,12 +227,12 @@ export const OrganizerDiscoveryPage: React.FC = () => {
                                         <button
                                             key={opt.id}
                                             onClick={() => setFilterMode(opt.id as any)}
-                                            className={`flex items-center gap-4 w-full group transition-all text-left ${filterMode === opt.id ? 'text-[#38BDF2]' : 'text-[#65676B] hover:text-[#050505]'}`}
+                                            className={`flex items-center gap-2 lg:gap-4 w-auto lg:w-full shrink-0 group transition-all text-left whitespace-nowrap rounded-full px-5 py-2 lg:px-0 lg:py-0 lg:rounded-none ${filterMode === opt.id ? 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/30 lg:border-transparent lg:bg-transparent lg:text-[#38BDF2]' : 'bg-[#E5E7EB]/50 border border-[#2E2E2F]/10 text-[#65676B] hover:text-[#050505] lg:border-none lg:bg-transparent'}`}
                                         >
-                                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${filterMode === opt.id ? 'bg-[#38BDF2] text-white' : 'bg-[#F2F2F2] border border-[#2E2E2F]/5 group-hover:bg-[#38BDF2]/10 group-hover:text-[#38BDF2]'}`}>
+                                            <div className={`hidden lg:flex w-8 h-8 rounded-xl items-center justify-center transition-all ${filterMode === opt.id ? 'bg-[#38BDF2] text-white' : 'bg-[#F2F2F2] border border-[#2E2E2F]/5 group-hover:bg-[#38BDF2]/10 group-hover:text-[#38BDF2]'}`}>
                                                 <opt.icon className="w-4 h-4" />
                                             </div>
-                                            <span className="text-sm font-black tracking-tight">{opt.label}</span>
+                                            <span className="text-[13px] lg:text-sm font-black tracking-tight">{opt.label}</span>
                                         </button>
                                     ))}
                                 </div>

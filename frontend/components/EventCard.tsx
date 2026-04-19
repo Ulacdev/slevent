@@ -51,11 +51,11 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick, layou
   return (
     <div
       onClick={handleClick}
-      className={`cursor-pointer group flex transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.2)] border border-[#2E2E2F]/10 hover:border-[#38BDF2]/30 ${isHorizontal ? 'flex-row rounded-2xl p-4 gap-6 bg-white' : 'flex-col rounded-xl overflow-hidden bg-[#1A1A1A]'}`}
+      className={`cursor-pointer group flex transition-all duration-300 hover:shadow-[0_12px_40px_rgba(46,46,47,0.15)] border border-[#2E2E2F]/10 hover:border-[#38BDF2]/30 ${isHorizontal ? 'flex-row rounded-2xl p-4 gap-6 bg-[#F2F2F2]' : 'flex-col rounded-2xl overflow-hidden bg-[#F2F2F2] shadow-sm'}`}
       style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
     >
       {/* Image Container */}
-      <div className={`relative overflow-hidden bg-[#F2F2F2] shrink-0 ${isHorizontal ? 'w-[280px] h-[190px] rounded-xl' : 'h-48 md:h-72 w-full'}`}>
+      <div className={`relative overflow-hidden bg-[#F2F2F2] shrink-0 ${isHorizontal ? 'w-[280px] h-[190px] rounded-xl' : 'h-56 w-full'}`}>
         {event.image_url ? (
           <img
             src={event.image_url}
@@ -63,84 +63,89 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onEventClick, layou
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center p-12 bg-gradient-to-br from-[#38BDF2] to-black">
+          <div className="w-full h-full flex flex-col items-center justify-center p-12 bg-gradient-to-br from-[#38BDF2]/10 to-[#F2F2F2]">
             <img
               src={BRAND_LOGO_URL}
               alt="StartupLab"
-              className="w-20 h-20 object-contain brightness-0 invert drop-shadow-2xl"
+              className="w-20 h-20 object-contain drop-shadow-xl opacity-20"
             />
           </div>
         )}
 
         {/* Promoted Badge - Top Left */}
         {event.is_promoted && (
-          <div className="absolute top-5 left-5 bg-[#38BDF2] px-3 py-1.5 rounded-full text-[10px] font-black tracking-widest text-white flex items-center gap-1.5 shadow-lg animate-in fade-in zoom-in duration-500 z-20">
+          <div className="absolute top-4 left-4 bg-[#38BDF2] px-3 py-1.5 rounded-full text-[10px] font-black tracking-widest text-white flex items-center gap-1.5 shadow-lg animate-in fade-in zoom-in duration-500 z-20">
             <span>PROMOTED</span>
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className={`flex flex-col ${isHorizontal ? 'flex-1 py-1 text-black' : 'p-5 space-y-3 bg-[#1A1A1A]'}`}>
-        <h3 className={`font-black text-lg md:text-2xl line-clamp-2 transition-colors leading-tight ${isHorizontal ? 'text-black group-hover:text-[#38BDF2]' : 'text-white group-hover:text-[#38BDF2]'}`}>
+      <div className={`flex flex-col ${isHorizontal ? 'flex-1 py-1' : 'p-5 space-y-4'}`}>
+        <h3 className={`font-black text-lg md:text-xl line-clamp-2 transition-colors leading-tight text-[#2E2E2F] group-hover:text-[#38BDF2]`}>
           {event.eventName}
         </h3>
 
-        {/* Core Info - 4 Symmetrical Points (Following Location Style) */}
-        <div className="space-y-2 text-sm text-[#2E2E2F] font-normal mt-2">
-          {/* 1. Likes */}
-          <div className="flex items-center gap-3">
-            <ICONS.Heart className="w-4 h-4 shrink-0 text-[#38BDF2]" strokeWidth={2} />
-            <span>{event.likesCount || 0} likes</span>
-          </div>
-
-          {/* 2. Registered */}
-          <div className="flex items-center gap-3">
-            <ICONS.Users className="w-4 h-4 shrink-0 text-black" strokeWidth={2} />
-            <span className="text-[#38BDF2]">{event.totalTickets && event.ticketsAvailable ? (event.totalTickets - event.ticketsAvailable) : 0} Registered</span>
+        {/* Core Info */}
+        <div className="space-y-2.5 text-[13px] text-[#2E2E2F]/70 font-semibold">
+          {/* 1. Registered & Likes Row */}
+          <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <ICONS.Users className="w-4 h-4 text-[#38BDF2]" strokeWidth={2.5} />
+                <span className="text-[#38BDF2]">{event.totalTickets && event.ticketsAvailable ? (event.totalTickets - event.ticketsAvailable) : 0} Registered</span>
+              </div>
+              <div className="flex items-center gap-1.5 opacity-60">
+                <ICONS.Heart className="w-3.5 h-3.5" />
+                <span>{event.likesCount || 0}</span>
+              </div>
           </div>
           
-          {/* 3. Location */}
+          {/* 2. Location */}
           <div className="flex items-center gap-3">
-            <ICONS.MapPin className="w-4 h-4 shrink-0 text-black" strokeWidth={2} />
+            <ICONS.MapPin className="w-4 h-4 shrink-0 text-[#2E2E2F]/40" />
             <span className="line-clamp-1">{event.locationText}</span>
           </div>
 
-          {/* 4. Date & Time */}
+          {/* 3. Date & Time */}
           <div className="flex items-center gap-3">
-            <ICONS.Calendar className="w-4 h-4 shrink-0 text-black" strokeWidth={2} />
-            <span>{dateStr}{timeStr && <span className="mx-1">•</span>}{timeStr}</span>
+            <ICONS.Calendar className="w-4 h-4 shrink-0 text-[#2E2E2F]/40" />
+            <span>{dateStr}{timeStr && <span className="mx-1 opacity-30">•</span>}{timeStr}</span>
           </div>
         </div>
 
-        {/* Secondary Marketplace Info (Price) */}
-        <div className="pt-3 flex items-center justify-between border-t border-[#2E2E2F]/5 mt-2">
-          <div className="flex items-center gap-2 text-[#38BDF2] font-black uppercase tracking-widest text-[11px]">
+        {/* Secondary Info */}
+        <div className="pt-4 flex items-center justify-between border-t border-[#2E2E2F]/5">
+          <div className="flex items-center gap-2 font-black uppercase tracking-widest text-[11px]">
             {(() => {
               const now = new Date();
               const eventStart = event.startAt ? new Date(event.startAt) : null;
               const eventEnd = eventStart ? new Date(eventStart.getTime() + 2 * 60 * 60 * 1000) : null;
               const isDone = eventEnd && now > eventEnd;
 
-              if (isDone) return <span className="text-black opacity-40 font-bold">Event Ended</span>;
+              if (isDone) return <span className="text-[#2E2E2F] opacity-30 font-black">Event Ended</span>;
 
-              return event.price_min === 0 ? "FREE SESSION" : `₱${event.price_min?.toLocaleString()}`;
+              return (
+                <div className="flex items-center gap-2">
+                    <span className="text-[#38BDF2]">{event.price_min === 0 ? "FREE" : `₱${event.price_min?.toLocaleString()}`}</span>
+                    <span className="text-[#2E2E2F]/20">/ SESSION</span>
+                </div>
+              );
             })()}
           </div>
           
-          <div className="flex items-center gap-2 text-[10px] font-bold text-[#65676B] opacity-60">
-             ⭐ {event.avgRating && event.avgRating > 0 ? event.avgRating.toFixed(1) : "N/A"}
-          </div>
+          {event.avgRating && event.avgRating > 0 ? (
+            <div className="flex items-center gap-1.5 text-[10px] font-black text-[#2E2E2F]/40 bg-[#2E2E2F]/5 px-2 py-1 rounded-md">
+              ⭐ {event.avgRating.toFixed(1)}
+            </div>
+          ) : null}
         </div>
 
-        {/* Promoted Duration (if promoted) */}
+        {/* Promoted Duration */}
         {event.is_promoted && event.promotionEndDate && (
-          <div className="pt-2">
-            <p className="text-[8px] text-[#38BDF2] font-bold uppercase tracking-widest flex items-center gap-2">
-              <ICONS.Info className="w-3 h-3 shrink-0" strokeWidth={2.5} />
-              {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(
-                new Date(event.promotionEndDate)
-              )}
+          <div className="pt-1">
+            <p className="text-[9px] text-[#38BDF2] font-black uppercase tracking-[0.2em] flex items-center gap-2">
+              <ICONS.Zap className="w-3 h-3" />
+              Featured until {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(event.promotionEndDate))}
             </p>
           </div>
         )}

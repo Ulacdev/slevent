@@ -33,7 +33,12 @@ export const EventsFeed: React.FC<EventsFeedProps> = ({
       setLoading(true);
       const response = await apiService.getEventsFeed(pageNum, 12, search || '', location || '', category || '');
 
-      const newEvents = response.events || [];
+      const rawEvents = response.events || [];
+      const newEvents: EventCardData[] = rawEvents.map((e: any) => ({
+        ...e,
+        organizerName: e.organizerName || e.employerName || 'Organizer'
+      }));
+
       setTotalEvents(response.pagination?.total || 0);
       setTotalPages(response.pagination?.totalPages || 1);
 
@@ -63,7 +68,7 @@ export const EventsFeed: React.FC<EventsFeedProps> = ({
   const regularCount = events.filter(e => !e.is_promoted).length;
 
   if (loading && page === 1) {
-    return <PageLoader variant="page" label="Finding awesome events..." />;
+    return <PageLoader variant="page" />;
   }
 
   return (
@@ -123,20 +128,14 @@ export const EventsFeed: React.FC<EventsFeedProps> = ({
                   setPage(nextPage);
                   loadMoreEvents(nextPage);
                 }}
+                loading={loading}
                 disabled={loading}
                 className="px-8 py-4 bg-[#38BDF2] text-white font-black rounded-xl hover:bg-[#2E2E2F] transition-colors shadow-lg shadow-[#38BDF2]/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="animate-spin">⏳</span>
-                    Loading...
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    Load More Events
-                    <ICONS.ChevronDown className="w-4 h-4" />
-                  </span>
-                )}
+                <span className="flex items-center gap-2">
+                  Load More Events
+                  <ICONS.ChevronDown className="w-4 h-4" />
+                </span>
               </Button>
             </div>
           )}

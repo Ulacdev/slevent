@@ -87,17 +87,14 @@ export const Button: React.FC<{
         disabled={disabled || loading}
         onClick={onClick}
         style={style}
-        className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
+        className={`${base} ${variants[variant]} ${sizes[size]} relative overflow-hidden ${className} ${loading ? 'cursor-wait' : ''}`}
       >
-        {loading ? (
-          <div className="flex items-center gap-2">
-            <svg className="animate-spin h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span className="opacity-70">Processing...</span>
-          </div>
-        ) : children}
+        {loading && (
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite] z-0" />
+        )}
+        <span className={`transition-opacity duration-200 ${loading ? 'opacity-40' : 'opacity-100'}`}>
+          {children}
+        </span>
       </button>
     );
   };
@@ -319,34 +316,25 @@ export const Modal: React.FC<{
   };
 
 export const PageLoader: React.FC<{
-  label?: string;
   variant?: 'page' | 'section' | 'viewport';
-  size?: 'sm' | 'md' | 'lg';
   className?: string;
 }> = ({
-  label = 'Loading content...',
   variant = 'section',
-  size = 'md',
   className = ''
 }) => {
-    if (variant === 'viewport') {
-        return (
-            <div className="fixed inset-0 z-[10000] bg-[#F2F2F2] flex flex-col items-center justify-center p-8">
-                <div className="w-24 h-24 relative mb-12">
-                    <div className="absolute inset-0 rounded-full border-4 border-[#38BDF2]/10" />
-                    <div className="absolute inset-0 rounded-full border-4 border-t-[#38BDF2] animate-spin" />
+    const SkeletonContent = () => (
+        <div className={`flex flex-col gap-10 w-full px-4 sm:px-8 py-10 animate-in fade-in duration-700 ${className}`}>
+            {/* Header Skeleton (Top Nav) */}
+            <div className="w-full flex items-center justify-between mb-2">
+                <div className="w-32 h-10 bg-[#E0E0E0]/30 rounded-xl" />
+                <div className="flex gap-4">
+                    <div className="w-10 h-10 bg-[#E0E0E0]/20 rounded-full" />
+                    <div className="w-10 h-10 bg-[#E0E0E0]/20 rounded-full" />
                 </div>
-                <p className="text-[#2E2E2F] font-black uppercase tracking-[0.4em] text-[15px] animate-pulse">
-                    {label}
-                </p>
             </div>
-        );
-    }
 
-    return (
-        <div className={`flex flex-col gap-12 w-full pt-10 px-4 sm:px-8 ${className}`}>
-            {/* Skeleton Hero */}
-            <div className="w-full h-64 sm:h-80 bg-[#E0E0E0]/30 rounded-2xl relative overflow-hidden animate-pulse">
+            {/* Skeleton Hero Layout */}
+            <div className="w-full h-64 sm:h-80 bg-[#E0E0E0]/30 rounded-2xl relative overflow-hidden group">
                 <div className="absolute inset-x-8 bottom-12 space-y-4">
                     <div className="h-10 w-2/3 bg-[#E0E0E0]/50 rounded-lg" />
                     <div className="h-6 w-1/2 bg-[#E0E0E0]/50 rounded-lg" />
@@ -354,28 +342,40 @@ export const PageLoader: React.FC<{
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
             </div>
 
-            {/* Skeleton Content Grid */}
+            {/* Skeleton Content Grid (3 cards) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {[...Array(3)].map((_, i) => (
                     <div key={i} className="space-y-4">
-                        <div className="aspect-video bg-[#E0E0E0]/30 rounded-xl relative overflow-hidden animate-pulse">
+                        <div className="aspect-video bg-[#E0E0E0]/30 rounded-xl relative overflow-hidden">
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
                         </div>
-                        <div className="h-6 w-2/3 bg-[#E0E0E0]/30 rounded-lg animate-pulse" />
-                        <div className="h-4 w-full bg-[#E0E0E0]/20 rounded-lg animate-pulse" />
+                        <div className="h-6 w-2/3 bg-[#E0E0E0]/30 rounded-lg" />
+                        <div className="h-4 w-full bg-[#E0E0E0]/20 rounded-lg" />
                     </div>
                 ))}
             </div>
-            
-            {label && (
-                <div className="flex justify-center mt-4">
-                    <p className="text-[#2E2E2F] font-black uppercase tracking-[0.2em] text-[10px] animate-pulse">
-                        {label}
-                    </p>
-                </div>
-            )}
+
+            {/* Sub-grid of smaller items */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                {[...Array(4)].map((_, i) => (
+                    <div key={i} className="h-20 bg-[#E0E0E0]/15 rounded-xl animate-pulse" />
+                ))}
+            </div>
         </div>
     );
+
+    if (variant === 'viewport') {
+        return (
+            <div className="fixed inset-0 z-[10000] bg-[#F2F2F2] flex flex-col overflow-hidden">
+                <div className="w-full h-1 bg-[#38BDF2]/20 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[#38BDF2] w-1/2 animate-[suspense-loading_2s_infinite]" />
+                </div>
+                <SkeletonContent />
+            </div>
+        );
+    }
+
+    return <SkeletonContent />;
 };
 
 export const Checkbox: React.FC<{
