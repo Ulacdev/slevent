@@ -123,9 +123,9 @@ export const OrganizerDiscoveryPage: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="bg-[#F2F2F2] min-h-screen">
-                <div className="max-w-[88rem] mx-auto px-4 sm:px-10 py-24">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="bg-[#F2F2F2] min-h-screen flex items-center justify-center p-4">
+                <div className="max-w-[88rem] w-full mx-auto px-4 sm:px-10">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 place-items-center">
                         {Array.from({ length: 9 }).map((_, i) => (
                             <OrganizerCardSkeleton key={i} />
                         ))}

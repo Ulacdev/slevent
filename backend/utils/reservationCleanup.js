@@ -59,25 +59,31 @@ const getBackoffDelayMs = (intervalMs, consecutiveFailures) => {
 };
 
 export const runReservationCleanup = async () => {
-  console.log(`[ReservationCleanup] Running cleanup at`, new Date().toISOString());
   const now = new Date();
   
-  // 1. Audit Log Pruning (90-day retention TTL)
-  const ninetyDaysAgo = new Date();
-  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-  
-  try {
-    const { count: prunedLogs } = await supabase
-      .from('auditLogs')
-      .delete({ count: 'exact' })
-      .lt('createdAt', ninetyDaysAgo.toISOString());
+  // 1. Audit Log Pruning (90-day retention TTL) - Run only once per hour to reduce load
+  const lastPrune = global._lastAuditPrune || 0;
+  if (now.getTime() - lastPrune > 3600_000) {
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
     
-    if (prunedLogs) {
-      console.log(`[Maintenance] Pruned ${prunedLogs} old audit logs.`);
+    try {
+      console.log(`[Maintenance] Starting audit log pruning...`);
+      const { count: prunedLogs } = await supabase
+        .from('auditLogs')
+        .delete({ count: 'exact' })
+        .lt('createdAt', ninetyDaysAgo.toISOString());
+      
+      if (prunedLogs) {
+        console.log(`[Maintenance] Pruned ${prunedLogs} old audit logs.`);
+      }
+      global._lastAuditPrune = now.getTime();
+    } catch (err) {
+      console.warn('[Maintenance] Audit log pruning failed:', err.message);
     }
-  } catch (err) {
-    console.warn('[Maintenance] Audit log pruning failed:', err.message);
   }
+
+  console.log(`[ReservationCleanup] Running reservation check at`, now.toISOString());
 
   // 2. Batch Reservation Cleanup
   const { data: expiredOrders, error } = await supabase

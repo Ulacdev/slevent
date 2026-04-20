@@ -1,0 +1,11 @@
+{
+  "ignore": [
+    "*.log",
+    "logs.txt",
+    "notification_debug.log",
+    "node_modules",
+    "scratch",
+    "test-results",
+    "tmp"
+  ]
+}

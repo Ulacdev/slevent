@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiService, API_BASE } from '../../services/apiService';
-import { Event, TicketType, EventStatus, RegistrationView, OrganizerProfile, UserRole } from '../../types';
+import type { Event } from '../../types';
+import { TicketType, EventStatus, RegistrationView, OrganizerProfile, UserRole } from '../../types';
 import { Card, Badge, Button, Modal, Input, PageLoader, Checkbox } from '../../components/Shared';
 import { OnsiteLocationAssistant } from '../../components/OnsiteLocationAssistant';
 import { ICONS } from '../../constants';
@@ -370,6 +371,7 @@ interface EventPreviewProps {
 const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPreviewMode, setIsPreviewMode, setPreviewDevice, formData, organizerProfile, events, brandingEnabled, name }) => {
 
     const previewAccentColor = brandingEnabled ? formData.brandColor || '#38BDF2' : '#38BDF2';
+    const [isPreviewSheetExpanded, setIsPreviewSheetExpanded] = React.useState(false);
 
     const previewDateLabel = React.useMemo(() => {
         if (!formData.eventDate) return 'Date and time not set';
@@ -393,39 +395,44 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
     const organizerPreviewInitial = (organizerProfile?.organizerName || name || 'O').charAt(0).toUpperCase();
 
     return (
-        <div className={`flex flex-col h-full w-full ${previewDevice === 'desktop' ? 'bg-[#F2F2F2]' : 'bg-[#F2F2F2] pb-32'}`}>
+        <div className={`w-full bg-[#F2F2F2] ${window.innerWidth < 768 ? 'block pb-24' : 'flex flex-col h-full'}`}>
             {/* Mobile Header Bar */}
             {(previewDevice as string) === 'mobile' && (
-                <div className="flex items-center justify-between flex-shrink-0 px-5 pt-5">
+                <>
+                    {/* Floating Close Button explicitly for actual Mobile Devices */}
                     <button
                         type="button"
                         onClick={() => setIsPreviewMode(false)}
-                        className="flex items-center gap-2 text-[#2E2E2F] hover:text-black transition-colors"
+                        className="fixed top-6 right-6 w-12 h-12 rounded-full bg-[#2E2E2F] text-white flex items-center justify-center shadow-xl z-[10000] active:scale-90 transition-transform md:hidden"
                     >
-                        <ICONS.ChevronRight className="w-4 h-4 text-[#2E2E2F]/65" />
-                        <h4 className="text-[30px] font-black text-[#2E2E2F] tracking-tight">Preview</h4>
+                        <ICONS.X className="w-6 h-6" />
                     </button>
-                    <div className="flex items-center gap-2">
-                        <div className="inline-flex items-center rounded-2xl border-2 border-[#2E2E2F]/5 bg-[#F2F2F2] p-1 shadow-sm">
-                            <button
-                                type="button"
-                                onClick={() => setPreviewDevice('mobile')}
-                                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
-                            >
-                                <MobilePreviewIcon className="w-4 h-4" />
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setPreviewDevice('desktop')}
-                                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
-                            >
-                                <DesktopPreviewIcon className="w-4 h-4" />
-                            </button>
+                    {/* Inline Header Bar - Only visible on Desktop POV */}
+                    <div className="hidden md:flex items-center justify-between flex-shrink-0 px-5 pt-5 pb-4">
+                        <div>
+                            <h4 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] hidden md:block">PREVIEW MODE</h4>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="inline-flex items-center rounded-2xl border-2 border-[#2E2E2F]/5 bg-[#F2F2F2] p-1 shadow-sm">
+                                <button
+                                    type="button"
+                                    onClick={() => setPreviewDevice('mobile')}
+                                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
+                                >
+                                    <MobilePreviewIcon className="w-4 h-4" />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setPreviewDevice('desktop')}
+                                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
+                                >
+                                    <DesktopPreviewIcon className="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </>
             )}
-
 
             {(previewDevice as string) === 'desktop' ? (
                 <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center pt-32 pb-12 px-6">
@@ -625,31 +632,36 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                 </div>
             ) : (
                 /* Mobile Preview Mode - Phone Shell Implementation */
-                <div className="flex-1 w-full bg-[#F2F2F2] flex flex-col items-center">
-                    {/* Centered Phone Shell - Scaled to fit screen */}
-                    <div 
-                        className="relative w-[375px] h-[780px] bg-[#F2F2F2] rounded-[3.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.15)] border-[12px] border-[#F2F2F2] flex flex-col overflow-hidden"
-                        style={{ transform: 'scale(0.8)', transformOrigin: 'top center' }}
-                    >
-                        {/* Status Bar / Notch Area */}
-                        <div className="h-8 bg-[#F2F2F2] flex items-center justify-center relative shrink-0">
-                            <div className="w-24 h-5 bg-[#F2F2F2] rounded-b-2xl absolute top-0" />
-                        </div>
+                    <div className={`w-full bg-[#F2F2F2] ${window.innerWidth < 768 ? 'block min-h-screen' : 'flex-1 flex flex-col items-center'}`}>
+                        {/* Shell / Content Wrapper - Phone feel only on desktop pov */}
+                        <div 
+                            className={`relative bg-[#F2F2F2] ${window.innerWidth < 768 
+                                ? 'w-full block h-auto' 
+                                : 'w-[375px] h-[780px] rounded-[3.5rem] border-[12px] border-[#F2F2F2] overflow-hidden flex flex-col shadow-[0_40px_100px_rgba(0,0,0,0.15)]'}`}
+                            style={window.innerWidth < 768 ? {} : { transform: 'scale(0.8)', transformOrigin: 'top center' }}
+                        >
+                            {/* Stylized Notch for Mobile Preview - Hidden on actual mobile device */}
+                            {window.innerWidth >= 768 && (
+                                <div className="h-8 bg-[#F2F2F2] flex items-center justify-center relative shrink-0">
+                                    <div className="w-24 h-5 bg-[#F2F2F2] rounded-b-2xl absolute top-0" />
+                                </div>
+                            )}
 
-                        {/* Scrollable Content inside Phone */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar">
-                    <div className="w-full">
-                        <div className="h-14 border-b border-[#2E2E2F]/15 px-5 flex items-center justify-between bg-[#F2F2F2]">
-                            <img
-                                src={brandingEnabled && organizerProfile?.profileImageUrl ? getImageUrl(organizerProfile.profileImageUrl) : BRAND_LOGO_URL}
-                                alt="Event Logo"
-                                className="h-8 w-auto object-contain"
-                            />
-                            <div className="flex items-center gap-3 text-[#2E2E2F]/70">
-                                <ICONS.Users className="w-4 h-4" />
-                                <ICONS.MoreHorizontal className="w-4 h-4" />
-                            </div>
-                        </div>
+                            {/* Main Content Area */}
+                            <div className={`${window.innerWidth >= 768 ? 'flex-1 overflow-y-auto custom-scrollbar' : 'w-full block h-auto'}`}>
+                            <div className="w-full pb-48">
+                                <div className="h-14 border-b border-[#2E2E2F]/15 px-5 flex items-center justify-between bg-[#F2F2F2]">
+                                    <img
+                                        src={organizerProfile?.profileImageUrl ? getImageUrl(organizerProfile.profileImageUrl) : BRAND_LOGO_URL}
+                                        alt="Event Logo"
+                                        className="h-8 w-auto object-contain"
+                                        onError={(e) => { e.currentTarget.src = '/lgo.webp'; }}
+                                    />
+                                    <div className="flex items-center gap-3 text-[#2E2E2F]/70">
+                                        <ICONS.Users className="w-4 h-4" />
+                                        <ICONS.MoreHorizontal className="w-4 h-4" />
+                                    </div>
+                                </div>
 
                         <div className="bg-[#F2F2F2] p-5 space-y-6">
                             <div className="w-full space-y-6">
@@ -714,7 +726,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 rounded-full overflow-hidden text-[#F2F2F2] flex items-center justify-center text-lg font-bold shrink-0" style={{ backgroundColor: previewAccentColor }}>
                                                 {organizerProfile?.profileImageUrl ? (
-                                                    <img src={getImageUrl(organizerProfile.profileImageUrl)} alt={organizerProfile.organizerName || 'Organizer'} crossOrigin="use-credentials" className="w-full h-full object-cover" />
+                                                    <img src={getImageUrl(organizerProfile.profileImageUrl)} alt={organizerProfile.organizerName || 'Organizer'} className="w-full h-full object-cover" />
                                                 ) : (
                                                     organizerPreviewInitial
                                                 )}
@@ -755,60 +767,113 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                     </div>
                                 )}
                             </div>
-
-                            <div className="w-full flex-col">
-                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15 shadow-sm">
-                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-6">SECURE ACCESS</h3>
-                                    <div className="space-y-4">
-                                        {formData.ticketTypes && formData.ticketTypes.length > 0 ? (
-                                            formData.ticketTypes.map((ticket: any) => (
-                                                <div key={ticket.ticketTypeId || ticket.name} className="p-5 rounded-2xl border-2 bg-[#F2F2F2]" style={{ borderColor: `${previewAccentColor}1A` }}>
-                                                    <div className="flex justify-between items-start mb-1">
-                                                        <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-wider">{ticket.name}</p>
-                                                        <span className="text-[8px] font-black px-2 py-0.5 rounded text-white" style={{ backgroundColor: previewAccentColor }}>AVAILABLE</span>
-                                                    </div>
-                                                    <p className="text-[16px] font-black text-[#2E2E2F]">
-                                                        {ticket.priceAmount === 0 ? 'FREE' : `PHP ${ticket.priceAmount.toLocaleString()}.00`}
-                                                    </p>
-                                                    <div className="mt-4 pt-4 border-t border-[#2E2E2F]/5 flex items-center justify-between">
-                                                        <span className="text-[8px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Quantity</span>
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-6 h-6 rounded-lg bg-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F]/20 text-xs">-</div>
-                                                            <span className="text-xs font-black">1</span>
-                                                            <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs text-white" style={{ backgroundColor: previewAccentColor }}>+</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <div className="py-12 text-center border-2 border-dashed border-[#2E2E2F]/5 rounded-[2rem]">
-                                                <p className="text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-widest">No tickets set</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="mt-8 space-y-4">
-                                        <button
-                                            type="button"
-                                            disabled
-                                            className="w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-white/50"
-                                            style={{ backgroundColor: `${previewAccentColor}4D` }}
-                                        >
-                                            Secure Checkout
-                                        </button>
-                                        <div className="flex items-center justify-center gap-2 opacity-20">
-                                            <ICONS.CreditCard className="w-3.5 h-3.5" />
-                                            <p className="text-[8px] font-black uppercase tracking-widest">HITPAY SECURE</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+
+                        {/* Mobile-style Ticket Interaction (Compact Bar + Expanded Sheet) */}
+                        <div className="relative w-full shrink-0">
+                            {/* Floating Mobile Footer (Compact State) */}
+                            {!isPreviewSheetExpanded && (
+                                <div 
+                                    className="z-50 w-full bg-[#F2F2F2] border-t border-[#2E2E2F]/10 px-5 py-4 flex items-center justify-between shadow-[0_-15px_40px_rgba(0,0,0,0.06)] cursor-pointer" 
+                                    style={{ position: window.innerWidth < 768 ? 'fixed' : 'absolute', bottom: 0, left: 0, paddingBottom: window.innerWidth < 768 ? 'calc(env(safe-area-inset-bottom) + 1rem)' : '1.25rem' }}
+                                    onClick={() => setIsPreviewSheetExpanded(true)}
+                                >
+                                    <div className="flex flex-col">
+                                        <span className="text-[16px] font-black text-[#2E2E2F] tracking-tight">
+                                            {formData.ticketTypes && formData.ticketTypes.length > 0
+                                                ? (formData.ticketTypes.some((t: any) => t.priceAmount === 0) ? 'Free' : `From ₱${Math.min(...formData.ticketTypes.map((t: any) => t.priceAmount)).toLocaleString()}`)
+                                                : 'Free'}
+                                        </span>
+                                        <span className="text-[12px] font-medium text-[#2E2E2F]/50">
+                                            {formData.eventDate ? new Date(formData.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Set Date'}
+                                        </span>
+                                    </div>
+                                    <div 
+                                        className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xl font-black shadow-md"
+                                        style={{ backgroundColor: previewAccentColor }}
+                                    >
+                                        <ICONS.Plus className="w-5 h-5" strokeWidth={4} />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Expanded Mobile Ticket Sheet (Mock Layer) */}
+                            {isPreviewSheetExpanded && (
+                                <div 
+                                    className="z-[60] absolute inset-0 flex flex-col justify-end" 
+                                    style={{ height: window.innerWidth < 768 ? '100dvh' : '100%', position: window.innerWidth < 768 ? 'fixed' : 'absolute' }}
+                                >
+                                    {/* Backdrop */}
+                                    <div 
+                                        className="absolute inset-0 bg-black/60 transition-opacity duration-300"
+                                        onClick={() => setIsPreviewSheetExpanded(false)}
+                                    />
+                                    
+                                    {/* The Sheet */}
+                                    <div 
+                                        className="relative w-full bg-[#F2F2F2] rounded-t-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] flex flex-col max-h-[85%]"
+                                        style={{ paddingBottom: window.innerWidth < 768 ? 'calc(env(safe-area-inset-bottom) + 1.25rem)' : '1.25rem' }}
+                                    >
+                                        <div className="pt-6 pb-2 px-6 shrink-0 border-b border-[#2E2E2F]/5 flex flex-col items-center">
+                                            <div className="w-12 h-1.5 rounded-full bg-[#2E2E2F]/10 mb-4 cursor-pointer" onClick={() => setIsPreviewSheetExpanded(false)} />
+                                            <div className="w-full flex justify-between items-center px-2">
+                                                <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[#2E2E2F]/60">PREVIEW ACCESS</p>
+                                                <button onClick={() => setIsPreviewSheetExpanded(false)} className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F]/40 hover:text-[#2E2E2F]">Close</button>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+                                            {formData.ticketTypes && formData.ticketTypes.length > 0 ? (
+                                                formData.ticketTypes.map((ticket: any) => (
+                                                    <div key={ticket.ticketTypeId || ticket.name} className="p-5 rounded-2xl border-2 bg-[#F2F2F2]" style={{ borderColor: `${previewAccentColor}1A` }}>
+                                                        <div className="flex justify-between items-start mb-1">
+                                                            <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-wider">{ticket.name}</p>
+                                                            <span className="text-[8px] font-black px-2 py-0.5 rounded text-white" style={{ backgroundColor: previewAccentColor }}>AVAILABLE</span>
+                                                        </div>
+                                                        <p className="text-[16px] font-black text-[#2E2E2F]">
+                                                            {ticket.priceAmount === 0 ? 'FREE' : `PHP ${ticket.priceAmount.toLocaleString()}.00`}
+                                                        </p>
+                                                        <div className="mt-4 pt-4 border-t border-[#2E2E2F]/5 flex items-center justify-between">
+                                                            <span className="text-[8px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Quantity</span>
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-6 h-6 rounded-lg bg-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F]/20 text-xs">-</div>
+                                                                <span className="text-xs font-black">1</span>
+                                                                <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs text-white" style={{ backgroundColor: previewAccentColor }}>+</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="py-12 text-center border-2 border-dashed border-[#2E2E2F]/5 rounded-[2rem]">
+                                                    <p className="text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-widest">No tickets set</p>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="px-6 pt-4 shrink-0 bg-[#F2F2F2] border-t border-[#2E2E2F]/5">
+                                            <button
+                                                type="button"
+                                                disabled
+                                                className="w-full py-5 rounded-[1.2rem] font-black text-[10px] uppercase tracking-[0.2em] text-white/50"
+                                                style={{ backgroundColor: `${previewAccentColor}4D` }}
+                                            >
+                                                Secure Checkout
+                                            </button>
+                                            <div className="mt-4 flex items-center justify-center gap-2 text-[#2E2E2F]/30 pb-2">
+                                                <ICONS.CreditCard className="w-3.5 h-3.5" />
+                                                <p className="text-[8px] font-black uppercase tracking-widest">HITPAY SECURE</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-    )}
-</div>
     );
 });
 
@@ -1540,7 +1605,7 @@ const WizardStepContent = React.memo(({
                         <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Event Name</label>
                         <div className="relative">
                             <Input placeholder="e.g. Founder Growth Summit 2026" value={formData.eventName} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, eventName: e.target.value }))} className="pr-20" />
-                            <div className="absolute right-3 bottom-2.5">
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
                                 <AIFieldAssist
                                     field="eventName" fieldLabel="Event Name"
                                     onApply={v => setFormData((p: any) => ({ ...p, eventName: v }))}
@@ -1561,7 +1626,7 @@ const WizardStepContent = React.memo(({
                                 value={formData.description}
                                 onChange={(e: any) => setFormData((prev: any) => ({ ...prev, description: e.target.value }))}
                             />
-                            <div className="absolute right-4 bottom-4">
+                            <div className="absolute right-3 bottom-3">
                                 <AIDescriptionGenerator
                                     eventName={formData.eventName}
                                     currentValue={formData.description}
@@ -1698,7 +1763,7 @@ const WizardStepContent = React.memo(({
                             <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">{formData.locationType === 'ONLINE' ? 'Physical Hub (Optional)' : 'Venue Address'}</label>
                             <div className="relative">
                                 <Input placeholder="e.g. Global Tech Center" value={formData.location} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, location: e.target.value }))} className="pr-20" />
-                                <div className="absolute right-3 bottom-2.5">
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
                                     <AIFieldAssist
                                         field="location" fieldLabel="Venue Address"
                                         onApply={v => applyLocationValue(v)}
@@ -1812,7 +1877,7 @@ const WizardStepContent = React.memo(({
                                             <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Promo Code</label>
                                             <div className="relative">
                                                 <Input placeholder="SALE20" value={promoForm.code} onChange={(e: any) => setPromoForm({ ...promoForm, code: e.target.value.toUpperCase() })} className="pr-20" />
-                                                <div className="absolute right-3 bottom-2.5">
+                                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
                                                     <AIFieldAssist
                                                         field="promoCode" fieldLabel="Promo Code"
                                                         onApply={v => setPromoForm({ ...promoForm, code: v.toUpperCase() })}
@@ -1972,10 +2037,14 @@ export const UserEvents: React.FC = () => {
     const [isWorkflowNoticeOpen, setIsWorkflowNoticeOpen] = useState(false);
     const [isPreviewMode, setIsPreviewMode] = useState(false);
     const [isSidebarHidden, setIsSidebarHidden] = useState(false);
-
     const [previewDevice, setPreviewDevice] = useState<'mobile' | 'desktop'>('mobile');
     const [finalStatusDecision, setFinalStatusDecision] = useState<EventStatus | ''>('');
     const [isPaymentRestrictionOpen, setIsPaymentRestrictionOpen] = useState(false);
+
+    // No-op effect to replace previous scroll locking
+    useEffect(() => {
+        // Scroll locking disabled to ensure overlay scrolling works on all devices
+    }, [isPreviewMode]);
     const [promotions, setPromotions] = useState<any[]>([]);
     const [promotionsLoading, setPromotionsLoading] = useState(false);
     const [editingPromotion, setEditingPromotion] = useState<any | null>(null);
@@ -2230,7 +2299,10 @@ export const UserEvents: React.FC = () => {
 
         setPreviewDevice('mobile');
         setFinalStatusDecision('');
+        setIsPreviewSheetExpanded(false);
     }, []);
+
+    const [isPreviewSheetExpanded, setIsPreviewSheetExpanded] = useState(false);
 
     const loadPromotionMetadata = React.useCallback(async () => {
         try {
@@ -2810,7 +2882,7 @@ export const UserEvents: React.FC = () => {
     };
 
 
-    if (loading) return <PageLoader label="Loading your events..." variant="section" />;
+    if (loading) return <PageLoader variant="section" />;
 
     return (
         <div className="space-y-0 -mt-4">
@@ -3175,7 +3247,7 @@ export const UserEvents: React.FC = () => {
             {/* ─── Create/Edit Event logic (In-page) ─── */}
             {isModalOpen && (
                 <div className="animate-in fade-in duration-200 min-h-[calc(100vh-40px)] md:min-h-[calc(85vh-80px)] mb-0 px-0 pt-0">
-                    <div className={`grid grid-cols-1 gap-6 ${isSidebarHidden ? 'xl:grid-cols-1' : (!isPreviewMode || previewDevice === 'desktop') ? 'xl:grid-cols-[300px_minmax(0,1fr)]' : 'xl:grid-cols-[300px_minmax(0,1fr)_380px]'}`} style={{ zoom: 0.85 }}>
+                    <div className={`grid grid-cols-1 gap-6 ${isSidebarHidden ? 'xl:grid-cols-1' : (!isPreviewMode || previewDevice === 'desktop') ? 'xl:grid-cols-[300px_minmax(0,1fr)]' : 'xl:grid-cols-[300px_minmax(0,1fr)_380px]'}`} style={window.innerWidth >= 768 ? { zoom: 0.85 } : {}}>
                         {!isSidebarHidden && (
                             <div className="space-y-5 xl:sticky xl:top-0 self-start xl:max-h-[calc(70vh-1rem)] xl:overflow-y-auto xl:pr-1">
                                 <div className="bg-[#F2F2F2] rounded-[2rem] border border-[#2E2E2F]/15 overflow-hidden">
@@ -3258,7 +3330,7 @@ export const UserEvents: React.FC = () => {
                                     )}</div>
                             </div>
 
-                            <form onSubmit={handleSubmit} className="space-y-8 px-1">
+                            <form onSubmit={handleSubmit} className={`space-y-8 px-1 pb-32 md:pb-8 ${isPreviewMode ? 'md:block hidden' : ''}`}>
                                 <WizardStepContent
                                     wizardStep={wizardStep}
                                     formData={formData}
@@ -3348,24 +3420,41 @@ export const UserEvents: React.FC = () => {
                             setPreviewDevice={setPreviewDevice}
                         />
 
-                        {/* Dynamic Preview Overlay/Sidebar - Restored to Right side */}
+                        {/* Dynamic Preview Overlay/Sidebar */}
                         {isPreviewMode && (
-                            <div className={`${previewDevice === 'desktop'
-                                ? 'fixed top-0 bottom-0 left-0 lg:left-64 right-0 z-[9999] bg-[#F2F2F2] flex flex-col overflow-hidden animate-in fade-in duration-300'
-                                : 'fixed inset-0 top-24 z-[450] bg-[#F2F2F2] overflow-y-auto xl:relative xl:top-0 xl:inset-auto xl:z-0 xl:block xl:sticky xl:top-0 self-start space-y-3 xl:h-[calc(100vh-100px)] xl:overflow-y-auto xl:pr-1'
-                                }`}>
-                                <EventPreviewContent
-                                    previewDevice={previewDevice}
-                                    isPreviewMode={isPreviewMode}
-                                    setIsPreviewMode={setIsPreviewMode}
-                                    setPreviewDevice={setPreviewDevice}
-                                    formData={formData}
-                                    organizerProfile={organizerProfile}
-                                    events={events}
-                                    brandingEnabled={!!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding)}
-                                    name={name}
-                                />
-                            </div>
+                            window.innerWidth < 768 ? createPortal(
+                                <div className="fixed inset-0 z-[99999] bg-[#F2F2F2] pointer-events-auto overflow-y-scroll overflow-x-hidden [-webkit-overflow-scrolling:touch] overscroll-contain">
+                                    <EventPreviewContent
+                                        previewDevice={previewDevice}
+                                        isPreviewMode={isPreviewMode}
+                                        setIsPreviewMode={setIsPreviewMode}
+                                        setPreviewDevice={setPreviewDevice}
+                                        formData={formData}
+                                        organizerProfile={organizerProfile}
+                                        events={events}
+                                        brandingEnabled={!!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding)}
+                                        name={name}
+                                    />
+                                </div>,
+                                document.body
+                            ) : (
+                                <div className={`${previewDevice === 'desktop'
+                                    ? 'fixed top-0 bottom-0 left-0 lg:left-64 right-0 z-[9999] bg-[#F2F2F2] flex flex-col overflow-hidden animate-in fade-in duration-300'
+                                    : 'relative z-0 block sticky top-0 self-start xl:h-[calc(100vh-100px)] xl:pr-1 pointer-events-auto'
+                                    }`}>
+                                    <EventPreviewContent
+                                        previewDevice={previewDevice}
+                                        isPreviewMode={isPreviewMode}
+                                        setIsPreviewMode={setIsPreviewMode}
+                                        setPreviewDevice={setPreviewDevice}
+                                        formData={formData}
+                                        organizerProfile={organizerProfile}
+                                        events={events}
+                                        brandingEnabled={!!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding)}
+                                        name={name}
+                                    />
+                                </div>
+                            )
                         )}
                     </div>
                 </div>

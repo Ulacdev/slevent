@@ -707,8 +707,8 @@ export const AuthPage: React.FC = () => {
                       <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Password <span className="text-red-500">*</span></label>
                       <PasswordInput value={password} onChange={(e: any) => setPassword(e.target.value)} required placeholder="••••••••"
                         icon={<LockIcon className="w-4 h-4" />}
-                        inputClassName="!bg-[#F2F2F2] !border-black/10 !rounded-[11px] !py-2 !text-[10px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0" />
-                      <button type="button" onClick={() => setView('forgot-password')} className="text-[13px] font-bold text-[#38BDF2] hover:underline mt-0.5 flex justify-end w-full">Forgot password?</button>
+                        inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all" />
+                      <button type="button" onClick={() => setView('forgot-password')} className="text-[11px] font-bold text-[#38BDF2] hover:underline mt-1.5 flex justify-end w-full">Forgot password?</button>
                     </div>
                   </div>
 
@@ -723,7 +723,7 @@ export const AuthPage: React.FC = () => {
                     </div>
                   )}
 
-                  <Button type="submit" className="mt-1.5 w-full py-3.5 text-[11px] font-black rounded-[16px] border-none bg-gradient-to-r from-[#38BDF2] to-[#2DAADF] text-white shadow-[0_10px_20px_rgba(56,189,242,0.2),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" loading={loading} disabled={loading}>
+                  <Button type="submit" className="mt-1.5 w-full py-3.5 text-[13.5px] font-black rounded-[16px] border-none bg-gradient-to-r from-[#38BDF2] to-[#2DAADF] text-white shadow-[0_10px_20px_rgba(56,189,242,0.2),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" loading={loading} disabled={loading}>
                     Login
                   </Button>
 
@@ -748,43 +748,43 @@ export const AuthPage: React.FC = () => {
               )}
 
               {view === 'signup' && (
-                <div className="w-full" style={{ zoom: 0.8 }}>
+                <div className="w-full">
                   <form onSubmit={handleSignup} className="flex flex-col pb-10 items-stretch">
                     <div className="space-y-3">
                   <div className="space-y-0.5">
                     <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Full Name <span className="text-red-500">*</span></label>
-                    <IconInput
-                      placeholder="Juan Dela Cruz"
-                      required
-                      value={name}
-                      onChange={(e: any) => setName(e.target.value)}
-                      icon={<UserIcon className="w-4 h-4" />}
-                      inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[12px] !py-2.5 !text-[14px] !font-medium"
-                    />
+                      <IconInput
+                        placeholder="Juan Dela Cruz"
+                        required
+                        value={name}
+                        onChange={(e: any) => setName(e.target.value)}
+                        icon={<UserIcon className="w-4 h-4" />}
+                        inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium"
+                      />
                   </div>
                   <div className="space-y-0.5">
                     <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Email Address <span className="text-red-500">*</span></label>
-                    <IconInput
-                      type="email"
-                      placeholder="you@domain.com"
-                      required
-                      value={email}
-                      onChange={(e: any) => setEmail(e.target.value)}
-                      icon={<EnvelopeIcon className="w-4 h-4" />}
-                      inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[12px] !py-2.5 !text-[14px] !font-medium"
-                    />
+                      <IconInput
+                        type="email"
+                        placeholder="you@domain.com"
+                        required
+                        value={email}
+                        onChange={(e: any) => setEmail(e.target.value)}
+                        icon={<EnvelopeIcon className="w-4 h-4" />}
+                        inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium"
+                      />
                   </div>
                   <div className="space-y-0.5">
                     <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Password <span className="text-red-500">*</span></label>
-                    <PasswordInput placeholder="Create password" required value={password} onChange={(e: any) => setPassword(e.target.value)}
-                      icon={<LockIcon className="w-4 h-4" />}
-                      inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[12px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all" />
+                      <PasswordInput placeholder="Create password" required value={password} onChange={(e: any) => setPassword(e.target.value)}
+                        icon={<LockIcon className="w-4 h-4" />}
+                        inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all" />
                   </div>
                   <div className="space-y-0.5">
                     <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Confirm Password <span className="text-red-500">*</span></label>
-                    <PasswordInput placeholder="Confirm password" required value={confirmPassword} onChange={(e: any) => setConfirmPassword(e.target.value)}
-                      icon={<LockIcon className="w-4 h-4" />}
-                      inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[12px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all" />
+                      <PasswordInput placeholder="Confirm password" required value={confirmPassword} onChange={(e: any) => setConfirmPassword(e.target.value)}
+                        icon={<LockIcon className="w-4 h-4" />}
+                        inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all" />
                     </div>
                   </div>
                   
@@ -797,7 +797,7 @@ export const AuthPage: React.FC = () => {
 
                   <Button 
                     type="submit" 
-                    className="mt-1 w-full py-3.5 text-[13px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" 
+                    className="mt-1 w-full py-3.5 text-[13.5px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" 
                     loading={loading}
                     disabled={loading}
                   >
@@ -872,7 +872,7 @@ export const AuthPage: React.FC = () => {
                         </div>
                       )}
 
-                      <Button type="submit" className="w-full py-4 text-[11px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all disabled:opacity-50" loading={loading} disabled={loading}>
+                      <Button type="submit" className="w-full py-4 text-[13.5px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all disabled:opacity-50" loading={loading} disabled={loading}>
                         Send Link
                       </Button>
                     </form>
@@ -895,7 +895,7 @@ export const AuthPage: React.FC = () => {
                           required
                           placeholder="••••••••"
                           icon={<LockIcon className="w-4 h-4" />}
-                          inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[10px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0"
+                          inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all"
                         />
                         <PasswordRequirements password={password} />
                       </div>
@@ -907,7 +907,7 @@ export const AuthPage: React.FC = () => {
                           required
                           placeholder="••••••••"
                           icon={<LockIcon className="w-4 h-4" />}
-                          inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[10px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all !min-h-0"
+                          inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all"
                         />
                       </div>
 
@@ -918,7 +918,7 @@ export const AuthPage: React.FC = () => {
                         </div>
                       )}
 
-                      <Button type="submit" className="w-full py-4 bg-[#38BDF2] rounded-[16px] font-black border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all" loading={loading} disabled={loading}>
+                      <Button type="submit" className="w-full py-4 bg-[#38BDF2] rounded-[16px] text-[13.5px] font-black border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all" loading={loading} disabled={loading}>
                         Update Password
                       </Button>
                     </form>
@@ -940,7 +940,7 @@ export const AuthPage: React.FC = () => {
                           onChange={(e: any) => setName(e.target.value)}
                           required
                           icon={<UserIcon className="w-4 h-4" />}
-                          inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[12px] !py-3 !text-[14px] !font-medium"
+                          inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium"
                         />
                       </div>
 
@@ -954,7 +954,7 @@ export const AuthPage: React.FC = () => {
                               required
                               placeholder="••••••••"
                               icon={<LockIcon className="w-4 h-4" />}
-                              inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[12px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all"
+                              inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all"
                             />
                             <PasswordRequirements password={password} />
                           </div>
@@ -966,7 +966,7 @@ export const AuthPage: React.FC = () => {
                               required
                               placeholder="••••••••"
                               icon={<LockIcon className="w-4 h-4" />}
-                              inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[12px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all"
+                              inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all"
                             />
                           </div>
                         </>
@@ -979,7 +979,7 @@ export const AuthPage: React.FC = () => {
                         </div>
                       )}
 
-                      <Button type="submit" className="w-full py-4 bg-[#38BDF2] rounded-[16px] font-black border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all" loading={loading} disabled={loading}>
+                      <Button type="submit" className="w-full py-4 bg-[#38BDF2] rounded-[16px] text-[13.5px] font-black border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all" loading={loading} disabled={loading}>
                         {inviteInfo?.accountExists ? 'Join Organization' : 'Create & Join'}
                       </Button>
                     </form>

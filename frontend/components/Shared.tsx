@@ -160,7 +160,7 @@ export const PasswordInput: React.FC<{
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-2 top-0 bottom-1.5 flex items-center justify-center text-[#2E2E2F]/40 hover:text-[#38BDF2] transition-colors px-2 z-10 active:scale-95"
+          className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-[#2E2E2F]/40 hover:text-[#38BDF2] transition-colors z-10 active:scale-95"
         >
           {showPassword ? <EyeOffIcon /> : <EyeIcon />}
         </button>

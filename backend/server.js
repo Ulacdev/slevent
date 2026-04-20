@@ -6,6 +6,18 @@ import helmet from "helmet";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
+import path from "path";
+import fs from "fs";
+
+// Prevent crashing on unhandled errors
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🔥 [FATAL] Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('🔥 [FATAL] Uncaught Exception:', err);
+  // Optional: Gracefully shutdown? For now, just log.
+});
 
 import userRoutes from "./routes/userRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
@@ -62,8 +74,10 @@ app.use(cors({
       return callback(null, true);
     }
 
-    console.error("Blocked by CORS:", origin);
-    return callback(new Error("Not allowed by CORS"));
+    console.warn("⚠️ [CORS] Blocked origin:", origin);
+    // Instead of throwing an error which might crash some middlewares/libs, 
+    // we return false. The browser will handle the CORS failure.
+    return callback(null, false);
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -73,7 +87,7 @@ app.use(cors({
 // Security: Rate limiting for auth and sensitive endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 30, // Limit each IP to 30 failed attempts per window for auth
+  max: 1000, // Limit each IP to 1000 failed attempts per window for auth
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true, // IMPORTANT: only count failures (4xx, 5xx)
@@ -84,9 +98,10 @@ const authLimiter = rateLimit({
   }
 });
 
-const generalApiLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100, // Limit each IP to 100 requests per minute
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 1000, // Increased from 100 to prevent false-positive 'crashes' on SPAs
+  message: "Too many requests from this IP, please try again after 15 minutes",
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -141,8 +156,8 @@ app.use(
     next();
   }
 );
-app.use(express.json({ verify: rawBodySaver }));
-app.use(express.urlencoded({ extended: false, verify: rawBodySaver }));
+app.use(express.json({ limit: "50mb", verify: rawBodySaver }));
+app.use(express.urlencoded({ limit: "50mb", extended: true, verify: rawBodySaver }));
 
 app.use("/api/events", eventRoutes);
 app.use("/api/tickets", ticketRoutes);

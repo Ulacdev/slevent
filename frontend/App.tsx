@@ -704,21 +704,14 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   setDesktopSidebarOpen(!desktopSidebarOpen);
                 }
               }}
-              className="p-2 w-16 h-16 md:w-11 md:h-11 flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-[#F2F2F2] hover:bg-gray-100 transition-all group active:scale-95"
+              className="p-2 w-11 h-11 flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-[#F2F2F2] hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all group active:scale-95"
               aria-label="Toggle Sidebar"
             >
-              <svg className={`w-7 h-7 md:w-5 md:h-5 transition-transform duration-500 ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M4 6h16M4 12h16M4 18h16" />
+              <svg className={`w-5 h-5 transition-transform duration-500 ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            {/* Mobile Logo */}
-            <Link to={role === UserRole.ADMIN ? "/dashboard" : (role === UserRole.STAFF ? "/events" : "/user-home")} className="md:hidden shrink-0 flex items-center">
-              {employerLogoUrl ? (
-                <img src={employerLogoUrl} alt="Logo" className="h-16 w-auto max-w-[180px] object-contain" />
-              ) : (
-                <img src="/lgo.webp" alt="Logo" className="h-16 w-16 object-contain" />
-              )}
-            </Link>
+            {/* Mobile Logo removed as per user request - branded inside sidebar only */}
             <div className="hidden sm:block">
               <p className="text-[10px] uppercase font-black text-[#2E2E2F] tracking-[0.2em]">
                 {isStaff ? 'Staff Panel' : role === UserRole.ADMIN ? 'Admin Center' : 'Organizer Portal'}
@@ -734,7 +727,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 >
                   <ICONS.Bell className="w-5 h-5 text-[#2E2E2F] group-hover:text-[#38BDF2] transition-colors" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[20px] h-[20px] bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center px-1 border-2 border-[#F2F2F2] shadow-lg animate-in zoom-in duration-300">
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center px-1 border-2 border-[#F2F2F2] shadow-sm">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   )}
@@ -975,53 +968,53 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         </header>
         {/* Sidebar overlay for mobile */}
         {sidebarOpen && (
-          <div className="fixed inset-0 z-[100] flex md:hidden">
+          <div className="fixed inset-0 z-[1000] flex md:hidden">
             <div className="fixed inset-0 bg-[#2E2E2F]/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-            <aside className="relative w-[min(18.5rem,calc(100vw-1rem))] bg-[#F2F2F2] border-r border-[#E5E7EB] flex flex-col h-full z-[110] animate-in slide-in-from-left duration-300 shadow-2xl">
-              <div className="p-8 pb-4 flex items-center justify-between border-b border-[#E5E7EB]">
-                <Link to={role === UserRole.ADMIN ? "/dashboard" : (role === UserRole.STAFF ? "/events" : "/user-home")} onClick={() => setSidebarOpen(false)} className="flex flex-col items-start gap-2 group transition-all duration-500">
+            <aside className="relative w-[min(18.5rem,calc(100vw-2.5rem))] bg-[#F2F2F2] border-r border-[#E5E7EB] flex flex-col h-full z-[1100] animate-in slide-in-from-left duration-300 shadow-2xl">
+              <div className="p-6 flex items-center justify-between border-b border-[#E5E7EB] shrink-0 h-20">
+                <Link to={role === UserRole.ADMIN ? "/dashboard" : (role === UserRole.STAFF ? "/events" : "/user-home")} onClick={() => setSidebarOpen(false)} className="flex items-center gap-3 group transition-all">
                   {employerLogoUrl ? (
                     <img
                       src={employerLogoUrl}
                       alt={employerName || 'Logo'}
-                      className="h-12 w-auto max-w-[168px] object-contain"
+                      className="h-10 w-auto max-w-[140px] object-contain"
                     />
                   ) : (
-                    <Branding className="h-12 w-auto" />
+                    <Branding className="h-10 w-auto" />
                   )}
                   {employerName && (
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] ml-0.5">
+                    <span className="text-[11px] font-black uppercase tracking-tight text-[#2E2E2F] truncate max-w-[120px]">
                       {employerName}
                     </span>
                   )}
                 </Link>
                 <button
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#2E2E2F]/5 text-[#111827] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors"
+                  className="w-11 h-11 flex items-center justify-center rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors"
                   onClick={() => setSidebarOpen(false)}
                   aria-label="Close navigation"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.4} viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
-              <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-none">
+              <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto scrollbar-none">
                 {menuItems.map((item) => {
                   const isActive = checkIsActiveAdmin(item.path);
                   return (
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`flex items-center gap-4 px-5 py-3.5 mx-2 rounded-lg transition-all duration-200 group ${isActive
+                      className={`flex items-center gap-4 px-4 py-3 mx-2 rounded-lg transition-all duration-200 group ${isActive
                         ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20'
                         : 'text-[#000000]/90 hover:bg-[#E5E7EB]/50 hover:text-[#000000]'
                         }`}
                       onClick={() => setSidebarOpen(false)}
                     >
                       <div className={isActive ? 'text-white' : 'text-[#000000]/90 group-hover:text-[#000000]'}>
-                        {React.cloneElement(item.icon as React.ReactElement<any>, { className: (desktopSidebarOpen ? 'w-5 h-5' : 'w-4 h-4') + ' ' + (isActive ? 'stroke-[2px]' : 'stroke-[1.5px]') })}
+                        {React.cloneElement(item.icon as React.ReactElement<any>, { className: 'w-5 h-5 ' + (isActive ? 'stroke-[2px]' : 'stroke-[1.5px]') })}
                       </div>
-                      <span className={`text-sm tracking-tight ${isActive ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
+                      <span className={`text-sm tracking-tight ${isActive ? 'font-black' : 'font-bold'}`}>{item.label}</span>
                     </Link>
                   );
                 })}
@@ -1042,7 +1035,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           </div>
         )}
 
-        <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <div id="main-scroll-container" className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           <div className="max-w-7xl mx-auto" style={{ fontSize: '1.1rem' }}>
             {(noStaffPerms && location.pathname !== '/attendees') ? (
               <div className="flex flex-col items-center justify-center min-h-[40vh]">
@@ -2645,21 +2638,14 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   setDesktopSidebarOpen(!desktopSidebarOpen);
                 }
               }}
-              className="p-2 w-16 h-16 md:w-11 md:h-11 flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-[#F2F2F2] hover:bg-gray-100 transition-all group active:scale-95"
+              className="p-2 w-11 h-11 flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-[#F2F2F2] hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all group active:scale-95"
               aria-label="Toggle Sidebar"
             >
-              <svg className={`w-7 h-7 md:w-5 md:h-5 transition-transform duration-500 ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M4 6h16M4 12h16M4 18h16" />
+              <svg className={`w-5 h-5 transition-transform duration-500 ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            {/* Mobile Logo */}
-            <Link to="/user-home" className="md:hidden shrink-0 flex items-center">
-              {employerLogoUrl ? (
-                <img src={employerLogoUrl} alt="Logo" className="h-16 w-auto max-w-[180px] object-contain" />
-              ) : (
-                <img src="/lgo.webp" alt="Logo" className="h-16 w-16 object-contain" />
-              )}
-            </Link>
+            {/* Mobile Logo removed as per user request - branded inside sidebar only */}
             <div className="ml-1 hidden sm:block">
               <p className="text-[10px] uppercase font-black text-[#111111] tracking-[0.2em]">
                 Organizer Portal
@@ -2910,16 +2896,16 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
 
 
         {sidebarOpen && (
-          <div className="fixed inset-0 z-[100] flex lg:hidden">
+          <div className="fixed inset-0 z-[1000] flex lg:hidden">
             <div className="fixed inset-0 bg-[#2E2E2F]/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-            <aside className="relative w-[min(18.5rem,calc(100vw-1rem))] bg-[#F2F2F2] border-r border-[#E5E7EB] flex flex-col h-full z-50 animate-in slide-in-from-left duration-300 shadow-2xl">
-              <div className="p-8 pb-3 flex items-center justify-between border-b border-[#E5E7EB]">
-                <Link to="/user-home" onClick={() => setSidebarOpen(false)} className="flex flex-col items-start gap-2 group transition-all duration-500">
+            <aside className="relative w-[min(18.5rem,calc(100vw-2.5rem))] bg-[#F2F2F2] border-r border-[#E5E7EB] flex flex-col h-full z-[1100] animate-in slide-in-from-left duration-300 shadow-2xl">
+              <div className="p-6 flex items-center justify-between border-b border-[#E5E7EB] shrink-0 h-20">
+                <Link to="/user-home" onClick={() => setSidebarOpen(false)} className="flex items-center gap-3 group transition-all">
                   {employerLogoUrl ? (
                     <img
                       src={employerLogoUrl}
                       alt={employerName || 'Logo'}
-                      className="h-12 w-auto max-w-[168px] object-contain"
+                      className="h-10 w-auto max-w-[140px] object-contain"
                     />
                   ) : (
                     <img
@@ -2929,29 +2915,29 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     />
                   )}
                   {employerName && (
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] ml-0.5">
+                    <span className="text-[11px] font-black uppercase tracking-tight text-[#2E2E2F] truncate max-w-[120px]">
                       {employerName}
                     </span>
                   )}
                 </Link>
                 <button
-                  className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#2E2E2F]/5 text-[#2E2E2F] hover:bg-gray-100 transition-colors"
+                  className="w-11 h-11 flex items-center justify-center rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors"
                   onClick={() => setSidebarOpen(false)}
                   aria-label="Close navigation"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
-              <nav className="flex-1 px-4 pt-4 pb-24 space-y-1 overflow-y-auto scrollbar-none">
+              <nav className="flex-1 px-3 pt-6 pb-24 space-y-1 overflow-y-auto scrollbar-none">
                 {menuItems.map((item: any) => {
                   const isActive = checkIsActive(item.path);
                   return (
                     <Link
                       key={item.path}
                       to={item.path}
-                      className={`flex items-center gap-4 px-5 py-3.5 mx-2 rounded-lg transition-all duration-200 group ${isActive
+                      className={`flex items-center gap-4 px-4 py-3 mx-2 rounded-lg transition-all duration-200 group ${isActive
                         ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20'
                         : 'text-[#000000]/90 hover:bg-[#E5E7EB]/50 hover:text-[#000000]'
                         }`}
@@ -2960,7 +2946,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                       <div className={isActive ? 'text-white' : 'text-[#000000]/90 group-hover:text-[#000000]'}>
                         {React.cloneElement(item.icon as React.ReactElement<any>, { className: 'w-5 h-5 ' + (isActive ? 'stroke-[2px]' : 'stroke-[1.5px]') })}
                       </div>
-                      <span className={`text-sm tracking-tight ${isActive ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
+                      <span className={`text-sm tracking-tight ${isActive ? 'font-black' : 'font-bold'}`}>{item.label}</span>
                     </Link>
                   );
                 })}

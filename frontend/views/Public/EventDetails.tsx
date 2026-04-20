@@ -324,6 +324,7 @@ export const EventDetails: React.FC = () => {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [showRefundPolicyModal, setShowRefundPolicyModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [isSheetExpanded, setIsSheetExpanded] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -969,7 +970,7 @@ export const EventDetails: React.FC = () => {
           </div>
 
           {/* Secure Access Sidebar */}
-          <div className="w-full md:w-[280px] lg:w-[380px] shrink-0 lg:sticky lg:top-24 self-start">
+          <div className={`w-full md:w-[280px] lg:w-[380px] shrink-0 lg:sticky lg:top-24 self-start ${!isOwnEvent && !isDone ? 'hidden lg:block' : ''}`}>
             <Card className="p-8 rounded-xl bg-[#F2F2F2] border border-[#2E2E2F]/10 lg:max-h-[calc(100vh-7rem)] lg:flex lg:flex-col">
               {isOwnEvent ? (
                 <div className="flex flex-col items-center text-center py-6 border-b border-[#2E2E2F]/10 mb-6">
@@ -1190,31 +1191,146 @@ export const EventDetails: React.FC = () => {
       </div>
 
       {!isOwnEvent && !isDone && (
-        <div
-          className="fixed inset-x-0 z-[60] px-3 sm:px-4 lg:hidden pointer-events-none"
-          style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
-        >
-          <div className="pointer-events-auto mx-auto w-full max-w-xl max-h-[calc(100dvh-7.5rem)] overflow-y-auto overscroll-contain rounded-xl border border-[#2E2E2F]/15 bg-[#F2F2F2]/98 backdrop-blur px-6 py-6 shadow-[0_18px_38px_-18px_rgba(46,46,47,0.35)]">
-            <p className="text-xl font-black text-[#2E2E2F] tracking-tight">
-              Get Tickets
-            </p>
-            <div className="mt-5 border-t border-[#2E2E2F]/10" />
-            <Button
-              className="w-full mt-5"
-              disabled={totalQuantity === 0}
-              onClick={handleRegister}
-              style={{ backgroundColor: brandColor }}
+        <>
+          {/* Compact Bar (Visible only when sheet is closed) */}
+          {!isSheetExpanded && (
+            <div 
+              className="fixed inset-x-0 bottom-0 z-[60] lg:hidden bg-[#F2F2F2] border-t border-[#2E2E2F]/10 px-6 py-4 flex items-center justify-between shadow-[0_-10px_30px_rgba(0,0,0,0.1)]"
+              style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}
+              onClick={() => setIsSheetExpanded(true)}
             >
-              {ctaLabel}
-            </Button>
-            <div className="mt-4 flex items-center justify-center gap-2 opacity-40">
-              <ICONS.CreditCard className="w-4 h-4" />
-              <p className="text-[9px] text-center font-black uppercase tracking-[0.3em] text-[#2E2E2F]">
-                SECURE HITPAY CHECKOUT
-              </p>
+              <div className="flex flex-col">
+                <span className="text-[17px] font-black text-[#2E2E2F] tracking-tight">
+                  {totalQuantity > 0 ? `₱${grandTotal.toLocaleString()}` : (
+                    event.ticketTypes && event.ticketTypes.length > 0
+                      ? (event.ticketTypes.some(t => t.priceAmount === 0) ? 'Free' : `From ₱${Math.min(...event.ticketTypes.map(t => t.priceAmount)).toLocaleString()}`)
+                      : 'Free'
+                  )}
+                </span>
+                <span className="text-[13px] font-medium text-[#2E2E2F]/50">
+                  {totalQuantity > 0 ? `${totalQuantity} Ticket${totalQuantity > 1 ? 's' : ''}` : (event.ticketTypes && event.ticketTypes.length > 1 ? 'Multiple dates' : (event.startAt ? formatDate(event.startAt, event.timezone, { month: 'short', day: 'numeric' }) : 'Multiple dates'))}
+                </span>
+              </div>
+              <Button
+                className={`transform transition-all active:scale-90 ${totalQuantity > 0 ? 'px-6 py-3.5 text-[11px] uppercase tracking-widest' : 'w-11 h-11 p-0'}`}
+                style={{ backgroundColor: brandColor, color: '#F2F2F2' }}
+              >
+                {totalQuantity > 0 ? 'Reserve Access' : <ICONS.Plus className="w-5 h-5 mx-auto" strokeWidth={4} />}
+              </Button>
             </div>
-          </div>
-        </div>
+          )}
+
+          {/* Expanded Bottom Sheet (Modal Layer) */}
+          {isSheetExpanded && (
+            <div className="fixed inset-0 z-[9999] lg:hidden flex flex-col justify-end">
+              {/* Dark Overlay */}
+              <div 
+                className="absolute inset-0 bg-[#000000]/60" 
+                onClick={() => setIsSheetExpanded(false)} 
+              />
+              
+              {/* The Sheet Content */}
+              <div 
+                className="relative w-full bg-[#F2F2F2] rounded-t-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] flex flex-col max-h-[85dvh]" 
+                style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}
+              >
+                {/* Drag Handle & Close */}
+                <div className="pt-6 pb-2 px-7 shrink-0 border-b border-[#2E2E2F]/5 flex flex-col items-center bg-[#F2F2F2] rounded-t-[2.5rem]">
+                  <div className="w-12 h-1.5 rounded-full bg-[#2E2E2F]/10 mb-4" onClick={() => setIsSheetExpanded(false)} />
+                  <div className="w-full flex justify-between items-center">
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#2E2E2F]/60">
+                      SECURE ACCESS
+                    </p>
+                    <button 
+                      onClick={() => setIsSheetExpanded(false)}
+                      className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/40 hover:text-[#2E2E2F]"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+
+                {/* Ticket List */}
+                <div className="flex-1 overflow-y-auto px-7 py-5 space-y-4 custom-scrollbar">
+                  {event.ticketTypes.map(ticket => {
+                    const qty = quantities[ticket.ticketTypeId] || 0;
+                    const available = ticket.quantityTotal - ticket.quantitySold;
+                    const isSoldOut = available <= 0;
+                    const salesEnded = ticket.salesEndAt && new Date() > new Date(ticket.salesEndAt);
+                    const salesNotStarted = ticket.salesStartAt && new Date() < new Date(ticket.salesStartAt);
+
+                    return (
+                      <div
+                        key={ticket.ticketTypeId}
+                        className="p-6 rounded-2xl border-2 transition-colors bg-[#F2F2F2]"
+                        style={{ borderColor: qty > 0 ? brandColor : '#2E2E2F1A' }}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[#2E2E2F] text-[13px] uppercase tracking-wider font-bold">{ticket.name}</span>
+                          </div>
+                          <span
+                            className="text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest text-[#F2F2F2]"
+                            style={{ backgroundColor: salesEnded ? '#2E2E2F' : (isSoldOut ? '#2E2E2F' : brandColor) }}
+                          >
+                            {salesEnded ? 'SALES ENDED' : (isSoldOut ? 'SOLD OUT' : 'AVAILABLE')}
+                          </span>
+                        </div>
+                        
+                        <div className="text-xl font-black text-[#2E2E2F] mb-6 tracking-tighter">
+                          {ticket.priceAmount === 0 ? 'FREE' : (
+                            <><span className="">PHP</span> <span className="font-black">{ticket.priceAmount.toLocaleString()}.00</span></>
+                          )}
+                        </div>
+
+                        <div className="pt-6 border-t border-[#2E2E2F]/10 flex items-center justify-between">
+                          <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">QUANTITY</span>
+                          <div className="flex items-center gap-5">
+                            <button
+                              onClick={() => updateQuantity(ticket.ticketTypeId, -1, available)}
+                              disabled={qty === 0 || isSoldOut}
+                              className="w-8 h-8 flex items-center justify-center rounded-xl transition-colors disabled:opacity-20 disabled:cursor-not-allowed border border-[#2E2E2F]/10"
+                              style={qty > 0 && !isSoldOut ? { backgroundColor: brandColor, color: '#F2F2F2' } : {}}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M20 12H4" /></svg>
+                            </button>
+                            <span className="font-black text-lg text-[#2E2E2F] w-4 text-center">{qty}</span>
+                            <button
+                              onClick={() => updateQuantity(ticket.ticketTypeId, 1, available)}
+                              disabled={isSoldOut || qty >= available}
+                              className="w-8 h-8 flex items-center justify-center rounded-xl text-[#F2F2F2] transition-colors disabled:opacity-20 disabled:cursor-not-allowed border border-[#2E2E2F]/10"
+                              style={!isSoldOut && qty < available ? { backgroundColor: brandColor } : {}}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M12 4v16m8-8H4" /></svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Final Checkout Button */}
+                <div className="px-7 pt-4 shrink-0 bg-[#F2F2F2] border-t border-[#2E2E2F]/5">
+                  <Button
+                    className="w-full py-6 rounded-[1.2rem] font-black text-[11px] uppercase tracking-[0.2em] shadow-lg"
+                    disabled={totalQuantity === 0}
+                    onClick={handleRegister}
+                    style={{ backgroundColor: brandColor, color: '#F2F2F2' }}
+                  >
+                    {ctaLabel}
+                  </Button>
+                  <div className="mt-4 flex items-center justify-center gap-2 text-[#2E2E2F]/30 pb-2">
+                    <ICONS.CreditCard className="w-3.5 h-3.5" />
+                    <p className="text-[8px] font-black uppercase tracking-widest">
+                      SECURE HITPAY CHECKOUT
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <Modal
