@@ -569,7 +569,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
     setIsMarqueePaused(false);
   };
 
-    // CSS Marquee is used for categories instead of JS frame-by-frame scroll for better performance
+  // CSS Marquee is used for categories instead of JS frame-by-frame scroll for better performance
 
 
   const likedSet = useMemo(() => new Set(likedEventIds), [likedEventIds]);
@@ -1057,481 +1057,532 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
   return (
     <>
-      <div 
+      <div
         className={`${isLanding ? 'max-w-[88rem] mx-auto px-4 sm:px-10 pt-6 sm:pt-12' : 'max-w-full px-6 sm:px-10 pt-0'} pb-16`}
         style={isLanding ? { zoom: 0.9 } : {}}
       >
-      {isLanding && (
-        <>
-          {/* Premium Hero Section */}
-          <div className="flex flex-col lg:flex-row items-center lg:items-stretch justify-between gap-8 lg:gap-14 mb-20 lg:mb-24">
-            {/* Left Column: Content */}
-            <div className="flex-1 min-w-0 flex flex-col items-start justify-center text-left w-full">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#38BDF2] border border-white/20 text-[11px] font-black text-white mb-8 tracking-wide">
-                  <span role="img" aria-label="megaphone">📢</span>
-                  New: Advanced QR Ticketing & Analytics Launched!
+        {isLanding && (
+          <>
+            {/* Premium Hero Section */}
+            <div className="flex flex-col lg:flex-row items-center lg:items-stretch justify-between gap-8 lg:gap-14 mb-20 lg:mb-24">
+              {/* Left Column: Content */}
+              <div className="flex-1 min-w-0 flex flex-col items-start justify-center text-left w-full">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#38BDF2] border border-white/20 text-[11px] font-black text-white mb-8 tracking-wide">
+                    <span role="img" aria-label="megaphone">📢</span>
+                    New: Advanced QR Ticketing & Analytics Launched!
+                  </div>
+
+                  <h1 className="text-[2.8rem] sm:text-5xl lg:text-[60px] font-bold text-black tracking-tight leading-[1.05] mb-5">
+                    Modern Events for<br />
+                    Philippine<br />
+                    Organizers
+                  </h1>
+
+                  <p className="text-[20px] font-medium text-black leading-relaxed max-w-[800px] mb-10">
+                    Manage registrations, tickets, attendee check-ins, and performance in one simple, compliance-ready event platform — built specifically for growth-focused organizers.
+                  </p>
+
+                  <div className="flex flex-row items-center gap-3 sm:gap-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (isAuthenticated) {
+                          navigate(role === UserRole.ORGANIZER ? '/user-home' : '/browse-events');
+                        } else {
+                          gotoSignup();
+                        }
+                      }}
+                      className="px-6 sm:px-8 py-3 sm:py-4 bg-[#38BDF2] text-white font-black text-[14px] sm:text-[15px] rounded-xl shadow-lg shadow-[#38BDF2]/30 hover:scale-105 active:scale-95 transition-all flex flex-row items-center justify-center gap-2 whitespace-nowrap"
+                    >
+                      {isAuthenticated ? (role === UserRole.ORGANIZER ? 'Dashboard' : 'Explore') : 'Get Started'}
+                      <ICONS.ArrowRight className="w-5 h-5 shrink-0" strokeWidth={2.5} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const pricingSection = document.getElementById('pricing');
+                        if (pricingSection) {
+                          pricingSection.scrollIntoView({ behavior: 'smooth' });
+                        } else {
+                          navigate('/pricing');
+                        }
+                      }}
+                      className="px-6 sm:px-8 py-3 sm:py-4 bg-transparent border-2 border-solid border-[#38BDF2] text-[#38BDF2] font-black text-[14px] sm:text-[15px] rounded-xl hover:bg-[#38BDF2] hover:text-white transition-all flex flex-row items-center justify-center gap-2 whitespace-nowrap group"
+                    >
+                      <ICONS.CreditCard className="w-5 h-5 text-[#38BDF2] group-hover:text-white transition-colors shrink-0" strokeWidth={2} />
+                      Pricing
+                    </button>
+                  </div>
                 </div>
 
-                <h1 className="text-[2.8rem] sm:text-5xl lg:text-[60px] font-bold text-black tracking-tight leading-[1.05] mb-5">
-                  Modern Events for<br />
-                  Philippine<br />
-                  Organizers
-                </h1>
-
-                <p className="text-[20px] font-medium text-black leading-relaxed max-w-[800px] mb-10">
-                  Manage registrations, tickets, attendee check-ins, and performance in one simple, compliance-ready event platform — built specifically for growth-focused organizers.
-                </p>
-
-                <div className="flex flex-row items-center gap-3 sm:gap-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (isAuthenticated) {
-                        navigate(role === UserRole.ORGANIZER ? '/user-home' : '/browse-events');
-                      } else {
-                        gotoSignup();
-                      }
-                    }}
-                    className="px-6 sm:px-8 py-3 sm:py-4 bg-[#38BDF2] text-white font-black text-[14px] sm:text-[15px] rounded-xl shadow-lg shadow-[#38BDF2]/30 hover:scale-105 active:scale-95 transition-all flex flex-row items-center justify-center gap-2 whitespace-nowrap"
-                  >
-                    {isAuthenticated ? (role === UserRole.ORGANIZER ? 'Dashboard' : 'Explore') : 'Get Started'}
-                    <ICONS.ArrowRight className="w-5 h-5 shrink-0" strokeWidth={2.5} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const pricingSection = document.getElementById('pricing');
-                      if (pricingSection) {
-                        pricingSection.scrollIntoView({ behavior: 'smooth' });
-                      } else {
-                        navigate('/pricing');
-                      }
-                    }}
-                    className="px-6 sm:px-8 py-3 sm:py-4 bg-transparent border-2 border-solid border-[#38BDF2] text-[#38BDF2] font-black text-[14px] sm:text-[15px] rounded-xl hover:bg-[#38BDF2] hover:text-white transition-all flex flex-row items-center justify-center gap-2 whitespace-nowrap group"
-                  >
-                    <ICONS.CreditCard className="w-5 h-5 text-[#38BDF2] group-hover:text-white transition-colors shrink-0" strokeWidth={2} />
-                    Pricing
-                  </button>
+                {/* Stats Block - Tucked tightly under the buttons */}
+                <div className="mt-10 sm:mt-12 w-full grid grid-cols-2 sm:grid-cols-3 gap-x-6 sm:gap-x-10 gap-y-8 sm:gap-y-12">
+                  <div className="flex-1 min-w-[140px]">
+                    <h4 className="text-[32px] font-bold text-black tracking-tighter leading-tight mb-1">
+                      6+ Core<br />Event<br />Modules
+                    </h4>
+                    <p className="text-[20px] font-normal text-black leading-tight tracking-tight mt-0.5">
+                      Ticketing, Registration,<br />Check-in, Analytics,<br />Seats, Reports
+                    </p>
+                  </div>
+                  <div className="flex-1 min-w-[140px]">
+                    <h4 className="text-[32px] font-bold text-black tracking-tighter leading-tight mb-1">
+                      8+ Active<br />Event<br />Organizers
+                    </h4>
+                    <p className="text-[20px] font-normal text-black leading-tight tracking-tight mt-0.5">
+                      Built with real-world<br />organizer experience
+                    </p>
+                  </div>
+                  <div className="flex-1 min-w-[140px]">
+                    <h4 className="text-[32px] font-bold text-black tracking-tighter leading-tight mb-1">
+                      10+ Hosted<br />Event<br />Workflows
+                    </h4>
+                    <p className="text-[20px] font-normal text-black leading-tight tracking-tight mt-0.5">
+                      From event planning to<br />secure payouts
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Stats Block - Tucked tightly under the buttons */}
-              <div className="mt-10 sm:mt-12 w-full grid grid-cols-2 sm:grid-cols-3 gap-x-6 sm:gap-x-10 gap-y-8 sm:gap-y-12">
-                <div className="flex-1 min-w-[140px]">
-                  <h4 className="text-[32px] font-bold text-black tracking-tighter leading-tight mb-1">
-                    6+ Core<br />Event<br />Modules
-                  </h4>
-                  <p className="text-[20px] font-normal text-black leading-tight tracking-tight mt-0.5">
-                    Ticketing, Registration,<br />Check-in, Analytics,<br />Seats, Reports
-                  </p>
+              {/* Right Column: Visual Dashboard Stack - Balanced & Static (Stand Still) */}
+              <div className="flex-1 relative w-full mt-10 lg:mt-0 flex flex-col gap-6 lg:gap-8 justify-center">
+                <div className="absolute -inset-10 bg-gradient-to-tr from-[#38BDF2]/10 to-transparent blur-[80px] opacity-30"></div>
+
+                {/* Top Card: Admin Center */}
+                <div className="relative bg-[#F2F2F2] p-1.5 rounded-2xl shadow-[0_20px_40px_-10px_rgba(46,46,47,0.1)] overflow-hidden group max-w-[620px] mx-auto lg:ml-auto transition-transform hover:scale-[1.02] duration-500">
+                  <img
+                    src="/hero-admin-preview.png"
+                    alt="Admin Center Dashboard"
+                    className="w-full h-auto rounded-xl block"
+                  />
+                  <div className="absolute top-3 right-3 bg-white/40 backdrop-blur-md px-3 py-1 rounded-full text-[8px] font-black text-black/60 uppercase tracking-[0.2em]">
+                    Admin Center
+                  </div>
                 </div>
-                <div className="flex-1 min-w-[140px]">
-                  <h4 className="text-[32px] font-bold text-black tracking-tighter leading-tight mb-1">
-                    8+ Active<br />Event<br />Organizers
-                  </h4>
-                  <p className="text-[20px] font-normal text-black leading-tight tracking-tight mt-0.5">
-                    Built with real-world<br />organizer experience
-                  </p>
+
+                {/* Bottom Card: Organizer Portal */}
+                <div className="relative bg-[#F2F2F2] p-1.5 rounded-2xl shadow-[0_25px_50px_-12px_rgba(46,46,47,0.12)] overflow-hidden group max-w-[620px] mx-auto lg:ml-auto transition-transform hover:scale-[1.02] duration-500">
+                  <img
+                    src="/hero-dashboard-preview.png"
+                    alt="Organizer Portal Dashboard"
+                    className="w-full h-auto rounded-xl block"
+                  />
+                  <div className="absolute top-3 right-3 bg-white/40 backdrop-blur-md px-3 py-1 rounded-full text-[8px] font-black text-black/60 uppercase tracking-[0.2em]">
+                    Organizer Portal
+                  </div>
                 </div>
-                <div className="flex-1 min-w-[140px]">
-                  <h4 className="text-[32px] font-bold text-black tracking-tighter leading-tight mb-1">
-                    10+ Hosted<br />Event<br />Workflows
-                  </h4>
-                  <p className="text-[20px] font-normal text-black leading-tight tracking-tight mt-0.5">
-                    From event planning to<br />secure payouts
-                  </p>
+
+                {/* Floating badge: Organizer Tally - Resized (More Compact) */}
+                <div
+                  className="absolute -bottom-4 -left-4 bg-[#F2F2F2] p-2.5 rounded-xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] flex flex-col items-start gap-2 animate-float group/badge cursor-pointer z-40 scale-90 lg:scale-100"
+                  onMouseEnter={() => setShowOrgDropdown(true)}
+                  onMouseLeave={() => setShowOrgDropdown(false)}
+                >
+                  <div className="flex -space-x-2.5">
+                    {organizerBadgeItems.map((organizer) => (
+                      <div key={organizer.key} className="w-8 h-8 rounded-full border-[2px] border-white overflow-hidden shadow-sm bg-[#38BDF2]/10 ring-1 ring-black/5">
+                        <img src={organizer.src} alt={organizer.alt} className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                    <div className="w-8 h-8 rounded-full border-[2px] border-white bg-[#E8E8E8] flex items-center justify-center text-[9px] font-black text-black shadow-sm ring-1 ring-black/5">
+                      +{organizerCount > 3 ? organizerCount - 3 : 5}
+                    </div>
+                  </div>
+                  <div className="space-y-0" onClick={() => navigate('/organizers/discover')}>
+                    <p className="text-[7.5px] font-black uppercase tracking-[0.05em] text-black/60 leading-tight">Active Organizers</p>
+                    <p className="text-[14px] font-black text-black leading-tight hover:text-[#38BDF2] transition-colors tracking-tight">
+                      8+ Trusted Leaders
+                    </p>
+                  </div>
+
+                  {/* Dropdown list of organizers (Restored) */}
+                  <div className={`absolute bottom-[calc(100%-10px)] left-0 w-64 bg-[#F2F2F2] border border-black/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden transition-all duration-300 origin-bottom-left pb-3 ${showOrgDropdown ? 'opacity-100 scale-100 translate-y-[-10px]' : 'opacity-0 scale-95 pointer-events-none translate-y-0'}`}>
+                    <div className="p-5 border-b border-black/5 bg-black/[0.02]">
+                      <h5 className="text-[10px] font-black text-black uppercase tracking-[0.25em]">Our Partners</h5>
+                    </div>
+                    <div className="max-h-[238px] overflow-y-auto custom-scrollbar p-2.5 space-y-1">
+                      {organizers.map((org) => (
+                        <button
+                          key={org.organizerId}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/organizer/${org.organizerId}`);
+                          }}
+                          className="w-full flex items-center gap-3.5 p-2.5 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-300 text-left group/item border border-transparent hover:border-black/5"
+                        >
+                          <div className="w-9 h-9 rounded-xl overflow-hidden border-2 border-white shadow-sm bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] flex items-center justify-center shrink-0">
+                            {org.profileImageUrl ? (
+                              <img src={getImageUrl(org.profileImageUrl)} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-white text-[11px] font-black uppercase drop-shadow-sm">
+                                {(org.organizerName || 'O').charAt(0)}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] font-black text-black truncate group-hover/item:text-[#38BDF2] transition-colors tracking-tight">
+                              {org.organizerName}
+                            </p>
+                            <p className="text-[9px] font-bold text-black uppercase tracking-[0.1em]">
+                              {org.followersCount || 0} Followers
+                            </p>
+                          </div>
+                          <ICONS.ChevronRight className="w-3.5 h-3.5 text-black group-hover/item:text-[#38BDF2] group-hover/item:translate-x-0.5 transition-all" />
+                        </button>
+                      ))}
+                    </div>
+                    <div className="px-4 py-3 bg-[#F2F2F2] border-t border-black/5 text-center">
+                      <div className="flex items-center justify-center gap-2 text-[9px] font-black text-[#38BDF2] uppercase tracking-[0.2em] opacity-40 hover:opacity-100 transition-opacity cursor-default">
+                        <div className="w-1 h-1 rounded-full bg-[#38BDF2] animate-pulse" />
+                        Verified Community
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Visual Dashboard Stack - Balanced & Static (Stand Still) */}
-            <div className="flex-1 relative w-full mt-10 lg:mt-0 flex flex-col gap-6 lg:gap-8 justify-center">
-              <div className="absolute -inset-10 bg-gradient-to-tr from-[#38BDF2]/10 to-transparent blur-[80px] opacity-30"></div>
-              
-              {/* Top Card: Admin Center */}
-              <div className="relative bg-[#F2F2F2] p-1.5 rounded-2xl shadow-[0_20px_40px_-10px_rgba(46,46,47,0.1)] overflow-hidden group max-w-[620px] mx-auto lg:ml-auto transition-transform hover:scale-[1.02] duration-500">
-                <img
-                  src="/hero-admin-preview.png"
-                  alt="Admin Center Dashboard"
-                  className="w-full h-auto rounded-xl block"
-                />
-                <div className="absolute top-3 right-3 bg-white/40 backdrop-blur-md px-3 py-1 rounded-full text-[8px] font-black text-black/60 uppercase tracking-[0.2em]">
-                  Admin Center
+            {/* Category Rail (Top of Available Events) */}
+            <div className="mt-44 mb-28 overflow-visible relative z-10">
+              <div className="rounded-2xl border border-black/10 bg-[#F2F2F2] px-6 py-8 md:px-8 shadow-sm">
+                <div className="mb-8">
+                  <h2 className="text-[16px] font-black tracking-tight text-black">Event smart categories</h2>
                 </div>
-              </div>
-
-                {/* Bottom Card: Organizer Portal */}
-              <div className="relative bg-[#F2F2F2] p-1.5 rounded-2xl shadow-[0_25px_50px_-12px_rgba(46,46,47,0.12)] overflow-hidden group max-w-[620px] mx-auto lg:ml-auto transition-transform hover:scale-[1.02] duration-500">
-                <img
-                  src="/hero-dashboard-preview.png"
-                  alt="Organizer Portal Dashboard"
-                  className="w-full h-auto rounded-xl block"
-                />
-                <div className="absolute top-3 right-3 bg-white/40 backdrop-blur-md px-3 py-1 rounded-full text-[8px] font-black text-black/60 uppercase tracking-[0.2em]">
-                  Organizer Portal
-                </div>
-              </div>
-
-              {/* Floating badge: Organizer Tally - Resized (More Compact) */}
-              <div
-                className="absolute -bottom-4 -left-4 bg-[#F2F2F2] p-2.5 rounded-xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] flex flex-col items-start gap-2 animate-float group/badge cursor-pointer z-40 scale-90 lg:scale-100"
-                onMouseEnter={() => setShowOrgDropdown(true)}
-                onMouseLeave={() => setShowOrgDropdown(false)}
-              >
-                <div className="flex -space-x-2.5">
-                  {organizerBadgeItems.map((organizer) => (
-                    <div key={organizer.key} className="w-8 h-8 rounded-full border-[2px] border-white overflow-hidden shadow-sm bg-[#38BDF2]/10 ring-1 ring-black/5">
-                      <img src={organizer.src} alt={organizer.alt} className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                  <div className="w-8 h-8 rounded-full border-[2px] border-white bg-[#E8E8E8] flex items-center justify-center text-[9px] font-black text-black shadow-sm ring-1 ring-black/5">
-                    +{organizerCount > 3 ? organizerCount - 3 : 5}
-                  </div>
-                </div>
-                <div className="space-y-0" onClick={() => navigate('/organizers/discover')}>
-                  <p className="text-[7.5px] font-black uppercase tracking-[0.05em] text-black/60 leading-tight">Active Organizers</p>
-                  <p className="text-[14px] font-black text-black leading-tight hover:text-[#38BDF2] transition-colors tracking-tight">
-                    8+ Trusted Leaders
-                  </p>
-                </div>
-
-                {/* Dropdown list of organizers (Restored) */}
-                <div className={`absolute bottom-[calc(100%-10px)] left-0 w-64 bg-[#F2F2F2] border border-black/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden transition-all duration-300 origin-bottom-left pb-3 ${showOrgDropdown ? 'opacity-100 scale-100 translate-y-[-10px]' : 'opacity-0 scale-95 pointer-events-none translate-y-0'}`}>
-                  <div className="p-5 border-b border-black/5 bg-black/[0.02]">
-                    <h5 className="text-[10px] font-black text-black uppercase tracking-[0.25em]">Our Partners</h5>
-                  </div>
-                  <div className="max-h-[238px] overflow-y-auto custom-scrollbar p-2.5 space-y-1">
-                    {organizers.map((org) => (
+                <div
+                  className="category-marquee py-2 relative overflow-hidden outline-none cursor-grab active:cursor-grabbing select-none"
+                  tabIndex={0}
+                  onMouseEnter={() => setIsMarqueePaused(true)}
+                  onMouseLeave={handleMouseUpOrLeave}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUpOrLeave}
+                >
+                  <div
+                    ref={categoriesScrollRef}
+                    className="category-marquee__track flex items-center gap-6 whitespace-nowrap"
+                    style={{ animationPlayState: (isMarqueePaused || isDraggingRef.current) ? 'paused' : 'running' }}
+                  >
+                    {[...categories, ...categories].map((category, index) => (
                       <button
-                        key={org.organizerId}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/organizer/${org.organizerId}`);
-                        }}
-                        className="w-full flex items-center gap-3.5 p-2.5 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-300 text-left group/item border border-transparent hover:border-black/5"
+                        key={`${category.key}-${index}`}
+                        type="button"
+                        onClick={() => navigate(`/categories/${category.key.toLowerCase()}`)}
+                        className="shrink-0 w-[128px] flex flex-col items-center gap-3 text-center group px-2 py-4 hover:z-50 hover:-translate-y-1 transition-transform relative"
                       >
-                        <div className="w-9 h-9 rounded-xl overflow-hidden border-2 border-white shadow-sm bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] flex items-center justify-center shrink-0">
-                          {org.profileImageUrl ? (
-                            <img src={getImageUrl(org.profileImageUrl)} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-white text-[11px] font-black uppercase drop-shadow-sm">
-                              {(org.organizerName || 'O').charAt(0)}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[11px] font-black text-black truncate group-hover/item:text-[#38BDF2] transition-colors tracking-tight">
-                            {org.organizerName}
-                          </p>
-                          <p className="text-[9px] font-bold text-black uppercase tracking-[0.1em]">
-                            {org.followersCount || 0} Followers
-                          </p>
-                        </div>
-                        <ICONS.ChevronRight className="w-3.5 h-3.5 text-black group-hover/item:text-[#38BDF2] group-hover/item:translate-x-0.5 transition-all" />
+                        <span className="w-[72px] h-[72px] rounded-full border border-transparent flex items-center justify-center text-black bg-transparent group-hover:bg-[#38BDF2]/10 group-hover:border-[#38BDF2]/40 group-hover:text-black transition-all duration-300 group-hover:scale-125 group-hover:shadow-[0_10px_25px_-5px_rgba(56,189,242,0.4)] group-focus-visible:scale-125 relative z-20">
+                          <category.Icon className="w-7 h-7 transition-all duration-300 group-hover:scale-110" />
+                        </span>
+                        <span className="text-[14px] font-bold text-black leading-tight min-h-[32px] flex items-center justify-center pt-2 group-hover:text-[#38BDF2] transition-colors">{category.label}</span>
                       </button>
                     ))}
                   </div>
-                  <div className="px-4 py-3 bg-[#F2F2F2] border-t border-black/5 text-center">
-                    <div className="flex items-center justify-center gap-2 text-[9px] font-black text-[#38BDF2] uppercase tracking-[0.2em] opacity-40 hover:opacity-100 transition-opacity cursor-default">
-                      <div className="w-1 h-1 rounded-full bg-[#38BDF2] animate-pulse" />
-                      Verified Community
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Category Rail (Top of Available Events) */}
-          <div className="mt-44 mb-28 overflow-visible relative z-10">
-            <div className="rounded-2xl border border-black/10 bg-[#F2F2F2] px-6 py-8 md:px-8 shadow-sm">
-              <div className="mb-8">
-                <h2 className="text-[16px] font-black tracking-tight text-black">Event smart categories</h2>
+            {/* Promoted Events Carousel Section */}
+            {(loadingPromoted || promotedEvents.length > 0) && (
+              <div className="w-full mt-44 mb-44 animate-in fade-in slide-in-from-bottom-4 duration-700 px-1">
+                {/* Header Section */}
+                <div className="mb-12 text-center flex flex-col items-center">
+                  <div className="flex items-center gap-3 mb-3">
+                    <h2 className="text-3xl md:text-4xl font-black text-black tracking-tight leading-none">Promoted Events</h2>
+                    <div className="group/info relative">
+                      <ICONS.Info className="w-6 h-6 text-black cursor-help hover:text-[#38BDF2] transition-colors" strokeWidth={2} />
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-64 p-4 bg-black text-white text-[11px] font-bold rounded-xl shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover/info:opacity-100 group-hover/info:translate-y-0 transition-all z-50 leading-relaxed text-center">
+                        These events are highlighted because the organizer has subscribed to a premium plan with promotion features.
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-black"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-black text-sm md:text-base font-medium max-w-2xl leading-relaxed">
+                    Discover curated sessions highlighted by organizers as part of their elite plan features.
+                  </p>
+                </div>
+
+                {loadingPromoted ? (
+                  <PromotedEventSkeleton />
+                ) : promotedEvents.length > 0 ? (
+                  <div className="relative">
+                    {/* Carousel Container */}
+                    <div className="rounded-2xl overflow-hidden border border-black/15 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] group">
+                      <div className="relative h-[420px] sm:h-[400px] lg:h-[500px] overflow-hidden bg-white">
+                        {/* Carousel Images */}
+                        {promotedEvents.map((event, idx) => {
+                          const imageUrl = getImageUrl(event.imageUrl);
+                          return (
+                            <div
+                              key={event.eventId}
+                              className={`absolute inset-0 transition-all duration-[600ms] ease-in-out transform cursor-pointer ${idx === currentPromotedIndex
+                                ? 'opacity-100 translate-x-0 z-10 pointer-events-auto'
+                                : 'opacity-0 translate-x-full z-0 pointer-events-none invisible'
+                                }`}
+                              aria-hidden={idx !== currentPromotedIndex}
+                              onClick={() => navigate(`/events/${event.slug || event.eventId}`)}
+                            >
+                              <img
+                                src={imageUrl}
+                                alt={event.eventName}
+                                className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.05] z-10"
+                              />
+
+                              <div className="absolute inset-0 z-20 flex flex-col justify-center">
+                                <div className="absolute inset-0 z-[1] bg-gradient-to-r from-black/85 via-black/60 via-[40%] to-transparent" />
+
+                                <div className="relative z-30 p-5 sm:p-12 animate-in fade-in slide-in-from-left-4 duration-700">
+                                  {(() => {
+                                    const totalSlots = (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0);
+                                    const soldSlots = (event as any).registrationCount ?? (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantitySold || 0), 0);
+                                    return (
+                                      <div className="flex flex-col gap-3 sm:gap-4 text-white max-w-xl">
+                                        <div className="flex items-center gap-3 group/badge shrink-0">
+                                          <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-white shadow-lg">
+                                            <ICONS.Check className="w-4 h-4" strokeWidth={5} />
+                                          </div>
+                                          <div className="flex flex-col">
+                                            <span className="text-xs font-black tracking-[0.15em] text-white uppercase leading-none">
+                                              Featured Session
+                                            </span>
+                                          </div>
+                                        </div>
+
+                                        <h3 className={`font-black tracking-tighter leading-[1.1] text-white drop-shadow-sm line-clamp-2 ${(event.eventName || '').length > 40
+                                          ? 'text-xl sm:text-2xl md:text-3xl'
+                                          : 'text-2xl sm:text-3xl md:text-5xl'
+                                          }`}>
+                                          {event.eventName}
+                                        </h3>
+
+                                        <div className="space-y-2 sm:space-y-2.5 pt-1">
+                                          <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-white">
+                                            <div className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-lg">
+                                              <ICONS.Heart className="w-5 h-5" strokeWidth={2} />
+                                            </div>
+                                            <span>{event.likesCount || 0} likes</span>
+                                          </div>
+
+                                          <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-white">
+                                            <div className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-lg">
+                                              <ICONS.Users className="w-5 h-5" strokeWidth={2} />
+                                            </div>
+                                            <span>{soldSlots} registered <span className="mx-1">•</span> {Math.max(0, totalSlots - soldSlots)} available</span>
+                                          </div>
+
+                                          <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-white">
+                                            <div className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-lg">
+                                              <ICONS.MapPin className="w-5 h-5" strokeWidth={2} />
+                                            </div>
+                                            <span className="line-clamp-1">{event.locationText || 'Location TBA'}</span>
+                                          </div>
+
+                                          <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-white">
+                                            <div className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-lg">
+                                              <ICONS.Calendar className="w-5 h-5" strokeWidth={2} />
+                                            </div>
+                                            <span>{formatStartForCard(event.startAt || '', event.timezone)}</span>
+                                          </div>
+                                        </div>
+
+                                        <div className="pt-6 sm:pt-8">
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              navigate(`/events/${event.slug || event.eventId}`);
+                                            }}
+                                            className="px-8 py-3 bg-white/10 backdrop-blur-sm text-white text-[14px] font-bold rounded-full border-2 border-white hover:bg-white/20 transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-3 group/btn w-fit shadow-xl"
+                                          >
+                                            <ICONS.Ticket className="w-4 h-4" />
+                                            Get Ticket
+                                          </button>
+                                        </div>
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+
+                        {/* Navigation Arrows */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (promotedCarouselInterval) clearInterval(promotedCarouselInterval);
+                            setCurrentPromotedIndex((prev) => (prev - 1 + promotedEvents.length) % promotedEvents.length);
+                          }}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg border border-black/5 flex items-center justify-center text-black hover:bg-[#38BDF2] hover:text-white transition-all opacity-0 group-hover:opacity-100 z-20"
+                        >
+                          <ICONS.ChevronLeft className="w-5 h-5" strokeWidth={3} />
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (promotedCarouselInterval) clearInterval(promotedCarouselInterval);
+                            setCurrentPromotedIndex((prev) => (prev + 1) % promotedEvents.length);
+                          }}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg border border-black/5 flex items-center justify-center text-black hover:bg-[#38BDF2] hover:text-white transition-all opacity-0 group-hover:opacity-100 z-20"
+                        >
+                          <ICONS.ChevronRight className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
               </div>
-              <div
-                className="category-marquee py-2 relative overflow-hidden outline-none cursor-grab active:cursor-grabbing select-none"
-                tabIndex={0}
-                onMouseEnter={() => setIsMarqueePaused(true)}
-                onMouseLeave={handleMouseUpOrLeave}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUpOrLeave}
+            )}
+
+          </>
+        )}
+
+        {!isLanding && (
+          <>
+            {selectedLocation !== DEFAULT_LOCATION && selectedLocation !== ONLINE_LOCATION_VALUE ? (
+              /* Premium City Hub Hero */
+              <section
+                className={`relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[350px] sm:h-[450px] lg:h-[500px] overflow-x-hidden overflow-y-hidden mb-12 shadow-2xl transition-all duration-1000 ${selectedCityImage ? 'bg-black' : ''}`}
+                style={{ zoom: 0.9 }}
               >
-                <div
-                  ref={categoriesScrollRef}
-                  className="category-marquee__track flex items-center gap-6 whitespace-nowrap"
-                  style={{ animationPlayState: (isMarqueePaused || isDraggingRef.current) ? 'paused' : 'running' }}
-                >
-                  {[...categories, ...categories].map((category, index) => (
-                    <button
-                      key={`${category.key}-${index}`}
-                      type="button"
-                      onClick={() => navigate(`/categories/${category.key.toLowerCase()}`)}
-                      className="shrink-0 w-[128px] flex flex-col items-center gap-3 text-center group px-2 py-4 hover:z-50 hover:-translate-y-1 transition-transform relative"
-                    >
-                      <span className="w-[72px] h-[72px] rounded-full border border-transparent flex items-center justify-center text-black bg-transparent group-hover:bg-[#38BDF2]/10 group-hover:border-[#38BDF2]/40 group-hover:text-black transition-all duration-300 group-hover:scale-125 group-hover:shadow-[0_10px_25px_-5px_rgba(56,189,242,0.4)] group-focus-visible:scale-125 relative z-20">
-                        <category.Icon className="w-7 h-7 transition-all duration-300 group-hover:scale-110" />
-                      </span>
-                      <span className="text-[14px] font-bold text-black leading-tight min-h-[32px] flex items-center justify-center pt-2 group-hover:text-[#38BDF2] transition-colors">{category.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Promoted Events Carousel Section */}
-          {(loadingPromoted || promotedEvents.length > 0) && (
-            <div className="w-full mt-44 mb-44 animate-in fade-in slide-in-from-bottom-4 duration-700 px-1">
-              {/* Header Section */}
-              <div className="mb-12 text-center flex flex-col items-center">
-                <div className="flex items-center gap-3 mb-3">
-                  <h2 className="text-3xl md:text-4xl font-black text-black tracking-tight leading-none">Promoted Events</h2>
-                  <div className="group/info relative">
-                    <ICONS.Info className="w-6 h-6 text-black cursor-help hover:text-[#38BDF2] transition-colors" strokeWidth={2} />
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-64 p-4 bg-black text-white text-[11px] font-bold rounded-xl shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover/info:opacity-100 group-hover/info:translate-y-0 transition-all z-50 leading-relaxed text-center">
-                      These events are highlighted because the organizer has subscribed to a premium plan with promotion features.
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-black"></div>
+                {selectedCityImage ? (
+                  <div className="absolute inset-0">
+                    <img
+                      src={selectedCityImage}
+                      alt=""
+                      className="w-full h-full object-cover opacity-60 scale-105 animate-pulse-slow font-black"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent" />
+                  </div>
+                ) : (
+                  <div className="absolute inset-0 bg-[#38BDF2]/40" />
+                )}
+                <div className="relative z-10 mx-auto flex h-full w-full max-w-[88rem] items-center px-4 sm:px-10">
+                  <div className="max-w-[900px] animate-in fade-in slide-in-from-left-6 duration-1000">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="px-3 py-1.5 bg-[#38BDF2] rounded-full text-[9px] font-black uppercase tracking-widest text-white shadow-lg shadow-[#38BDF2]/40">
+                        Discovery Hub
+                      </div>
                     </div>
+                    <h1 className="text-[1.85rem] font-black leading-[1.1] tracking-tighter text-white sm:text-4xl lg:text-5xl xl:text-6xl uppercase transform-gpu">
+                      Most Popular Events in<br />
+                      <span className="text-[#38BDF2] drop-shadow-xl underline decoration-white/20 underline-offset-[8px]">
+                        {selectedLocation}
+                      </span>
+                    </h1>
+                    <p className="mt-8 max-w-[650px] text-sm sm:text-base leading-relaxed text-white font-normal uppercase tracking-[0.1em] drop-shadow-sm">
+                      Discover elite curated sessions happening now in {selectedLocation}.
+                    </p>
                   </div>
                 </div>
-                <p className="text-black text-sm md:text-base font-medium max-w-2xl leading-relaxed">
-                  Discover curated sessions highlighted by organizers as part of their elite plan features.
+              </section>
+            ) : (
+              /* Classic Marketplace Hero for "All Events" */
+              <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[260px] sm:h-[300px] lg:h-[350px] overflow-x-hidden mb-8">
+                <div className="absolute inset-0 bg-[linear-gradient(116deg,#38BDF2_0%,#38BDF2_44%,#F2F2F2_100%)]" />
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,62,134,0.45)_0%,rgba(0,62,134,0.2)_34%,rgba(0,62,134,0)_72%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />
+                <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-5 sm:px-8">
+                  <div className="max-w-[720px]">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-white/90 mb-3">Event Marketplace</p>
+                    <h1 className="text-[2.1rem] font-extrabold leading-none tracking-tight text-white sm:text-5xl">All Events</h1>
+                    <p className="mt-4 max-w-[680px] text-base leading-relaxed text-white/95 sm:text-[1.05rem]">
+                      Explore all published events and use the sorting controls to narrow by relevance, timing, and location context.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            )}
+          </>
+        )}
+
+        {isLanding && !isSpecialListing && (
+          <section className="mb-0 px-0 pt-0 pb-4">
+            <div id="marketplace-results" className="scroll-mt-32">
+              <BrowseEventsNavigator
+                activeTab={activeBrowseTab}
+                onTabChange={setActiveBrowseTab}
+                selectedLocation={selectedLocation}
+                onLocationSelect={(loc) => {
+                  // On Home, we just filter the local grid, no redirect
+                  setSelectedLocation(loc);
+                  setCurrentPage(1);
+                }}
+                onLocationClear={() => {
+                  setSearchTerm('');
+                  setDebouncedSearch('');
+                  setSelectedLocation(DEFAULT_LOCATION);
+                  setActiveBrowseTab('ALL');
+                }}
+                isLoading={isFetching}
+                className="mt-0 mb-5 mx-0"
+              />
+            </div>
+
+            <div id="marketplace-results-grid" className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-2 mb-6 pb-0 px-0 scroll-mt-24">
+              <div className="flex-1 space-y-1.5">
+                <h2 className="text-2xl md:text-3xl font-black text-black tracking-tight leading-none">
+                  {selectedLocation === DEFAULT_LOCATION ? 'Global Trending Events' : `Trending in ${selectedLocation}`}
+                </h2>
+                <p className="text-black text-xs md:text-sm font-medium leading-relaxed">
+                  {selectedLocation === DEFAULT_LOCATION
+                    ? 'The most liked and anticipated sessions happening now world-wide.'
+                    : `Top rated sessions happening across ${selectedLocation}.`}
                 </p>
               </div>
 
-              {loadingPromoted ? (
-                <PromotedEventSkeleton />
-              ) : promotedEvents.length > 0 ? (
-                <div className="relative">
-                  {/* Carousel Container */}
-                  <div className="rounded-2xl overflow-hidden border border-black/15 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] group">
-                    <div className="relative h-[420px] sm:h-[400px] lg:h-[500px] overflow-hidden bg-white">
-                      {/* Carousel Images */}
-                      {promotedEvents.map((event, idx) => {
-                        const imageUrl = getImageUrl(event.imageUrl);
-                        return (
-                          <div
-                            key={event.eventId}
-                            className={`absolute inset-0 transition-all duration-[600ms] ease-in-out transform cursor-pointer ${idx === currentPromotedIndex
-                              ? 'opacity-100 translate-x-0 z-10 pointer-events-auto'
-                              : 'opacity-0 translate-x-full z-0 pointer-events-none invisible'
-                              }`}
-                            aria-hidden={idx !== currentPromotedIndex}
-                            onClick={() => navigate(`/events/${event.slug || event.eventId}`)}
-                          >
-                            <img
-                              src={imageUrl}
-                              alt={event.eventName}
-                              className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.05] z-10"
-                            />
-
-                            <div className="absolute inset-0 z-20 flex flex-col justify-center">
-                              <div className="absolute inset-0 z-[1] bg-gradient-to-r from-black/85 via-black/60 via-[40%] to-transparent" />
-
-                              <div className="relative z-30 p-5 sm:p-12 animate-in fade-in slide-in-from-left-4 duration-700">
-                                {(() => {
-                                  const totalSlots = (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0);
-                                  const soldSlots = (event as any).registrationCount ?? (event.ticketTypes || []).reduce((sum, t) => sum + (t.quantitySold || 0), 0);
-                                  return (
-                                    <div className="flex flex-col gap-3 sm:gap-4 text-white max-w-xl">
-                                      <div className="flex items-center gap-3 group/badge shrink-0">
-                                        <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-white shadow-lg">
-                                          <ICONS.Check className="w-4 h-4" strokeWidth={5} />
-                                        </div>
-                                        <div className="flex flex-col">
-                                          <span className="text-xs font-black tracking-[0.15em] text-white uppercase leading-none">
-                                            Featured Session
-                                          </span>
-                                        </div>
-                                      </div>
-
-                                      <h3 className={`font-black tracking-tighter leading-[1.1] text-white drop-shadow-sm line-clamp-2 ${(event.eventName || '').length > 40
-                                        ? 'text-xl sm:text-2xl md:text-3xl'
-                                        : 'text-2xl sm:text-3xl md:text-5xl'
-                                        }`}>
-                                        {event.eventName}
-                                      </h3>
-
-                                      <div className="space-y-2 sm:space-y-2.5 pt-1">
-                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-white">
-                                          <div className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-lg">
-                                            <ICONS.Heart className="w-5 h-5" strokeWidth={2} />
-                                          </div>
-                                          <span>{event.likesCount || 0} likes</span>
-                                        </div>
-
-                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-white">
-                                          <div className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-lg">
-                                            <ICONS.Users className="w-5 h-5" strokeWidth={2} />
-                                          </div>
-                                          <span>{soldSlots} registered <span className="mx-1">•</span> {Math.max(0, totalSlots - soldSlots)} available</span>
-                                        </div>
-
-                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-white">
-                                          <div className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-lg">
-                                            <ICONS.MapPin className="w-5 h-5" strokeWidth={2} />
-                                          </div>
-                                          <span className="line-clamp-1">{event.locationText || 'Location TBA'}</span>
-                                        </div>
-
-                                        <div className="flex items-center gap-4 text-base sm:text-lg font-normal text-white">
-                                          <div className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-lg">
-                                            <ICONS.Calendar className="w-5 h-5" strokeWidth={2} />
-                                          </div>
-                                          <span>{formatStartForCard(event.startAt || '', event.timezone)}</span>
-                                        </div>
-                                      </div>
-
-                                      <div className="pt-6 sm:pt-8">
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(`/events/${event.slug || event.eventId}`);
-                                          }}
-                                          className="px-8 py-3 bg-white/10 backdrop-blur-sm text-white text-[14px] font-bold rounded-full border-2 border-white hover:bg-white/20 transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-3 group/btn w-fit shadow-xl"
-                                        >
-                                          <ICONS.Ticket className="w-4 h-4" />
-                                          Get Ticket
-                                        </button>
-                                      </div>
-                                    </div>
-                                  );
-                                })()}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-
-                      {/* Navigation Arrows */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (promotedCarouselInterval) clearInterval(promotedCarouselInterval);
-                          setCurrentPromotedIndex((prev) => (prev - 1 + promotedEvents.length) % promotedEvents.length);
-                        }}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg border border-black/5 flex items-center justify-center text-black hover:bg-[#38BDF2] hover:text-white transition-all opacity-0 group-hover:opacity-100 z-20"
-                      >
-                        <ICONS.ChevronLeft className="w-5 h-5" strokeWidth={3} />
-                      </button>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (promotedCarouselInterval) clearInterval(promotedCarouselInterval);
-                          setCurrentPromotedIndex((prev) => (prev + 1) % promotedEvents.length);
-                        }}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg border border-black/5 flex items-center justify-center text-black hover:bg-[#38BDF2] hover:text-white transition-all opacity-0 group-hover:opacity-100 z-20"
-                      >
-                        <ICONS.ChevronRight className="w-5 h-5" />
-                      </button>
-                    </div>
+              <div className="w-full md:w-[320px] shrink-0">
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-black group-focus-within:text-[#38BDF2] transition-colors">
+                    <ICONS.Search className="h-4 w-4" strokeWidth={3} />
                   </div>
-                </div>
-              ) : null}
-            </div>
-          )}
-
-        </>
-      )}
-
-      {!isLanding && (
-        <>
-          {selectedLocation !== DEFAULT_LOCATION && selectedLocation !== ONLINE_LOCATION_VALUE ? (
-            /* Premium City Hub Hero */
-            <section
-              className={`relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[350px] sm:h-[450px] lg:h-[500px] overflow-x-hidden overflow-y-hidden mb-12 shadow-2xl transition-all duration-1000 ${selectedCityImage ? 'bg-black' : ''}`}
-              style={{ zoom: 0.9 }}
-            >
-              {selectedCityImage ? (
-                <div className="absolute inset-0">
-                  <img
-                    src={selectedCityImage}
-                    alt=""
-                    className="w-full h-full object-cover opacity-60 scale-105 animate-pulse-slow font-black"
+                  <input
+                    type="text"
+                    placeholder={`Search in ${selectedLocation}...`}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="block w-full pl-10 pr-9 py-3 bg-[#F2F2F2] border border-[#D1D5DB] rounded-xl text-[12px] font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-black"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent" />
-                </div>
-              ) : (
-                <div className="absolute inset-0 bg-[#38BDF2]/40" />
-              )}
-              <div className="relative z-10 mx-auto flex h-full w-full max-w-[88rem] items-center px-4 sm:px-10">
-                <div className="max-w-[900px] animate-in fade-in slide-in-from-left-6 duration-1000">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="px-3 py-1.5 bg-[#38BDF2] rounded-full text-[9px] font-black uppercase tracking-widest text-white shadow-lg shadow-[#38BDF2]/40">
-                      Discovery Hub
-                    </div>
-                  </div>
-                  <h1 className="text-[1.85rem] font-black leading-[1.1] tracking-tighter text-white sm:text-4xl lg:text-5xl xl:text-6xl uppercase transform-gpu">
-                    Most Popular Events in<br />
-                    <span className="text-[#38BDF2] drop-shadow-xl underline decoration-white/20 underline-offset-[8px]">
-                      {selectedLocation}
-                    </span>
-                  </h1>
-                  <p className="mt-8 max-w-[650px] text-sm sm:text-base leading-relaxed text-white font-normal uppercase tracking-[0.1em] drop-shadow-sm">
-                    Discover elite curated sessions happening now in {selectedLocation}.
-                  </p>
                 </div>
               </div>
-            </section>
-          ) : (
-            /* Classic Marketplace Hero for "All Events" */
-            <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[260px] sm:h-[300px] lg:h-[350px] overflow-x-hidden mb-8">
-              <div className="absolute inset-0 bg-[linear-gradient(116deg,#38BDF2_0%,#38BDF2_44%,#F2F2F2_100%)]" />
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,62,134,0.45)_0%,rgba(0,62,134,0.2)_34%,rgba(0,62,134,0)_72%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />
-              <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-5 sm:px-8">
-                <div className="max-w-[720px]">
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-white/90 mb-3">Event Marketplace</p>
-                  <h1 className="text-[2.1rem] font-extrabold leading-none tracking-tight text-white sm:text-5xl">All Events</h1>
-                  <p className="mt-4 max-w-[680px] text-base leading-relaxed text-white/95 sm:text-[1.05rem]">
-                    Explore all published events and use the sorting controls to narrow by relevance, timing, and location context.
-                  </p>
-                </div>
-              </div>
-            </section>
-          )}
-        </>
-      )}
-
-      {isLanding && !isSpecialListing && (
-        <section className="mb-0 px-0 pt-0 pb-4">
-          <div id="marketplace-results" className="scroll-mt-32">
-            <BrowseEventsNavigator
-              activeTab={activeBrowseTab}
-              onTabChange={setActiveBrowseTab}
-              selectedLocation={selectedLocation}
-              onLocationSelect={(loc) => {
-                // On Home, we just filter the local grid, no redirect
-                setSelectedLocation(loc);
-                setCurrentPage(1);
-              }}
-              onLocationClear={() => {
-                setSearchTerm('');
-                setDebouncedSearch('');
-                setSelectedLocation(DEFAULT_LOCATION);
-                setActiveBrowseTab('ALL');
-              }}
-              isLoading={isFetching}
-              className="mt-0 mb-5 mx-0"
-            />
-          </div>
-
-          <div id="marketplace-results-grid" className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-2 mb-6 pb-0 px-0 scroll-mt-24">
-            <div className="flex-1 space-y-1.5">
-              <h2 className="text-2xl md:text-3xl font-black text-black tracking-tight leading-none">
-                {selectedLocation === DEFAULT_LOCATION ? 'Global Trending Events' : `Trending in ${selectedLocation}`}
-              </h2>
-              <p className="text-black text-xs md:text-sm font-medium leading-relaxed">
-                {selectedLocation === DEFAULT_LOCATION
-                  ? 'The most liked and anticipated sessions happening now world-wide.'
-                  : `Top rated sessions happening across ${selectedLocation}.`}
-              </p>
             </div>
+          </section>
+        )}
 
-            <div className="w-full md:w-[320px] shrink-0">
+        {!isLanding && (
+          <div className="mb-0">
+            {/* Internal Navigator for Discovery Mode - Hidden per request */}
+          </div>
+        )}
+
+        <div style={{ zoom: !isLanding ? 0.8 : undefined }} className="origin-top transition-transform duration-500">
+          <div className={`flex flex-col sm:flex-row items-center justify-between gap-6 px-0 ${isLanding ? 'hidden' : 'mb-8 mt-2'}`}>
+            {!isLanding && !isSpecialListing && (
+              <div className="flex items-center gap-4 w-full sm:w-auto">
+                <button
+                  onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+                  className="flex items-center gap-2 bg-[#F2F2F2] px-4 py-2.5 rounded-xl border border-[#E5E7EB] shadow-sm text-[10px] font-black uppercase tracking-widest text-black hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all"
+                >
+                  <ICONS.Filter className="w-4 h-4" />
+                  {isSidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
+                </button>
+
+                <div className="flex items-center gap-3 bg-[#F2F2F2] px-5 py-2.5 rounded-xl border border-[#D1D5DB] shadow-sm justify-between sm:justify-start">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-black">Sort By</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="bg-transparent text-xs font-bold text-black outline-none cursor-pointer"
+                  >
+                    <option value="relevance">Relevance</option>
+                    <option value="newest">Newest</option>
+                    <option value="date_soon">Soonest</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            <div className="w-full sm:w-[280px] md:w-[320px]">
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-black group-focus-within:text-[#38BDF2] transition-colors">
                   <ICONS.Search className="h-4 w-4" strokeWidth={3} />
@@ -1546,358 +1597,307 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               </div>
             </div>
           </div>
-        </section>
-      )}
 
-      {!isLanding && (
-        <div className="mb-0">
-          {/* Internal Navigator for Discovery Mode - Hidden per request */}
-        </div>
-      )}
+          {interactionNotice && (
+            <div className="mb-6 rounded-xl border border-[#38BDF2]/30 bg-[#38BDF2]/10 px-4 py-3 text-sm font-semibold text-black">
+              {interactionNotice}
+            </div>
+          )}
 
-      <div style={{ zoom: !isLanding ? 0.8 : undefined }} className="origin-top transition-transform duration-500">
-        <div className={`flex flex-col sm:flex-row items-center justify-between gap-6 px-0 ${isLanding ? 'hidden' : 'mb-8 mt-2'}`}>
-          {!isLanding && !isSpecialListing && (
-            <div className="flex items-center gap-4 w-full sm:w-auto">
-              <button
-                onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-                className="flex items-center gap-2 bg-[#F2F2F2] px-4 py-2.5 rounded-xl border border-[#E5E7EB] shadow-sm text-[10px] font-black uppercase tracking-widest text-black hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all"
+          <div className="flex flex-col lg:flex-row gap-10">
+            {/* Sidebar Filter - Eventbrite style */}
+            {!isLanding && !isSpecialListing && isSidebarVisible && (
+              <aside
+                className="w-full lg:w-72 shrink-0 lg:sticky lg:top-28 lg:self-start lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-4 lg:custom-scrollbar animate-in fade-in slide-in-from-left-4 duration-700"
+                style={{ zoom: 1.1 }}
               >
-                <ICONS.Filter className="w-4 h-4" />
-                {isSidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
-              </button>
-
-              <div className="flex items-center gap-3 bg-[#F2F2F2] px-5 py-2.5 rounded-xl border border-[#D1D5DB] shadow-sm justify-between sm:justify-start">
-                <span className="text-[10px] font-black uppercase tracking-widest text-black">Sort By</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-transparent text-xs font-bold text-black outline-none cursor-pointer"
-                >
-                  <option value="relevance">Relevance</option>
-                  <option value="newest">Newest</option>
-                  <option value="date_soon">Soonest</option>
-                </select>
-              </div>
-            </div>
-          )}
-
-          <div className="w-full sm:w-[280px] md:w-[320px]">
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-black group-focus-within:text-[#38BDF2] transition-colors">
-                <ICONS.Search className="h-4 w-4" strokeWidth={3} />
-              </div>
-              <input
-                type="text"
-                placeholder={`Search in ${selectedLocation}...`}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-9 py-3 bg-[#F2F2F2] border border-[#D1D5DB] rounded-xl text-[12px] font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-black"
-              />
-            </div>
-          </div>
-        </div>
-
-        {interactionNotice && (
-          <div className="mb-6 rounded-xl border border-[#38BDF2]/30 bg-[#38BDF2]/10 px-4 py-3 text-sm font-semibold text-black">
-            {interactionNotice}
-          </div>
-        )}
-
-        <div className="flex flex-col lg:flex-row gap-10">
-          {/* Sidebar Filter - Eventbrite style */}
-          {!isLanding && !isSpecialListing && isSidebarVisible && (
-            <aside
-              className="w-full lg:w-72 shrink-0 lg:sticky lg:top-28 lg:self-start lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-4 lg:custom-scrollbar animate-in fade-in slide-in-from-left-4 duration-700"
-              style={{ zoom: 1.1 }}
-            >
-              {/* Active Filters Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-black/5">
-                <h3 className="text-xl font-black text-black tracking-tight">Filters</h3>
-                {(selectedCategory !== 'all' || selectedDate !== 'all' || selectedPrice !== 'all' || selectedFormat !== 'all') && (
-                  <button
-                    onClick={() => {
-                      setSelectedCategory('all');
-                      setSelectedDate('all');
-                      setSelectedPrice('all');
-                      setSelectedFormat('all');
-                      setSearchTerm('');
-                    }}
-                    className="text-[10px] font-black uppercase tracking-widest text-[#38BDF2] hover:text-black transition-colors"
-                  >
-                    Clear all
-                  </button>
-                )}
-              </div>
-              {/* Category Section */}
-              <div className="space-y-3 lg:space-y-6">
-                <h4 className="hidden lg:block text-[11px] font-black uppercase tracking-[0.2em] text-black">Category</h4>
-                <div className="flex flex-row overflow-x-auto gap-2 pb-3 lg:pb-0 lg:flex-col lg:space-y-3.5 lg:overflow-visible custom-scrollbar">
-                  {(showCategoriesFull ? categories : categories.slice(0, 6)).map((cat) => (
+                {/* Active Filters Header */}
+                <div className="flex items-center justify-between pb-4 border-b border-black/5">
+                  <h3 className="text-xl font-black text-black tracking-tight">Filters</h3>
+                  {(selectedCategory !== 'all' || selectedDate !== 'all' || selectedPrice !== 'all' || selectedFormat !== 'all') && (
                     <button
-                      key={cat.key}
-                      onClick={() => setSelectedCategory(selectedCategory === cat.key ? 'all' : cat.key)}
-                      className={`flex items-center gap-2 lg:gap-3.5 w-auto lg:w-full shrink-0 whitespace-nowrap rounded-full px-4 py-2 lg:px-0 lg:py-0 lg:rounded-none text-left group transition-all ${selectedCategory === cat.key ? 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/30 lg:border-transparent lg:bg-transparent lg:text-[#38BDF2]' : 'bg-[#E5E7EB]/50 border border-black/5 text-[#65676B] hover:text-[#050505] lg:border-none lg:bg-transparent'}`}
+                      onClick={() => {
+                        setSelectedCategory('all');
+                        setSelectedDate('all');
+                        setSelectedPrice('all');
+                        setSelectedFormat('all');
+                        setSearchTerm('');
+                      }}
+                      className="text-[10px] font-black uppercase tracking-widest text-[#38BDF2] hover:text-black transition-colors"
                     >
-                      <div className={`hidden lg:flex w-8 h-8 rounded-xl items-center justify-center transition-all ${selectedCategory === cat.key ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#F2F2F2] border border-black/5 group-hover:bg-[#38BDF2]/10'}`}>
-                        <cat.Icon className="w-4 h-4" />
-                      </div>
-                      <span className={`text-[12px] lg:text-[13px] font-bold tracking-tight ${selectedCategory === cat.key ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'}`}>{cat.label}</span>
+                      Clear all
                     </button>
-                  ))}
-                  <button
-                    onClick={() => setShowCategoriesFull(!showCategoriesFull)}
-                    className="hidden lg:flex text-xs font-black text-[#38BDF2] pt-2 hover:underline transition-all items-center gap-1 shrink-0"
-                  >
-                    {showCategoriesFull ? 'View less' : 'View more'}
-                    <ICONS.ChevronDown className={`w-3.5 h-3.5 transition-transform ${showCategoriesFull ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Date Section */}
-              <div className="space-y-3 lg:space-y-6">
-                <h4 className="hidden lg:block text-[11px] font-black uppercase tracking-[0.2em] text-black">Date</h4>
-                <div className="flex flex-row overflow-x-auto gap-2 pb-1 lg:pb-0 lg:flex-col lg:space-y-4 lg:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                  {[
-                    { id: 'all', label: 'Any time' },
-                    { id: 'today', label: 'Today' },
-                    { id: 'tomorrow', label: 'Tomorrow' },
-                    { id: 'weekend', label: 'This weekend' }
-                  ].map((opt) => (
-                    <button
-                      key={opt.id}
-                      onClick={() => setSelectedDate(opt.id)}
-                      className={`flex items-center gap-2 lg:gap-3 shrink-0 whitespace-nowrap rounded-full px-4 py-2 lg:px-0 lg:py-0 lg:rounded-none w-auto lg:w-full group transition-all ${selectedDate === opt.id ? 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/30 lg:border-transparent lg:bg-transparent lg:text-black' : 'bg-[#E5E7EB]/50 border border-black/5 text-[#65676B] hover:bg-[#E5E7EB] hover:text-[#050505] lg:border-none lg:bg-transparent lg:hover:bg-transparent'}`}
-                    >
-                      <div className={`hidden lg:flex w-4 h-4 rounded-full border-2 items-center justify-center transition-all ${selectedDate === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
-                        {selectedDate === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
-                      </div>
-                      <span className={`text-[12px] lg:text-[13px] font-bold tracking-tight ${selectedDate === opt.id ? 'text-[#38BDF2] lg:text-black' : 'text-[#65676B] group-hover:text-black'}`}>{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Section */}
-              <div className="space-y-3 lg:space-y-6">
-                <h4 className="hidden lg:block text-[11px] font-black uppercase tracking-[0.2em] text-black">Price</h4>
-                <div className="flex flex-row overflow-x-auto gap-2 pb-1 lg:pb-0 lg:flex-col lg:space-y-4 lg:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                  {[
-                    { id: 'all', label: 'All Prices' },
-                    { id: 'free', label: 'Free' },
-                    { id: 'paid', label: 'Paid' }
-                  ].map((opt) => (
-                    <button
-                      key={opt.id}
-                      onClick={() => setSelectedPrice(opt.id as any)}
-                      className={`flex items-center gap-2 lg:gap-3 shrink-0 whitespace-nowrap rounded-full px-4 py-2 lg:px-0 lg:py-0 lg:rounded-none w-auto lg:w-full group transition-all ${selectedPrice === opt.id ? 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/30 lg:border-transparent lg:bg-transparent lg:text-black' : 'bg-[#E5E7EB]/50 border border-black/5 text-[#65676B] hover:bg-[#E5E7EB] hover:text-[#050505] lg:border-none lg:bg-transparent lg:hover:bg-transparent'}`}
-                    >
-                      <div className={`hidden lg:flex w-4 h-4 rounded-full border-2 items-center justify-center transition-all ${selectedPrice === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
-                        {selectedPrice === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
-                      </div>
-                      <span className={`text-[12px] lg:text-[13px] font-bold tracking-tight ${selectedPrice === opt.id ? 'text-[#38BDF2] lg:text-black' : 'text-[#65676B] group-hover:text-black'}`}>{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Format Section */}
-              <div className="space-y-3 lg:space-y-6">
-                <h4 className="hidden lg:block text-[11px] font-black uppercase tracking-[0.2em] text-black">Format</h4>
-                <div className="flex flex-row overflow-x-auto gap-2 pb-1 lg:pb-0 lg:flex-col lg:space-y-4 lg:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                  {[
-                    { id: 'all', label: 'All Formats' },
-                    { id: 'online', label: 'Online' },
-                    { id: 'in-person', label: 'In-person' }
-                  ].map((opt) => (
-                    <button
-                      key={opt.id}
-                      onClick={() => setSelectedFormat(opt.id as any)}
-                      className={`flex items-center gap-2 lg:gap-3 shrink-0 whitespace-nowrap rounded-full px-4 py-2 lg:px-0 lg:py-0 lg:rounded-none w-auto lg:w-full group transition-all ${selectedFormat === opt.id ? 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/30 lg:border-transparent lg:bg-transparent lg:text-black' : 'bg-[#E5E7EB]/50 border border-black/5 text-[#65676B] hover:bg-[#E5E7EB] hover:text-[#050505] lg:border-none lg:bg-transparent lg:hover:bg-transparent'}`}
-                    >
-                      <div className={`hidden lg:flex w-4 h-4 rounded-full border-2 items-center justify-center transition-all ${selectedFormat === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
-                        {selectedFormat === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
-                      </div>
-                      <span className={`text-[12px] lg:text-[13px] font-bold tracking-tight ${selectedFormat === opt.id ? 'text-[#38BDF2] lg:text-black' : 'text-[#65676B] group-hover:text-black'}`}>{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </aside>
-          )}
-
-          <div className="flex-1 flex min-w-0 gap-10">
-            <div className="flex-1 min-w-0 space-y-12">
-              {/* Most Liked Events Section (Discovery Mode Only) */}
-              {!isLanding && selectedLocation !== DEFAULT_LOCATION && displayEvents.length > 0 && !loading && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                  <div className="flex items-center gap-4">
-                    <div className="h-0.5 bg-[#38BDF2] w-8" />
-                    <h3 className="text-xl font-black text-black tracking-tight uppercase">Most Liked in {selectedLocation}</h3>
-                    <div className="h-px bg-black/5 flex-1" />
-                  </div>
-                  <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`} style={{ zoom: 0.95 }}>
-
-
-                    {displayEvents.slice(0, 3).map((event) => (
-                      <EventCard
-                        key={`featured-${event.eventId}`}
-                        event={event}
-                        onActionNotice={setInteractionNotice}
-                        trendingRank={trendingRankByEventId.get(event.eventId) ?? null}
-                        organizers={organizers}
-                        isLanding={isLanding}
-                        listing={listing}
-                        layout={!isLanding ? 'horizontal' : 'vertical'}
-                        onSelectEvent={setSelectedMapEvent}
-                      />
-                    ))}
-                  </div>
-
-                  {displayEvents.length > 3 && (
-                    <div className="pt-8 space-y-8">
-                      <div className="flex items-center gap-4">
-                        <div className="h-0.5 bg-black/20 w-8" />
-                        <h3 className="text-xl font-black text-black tracking-tight uppercase">Other Events</h3>
-                        <div className="h-px bg-black/5 flex-1" />
-                      </div>
-                      <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`} style={{ zoom: 0.9 }}>
-
-                        {displayEvents.slice(3).map((event) => (
-                          <EventCard
-                            key={`other-${event.eventId}`}
-                            event={event}
-                            onActionNotice={setInteractionNotice}
-                            trendingRank={trendingRankByEventId.get(event.eventId) ?? null}
-                            organizers={organizers}
-                            isLanding={isLanding}
-                            listing={listing}
-                            layout={!isLanding ? 'horizontal' : 'vertical'}
-                            onSelectEvent={setSelectedMapEvent}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
                   )}
                 </div>
-              )}
-
-              {/* Standard Grid Display (Fallbacks) */}
-              {((isLanding || selectedLocation === DEFAULT_LOCATION) || loading) && (
-                <>
-                  <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8'} pt-10 ${displayEvents.length > 0 ? 'min-h-[400px]' : 'min-h-0'}`} style={{ zoom: 0.9 }}>
-
-
-                    {loading ? (
-                      Array.from({ length: isLandingAllListing ? 3 : 6 }).map((_, idx) => (
-                        <div key={idx} className={!isLanding ? 'h-[190px]' : ''}>
-                          <EventCardSkeleton layout={!isLanding ? 'horizontal' : 'vertical'} />
+                {/* Category Section */}
+                <div className="space-y-3 lg:space-y-6">
+                  <h4 className="hidden lg:block text-[11px] font-black uppercase tracking-[0.2em] text-black">Category</h4>
+                  <div className="flex flex-row overflow-x-auto gap-2 pb-3 lg:pb-0 lg:flex-col lg:space-y-3.5 lg:overflow-visible custom-scrollbar">
+                    {(showCategoriesFull ? categories : categories.slice(0, 6)).map((cat) => (
+                      <button
+                        key={cat.key}
+                        onClick={() => setSelectedCategory(selectedCategory === cat.key ? 'all' : cat.key)}
+                        className={`flex items-center gap-2 lg:gap-3.5 w-auto lg:w-full shrink-0 whitespace-nowrap rounded-full px-4 py-2 lg:px-0 lg:py-0 lg:rounded-none text-left group transition-all ${selectedCategory === cat.key ? 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/30 lg:border-transparent lg:bg-transparent lg:text-[#38BDF2]' : 'bg-[#E5E7EB]/50 border border-black/5 text-[#65676B] hover:text-[#050505] lg:border-none lg:bg-transparent'}`}
+                      >
+                        <div className={`hidden lg:flex w-8 h-8 rounded-xl items-center justify-center transition-all ${selectedCategory === cat.key ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#F2F2F2] border border-black/5 group-hover:bg-[#38BDF2]/10'}`}>
+                          <cat.Icon className="w-4 h-4" />
                         </div>
-                      ))
-                    ) : displayEvents.map((event, idx) => (
-                      <div key={event.eventId} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <span className={`text-[12px] lg:text-[13px] font-bold tracking-tight ${selectedCategory === cat.key ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'}`}>{cat.label}</span>
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setShowCategoriesFull(!showCategoriesFull)}
+                      className="hidden lg:flex text-xs font-black text-[#38BDF2] pt-2 hover:underline transition-all items-center gap-1 shrink-0"
+                    >
+                      {showCategoriesFull ? 'View less' : 'View more'}
+                      <ICONS.ChevronDown className={`w-3.5 h-3.5 transition-transform ${showCategoriesFull ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Date Section */}
+                <div className="space-y-3 lg:space-y-6">
+                  <h4 className="hidden lg:block text-[11px] font-black uppercase tracking-[0.2em] text-black">Date</h4>
+                  <div className="flex flex-row overflow-x-auto gap-2 pb-1 lg:pb-0 lg:flex-col lg:space-y-4 lg:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                    {[
+                      { id: 'all', label: 'Any time' },
+                      { id: 'today', label: 'Today' },
+                      { id: 'tomorrow', label: 'Tomorrow' },
+                      { id: 'weekend', label: 'This weekend' }
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => setSelectedDate(opt.id)}
+                        className={`flex items-center gap-2 lg:gap-3 shrink-0 whitespace-nowrap rounded-full px-4 py-2 lg:px-0 lg:py-0 lg:rounded-none w-auto lg:w-full group transition-all ${selectedDate === opt.id ? 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/30 lg:border-transparent lg:bg-transparent lg:text-black' : 'bg-[#E5E7EB]/50 border border-black/5 text-[#65676B] hover:bg-[#E5E7EB] hover:text-[#050505] lg:border-none lg:bg-transparent lg:hover:bg-transparent'}`}
+                      >
+                        <div className={`hidden lg:flex w-4 h-4 rounded-full border-2 items-center justify-center transition-all ${selectedDate === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
+                          {selectedDate === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
+                        </div>
+                        <span className={`text-[12px] lg:text-[13px] font-bold tracking-tight ${selectedDate === opt.id ? 'text-[#38BDF2] lg:text-black' : 'text-[#65676B] group-hover:text-black'}`}>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Price Section */}
+                <div className="space-y-3 lg:space-y-6">
+                  <h4 className="hidden lg:block text-[11px] font-black uppercase tracking-[0.2em] text-black">Price</h4>
+                  <div className="flex flex-row overflow-x-auto gap-2 pb-1 lg:pb-0 lg:flex-col lg:space-y-4 lg:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                    {[
+                      { id: 'all', label: 'All Prices' },
+                      { id: 'free', label: 'Free' },
+                      { id: 'paid', label: 'Paid' }
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => setSelectedPrice(opt.id as any)}
+                        className={`flex items-center gap-2 lg:gap-3 shrink-0 whitespace-nowrap rounded-full px-4 py-2 lg:px-0 lg:py-0 lg:rounded-none w-auto lg:w-full group transition-all ${selectedPrice === opt.id ? 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/30 lg:border-transparent lg:bg-transparent lg:text-black' : 'bg-[#E5E7EB]/50 border border-black/5 text-[#65676B] hover:bg-[#E5E7EB] hover:text-[#050505] lg:border-none lg:bg-transparent lg:hover:bg-transparent'}`}
+                      >
+                        <div className={`hidden lg:flex w-4 h-4 rounded-full border-2 items-center justify-center transition-all ${selectedPrice === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
+                          {selectedPrice === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
+                        </div>
+                        <span className={`text-[12px] lg:text-[13px] font-bold tracking-tight ${selectedPrice === opt.id ? 'text-[#38BDF2] lg:text-black' : 'text-[#65676B] group-hover:text-black'}`}>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Format Section */}
+                <div className="space-y-3 lg:space-y-6">
+                  <h4 className="hidden lg:block text-[11px] font-black uppercase tracking-[0.2em] text-black">Format</h4>
+                  <div className="flex flex-row overflow-x-auto gap-2 pb-1 lg:pb-0 lg:flex-col lg:space-y-4 lg:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                    {[
+                      { id: 'all', label: 'All Formats' },
+                      { id: 'online', label: 'Online' },
+                      { id: 'in-person', label: 'In-person' }
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => setSelectedFormat(opt.id as any)}
+                        className={`flex items-center gap-2 lg:gap-3 shrink-0 whitespace-nowrap rounded-full px-4 py-2 lg:px-0 lg:py-0 lg:rounded-none w-auto lg:w-full group transition-all ${selectedFormat === opt.id ? 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/30 lg:border-transparent lg:bg-transparent lg:text-black' : 'bg-[#E5E7EB]/50 border border-black/5 text-[#65676B] hover:bg-[#E5E7EB] hover:text-[#050505] lg:border-none lg:bg-transparent lg:hover:bg-transparent'}`}
+                      >
+                        <div className={`hidden lg:flex w-4 h-4 rounded-full border-2 items-center justify-center transition-all ${selectedFormat === opt.id ? 'border-[#38BDF2]' : 'border-[#E5E7EB] group-hover:border-[#38BDF2]/40'}`}>
+                          {selectedFormat === opt.id && <div className="w-2 h-2 bg-[#38BDF2] rounded-full" />}
+                        </div>
+                        <span className={`text-[12px] lg:text-[13px] font-bold tracking-tight ${selectedFormat === opt.id ? 'text-[#38BDF2] lg:text-black' : 'text-[#65676B] group-hover:text-black'}`}>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </aside>
+            )}
+
+            <div className="flex-1 flex min-w-0 gap-10">
+              <div className="flex-1 min-w-0 space-y-12">
+                {/* Most Liked Events Section (Discovery Mode Only) */}
+                {!isLanding && selectedLocation !== DEFAULT_LOCATION && displayEvents.length > 0 && !loading && (
+                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="flex items-center gap-4">
+                      <div className="h-0.5 bg-[#38BDF2] w-8" />
+                      <h3 className="text-xl font-black text-black tracking-tight uppercase">Most Liked in {selectedLocation}</h3>
+                      <div className="h-px bg-black/5 flex-1" />
+                    </div>
+                    <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`} style={{ zoom: 0.95 }}>
+
+
+                      {displayEvents.slice(0, 3).map((event) => (
                         <EventCard
+                          key={`featured-${event.eventId}`}
                           event={event}
                           onActionNotice={setInteractionNotice}
                           trendingRank={trendingRankByEventId.get(event.eventId) ?? null}
                           organizers={organizers}
                           isLanding={isLanding}
                           listing={listing}
-                          isRecommended={isLandingAllListing && idx === 1}
                           layout={!isLanding ? 'horizontal' : 'vertical'}
                           onSelectEvent={setSelectedMapEvent}
                         />
-                      </div>
-                    ))}
-                  </div>
-
-                  {isLandingAllListing && displayEvents.length > 0 && (
-                    <div className="flex justify-center mt-12 px-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-                      <button
-                        onClick={() => navigate('/browse-events')}
-                        className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-4 bg-[#38BDF2] rounded-xl text-[12px] font-black uppercase tracking-widest text-[#F2F2F2] hover:bg-black transition-all active:scale-95 shadow-lg shadow-[#38BDF2]/20 shadow-blue-500/20"
-                      >
-                        Explore All Events
-                        <ICONS.ArrowRight className="w-5 h-5" />
-                      </button>
+                      ))}
                     </div>
-                  )}
-                </>
-              )}
 
-              {displayEvents.length === 0 && (
-                <div className="py-12 px-6 text-center bg-white rounded-3xl border border-black/5 animate-in zoom-in-95 duration-500 shadow-sm">
-                  <div className="w-14 h-14 bg-[#F2F2F2] border border-black/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <ICONS.Search className="w-7 h-7 text-black opacity-40" />
+                    {displayEvents.length > 3 && (
+                      <div className="pt-8 space-y-8">
+                        <div className="flex items-center gap-4">
+                          <div className="h-0.5 bg-black/20 w-8" />
+                          <h3 className="text-xl font-black text-black tracking-tight uppercase">Other Events</h3>
+                          <div className="h-px bg-black/5 flex-1" />
+                        </div>
+                        <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-8'} pt-10`} style={{ zoom: 0.9 }}>
+
+                          {displayEvents.slice(3).map((event) => (
+                            <EventCard
+                              key={`other-${event.eventId}`}
+                              event={event}
+                              onActionNotice={setInteractionNotice}
+                              trendingRank={trendingRankByEventId.get(event.eventId) ?? null}
+                              organizers={organizers}
+                              isLanding={isLanding}
+                              listing={listing}
+                              layout={!isLanding ? 'horizontal' : 'vertical'}
+                              onSelectEvent={setSelectedMapEvent}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                    )}
                   </div>
-                  <h3 className="text-xl font-black text-black tracking-tight mb-3 uppercase">
-                    {isLandingAllListing
-                      ? 'No Trending Hubs Yet'
-                      : selectedLocation !== DEFAULT_LOCATION
-                        ? `No Sessions in ${selectedLocation}`
-                        : 'No matches found'}
-                  </h3>
-                  <p className="text-xs font-bold text-black/60 mb-8 max-w-[280px] mx-auto leading-relaxed">
-                    {isLandingAllListing
-                      ? 'Be the first to like a session to see it trending here, or explore our full catalog below.'
-                      : `We couldn't find any upcoming events in this local hub. Try broadening your location or checking "All areas".`}
-                  </p>
-                  <Button
-                    className="px-8 py-3.5 rounded-xl bg-black text-white font-black uppercase tracking-widest text-[10px] hover:bg-[#38BDF2] transition-all transform active:scale-95 shadow-lg shadow-black/10"
-                    onClick={() => {
-                      setSearchTerm('');
-                      setSelectedLocation(DEFAULT_LOCATION);
-                      setActiveBrowseTab('ALL');
-                      setSelectedCategory('all');
-                      setSelectedDate('all');
-                      setSelectedPrice('all');
-                      setSelectedFormat('all');
-                      navigate('/browse-events');
-                    }}
-                  >
-                    Discover All Hubs
-                  </Button>
-                </div>
-              )}
+                )}
 
+                {/* Standard Grid Display (Fallbacks) */}
+                {((isLanding || selectedLocation === DEFAULT_LOCATION) || loading) && (
+                  <>
+                    <div className={`grid grid-cols-1 ${!isLanding ? 'gap-6' : 'lg:grid-cols-2 xl:grid-cols-3 gap-7 lg:gap-8'} pt-10 ${displayEvents.length > 0 ? 'min-h-[400px]' : 'min-h-0'}`} style={{ zoom: 0.9 }}>
+
+
+                      {loading ? (
+                        Array.from({ length: isLandingAllListing ? 3 : 6 }).map((_, idx) => (
+                          <div key={idx} className={!isLanding ? 'h-[190px]' : ''}>
+                            <EventCardSkeleton layout={!isLanding ? 'horizontal' : 'vertical'} />
+                          </div>
+                        ))
+                      ) : displayEvents.map((event, idx) => (
+                        <div key={event.eventId} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                          <EventCard
+                            event={event}
+                            onActionNotice={setInteractionNotice}
+                            trendingRank={trendingRankByEventId.get(event.eventId) ?? null}
+                            organizers={organizers}
+                            isLanding={isLanding}
+                            listing={listing}
+                            isRecommended={isLandingAllListing && idx === 1}
+                            layout={!isLanding ? 'horizontal' : 'vertical'}
+                            onSelectEvent={setSelectedMapEvent}
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    {isLandingAllListing && displayEvents.length > 0 && (
+                      <div className="flex justify-center mt-12 px-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                        <button
+                          onClick={() => navigate('/browse-events')}
+                          className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-4 bg-[#38BDF2] rounded-xl text-[12px] font-black uppercase tracking-widest text-[#F2F2F2] hover:bg-black transition-all active:scale-95 shadow-lg shadow-[#38BDF2]/20 shadow-blue-500/20"
+                        >
+                          Explore All Events
+                          <ICONS.ArrowRight className="w-5 h-5" />
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {displayEvents.length === 0 && (
+                  <div className="py-12 px-6 text-center bg-white rounded-3xl border border-black/5 animate-in zoom-in-95 duration-500 shadow-sm">
+                    <div className="w-14 h-14 bg-[#F2F2F2] border border-black/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                      <ICONS.Search className="w-7 h-7 text-black opacity-40" />
+                    </div>
+                    <h3 className="text-xl font-black text-black tracking-tight mb-3 uppercase">
+                      {isLandingAllListing
+                        ? 'No Trending Hubs Yet'
+                        : selectedLocation !== DEFAULT_LOCATION
+                          ? `No Sessions in ${selectedLocation}`
+                          : 'No matches found'}
+                    </h3>
+                    <p className="text-xs font-bold text-black/60 mb-8 max-w-[280px] mx-auto leading-relaxed">
+                      {isLandingAllListing
+                        ? 'Be the first to like a session to see it trending here, or explore our full catalog below.'
+                        : `We couldn't find any upcoming events in this local hub. Try broadening your location or checking "All areas".`}
+                    </p>
+                    <Button
+                      className="px-8 py-3.5 rounded-xl bg-black text-white font-black uppercase tracking-widest text-[10px] hover:bg-[#38BDF2] transition-all transform active:scale-95 shadow-lg shadow-black/10"
+                      onClick={() => {
+                        setSearchTerm('');
+                        setSelectedLocation(DEFAULT_LOCATION);
+                        setActiveBrowseTab('ALL');
+                        setSelectedCategory('all');
+                        setSelectedDate('all');
+                        setSelectedPrice('all');
+                        setSelectedFormat('all');
+                        navigate('/browse-events');
+                      }}
+                    >
+                      Discover All Hubs
+                    </Button>
+                  </div>
+                )}
+
+
+              </div>
+
+              {/* Map Sidebar ONLY on Browse Events (!isLanding) */}
+              {!isLanding && !isSpecialListing && (
+                <aside className="hidden xl:block w-[340px] 2xl:w-[420px] shrink-0 sticky top-28 self-start h-[500px] max-h-[calc(100vh-140px)] rounded-xl overflow-hidden bg-[#E5E7EB] border border-[#2E2E2F]/10 z-10 shadow-sm relative">
+                  <div className="absolute inset-0 transition-all duration-500">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      className="absolute inset-0 z-0"
+                      style={{ border: 0 }}
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent((selectedMapEvent ? (selectedMapEvent.locationText || selectedMapEvent.eventName) : selectedLocation) || 'Philippines')}&t=&z=12&ie=UTF8&iwloc=&output=embed`}
+                    />
+                  </div>
+                </aside>
+              )}
 
             </div>
-
-            {/* Map Sidebar ONLY on Browse Events (!isLanding) */}
-            {!isLanding && !isSpecialListing && (
-              <aside className="hidden xl:block w-[340px] 2xl:w-[420px] shrink-0 sticky top-28 self-start h-[500px] max-h-[calc(100vh-140px)] rounded-xl overflow-hidden bg-[#E5E7EB] border border-[#2E2E2F]/10 z-10 shadow-sm relative">
-                <div className="absolute inset-0 transition-all duration-500">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    className="absolute inset-0 z-0"
-                    style={{ border: 0 }}
-                    src={`https://maps.google.com/maps?q=${encodeURIComponent((selectedMapEvent ? (selectedMapEvent.locationText || selectedMapEvent.eventName) : selectedLocation) || 'Philippines')}&t=&z=12&ie=UTF8&iwloc=&output=embed`}
-                  />
-                </div>
-              </aside>
-            )}
-
           </div>
         </div>
-      </div>
 
-      {isLanding && (
-        <DestinationSlider onSelect={(city) => {
-          navigate(`/browse-events?location=${encodeURIComponent(city)}`);
-          window.scrollTo({ top: 0, behavior: 'instant' });
-        }} />
-      )}
+        {isLanding && (
+          <DestinationSlider onSelect={(city) => {
+            navigate(`/browse-events?location=${encodeURIComponent(city)}`);
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          }} />
+        )}
 
-      {isLanding && <PricingSection />}
-      <div className="mt-12">
-        {isLanding && <FeaturedOrganizers />}
-      </div>
-      <div className="mt-12">
-        {isLanding && <FAQSection />}
-      </div>
+        {isLanding && <PricingSection />}
+        <div className="mt-12">
+          {isLanding && <FeaturedOrganizers />}
+        </div>
+        <div className="mt-12">
+          {isLanding && <FAQSection />}
+        </div>
 
       </div>
       {/* Modern Announcement Modal - Outside zoom div */}

@@ -203,15 +203,15 @@ export const AuthPage: React.FC = () => {
     }
     if (!name.trim()) { setError('Full Name is required.'); return; }
     if (!inviteInfo?.accountExists && !password) { setError('Password is required.'); return; }
-    
+
     setLoading(true);
     try {
       const res = await fetch(`${API}/api/invite/accept-invite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          token, 
-          name: name.trim(), 
+        body: JSON.stringify({
+          token,
+          name: name.trim(),
           password: !inviteInfo?.accountExists ? maskPassword(password) : undefined
         })
       });
@@ -279,14 +279,14 @@ export const AuthPage: React.FC = () => {
       const res = await fetch(`${API}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: email.trim().toLowerCase(), 
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
           password: maskPassword(password),
           captchaToken: captchaValue || undefined
         })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) { 
+      if (!res.ok) {
         if (data.requiresCaptcha) {
           setShowLoginCaptcha(true);
           setLoginAttempts(Math.max(loginAttempts, 15));
@@ -297,9 +297,9 @@ export const AuthPage: React.FC = () => {
             return next;
           });
         }
-        setError(data.message || "Invalid credentials."); 
-        setLoading(false); 
-        return; 
+        setError(data.message || "Invalid credentials.");
+        setLoading(false);
+        return;
       }
 
       // Reset attempts on success
@@ -326,9 +326,9 @@ export const AuthPage: React.FC = () => {
       const res = await fetch(`${API}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name: name.trim(), 
-          email: email.trim().toLowerCase(), 
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
           password: maskPassword(password)
         })
       });
@@ -337,10 +337,10 @@ export const AuthPage: React.FC = () => {
       showToast('success', 'Account created! Please verify email.');
       setView('login');
       setPassword(''); setEmail('');
-    } catch (err) { 
-      setError('Failed to register.'); 
-    } finally { 
-      setLoading(false); 
+    } catch (err) {
+      setError('Failed to register.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -649,9 +649,9 @@ export const AuthPage: React.FC = () => {
         </div>
 
         {/* RIGHT: Auth Forms (45%) */}
-        <div className="w-full lg:w-[40%] min-h-full flex flex-col items-center justify-center lg:justify-start lg:pt-[10vh] p-8 bg-[#F2F2F2] overflow-visible relative custom-scrollbar">
+        <div className="w-full lg:w-[40%] min-h-full flex flex-col items-center justify-start pt-8 lg:pt-[4vh] p-8 bg-[#F2F2F2] overflow-visible relative custom-scrollbar">
           <div className="w-full max-w-[380px] py-10 lg:py-0">
-            
+
             {/* MOBILE ONLY LOGO */}
             <div className="lg:hidden flex justify-center mb-6">
               <Link to="/" className="inline-block hover:opacity-80 transition-opacity">
@@ -751,76 +751,78 @@ export const AuthPage: React.FC = () => {
                 <div className="w-full">
                   <form onSubmit={handleSignup} className="flex flex-col pb-10 items-stretch">
                     <div className="space-y-3">
-                  <div className="space-y-0.5">
-                    <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Full Name <span className="text-red-500">*</span></label>
-                      <IconInput
-                        placeholder="Juan Dela Cruz"
-                        required
-                        value={name}
-                        onChange={(e: any) => setName(e.target.value)}
-                        icon={<UserIcon className="w-4 h-4" />}
-                        inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium"
-                      />
-                  </div>
-                  <div className="space-y-0.5">
-                    <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Email Address <span className="text-red-500">*</span></label>
-                      <IconInput
-                        type="email"
-                        placeholder="you@domain.com"
-                        required
-                        value={email}
-                        onChange={(e: any) => setEmail(e.target.value)}
-                        icon={<EnvelopeIcon className="w-4 h-4" />}
-                        inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium"
-                      />
-                  </div>
-                  <div className="space-y-0.5">
-                    <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Password <span className="text-red-500">*</span></label>
-                      <PasswordInput placeholder="Create password" required value={password} onChange={(e: any) => setPassword(e.target.value)}
-                        icon={<LockIcon className="w-4 h-4" />}
-                        inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all" />
-                  </div>
-                  <div className="space-y-0.5">
-                    <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Confirm Password <span className="text-red-500">*</span></label>
-                      <PasswordInput placeholder="Confirm password" required value={confirmPassword} onChange={(e: any) => setConfirmPassword(e.target.value)}
-                        icon={<LockIcon className="w-4 h-4" />}
-                        inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all" />
+                      <div className="space-y-0.5">
+                        <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Full Name <span className="text-red-500">*</span></label>
+                        <IconInput
+                          placeholder="Juan Dela Cruz"
+                          required
+                          value={name}
+                          onChange={(e: any) => setName(e.target.value)}
+                          icon={<UserIcon className="w-4 h-4" />}
+                          inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium"
+                        />
+                      </div>
+                      <div className="space-y-0.5">
+                        <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Email Address <span className="text-red-500">*</span></label>
+                        <IconInput
+                          type="email"
+                          placeholder="you@domain.com"
+                          required
+                          value={email}
+                          onChange={(e: any) => setEmail(e.target.value)}
+                          icon={<EnvelopeIcon className="w-4 h-4" />}
+                          inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium"
+                        />
+                      </div>
+                      <div className="space-y-0.5">
+                        <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Password <span className="text-red-500">*</span></label>
+                        <PasswordInput placeholder="Create password" required value={password} onChange={(e: any) => setPassword(e.target.value)}
+                          icon={<LockIcon className="w-4 h-4" />}
+                          inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Confirm Password <span className="text-red-500">*</span></label>
+                        <PasswordInput placeholder="Confirm password" required value={confirmPassword} onChange={(e: any) => setConfirmPassword(e.target.value)}
+                          icon={<LockIcon className="w-4 h-4" />}
+                          inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all" />
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 p-1 bg-black/[0.01] rounded-[11px] mt-1.5 mb-1">
-                    <Checkbox checked={agreedToTerms} onChange={setAgreedToTerms} />
-                    <span className="text-[13px] text-black/70 font-bold leading-tight">
-                      I agree to the <button type="button" onClick={() => setShowTerms(true)} className="text-[#38BDF2] hover:underline">Terms of Service</button> and <button type="button" onClick={() => setShowPrivacy(true)} className="text-[#38BDF2] hover:underline">Privacy Policy</button>.
-                    </span>
-                  </div>
 
-                  <Button 
-                    type="submit" 
-                    className="mt-1 w-full py-3.5 text-[13.5px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" 
-                    loading={loading}
-                    disabled={loading}
-                  >
-                    Create account
-                  </Button>
+                    <div className="flex items-start gap-2.5 p-1 bg-black/[0.01] rounded-[11px] mt-2 mb-1">
+                      <div className="pt-0.5">
+                        <Checkbox checked={agreedToTerms} onChange={setAgreedToTerms} size="sm" />
+                      </div>
+                      <span className="text-[11px] text-black/60 font-medium leading-relaxed">
+                        I agree to the <button type="button" onClick={() => setShowTerms(true)} className="text-[#38BDF2] font-bold hover:underline">Terms of Service</button> and <button type="button" onClick={() => setShowPrivacy(true)} className="text-[#38BDF2] font-bold hover:underline">Privacy Policy</button>.
+                      </span>
+                    </div>
 
-                  <div className="flex items-center gap-3 mt-2 mb-2">
-                    <div className="h-px bg-black/5 flex-1"></div>
-                    <span className="text-[13px] font-bold text-black/20">Or sign up with</span>
-                    <div className="h-px bg-black/5 flex-1"></div>
-                  </div>
+                    <Button
+                      type="submit"
+                      className="mt-1 w-full py-3.5 text-[13.5px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                      loading={loading}
+                      disabled={loading}
+                    >
+                      Create account
+                    </Button>
 
-                  <button type="button" onClick={() => handleSocialLogin('google')} disabled={!!socialLoading}
-                    className="flex items-center justify-center gap-3 w-full py-3 bg-[#F2F2F2] !border-[1px] !border-solid !border-black/[0.05] rounded-[16px] shadow-[inset_0_-2px_6px_rgba(0,0,0,0.02),inset_0_2px_6px_rgba(255,255,255,0.7),0_4px_12px_rgba(0,0,0,0.03)] hover:scale-[1.02] transition-all"
-                  >
-                    <ICONS.Google className="w-4 h-4" />
-                    <span className="text-[13px] font-bold text-black/80">Continue with Google</span>
-                  </button>
+                    <div className="flex items-center gap-3 mt-2 mb-2">
+                      <div className="h-px bg-black/5 flex-1"></div>
+                      <span className="text-[13px] font-bold text-black/20">Or sign up with</span>
+                      <div className="h-px bg-black/5 flex-1"></div>
+                    </div>
 
-                  <p className="text-black/40 text-[13px] font-bold text-center mt-2">
-                    Already have an account? <button type="button" onClick={() => setView('login')} className="text-[#38BDF2] hover:underline">Sign In</button>
-                  </p>
-                </form>
+                    <button type="button" onClick={() => handleSocialLogin('google')} disabled={!!socialLoading}
+                      className="flex items-center justify-center gap-3 w-full py-3 bg-[#F2F2F2] !border-[1px] !border-solid !border-black/[0.05] rounded-[16px] shadow-[inset_0_-2px_6px_rgba(0,0,0,0.02),inset_0_2px_6px_rgba(255,255,255,0.7),0_4px_12px_rgba(0,0,0,0.03)] hover:scale-[1.02] transition-all"
+                    >
+                      <ICONS.Google className="w-4 h-4" />
+                      <span className="text-[13px] font-bold text-black/80">Continue with Google</span>
+                    </button>
+
+                    <p className="text-black/40 text-[13px] font-bold text-center mt-2">
+                      Already have an account? <button type="button" onClick={() => setView('login')} className="text-[#38BDF2] hover:underline">Sign In</button>
+                    </p>
+                  </form>
                 </div>
               )}
 
@@ -861,7 +863,7 @@ export const AuthPage: React.FC = () => {
                           value={email}
                           onChange={(e: any) => setEmail(e.target.value)}
                           required
-                        icon={<EnvelopeIcon className="w-4 h-4" />}
+                          icon={<EnvelopeIcon className="w-4 h-4" />}
                         />
                       </div>
 

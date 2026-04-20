@@ -16,9 +16,9 @@ export const Badge: React.FC<{
     neutral: 'bg-[#2E2E2F]/10 text-[#2E2E2F]',
   };
   return (
-    <span 
-      onClick={onClick} 
-      title={title} 
+    <span
+      onClick={onClick}
+      title={title}
       className={`px-2.5 py-1 rounded-full text-[13px] sm:text-[13px] font-bold uppercase tracking-wide ${styles[type]} inline-block ${className} ${onClick ? 'cursor-pointer' : ''}`}
     >
       {children}
@@ -272,7 +272,7 @@ export const Modal: React.FC<{
           aria-modal="true"
           aria-labelledby="modal-title"
           className={`relative w-full overflow-hidden bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-2xl shadow-2xl animate-in ${zoom ? '' : 'zoom-in-95'} duration-300 flex flex-col ${sizes[size]} max-h-[90vh] sm:max-h-[85vh] origin-center ${className}`}
-          style={{ 
+          style={{
             zIndex: zIndex,
             transform: zoom ? 'scale(0.8)' : undefined
           }}
@@ -316,67 +316,83 @@ export const Modal: React.FC<{
   };
 
 export const PageLoader: React.FC<{
+  label?: string;
   variant?: 'page' | 'section' | 'viewport';
   className?: string;
 }> = ({
+  label,
   variant = 'section',
   className = ''
 }) => {
     const SkeletonContent = () => (
-        <div className={`flex flex-col gap-10 w-full px-4 sm:px-8 py-10 animate-in fade-in duration-700 ${className}`}>
-            {/* Header Skeleton (Top Nav) */}
-            <div className="w-full flex items-center justify-between mb-2">
-                <div className="w-32 h-10 bg-[#E0E0E0]/30 rounded-xl" />
-                <div className="flex gap-4">
-                    <div className="w-10 h-10 bg-[#E0E0E0]/20 rounded-full" />
-                    <div className="w-10 h-10 bg-[#E0E0E0]/20 rounded-full" />
-                </div>
-            </div>
-
-            {/* Skeleton Hero Layout */}
-            <div className="w-full h-64 sm:h-80 bg-[#E0E0E0]/30 rounded-2xl relative overflow-hidden group">
-                <div className="absolute inset-x-8 bottom-12 space-y-4">
-                    <div className="h-10 w-2/3 bg-[#E0E0E0]/50 rounded-lg" />
-                    <div className="h-6 w-1/2 bg-[#E0E0E0]/50 rounded-lg" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-            </div>
-
-            {/* Skeleton Content Grid (3 cards) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[...Array(3)].map((_, i) => (
-                    <div key={i} className="space-y-4">
-                        <div className="aspect-video bg-[#E0E0E0]/30 rounded-xl relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-                        </div>
-                        <div className="h-6 w-2/3 bg-[#E0E0E0]/30 rounded-lg" />
-                        <div className="h-4 w-full bg-[#E0E0E0]/20 rounded-lg" />
-                    </div>
-                ))}
-            </div>
-
-            {/* Sub-grid of smaller items */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                {[...Array(4)].map((_, i) => (
-                    <div key={i} className="h-20 bg-[#E0E0E0]/15 rounded-xl animate-pulse" />
-                ))}
-            </div>
+      <div className={`flex flex-col gap-10 w-full px-4 sm:px-8 py-10 animate-in fade-in duration-700 ${className}`}>
+        {/* Header Skeleton (Top Nav) */}
+        <div className="w-full flex items-center justify-between mb-2">
+          <div className="w-32 h-10 bg-[#E0E0E0]/30 rounded-xl" />
+          <div className="flex gap-4">
+            <div className="w-10 h-10 bg-[#E0E0E0]/20 rounded-full" />
+            <div className="w-10 h-10 bg-[#E0E0E0]/20 rounded-full" />
+          </div>
         </div>
+
+        {/* Skeleton Hero Layout */}
+        <div className="w-full h-64 sm:h-80 bg-[#E0E0E0]/30 rounded-2xl relative overflow-hidden group">
+          <div className="absolute inset-x-8 bottom-12 space-y-4">
+            <div className="h-10 w-2/3 bg-[#E0E0E0]/50 rounded-lg" />
+            <div className="h-6 w-1/2 bg-[#E0E0E0]/50 rounded-lg" />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+        </div>
+
+        {/* Skeleton Content Grid (3 cards) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="space-y-4">
+              <div className="aspect-video bg-[#E0E0E0]/30 rounded-xl relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+              </div>
+              <div className="h-6 w-2/3 bg-[#E0E0E0]/30 rounded-lg" />
+              <div className="h-4 w-full bg-[#E0E0E0]/20 rounded-lg" />
+            </div>
+          ))}
+        </div>
+
+        {/* Sub-grid of smaller items */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-20 bg-[#E0E0E0]/15 rounded-xl animate-pulse" />
+          ))}
+        </div>
+      </div>
     );
 
     if (variant === 'viewport') {
-        return (
-            <div className="fixed inset-0 z-[10000] bg-[#F2F2F2] flex flex-col overflow-hidden">
-                <div className="w-full h-1 bg-[#38BDF2]/20 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-[#38BDF2] w-1/2 animate-[suspense-loading_2s_infinite]" />
-                </div>
-                <SkeletonContent />
+      return (
+        <div className="fixed inset-0 z-[10000] bg-[#F2F2F2] flex flex-col overflow-hidden">
+          <div className="w-full h-1 bg-[#38BDF2]/20 relative overflow-hidden">
+            <div className="absolute inset-0 bg-[#38BDF2] w-1/2 animate-[suspense-loading_2s_infinite]" />
+          </div>
+          {label && (
+            <div className="mt-8 px-8 py-2 text-center">
+              <p className="text-[12px] font-black uppercase tracking-[0.3em] text-[#2E2E2F] animate-pulse">{label}</p>
             </div>
-        );
+          )}
+          <SkeletonContent />
+        </div>
+      );
     }
 
-    return <SkeletonContent />;
-};
+    return (
+      <div className="relative">
+        <SkeletonContent />
+        {label && (
+          <div className="absolute inset-x-0 top-1/3 z-10 flex items-center justify-center pointer-events-none">
+             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] animate-pulse bg-[#F2F2F2]/90 px-6 py-3 rounded-2xl border border-[#2E2E2F]/10 shadow-xl backdrop-blur-md">{label}</p>
+          </div>
+        )}
+      </div>
+    );
+  };
 
 export const Checkbox: React.FC<{
   checked: boolean;
@@ -391,7 +407,7 @@ export const Checkbox: React.FC<{
     md: 'w-5 h-5',
     lg: 'w-6 h-6',
   };
-  
+
   const iconSizes = {
     sm: 'w-2.5 h-2.5',
     md: 'w-3.5 h-3.5',
@@ -407,7 +423,7 @@ export const Checkbox: React.FC<{
 
   return (
     <label className={`flex items-start gap-3 cursor-pointer group select-none ${className}`}>
-      <div 
+      <div
         onClick={(e) => { e.stopPropagation(); onChange(!checked); }}
         className={`${sizes[size]} ${rounding[rounded]} border-2 flex items-center justify-center transition-all ${checked ? 'bg-[#38BDF2] border-[#38BDF2]' : 'border-[#2E2E2F]/20 bg-white group-hover:border-[#38BDF2]/50'}`}
       >

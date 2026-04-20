@@ -495,9 +495,9 @@ export const RegistrationForm: React.FC = () => {
                       <Checkbox
                         checked={formData.termsAccepted}
                         onChange={(val) => setFormData({ ...formData, termsAccepted: val })}
-                        size="lg"
+                        size="md"
                         label={
-                          <span className="text-sm font-medium text-[#2E2E2F] leading-relaxed group-hover:text-[#2E2E2F] transition-colors">
+                          <span className="text-[11px] font-medium text-[#2E2E2F] leading-relaxed group-hover:text-[#2E2E2F] transition-colors">
                             I acknowledge that I have read and agree to the {' '}
                             <button
                               type="button"

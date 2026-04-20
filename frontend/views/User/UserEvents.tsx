@@ -61,10 +61,10 @@ const MoreVerticalIcon: React.FC<any> = (props) => (
 );
 
 const WandIcon: React.FC<any> = (props) => (
-    <svg 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
+    <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
         xmlns="http://www.w3.org/2000/svg"
         {...props}
     >
@@ -190,12 +190,12 @@ const EventMobileCard = React.memo<{
                                 <ICONS.AlertTriangle className="w-4 h-4" /> Cancel Event
                             </button>
                         )}
-                        <button 
-                            onClick={(e) => { 
+                        <button
+                            onClick={(e) => {
                                 if (isArchiveDisabled) return;
-                                e.stopPropagation(); 
-                                onArchive(); 
-                            }} 
+                                e.stopPropagation();
+                                onArchive();
+                            }}
                             disabled={isArchiveDisabled}
                             className={`w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-colors ${isArchiveDisabled ? 'text-[#2E2E2F]/20 cursor-not-allowed opacity-50' : 'text-red-500/70 hover:bg-red-500/10 hover:text-red-600'}`}
                         >
@@ -337,12 +337,12 @@ const EventTableRow = React.memo<{
                                 <ICONS.AlertTriangle className="w-4 h-4" /> Cancel Event
                             </button>
                         )}
-                        <button 
-                            onClick={(e) => { 
+                        <button
+                            onClick={(e) => {
                                 if (isArchiveDisabled) return;
-                                e.stopPropagation(); 
-                                onArchive(); 
-                            }} 
+                                e.stopPropagation();
+                                onArchive();
+                            }}
                             disabled={isArchiveDisabled}
                             className={`w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-colors ${isArchiveDisabled ? 'text-[#2E2E2F]/20 cursor-not-allowed opacity-50' : 'text-red-500/70 hover:bg-red-500/10 hover:text-red-600'}`}
                         >
@@ -437,7 +437,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
             {(previewDevice as string) === 'desktop' ? (
                 <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center pt-32 pb-12 px-6">
                     {/* Centered Browser Window Frame - Scaled to 75% POV */}
-                    <div 
+                    <div
                         className="w-full max-w-[1300px] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.12)] border border-[#2E2E2F]/10 bg-[#F2F2F2] min-h-[90vh] flex flex-col"
                         style={{ transform: 'scale(0.75)', transformOrigin: 'top center' }}
                     >
@@ -448,7 +448,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                 <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
                                 <div className="w-3 h-3 rounded-full bg-[#28C840]" />
                             </div>
-                            
+
                             <div className="flex-1">
                                 <div className="bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-lg px-3 py-1 text-[10px] text-[#2E2E2F]/40 font-medium truncate flex items-center gap-1.5 max-w-[400px]">
                                     <ICONS.Lock className="w-2.5 h-2.5" />
@@ -632,23 +632,23 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                 </div>
             ) : (
                 /* Mobile Preview Mode - Phone Shell Implementation */
-                    <div className={`w-full bg-[#F2F2F2] ${window.innerWidth < 768 ? 'block min-h-screen' : 'flex-1 flex flex-col items-center'}`}>
-                        {/* Shell / Content Wrapper - Phone feel only on desktop pov */}
-                        <div 
-                            className={`relative bg-[#F2F2F2] ${window.innerWidth < 768 
-                                ? 'w-full block h-auto' 
-                                : 'w-[375px] h-[780px] rounded-[3.5rem] border-[12px] border-[#F2F2F2] overflow-hidden flex flex-col shadow-[0_40px_100px_rgba(0,0,0,0.15)]'}`}
-                            style={window.innerWidth < 768 ? {} : { transform: 'scale(0.8)', transformOrigin: 'top center' }}
-                        >
-                            {/* Stylized Notch for Mobile Preview - Hidden on actual mobile device */}
-                            {window.innerWidth >= 768 && (
-                                <div className="h-8 bg-[#F2F2F2] flex items-center justify-center relative shrink-0">
-                                    <div className="w-24 h-5 bg-[#F2F2F2] rounded-b-2xl absolute top-0" />
-                                </div>
-                            )}
+                <div className={`w-full bg-[#F2F2F2] ${window.innerWidth < 768 ? 'block min-h-screen' : 'flex-1 flex flex-col items-center'}`}>
+                    {/* Shell / Content Wrapper - Phone feel only on desktop pov */}
+                    <div
+                        className={`relative bg-[#F2F2F2] ${window.innerWidth < 768
+                            ? 'w-full block h-auto'
+                            : 'w-[375px] h-[780px] rounded-[3.5rem] border-[12px] border-[#F2F2F2] overflow-hidden flex flex-col shadow-[0_40px_100px_rgba(0,0,0,0.15)]'}`}
+                        style={window.innerWidth < 768 ? {} : { transform: 'scale(0.8)', transformOrigin: 'top center' }}
+                    >
+                        {/* Stylized Notch for Mobile Preview - Hidden on actual mobile device */}
+                        {window.innerWidth >= 768 && (
+                            <div className="h-8 bg-[#F2F2F2] flex items-center justify-center relative shrink-0">
+                                <div className="w-24 h-5 bg-[#F2F2F2] rounded-b-2xl absolute top-0" />
+                            </div>
+                        )}
 
-                            {/* Main Content Area */}
-                            <div className={`${window.innerWidth >= 768 ? 'flex-1 overflow-y-auto custom-scrollbar' : 'w-full block h-auto'}`}>
+                        {/* Main Content Area */}
+                        <div className={`${window.innerWidth >= 768 ? 'flex-1 overflow-y-auto custom-scrollbar' : 'w-full block h-auto'}`}>
                             <div className="w-full pb-48">
                                 <div className="h-14 border-b border-[#2E2E2F]/15 px-5 flex items-center justify-between bg-[#F2F2F2]">
                                     <img
@@ -663,120 +663,120 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                     </div>
                                 </div>
 
-                        <div className="bg-[#F2F2F2] p-5 space-y-6">
-                            <div className="w-full space-y-6">
-                                <div className="mb-4">
-                                    <div className="flex items-center gap-2 text-[8px] font-black tracking-widest uppercase mb-6" style={{ color: previewAccentColor }}>
-                                        <svg className="w-2.5 h-2.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
-                                        BACK TO EVENTS
-                                    </div>
-
-                                    <div className="flex items-start justify-between gap-4 mb-4">
-                                        <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tighter leading-tight">
-                                            {formData.eventName || 'Event title'}
-                                        </h2>
-                                        <div className="flex items-center gap-2 shrink-0">
-                                            <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
-                                                <ICONS.Heart className="w-4 h-4 text-[#2E2E2F]/40" />
+                                <div className="bg-[#F2F2F2] p-5 space-y-6">
+                                    <div className="w-full space-y-6">
+                                        <div className="mb-4">
+                                            <div className="flex items-center gap-2 text-[8px] font-black tracking-widest uppercase mb-6" style={{ color: previewAccentColor }}>
+                                                <svg className="w-2.5 h-2.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
+                                                BACK TO EVENTS
                                             </div>
-                                            <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
-                                                <ICONS.Download className="w-4 h-4 text-[#2E2E2F]/40" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="rounded-[2rem] overflow-hidden border-2 border-[#2E2E2F]/15 mb-6 group">
-                                        <img
-                                            src={getImageUrl(formData.imageUrl)}
-                                            alt="Event Preview"
-                                            crossOrigin="use-credentials"
-                                            className="w-full aspect-video object-cover"
-                                        />
-                                    </div>
 
-                                    <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F]/70">
-                                        <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
-                                            <ICONS.Calendar className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
-                                            {previewDateLabel}
-                                        </div>
-                                        <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
-                                            <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
-                                            {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
-                                        </div>
-                                        {formData.streamingPlatform && (
-                                            <div className="flex items-center bg-[#F2F2F2] px-3 py-1.5 rounded-xl border text-[10px] font-black tracking-wide" style={{ color: previewAccentColor, borderColor: `${previewAccentColor}33`, backgroundColor: `${previewAccentColor}0D` }}>
-                                                VIA {formData.streamingPlatform.toUpperCase()}
-                                            </div>
-                                        )}
-                                        <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
-                                            CAPACITY: {formData.capacityTotal}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
-                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
-                                    <p className="text-[#2E2E2F]/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
-                                        {formData.description || 'Provide an executive summary of this event session...'}
-                                    </p>
-                                </div>
-
-                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
-                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
-                                    <div className="rounded-[1.2rem] border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] p-4 flex flex-col gap-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-full overflow-hidden text-[#F2F2F2] flex items-center justify-center text-lg font-bold shrink-0" style={{ backgroundColor: previewAccentColor }}>
-                                                {organizerProfile?.profileImageUrl ? (
-                                                    <img src={getImageUrl(organizerProfile.profileImageUrl)} alt={organizerProfile.organizerName || 'Organizer'} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    organizerPreviewInitial
-                                                )}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-lg font-black text-[#2E2E2F] tracking-tight truncate">
-                                                    {organizerProfile?.organizerName || 'Organizer Profile'}
-                                                </p>
-                                                <div className="flex items-center gap-4 mt-1">
-                                                    <div>
-                                                        <p className="text-[8px] uppercase tracking-widest font-black text-[#2E2E2F]/40">Followers</p>
-                                                        <p className="text-sm font-black">{organizerProfile?.followersCount || 0}</p>
+                                            <div className="flex items-start justify-between gap-4 mb-4">
+                                                <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tighter leading-tight">
+                                                    {formData.eventName || 'Event title'}
+                                                </h2>
+                                                <div className="flex items-center gap-2 shrink-0">
+                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
+                                                        <ICONS.Heart className="w-4 h-4 text-[#2E2E2F]/40" />
                                                     </div>
-                                                    <div>
-                                                        <p className="text-[14px] font-black">{events.length}</p>
+                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
+                                                        <ICONS.Download className="w-4 h-4 text-[#2E2E2F]/40" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="rounded-[2rem] overflow-hidden border-2 border-[#2E2E2F]/15 mb-6 group">
+                                                <img
+                                                    src={getImageUrl(formData.imageUrl)}
+                                                    alt="Event Preview"
+                                                    crossOrigin="use-credentials"
+                                                    className="w-full aspect-video object-cover"
+                                                />
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F]/70">
+                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                                    <ICONS.Calendar className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
+                                                    {previewDateLabel}
+                                                </div>
+                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                                    <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
+                                                    {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
+                                                </div>
+                                                {formData.streamingPlatform && (
+                                                    <div className="flex items-center bg-[#F2F2F2] px-3 py-1.5 rounded-xl border text-[10px] font-black tracking-wide" style={{ color: previewAccentColor, borderColor: `${previewAccentColor}33`, backgroundColor: `${previewAccentColor}0D` }}>
+                                                        VIA {formData.streamingPlatform.toUpperCase()}
+                                                    </div>
+                                                )}
+                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                                    CAPACITY: {formData.capacityTotal}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
+                                            <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
+                                            <p className="text-[#2E2E2F]/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
+                                                {formData.description || 'Provide an executive summary of this event session...'}
+                                            </p>
+                                        </div>
+
+                                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
+                                            <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
+                                            <div className="rounded-[1.2rem] border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] p-4 flex flex-col gap-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-full overflow-hidden text-[#F2F2F2] flex items-center justify-center text-lg font-bold shrink-0" style={{ backgroundColor: previewAccentColor }}>
+                                                        {organizerProfile?.profileImageUrl ? (
+                                                            <img src={getImageUrl(organizerProfile.profileImageUrl)} alt={organizerProfile.organizerName || 'Organizer'} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            organizerPreviewInitial
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-lg font-black text-[#2E2E2F] tracking-tight truncate">
+                                                            {organizerProfile?.organizerName || 'Organizer Profile'}
+                                                        </p>
+                                                        <div className="flex items-center gap-4 mt-1">
+                                                            <div>
+                                                                <p className="text-[8px] uppercase tracking-widest font-black text-[#2E2E2F]/40">Followers</p>
+                                                                <p className="text-sm font-black">{organizerProfile?.followersCount || 0}</p>
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[14px] font-black">{events.length}</p>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {hasPreviewPhysicalLocation && (
+                                            <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
+                                                <div className="flex items-center justify-between gap-3 mb-4">
+                                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-[#38BDF2]">Open in Maps</span>
+                                                </div>
+                                                <p className="text-[12px] text-[#2E2E2F]/70 font-medium mb-4">{formData.location}</p>
+                                                <div className="rounded-xl overflow-hidden border-2 border-[#2E2E2F]/15 bg-[#F2F2F2]">
+                                                    <iframe
+                                                        src={previewMapEmbedUrl}
+                                                        title="Preview map"
+                                                        className="w-full h-40"
+                                                        loading="lazy"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-
-                                {hasPreviewPhysicalLocation && (
-                                    <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
-                                        <div className="flex items-center justify-between gap-3 mb-4">
-                                            <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-[#38BDF2]">Open in Maps</span>
-                                        </div>
-                                        <p className="text-[12px] text-[#2E2E2F]/70 font-medium mb-4">{formData.location}</p>
-                                        <div className="rounded-xl overflow-hidden border-2 border-[#2E2E2F]/15 bg-[#F2F2F2]">
-                                            <iframe
-                                                src={previewMapEmbedUrl}
-                                                title="Preview map"
-                                                className="w-full h-40"
-                                                loading="lazy"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </div>
-                    </div>
-                </div>
 
                         {/* Mobile-style Ticket Interaction (Compact Bar + Expanded Sheet) */}
                         <div className="relative w-full shrink-0">
                             {/* Floating Mobile Footer (Compact State) */}
                             {!isPreviewSheetExpanded && (
-                                <div 
-                                    className="z-50 w-full bg-[#F2F2F2] border-t border-[#2E2E2F]/10 px-5 py-4 flex items-center justify-between shadow-[0_-15px_40px_rgba(0,0,0,0.06)] cursor-pointer" 
+                                <div
+                                    className="z-50 w-full bg-[#F2F2F2] border-t border-[#2E2E2F]/10 px-5 py-4 flex items-center justify-between shadow-[0_-15px_40px_rgba(0,0,0,0.06)] cursor-pointer"
                                     style={{ position: window.innerWidth < 768 ? 'fixed' : 'absolute', bottom: 0, left: 0, paddingBottom: window.innerWidth < 768 ? 'calc(env(safe-area-inset-bottom) + 1rem)' : '1.25rem' }}
                                     onClick={() => setIsPreviewSheetExpanded(true)}
                                 >
@@ -790,7 +790,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                             {formData.eventDate ? new Date(formData.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Set Date'}
                                         </span>
                                     </div>
-                                    <div 
+                                    <div
                                         className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xl font-black shadow-md"
                                         style={{ backgroundColor: previewAccentColor }}
                                     >
@@ -801,18 +801,18 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
 
                             {/* Expanded Mobile Ticket Sheet (Mock Layer) */}
                             {isPreviewSheetExpanded && (
-                                <div 
-                                    className="z-[60] absolute inset-0 flex flex-col justify-end" 
+                                <div
+                                    className="z-[60] absolute inset-0 flex flex-col justify-end"
                                     style={{ height: window.innerWidth < 768 ? '100dvh' : '100%', position: window.innerWidth < 768 ? 'fixed' : 'absolute' }}
                                 >
                                     {/* Backdrop */}
-                                    <div 
+                                    <div
                                         className="absolute inset-0 bg-black/60 transition-opacity duration-300"
                                         onClick={() => setIsPreviewSheetExpanded(false)}
                                     />
-                                    
+
                                     {/* The Sheet */}
-                                    <div 
+                                    <div
                                         className="relative w-full bg-[#F2F2F2] rounded-t-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] flex flex-col max-h-[85%]"
                                         style={{ paddingBottom: window.innerWidth < 768 ? 'calc(env(safe-area-inset-bottom) + 1.25rem)' : '1.25rem' }}
                                     >
@@ -940,7 +940,7 @@ const AISuggestPanel: React.FC<{
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#38BDF2] to-[#0ea5e9] flex items-center justify-center shadow-md shrink-0">
                             <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                             </svg>
                         </div>
                         <div>
@@ -1093,7 +1093,7 @@ const AISuggestPanel: React.FC<{
                         <div className="py-10 text-center border-2 border-dashed border-[#2E2E2F]/08 rounded-2xl">
                             <div className="w-10 h-10 rounded-2xl bg-[#38BDF2]/10 flex items-center justify-center mx-auto mb-3">
                                 <svg className="w-5 h-5 text-[#38BDF2]/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                                 </svg>
                             </div>
                             <p className="text-[10px] font-black text-[#2E2E2F]/25 uppercase tracking-widest">Select context above</p>
@@ -1110,11 +1110,11 @@ const AISuggestPanel: React.FC<{
 // ─── AI Field Assist ─────────────────────────────────────────────────────────
 // Reusable per-field AI button + compact centered modal
 const FIELD_CONFIG: Record<string, { question: string; placeholder: string }> = {
-    eventName:       { question: 'What kind of event are you planning?',         placeholder: 'e.g. A tech conference for startup founders in Manila' },
-    description:     { question: 'Briefly describe your event in your own words', placeholder: 'e.g. A 2-day bootcamp for young entrepreneurs on product-market fit' },
-    location:        { question: 'What type of venue are you looking for?',       placeholder: 'e.g. A rooftop venue in BGC for 100 pax' },
-    streamingPlatform: { question: 'Tell me about your streaming setup',          placeholder: 'e.g. Live stream for 500 online participants with Q&A' },
-    promoCode:       { question: 'What is the promotion about?',                  placeholder: 'e.g. Early bird 30% off for the first 50 sign-ups' },
+    eventName: { question: 'What kind of event are you planning?', placeholder: 'e.g. A tech conference for startup founders in Manila' },
+    description: { question: 'Briefly describe your event in your own words', placeholder: 'e.g. A 2-day bootcamp for young entrepreneurs on product-market fit' },
+    location: { question: 'What type of venue are you looking for?', placeholder: 'e.g. A rooftop venue in BGC for 100 pax' },
+    streamingPlatform: { question: 'Tell me about your streaming setup', placeholder: 'e.g. Live stream for 500 online participants with Q&A' },
+    promoCode: { question: 'What is the promotion about?', placeholder: 'e.g. Early bird 30% off for the first 50 sign-ups' },
 };
 
 const AIFieldAssist: React.FC<{
@@ -1175,7 +1175,7 @@ const AIFieldAssist: React.FC<{
                         <div className="flex items-center gap-2.5">
                             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#38BDF2] to-[#0ea5e9] flex items-center justify-center shadow-md shrink-0">
                                 <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                                 </svg>
                             </div>
                             <div>
@@ -1292,7 +1292,7 @@ const AIDescriptionGenerator: React.FC<{
 }> = ({ eventName, onApply, showToast, organizerName, locationType, currentValue }) => {
     const [loading, setLoading] = React.useState(false);
     const [suggestions, setSuggestions] = React.useState<string[]>([]);
-    
+
     const handleGenerate = async () => {
         if (!eventName?.trim()) {
             showToast('error', 'Provide an event name first!');
@@ -1316,9 +1316,9 @@ const AIDescriptionGenerator: React.FC<{
             setLoading(false);
         }
     };
-    
+
     if (loading) return <div className="text-[10px] font-black text-[#38BDF2] animate-pulse uppercase tracking-[0.15em] py-1">✨ Drafting...</div>;
-    
+
     if (suggestions.length > 0) {
         return (
             <div className="flex animate-in fade-in slide-in-from-right-2 duration-300">
@@ -1327,17 +1327,16 @@ const AIDescriptionGenerator: React.FC<{
                         const cleanS = s.replace(/[""]/g, '');
                         const isSelected = currentValue === cleanS;
                         return (
-                            <button 
-                                key={i} 
+                            <button
+                                key={i}
                                 type="button"
-                                onClick={() => onApply(cleanS)} 
-                                className={`text-[9px] font-black px-2.5 py-1.5 rounded-lg border transition-all uppercase tracking-wider ${
-                                    isSelected 
-                                    ? 'bg-[#38BDF2] text-white border-[#38BDF2]' 
-                                    : 'bg-[#38BDF2]/10 text-[#38BDF2] border-[#38BDF2]/20 hover:bg-[#38BDF2] hover:text-white'
-                                }`}
+                                onClick={() => onApply(cleanS)}
+                                className={`text-[9px] font-black px-2.5 py-1.5 rounded-lg border transition-all uppercase tracking-wider ${isSelected
+                                        ? 'bg-[#38BDF2] text-white border-[#38BDF2]'
+                                        : 'bg-[#38BDF2]/10 text-[#38BDF2] border-[#38BDF2]/20 hover:bg-[#38BDF2] hover:text-white'
+                                    }`}
                             >
-                                {isSelected ? 'Selected' : `Option ${i+1}`}
+                                {isSelected ? 'Selected' : `Option ${i + 1}`}
                             </button>
                         );
                     })}
@@ -1351,7 +1350,7 @@ const AIDescriptionGenerator: React.FC<{
     }
 
     return (
-        <button 
+        <button
             type="button"
             onClick={handleGenerate}
             disabled={!eventName?.trim()}
@@ -1395,13 +1394,13 @@ const AIImageGenerator: React.FC<{
 
         const seed = Math.floor(Math.random() * 1000000);
         const finalPrompt = prompt.trim() || `Professional high-quality banner for an event titled "${eventName}" in the Philippines, startup theme, cinematic lighting, 8k resolution`;
-        
+
         // Using backend proxy-image bridge to bypass browser-level blocks
         const sanitizedPrompt = finalPrompt.replace(/#/g, '').substring(0, 1000);
         const timestamp = Date.now();
         const relativePath = `/api/ai/proxy-image?prompt=${encodeURIComponent(sanitizedPrompt)}&seed=${seed}&t=${timestamp}`;
         const fullUrl = `${API_BASE}${relativePath}`;
-        
+
         console.log(`[AI Generator] Requesting image via backend bridge: "${sanitizedPrompt}"`);
         console.log(`[AI Generator] Bridge path: ${relativePath}`);
         console.log(`[AI Generator] Full request URL: ${fullUrl}`);
@@ -1439,9 +1438,9 @@ const AIImageGenerator: React.FC<{
                             <h3 className="text-[14px] font-black text-[#2E2E2F] uppercase tracking-tight">AI Image Studio</h3>
                             <p className="text-[9px] font-semibold text-[#2E2E2F]/35 uppercase tracking-widest mt-0.5">Powered by StartupLab AI</p>
                         </div>
-                        <button 
+                        <button
                             type="button"
-                            onClick={() => setIsOpen(false)} 
+                            onClick={() => setIsOpen(false)}
                             className="w-8 h-8 rounded-xl border border-[#2E2E2F]/15 flex items-center justify-center text-[#2E2E2F]/35 hover:text-[#2E2E2F] transition-colors"
                         >
                             <ICONS.X className="w-4 h-4" />
@@ -1460,9 +1459,9 @@ const AIImageGenerator: React.FC<{
                         <div className="relative aspect-video rounded-2xl overflow-hidden border-2 border-[#2E2E2F]/10 bg-[#2E2E2F]/05 group">
                             {previewUrl && !imgError ? (
                                 <>
-                                    <img 
-                                        src={previewUrl} 
-                                        alt="AI Generated" 
+                                    <img
+                                        src={previewUrl}
+                                        alt="AI Generated"
                                         crossOrigin="anonymous"
                                         className={`w-full h-full object-cover transition-opacity duration-700 ${loading ? 'opacity-30 blur-sm' : 'opacity-100'}`}
                                         onLoad={() => {
@@ -1470,7 +1469,7 @@ const AIImageGenerator: React.FC<{
                                             if (loadingTimerRef.current) { clearTimeout(loadingTimerRef.current); loadingTimerRef.current = null; }
                                             setLoading(false);
                                         }}
-                                        onError={() => { 
+                                        onError={() => {
                                             console.error('[AI Generator] Proxy image failed to load');
                                             if (loadingTimerRef.current) { clearTimeout(loadingTimerRef.current); loadingTimerRef.current = null; }
                                             setLoading(false);
@@ -1501,7 +1500,7 @@ const AIImageGenerator: React.FC<{
                                     <p className="text-[10px] font-black text-[#2E2E2F]/20 uppercase tracking-widest text-center px-10 leading-relaxed">Your AI Masterpiece will appear here</p>
                                 </div>
                             )}
-                            
+
                             {loading && (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#F2F2F2]/20 backdrop-blur-[2px]">
                                     <div className="w-10 h-10 border-[3.5px] border-[#38BDF2] border-t-transparent rounded-full animate-spin mb-4" />
@@ -1518,18 +1517,18 @@ const AIImageGenerator: React.FC<{
                             )}
                         </div>
                         <div className="flex gap-3">
-                            <button 
+                            <button
                                 type="button"
-                                onClick={handleGenerate} 
-                                disabled={loading} 
+                                onClick={handleGenerate}
+                                disabled={loading}
                                 className="flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[#2E2E2F] text-white hover:bg-[#38BDF2] transition-all disabled:opacity-50"
                             >
                                 {previewUrl ? 'Regenerate' : 'Generate Image'}
                             </button>
                             {previewUrl && (
-                                <button 
+                                <button
                                     type="button"
-                                    onClick={handleApply} 
+                                    onClick={handleApply}
                                     className="flex-1 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#38BDF2] to-[#0ea5e9] text-white shadow-lg active:scale-95 transition-all"
                                 >
                                     Apply to Event
@@ -1545,9 +1544,9 @@ const AIImageGenerator: React.FC<{
 
     return (
         <>
-            <button 
-                type="button" 
-                onClick={(e) => { e.stopPropagation(); setIsOpen(true); }} 
+            <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setIsOpen(true); }}
                 title="AI Image Studio"
                 className="relative z-[30] w-10 h-10 flex items-center justify-center rounded-2xl bg-transparent text-[#38BDF2] border-2 border-[#38BDF2]/20 hover:border-[#38BDF2]/60 hover:shadow-[0_0_15px_rgba(56,189,242,0.4)] active:scale-95 transition-all group"
             >
@@ -1682,11 +1681,11 @@ const WizardStepContent = React.memo(({
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 {formData.imageUrl ? (
-                                    <img 
-                                        src={getImageUrl(formData.imageUrl)} 
-                                        alt="Preview" 
+                                    <img
+                                        src={getImageUrl(formData.imageUrl)}
+                                        alt="Preview"
                                         crossOrigin="use-credentials"
-                                        className="w-full h-full object-cover rounded-[1.5rem]" 
+                                        className="w-full h-full object-cover rounded-[1.5rem]"
                                     />
                                 ) : (
                                     <div className="flex flex-col items-center justify-center w-full h-full">
@@ -2753,7 +2752,7 @@ export const UserEvents: React.FC = () => {
                 setWizardStep(4);
                 setIsTicketModalOpen(false);
                 setIsModalOpen(true);
-            showToast('success', 'Tickets saved. Final step: set the event status.');
+                showToast('success', 'Tickets saved. Final step: set the event status.');
                 fetchEvents();
                 return;
             }
@@ -3070,22 +3069,22 @@ export const UserEvents: React.FC = () => {
                                     <div className="flex items-center gap-3">
                                         {selectedRows.size > 0 && (
                                             <>
-                                                <button 
-                                                     onClick={handleBulkArchive} 
-                                                     className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-red-500 !text-red-500 px-6 py-2.5 text-[13px] hover:!bg-red-500 hover:!text-white flex items-center gap-2 group" 
-                                                     title="Archive Selected"
-                                                 >
-                                                     <ICONS.Trash className="w-5 h-5 text-red-500 group-hover:text-white transition-colors" />
-                                                     ARCHIVE ({selectedRows.size})
-                                                 </button>
-                                                 <button 
-                                                     onClick={handleBulkPromote} 
-                                                     className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-[#38BDF2] !text-[#38BDF2] px-6 py-2.5 text-[13px] hover:!bg-[#38BDF2] hover:!text-white flex items-center gap-2 group" 
-                                                     title="Promote Selected"
-                                                 >
-                                                     <ICONS.Zap className="w-5 h-5 text-[#38BDF2] group-hover:text-white transition-colors" />
-                                                     PROMOTE ({selectedRows.size})
-                                                 </button>
+                                                <button
+                                                    onClick={handleBulkArchive}
+                                                    className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-red-500 !text-red-500 px-6 py-2.5 text-[13px] hover:!bg-red-500 hover:!text-white flex items-center gap-2 group"
+                                                    title="Archive Selected"
+                                                >
+                                                    <ICONS.Trash className="w-5 h-5 text-red-500 group-hover:text-white transition-colors" />
+                                                    ARCHIVE ({selectedRows.size})
+                                                </button>
+                                                <button
+                                                    onClick={handleBulkPromote}
+                                                    className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-[#38BDF2] !text-[#38BDF2] px-6 py-2.5 text-[13px] hover:!bg-[#38BDF2] hover:!text-white flex items-center gap-2 group"
+                                                    title="Promote Selected"
+                                                >
+                                                    <ICONS.Zap className="w-5 h-5 text-[#38BDF2] group-hover:text-white transition-colors" />
+                                                    PROMOTE ({selectedRows.size})
+                                                </button>
                                                 <div className="h-8 w-[2px] bg-[#2E2E2F]/10 mx-1" />
                                             </>
                                         )}
@@ -3754,7 +3753,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
     const isNewTicketDirty = (newTicket.name?.trim() || '') !== '' || (newTicket.description?.trim() || '') !== '';
     const isNewTicketComplete = (newTicket.name?.trim() || '') !== '' && (newTicket.description?.trim() || '') !== '';
     const isInventoryValid = (tickets.length > 0 || isNewTicketComplete) && !hasInvalidTickets && (!isNewTicketDirty || isNewTicketComplete);
-    
+
     // Check if we have at least one ticket
     const hasAtLeastOneTicket = tickets.length > 0 || isNewTicketComplete;
 
@@ -4010,7 +4009,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                         </div>
                     )}
 
-                    { (expandedTicketId !== null || isNewTicketDirty) && (
+                    {(expandedTicketId !== null || isNewTicketDirty) && (
                         <Button
                             onClick={() => {
                                 // 1. Check for partially filled new ticket
@@ -4025,7 +4024,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                 }
 
                                 let finalTickets = [...tickets];
-                                
+
                                 // 2. AUTO-ADD: If the user filled out the new ticket form completely but didn't click "Add"
                                 if (isNewTicketComplete) {
                                     const newId = `tk-${Date.now()}`;
@@ -4055,7 +4054,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                 onSave(finalTickets);
                             }}
                             disabled={submitting || isOverCapacity || !isInventoryValid}
-                            className={`w-full mt-4 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${ (isOverCapacity || !isInventoryValid)
+                            className={`w-full mt-4 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${(isOverCapacity || !isInventoryValid)
                                 ? 'bg-[#2E2E2F] text-white/40 cursor-not-allowed opacity-80'
                                 : 'bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]'
                                 }`}

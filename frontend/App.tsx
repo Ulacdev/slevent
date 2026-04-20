@@ -1928,18 +1928,27 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
             {/* Row 2 (Mobile Quick Links - Persistent) */}
             {showMobileNav && (
-              <div className="lg:hidden flex items-center justify-around h-20 border-t border-[#2E2E2F]/5 bg-[#F2F2F2]/50 relative">
-                <Link to="/" title="Home" className="w-16 h-16 flex items-center justify-center rounded-2xl text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 transition-all">
-                  <ICONS.Home className="w-7 h-7" />
+              <div className="lg:hidden flex items-center justify-around h-20 border-t border-[#2E2E2F]/10 bg-[#F2F2F2] relative">
+                <div className="absolute bottom-0 left-0 w-full h-[1px] bg-[#2E2E2F]/5" />
+                
+                <Link to="/" title="Home" className={`w-16 h-16 flex items-center justify-center rounded-2xl transition-all relative text-[#2E2E2F] hover:bg-black/5 active:bg-black/10`}>
+                  <ICONS.Home className={`w-7 h-7 transition-all ${location.pathname === '/' ? 'opacity-100' : 'opacity-60'}`} />
+                  {location.pathname === '/' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#38BDF2] rounded-full" />}
                 </Link>
-                <Link to="/browse-events" title="Events" className="w-16 h-16 flex items-center justify-center rounded-2xl text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 transition-all">
-                  <ICONS.Calendar className="w-7 h-7" />
+
+                <Link to="/browse-events" title="Events" className={`w-16 h-16 flex items-center justify-center rounded-2xl transition-all relative text-[#2E2E2F] hover:bg-black/5 active:bg-black/10`}>
+                  <ICONS.Calendar className={`w-7 h-7 transition-all ${location.pathname === '/browse-events' ? 'opacity-100' : 'opacity-60'}`} />
+                  {location.pathname === '/browse-events' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#38BDF2] rounded-full" />}
                 </Link>
-                <Link to="/organizers/discover" title="Discover" className="w-16 h-16 flex items-center justify-center rounded-2xl text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 transition-all">
-                  <ICONS.Compass className="w-7 h-7" />
+
+                <Link to="/organizers/discover" title="Discover" className={`w-16 h-16 flex items-center justify-center rounded-2xl transition-all relative text-[#2E2E2F] hover:bg-black/5 active:bg-black/10`}>
+                  <ICONS.Compass className={`w-7 h-7 transition-all ${location.pathname === '/organizers/discover' ? 'opacity-100' : 'opacity-60'}`} />
+                  {location.pathname === '/organizers/discover' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#38BDF2] rounded-full" />}
                 </Link>
-                <Link to="/pricing" title="Pricing" className="w-16 h-16 flex items-center justify-center rounded-2xl text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 transition-all">
-                  <ICONS.Ticket className="w-7 h-7" />
+
+                <Link to="/pricing" title="Pricing" className={`w-16 h-16 flex items-center justify-center rounded-2xl transition-all relative text-[#2E2E2F] hover:bg-black/5 active:bg-black/10`}>
+                  <ICONS.Ticket className={`w-7 h-7 transition-all ${location.pathname === '/pricing' ? 'opacity-100' : 'opacity-60'}`} />
+                  {location.pathname === '/pricing' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#38BDF2] rounded-full" />}
                 </Link>
                 
                 {isAuthenticated ? (
@@ -1947,15 +1956,18 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     <button 
                       onClick={() => setMobileUserMenuOpen(!mobileUserMenuOpen)} 
                       title="Profile" 
-                      className="w-16 h-16 flex items-center justify-center rounded-2xl transition-all overflow-hidden"
+                      className={`w-16 h-16 flex items-center justify-center rounded-2xl transition-all relative text-[#2E2E2F]`}
                     >
-                      <div className={`w-10 h-10 rounded-xl overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center border-2 ${mobileUserMenuOpen ? 'border-[#38BDF2]' : 'border-transparent'}`}>
+                      <div className={`w-10 h-10 rounded-xl overflow-hidden bg-[#2E2E2F]/5 text-[#2E2E2F] flex items-center justify-center border-2 ${mobileUserMenuOpen ? 'border-[#38BDF2]/50' : 'border-transparent'}`}>
                         {imageUrl ? (
-                          <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                          <img src={imageUrl} alt="Profile" className={`w-full h-full object-cover transition-all ${mobileUserMenuOpen ? 'opacity-100' : 'opacity-70'}`} />
                         ) : (
-                          <span className="font-bold text-xs text-[#2E2E2F]">{initials}</span>
+                          <span className={`font-bold text-xs text-[#2E2E2F] transition-all ${mobileUserMenuOpen ? 'opacity-100' : 'opacity-70'}`}>{initials}</span>
                         )}
                       </div>
+                      {(location.pathname.startsWith('/my-tickets') || location.pathname.startsWith('/user-settings') || location.pathname.startsWith('/liked') || location.pathname.startsWith('/followings')) && (
+                         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#38BDF2] rounded-full" />
+                      )}
                     </button>
 
                     {/* Mobile User Dropdown Popover */}
