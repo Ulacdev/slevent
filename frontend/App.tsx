@@ -1997,13 +1997,13 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                                       <ICONS.Heart className="w-4 h-4 opacity-70" />
                                       <span>Liked</span>
                                     </button>
-                                    <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('attending'); setMobileUserMenuOpen(false); navigate('/followings'); }}>
-                                      <ICONS.Users className="w-4 h-4 opacity-70" />
-                                      <span>Followings</span>
-                                    </button>
                                     <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('organizer'); setMobileUserMenuOpen(false); navigate('/my-events'); }}>
                                       <ICONS.Zap className="w-4 h-4 opacity-70" />
                                       <span>Organize Events</span>
+                                    </button>
+                                    <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('attending'); setMobileUserMenuOpen(false); navigate('/followings'); }}>
+                                      <ICONS.Users className="w-4 h-4 opacity-70" />
+                                      <span>Followings</span>
                                     </button>
                                   </>
                                 ) : (

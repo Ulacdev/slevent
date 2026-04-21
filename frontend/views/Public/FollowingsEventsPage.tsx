@@ -279,7 +279,7 @@ export const FollowingsEventsPage: React.FC = () => {
 
   return (
     <div className="max-w-[88rem] mx-auto px-6 pb-16 pt-8">
-      <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[260px] sm:h-[300px] overflow-hidden mb-8">
+      <section className="relative w-screen left-[50%] right-[50%] ml-[-50vw] mr-[-50vw] h-[260px] sm:h-[300px] overflow-hidden mb-8">
         <div className="absolute inset-0 bg-[linear-gradient(116deg,#38BDF2_0%,#38BDF2_45%,#F2F2F2_100%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,62,134,0.45)_0%,rgba(0,62,134,0.2)_34%,rgba(0,62,134,0)_72%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />

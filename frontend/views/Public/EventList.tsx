@@ -1306,7 +1306,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 ) : promotedEvents.length > 0 ? (
                   <div className="relative">
                     {/* Carousel Container */}
-                    <div className="rounded-2xl overflow-hidden border border-black/15 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] group">
+                    <div className="relative w-screen left-[50%] right-[50%] ml-[-50vw] mr-[-50vw] md:static md:w-full md:ml-0 md:mr-0 md:rounded-2xl overflow-hidden border-y md:border border-black/15 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] group">
                       <div className="relative h-[420px] sm:h-[400px] lg:h-[500px] overflow-hidden bg-white">
                         {/* Carousel Images */}
                         {promotedEvents.map((event, idx) => {
@@ -1442,7 +1442,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
             {selectedLocation !== DEFAULT_LOCATION && selectedLocation !== ONLINE_LOCATION_VALUE ? (
               /* Premium City Hub Hero */
               <section
-                className={`relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[350px] sm:h-[450px] lg:h-[500px] overflow-x-hidden overflow-y-hidden mb-12 shadow-2xl transition-all duration-1000 ${selectedCityImage ? 'bg-black' : ''}`}
+                className={`relative w-screen left-[50%] right-[50%] ml-[-50vw] mr-[-50vw] h-[350px] sm:h-[450px] lg:h-[500px] overflow-x-hidden overflow-y-hidden mb-12 shadow-2xl transition-all duration-1000 ${selectedCityImage ? 'bg-black' : ''}`}
                 style={{ zoom: 0.9 }}
               >
                 {selectedCityImage ? (
@@ -1477,17 +1477,24 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 </div>
               </section>
             ) : (
-              /* Classic Marketplace Hero for "All Events" */
-              <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 h-[260px] sm:h-[300px] lg:h-[350px] overflow-x-hidden mb-8">
+              /* Classic Marketplace Hero for "All Events" / "Liked Events" */
+              <section className="relative w-screen left-[50%] right-[50%] ml-[-50vw] mr-[-50vw] h-[260px] sm:h-[300px] lg:h-[350px] overflow-x-hidden mb-8">
                 <div className="absolute inset-0 bg-[linear-gradient(116deg,#38BDF2_0%,#38BDF2_44%,#F2F2F2_100%)]" />
                 <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,62,134,0.45)_0%,rgba(0,62,134,0.2)_34%,rgba(0,62,134,0)_72%)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_32%,rgba(255,255,255,0.34),transparent_46%),linear-gradient(90deg,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_52%)]" />
                 <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center px-5 sm:px-8">
                   <div className="max-w-[720px]">
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-white/90 mb-3">Event Marketplace</p>
-                    <h1 className="text-[2.1rem] font-extrabold leading-none tracking-tight text-white sm:text-5xl">All Events</h1>
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-white/90 mb-3">
+                      {listing === 'liked' ? 'Favorites' : 'Event Marketplace'}
+                    </p>
+                    <h1 className="text-[2.1rem] font-extrabold leading-none tracking-tight text-white sm:text-5xl">
+                      {listing === 'liked' ? 'Liked Events' : 'All Events'}
+                    </h1>
                     <p className="mt-4 max-w-[680px] text-base leading-relaxed text-white/95 sm:text-[1.05rem]">
-                      Explore all published events and use the sorting controls to narrow by relevance, timing, and location context.
+                      {listing === 'liked'
+                        ? 'Access all the session recordings and workshops you have personally marked as favorites.'
+                        : 'Explore all published events and use the sorting controls to narrow by relevance, timing, and location context.'
+                      }
                     </p>
                   </div>
                 </div>

@@ -1332,8 +1332,8 @@ const AIDescriptionGenerator: React.FC<{
                                 type="button"
                                 onClick={() => onApply(cleanS)}
                                 className={`text-[9px] font-black px-2.5 py-1.5 rounded-lg border transition-all uppercase tracking-wider ${isSelected
-                                        ? 'bg-[#38BDF2] text-white border-[#38BDF2]'
-                                        : 'bg-[#38BDF2]/10 text-[#38BDF2] border-[#38BDF2]/20 hover:bg-[#38BDF2] hover:text-white'
+                                    ? 'bg-[#38BDF2] text-white border-[#38BDF2]'
+                                    : 'bg-[#38BDF2]/10 text-[#38BDF2] border-[#38BDF2]/20 hover:bg-[#38BDF2] hover:text-white'
                                     }`}
                             >
                                 {isSelected ? 'Selected' : `Option ${i + 1}`}

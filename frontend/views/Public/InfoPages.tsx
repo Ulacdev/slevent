@@ -310,31 +310,31 @@ export const FaqPage: React.FC = () => (
       {
         title: 'How do I create an event?',
         paragraphs: [
-          'Sign in as an organizer, create a draft event, configure ticket classes and order form fields, then publish when ready.'
+          'Sign in as an Organizer and navigate to your dashboard. Click "Create Event" to launch our guided 5-step builder where you can configure the event Identity, Schedule, Registrations (Tickets), and Promotions before publishing it to the marketplace.'
         ],
       },
       {
         title: 'How do attendees receive tickets?',
         paragraphs: [
-          'After successful checkout, attendees receive confirmation and ticket records tied to their order, including QR-enabled check-in details where configured.'
+          'After a successful checkout via our secure payment gateway (HitPay/GCash), attendees instantly receive an email confirmation with their tickets. They can also access their digital QR-code tickets anytime by logging in and visiting their "My Tickets" page.'
         ],
       },
       {
         title: 'Can my team have different access levels?',
         paragraphs: [
-          'Yes. Organizer access can be scoped by role so teams can separate event editing, finance, marketing, and check-in responsibilities.'
+          'Yes. From the "Teams & Access" section in Organizer Settings, you can invite team members and assign them specific roles (such as Admin or Check-in Staff) to safely delegate event editing, finance, and on-site check-in responsibilities.'
         ],
       },
       {
         title: 'What should I do if payment fails at checkout?',
         paragraphs: [
-          'Retry within the checkout flow. If the issue persists, use support with your order reference and timestamp for transaction review.'
+          'If a transaction fails, simply attempt the checkout process again. Disconnected sessions or timed-out e-wallet approvals will invalidate the pending tickets. If you were charged but did not receive your tickets, contact support with your email and the exact time of the transaction.'
         ],
       },
       {
         title: 'How are refunds processed?',
         paragraphs: [
-          'Refunds follow organizer rules, event status, and platform safeguards. Duplicate refund attempts are blocked by transaction controls.'
+          'Refund approvals depend directly on the organizer\'s specified refund policy and the current status of the event. Approved refunds are securely reversed back to the original method of payment (e.g., GCash) through our payment processor.'
         ],
       },
     ]}

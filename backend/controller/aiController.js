@@ -6,7 +6,7 @@ const callGemini = async (prompt) => {
 
   // Detection for Groq keys
   const isGroq = apiKey.startsWith('gsk_');
-  
+
   if (isGroq) {
     console.log('[AI] Using Groq (Llama 3)...');
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -240,21 +240,21 @@ export const proxyImage = async (req, res) => {
       const height = attempt === 1 ? 576 : 450;
       // Disable 'enhance' on retry to speed up generation and reduce server load
       const enhance = attempt === 1 ? 'true' : 'false';
-      
+
       const modelLabel = model.toUpperCase();
       console.log(`[AI Proxy] Attempt ${attempt} (${modelLabel}, seed ${s}, ${width}x${height})...`);
-      
+
       const response = await axios({
         method: 'get',
         url: `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&seed=${s}&model=${model}&nologo=true&enhance=${enhance}`,
-        timeout: 25000, 
+        timeout: 25000,
         responseType: 'arraybuffer',
         headers: {
           'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
           'User-Agent': `Mozilla/5.0 StartupLab-AI-Proxy/${modelLabel}`,
         }
       });
-      
+
       const contentType = response.headers['content-type'] || 'image/jpeg';
       if (!contentType.startsWith('image/')) {
         console.warn(`[AI Proxy] ${modelLabel} failed: Non-image content-type "${contentType}"`);
@@ -289,7 +289,7 @@ export const proxyImage = async (req, res) => {
 
     const { response } = result;
     const contentType = response.headers['content-type'] || 'image/jpeg';
-    
+
     res.setHeader('Content-Type', contentType);
     res.setHeader('Cache-Control', 'public, max-age=3600');
 

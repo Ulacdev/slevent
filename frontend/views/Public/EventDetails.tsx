@@ -743,8 +743,8 @@ export const EventDetails: React.FC = () => {
                 </div>
               </div>
 
-              {/* Visual Header */}
-              <div className="overflow-hidden rounded-xl border border-[#2E2E2F]/10">
+              {/* Visual Header / Hero Background */}
+              <div className="relative w-screen left-[50%] right-[50%] ml-[-50vw] mr-[-50vw] md:static md:w-full md:ml-0 md:mr-0 overflow-hidden md:rounded-xl md:border border-[#2E2E2F]/10">
                 <img
                   src={getImageUrl(event.imageUrl)}
                   alt={event.eventName}
@@ -811,21 +811,21 @@ export const EventDetails: React.FC = () => {
                   </div>
 
                   <div className="flex-1">
-                    <p className="text-2xl font-black text-[#2E2E2F] tracking-tight">
+                    <p className="text-xl sm:text-2xl font-bold text-[#2E2E2F] tracking-tight">
                       {organizer?.organizerName || 'Organizer profile coming soon'}
                     </p>
-                    <div className="flex flex-wrap items-center gap-6 mt-2 text-[#2E2E2F]">
+                    <div className="flex flex-wrap items-center gap-6 mt-3 text-[#2E2E2F]">
                       <div>
-                        <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]">Followers</p>
-                        <p className="text-2xl font-black">{organizer?.followersCount || 0}</p>
+                        <p className="text-[10px] uppercase tracking-widest font-bold text-[#2E2E2F]/70">Followers</p>
+                        <p className="text-xl font-bold mt-0.5">{organizer?.followersCount || 0}</p>
                       </div>
                       <div>
-                        <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]">Events</p>
-                        <p className="text-2xl font-black">{organizer?.eventsHostedCount || 0}</p>
+                        <p className="text-[10px] uppercase tracking-widest font-bold text-[#2E2E2F]/70">Events</p>
+                        <p className="text-xl font-bold mt-0.5">{organizer?.eventsHostedCount || 0}</p>
                       </div>
                       <div>
-                        <p className="text-[11px] uppercase tracking-widest font-black text-[#2E2E2F]">Hosting</p>
-                        <p className="text-2xl font-black">{organizer ? 'Active' : '--'}</p>
+                        <p className="text-[10px] uppercase tracking-widest font-bold text-[#2E2E2F]/70">Hosting</p>
+                        <p className="text-xl font-bold mt-0.5">{organizer ? 'Active' : '--'}</p>
                       </div>
                     </div>
                   </div>
@@ -836,7 +836,7 @@ export const EventDetails: React.FC = () => {
                         href={organizerWebsite}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-8 py-3 rounded-xl border font-black text-sm transition-colors text-white hover:opacity-90 shadow-md"
+                        className="px-6 py-2.5 rounded-xl border font-semibold text-sm transition-colors text-white hover:opacity-90 shadow-md"
                         style={{ backgroundColor: brandColor, borderColor: brandColor }}
                       >
                         Contact
@@ -845,7 +845,7 @@ export const EventDetails: React.FC = () => {
                       <button
                         type="button"
                         disabled
-                        className="px-8 py-3 rounded-xl border border-[#2E2E2F]/20 text-[#2E2E2F] font-black text-sm cursor-not-allowed"
+                        className="px-6 py-2.5 rounded-xl border-2 border-[#2E2E2F]/10 text-[#2E2E2F] font-semibold text-sm cursor-not-allowed bg-white"
                       >
                         Contact
                       </button>
@@ -854,7 +854,7 @@ export const EventDetails: React.FC = () => {
                       type="button"
                       onClick={handleFollow}
                       disabled={!organizerId}
-                      className={`px-8 py-3 rounded-xl font-black text-sm transition-all duration-300 shadow-md ${following
+                      className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 shadow-md ${following
                         ? 'bg-[#2E2E2F] !text-white opacity-40 cursor-default border-none shadow-none'
                         : !organizerId 
                           ? 'bg-[#F2F2F2] !text-[#2E2E2F] border border-[#2E2E2F]/20 cursor-not-allowed shadow-none'
@@ -943,7 +943,7 @@ export const EventDetails: React.FC = () => {
               {hasPhysicalLocation && (
                 <div className="p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10">
                   <div className="flex items-center justify-between gap-3 mb-4">
-                    <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] EXACt LOCATION">EXACT LOCATION</h3>
+                    <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em]">EXACT LOCATION</h3>
                     <a
                       href={openMapUrl}
                       target="_blank"
@@ -955,6 +955,7 @@ export const EventDetails: React.FC = () => {
                     </a>
                   </div>
                   <p className="text-sm text-[#2E2E2F] font-medium mb-5">{event.locationText}</p>
+                  
                   <div className="rounded-xl overflow-hidden border border-[#2E2E2F]/10 bg-[#F2F2F2]">
                     <iframe
                       src={mapEmbedUrl}
@@ -963,6 +964,94 @@ export const EventDetails: React.FC = () => {
                       loading="lazy"
                       referrerPolicy="no-referrer-when-downgrade"
                     />
+                  </div>
+
+                  {/* Directions Quick Links */}
+                  <div className="mt-8 pt-8 border-t border-[#2E2E2F]/10">
+                    <h4 className="text-[17px] sm:text-[19px] font-bold tracking-tight text-[#2E2E2F] mb-6 text-left">
+                      How do you want to get there?
+                    </h4>
+                    <div className="flex flex-col gap-5 pl-2">
+                      {[
+                        { 
+                          mode: 'driving', 
+                          label: 'Driving', 
+                          icon: (
+                            <>
+                              <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+                              <circle cx="7" cy="17" r="2" />
+                              <path d="M9 17h6" />
+                              <circle cx="17" cy="17" r="2" />
+                            </>
+                          )
+                        },
+                        { 
+                          mode: 'transit', 
+                          label: 'Public transport', 
+                          icon: (
+                            <>
+                              <path d="M8 6v6" />
+                              <path d="M15 6v6" />
+                              <path d="M2 12h19.6" />
+                              <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3" />
+                              <circle cx="7" cy="18" r="2" />
+                              <path d="M9 18h5" />
+                              <circle cx="16" cy="18" r="2" />
+                            </>
+                          )
+                        },
+                        { 
+                          mode: 'bicycling', 
+                          label: 'Biking', 
+                          icon: (
+                            <>
+                              <circle cx="18.5" cy="17.5" r="3.5" />
+                              <circle cx="5.5" cy="17.5" r="3.5" />
+                              <circle cx="15" cy="5" r="1" />
+                              <path d="M12 17.5V14l-3-3 4-3 2 3h2" />
+                            </>
+                          )
+                        },
+                        { 
+                          mode: 'walking', 
+                          label: 'Walking', 
+                          icon: (
+                            <>
+                              <circle cx="12" cy="4" r="2" />
+                              <path d="M12 6v6" />
+                              <path d="M12 7l-4 3" />
+                              <path d="M12 7l4 3" />
+                              <path d="M12 12l-3 8" />
+                              <path d="M12 12l3 8" />
+                            </>
+                          )
+                        }
+                      ].map(({ mode, label, icon }) => (
+                        <a
+                          key={mode}
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(event.locationText || '')}&travelmode=${mode}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="group flex items-center gap-4 p-3.5 rounded-xl bg-[#2E2E2F]/5 hover:bg-[#38BDF2]/10 transition-colors"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="28"
+                            height="28"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="w-7 h-7 shrink-0 text-[#2E2E2F] group-hover:text-[#38BDF2] transition-colors"
+                          >
+                            {icon}
+                          </svg>
+                          <span className="text-[18px] font-medium tracking-tight text-[#2E2E2F] group-hover:text-[#38BDF2] transition-colors">{label}</span>
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
