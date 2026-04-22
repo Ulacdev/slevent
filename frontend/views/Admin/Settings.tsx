@@ -290,10 +290,10 @@ export const SettingsView: React.FC = () => {
       type="button"
       onClick={disabled ? undefined : onClick}
       className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${disabled
-        ? 'text-[#2E2E2F] bg-[#F2F2F2] cursor-not-allowed opacity-60'
+        ? 'text-text bg-background cursor-not-allowed opacity-60'
         : active
-          ? 'text-[#F2F2F2] bg-[#38BDF2]'
-          : 'text-[#2E2E2F] bg-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]'
+          ? 'text-background bg-[#38BDF2]'
+          : 'text-text bg-background hover:bg-text hover:text-background dark:hover:bg-white dark:hover:text-[#2E2E2F]'
         }`}
     >
       {iconType === 'bell' ? (
@@ -311,8 +311,8 @@ export const SettingsView: React.FC = () => {
       {/* Local notification JSX removed */}
       <div className="px-2 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">{activeTabMeta.label}</h1>
-          <p className="mt-1 text-sm font-semibold text-[#2E2E2F]">{activeTabMeta.description}</p>
+          <h1 className="text-3xl md:text-[2rem] font-semibold text-text dark:text-white tracking-tight">{activeTabMeta.label}</h1>
+          <p className="mt-1 text-sm font-semibold text-text dark:text-white/60">{activeTabMeta.description}</p>
         </div>
       </div>
 
@@ -320,8 +320,8 @@ export const SettingsView: React.FC = () => {
         {activeTab === 'team' && (
           <div className="space-y-10">
             {/* Sub-navigation for Team */}
-            <div className="flex justify-end border-b border-[#2E2E2F]/10 pb-2">
-              <div className="flex bg-[#F2F2F2] p-1 rounded-xl border border-[#2E2E2F]/10 shrink-0">
+            <div className="flex justify-end border-b border-sidebar-border pb-2">
+              <div className="flex bg-background p-1 rounded-xl border border-sidebar-border shrink-0">
                 {[
                   { id: 'directory', label: 'Directory' },
                   { id: 'permissions', label: 'Access Control' }
@@ -329,7 +329,7 @@ export const SettingsView: React.FC = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveSubTab(tab.id as any)}
-                    className={`min-h-[32px] px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors ${activeSubTab === tab.id ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#F2F2F2] text-[#2E2E2F] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]'}`}
+                    className={`min-h-[32px] px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors ${activeSubTab === tab.id ? 'bg-[#38BDF2] text-white shadow-sm' : 'bg-background text-text hover:bg-text hover:text-background dark:hover:bg-white dark:hover:text-[#2E2E2F]'}`}
                   >
                     {tab.label}
                   </button>
@@ -340,7 +340,7 @@ export const SettingsView: React.FC = () => {
             {activeSubTab === 'directory' ? (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <label className="block text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-3 ml-1">Team Directory</label>
+                  <label className="block text-[10px] font-black text-text dark:text-white/60 uppercase tracking-[0.2em] mb-3 ml-1">Team Directory</label>
                   <Button onClick={() => setIsInviteModalOpen(true)}>
                     <span className="text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
                       <ICONS.Users className="w-3.5 h-3.5" />
@@ -348,17 +348,17 @@ export const SettingsView: React.FC = () => {
                     </span>
                   </Button>
                 </div>
-                <Card className="overflow-hidden border-[#2E2E2F]/10 rounded-xl bg-[#F2F2F2]">
+                <Card className="overflow-hidden border-sidebar-border rounded-xl bg-surface">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                      <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
+                      <thead className="bg-background border-b border-sidebar-border">
                         <tr>
-                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Name</th>
-                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Email</th>
-                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Role</th>
-                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Registered Date</th>
-                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Status</th>
-                          <th className="px-4 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-right">
+                          <th className="px-10 py-6 text-[9px] font-black text-text dark:text-white/60 uppercase tracking-[0.2em]">Name</th>
+                          <th className="px-10 py-6 text-[9px] font-black text-text dark:text-white/60 uppercase tracking-[0.2em]">Email</th>
+                          <th className="px-10 py-6 text-[9px] font-black text-text dark:text-white/60 uppercase tracking-[0.2em]">Role</th>
+                          <th className="px-10 py-6 text-[9px] font-black text-text dark:text-white/60 uppercase tracking-[0.2em]">Registered Date</th>
+                          <th className="px-10 py-6 text-[9px] font-black text-text dark:text-white/60 uppercase tracking-[0.2em]">Status</th>
+                          <th className="px-4 py-6 text-[9px] font-black text-text uppercase tracking-[0.2em] text-right">
                             <div className="flex items-center justify-end gap-2 pr-4">
                               <button onClick={handlePrintTeam} className="p-2 bg-[#38BDF2] text-white rounded-lg hover:bg-[#2E2E2F] transition-all active:scale-95 shadow-sm" title="Print List">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
@@ -370,29 +370,29 @@ export const SettingsView: React.FC = () => {
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#2E2E2F]/10">
+                      <tbody className="divide-y divide-sidebar-border">
                         {teamMembers.map((member) => (
-                          <tr key={member.id} className="hover:bg-[#38BDF2]/10 transition-colors group">
+                          <tr key={member.id} className="hover:bg-[#38BDF2]/5 transition-colors group">
                             <td className="px-10 py-8">
                               <div className="flex items-center gap-5">
-                                <div className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-black text-lg bg-[#38BDF2] text-[#F2F2F2]`}>
+                                <div className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-black text-lg bg-[#38BDF2] text-white shadow-sm`}>
                                   {member.imageUrl ? (
                                     <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
                                   ) : (
                                     member.name.charAt(0)
                                   )}
                                 </div>
-                                <div className="font-black text-[#2E2E2F] text-[15px] tracking-tight">{member.name}</div>
+                                <div className="font-black text-text dark:text-white text-[15px] tracking-tight">{member.name}</div>
                               </div>
                             </td>
                             <td className="px-10 py-8">
-                              <div className="text-[12px] text-[#2E2E2F] font-bold tracking-tight">{member.email}</div>
+                              <div className="text-[12px] text-text dark:text-white/80 font-bold tracking-tight">{member.email}</div>
                             </td>
                             <td className="px-10 py-8">
-                              <div className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest">{member.role}</div>
+                              <div className="text-[11px] font-black text-text dark:text-white/60 uppercase tracking-widest">{member.role}</div>
                             </td>
                             <td className="px-10 py-8">
-                              <div className="text-[11px] font-black text-[#2E2E2F] tracking-tight">
+                              <div className="text-[11px] font-black text-text dark:text-white/60 tracking-tight">
                                 {member.createdAt ? format(new Date(member.createdAt), 'MMM dd, yyyy') : 'N/A'}
                               </div>
                             </td>
@@ -419,24 +419,24 @@ export const SettingsView: React.FC = () => {
                   <label className="block text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-3 ml-1">Access Control</label>
                   <Badge type="info" className="font-black text-[9px] tracking-widest uppercase bg-[#38BDF2]/20 text-[#2E2E2F]">Manage Team Permissions</Badge>
                 </div>
-                <Card className="overflow-hidden border-[#2E2E2F]/10 rounded-xl bg-[#F2F2F2]">
+                <Card className="overflow-hidden border-sidebar-border rounded-xl bg-surface">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                      <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
+                      <thead className="bg-background border-b border-sidebar-border">
                         <tr>
-                          <th className="px-10 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">Name</th>
-                          <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-center">View Events</th>
-                          <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-center">Edit Events</th>
-                          <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-center">Check-in</th>
-                          <th className="px-6 py-6 text-[9px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] text-center">Notify</th>
+                          <th className="px-10 py-6 text-[9px] font-black text-text dark:text-white/60 uppercase tracking-[0.2em]">Name</th>
+                          <th className="px-6 py-6 text-[9px] font-black text-text dark:text-white/60 uppercase tracking-[0.2em] text-center">View Events</th>
+                          <th className="px-6 py-6 text-[9px] font-black text-text dark:text-white/60 uppercase tracking-[0.2em] text-center">Edit Events</th>
+                          <th className="px-6 py-6 text-[9px] font-black text-text dark:text-white/60 uppercase tracking-[0.2em] text-center">Check-in</th>
+                          <th className="px-6 py-6 text-[9px] font-black text-text dark:text-white/60 uppercase tracking-[0.2em] text-center">Notify</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#2E2E2F]/10">
+                      <tbody className="divide-y divide-sidebar-border">
                         {teamMembers.map((member) => (
-                          <tr key={member.id} className="hover:bg-[#38BDF2]/10 transition-colors group">
+                          <tr key={member.id} className="hover:bg-[#38BDF2]/5 transition-colors group">
                             <td className="px-10 py-8">
                               <div className="flex items-center gap-5">
-                                <div className={`w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center font-black text-sm ${member.isOwner ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#38BDF2] text-[#2E2E2F]'}`}>
+                                <div className={`w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center font-black text-sm ${member.isOwner ? 'bg-[#38BDF2] text-white' : 'bg-[#38BDF2] text-white shadow-sm'}`}>
                                   {member.imageUrl ? (
                                     <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
                                   ) : (
@@ -445,9 +445,9 @@ export const SettingsView: React.FC = () => {
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-2 mb-0.5">
-                                    <div className="font-black text-[#2E2E2F] text-[14px] tracking-tight">{member.name}</div>
+                                    <div className="font-black text-text dark:text-white text-[14px] tracking-tight">{member.name}</div>
                                   </div>
-                                  <div className="text-[10px] text-[#2E2E2F] font-black uppercase tracking-widest">{member.role}</div>
+                                  <div className="text-[10px] text-text dark:text-white/60 font-black uppercase tracking-widest">{member.role}</div>
                                 </div>
                               </div>
                             </td>
@@ -487,30 +487,30 @@ export const SettingsView: React.FC = () => {
         {activeTab === 'support' && <SupportTickets />}
         {activeTab === 'profile' && (
           <div className="space-y-8 max-w-2xl">
-            <Card className="p-10 border-[#2E2E2F]/10 rounded-xl bg-[#F2F2F2]">
+            <Card className="p-10 border-sidebar-border rounded-xl bg-surface">
               <div className="flex items-center gap-3 mb-10">
                 <div className="w-10 h-10 rounded-xl bg-[#38BDF2]/10 text-[#38BDF2] flex items-center justify-center">
                   <ICONS.Users className="w-5 h-5" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-[#2E2E2F] uppercase tracking-wider">Admin Profile</h3>
-                  <p className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-widest mt-0.5">Manage your personal identification</p>
+                  <h3 className="text-sm font-black text-text dark:text-white uppercase tracking-wider">Admin Profile</h3>
+                  <p className="text-[10px] text-text dark:text-white/60 font-bold uppercase tracking-widest mt-0.5">Manage your personal identification</p>
                 </div>
               </div>
 
               <div className="space-y-6">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] ml-1">Full Name</label>
+                  <label className="text-[10px] font-black text-text dark:text-white/60 uppercase tracking-[0.2em] ml-1">Full Name</label>
                   <Input
                     value={userName}
                     onChange={(e: any) => setUserName(e.target.value)}
                     placeholder="StartupLab Admin"
-                    className="font-bold text-[#2E2E2F]"
+                    className="font-bold text-text dark:text-white"
                   />
                 </div>
                 <div className="space-y-1.5 opacity-60">
-                  <label className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] ml-1">Email Address</label>
-                  <div className="px-5 py-3.5 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl text-xs text-[#2E2E2F] font-bold">
+                  <label className="text-[10px] font-black text-text dark:text-white/60 uppercase tracking-[0.2em] ml-1">Email Address</label>
+                  <div className="px-5 py-3.5 bg-background border border-sidebar-border rounded-xl text-xs text-text dark:text-white font-bold">
                     {adminEmail}
                   </div>
                 </div>
@@ -525,26 +525,26 @@ export const SettingsView: React.FC = () => {
               </div>
             </Card>
 
-            <Card className="p-10 border-[#D1D5DB] rounded-xl bg-[#F2F2F2]">
+            <Card className="p-10 border-sidebar-border rounded-xl bg-surface">
               <div className="flex items-center gap-3 mb-10">
                 <div className="w-10 h-10 rounded-xl bg-[#38BDF2]/10 text-[#38BDF2] flex items-center justify-center">
                   <ICONS.Shield className="w-5 h-5" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-[#2E2E2F] uppercase tracking-wider">Security</h3>
-                  <p className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-widest mt-0.5">Manage your authentication credentials</p>
+                  <h3 className="text-sm font-black text-text dark:text-white uppercase tracking-wider">Security</h3>
+                  <p className="text-[10px] text-text dark:text-white/60 font-bold uppercase tracking-widest mt-0.5">Manage your authentication credentials</p>
                 </div>
               </div>
 
               <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 rounded-xl bg-[#F2F2F2] border border-[#D1D5DB]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 rounded-xl bg-background border border-sidebar-border">
                   <div className="space-y-1">
-                    <h4 className="text-xs font-bold text-[#2E2E2F]">Password Protection</h4>
-                    <p className="text-[11px] text-[#2E2E2F] font-medium tracking-tight">Generate a secure reset link</p>
+                    <h4 className="text-xs font-bold text-text dark:text-white">Password Protection</h4>
+                    <p className="text-[11px] text-text dark:text-white/60 font-medium tracking-tight">Generate a secure reset link</p>
                   </div>
                   <Button
                     variant="outline"
-                    className="rounded-xl px-5 py-2 text-[10px] font-black uppercase tracking-widest border-[#D1D5DB]"
+                    className="rounded-xl px-5 py-2 text-[10px] font-black uppercase tracking-widest border-sidebar-border dark:border-white/20"
                     onClick={handleResetPassword}
                     disabled={passwordLoading}
                   >
@@ -553,7 +553,7 @@ export const SettingsView: React.FC = () => {
                 </div>
                 <div className="p-4 bg-[#38BDF2]/5 border border-[#38BDF2]/20 rounded-xl flex gap-3">
                   <ICONS.Bell className="w-4 h-4 text-[#38BDF2] shrink-0 mt-0.5" />
-                  <p className="text-[10px] text-[#2E2E2F] font-medium leading-relaxed">
+                  <p className="text-[10px] text-text dark:text-white/80 font-medium leading-relaxed">
                     By clicking "Change Password", you will receive a reset link at <strong>{adminEmail}</strong>. This email is sent using your configured Admin SMTP settings.
                   </p>
                 </div>
@@ -566,8 +566,8 @@ export const SettingsView: React.FC = () => {
       <Modal isOpen={isInviteModalOpen} onClose={() => setIsInviteModalOpen(false)} title="Invite Team Member" size="lg">
         <form onSubmit={handleInviteSubmit} className="space-y-10 px-2">
           <div className="space-y-6">
-            <Input label="Work Email" type="email" placeholder="j.miller@startuplab.co" required className="w-full py-5 px-6 rounded-xl bg-[#F2F2F2] border-[#2E2E2F]/20 text-base" value={inviteData.email} onChange={(e: any) => setInviteData({ ...inviteData, email: e.target.value })} />
-            <Input label="Assigned Position" value="STAFF" disabled className="w-full py-5 px-6 rounded-xl bg-[#F2F2F2] border-[#2E2E2F]/20 text-[#2E2E2F] text-base" />
+            <Input label="Work Email" type="email" placeholder="j.miller@startuplab.co" required className="w-full py-5 px-6 rounded-xl bg-background border-sidebar-border text-base dark:text-white" value={inviteData.email} onChange={(e: any) => setInviteData({ ...inviteData, email: e.target.value })} />
+            <Input label="Assigned Position" value="STAFF" disabled className="w-full py-5 px-6 rounded-xl bg-background border-sidebar-border text-text dark:text-white text-base" />
           </div>
           <div className="pt-8 flex flex-col sm:flex-row gap-4">
             <Button className="flex-1" onClick={() => setIsInviteModalOpen(false)}>Cancel</Button>
@@ -649,7 +649,7 @@ const AdminEmailSettings: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="p-8 font-black text-[10px] text-[#2E2E2F] uppercase tracking-widest">Loading Gateway Configuration...</div>;
+  if (loading) return <div className="p-8 font-black text-[10px] text-text dark:text-white uppercase tracking-widest">Loading Gateway Configuration...</div>;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -667,32 +667,32 @@ const AdminEmailSettings: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Form */}
-        <Card className="lg:col-span-2 p-8 rounded-xl bg-[#F2F2F2] border-[#2E2E2F]/10 shadow-sm space-y-8">
+        <Card className="lg:col-span-2 p-8 rounded-xl bg-surface border-sidebar-border shadow-sm space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1.5 opacity-60">
               <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">Email Provider</label>
-              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]">
+              <div className="w-full px-6 py-3 bg-background border border-sidebar-border dark:border-white/5 rounded-full font-bold text-text dark:text-white/80">
                 Gmail (SMTP Server)
               </div>
             </div>
 
             <div className="space-y-1.5 opacity-60">
               <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">Mail Driver</label>
-              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]">
+              <div className="w-full px-6 py-3 bg-background border border-sidebar-border dark:border-white/5 rounded-full font-bold text-text dark:text-white/80">
                 smtp
               </div>
             </div>
 
             <div className="space-y-1.5 opacity-60">
               <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">SMTP Host</label>
-              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]">
+              <div className="w-full px-6 py-3 bg-background border border-sidebar-border dark:border-white/5 rounded-full font-bold text-text dark:text-white/80">
                 smtp.gmail.com
               </div>
             </div>
 
             <div className="space-y-1.5 opacity-60">
               <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-widest pl-1">SMTP Port</label>
-              <div className="w-full px-6 py-3 bg-[#E8E8E8] border border-[#2E2E2F]/10 rounded-full font-bold text-[#2E2E2F]">
+              <div className="w-full px-6 py-3 bg-background border border-sidebar-border dark:border-white/5 rounded-full font-bold text-text dark:text-white/80">
                 587
               </div>
             </div>
@@ -704,7 +704,7 @@ const AdminEmailSettings: React.FC = () => {
                 value={formData.smtpUsername}
                 onChange={handleChange}
                 placeholder="youraccount@gmail.com"
-                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
+                className="bg-background border border-sidebar-border dark:border-white/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6 text-text dark:text-white"
               />
             </div>
 
@@ -716,7 +716,7 @@ const AdminEmailSettings: React.FC = () => {
                 value={formData.smtpPassword}
                 onChange={handleChange}
                 placeholder="••••••••••••"
-                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
+                className="bg-background border border-sidebar-border dark:border-white/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6 text-text dark:text-white"
               />
             </div>
 
@@ -734,7 +734,7 @@ const AdminEmailSettings: React.FC = () => {
                 value={formData.fromAddress}
                 onChange={handleChange}
                 placeholder="hello@yourdomain.com"
-                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
+                className="bg-background border border-sidebar-border dark:border-white/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6 text-text dark:text-white"
               />
             </div>
 
@@ -745,7 +745,7 @@ const AdminEmailSettings: React.FC = () => {
                 value={formData.fromName}
                 onChange={handleChange}
                 placeholder="StartupLab Ticketing"
-                className="bg-[#F2F2F2] border border-[#2E2E2F]/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6"
+                className="bg-background border border-sidebar-border dark:border-white/10 focus:ring-2 focus:ring-[#38BDF2] focus:border-[#38BDF2] transition-all rounded-full px-6 text-text dark:text-white"
               />
             </div>
 
@@ -754,7 +754,7 @@ const AdminEmailSettings: React.FC = () => {
 
         {/* Sidebar - Test Configuration */}
         <div className="space-y-6">
-          <Card className="p-8 rounded-xl bg-[#F2F2F2] border-[#2E2E2F]/10 shadow-sm space-y-6">
+          <Card className="p-8 rounded-xl bg-surface border-sidebar-border shadow-sm space-y-6">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]">
                 <ICONS.Send className="w-4 h-4" />
@@ -769,10 +769,10 @@ const AdminEmailSettings: React.FC = () => {
                   value={testRecipient}
                   onChange={(e: any) => setTestRecipient(e.target.value)}
                   placeholder="test@example.com"
-                  className="bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-full px-6"
+                  className="bg-background border border-sidebar-border rounded-full px-6 text-text dark:text-white"
                 />
               </div>
-              <p className="text-[10px] text-[#2E2E2F] font-medium pl-1">
+              <p className="text-[10px] text-text dark:text-white/60 font-medium pl-1">
                 Enter an email address to send a test message to verify your settings.
               </p>
               <Button
@@ -794,10 +794,10 @@ const AdminEmailSettings: React.FC = () => {
               <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF2] animate-pulse" />
               Security Tip
             </h4>
-            <p className="text-[11px] text-[#2E2E2F] leading-relaxed font-bold">
-              When using Gmail, you must use a dedicated <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-[#38BDF2] underline decoration-2 underline-offset-2 hover:text-[#2E2E2F] transition-colors">App Password</a> rather than your main password.
+            <p className="text-[11px] text-text dark:text-white/80 leading-relaxed font-bold">
+              When using Gmail, you must use a dedicated <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-[#38BDF2] underline decoration-2 underline-offset-2 hover:text-text transition-colors">App Password</a> rather than your main password.
             </p>
-            <p className="text-[10px] text-[#2E2E2F] mt-2 font-medium">
+            <p className="text-[10px] text-text dark:text-white/60 mt-2 font-medium">
               This ensures secure access and bypasses 2FA requirements for the SMTP server.
             </p>
           </div>

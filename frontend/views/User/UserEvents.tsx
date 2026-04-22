@@ -101,24 +101,27 @@ const EventMobileCard = React.memo<{
     openDropdownId: string | null;
     setOpenDropdownId: (id: string | null) => void;
     navigate: any;
-}>(({ event, isPromoted, onOpenEdit, onOpenTickets, onOpenAttendeePop, onTogglePromotion, onArchive, onCancel, onNotify, openDropdownId, setOpenDropdownId, navigate }) => {
+    isExpiredPromotion?: boolean;
+    expiresAt?: string;
+    now?: Date;
+}>(({ event, isPromoted, onOpenEdit, onOpenTickets, onOpenAttendeePop, onTogglePromotion, onArchive, onCancel, onNotify, openDropdownId, setOpenDropdownId, navigate, isExpiredPromotion, expiresAt, now }) => {
     const isDropdownOpen = openDropdownId === event.eventId;
-    const now = new Date();
+    const currentTime = now || new Date();
     const eventEnd = event.endAt ? new Date(event.endAt) : new Date(new Date(event.startAt).getTime() + 2 * 60 * 60 * 1000);
-    const isCompleted = now > eventEnd;
+    const isCompleted = currentTime > eventEnd;
     const isArchiveDisabled = event.status === 'PUBLISHED' && !isCompleted;
 
     return (
         <Card
-            className="p-5 border-2 border-[#2E2E2F]/15 hover:border-[#38BDF2]/40 transition-colors cursor-pointer group"
+            className="p-5 border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 hover:border-[#38BDF2]/40 transition-colors cursor-pointer group"
             onClick={onOpenEdit}
         >
             <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 border-[#2E2E2F]/15">
+                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
                     <img src={getImageUrl(event.imageUrl)} alt="" crossOrigin="use-credentials" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
                         <Badge
                             type={isCompleted ? 'neutral' : (event.status === 'PUBLISHED' ? 'success' : 'neutral')}
                             className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5"
@@ -126,29 +129,47 @@ const EventMobileCard = React.memo<{
                             {isCompleted ? 'COMPLETED' : event.status}
                         </Badge>
                         {isPromoted && (
-                            <Badge
-                                type="success"
-                                className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 bg-[#38BDF2]/20 text-[#38BDF2] border border-[#38BDF2]/30 flex items-center gap-1"
-                            >
-                                <ICONS.Zap className="w-2.5 h-2.5" />
-                                Promoted
-                            </Badge>
+                            <div className="flex flex-col gap-1">
+                                <Badge
+                                    type="success"
+                                    className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 flex items-center gap-1 ${isExpiredPromotion ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-[#38BDF2]/10 text-[#38BDF2] dark:text-[#38BDF2] border-[#38BDF2]/20'}`}
+                                >
+                                    <ICONS.Zap className="w-2.5 h-2.5" />
+                                    {isExpiredPromotion ? 'PROMOTED DONE' : 'Promoted'}
+                                </Badge>
+                                {!isExpiredPromotion && expiresAt && now && (() => {
+                                    const exp = new Date(expiresAt);
+                                    const diff = exp.getTime() - now.getTime();
+                                    if (diff <= 0) return null;
+                                    const d = Math.floor(diff / 86400000);
+                                    const h = Math.floor((diff % 86400000) / 3600000);
+                                    const m = Math.floor((diff % 3600000) / 60000);
+                                    const s = Math.floor((diff % 60000) / 1000);
+                                    return (
+                                        <div className="flex items-center gap-1 tabular-nums text-[8px] font-black text-[#38BDF2] dark:text-[#38BDF2] bg-[#38BDF2]/5 px-2 py-0.5 rounded-full border border-[#38BDF2]/10 uppercase tracking-tighter">
+                                            <ICONS.Clock className="w-2 h-2" />
+                                            {d > 0 && <span>{d}d </span>}
+                                            <span>{h}h {m}m {s}s</span>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
                         )}
                     </div>
                     <div className="mb-2">
-                        <span className="text-[10px] font-medium text-[#2E2E2F]/40 truncate">
+                        <span className="text-[10px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/40 truncate">
                             ID: {event.eventId.split('-')[0]}
                         </span>
-                        <h3 className="font-bold text-[#2E2E2F] text-base truncate mt-0.5">
+                        <h3 className="font-bold text-[#2E2E2F] dark:text-white dark:text-white text-base truncate mt-0.5">
                             {event.eventName}
                         </h3>
                     </div>
                     <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-[11px] text-[#2E2E2F]/60 font-medium">
+                        <div className="flex items-center gap-2 text-[11px] text-[#2E2E2F] dark:text-white dark:text-white/60 font-medium">
                             <ICONS.Calendar className="w-3 h-3 text-[#38BDF2]" />
                             {new Date(event.startAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </div>
-                        <div className="flex items-center gap-2 text-[11px] text-[#2E2E2F]/60 font-medium">
+                        <div className="flex items-center gap-2 text-[11px] text-[#2E2E2F] dark:text-white dark:text-white/60 font-medium">
                             <ICONS.MapPin className="w-3 h-3 text-[#38BDF2]" />
                             <span className="truncate">{event.locationText}</span>
                         </div>
@@ -157,34 +178,34 @@ const EventMobileCard = React.memo<{
                 <div className="relative shrink-0">
                     <button
                         onClick={(e) => { e.stopPropagation(); setOpenDropdownId(isDropdownOpen ? null : event.eventId); }}
-                        className={`p-1.5 rounded-xl transition-all duration-300 ${isDropdownOpen ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'hover:bg-[#2E2E2F]/5 text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                        className={`p-1.5 rounded-xl transition-all duration-300 ${isDropdownOpen ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'hover:bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
                     >
                         <MoreVerticalIcon className="w-5 h-5" />
                     </button>
 
                     <div
-                        className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${isDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}`}
+                        className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${isDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}`}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <EyeIcon className="w-4 h-4" /> View
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); onOpenTickets(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); onOpenTickets(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <ICONS.CreditCard className="w-4 h-4" /> Tickets
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); onOpenAttendeePop(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); onOpenAttendeePop(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <ICONS.Users className="w-4 h-4" /> Guests
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); onOpenEdit(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); onOpenEdit(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <ICONS.Edit className="w-4 h-4" /> Edit
                         </button>
-                        <button onClick={onTogglePromotion} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
-                            <ICONS.Zap className="w-4 h-4" fill={isPromoted ? "currentColor" : "none"} /> Promote
+                        <button onClick={onTogglePromotion} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <ICONS.Zap className="w-4 h-4" fill={isPromoted ? "currentColor" : "none"} /> {isExpiredPromotion ? 'Promotion Ended' : 'Promote'}
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); onNotify(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); onNotify(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <ICONS.Mail className="w-4 h-4" /> Notify Guests
                         </button>
-                        <div className="my-1 border-t border-[#2E2E2F]/5" />
+                        <div className="my-1 border-t border-[#2E2E2F]/5 dark:border-white/5" />
                         {event.status !== 'CANCELLED' && (
                             <button onClick={(e) => { e.stopPropagation(); onCancel(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-amber-600/70 hover:bg-amber-500/10 hover:text-amber-600 flex items-center gap-3 transition-colors">
                                 <ICONS.AlertTriangle className="w-4 h-4" /> Cancel Event
@@ -197,14 +218,14 @@ const EventMobileCard = React.memo<{
                                 onArchive();
                             }}
                             disabled={isArchiveDisabled}
-                            className={`w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-colors ${isArchiveDisabled ? 'text-[#2E2E2F]/20 cursor-not-allowed opacity-50' : 'text-red-500/70 hover:bg-red-500/10 hover:text-red-600'}`}
+                            className={`w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-colors ${isArchiveDisabled ? 'text-[#2E2E2F] dark:text-white dark:text-white/20 cursor-not-allowed opacity-50' : 'text-red-500/70 hover:bg-red-500/10 hover:text-red-600'}`}
                         >
                             <ICONS.Trash className="w-4 h-4" /> {isArchiveDisabled ? 'Archive Lock' : 'Archive'}
                         </button>
                     </div>
                 </div>
             </div>
-            <div className="mt-5 pt-4 border-t border-[#2E2E2F]/15 flex items-center justify-between text-[11px] font-bold text-[#2E2E2F]/40 uppercase tracking-widest">
+            <div className="mt-5 pt-4 border-t border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 flex items-center justify-between text-[11px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest">
                 <span>Inventory</span>
                 <span className="text-[#38BDF2]">{event.capacityTotal} Slots</span>
             </div>
@@ -226,12 +247,15 @@ const EventTableRow = React.memo<{
     isPromoted: boolean;
     openDropdownId: string | null;
     setOpenDropdownId: (id: string | null) => void;
-}>(({ event, isSelected, onToggle, onOpenEdit, onOpenTickets, onOpenAttendeePop, onTogglePromotion, onArchive, onCancel, onNotify, isPromoted, openDropdownId, setOpenDropdownId }) => {
+    isExpiredPromotion?: boolean;
+    expiresAt?: string;
+    now?: Date;
+}>(({ event, isSelected, onToggle, onOpenEdit, onOpenTickets, onOpenAttendeePop, onTogglePromotion, onArchive, onCancel, onNotify, isPromoted, openDropdownId, setOpenDropdownId, isExpiredPromotion, expiresAt, now }) => {
     const navigate = useNavigate();
     const isDropdownOpen = openDropdownId === event.eventId;
-    const now = new Date();
+    const currentTime = now || new Date();
     const eventEnd = event.endAt ? new Date(event.endAt) : new Date(new Date(event.startAt).getTime() + 2 * 60 * 60 * 1000);
-    const isCompleted = now > eventEnd;
+    const isCompleted = currentTime > eventEnd;
     const isArchiveDisabled = event.status === 'PUBLISHED' && !isCompleted;
 
     return (
@@ -247,44 +271,65 @@ const EventTableRow = React.memo<{
             </td>
             <td className="px-8 py-7">
                 <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border-2 border-[#2E2E2F]/15 relative">
+                    <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 relative">
                         <img src={getImageUrl(event.imageUrl)} alt="" crossOrigin="use-credentials" className="w-full h-full object-cover" />
                     </div>
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                            <div className="font-bold text-[#2E2E2F] text-[16px] tracking-tight transition-colors">{event.eventName}</div>
+                            <div className="font-bold text-[#2E2E2F] dark:text-white dark:text-white text-[16px] tracking-tight transition-colors">{event.eventName}</div>
                             {isPromoted && (
-                                <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 bg-[#38BDF2]/20 text-[#38BDF2] border border-[#38BDF2]/30 rounded-full whitespace-nowrap flex items-center gap-1">
-                                    <ICONS.Zap className="w-2 h-2" />
-                                    Promoted
-                                </span>
+                                <div className="flex flex-col gap-1 items-start">
+                                    <Badge
+                                        type="success"
+                                        className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 flex items-center gap-1 ${isExpiredPromotion ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-[#38BDF2]/10 text-[#38BDF2] dark:text-[#38BDF2] border-[#38BDF2]/20'}`}
+                                    >
+                                        <ICONS.Zap className="w-2 h-2" />
+                                        {isExpiredPromotion ? 'PROMOTED DONE' : 'Promoted'}
+                                    </Badge>
+                                    {!isExpiredPromotion && expiresAt && now && (() => {
+                                        const exp = new Date(expiresAt);
+                                        const diff = exp.getTime() - now.getTime();
+                                        if (diff <= 0) return null;
+                                        const d = Math.floor(diff / 86400000);
+                                        const h = Math.floor((diff % 86400000) / 3600000);
+                                        const m = Math.floor((diff % 3600000) / 60000);
+                                        const s = Math.floor((diff % 60000) / 1000);
+                                        return (
+                                            <div className="flex items-center gap-1 tabular-nums text-[8px] font-black text-[#38BDF2] dark:text-[#38BDF2] bg-[#38BDF2]/5 px-2 py-0.5 rounded-full border border-[#38BDF2]/10 uppercase tracking-tighter">
+                                                <ICONS.Clock className="w-2 h-2" />
+                                                {d > 0 && <span>{d}d </span>}
+                                                <span>{h}h {m}m {s}s</span>
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
                             )}
                         </div>
                         <div className="flex items-center gap-3">
-                            <span className="text-[11px] font-medium text-[#2E2E2F]/40 uppercase tracking-widest">{event.eventId.split('-')[0]}</span>
+                            <span className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest">{event.eventId.split('-')[0]}</span>
                             <span className="w-1 h-1 rounded-full bg-[#2E2E2F]/10"></span>
-                            <span className="text-[11px] font-medium text-[#2E2E2F]/60 tracking-tight">/{event.slug}</span>
+                            <span className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 tracking-tight">/{event.slug}</span>
                         </div>
                     </div>
                 </div>
             </td>
             <td className="px-8 py-7">
-                <div className="text-[14px] font-semibold text-[#2E2E2F] tracking-tight">
+                <div className="text-[14px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white tracking-tight">
                     {new Date(event.startAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                 </div>
-                <div className="text-[12px] text-[#2E2E2F]/60 font-medium mt-1.5 flex items-center gap-2">
-                    <ICONS.MapPin className="w-3 h-3 text-[#2E2E2F]/50" />
+                <div className="text-[12px] text-[#2E2E2F] dark:text-white dark:text-white/60 font-medium mt-1.5 flex items-center gap-2">
+                    <ICONS.MapPin className="w-3 h-3 text-[#2E2E2F] dark:text-white dark:text-white/50" />
                     <span className="truncate max-w-[200px]">{event.locationText}</span>
                 </div>
             </td>
             <td className="px-8 py-7">
                 <div className={`inline-flex px-3.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${isCompleted
-                    ? 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
+                    ? 'bg-[#2E2E2F]/10 text-[#2E2E2F] dark:text-white dark:text-white'
                     : event.status === 'PUBLISHED'
-                        ? 'bg-[#38BDF2]/20 text-[#2E2E2F]'
+                        ? 'bg-[#38BDF2]/20 text-[#2E2E2F] dark:text-white dark:text-white'
                         : event.status === 'DRAFT'
-                            ? 'bg-[#F2F2F2] text-[#2E2E2F]/60 border-2 border-[#2E2E2F]/15'
-                            : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
+                            ? 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white/60 border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10'
+                            : 'bg-[#2E2E2F]/10 text-[#2E2E2F] dark:text-white dark:text-white'
                     }`}>
                     {isCompleted ? 'COMPLETED' : event.status}
                 </div>
@@ -292,10 +337,10 @@ const EventTableRow = React.memo<{
             <td className="px-8 py-7">
                 <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
-                        <span className="text-base font-black text-[#2E2E2F]">{event.capacityTotal}</span>
-                        <span className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Slots</span>
+                        <span className="text-base font-black text-[#2E2E2F] dark:text-white dark:text-white">{event.capacityTotal}</span>
+                        <span className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase tracking-widest">Slots</span>
                     </div>
-                    <div className="w-[100px] h-1.5 bg-[#2E2E2F]/5 rounded-full overflow-hidden">
+                    <div className="w-[100px] h-1.5 bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 rounded-full overflow-hidden">
                         <div className="h-full bg-[#38BDF2]" style={{ width: '100%' }} />
                     </div>
                 </div>
@@ -304,34 +349,37 @@ const EventTableRow = React.memo<{
                 <div className="flex justify-center items-center relative h-full">
                     <button
                         onClick={(e) => { e.stopPropagation(); setOpenDropdownId(isDropdownOpen ? null : event.eventId); }}
-                        className={`p-1.5 rounded-xl transition-all duration-300 ${isDropdownOpen ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'hover:bg-[#2E2E2F]/5 text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                        className={`p-1.5 rounded-xl transition-all duration-300 ${isDropdownOpen ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'hover:bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
                     >
                         <MoreVerticalIcon className="w-5 h-5" />
                     </button>
 
                     <div
-                        className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${isDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}`}
+                        className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${isDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}`}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <EyeIcon className="w-4 h-4" /> View
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); onOpenTickets(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); onOpenTickets(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <ICONS.CreditCard className="w-4 h-4" /> Tickets
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); onOpenAttendeePop(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); onOpenAttendeePop(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <ICONS.Users className="w-4 h-4" /> Guests
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); onOpenEdit(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); onOpenEdit(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <ICONS.Edit className="w-4 h-4" /> Edit
                         </button>
-                        <button onClick={onTogglePromotion} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
-                            <ICONS.Zap className="w-4 h-4" fill={isPromoted ? "currentColor" : "none"} /> Promote
+                        <button 
+                            onClick={onTogglePromotion} 
+                            className={`w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-colors ${isPromoted ? 'text-[#38BDF2] bg-[#38BDF2]/05 cursor-default' : 'text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'}`}
+                        >
+                            <ICONS.Zap className="w-4 h-4" fill={isPromoted ? "currentColor" : "none"} /> {isPromoted ? (isExpiredPromotion ? 'Promotion Ended' : 'Promoted') : 'Promote'}
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); onNotify(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); onNotify(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <ICONS.Mail className="w-4 h-4" /> Notify Guests
                         </button>
-                        <div className="my-1 border-t border-[#2E2E2F]/5" />
+                        <div className="my-1 border-t border-[#2E2E2F]/5 dark:border-white/5" />
                         {event.status !== 'CANCELLED' && (
                             <button onClick={(e) => { e.stopPropagation(); onCancel(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-amber-600/70 hover:bg-amber-500/10 hover:text-amber-600 flex items-center gap-3 transition-colors">
                                 <ICONS.AlertTriangle className="w-4 h-4" /> Cancel Event
@@ -344,7 +392,7 @@ const EventTableRow = React.memo<{
                                 onArchive();
                             }}
                             disabled={isArchiveDisabled}
-                            className={`w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-colors ${isArchiveDisabled ? 'text-[#2E2E2F]/20 cursor-not-allowed opacity-50' : 'text-red-500/70 hover:bg-red-500/10 hover:text-red-600'}`}
+                            className={`w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-colors ${isArchiveDisabled ? 'text-[#2E2E2F] dark:text-white dark:text-white/20 cursor-not-allowed opacity-50' : 'text-red-500/70 hover:bg-red-500/10 hover:text-red-600'}`}
                         >
                             <ICONS.Trash className="w-4 h-4" /> {isArchiveDisabled ? 'Archive Lock' : 'Archive'}
                         </button>
@@ -395,7 +443,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
     const organizerPreviewInitial = (organizerProfile?.organizerName || name || 'O').charAt(0).toUpperCase();
 
     return (
-        <div className={`w-full bg-[#F2F2F2] ${window.innerWidth < 768 ? 'block pb-24' : 'flex flex-col h-full'}`}>
+        <div className={`w-full bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] ${window.innerWidth < 768 ? 'block pb-24' : 'flex flex-col h-full'}`}>
             {/* Mobile Header Bar */}
             {(previewDevice as string) === 'mobile' && (
                 <>
@@ -410,21 +458,21 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                     {/* Inline Header Bar - Only visible on Desktop POV */}
                     <div className="hidden md:flex items-center justify-between flex-shrink-0 px-5 pt-5 pb-4">
                         <div>
-                            <h4 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] hidden md:block">PREVIEW MODE</h4>
+                            <h4 className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em] hidden md:block">PREVIEW MODE</h4>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="inline-flex items-center rounded-2xl border-2 border-[#2E2E2F]/5 bg-[#F2F2F2] p-1 shadow-sm">
+                            <div className="inline-flex items-center rounded-2xl border-2 border-[#2E2E2F]/5 dark:border-white/5 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] p-1 shadow-sm">
                                 <button
                                     type="button"
                                     onClick={() => setPreviewDevice('mobile')}
-                                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
+                                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border border-[#2E2E2F]/10 dark:border-white/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white dark:text-white/45 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
                                 >
                                     <MobilePreviewIcon className="w-4 h-4" />
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setPreviewDevice('desktop')}
-                                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/45 hover:text-[#2E2E2F]'}`}
+                                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border border-[#2E2E2F]/10 dark:border-white/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white dark:text-white/45 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
                                 >
                                     <DesktopPreviewIcon className="w-4 h-4" />
                                 </button>
@@ -438,11 +486,11 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                 <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center pt-32 pb-12 px-6">
                     {/* Centered Browser Window Frame - Scaled to 75% POV */}
                     <div
-                        className="w-full max-w-[1300px] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.12)] border border-[#2E2E2F]/10 bg-[#F2F2F2] min-h-[90vh] flex flex-col"
+                        className="w-full max-w-[1300px] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.12)] border border-[#2E2E2F]/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] min-h-[90vh] flex flex-col"
                         style={{ transform: 'scale(0.75)', transformOrigin: 'top center' }}
                     >
                         {/* Browser Bar - Integrated Controls */}
-                        <div className="h-12 bg-[#F3F3F3] border-b border-[#2E2E2F]/10 flex items-center px-4 gap-4 shrink-0 overflow-hidden">
+                        <div className="h-12 bg-[#F3F3F3] border-b border-[#2E2E2F]/10 dark:border-white/10 flex items-center px-4 gap-4 shrink-0 overflow-hidden">
                             <div className="flex gap-1.5 shrink-0">
                                 <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
                                 <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
@@ -450,7 +498,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                             </div>
 
                             <div className="flex-1">
-                                <div className="bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-lg px-3 py-1 text-[10px] text-[#2E2E2F]/40 font-medium truncate flex items-center gap-1.5 max-w-[400px]">
+                                <div className="bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border border-[#2E2E2F]/10 dark:border-white/10 rounded-lg px-3 py-1 text-[10px] text-[#2E2E2F] dark:text-white dark:text-white/40 font-medium truncate flex items-center gap-1.5 max-w-[400px]">
                                     <ICONS.Lock className="w-2.5 h-2.5" />
                                     startuplab.io/{(formData.eventName || 'event').toLowerCase().replace(/\s+/g, '-')}
                                 </div>
@@ -458,18 +506,18 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
 
                             <div className="flex items-center gap-4 shrink-0">
                                 {/* Integrated Toggle Pill */}
-                                <div className="inline-flex items-center rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-1">
+                                <div className="inline-flex items-center rounded-xl border border-[#2E2E2F]/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] p-1">
                                     <button
                                         type="button"
                                         onClick={() => setPreviewDevice('mobile')}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border border-[#2E2E2F]/10 dark:border-white/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
                                     >
                                         <MobilePreviewIcon className="w-3.5 h-3.5" />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setPreviewDevice('desktop')}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border border-[#2E2E2F]/10 dark:border-white/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
                                     >
                                         <DesktopPreviewIcon className="w-3.5 h-3.5" />
                                     </button>
@@ -479,7 +527,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                 <button
                                     type="button"
                                     onClick={() => setIsPreviewMode(false)}
-                                    className="flex items-center gap-1.5 text-[#2E2E2F]/60 hover:text-black transition-colors group px-2"
+                                    className="flex items-center gap-1.5 text-[#2E2E2F] dark:text-white dark:text-white/60 hover:text-black transition-colors group px-2"
                                 >
                                     <ICONS.ChevronRight className="w-4 h-4 rotate-180 transition-transform group-hover:-translate-x-0.5" />
                                     <span className="text-[11px] font-bold uppercase tracking-widest">Close Preview</span>
@@ -488,16 +536,16 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                         </div>
 
                         {/* Internal Site Layout */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#F2F2F2]">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]">
                             {/* Header - ONLY MOBILE/Internal hidden for clean desktop preview as requested */}
                             {false && (
-                                <div className="h-14 border-b border-[#2E2E2F]/15 px-6 flex items-center justify-between bg-white sticky top-0 z-10">
+                                <div className="h-14 border-b border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 px-6 flex items-center justify-between bg-white sticky top-0 z-10">
                                     <img
                                         src={brandingEnabled && organizerProfile?.profileImageUrl ? getImageUrl(organizerProfile.profileImageUrl) : BRAND_LOGO_URL}
                                         alt="Event Logo"
                                         className="h-8 w-auto object-contain"
                                     />
-                                    <div className="flex items-center gap-3 text-[#2E2E2F]/50">
+                                    <div className="flex items-center gap-3 text-[#2E2E2F] dark:text-white dark:text-white/50">
                                         <ICONS.Users className="w-4 h-4" />
                                         <ICONS.MoreHorizontal className="w-4 h-4" />
                                     </div>
@@ -514,47 +562,47 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                             </div>
 
                                             <div className="flex items-start justify-between gap-4 mb-4">
-                                                <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tighter leading-tight">
+                                                <h2 className="text-3xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tighter leading-tight">
                                                     {formData.eventName || 'Event title'}
                                                 </h2>
                                                 <div className="flex items-center gap-2 shrink-0">
-                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
-                                                        <ICONS.Heart className="w-4 h-4 text-[#2E2E2F]/40" />
+                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 flex items-center justify-center">
+                                                        <ICONS.Heart className="w-4 h-4 text-[#2E2E2F] dark:text-white dark:text-white/40" />
                                                     </div>
-                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
-                                                        <ICONS.Download className="w-4 h-4 text-[#2E2E2F]/40" />
+                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 flex items-center justify-center">
+                                                        <ICONS.Download className="w-4 h-4 text-[#2E2E2F] dark:text-white dark:text-white/40" />
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="rounded-[2.5rem] overflow-hidden border-2 border-[#2E2E2F]/15 mb-6 shadow-sm">
+                                            <div className="rounded-[2.5rem] overflow-hidden border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 mb-6 shadow-sm">
                                                 <img src={getImageUrl(formData.imageUrl)} alt="Event Preview" crossOrigin="use-credentials" className="w-full aspect-video object-cover" />
                                             </div>
 
-                                            <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F]/70">
-                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                            <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F] dark:text-white dark:text-white/70">
+                                                <div className="flex items-center text-[#2E2E2F] dark:text-white dark:text-white/80 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 text-[10px] font-bold">
                                                     <ICONS.Calendar className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
                                                     {previewDateLabel}
                                                 </div>
-                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                                <div className="flex items-center text-[#2E2E2F] dark:text-white dark:text-white/80 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 text-[10px] font-bold">
                                                     <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
                                                     {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
                                                 </div>
-                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                                <div className="flex items-center text-[#2E2E2F] dark:text-white dark:text-white/80 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 text-[10px] font-bold">
                                                     CAPACITY: {formData.capacityTotal}
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15">
-                                            <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
-                                            <p className="text-[#2E2E2F]/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
+                                        <div className="p-8 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
+                                            <h3 className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
+                                            <p className="text-[#2E2E2F] dark:text-white dark:text-white/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
                                                 {formData.description || 'Provide an executive summary of this event session...'}
                                             </p>
                                         </div>
 
-                                        <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15">
-                                            <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
-                                            <div className="rounded-[1.5rem] border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] p-5 flex flex-col gap-4">
+                                        <div className="p-8 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
+                                            <h3 className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
+                                            <div className="rounded-[1.5rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] p-5 flex flex-col gap-4">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-14 h-14 rounded-full overflow-hidden text-[#F2F2F2] flex items-center justify-center text-xl font-bold shrink-0" style={{ backgroundColor: previewAccentColor }}>
                                                         {organizerProfile?.profileImageUrl ? (
@@ -564,7 +612,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                                         )}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-xl font-black text-[#2E2E2F] tracking-tight truncate">
+                                                        <p className="text-xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight truncate">
                                                             {organizerProfile?.organizerName || 'Organizer Profile'}
                                                         </p>
                                                     </div>
@@ -573,13 +621,13 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                         </div>
 
                                         {hasPreviewPhysicalLocation && (
-                                            <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15">
+                                            <div className="p-8 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
                                                 <div className="flex items-center justify-between gap-3 mb-4">
-                                                    <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
+                                                    <h3 className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-[#38BDF2]">Open in Maps</span>
                                                 </div>
-                                                <p className="text-[13px] text-[#2E2E2F]/70 font-medium mb-5">{formData.location}</p>
-                                                <div className="rounded-2xl overflow-hidden border-2 border-[#2E2E2F]/15 bg-[#F2F2F2]">
+                                                <p className="text-[13px] text-[#2E2E2F] dark:text-white dark:text-white/70 font-medium mb-5">{formData.location}</p>
+                                                <div className="rounded-2xl overflow-hidden border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]">
                                                     <iframe src={previewMapEmbedUrl} title="Preview map" className="w-full h-64" loading="lazy" />
                                                 </div>
                                             </div>
@@ -587,23 +635,23 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                     </div>
 
                                     <div className="w-[340px] shrink-0 space-y-6 sticky top-0">
-                                        <div className="p-8 bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15 shadow-sm">
-                                            <h3 className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-6">SECURE ACCESS</h3>
+                                        <div className="p-8 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 shadow-sm">
+                                            <h3 className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em] mb-6">SECURE ACCESS</h3>
                                             <div className="space-y-4">
                                                 {formData.ticketTypes && formData.ticketTypes.length > 0 ? (
                                                     formData.ticketTypes.map((ticket: any) => (
-                                                        <div key={ticket.ticketTypeId || ticket.name} className="p-6 rounded-[1.5rem] border-2 bg-[#F2F2F2]" style={{ borderColor: `${previewAccentColor}1A` }}>
+                                                        <div key={ticket.ticketTypeId || ticket.name} className="p-6 rounded-[1.5rem] border-2 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]" style={{ borderColor: `${previewAccentColor}1A` }}>
                                                             <div className="flex justify-between items-start mb-1">
-                                                                <p className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-wider">{ticket.name}</p>
+                                                                <p className="text-[11px] font-black text-[#2E2E2F] dark:text-white dark:text-white uppercase tracking-wider">{ticket.name}</p>
                                                                 <span className="text-[9px] font-black px-2 py-0.5 rounded text-white" style={{ backgroundColor: previewAccentColor }}>AVAILABLE</span>
                                                             </div>
-                                                            <p className="text-[18px] font-black text-[#2E2E2F]">
+                                                            <p className="text-[18px] font-black text-[#2E2E2F] dark:text-white dark:text-white">
                                                                 {ticket.priceAmount === 0 ? 'FREE' : `PHP ${ticket.priceAmount.toLocaleString()}.00`}
                                                             </p>
-                                                            <div className="mt-5 pt-5 border-t border-[#2E2E2F]/5 flex items-center justify-between">
-                                                                <span className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Quantity</span>
+                                                            <div className="mt-5 pt-5 border-t border-[#2E2E2F]/5 dark:border-white/5 flex items-center justify-between">
+                                                                <span className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase tracking-widest">Quantity</span>
                                                                 <div className="flex items-center gap-3">
-                                                                    <div className="w-7 h-7 rounded-xl bg-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F]/20 text-sm">-</div>
+                                                                    <div className="w-7 h-7 rounded-xl bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 flex items-center justify-center text-[#2E2E2F] dark:text-white dark:text-white/20 text-sm">-</div>
                                                                     <span className="text-sm font-black">1</span>
                                                                     <div className="w-7 h-7 rounded-xl flex items-center justify-center text-sm text-white" style={{ backgroundColor: previewAccentColor }}>+</div>
                                                                 </div>
@@ -611,8 +659,8 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                                         </div>
                                                     ))
                                                 ) : (
-                                                    <div className="py-14 text-center border-2 border-dashed border-[#2E2E2F]/10 rounded-[2rem]">
-                                                        <p className="text-[11px] font-bold text-[#2E2E2F]/30 uppercase tracking-widest">No tickets set</p>
+                                                    <div className="py-14 text-center border-2 border-dashed border-[#2E2E2F]/10 dark:border-white/10 rounded-[2rem]">
+                                                        <p className="text-[11px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase tracking-widest">No tickets set</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -632,38 +680,38 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                 </div>
             ) : (
                 /* Mobile Preview Mode - Phone Shell Implementation */
-                <div className={`w-full bg-[#F2F2F2] ${window.innerWidth < 768 ? 'block min-h-screen' : 'flex-1 flex flex-col items-center'}`}>
+                <div className={`w-full bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] ${window.innerWidth < 768 ? 'block min-h-screen' : 'flex-1 flex flex-col items-center'}`}>
                     {/* Shell / Content Wrapper - Phone feel only on desktop pov */}
                     <div
-                        className={`relative bg-[#F2F2F2] ${window.innerWidth < 768
+                        className={`relative bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] ${window.innerWidth < 768
                             ? 'w-full block h-auto'
                             : 'w-[375px] h-[780px] rounded-[3.5rem] border-[12px] border-[#F2F2F2] overflow-hidden flex flex-col shadow-[0_40px_100px_rgba(0,0,0,0.15)]'}`}
                         style={window.innerWidth < 768 ? {} : { transform: 'scale(0.8)', transformOrigin: 'top center' }}
                     >
                         {/* Stylized Notch for Mobile Preview - Hidden on actual mobile device */}
                         {window.innerWidth >= 768 && (
-                            <div className="h-8 bg-[#F2F2F2] flex items-center justify-center relative shrink-0">
-                                <div className="w-24 h-5 bg-[#F2F2F2] rounded-b-2xl absolute top-0" />
+                            <div className="h-8 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] flex items-center justify-center relative shrink-0">
+                                <div className="w-24 h-5 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-b-2xl absolute top-0" />
                             </div>
                         )}
 
                         {/* Main Content Area */}
                         <div className={`${window.innerWidth >= 768 ? 'flex-1 overflow-y-auto custom-scrollbar' : 'w-full block h-auto'}`}>
                             <div className="w-full pb-48">
-                                <div className="h-14 border-b border-[#2E2E2F]/15 px-5 flex items-center justify-between bg-[#F2F2F2]">
+                                <div className="h-14 border-b border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 px-5 flex items-center justify-between bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]">
                                     <img
                                         src={organizerProfile?.profileImageUrl ? getImageUrl(organizerProfile.profileImageUrl) : BRAND_LOGO_URL}
                                         alt="Event Logo"
                                         className="h-8 w-auto object-contain"
                                         onError={(e) => { e.currentTarget.src = '/lgo.webp'; }}
                                     />
-                                    <div className="flex items-center gap-3 text-[#2E2E2F]/70">
+                                    <div className="flex items-center gap-3 text-[#2E2E2F] dark:text-white dark:text-white/70">
                                         <ICONS.Users className="w-4 h-4" />
                                         <ICONS.MoreHorizontal className="w-4 h-4" />
                                     </div>
                                 </div>
 
-                                <div className="bg-[#F2F2F2] p-5 space-y-6">
+                                <div className="bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] p-5 space-y-6">
                                     <div className="w-full space-y-6">
                                         <div className="mb-4">
                                             <div className="flex items-center gap-2 text-[8px] font-black tracking-widest uppercase mb-6" style={{ color: previewAccentColor }}>
@@ -672,19 +720,19 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                             </div>
 
                                             <div className="flex items-start justify-between gap-4 mb-4">
-                                                <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tighter leading-tight">
+                                                <h2 className="text-2xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tighter leading-tight">
                                                     {formData.eventName || 'Event title'}
                                                 </h2>
                                                 <div className="flex items-center gap-2 shrink-0">
-                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
-                                                        <ICONS.Heart className="w-4 h-4 text-[#2E2E2F]/40" />
+                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 flex items-center justify-center">
+                                                        <ICONS.Heart className="w-4 h-4 text-[#2E2E2F] dark:text-white dark:text-white/40" />
                                                     </div>
-                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] border-[#2E2E2F]/15 flex items-center justify-center">
-                                                        <ICONS.Download className="w-4 h-4 text-[#2E2E2F]/40" />
+                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 flex items-center justify-center">
+                                                        <ICONS.Download className="w-4 h-4 text-[#2E2E2F] dark:text-white dark:text-white/40" />
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="rounded-[2rem] overflow-hidden border-2 border-[#2E2E2F]/15 mb-6 group">
+                                            <div className="rounded-[2rem] overflow-hidden border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 mb-6 group">
                                                 <img
                                                     src={getImageUrl(formData.imageUrl)}
                                                     alt="Event Preview"
@@ -693,36 +741,36 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                                 />
                                             </div>
 
-                                            <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F]/70">
-                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                            <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F] dark:text-white dark:text-white/70">
+                                                <div className="flex items-center text-[#2E2E2F] dark:text-white dark:text-white/80 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 text-[10px] font-bold">
                                                     <ICONS.Calendar className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
                                                     {previewDateLabel}
                                                 </div>
-                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                                <div className="flex items-center text-[#2E2E2F] dark:text-white dark:text-white/80 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 text-[10px] font-bold">
                                                     <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
                                                     {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
                                                 </div>
                                                 {formData.streamingPlatform && (
-                                                    <div className="flex items-center bg-[#F2F2F2] px-3 py-1.5 rounded-xl border text-[10px] font-black tracking-wide" style={{ color: previewAccentColor, borderColor: `${previewAccentColor}33`, backgroundColor: `${previewAccentColor}0D` }}>
+                                                    <div className="flex items-center bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3 py-1.5 rounded-xl border text-[10px] font-black tracking-wide" style={{ color: previewAccentColor, borderColor: `${previewAccentColor}33`, backgroundColor: `${previewAccentColor}0D` }}>
                                                         VIA {formData.streamingPlatform.toUpperCase()}
                                                     </div>
                                                 )}
-                                                <div className="flex items-center text-[#2E2E2F]/80 bg-[#F2F2F2] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 text-[10px] font-bold">
+                                                <div className="flex items-center text-[#2E2E2F] dark:text-white dark:text-white/80 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 text-[10px] font-bold">
                                                     CAPACITY: {formData.capacityTotal}
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
-                                            <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
-                                            <p className="text-[#2E2E2F]/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
+                                        <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[1.5rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
+                                            <h3 className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
+                                            <p className="text-[#2E2E2F] dark:text-white dark:text-white/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
                                                 {formData.description || 'Provide an executive summary of this event session...'}
                                             </p>
                                         </div>
 
-                                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
-                                            <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
-                                            <div className="rounded-[1.2rem] border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] p-4 flex flex-col gap-4">
+                                        <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[1.5rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
+                                            <h3 className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
+                                            <div className="rounded-[1.2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] p-4 flex flex-col gap-4">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-12 h-12 rounded-full overflow-hidden text-[#F2F2F2] flex items-center justify-center text-lg font-bold shrink-0" style={{ backgroundColor: previewAccentColor }}>
                                                         {organizerProfile?.profileImageUrl ? (
@@ -732,12 +780,12 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                                         )}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-lg font-black text-[#2E2E2F] tracking-tight truncate">
+                                                        <p className="text-lg font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight truncate">
                                                             {organizerProfile?.organizerName || 'Organizer Profile'}
                                                         </p>
                                                         <div className="flex items-center gap-4 mt-1">
                                                             <div>
-                                                                <p className="text-[8px] uppercase tracking-widest font-black text-[#2E2E2F]/40">Followers</p>
+                                                                <p className="text-[8px] uppercase tracking-widest font-black text-[#2E2E2F] dark:text-white dark:text-white/40">Followers</p>
                                                                 <p className="text-sm font-black">{organizerProfile?.followersCount || 0}</p>
                                                             </div>
                                                             <div>
@@ -750,13 +798,13 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                         </div>
 
                                         {hasPreviewPhysicalLocation && (
-                                            <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#2E2E2F]/15">
+                                            <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[1.5rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
                                                 <div className="flex items-center justify-between gap-3 mb-4">
-                                                    <h3 className="text-[9px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
+                                                    <h3 className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
                                                     <span className="text-[9px] font-black uppercase tracking-widest text-[#38BDF2]">Open in Maps</span>
                                                 </div>
-                                                <p className="text-[12px] text-[#2E2E2F]/70 font-medium mb-4">{formData.location}</p>
-                                                <div className="rounded-xl overflow-hidden border-2 border-[#2E2E2F]/15 bg-[#F2F2F2]">
+                                                <p className="text-[12px] text-[#2E2E2F] dark:text-white dark:text-white/70 font-medium mb-4">{formData.location}</p>
+                                                <div className="rounded-xl overflow-hidden border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]">
                                                     <iframe
                                                         src={previewMapEmbedUrl}
                                                         title="Preview map"
@@ -776,17 +824,17 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                             {/* Floating Mobile Footer (Compact State) */}
                             {!isPreviewSheetExpanded && (
                                 <div
-                                    className="z-50 w-full bg-[#F2F2F2] border-t border-[#2E2E2F]/10 px-5 py-4 flex items-center justify-between shadow-[0_-15px_40px_rgba(0,0,0,0.06)] cursor-pointer"
+                                    className="z-50 w-full bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-t border-[#2E2E2F]/10 dark:border-white/10 px-5 py-4 flex items-center justify-between shadow-[0_-15px_40px_rgba(0,0,0,0.06)] cursor-pointer"
                                     style={{ position: window.innerWidth < 768 ? 'fixed' : 'absolute', bottom: 0, left: 0, paddingBottom: window.innerWidth < 768 ? 'calc(env(safe-area-inset-bottom) + 1rem)' : '1.25rem' }}
                                     onClick={() => setIsPreviewSheetExpanded(true)}
                                 >
                                     <div className="flex flex-col">
-                                        <span className="text-[16px] font-black text-[#2E2E2F] tracking-tight">
+                                        <span className="text-[16px] font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight">
                                             {formData.ticketTypes && formData.ticketTypes.length > 0
                                                 ? (formData.ticketTypes.some((t: any) => t.priceAmount === 0) ? 'Free' : `From ₱${Math.min(...formData.ticketTypes.map((t: any) => t.priceAmount)).toLocaleString()}`)
                                                 : 'Free'}
                                         </span>
-                                        <span className="text-[12px] font-medium text-[#2E2E2F]/50">
+                                        <span className="text-[12px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/50">
                                             {formData.eventDate ? new Date(formData.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Set Date'}
                                         </span>
                                     </div>
@@ -813,32 +861,32 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
 
                                     {/* The Sheet */}
                                     <div
-                                        className="relative w-full bg-[#F2F2F2] rounded-t-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] flex flex-col max-h-[85%]"
+                                        className="relative w-full bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-t-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] flex flex-col max-h-[85%]"
                                         style={{ paddingBottom: window.innerWidth < 768 ? 'calc(env(safe-area-inset-bottom) + 1.25rem)' : '1.25rem' }}
                                     >
-                                        <div className="pt-6 pb-2 px-6 shrink-0 border-b border-[#2E2E2F]/5 flex flex-col items-center">
+                                        <div className="pt-6 pb-2 px-6 shrink-0 border-b border-[#2E2E2F]/5 dark:border-white/5 flex flex-col items-center">
                                             <div className="w-12 h-1.5 rounded-full bg-[#2E2E2F]/10 mb-4 cursor-pointer" onClick={() => setIsPreviewSheetExpanded(false)} />
                                             <div className="w-full flex justify-between items-center px-2">
-                                                <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[#2E2E2F]/60">PREVIEW ACCESS</p>
-                                                <button onClick={() => setIsPreviewSheetExpanded(false)} className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F]/40 hover:text-[#2E2E2F]">Close</button>
+                                                <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[#2E2E2F] dark:text-white dark:text-white/60">PREVIEW ACCESS</p>
+                                                <button onClick={() => setIsPreviewSheetExpanded(false)} className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white">Close</button>
                                             </div>
                                         </div>
 
                                         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
                                             {formData.ticketTypes && formData.ticketTypes.length > 0 ? (
                                                 formData.ticketTypes.map((ticket: any) => (
-                                                    <div key={ticket.ticketTypeId || ticket.name} className="p-5 rounded-2xl border-2 bg-[#F2F2F2]" style={{ borderColor: `${previewAccentColor}1A` }}>
+                                                    <div key={ticket.ticketTypeId || ticket.name} className="p-5 rounded-2xl border-2 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]" style={{ borderColor: `${previewAccentColor}1A` }}>
                                                         <div className="flex justify-between items-start mb-1">
-                                                            <p className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-wider">{ticket.name}</p>
+                                                            <p className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white uppercase tracking-wider">{ticket.name}</p>
                                                             <span className="text-[8px] font-black px-2 py-0.5 rounded text-white" style={{ backgroundColor: previewAccentColor }}>AVAILABLE</span>
                                                         </div>
-                                                        <p className="text-[16px] font-black text-[#2E2E2F]">
+                                                        <p className="text-[16px] font-black text-[#2E2E2F] dark:text-white dark:text-white">
                                                             {ticket.priceAmount === 0 ? 'FREE' : `PHP ${ticket.priceAmount.toLocaleString()}.00`}
                                                         </p>
-                                                        <div className="mt-4 pt-4 border-t border-[#2E2E2F]/5 flex items-center justify-between">
-                                                            <span className="text-[8px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Quantity</span>
+                                                        <div className="mt-4 pt-4 border-t border-[#2E2E2F]/5 dark:border-white/5 flex items-center justify-between">
+                                                            <span className="text-[8px] font-black text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase tracking-widest">Quantity</span>
                                                             <div className="flex items-center gap-3">
-                                                                <div className="w-6 h-6 rounded-lg bg-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F]/20 text-xs">-</div>
+                                                                <div className="w-6 h-6 rounded-lg bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 flex items-center justify-center text-[#2E2E2F] dark:text-white dark:text-white/20 text-xs">-</div>
                                                                 <span className="text-xs font-black">1</span>
                                                                 <div className="w-6 h-6 rounded-lg flex items-center justify-center text-xs text-white" style={{ backgroundColor: previewAccentColor }}>+</div>
                                                             </div>
@@ -846,13 +894,13 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                                     </div>
                                                 ))
                                             ) : (
-                                                <div className="py-12 text-center border-2 border-dashed border-[#2E2E2F]/5 rounded-[2rem]">
-                                                    <p className="text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-widest">No tickets set</p>
+                                                <div className="py-12 text-center border-2 border-dashed border-[#2E2E2F]/5 dark:border-white/5 rounded-[2rem]">
+                                                    <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase tracking-widest">No tickets set</p>
                                                 </div>
                                             )}
                                         </div>
 
-                                        <div className="px-6 pt-4 shrink-0 bg-[#F2F2F2] border-t border-[#2E2E2F]/5">
+                                        <div className="px-6 pt-4 shrink-0 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-t border-[#2E2E2F]/5 dark:border-white/5">
                                             <button
                                                 type="button"
                                                 disabled
@@ -861,7 +909,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                             >
                                                 Secure Checkout
                                             </button>
-                                            <div className="mt-4 flex items-center justify-center gap-2 text-[#2E2E2F]/30 pb-2">
+                                            <div className="mt-4 flex items-center justify-center gap-2 text-[#2E2E2F] dark:text-white dark:text-white/30 pb-2">
                                                 <ICONS.CreditCard className="w-3.5 h-3.5" />
                                                 <p className="text-[8px] font-black uppercase tracking-widest">HITPAY SECURE</p>
                                             </div>
@@ -932,11 +980,11 @@ const AISuggestPanel: React.FC<{
             />
             {/* Slide-in Panel */}
             <div
-                className={`fixed top-0 right-0 h-full w-full max-w-[460px] z-[9999] bg-[#F2F2F2] flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                className={`fixed top-0 right-0 h-full w-full max-w-[460px] z-[9999] bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
                 style={{ boxShadow: '-20px 0 60px rgba(0,0,0,0.15)', borderLeft: '1.5px solid rgba(46,46,47,0.10)' }}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 pt-7 pb-5 border-b border-[#2E2E2F]/10 shrink-0 bg-[#F2F2F2]">
+                <div className="flex items-center justify-between px-6 pt-7 pb-5 border-b border-[#2E2E2F]/10 dark:border-white/10 shrink-0 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#38BDF2] to-[#0ea5e9] flex items-center justify-center shadow-md shrink-0">
                             <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -944,41 +992,41 @@ const AISuggestPanel: React.FC<{
                             </svg>
                         </div>
                         <div>
-                            <h3 className="text-[14px] font-black text-[#2E2E2F] tracking-tight leading-none">AI Event Suggestions</h3>
-                            <p className="text-[9px] font-semibold text-[#2E2E2F]/40 uppercase tracking-widest mt-0.5">Powered by StartupLab AI</p>
+                            <h3 className="text-[14px] font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight leading-none">AI Event Suggestions</h3>
+                            <p className="text-[9px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest mt-0.5">Powered by StartupLab AI</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-8 h-8 rounded-xl border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] flex items-center justify-center text-[#2E2E2F]/40 hover:text-[#2E2E2F] hover:border-[#2E2E2F]/30 transition-colors"
+                        className="w-8 h-8 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] flex items-center justify-center text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white hover:border-[#2E2E2F]/30 transition-colors"
                     >
                         <ICONS.X className="w-3.5 h-3.5" />
                     </button>
                 </div>
 
                 {/* Scrollable Body */}
-                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 bg-[#F2F2F2]">
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]">
                     {/* Context Inputs */}
                     <div className="space-y-4">
-                        <p className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em]">Tell the AI about your event</p>
+                        <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase tracking-[0.2em]">Tell the AI about your event</p>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-semibold text-[#2E2E2F]/55 uppercase tracking-wide ml-0.5">Event Category</label>
+                            <label className="text-[10px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/55 uppercase tracking-wide ml-0.5">Event Category</label>
                             <select
                                 value={category}
                                 onChange={e => setCategory(e.target.value)}
-                                className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[12px] font-medium outline-none focus:border-[#38BDF2] transition-colors"
+                                className="w-full px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-[12px] font-medium outline-none focus:border-[#38BDF2] transition-colors"
                             >
                                 {['Startup & Entrepreneurship', 'Technology & Innovation', 'Business & Finance', 'Networking & Community', 'Workshop & Training', 'Conference & Summit', 'Product Launch', 'Investment & Funding', 'Marketing & Growth', 'Leadership & Management'].map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-semibold text-[#2E2E2F]/55 uppercase tracking-wide ml-0.5">Target Audience</label>
+                            <label className="text-[10px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/55 uppercase tracking-wide ml-0.5">Target Audience</label>
                             <select
                                 value={audience}
                                 onChange={e => setAudience(e.target.value)}
-                                className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[12px] font-medium outline-none focus:border-[#38BDF2] transition-colors"
+                                className="w-full px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-[12px] font-medium outline-none focus:border-[#38BDF2] transition-colors"
                             >
                                 {['Founders & Entrepreneurs', 'Business Owners & SMEs', 'Students & Recent Graduates', 'Tech Professionals & Developers', 'Investors & VCs', 'Marketing & Sales Professionals', 'C-Suite & Executives', 'Freelancers & Creatives', 'Non-Profit & Social Enterprises', 'General Public'].map(a => <option key={a} value={a}>{a}</option>)}
                             </select>
@@ -986,7 +1034,7 @@ const AISuggestPanel: React.FC<{
 
                         {/* Event Format — read-only display, taken from form */}
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-semibold text-[#2E2E2F]/55 uppercase tracking-wide ml-0.5">Event Format</label>
+                            <label className="text-[10px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/55 uppercase tracking-wide ml-0.5">Event Format</label>
                             <div className="grid grid-cols-3 gap-2">
                                 {(['ONSITE', 'ONLINE', 'HYBRID'] as const).map(f => (
                                     <div
@@ -994,19 +1042,19 @@ const AISuggestPanel: React.FC<{
                                         className={`py-2.5 rounded-xl border-2 text-[9px] font-black uppercase tracking-widest text-center select-none pointer-events-none
                                             ${format === f
                                                 ? 'border-[#38BDF2]/60 bg-[#38BDF2]/10 text-[#38BDF2]'
-                                                : 'border-[#2E2E2F]/08 bg-[#2E2E2F]/04 text-[#2E2E2F]/20'
+                                                : 'border-[#2E2E2F]/08 bg-[#2E2E2F]/04 text-[#2E2E2F] dark:text-white dark:text-white/20'
                                             }`}
                                     >
                                         {f === 'ONSITE' ? 'In-Person' : f === 'ONLINE' ? 'Online' : 'Hybrid'}
                                     </div>
                                 ))}
                             </div>
-                            <p className="text-[11px] text-[#2E2E2F]/40 font-semibold ml-0.5 mt-1">Auto-set from your form · change in Step 2</p>
+                            <p className="text-[11px] text-[#2E2E2F] dark:text-white dark:text-white/40 font-semibold ml-0.5 mt-1">Auto-set from your form · change in Step 2</p>
                         </div>
 
                         {/* Tone */}
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-semibold text-[#2E2E2F]/55 uppercase tracking-wide ml-0.5">Tone / Vibe</label>
+                            <label className="text-[10px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/55 uppercase tracking-wide ml-0.5">Tone / Vibe</label>
                             <div className="grid grid-cols-2 gap-2">
                                 {['Inspirational', 'Professional', 'Casual & Fun', 'Urgent & Exclusive'].map(t => (
                                     <button
@@ -1016,7 +1064,7 @@ const AISuggestPanel: React.FC<{
                                         className={`py-2.5 rounded-xl border-2 text-[9px] font-black uppercase tracking-widest transition-all
                                             ${tone === t
                                                 ? 'border-[#38BDF2] bg-[#38BDF2]/10 text-[#38BDF2]'
-                                                : 'border-[#2E2E2F]/15 bg-[#F2F2F2] text-[#2E2E2F]/40 hover:border-[#2E2E2F]/25 hover:text-[#2E2E2F]/60'
+                                                : 'border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white/40 hover:border-[#2E2E2F]/25 hover:text-[#2E2E2F] dark:text-white dark:text-white/60'
                                             }`}
                                     >
                                         {t}
@@ -1050,7 +1098,7 @@ const AISuggestPanel: React.FC<{
 
                     {/* Error */}
                     {error && (
-                        <div className="p-4 bg-[#F2F2F2] border-2 border-red-200 rounded-2xl flex items-start gap-3">
+                        <div className="p-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-red-200 rounded-2xl flex items-start gap-3">
                             <ICONS.AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                             <p className="text-[11px] font-semibold text-red-600 leading-relaxed">{error}</p>
                         </div>
@@ -1059,14 +1107,14 @@ const AISuggestPanel: React.FC<{
                     {/* Suggestions list */}
                     {suggestions.length > 0 && (
                         <div className="space-y-3">
-                            <p className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-[0.2em]">Click a suggestion to apply it</p>
+                            <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase tracking-[0.2em]">Click a suggestion to apply it</p>
                             {suggestions.map((s, idx) => (
                                 <div
                                     key={idx}
                                     className={`p-4 rounded-2xl border-2 cursor-pointer transition-all group
                                         ${applied === idx
                                             ? 'border-[#38BDF2]/40 bg-[#38BDF2]/05 scale-[0.99]'
-                                            : 'border-[#2E2E2F]/12 bg-[#F2F2F2] hover:border-[#38BDF2]/40 hover:shadow-sm'
+                                            : 'border-[#2E2E2F]/12 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] hover:border-[#38BDF2]/40 hover:shadow-sm'
                                         }`}
                                     onClick={() => handleApply(idx)}
                                 >
@@ -1075,14 +1123,14 @@ const AISuggestPanel: React.FC<{
                                             <span className={`w-5 h-5 rounded-lg text-[9px] font-black flex items-center justify-center shrink-0 ${applied === idx ? 'bg-[#38BDF2] text-white' : 'bg-[#38BDF2]/15 text-[#38BDF2]'}`}>
                                                 {applied === idx ? '✓' : idx + 1}
                                             </span>
-                                            <p className="text-[12px] font-black text-[#2E2E2F] tracking-tight leading-tight truncate">{s.eventName}</p>
+                                            <p className="text-[12px] font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight leading-tight truncate">{s.eventName}</p>
                                         </div>
                                         <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg shrink-0 transition-all
                                             ${applied === idx ? 'bg-[#38BDF2] text-white' : 'bg-[#38BDF2]/10 text-[#38BDF2] group-hover:bg-[#38BDF2] group-hover:text-white'}`}>
                                             {applied === idx ? 'Applied' : 'Use'}
                                         </span>
                                     </div>
-                                    <p className="text-[11px] text-[#2E2E2F]/55 font-medium leading-relaxed line-clamp-3 ml-7">{s.description}</p>
+                                    <p className="text-[11px] text-[#2E2E2F] dark:text-white dark:text-white/55 font-medium leading-relaxed line-clamp-3 ml-7">{s.description}</p>
                                 </div>
                             ))}
                         </div>
@@ -1096,8 +1144,8 @@ const AISuggestPanel: React.FC<{
                                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                                 </svg>
                             </div>
-                            <p className="text-[10px] font-black text-[#2E2E2F]/25 uppercase tracking-widest">Select context above</p>
-                            <p className="text-[9px] text-[#2E2E2F]/20 font-medium mt-1">then click Generate Suggestions</p>
+                            <p className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/25 uppercase tracking-widest">Select context above</p>
+                            <p className="text-[9px] text-[#2E2E2F] dark:text-white dark:text-white/20 font-medium mt-1">then click Generate Suggestions</p>
                         </div>
                     )}
                 </div>
@@ -1164,14 +1212,14 @@ const AIFieldAssist: React.FC<{
         <>
             {/* Backdrop */}
             <div
-                className="fixed inset-0 z-[9998] bg-[#2E2E2F]/50 transition-opacity"
+                className="fixed inset-0 z-[9998] bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/50 transition-opacity"
                 onClick={handleClose}
             />
             {/* Compact centered modal */}
             <div className="fixed inset-0 z-[9999] flex items-center justify-center p-5 pointer-events-none">
-                <div className="w-full max-w-[420px] bg-[#F2F2F2] rounded-3xl shadow-2xl pointer-events-auto animate-in zoom-in-95 fade-in duration-200">
+                <div className="w-full max-w-[420px] bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-3xl shadow-2xl pointer-events-auto animate-in zoom-in-95 fade-in duration-200">
                     {/* Header */}
-                    <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[#2E2E2F]/10">
+                    <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[#2E2E2F]/10 dark:border-white/10">
                         <div className="flex items-center gap-2.5">
                             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#38BDF2] to-[#0ea5e9] flex items-center justify-center shadow-md shrink-0">
                                 <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1179,11 +1227,11 @@ const AIFieldAssist: React.FC<{
                                 </svg>
                             </div>
                             <div>
-                                <p className="text-[12px] font-black text-[#2E2E2F] tracking-tight">AI: {fieldLabel}</p>
-                                <p className="text-[9px] font-semibold text-[#2E2E2F]/35 uppercase tracking-widest">StartupLab AI</p>
+                                <p className="text-[12px] font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight">AI: {fieldLabel}</p>
+                                <p className="text-[9px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/35 uppercase tracking-widest">StartupLab AI</p>
                             </div>
                         </div>
-                        <button type="button" onClick={handleClose} className="w-7 h-7 rounded-lg border border-[#2E2E2F]/15 flex items-center justify-center text-[#2E2E2F]/35 hover:text-[#2E2E2F] transition-colors">
+                        <button type="button" onClick={handleClose} className="w-7 h-7 rounded-lg border border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 flex items-center justify-center text-[#2E2E2F] dark:text-white dark:text-white/35 hover:text-[#2E2E2F] dark:text-white dark:text-white transition-colors">
                             <ICONS.X className="w-3 h-3" />
                         </button>
                     </div>
@@ -1192,16 +1240,16 @@ const AIFieldAssist: React.FC<{
                     <div className="px-6 pt-5 pb-6 space-y-4">
                         {/* Context question */}
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-[#2E2E2F]/50 uppercase tracking-[0.15em]">{cfg.question}</label>
+                            <label className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/50 uppercase tracking-[0.15em]">{cfg.question}</label>
                             <textarea
-                                className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl text-[12px] font-medium outline-none resize-none focus:border-[#38BDF2] transition-colors placeholder:text-[#2E2E2F]/25 min-h-[72px]"
+                                className="w-full px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl text-[12px] font-medium outline-none resize-none focus:border-[#38BDF2] transition-colors placeholder:text-[#2E2E2F] dark:text-white dark:text-white/25 min-h-[72px]"
                                 placeholder={cfg.placeholder}
                                 value={context}
                                 onChange={e => setContext(e.target.value)}
                                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleGenerate(); } }}
                                 autoFocus
                             />
-                            <p className="text-[9px] text-[#2E2E2F]/25 font-medium ml-0.5">Press Enter to generate</p>
+                            <p className="text-[9px] text-[#2E2E2F] dark:text-white dark:text-white/25 font-medium ml-0.5">Press Enter to generate</p>
                         </div>
 
                         {/* Generate */}
@@ -1228,7 +1276,7 @@ const AIFieldAssist: React.FC<{
 
                         {/* Error */}
                         {error && (
-                            <div className="flex items-start gap-2.5 p-3.5 bg-[#F2F2F2] border-2 border-red-200 rounded-2xl">
+                            <div className="flex items-start gap-2.5 p-3.5 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-red-200 rounded-2xl">
                                 <ICONS.AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0 mt-0.5" />
                                 <p className="text-[11px] font-semibold text-red-600">{error}</p>
                             </div>
@@ -1237,16 +1285,16 @@ const AIFieldAssist: React.FC<{
                         {/* Suggestions */}
                         {suggestions.length > 0 && (
                             <div className="space-y-2">
-                                <p className="text-[9px] font-black text-[#2E2E2F]/35 uppercase tracking-[0.15em]">Click to apply</p>
+                                <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/35 uppercase tracking-[0.15em]">Click to apply</p>
                                 {suggestions.map((s, idx) => (
                                     <button
                                         key={idx}
                                         type="button"
                                         onClick={() => handleApply(s)}
-                                        className="w-full flex items-start gap-3 p-3.5 rounded-2xl border-2 border-[#2E2E2F]/10 bg-[#F2F2F2] text-left hover:border-[#38BDF2]/50 hover:shadow-sm transition-all group"
+                                        className="w-full flex items-start gap-3 p-3.5 rounded-2xl border-2 border-[#2E2E2F]/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-left hover:border-[#38BDF2]/50 hover:shadow-sm transition-all group"
                                     >
                                         <span className="w-5 h-5 rounded-lg bg-[#38BDF2]/15 text-[#38BDF2] text-[9px] font-black flex items-center justify-center shrink-0 group-hover:bg-[#38BDF2] group-hover:text-white transition-colors mt-0.5">{idx + 1}</span>
-                                        <span className="text-[12px] font-semibold text-[#2E2E2F] leading-relaxed flex-1">{s}</span>
+                                        <span className="text-[12px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white leading-relaxed flex-1">{s}</span>
                                     </button>
                                 ))}
                             </div>
@@ -1255,8 +1303,8 @@ const AIFieldAssist: React.FC<{
                         {/* Empty state */}
                         {!loading && !suggestions.length && !error && (
                             <div className="py-5 text-center border-2 border-dashed border-[#2E2E2F]/08 rounded-2xl">
-                                <p className="text-[10px] font-black text-[#2E2E2F]/20 uppercase tracking-widest">Add context above</p>
-                                <p className="text-[9px] text-[#2E2E2F]/15 font-medium mt-0.5">then click Generate</p>
+                                <p className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/20 uppercase tracking-widest">Add context above</p>
+                                <p className="text-[9px] text-[#2E2E2F] dark:text-white dark:text-white/15 font-medium mt-0.5">then click Generate</p>
                             </div>
                         )}
                     </div>
@@ -1322,7 +1370,7 @@ const AIDescriptionGenerator: React.FC<{
     if (suggestions.length > 0) {
         return (
             <div className="flex animate-in fade-in slide-in-from-right-2 duration-300">
-                <div className="flex items-center bg-[#F2F2F2] border border-[#2E2E2F]/15 rounded-xl p-1 gap-1 shadow-sm">
+                <div className="flex items-center bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl p-1 gap-1 shadow-sm">
                     {suggestions.map((s, i) => {
                         const cleanS = s.replace(/[""]/g, '');
                         const isSelected = currentValue === cleanS;
@@ -1432,31 +1480,31 @@ const AIImageGenerator: React.FC<{
         <>
             <div className="fixed inset-0 z-[10000] bg-[#2E2E2F]/60 backdrop-blur-md transition-opacity" onClick={() => setIsOpen(false)} />
             <div className="fixed inset-0 z-[10001] flex items-center justify-center p-5 pointer-events-none">
-                <div className="w-full max-w-[500px] bg-[#F2F2F2] rounded-3xl shadow-2xl pointer-events-auto overflow-hidden animate-in zoom-in-95 fade-in duration-200">
-                    <div className="px-6 pt-6 pb-4 border-b border-[#2E2E2F]/10 flex items-center justify-between">
+                <div className="w-full max-w-[500px] bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-3xl shadow-2xl pointer-events-auto overflow-hidden animate-in zoom-in-95 fade-in duration-200">
+                    <div className="px-6 pt-6 pb-4 border-b border-[#2E2E2F]/10 dark:border-white/10 flex items-center justify-between">
                         <div>
-                            <h3 className="text-[14px] font-black text-[#2E2E2F] uppercase tracking-tight">AI Image Studio</h3>
-                            <p className="text-[9px] font-semibold text-[#2E2E2F]/35 uppercase tracking-widest mt-0.5">Powered by StartupLab AI</p>
+                            <h3 className="text-[14px] font-black text-[#2E2E2F] dark:text-white dark:text-white uppercase tracking-tight">AI Image Studio</h3>
+                            <p className="text-[9px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/35 uppercase tracking-widest mt-0.5">Powered by StartupLab AI</p>
                         </div>
                         <button
                             type="button"
                             onClick={() => setIsOpen(false)}
-                            className="w-8 h-8 rounded-xl border border-[#2E2E2F]/15 flex items-center justify-center text-[#2E2E2F]/35 hover:text-[#2E2E2F] transition-colors"
+                            className="w-8 h-8 rounded-xl border border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 flex items-center justify-center text-[#2E2E2F] dark:text-white dark:text-white/35 hover:text-[#2E2E2F] dark:text-white dark:text-white transition-colors"
                         >
                             <ICONS.X className="w-4 h-4" />
                         </button>
                     </div>
                     <div className="p-6 space-y-5">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-[#2E2E2F]/50 uppercase tracking-[0.15em] ml-1">What should the image look like?</label>
+                            <label className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/50 uppercase tracking-[0.15em] ml-1">What should the image look like?</label>
                             <textarea
-                                className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl text-[12px] font-medium outline-none resize-none focus:border-[#38BDF2] transition-colors placeholder:text-[#2E2E2F]/25 min-h-[80px]"
+                                className="w-full px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl text-[12px] font-medium outline-none resize-none focus:border-[#38BDF2] transition-colors placeholder:text-[#2E2E2F] dark:text-white dark:text-white/25 min-h-[80px]"
                                 placeholder={eventName ? `e.g. A vibrant banner for "${eventName}"...` : "e.g. A futuristic startup hub in BGC, cinematic lighting..."}
                                 value={prompt}
                                 onChange={e => setPrompt(e.target.value)}
                             />
                         </div>
-                        <div className="relative aspect-video rounded-2xl overflow-hidden border-2 border-[#2E2E2F]/10 bg-[#2E2E2F]/05 group">
+                        <div className="relative aspect-video rounded-2xl overflow-hidden border-2 border-[#2E2E2F]/10 dark:border-white/10 bg-[#2E2E2F]/05 group">
                             {previewUrl && !imgError ? (
                                 <>
                                     <img
@@ -1488,28 +1536,28 @@ const AIImageGenerator: React.FC<{
                                     <div className="w-10 h-10 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center">
                                         <ICONS.AlertTriangle className="w-5 h-5 text-red-400" />
                                     </div>
-                                    <p className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest">Generation Failed</p>
-                                    <p className="text-[9px] text-[#2E2E2F]/30 font-medium leading-relaxed">Pollinations AI is busy or rate-limited. Try again in a few seconds or use a simpler prompt.</p>
+                                    <p className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest">Generation Failed</p>
+                                    <p className="text-[9px] text-[#2E2E2F] dark:text-white dark:text-white/30 font-medium leading-relaxed">Pollinations AI is busy or rate-limited. Try again in a few seconds or use a simpler prompt.</p>
                                     <button type="button" onClick={() => { setImgError(false); handleGenerate(); }} className="mt-1 px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-white hover:opacity-90 transition-all">
                                         Retry
                                     </button>
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center h-full gap-3">
-                                    <ICONS.Image className="w-8 h-8 text-[#2E2E2F]/15" />
-                                    <p className="text-[10px] font-black text-[#2E2E2F]/20 uppercase tracking-widest text-center px-10 leading-relaxed">Your AI Masterpiece will appear here</p>
+                                    <ICONS.Image className="w-8 h-8 text-[#2E2E2F] dark:text-white dark:text-white/15" />
+                                    <p className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/20 uppercase tracking-widest text-center px-10 leading-relaxed">Your AI Masterpiece will appear here</p>
                                 </div>
                             )}
 
                             {loading && (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#F2F2F2]/20 backdrop-blur-[2px]">
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]/20 backdrop-blur-[2px]">
                                     <div className="w-10 h-10 border-[3.5px] border-[#38BDF2] border-t-transparent rounded-full animate-spin mb-4" />
-                                    <p className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] animate-pulse">Turbo AI is Painting...</p>
-                                    <p className="text-[8px] text-[#2E2E2F]/50 font-bold uppercase tracking-widest mt-1">High-quality banner in progress</p>
+                                    <p className="text-[11px] font-black text-[#2E2E2F] dark:text-white dark:text-white uppercase tracking-[0.2em] animate-pulse">Turbo AI is Painting...</p>
+                                    <p className="text-[8px] text-[#2E2E2F] dark:text-white dark:text-white/50 font-bold uppercase tracking-widest mt-1">High-quality banner in progress</p>
                                     <button
                                         type="button"
                                         onClick={() => { if (loadingTimerRef.current) { clearTimeout(loadingTimerRef.current); loadingTimerRef.current = null; } setLoading(false); setPreviewUrl(''); }}
-                                        className="mt-4 px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border border-[#2E2E2F]/20 text-[#2E2E2F]/50 hover:text-red-500 hover:border-red-300 transition-all bg-white/60"
+                                        className="mt-4 px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border border-[#2E2E2F]/20 text-[#2E2E2F] dark:text-white dark:text-white/50 hover:text-red-500 hover:border-red-300 transition-all bg-white/60"
                                     >
                                         Cancel
                                     </button>
@@ -1594,14 +1642,14 @@ const WizardStepContent = React.memo(({
             {wizardStep === 1 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
                     <div className="md:col-span-2">
-                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Organizer Name</label>
-                        <select value={organizerProfile?.organizerId || ''} disabled className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[12px] font-semibold tracking-wide outline-none">
+                        <label className="block text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide mb-2 ml-1">Organizer Name</label>
+                        <select value={organizerProfile?.organizerId || ''} disabled className="w-full px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-[12px] font-semibold tracking-wide outline-none">
                             {organizerProfile?.organizerId ? <option value={organizerProfile.organizerId}>{organizerProfile.organizerName}</option> : <option value="">No organizer profile set</option>}
                         </select>
                     </div>
                     {/* Event Name with per-field AI */}
                     <div className="md:col-span-2">
-                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Event Name</label>
+                        <label className="block text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide mb-2 ml-1">Event Name</label>
                         <div className="relative">
                             <Input placeholder="e.g. Founder Growth Summit 2026" value={formData.eventName} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, eventName: e.target.value }))} className="pr-20" />
                             <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -1617,10 +1665,10 @@ const WizardStepContent = React.memo(({
                     </div>
                     {/* Description with Instant AI Generation from Title */}
                     <div className="md:col-span-2">
-                        <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Description</label>
+                        <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide mb-2 ml-1">Description</label>
                         <div className="relative">
                             <textarea
-                                className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-[1.5rem] text-sm min-h-[140px] focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors outline-none pb-14"
+                                className="w-full px-5 py-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-[1.5rem] text-sm min-h-[140px] focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors outline-none pb-14"
                                 placeholder="Describe your event... or click ✨ Generate below to draft based on your title!"
                                 value={formData.description}
                                 onChange={(e: any) => setFormData((prev: any) => ({ ...prev, description: e.target.value }))}
@@ -1641,12 +1689,12 @@ const WizardStepContent = React.memo(({
                     <div className="md:col-span-2">
                         <div className="flex flex-col gap-2 mb-1 px-1">
                             <div className="flex items-center justify-between">
-                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Brand Color</label>
+                                <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Brand Color</label>
                                 {!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) && (
                                     <Badge type="info" className="text-[8px] px-2 py-0.5 bg-[#2E2E2F] text-white">Premium Feature</Badge>
                                 )}
                             </div>
-                            <div className="flex items-center gap-4 p-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl relative overflow-hidden">
+                            <div className="flex items-center gap-4 p-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl relative overflow-hidden">
                                 <input
                                     type="color"
                                     value={formData.brandColor || '#38BDF2'}
@@ -1655,11 +1703,11 @@ const WizardStepContent = React.memo(({
                                     className={`w-12 h-12 rounded-lg cursor-pointer border-none p-0 bg-transparent ${!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) ? 'opacity-30' : ''}`}
                                 />
                                 <div className="flex-1">
-                                    <p className="text-xs font-bold text-[#2E2E2F]">Primary Accent Color</p>
-                                    <p className="text-[10px] text-[#2E2E2F]/50">Used for buttons, links, and highlights on your event page.</p>
+                                    <p className="text-xs font-bold text-[#2E2E2F] dark:text-white dark:text-white">Primary Accent Color</p>
+                                    <p className="text-[10px] text-[#2E2E2F] dark:text-white dark:text-white/50">Used for buttons, links, and highlights on your event page.</p>
                                 </div>
                                 {!(organizerProfile?.plan?.features?.enable_custom_branding || organizerProfile?.plan?.features?.custom_branding) && (
-                                    <div className="absolute inset-0 bg-[#F2F2F2]/40 backdrop-blur-[1px] flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]/40 backdrop-blur-[1px] flex items-center justify-center">
                                         <Button variant="outline" className="text-[8px] py-1 px-3 border-[#2E2E2F]/20" onClick={() => navigate('/subscription')}>Upgrade to Unlock</Button>
                                     </div>
                                 )}
@@ -1669,7 +1717,7 @@ const WizardStepContent = React.memo(({
                     <div className="md:col-span-2">
                         <div className="flex flex-col gap-2 mb-1 px-1">
                             <div className="flex items-center justify-between">
-                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Visual Media</label>
+                                <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Visual Media</label>
                                 <AIImageGenerator
                                     onApply={url => setFormData((p: any) => ({ ...p, imageUrl: url }))}
                                     showToast={showToast}
@@ -1677,7 +1725,7 @@ const WizardStepContent = React.memo(({
                                 />
                             </div>
                             <div
-                                className="relative group w-full h-44 rounded-[1.5rem] border-2 border-dashed border-[#2E2E2F]/30 bg-[#F2F2F2] flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#38BDF2] hover:bg-[#38BDF2]/10 transition-colors"
+                                className="relative group w-full h-44 rounded-[1.5rem] border-2 border-dashed border-[#2E2E2F]/30 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#38BDF2] hover:bg-[#38BDF2]/10 transition-colors"
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 {formData.imageUrl ? (
@@ -1689,11 +1737,11 @@ const WizardStepContent = React.memo(({
                                     />
                                 ) : (
                                     <div className="flex flex-col items-center justify-center w-full h-full">
-                                        <svg className="w-10 h-10 text-[#2E2E2F]/40 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="2.5" /><path d="M21 15l-5-5L5 21" /></svg>
-                                        <span className="text-[12px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Upload Event Image</span>
+                                        <svg className="w-10 h-10 text-[#2E2E2F] dark:text-white dark:text-white/40 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="2.5" /><path d="M21 15l-5-5L5 21" /></svg>
+                                        <span className="text-[12px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Upload Event Image</span>
                                     </div>
                                 )}
-                                <div className="absolute bottom-3 right-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-lg px-3 py-1 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors pointer-events-none">Browse</div>
+                                <div className="absolute bottom-3 right-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-lg px-3 py-1 text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white uppercase tracking-wide group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors pointer-events-none">Browse</div>
                             </div>
                             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
                         </div>
@@ -1738,9 +1786,9 @@ const WizardStepContent = React.memo(({
                     />
                     <Input label="End Time" type="time" value={formData.endTime} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, endTime: e.target.value }))} />
                     <div>
-                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Location Type</label>
+                        <label className="block text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide mb-2 ml-1">Location Type</label>
                         <select
-                            className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]"
+                            className="w-full px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]"
                             value={formData.locationType}
                             onChange={(e) => setFormData((prev: any) => ({ ...prev, locationType: e.target.value as Event['locationType'] }))}
                         >
@@ -1750,16 +1798,16 @@ const WizardStepContent = React.memo(({
                         </select>
                     </div>
                     <div>
-                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Timezone</label>
+                        <label className="block text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide mb-2 ml-1">Timezone</label>
                         <Input value={formData.timezone} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, timezone: e.target.value }))} />
                     </div>
                     <div className="md:col-span-2 space-y-8">
-                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/15">
+                        <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[1.5rem] border border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
                             <div className="flex items-center gap-3 mb-5">
                                 <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]"><ICONS.MapPin className="w-4 h-4" /></div>
-                                <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Venue Details</h4>
+                                <h4 className="text-[12px] font-black text-[#2E2E2F] dark:text-white dark:text-white uppercase tracking-widest">Venue Details</h4>
                             </div>
-                            <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">{formData.locationType === 'ONLINE' ? 'Physical Hub (Optional)' : 'Venue Address'}</label>
+                            <label className="block text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide mb-2 ml-1">{formData.locationType === 'ONLINE' ? 'Physical Hub (Optional)' : 'Venue Address'}</label>
                             <div className="relative">
                                 <Input placeholder="e.g. Global Tech Center" value={formData.location} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, location: e.target.value }))} className="pr-20" />
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -1774,10 +1822,10 @@ const WizardStepContent = React.memo(({
                             </div>
                             <div className="mt-4"><OnsiteLocationAssistant value={formData.location} onChange={applyLocationValue} /></div>
                         </div>
-                        <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border border-[#2E2E2F]/15">
+                        <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[1.5rem] border border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
                             <div className="flex items-center gap-3 mb-5">
                                 <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]"><ICONS.Monitor className="w-4 h-4" /></div>
-                                <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Broadcast Settings</h4>
+                                <h4 className="text-[12px] font-black text-[#2E2E2F] dark:text-white dark:text-white uppercase tracking-widest">Broadcast Settings</h4>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
@@ -1795,7 +1843,7 @@ const WizardStepContent = React.memo(({
                                         </div>
                                     </div>
                                     {(formData.streamingUrl.includes('youtube.com') || formData.streamingUrl.includes('youtu.be')) ? (
-                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#F2F2F2]/5 border border-[#F2F2F2]/5">
+                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]/5 border border-[#F2F2F2]/5">
                                             {(() => {
                                                 const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/|live\/)([^#\&\?]*).*/;
                                                 const match = formData.streamingUrl.match(regExp);
@@ -1806,11 +1854,11 @@ const WizardStepContent = React.memo(({
                                             })()}
                                         </div>
                                     ) : (formData.streamingUrl.includes('facebook.com') || formData.streamingUrl.includes('fb.watch')) ? (
-                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#F2F2F2]/5 border border-[#F2F2F2]/5">
+                                        <div className="relative aspect-video rounded-2xl overflow-hidden bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]/5 border border-[#F2F2F2]/5">
                                             <iframe className="absolute inset-0 w-full h-full" src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(formData.streamingUrl)}&show_text=0&width=560&t=0`} title="Facebook Preview" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col items-center justify-center p-10 rounded-2xl bg-[#F2F2F2]/5 border border-[#F2F2F2]/5 border-dashed">
+                                        <div className="flex flex-col items-center justify-center p-10 rounded-2xl bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]/5 border border-[#F2F2F2]/5 border-dashed">
                                             <ICONS.Monitor className="w-8 h-8 text-[#F2F2F2]/20 mb-3" />
                                             <p className="text-[#F2F2F2]/40 text-[11px] text-center font-medium">This platform doesn't support direct previews, but the link will be provided to attendees.</p>
                                         </div>
@@ -1830,21 +1878,21 @@ const WizardStepContent = React.memo(({
                     <Input label="Registration Close Date" type="date" value={formData.regCloseDate} onChange={(e: any) => { const val = e.target.value; const today = new Date().toISOString().split('T')[0]; if (val < today) { showToast('error', 'Registration close date cannot be in the past.'); return; } if (formData.regOpenDate && val < formData.regOpenDate) { showToast('error', 'Registration close date cannot be before open date.'); return; } setFormData((prev: any) => ({ ...prev, regCloseDate: val })); }} />
                     <Input label="Registration Close Time" type="time" value={formData.regCloseTime} onChange={(e: any) => setFormData((prev: any) => ({ ...prev, regCloseTime: e.target.value }))} />
                     <div className="md:col-span-2 space-y-4">
-                        <div className="p-5 rounded-2xl border border-[#2E2E2F]/15 bg-[#F2F2F2] flex items-center justify-between group relative overflow-hidden">
+                        <div className="p-5 rounded-2xl border border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] flex items-center justify-between group relative overflow-hidden">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]"><ICONS.CreditCard className="w-5 h-5" /></div>
-                                <div><p className="text-sm font-bold text-[#2E2E2F]">Enable Discount Codes</p><p className="text-[10px] text-[#2E2E2F]/50">Allow promotional codes during checkout.</p></div>
+                                <div><p className="text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white">Enable Discount Codes</p><p className="text-[10px] text-[#2E2E2F] dark:text-white dark:text-white/50">Allow promotional codes during checkout.</p></div>
                             </div>
                             <div className="flex items-center gap-3">
                                 {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) && <Badge type="info" className="text-[8px] font-black bg-[#2E2E2F] text-white">PRO</Badge>}
                                 <input type="checkbox" checked={formData.enableDiscountCodes} onChange={(e) => setFormData((prev: any) => ({ ...prev, enableDiscountCodes: e.target.checked }))} disabled={!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes)} className="w-6 h-6 accent-[#38BDF2] cursor-pointer disabled:opacity-30" />
                             </div>
-                            {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) && <div className="absolute inset-0 bg-[#F2F2F2]/40 backdrop-blur-[1px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="outline" className="text-[8px] py-1 px-3 border-[#2E2E2F]/20 bg-[#F2F2F2]" onClick={() => navigate('/subscription')}>Upgrade to Unlock</Button></div>}
+                            {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) && <div className="absolute inset-0 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]/40 backdrop-blur-[1px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="outline" className="text-[8px] py-1 px-3 border-[#2E2E2F]/20 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]" onClick={() => navigate('/subscription')}>Upgrade to Unlock</Button></div>}
                         </div>
-                        <div className="rounded-2xl border border-[#2E2E2F]/15 bg-[#F2F2F2] px-5 py-4">
-                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2E2E2F]/45">Ticket Setup Rule</p>
-                            <p className="mt-2 text-sm font-semibold text-[#2E2E2F]">Publishing is locked until at least one ticket type is configured.</p>
-                            <p className="mt-1 text-[12px] text-[#2E2E2F]/60">Clicking next will save draft and open ticket setup automatically.</p>
+                        <div className="rounded-2xl border border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-5 py-4">
+                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#2E2E2F] dark:text-white dark:text-white/45">Ticket Setup Rule</p>
+                            <p className="mt-2 text-sm font-semibold text-[#2E2E2F] dark:text-white dark:text-white">Publishing is locked until at least one ticket type is configured.</p>
+                            <p className="mt-1 text-[12px] text-[#2E2E2F] dark:text-white dark:text-white/60">Clicking next will save draft and open ticket setup automatically.</p>
                         </div>
                     </div>
                 </div>
@@ -1853,27 +1901,27 @@ const WizardStepContent = React.memo(({
             {wizardStep === 4 && (
                 <div className="space-y-6">
                     {!(organizerProfile?.plan?.features?.enable_discount_codes || organizerProfile?.plan?.features?.discount_codes) ? (
-                        <div className="p-10 text-center bg-[#F2F2F2] rounded-[2rem] border-2 border-[#2E2E2F]/15">
+                        <div className="p-10 text-center bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
                             <div className="w-16 h-16 bg-[#2E2E2F] text-white rounded-2xl flex items-center justify-center mx-auto mb-6"><ICONS.Lock className="w-8 h-8" /></div>
-                            <h3 className="text-xl font-black text-[#2E2E2F] tracking-tight">Promotions Locked</h3>
-                            <p className="text-[#2E2E2F]/60 text-sm mt-2 max-w-xs mx-auto">Upgrade to a Pro or Enterprise plan to enable discount codes and boost your ticket sales.</p>
+                            <h3 className="text-xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight">Promotions Locked</h3>
+                            <p className="text-[#2E2E2F] dark:text-white dark:text-white/60 text-sm mt-2 max-w-xs mx-auto">Upgrade to a Pro or Enterprise plan to enable discount codes and boost your ticket sales.</p>
                             <Button className="mt-6 bg-[#38BDF2]" onClick={() => navigate('/subscription')}>View Plans</Button>
                         </div>
                     ) : (
                         <div className="space-y-6">
                             <div className="flex items-center justify-between">
-                                <div><h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Active Promotions</h4><p className="text-[10px] text-[#2E2E2F]/50 mt-1 uppercase tracking-wider">Total: {promotions.length}</p></div>
+                                <div><h4 className="text-[12px] font-black text-[#2E2E2F] dark:text-white dark:text-white uppercase tracking-widest">Active Promotions</h4><p className="text-[10px] text-[#2E2E2F] dark:text-white dark:text-white/50 mt-1 uppercase tracking-wider">Total: {promotions.length}</p></div>
                                 <Button size="sm" onClick={() => { setEditingPromotion({ new: true }); setPromoForm({ code: '', discountType: 'PERCENTAGE', discountValue: '10', maxUses: '100', validFrom: '', validUntil: '', isActive: true }); }}>Add Code</Button>
                             </div>
                             {editingPromotion && (
-                                <div className="p-6 bg-[#F2F2F2] rounded-[1.5rem] border-2 border-[#38BDF2]/30 space-y-5">
+                                <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[1.5rem] border-2 border-[#38BDF2]/30 space-y-5">
                                     <div className="flex items-center justify-between">
                                         <h5 className="text-[11px] font-black uppercase tracking-widest">{editingPromotion.new ? 'New Promotion' : 'Edit Promotion'}</h5>
-                                        <button onClick={() => setEditingPromotion(null)} className="text-[#2E2E2F]/30 hover:text-red-500 transition-colors"><ICONS.X className="w-4 h-4" /></button>
+                                        <button onClick={() => setEditingPromotion(null)} className="text-[#2E2E2F] dark:text-white dark:text-white/30 hover:text-red-500 transition-colors"><ICONS.X className="w-4 h-4" /></button>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div>
-                                            <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Promo Code</label>
+                                            <label className="block text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide mb-2 ml-1">Promo Code</label>
                                             <div className="relative">
                                                 <Input placeholder="SALE20" value={promoForm.code} onChange={(e: any) => setPromoForm({ ...promoForm, code: e.target.value.toUpperCase() })} className="pr-20" />
                                                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -1888,8 +1936,8 @@ const WizardStepContent = React.memo(({
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide ml-1">Discount Type</label>
-                                            <select className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none" value={promoForm.discountType} onChange={(e) => setPromoForm({ ...promoForm, discountType: e.target.value })}>
+                                            <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide ml-1">Discount Type</label>
+                                            <select className="w-full px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none" value={promoForm.discountType} onChange={(e) => setPromoForm({ ...promoForm, discountType: e.target.value })}>
                                                 <option value="PERCENTAGE">Percentage (%)</option>
                                                 <option value="FIXED">Fixed Amount (PHP)</option>
                                             </select>
@@ -1900,7 +1948,7 @@ const WizardStepContent = React.memo(({
                                         <Input label="Valid Until" type="date" value={promoForm.validUntil} onChange={(e: any) => { const val = e.target.value; const today = new Date().toISOString().split('T')[0]; if (val < today) { showToast('error', 'Promotion valid until date cannot be in the past.'); return; } if (promoForm.validFrom && val < promoForm.validFrom) { showToast('error', 'Validation expiry date cannot be before start date.'); return; } setPromoForm({ ...promoForm, validUntil: val }); }} />
                                         <div className="md:col-span-2 flex items-center gap-3">
                                             <input type="checkbox" id="isActive" checked={promoForm.isActive} onChange={(e) => setPromoForm({ ...promoForm, isActive: e.target.checked })} className="w-5 h-5 accent-[#38BDF2]" />
-                                            <label htmlFor="isActive" className="text-xs font-bold text-[#2E2E2F]">Active and usable</label>
+                                            <label htmlFor="isActive" className="text-xs font-bold text-[#2E2E2F] dark:text-white dark:text-white">Active and usable</label>
                                         </div>
                                     </div>
                                     <div className="flex gap-3 pt-2">
@@ -1910,14 +1958,14 @@ const WizardStepContent = React.memo(({
                                 </div>
                             )}
                             <div className="space-y-3">
-                                {promotionsLoading ? <div className="py-10 text-center"><div className="w-6 h-6 border-2 border-[#38BDF2] border-t-transparent rounded-full animate-spin mx-auto"></div></div> : promotions.length === 0 ? <div className="py-10 text-center border-2 border-dashed border-[#2E2E2F]/15 rounded-2xl text-[#2E2E2F]/30 uppercase text-[10px] font-black tracking-widest">No promo codes active</div> : promotions.map(promo => (
-                                    <div key={promo.promotionId} className="flex items-center justify-between p-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl group border-l-4 border-l-[#38BDF2]">
+                                {promotionsLoading ? <div className="py-10 text-center"><div className="w-6 h-6 border-2 border-[#38BDF2] border-t-transparent rounded-full animate-spin mx-auto"></div></div> : promotions.length === 0 ? <div className="py-10 text-center border-2 border-dashed border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase text-[10px] font-black tracking-widest">No promo codes active</div> : promotions.map(promo => (
+                                    <div key={promo.promotionId} className="flex items-center justify-between p-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl group border-l-4 border-l-[#38BDF2]">
                                         <div>
-                                            <div className="flex items-center gap-2"><span className="font-black text-[#2E2E2F] tracking-tight">{promo.code}</span><Badge type={promo.isActive ? 'success' : 'neutral'} className="text-[8px] px-1.5 py-0">{promo.isActive ? 'Active' : 'Inactive'}</Badge></div>
-                                            <p className="text-[10px] text-[#2E2E2F]/50 mt-1 uppercase tracking-tight font-bold">{promo.discountType === 'PERCENTAGE' ? `${promo.discountValue}% Off` : `PHP ${promo.discountValue} Off`}<span className="mx-2">•</span>{promo.usedCount || 0} / {promo.maxUses} Uses</p>
+                                            <div className="flex items-center gap-2"><span className="font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight">{promo.code}</span><Badge type={promo.isActive ? 'success' : 'neutral'} className="text-[8px] px-1.5 py-0">{promo.isActive ? 'Active' : 'Inactive'}</Badge></div>
+                                            <p className="text-[10px] text-[#2E2E2F] dark:text-white dark:text-white/50 mt-1 uppercase tracking-tight font-bold">{promo.discountType === 'PERCENTAGE' ? `${promo.discountValue}% Off` : `PHP ${promo.discountValue} Off`}<span className="mx-2">•</span>{promo.usedCount || 0} / {promo.maxUses} Uses</p>
                                         </div>
                                         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => { setEditingPromotion(promo); setPromoForm({ code: promo.code, discountType: promo.discountType, discountValue: String(promo.discountValue), maxUses: String(promo.maxUses), validFrom: promo.validFrom ? promo.validFrom.split('T')[0] : '', validUntil: promo.validUntil ? promo.validUntil.split('T')[0] : '', isActive: promo.isActive }); }} className="p-2 hover:bg-[#38BDF2]/10 rounded-lg text-[#2E2E2F]"><ICONS.Edit className="w-4 h-4" /></button>
+                                            <button onClick={() => { setEditingPromotion(promo); setPromoForm({ code: promo.code, discountType: promo.discountType, discountValue: String(promo.discountValue), maxUses: String(promo.maxUses), validFrom: promo.validFrom ? promo.validFrom.split('T')[0] : '', validUntil: promo.validUntil ? promo.validUntil.split('T')[0] : '', isActive: promo.isActive }); }} className="p-2 hover:bg-[#38BDF2]/10 rounded-lg text-[#2E2E2F] dark:text-white dark:text-white"><ICONS.Edit className="w-4 h-4" /></button>
                                             <button onClick={() => handleDeletePromotion(promo.promotionId)} className="p-2 hover:bg-red-50 rounded-lg text-red-500"><ICONS.Trash className="w-4 h-4" /></button>
                                         </div>
                                     </div>
@@ -1931,23 +1979,23 @@ const WizardStepContent = React.memo(({
             {wizardStep === 5 && (
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div className={`rounded-2xl border px-4 py-4 ${isPersonalProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Account Profile</p>
-                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{isPersonalProfileReady ? 'Ready' : 'Incomplete'}</p>
+                        <div className={`rounded-2xl border px-4 py-4 ${isPersonalProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/45">Account Profile</p>
+                            <p className="mt-2 text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white">{isPersonalProfileReady ? 'Ready' : 'Incomplete'}</p>
                         </div>
-                        <div className={`rounded-2xl border px-4 py-4 ${isOrganizerProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Organization Profile</p>
-                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{isOrganizerProfileReady ? 'Ready' : 'Incomplete'}</p>
+                        <div className={`rounded-2xl border px-4 py-4 ${isOrganizerProfileReady ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/45">Organization Profile</p>
+                            <p className="mt-2 text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white">{isOrganizerProfileReady ? 'Ready' : 'Incomplete'}</p>
                         </div>
-                        <div className={`rounded-2xl border px-4 py-4 ${canPublishByTicketRule ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Ticket Setup</p>
-                            <p className="mt-2 text-sm font-bold text-[#2E2E2F]">{ticketReadinessLoading ? 'Checking...' : isEditMode ? `${activeEventTicketCount} ticket type(s)` : 'Save draft first'}</p>
+                        <div className={`rounded-2xl border px-4 py-4 ${canPublishByTicketRule ? 'border-[#38BDF2]/35 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/45">Ticket Setup</p>
+                            <p className="mt-2 text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white">{ticketReadinessLoading ? 'Checking...' : isEditMode ? `${activeEventTicketCount} ticket type(s)` : 'Save draft first'}</p>
                         </div>
                     </div>
                     <div>
-                        <label className="block text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide mb-2 ml-1">Event Status</label>
-                        <p className="mb-2 text-[11px] text-[#2E2E2F]/60">Current: <span className="font-bold text-[#2E2E2F]">{initialEventStatus}</span> · Choose final status below.</p>
-                        <select className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]" value={finalStatusDecision} onChange={(e) => { const nextStatus = e.target.value as EventStatus | ''; setFinalStatusDecision(nextStatus); if (nextStatus) { setFormData((prev: any) => ({ ...prev, status: nextStatus as EventStatus })); } }}>
+                        <label className="block text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide mb-2 ml-1">Event Status</label>
+                        <p className="mb-2 text-[11px] text-[#2E2E2F] dark:text-white dark:text-white/60">Current: <span className="font-bold text-[#2E2E2F] dark:text-white dark:text-white">{initialEventStatus}</span> · Choose final status below.</p>
+                        <select className="w-full px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]" value={finalStatusDecision} onChange={(e) => { const nextStatus = e.target.value as EventStatus | ''; setFinalStatusDecision(nextStatus); if (nextStatus) { setFormData((prev: any) => ({ ...prev, status: nextStatus as EventStatus })); } }}>
                             <option value="">Select final status</option>
                             <option value="DRAFT">Draft / Private</option>
                             <option value="PUBLISHED" disabled={!canPublishByTicketRule || isAtActiveLimit}>
@@ -1977,10 +2025,10 @@ const MobileWizardActions = React.memo(({
     setPreviewDevice
 }: any) => {
     return (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#2E2E2F]/15 md:hidden z-50 flex gap-2 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] animate-in slide-in-from-bottom duration-300">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 md:hidden z-50 flex gap-2 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] animate-in slide-in-from-bottom duration-300">
             <button type="button" onClick={handleNextWizardStep} className="flex-1 py-3 bg-[#38BDF2] text-white rounded-xl font-bold text-sm active:scale-95 transition-transform">Next</button>
             <button type="button" onClick={handleSubmit} className="flex-1 py-3 bg-[#38BDF2] text-white rounded-xl font-bold text-sm active:scale-95 transition-transform">Save</button>
-            <button type="button" onClick={() => { if (isPreviewMode) { setIsPreviewMode(false); } else { setPreviewDevice('mobile'); setIsPreviewMode(true); } }} className="flex-1 py-3 bg-[#F2F2F2] text-[#3A3247] rounded-xl font-bold text-sm border-2 border-[#2E2E2F]/15 flex items-center justify-center gap-2 active:scale-95 transition-transform">
+            <button type="button" onClick={() => { if (isPreviewMode) { setIsPreviewMode(false); } else { setPreviewDevice('mobile'); setIsPreviewMode(true); } }} className="flex-1 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#3A3247] rounded-xl font-bold text-sm border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 flex items-center justify-center gap-2 active:scale-95 transition-transform">
                 {isPreviewMode ? 'Close' : 'Preview'}
             </button>
         </div>
@@ -2057,7 +2105,7 @@ export const UserEvents: React.FC = () => {
         isActive: true
     });
 
-    const [promotedEventsMap, setPromotedEventsMap] = useState<Record<string, { promoted: boolean; remainingDays?: number }>>({});
+    const [promotedEventsMap, setPromotedEventsMap] = useState<Record<string, { promoted: boolean; expiresAt?: string; remainingDays?: number }>>({});
     const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
 
     const toggleRow = (id: string) => {
@@ -2310,15 +2358,22 @@ export const UserEvents: React.FC = () => {
                 apiService.getPromotionQuota()
             ]);
 
-            const map: Record<string, { promoted: boolean; remainingDays?: number }> = {};
+            const map: Record<string, { promoted: boolean; expiresAt?: string; remainingDays?: number }> = {};
             promoted.forEach((p: any) => {
-                map[p.eventId] = { promoted: true, remainingDays: p.remainingDays };
+                map[p.eventId] = { promoted: true, expiresAt: p.expiresAt, remainingDays: p.remainingDays };
             });
             setPromotedEventsMap(map);
             setPromotionQuota(quota);
         } catch {
             console.error('Failed to load promotion metadata');
         }
+    }, []);
+
+    const [now, setNow] = useState(new Date());
+
+    useEffect(() => {
+        const interval = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
@@ -2892,19 +2947,19 @@ export const UserEvents: React.FC = () => {
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2">
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3">
-                                <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">Events</h1>
+                                <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] dark:text-white dark:text-white tracking-tight">Events</h1>
                                 {!isStaff && (
                                     <button
                                         type="button"
                                         onClick={() => setIsWorkflowNoticeOpen(true)}
                                         title="Show Organizer Event Workflow guide"
-                                        className="h-[38px] w-[38px] shrink-0 rounded-xl border-2 border-[#2E2E2F]/20 bg-[#F2F2F2] text-[#2E2E2F]/70 hover:text-[#2E2E2F] hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/10 transition-colors flex items-center justify-center"
+                                        className="h-[38px] w-[38px] shrink-0 rounded-xl border-2 border-[#2E2E2F]/20 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white/70 hover:text-[#2E2E2F] dark:text-white dark:text-white hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/10 transition-colors flex items-center justify-center"
                                     >
                                         <ICONS.Info className="w-4 h-4" />
                                     </button>
                                 )}
                             </div>
-                            <p className="mt-1 text-sm font-semibold text-[#2E2E2F]/65">Configure and manage your session lifecycle.</p>
+                            <p className="mt-1 text-sm font-semibold text-[#2E2E2F] dark:text-white dark:text-white/65">Configure and manage your session lifecycle.</p>
                         </div>
 
                         <div className="flex flex-col gap-3 w-full lg:w-auto lg:items-end">
@@ -2914,14 +2969,14 @@ export const UserEvents: React.FC = () => {
                                 {!isStaff && (
                                     <>
                                         {promotionQuota && (
-                                            <div className="flex items-center gap-2 px-3 py-1.5 border-2 rounded-xl shadow-sm whitespace-nowrap border-[#D1D5DB] bg-[#F2F2F2]">
-                                                <ICONS.Zap className="w-3.5 h-3.5 text-[#2E2E2F]/40" />
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/60">
+                                            <div className="flex items-center gap-2 px-3 py-1.5 border-2 rounded-xl shadow-sm whitespace-nowrap border-[#D1D5DB] bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]">
+                                                <ICONS.Zap className="w-3.5 h-3.5 text-[#2E2E2F] dark:text-white dark:text-white/40" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/60">
                                                     Promotions
                                                 </span>
-                                                <span className="text-[10px] font-bold text-[#2E2E2F]/30">|</span>
+                                                <span className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/30">|</span>
                                                 <span className={`text-[10px] font-bold ${promotionQuota.used < promotionQuota.limit
-                                                    ? 'text-[#2E2E2F]/50'
+                                                    ? 'text-[#2E2E2F] dark:text-white dark:text-white/50'
                                                     : 'text-red-500'
                                                     }`}>
                                                     {promotionQuota.used}/{promotionQuota.limit}
@@ -2934,13 +2989,13 @@ export const UserEvents: React.FC = () => {
                                             const currentPaidCount = events.filter(e => (e.ticketTypes || []).some((t: any) => (t.priceAmount || 0) > 0)).length;
 
                                             return (
-                                                <div className={`flex items-center gap-2 px-3 py-1.5 bg-[#F2F2F2] border-2 rounded-xl shadow-sm whitespace-nowrap border-[#D1D5DB]`}>
-                                                    <ICONS.CreditCard className="w-3.5 h-3.5 text-[#2E2E2F]/40" />
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/60">
+                                                <div className={`flex items-center gap-2 px-3 py-1.5 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 rounded-xl shadow-sm whitespace-nowrap border-[#D1D5DB]`}>
+                                                    <ICONS.CreditCard className="w-3.5 h-3.5 text-[#2E2E2F] dark:text-white dark:text-white/40" />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/60">
                                                         Paid Events
                                                     </span>
-                                                    <span className="text-[10px] font-bold text-[#2E2E2F]/30">|</span>
-                                                    <span className={`text-[10px] font-bold ${currentPaidCount >= pricedLimit ? 'text-red-500' : 'text-[#2E2E2F]/40'}`}>
+                                                    <span className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/30">|</span>
+                                                    <span className={`text-[10px] font-bold ${currentPaidCount >= pricedLimit ? 'text-red-500' : 'text-[#2E2E2F] dark:text-white dark:text-white/40'}`}>
                                                         {currentPaidCount}/{pricedLimit}
                                                     </span>
                                                 </div>
@@ -2955,7 +3010,7 @@ export const UserEvents: React.FC = () => {
                             <div className="flex flex-wrap items-center gap-3 w-full">
 
                                 <div className="relative w-full sm:w-64">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#2E2E2F]/60">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#2E2E2F] dark:text-white dark:text-white/60">
                                         <ICONS.Search className="h-4 w-4" strokeWidth={3} />
                                     </div>
                                     <input
@@ -2963,11 +3018,11 @@ export const UserEvents: React.FC = () => {
                                         placeholder="Search events..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="block w-full pl-10 pr-10 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors"
+                                        className="block w-full pl-10 pr-10 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors"
                                     />
                                 </div>
                                 <select
-                                    className="px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-[11px] font-bold uppercase tracking-widest outline-none transition-colors"
+                                    className="px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-[11px] font-bold uppercase tracking-widest outline-none transition-colors"
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                 >
@@ -2977,15 +3032,15 @@ export const UserEvents: React.FC = () => {
                                     <option value="CLOSED">Closed</option>
                                 </select>
 
-                                <div className="flex items-center bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl p-1">
+                                <div className="flex items-center bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl p-1">
                                     <button
-                                        className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${viewMode === 'list' ? 'bg-[#38BDF2] text-white shadow-sm' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                                        className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${viewMode === 'list' ? 'bg-[#38BDF2] text-white shadow-sm' : 'text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
                                         onClick={() => setViewMode('list')}
                                     >
                                         List
                                     </button>
                                     <button
-                                        className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${viewMode === 'calendar' ? 'bg-[#38BDF2] text-white shadow-sm' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                                        className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${viewMode === 'calendar' ? 'bg-[#38BDF2] text-white shadow-sm' : 'text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
                                         onClick={() => setViewMode('calendar')}
                                     >
                                         Calendar
@@ -3005,7 +3060,7 @@ export const UserEvents: React.FC = () => {
                                             </span>
                                         </Button>
                                         {isAtTotalLimit && (
-                                            <p className="mt-1.5 text-[10px] text-[#2E2E2F]/50 font-bold uppercase tracking-tight">Upgrade for more events</p>
+                                            <p className="mt-1.5 text-[10px] text-[#2E2E2F] dark:text-white dark:text-white/50 font-bold uppercase tracking-tight">Upgrade for more events</p>
                                         )}
                                     </div>
                                 )}
@@ -3017,11 +3072,11 @@ export const UserEvents: React.FC = () => {
                     {viewMode === 'list' ? (
                         /* ─── TABLE VIEW ─── */
                         filteredEvents.length === 0 ? (
-                            <div className="py-20 text-center text-[#2E2E2F]/50">
-                                <div className="w-24 h-24 mx-auto mb-6 bg-[#F2F2F2] rounded-2xl flex items-center justify-center border-2 border-[#2E2E2F]/15">
+                            <div className="py-20 text-center text-[#2E2E2F] dark:text-white dark:text-white/50">
+                                <div className="w-24 h-24 mx-auto mb-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-2xl flex items-center justify-center border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
                                     <ICONS.Calendar className="w-12 h-12 opacity-30" />
                                 </div>
-                                <p className="text-base font-medium text-[#2E2E2F]/60 tracking-tight">No events to show</p>
+                                <p className="text-base font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 tracking-tight">No events to show</p>
                             </div>
                         ) : (
                             <>
@@ -3032,16 +3087,26 @@ export const UserEvents: React.FC = () => {
                                             key={event.eventId}
                                             event={event}
                                             isPromoted={promotedEventsMap[event.eventId]?.promoted || false}
+                                            isExpiredPromotion={promotedEventsMap[event.eventId]?.remainingDays !== undefined && promotedEventsMap[event.eventId]!.remainingDays <= 0}
+                                            expiresAt={promotedEventsMap[event.eventId]?.expiresAt}
+                                            now={now}
                                             onOpenEdit={() => handleOpenEdit(event)}
                                             onOpenTickets={() => handleOpenTickets(event)}
                                             onOpenAttendeePop={() => handleOpenAttendeePop(event)}
                                             onTogglePromotion={(e) => {
                                                 e.stopPropagation();
-                                                const isPromoted = promotedEventsMap[event.eventId]?.promoted;
-                                                if (promotionQuota && !isPromoted && !promotionQuota.canPromote) {
+                                                const promoData = promotedEventsMap[event.eventId];
+                                                const isPromoted = promoData?.promoted;
+                                                
+                                                if (isPromoted) {
+                                                    showToast('info', 'This event is already promoted and cannot be promoted again.');
+                                                    return;
+                                                }
+
+                                                if (promotionQuota && !promotionQuota.canPromote) {
                                                     showToast('error', 'You have reached your promotion limit.');
                                                 } else {
-                                                    handleToggleEventPromotion(event.eventId, isPromoted || false);
+                                                    handleToggleEventPromotion(event.eventId, false);
                                                 }
                                             }}
                                             onArchive={() => setDeleteConfirm(event)}
@@ -3060,7 +3125,7 @@ export const UserEvents: React.FC = () => {
                                         {selectedRows.size > 0 && (
                                             <div className="flex items-center gap-3">
                                                 <div className="w-2 h-2 rounded-full bg-[#38BDF2] animate-pulse" />
-                                                <span className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest bg-[#F2F2F2] px-3.5 py-1.5 rounded-lg border border-[#2E2E2F]/10">
+                                                <span className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3.5 py-1.5 rounded-lg border border-[#2E2E2F]/10 dark:border-white/10">
                                                     {selectedRows.size} Selected
                                                 </span>
                                             </div>
@@ -3096,12 +3161,12 @@ export const UserEvents: React.FC = () => {
                                         </button>
                                     </div>
                                 </div>
-                                <Card className="hidden md:block !overflow-visible border border-[#2E2E2F]/15 rounded-[2.5rem] bg-[#F2F2F2]">
+                                <Card className="hidden md:block !overflow-visible border border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-[2.5rem] bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]">
                                     <div className="!overflow-visible">
                                         <table className="w-full text-left">
-                                            <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/15">
+                                            <thead className="bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-b border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
                                                 <tr>
-                                                    <th className="px-4 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide w-12 text-center align-middle">
+                                                    <th className="px-4 py-5 text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide w-12 text-center align-middle">
                                                         <div className="flex justify-center">
                                                             <Checkbox
                                                                 checked={selectedRows.size === filteredEvents.length && filteredEvents.length > 0}
@@ -3110,11 +3175,11 @@ export const UserEvents: React.FC = () => {
                                                             />
                                                         </div>
                                                     </th>
-                                                    <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Event Identity</th>
-                                                    <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Date & Location</th>
-                                                    <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Lifecycle</th>
-                                                    <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Size</th>
-                                                    <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide text-right">Actions</th>
+                                                    <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Event Identity</th>
+                                                    <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Date & Location</th>
+                                                    <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Lifecycle</th>
+                                                    <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Size</th>
+                                                    <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide text-right">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y-2 divide-[#2E2E2F]/15">
@@ -3129,17 +3194,27 @@ export const UserEvents: React.FC = () => {
                                                         onOpenAttendeePop={() => handleOpenAttendeePop(event)}
                                                         onTogglePromotion={(e) => {
                                                             e.stopPropagation();
-                                                            const isPromoted = promotedEventsMap[event.eventId]?.promoted;
-                                                            if (promotionQuota && !isPromoted && !promotionQuota.canPromote) {
+                                                            const promoData = promotedEventsMap[event.eventId];
+                                                            const isPromoted = promoData?.promoted;
+
+                                                            if (isPromoted) {
+                                                                showToast('info', 'This event is already promoted and cannot be promoted again.');
+                                                                return;
+                                                            }
+
+                                                            if (promotionQuota && !promotionQuota.canPromote) {
                                                                 showToast('error', 'You have reached your promotion limit.');
                                                             } else {
-                                                                handleToggleEventPromotion(event.eventId, isPromoted || false);
+                                                                handleToggleEventPromotion(event.eventId, false);
                                                             }
                                                         }}
                                                         onArchive={() => setDeleteConfirm(event)}
                                                         onCancel={() => setCancelConfirm(event)}
                                                         onNotify={() => setBulkNotifyEvent(event)}
                                                         isPromoted={promotedEventsMap[event.eventId]?.promoted || false}
+                                                        isExpiredPromotion={promotedEventsMap[event.eventId]?.remainingDays !== undefined && promotedEventsMap[event.eventId]!.remainingDays <= 0}
+                                                        expiresAt={promotedEventsMap[event.eventId]?.expiresAt}
+                                                        now={now}
                                                         openDropdownId={openDropdownId}
                                                         setOpenDropdownId={setOpenDropdownId}
                                                     />
@@ -3155,20 +3230,20 @@ export const UserEvents: React.FC = () => {
                         <div className="bg-[var(--color-background)] border border-[var(--color-text-10)] rounded-2xl p-6">
                             {/* Month navigation */}
                             <div className="flex items-center justify-between mb-6">
-                                <button onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[var(--color-primary-10)] text-[#2E2E2F]/60 transition-colors">
+                                <button onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[var(--color-primary-10)] text-[#2E2E2F] dark:text-white dark:text-white/60 transition-colors">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
                                 </button>
-                                <h3 className="text-lg font-bold text-[#2E2E2F] tracking-tight">
+                                <h3 className="text-lg font-bold text-[#2E2E2F] dark:text-white dark:text-white tracking-tight">
                                     {calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                                 </h3>
-                                <button onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[var(--color-primary-10)] text-[#2E2E2F]/60 transition-colors">
+                                <button onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-[var(--color-primary-10)] text-[#2E2E2F] dark:text-white dark:text-white/60 transition-colors">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                                 </button>
                             </div>
                             {/* Day headers */}
                             <div className="grid grid-cols-7 gap-1 mb-2">
                                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                                    <div key={d} className="text-center text-[10px] font-bold text-[#2E2E2F]/40 uppercase tracking-wide py-1">{d}</div>
+                                    <div key={d} className="text-center text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-wide py-1">{d}</div>
                                 ))}
                             </div>
                             {/* Calendar grid */}
@@ -3180,9 +3255,9 @@ export const UserEvents: React.FC = () => {
                                     return (
                                         <div
                                             key={day}
-                                            className={`h-20 rounded-xl border p-1.5 flex flex-col transition-colors ${isToday ? 'border-[var(--color-primary-40)] bg-[var(--color-primary-10)]' : 'border-[#2E2E2F]/5 hover:border-[#2E2E2F]/15'}`}
+                                            className={`h-20 rounded-xl border p-1.5 flex flex-col transition-colors ${isToday ? 'border-[var(--color-primary-40)] bg-[var(--color-primary-10)]' : 'border-[#2E2E2F]/5 dark:border-white/5 hover:border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10'}`}
                                         >
-                                            <span className={`text-[11px] font-bold ${isToday ? 'text-[var(--color-primary)]' : 'text-[#2E2E2F]/60'}`}>{day}</span>
+                                            <span className={`text-[11px] font-bold ${isToday ? 'text-[var(--color-primary)]' : 'text-[#2E2E2F] dark:text-white dark:text-white/60'}`}>{day}</span>
                                             <div className="flex-1 overflow-hidden mt-0.5 space-y-0.5">
                                                 {dayEvents.slice(0, 2).map(ev => (
                                                     <div
@@ -3193,7 +3268,7 @@ export const UserEvents: React.FC = () => {
                                                         {ev.eventName}
                                                     </div>
                                                 ))}
-                                                {dayEvents.length > 2 && <span className="text-[8px] text-[#2E2E2F]/40 font-bold">+{dayEvents.length - 2} more</span>}
+                                                {dayEvents.length > 2 && <span className="text-[8px] text-[#2E2E2F] dark:text-white dark:text-white/40 font-bold">+{dayEvents.length - 2} more</span>}
                                             </div>
                                         </div>
                                     );
@@ -3211,33 +3286,33 @@ export const UserEvents: React.FC = () => {
                 subtitle="Step-by-step publishing guide"
             >
                 <div className="space-y-5">
-                    <div className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">
+                    <div className="text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">
                         {workflowCompletedCount} / 4 Completed
                     </div>
 
                     <div className="grid grid-cols-1 gap-3">
-                        <div className={`rounded-2xl border px-4 py-4 ${isOrganizerProfileReady ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 1</p>
-                            <p className="text-sm font-bold text-[#2E2E2F] mt-2">Set Org Profile</p>
-                            <p className="text-[11px] text-[#2E2E2F]/60 mt-1">Configure organizer name and branding details.</p>
+                        <div className={`rounded-2xl border px-4 py-4 ${isOrganizerProfileReady ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/45">Step 1</p>
+                            <p className="text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white mt-2">Set Org Profile</p>
+                            <p className="text-[11px] text-[#2E2E2F] dark:text-white dark:text-white/60 mt-1">Configure organizer name and branding details.</p>
                         </div>
 
-                        <div className={`rounded-2xl border px-4 py-4 ${isPaymentReady ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 2</p>
-                            <p className="text-sm font-bold text-[#2E2E2F] mt-2">Payment Gateway</p>
-                            <p className="text-[11px] text-[#2E2E2F]/60 mt-1">Connect your HitPay account to receive payouts for paid events.</p>
+                        <div className={`rounded-2xl border px-4 py-4 ${isPaymentReady ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/45">Step 2</p>
+                            <p className="text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white mt-2">Payment Gateway</p>
+                            <p className="text-[11px] text-[#2E2E2F] dark:text-white dark:text-white/60 mt-1">Connect your HitPay account to receive payouts for paid events.</p>
                         </div>
 
-                        <div className={`rounded-2xl border px-4 py-4 ${hasExistingEvents ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 3</p>
-                            <p className="text-sm font-bold text-[#2E2E2F] mt-2">Create Draft</p>
-                            <p className="text-[11px] text-[#2E2E2F]/60 mt-1">Build your event details and save as draft.</p>
+                        <div className={`rounded-2xl border px-4 py-4 ${hasExistingEvents ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/45">Step 3</p>
+                            <p className="text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white mt-2">Create Draft</p>
+                            <p className="text-[11px] text-[#2E2E2F] dark:text-white dark:text-white/60 mt-1">Build your event details and save as draft.</p>
                         </div>
 
-                        <div className={`rounded-2xl border px-4 py-4 ${hasPublishedEvent ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 bg-[#F2F2F2]'}`}>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]/45">Step 4</p>
-                            <p className="text-sm font-bold text-[#2E2E2F] mt-2">Tickets then Publish</p>
-                            <p className="text-[11px] text-[#2E2E2F]/60 mt-1">Add at least one ticket type before going live.</p>
+                        <div className={`rounded-2xl border px-4 py-4 ${hasPublishedEvent ? 'border-[#38BDF2]/40 bg-[#38BDF2]/10' : 'border-[#2E2E2F]/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]'}`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/45">Step 4</p>
+                            <p className="text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white mt-2">Tickets then Publish</p>
+                            <p className="text-[11px] text-[#2E2E2F] dark:text-white dark:text-white/60 mt-1">Add at least one ticket type before going live.</p>
                         </div>
                     </div>
                 </div>
@@ -3249,34 +3324,34 @@ export const UserEvents: React.FC = () => {
                     <div className={`grid grid-cols-1 gap-6 ${isSidebarHidden ? 'xl:grid-cols-1' : (!isPreviewMode || previewDevice === 'desktop') ? 'xl:grid-cols-[300px_minmax(0,1fr)]' : 'xl:grid-cols-[300px_minmax(0,1fr)_380px]'}`} style={window.innerWidth >= 768 ? { zoom: 0.85 } : {}}>
                         {!isSidebarHidden && (
                             <div className="space-y-5 xl:sticky xl:top-0 self-start xl:max-h-[calc(70vh-1rem)] xl:overflow-y-auto xl:pr-1">
-                                <div className="bg-[#F2F2F2] rounded-[2rem] border border-[#2E2E2F]/15 overflow-hidden">
+                                <div className="bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 overflow-hidden">
                                     <div className="p-4 space-y-4">
                                         <button
                                             type="button"
                                             onClick={handleCloseEventModal}
-                                            className="flex items-center gap-2 px-4 py-2 bg-[#F2F2F2] text-[#2E2E2F] rounded-xl hover:bg-[#2E2E2F] hover:text-white transition-colors w-fit"
+                                            className="flex items-center gap-2 px-4 py-2 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white rounded-xl hover:bg-[#2E2E2F] hover:text-white transition-colors w-fit"
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
                                             <span className="text-xs font-bold uppercase tracking-wide">Back to Events</span>
                                         </button>
-                                        <h1 className="text-3xl font-black text-[#2E2E2F] tracking-tight leading-tight">{formData.eventName || 'Event Title'}</h1>
+                                        <h1 className="text-3xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight leading-tight">{formData.eventName || 'Event Title'}</h1>
                                         <div className="flex flex-wrap items-center gap-3">
-                                            <div className={`px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-wide border ${formData.status === 'PUBLISHED' ? 'bg-[#38BDF2]/20 border-[#38BDF2]/40 text-[#2E2E2F]' : 'bg-[#F2F2F2] border-[#2E2E2F]/20 text-[#2E2E2F]/60'}`}>{formData.status}</div>
+                                            <div className={`px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-wide border ${formData.status === 'PUBLISHED' ? 'bg-[#38BDF2]/20 border-[#38BDF2]/40 text-[#2E2E2F] dark:text-white dark:text-white' : 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-[#2E2E2F]/20 text-[#2E2E2F] dark:text-white dark:text-white/60'}`}>{formData.status}</div>
                                         </div>
                                         <div className="space-y-3 pt-1">
-                                            <div className="flex items-center gap-3 bg-[#F2F2F2] px-4 py-3 rounded-2xl border-2 border-[#2E2E2F]/15">
-                                                <div className="w-8 h-8 bg-[#38BDF2]/10 text-[#2E2E2F] rounded-lg flex items-center justify-center"><ICONS.Calendar className="w-4 h-4" strokeWidth={2.5} /></div>
-                                                <span className="text-[13px] font-semibold text-[#2E2E2F] tracking-tight">{previewDateLabel}</span>
+                                            <div className="flex items-center gap-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-4 py-3 rounded-2xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
+                                                <div className="w-8 h-8 bg-[#38BDF2]/10 text-[#2E2E2F] dark:text-white dark:text-white rounded-lg flex items-center justify-center"><ICONS.Calendar className="w-4 h-4" strokeWidth={2.5} /></div>
+                                                <span className="text-[13px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white tracking-tight">{previewDateLabel}</span>
                                             </div>
-                                            <div className="flex items-center gap-3 bg-[#F2F2F2] px-4 py-3 rounded-2xl border-2 border-[#2E2E2F]/15">
-                                                <div className="w-8 h-8 bg-[#38BDF2]/10 text-[#2E2E2F] rounded-lg flex items-center justify-center"><ICONS.MapPin className="w-4 h-4" strokeWidth={2.5} /></div>
-                                                <span className="text-[13px] font-semibold text-[#2E2E2F] tracking-tight truncate max-w-[210px]">{formData.location || 'Set Venue / Connection'}</span>
+                                            <div className="flex items-center gap-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-4 py-3 rounded-2xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
+                                                <div className="w-8 h-8 bg-[#38BDF2]/10 text-[#2E2E2F] dark:text-white dark:text-white rounded-lg flex items-center justify-center"><ICONS.MapPin className="w-4 h-4" strokeWidth={2.5} /></div>
+                                                <span className="text-[13px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white tracking-tight truncate max-w-[210px]">{formData.location || 'Set Venue / Connection'}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="hidden md:block bg-[#F2F2F2] rounded-[2rem] border border-[#2E2E2F]/15 overflow-hidden">
-                                    <div className="px-5 py-3 border-b border-[#2E2E2F]/15"><p className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Steps</p></div>
+                                <div className="hidden md:block bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 overflow-hidden">
+                                    <div className="px-5 py-3 border-b border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10"><p className="text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Steps</p></div>
                                     {EVENT_SETUP_STEPS.map((step) => {
                                         const isStepReachable = isEditMode || step.id <= wizardStep;
                                         return (
@@ -3291,15 +3366,15 @@ export const UserEvents: React.FC = () => {
                                                         showToast('info', `Please complete the previous steps before proceeding to ${step.title}.`);
                                                     }
                                                 }}
-                                                className={`w-full text-left px-5 py-4 border-b border-[#2E2E2F]/15 last:border-b-0 transition-colors ${wizardStep === step.id ? 'bg-[#38BDF2]/10' : (isStepReachable ? 'hover:bg-[#38BDF2]/5 cursor-pointer' : 'opacity-40 cursor-not-allowed')}`}
+                                                className={`w-full text-left px-5 py-4 border-b border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 last:border-b-0 transition-colors ${wizardStep === step.id ? 'bg-[#38BDF2]/10' : (isStepReachable ? 'hover:bg-[#38BDF2]/5 cursor-pointer' : 'opacity-40 cursor-not-allowed')}`}
                                             >
                                                 <div className="flex items-start gap-3">
                                                     <span className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center ${wizardStep >= step.id ? 'border-[#2563EB]' : 'border-[#2E2E2F]/20'}`}>
                                                         {wizardStep >= step.id && <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]" />}
                                                     </span>
                                                     <div>
-                                                        <p className="text-[18px] leading-none font-bold text-[#2E2E2F]">{step.title}</p>
-                                                        <p className="mt-2 text-[13px] leading-5 text-[#2E2E2F]/70">{EVENT_SETUP_STEP_DETAIL[step.id]}</p>
+                                                        <p className="text-[18px] leading-none font-bold text-[#2E2E2F] dark:text-white dark:text-white">{step.title}</p>
+                                                        <p className="mt-2 text-[13px] leading-5 text-[#2E2E2F] dark:text-white dark:text-white/70">{EVENT_SETUP_STEP_DETAIL[step.id]}</p>
                                                     </div>
                                                 </div>
                                             </button>
@@ -3313,15 +3388,15 @@ export const UserEvents: React.FC = () => {
                         <div className="space-y-4">
                             <div className="hidden md:flex flex-wrap items-center justify-between gap-3">
                                 <div>
-                                    <h3 className="text-2xl font-black text-[#2E2E2F] tracking-tight">{activeStepMeta.title}</h3>
-                                    <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#2E2E2F]/55 mt-1">{EVENT_SETUP_STEP_DETAIL[wizardStep]}</p>
+                                    <h3 className="text-2xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight">{activeStepMeta.title}</h3>
+                                    <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#2E2E2F] dark:text-white dark:text-white/55 mt-1">{EVENT_SETUP_STEP_DETAIL[wizardStep]}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     {!isPreviewMode && (
                                         <button
                                             type="button"
                                             onClick={() => setIsPreviewMode(true)}
-                                            className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/35 transition-colors text-[13px] font-bold"
+                                            className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/35 transition-colors text-[13px] font-bold"
                                         >
                                             <EyeIcon className="w-4 h-4" />
                                             Show Preview
@@ -3363,10 +3438,10 @@ export const UserEvents: React.FC = () => {
                                     submitting={submitting}
                                 />
 
-                                <div className="hidden md:flex gap-4 pt-8 border-t border-[#2E2E2F]/15">
+                                <div className="hidden md:flex gap-4 pt-8 border-t border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
                                     <Button
                                         type="button"
-                                        className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border-2 border-[#2E2E2F]/15 hover:bg-[#2E2E2F]/5 transition-colors min-h-[32px]"
+                                        className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 hover:bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 transition-colors min-h-[32px]"
                                         onClick={() => {
                                             if (wizardStep === 1) {
                                                 handleCloseEventModal();
@@ -3382,7 +3457,7 @@ export const UserEvents: React.FC = () => {
                                         <Button
                                             type="submit"
                                             data-quick-update="true"
-                                            className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border-2 border-[#2E2E2F]/15 hover:bg-[#2E2E2F]/5 transition-colors min-h-[32px]"
+                                            className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 hover:bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 transition-colors min-h-[32px]"
                                             disabled={submitting}
                                         >
                                             {submitting ? 'Saving...' : 'Save Changes'}
@@ -3422,7 +3497,7 @@ export const UserEvents: React.FC = () => {
                         {/* Dynamic Preview Overlay/Sidebar */}
                         {isPreviewMode && (
                             window.innerWidth < 768 ? createPortal(
-                                <div className="fixed inset-0 z-[99999] bg-[#F2F2F2] pointer-events-auto overflow-y-scroll overflow-x-hidden [-webkit-overflow-scrolling:touch] overscroll-contain">
+                                <div className="fixed inset-0 z-[99999] bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] pointer-events-auto overflow-y-scroll overflow-x-hidden [-webkit-overflow-scrolling:touch] overscroll-contain">
                                     <EventPreviewContent
                                         previewDevice={previewDevice}
                                         isPreviewMode={isPreviewMode}
@@ -3438,7 +3513,7 @@ export const UserEvents: React.FC = () => {
                                 document.body
                             ) : (
                                 <div className={`${previewDevice === 'desktop'
-                                    ? 'fixed top-0 bottom-0 left-0 lg:left-64 right-0 z-[9999] bg-[#F2F2F2] flex flex-col overflow-hidden animate-in fade-in duration-300'
+                                    ? 'fixed top-0 bottom-0 left-0 lg:left-64 right-0 z-[9999] bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] flex flex-col overflow-hidden animate-in fade-in duration-300'
                                     : 'relative z-0 block sticky top-0 self-start xl:h-[calc(100vh-100px)] xl:pr-1 pointer-events-auto'
                                     }`}>
                                     <EventPreviewContent
@@ -3481,48 +3556,48 @@ export const UserEvents: React.FC = () => {
             >
                 <div className="space-y-6">
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Confirmed Registrations</span>
+                        <span className="text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Confirmed Registrations</span>
                         <Badge type="info" className="px-3 py-1 font-semibold text-[10px] tracking-wide">{attendees.filter(r => r.eventId === selectedEvent?.eventId).length} GUESTS</Badge>
                     </div>
 
                     <div className="max-h-[500px] overflow-y-auto pr-2 space-y-4">
                         {attendees.filter(r => r.eventId === selectedEvent?.eventId).map((reg) => (
-                            <div key={reg.id} className="flex flex-col p-5 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-[1.75rem] hover:border-[#38BDF2]/30 transition-colors group">
+                            <div key={reg.id} className="flex flex-col p-5 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-[1.75rem] hover:border-[#38BDF2]/30 transition-colors group">
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-2xl bg-[#F2F2F2] flex items-center justify-center text-[#2E2E2F] font-semibold text-sm border-2 border-[#2E2E2F]/15 group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors">
+                                        <div className="w-10 h-10 rounded-2xl bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] flex items-center justify-center text-[#2E2E2F] dark:text-white dark:text-white font-semibold text-sm border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors">
                                             {reg.attendeeName.charAt(0)}
                                         </div>
                                         <div>
-                                            <p className="font-bold text-[#2E2E2F] text-[15px] tracking-tight">{reg.attendeeName}</p>
-                                            <p className="text-[11px] text-[#2E2E2F]/50 font-medium uppercase tracking-tight">{reg.attendeeEmail}</p>
+                                            <p className="font-bold text-[#2E2E2F] dark:text-white dark:text-white text-[15px] tracking-tight">{reg.attendeeName}</p>
+                                            <p className="text-[11px] text-[#2E2E2F] dark:text-white dark:text-white/50 font-medium uppercase tracking-tight">{reg.attendeeEmail}</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${reg.status === 'USED' ? 'bg-[#38BDF2]/20 text-[#2E2E2F]' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'}`}>
+                                        <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${reg.status === 'USED' ? 'bg-[#38BDF2]/20 text-[#2E2E2F] dark:text-white dark:text-white' : 'bg-[#2E2E2F]/10 text-[#2E2E2F] dark:text-white dark:text-white'}`}>
                                             {reg.status}
                                         </span>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#2E2E2F]/5">
+                                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#2E2E2F]/5 dark:border-white/5">
                                     <div className="space-y-1">
-                                        <p className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Ticket Type</p>
-                                        <p className="text-[11px] font-bold text-[#2E2E2F] truncate uppercase">{reg.ticketName}</p>
+                                        <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase tracking-widest">Ticket Type</p>
+                                        <p className="text-[11px] font-bold text-[#2E2E2F] dark:text-white dark:text-white truncate uppercase">{reg.ticketName}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Phone</p>
-                                        <p className="text-[11px] font-bold text-[#2E2E2F]">{reg.attendeePhone || 'N/A'}</p>
+                                        <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase tracking-widest">Phone</p>
+                                        <p className="text-[11px] font-bold text-[#2E2E2F] dark:text-white dark:text-white">{reg.attendeePhone || 'N/A'}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Registered On</p>
-                                        <p className="text-[11px] font-bold text-[#2E2E2F]">
+                                        <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase tracking-widest">Registered On</p>
+                                        <p className="text-[11px] font-bold text-[#2E2E2F] dark:text-white dark:text-white">
                                             {reg.registrationDate ? new Date(reg.registrationDate).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}
                                         </p>
                                     </div>
                                     {reg.checkInTimestamp && (
                                         <div className="space-y-1">
-                                            <p className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-widest">Checked In</p>
-                                            <p className="text-[11px] font-bold text-[#2E2E2F]">
+                                            <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase tracking-widest">Checked In</p>
+                                            <p className="text-[11px] font-bold text-[#2E2E2F] dark:text-white dark:text-white">
                                                 {new Date(reg.checkInTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
@@ -3531,7 +3606,7 @@ export const UserEvents: React.FC = () => {
                             </div>
                         ))}
                         {attendees.filter(r => r.eventId === selectedEvent?.eventId).length === 0 && (
-                            <div className="py-24 text-center text-[#2E2E2F]/50">
+                            <div className="py-24 text-center text-[#2E2E2F] dark:text-white dark:text-white/50">
                                 <ICONS.Users className="w-14 h-14 mx-auto mb-5 opacity-20" />
                                 <p className="font-medium uppercase tracking-wide text-[11px]">No confirmed guests detected</p>
                             </div>
@@ -3557,10 +3632,10 @@ export const UserEvents: React.FC = () => {
                             <ICONS.Trash className="w-6 h-6 text-amber-500" strokeWidth={2} />
                         </div>
                         <div>
-                            <p className="font-bold text-[#2E2E2F] text-[16px] tracking-tight">
+                            <p className="font-bold text-[#2E2E2F] dark:text-white dark:text-white text-[16px] tracking-tight">
                                 Are you sure you want to archive this event?
                             </p>
-                            <p className="text-[13px] text-[#2E2E2F]/60 font-medium mt-2 leading-relaxed">
+                            <p className="text-[13px] text-[#2E2E2F] dark:text-white dark:text-white/60 font-medium mt-2 leading-relaxed">
                                 This will move <strong>"{deleteConfirm?.eventName}"</strong> to the archive. The event will be hidden from public pages but can be restored later from the Archive page.
                             </p>
                         </div>
@@ -3568,7 +3643,7 @@ export const UserEvents: React.FC = () => {
 
                     <div className="flex gap-4">
                         <Button
-                            className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border-2 border-[#2E2E2F]/15 hover:bg-[#2E2E2F]/10 transition-colors min-h-[32px]"
+                            className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 hover:bg-[#2E2E2F]/10 transition-colors min-h-[32px]"
                             onClick={() => setDeleteConfirm(null)}
                             disabled={submitting}
                         >
@@ -3593,13 +3668,13 @@ export const UserEvents: React.FC = () => {
                 <div className="space-y-6">
                     <div className={`flex items-start gap-5 p-6 rounded-[1.75rem] border ${cancelMeta.hasPaidTickets && cancelMeta.attendeeCount > 0 ? 'bg-red-100 border-red-300' : (cancelMeta.hasPaidTickets ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200')}`}>
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${cancelMeta.hasPaidTickets && cancelMeta.attendeeCount > 0 ? 'bg-red-200' : (cancelMeta.hasPaidTickets ? 'bg-amber-100' : 'bg-red-100')}`}>
-                            <ICONS.AlertTriangle className={`w-6 h-6 ${cancelMeta.hasPaidTickets && cancelMeta.attendeeCount > 0 ? 'text-red-600' : (cancelMeta.hasPaidTickets ? 'text-amber-500' : 'text-red-500')}`} strokeWidth={2} />
+                            <ICONS.AlertTriangle className={`w-6 h-6 ${cancelMeta.hasPaidTickets && cancelMeta.attendeeCount > 0 ? 'text-red-600' : (cancelMeta.hasPaidTickets ? 'text-[#38BDF2] dark:text-[#38BDF2]' : 'text-red-500')}`} strokeWidth={2} />
                         </div>
                         <div className="flex-1">
-                            <p className="font-bold text-[#2E2E2F] text-[16px] tracking-tight">
+                            <p className="font-bold text-[#2E2E2F] dark:text-white dark:text-white text-[16px] tracking-tight">
                                 {cancelMeta.hasPaidTickets && cancelMeta.attendeeCount > 0 ? 'CANCELLATION PROHIBITED' : (cancelMeta.hasPaidTickets ? 'CRITICAL: Financial Liability Detected' : 'Mandatory Confirmation')}
                             </p>
-                            <div className="text-[13px] text-[#2E2E2F]/60 font-medium mt-2 leading-relaxed space-y-3">
+                            <div className="text-[13px] text-[#2E2E2F] dark:text-white dark:text-white/60 font-medium mt-2 leading-relaxed space-y-3">
                                 <p>You are about to cancel <strong>"{cancelConfirm?.eventName}"</strong>.</p>
 
                                 {cancelMeta.loading ? (
@@ -3626,14 +3701,14 @@ export const UserEvents: React.FC = () => {
                                         )}
                                     </div>
                                 )}
-                                <p className="text-[#2E2E2F]/40 text-[11px] mt-4 font-black uppercase tracking-widest pt-4 border-t border-black/5">This action cannot be undone on the public discovery side.</p>
+                                <p className="text-[#2E2E2F] dark:text-white dark:text-white/40 text-[11px] mt-4 font-black uppercase tracking-widest pt-4 border-t border-black/5">This action cannot be undone on the public discovery side.</p>
                             </div>
                         </div>
                     </div>
 
                     <div className="flex gap-4">
                         <button
-                            className="flex-1 min-h-[44px] rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border-2 border-[#2E2E2F]/15 hover:bg-[#2E2E2F]/10 transition-colors"
+                            className="flex-1 min-h-[44px] rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 hover:bg-[#2E2E2F]/10 transition-colors"
                             onClick={() => setCancelConfirm(null)}
                             disabled={submitting}
                         >
@@ -3666,9 +3741,9 @@ export const UserEvents: React.FC = () => {
                             onChange={(e: any) => setBulkNotifyForm({ ...bulkNotifyForm, subject: e.target.value })}
                         />
                         <div className="space-y-1.5">
-                            <label className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Message Body</label>
+                            <label className="text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Message Body</label>
                             <textarea
-                                className="w-full px-4 py-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl text-[14px] outline-none focus:border-[#38BDF2] min-h-[150px] leading-relaxed"
+                                className="w-full px-4 py-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl text-[14px] outline-none focus:border-[#38BDF2] min-h-[150px] leading-relaxed"
                                 placeholder="Type your announcement here..."
                                 required
                                 value={bulkNotifyForm.message}
@@ -3680,7 +3755,7 @@ export const UserEvents: React.FC = () => {
                     <div className="flex gap-4">
                         <Button
                             type="button"
-                            className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border-2 border-[#2E2E2F]/15 hover:bg-[#2E2E2F]/10 transition-colors min-h-[32px]"
+                            className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 hover:bg-[#2E2E2F]/10 transition-colors min-h-[32px]"
                             onClick={() => setBulkNotifyEvent(null)}
                             disabled={submitting}
                         >
@@ -3784,8 +3859,8 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
         <div className="flex flex-col lg:grid lg:grid-cols-[380px_1fr] gap-10 items-start" style={{ zoom: '0.8' }}>
             {/* Left Column: Form */}
             <div className="space-y-6 w-full lg:sticky lg:top-0">
-                <div className="bg-[#F2F2F2] p-6 rounded-3xl border-2 border-[#2E2E2F]/15">
-                    <h4 className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide mb-4">Add Ticket Tier</h4>
+                <div className="bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] p-6 rounded-3xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
+                    <h4 className="text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide mb-4">Add Ticket Tier</h4>
                     <div className="space-y-4">
                         <Input
                             placeholder="Tier Name (e.g. VIP Access)"
@@ -3793,16 +3868,16 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                             onChange={(e: any) => setNewTicket({ ...newTicket, name: e.target.value })}
                         />
                         <textarea
-                            className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                            className="w-full px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                             placeholder="Description (optional)"
                             value={newTicket.description}
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewTicket({ ...newTicket, description: e.target.value })}
                         />
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Type</label>
+                                <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Type</label>
                                 <select
-                                    className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                    className="w-full px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                     value={newTicket.priceAmount === 0 ? 'FREE' : 'PAID'}
                                     onChange={(e) => {
                                         const isPaid = e.target.value === 'PAID';
@@ -3821,9 +3896,9 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                 </select>
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Status</label>
+                                <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Status</label>
                                 <select
-                                    className="w-full px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                    className="w-full px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                     value={newTicket.status ? 'ACTIVE' : 'INACTIVE'}
                                     onChange={(e) => setNewTicket({ ...newTicket, status: e.target.value === 'ACTIVE' })}
                                 >
@@ -3841,7 +3916,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                     onChange={(e: any) => setNewTicket({ ...newTicket, priceAmount: parseFloat(e.target.value) })}
                                 />
                                 <div className="space-y-1.5">
-                                    <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Sale Discount (%)</label>
+                                    <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Sale Discount (%)</label>
                                     <div className="flex gap-2 items-end">
                                         <input
                                             type="number"
@@ -3849,7 +3924,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                             max={100}
                                             value={newTicket.saleDiscountPercent || 0}
                                             onChange={(e: any) => setNewTicket({ ...newTicket, saleDiscountPercent: Math.max(0, Math.min(100, parseFloat(e.target.value) || 0)) })}
-                                            className="flex-1 px-4 py-3 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                            className="flex-1 px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                             placeholder="0"
                                         />
                                         {newTicket.saleDiscountPercent && newTicket.saleDiscountPercent > 0 && (
@@ -3983,7 +4058,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                 <span>Total Guest Capacity</span>
                                 <span>{tickets.reduce((acc, t) => acc + (t.quantityTotal * (t.capacityPerTicket || 1)), 0)} / {maxEventCapacity}</span>
                             </div>
-                            <div className="w-full h-1.5 bg-[#F2F2F2]/10 rounded-full overflow-hidden">
+                            <div className="w-full h-1.5 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]/10 rounded-full overflow-hidden">
                                 <div
                                     className={`h-full transition-all ${tickets.reduce((acc, t) => acc + (t.quantityTotal * (t.capacityPerTicket || 1)), 0) > maxEventCapacity ? 'bg-red-500' : 'bg-[#38BDF2]'
                                         }`}
@@ -4068,7 +4143,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
             {/* Right Column: Inventory List */}
             <div className="space-y-6 w-full h-full">
                 <div className="space-y-4 h-full">
-                    <h4 className="text-[11px] font-semibold text-[#2E2E2F]/60 uppercase tracking-wide">Current Inventory</h4>
+                    <h4 className="text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Current Inventory</h4>
                     <div className="space-y-3">
                         {tickets.map((t) => {
                             const isExpanded = expandedTicketId === t.ticketTypeId;
@@ -4077,7 +4152,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                             return (
                                 <div
                                     key={t.ticketTypeId}
-                                    className={`flex flex-col gap-4 p-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl transition-colors ${!isExpanded ? 'cursor-pointer hover:border-[#38BDF2]/30' : ''
+                                    className={`flex flex-col gap-4 p-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl transition-colors ${!isExpanded ? 'cursor-pointer hover:border-[#38BDF2]/30' : ''
                                         }`}
                                     onClick={() => {
                                         if (!isExpanded) setExpandedTicketId(t.ticketTypeId);
@@ -4085,14 +4160,14 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="space-y-1">
-                                            <p className="font-bold text-[#2E2E2F] text-sm">{t.name || 'Untitled Ticket'}</p>
+                                            <p className="font-bold text-[#2E2E2F] dark:text-white dark:text-white text-sm">{t.name || 'Untitled Ticket'}</p>
                                             <div className="flex flex-wrap items-center gap-3 text-[11px] font-medium uppercase tracking-wide">
-                                                <span className="text-[#2E2E2F]">{priceLabel}</span>
-                                                <span className="text-[#2E2E2F]/60">{t.status ? 'Active' : 'Inactive'}</span>
-                                                <span className="text-[#2E2E2F]/60">Qty {t.quantityTotal}</span>
+                                                <span className="text-[#2E2E2F] dark:text-white dark:text-white">{priceLabel}</span>
+                                                <span className="text-[#2E2E2F] dark:text-white dark:text-white/60">{t.status ? 'Active' : 'Inactive'}</span>
+                                                <span className="text-[#2E2E2F] dark:text-white dark:text-white/60">Qty {t.quantityTotal}</span>
                                                 {t.priceAmount > 0 && (
                                                     <>
-                                                        <span className="text-[#2E2E2F]/40">•</span>
+                                                        <span className="text-[#2E2E2F] dark:text-white dark:text-white/40">•</span>
                                                         <span className="text-[#38BDF2] font-bold">
                                                             {Math.round(((t.quantitySold || 0) / (t.quantityTotal || 1)) * 100)}% Sold
                                                         </span>
@@ -4110,7 +4185,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                                     e.stopPropagation();
                                                     setExpandedTicketId(isExpanded ? null : t.ticketTypeId);
                                                 }}
-                                                className="text-[11px] font-semibold uppercase tracking-wide text-[#2E2E2F] hover:text-[#2E2E2F] transition-colors"
+                                                className="text-[11px] font-semibold uppercase tracking-wide text-[#2E2E2F] dark:text-white dark:text-white hover:text-[#2E2E2F] dark:text-white dark:text-white transition-colors"
                                             >
                                                 {isExpanded ? 'Collapse' : 'Edit'}
                                             </button>
@@ -4120,7 +4195,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                                     e.stopPropagation();
                                                     removeTicket(t.ticketTypeId);
                                                 }}
-                                                className="text-[#2E2E2F] hover:bg-[#38BDF2]/10 p-2 rounded-lg transition-colors"
+                                                className="text-[#2E2E2F] dark:text-white dark:text-white hover:bg-[#38BDF2]/10 p-2 rounded-lg transition-colors"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                             </button>
@@ -4130,17 +4205,17 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                     {isExpanded && (
                                         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-[#2E2E2F]/20">
                                             <div className="space-y-1.5">
-                                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Tier Name</label>
+                                                <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Tier Name</label>
                                                 <input
                                                     value={t.name}
                                                     onChange={(e) => updateTicket(t.ticketTypeId, { name: e.target.value })}
-                                                    className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                                    className="w-full px-3 py-2 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Status</label>
+                                                <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Status</label>
                                                 <select
-                                                    className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                                    className="w-full px-3 py-2 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                                     value={t.status ? 'ACTIVE' : 'INACTIVE'}
                                                     onChange={(e) => updateTicket(t.ticketTypeId, { status: e.target.value === 'ACTIVE' })}
                                                 >
@@ -4149,9 +4224,9 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                                 </select>
                                             </div>
                                             <div className="space-y-1.5">
-                                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Type</label>
+                                                <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Type</label>
                                                 <select
-                                                    className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                                    className="w-full px-3 py-2 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                                     value={t.priceAmount === 0 ? 'FREE' : 'PAID'}
                                                     onChange={(e) => {
                                                         const isPaid = e.target.value === 'PAID';
@@ -4169,7 +4244,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                                 </select>
                                             </div>
                                             <div className="space-y-1.5">
-                                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Price ({t.currency || 'PHP'})</label>
+                                                <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Price ({t.currency || 'PHP'})</label>
                                                 <input
                                                     type="number"
                                                     min={0}
@@ -4177,11 +4252,11 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                                     disabled={t.priceAmount === 0}
                                                     value={t.priceAmount}
                                                     onChange={(e) => updateTicket(t.ticketTypeId, { priceAmount: Math.max(0, parseFloat(e.target.value) || 0) })}
-                                                    className={`w-full px-3 py-2 border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2] ${t.priceAmount === 0 ? 'bg-[#F2F2F2] text-[#2E2E2F]/60' : 'bg-[#F2F2F2]'}`}
+                                                    className={`w-full px-3 py-2 border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2] ${t.priceAmount === 0 ? 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white/60' : 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]'}`}
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Sale Discount (%)</label>
+                                                <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Sale Discount (%)</label>
                                                 <div className="flex gap-2 items-end">
                                                     <input
                                                         type="number"
@@ -4190,7 +4265,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                                         disabled={t.priceAmount === 0}
                                                         value={t.saleDiscountPercent || 0}
                                                         onChange={(e) => updateTicket(t.ticketTypeId, { saleDiscountPercent: Math.max(0, Math.min(100, parseFloat(e.target.value) || 0)) })}
-                                                        className={`flex-1 px-3 py-2 border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2] ${t.priceAmount === 0 ? 'bg-[#F2F2F2] text-[#2E2E2F]/60' : 'bg-[#F2F2F2]'}`}
+                                                        className={`flex-1 px-3 py-2 border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2] ${t.priceAmount === 0 ? 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white/60' : 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]'}`}
                                                     />
                                                     {t.saleDiscountPercent && t.saleDiscountPercent > 0 && (
                                                         <div className="text-[10px] font-bold text-[#38BDF2] whitespace-nowrap pb-2">
@@ -4200,7 +4275,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                                 </div>
                                             </div>
                                             <div className="space-y-1.5">
-                                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Quantity Total</label>
+                                                <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Quantity Total</label>
                                                 <input
                                                     type="number"
                                                     min={t.quantitySold || 0}
@@ -4211,40 +4286,40 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                                             quantityTotal: Math.max(nextValue, t.quantitySold || 0)
                                                         });
                                                     }}
-                                                    className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                                    className="w-full px-3 py-2 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <label className="text-[11px] font-medium text-[#2E2E2F]/60 uppercase tracking-wide">Guests per Ticket</label>
+                                                <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Guests per Ticket</label>
                                                 <input
                                                     type="number"
                                                     min={1}
                                                     value={t.capacityPerTicket || 1}
                                                     onChange={(e) => updateTicket(t.ticketTypeId, { capacityPerTicket: Math.max(1, parseInt(e.target.value, 10) || 1) })}
-                                                    className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                                    className="w-full px-3 py-2 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <label className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Currency</label>
+                                                <label className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-widest">Currency</label>
                                                 <input
                                                     value={t.currency}
                                                     onChange={(e) => updateTicket(t.ticketTypeId, { currency: e.target.value.toUpperCase() })}
-                                                    className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                                    className="w-full px-3 py-2 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                                 />
                                             </div>
                                             <div className="md:col-span-2 space-y-1.5">
-                                                <label className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Description</label>
+                                                <label className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-widest">Description</label>
                                                 <textarea
                                                     value={t.description || ''}
                                                     onChange={(e) => updateTicket(t.ticketTypeId, { description: e.target.value })}
-                                                    className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                                    className="w-full px-3 py-2 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                                     rows={2}
                                                 />
                                             </div>
                                             {t.priceAmount > 0 && (
                                                 <div className="md:col-span-2 space-y-4 mb-2">
                                                     <div className="space-y-1.5">
-                                                        <label className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Sales Start</label>
+                                                        <label className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-widest">Sales Start</label>
                                                         <input
                                                             type="datetime-local"
                                                             value={t.salesStartAt || ''}
@@ -4259,11 +4334,11 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                                                 }
                                                                 updateTicket(t.ticketTypeId, { salesStartAt: val });
                                                             }}
-                                                            className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                                            className="w-full px-3 py-2 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                                         />
                                                     </div>
                                                     <div className="space-y-1.5">
-                                                        <label className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">Sales End</label>
+                                                        <label className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-widest">Sales End</label>
                                                         <input
                                                             type="datetime-local"
                                                             value={t.salesEndAt || ''}
@@ -4282,7 +4357,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                                                 }
                                                                 updateTicket(t.ticketTypeId, { salesEndAt: val });
                                                             }}
-                                                            className="w-full px-3 py-2 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
+                                                            className="w-full px-3 py-2 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm outline-none focus:border-[#38BDF2]"
                                                         />
                                                     </div>
                                                 </div>
@@ -4290,7 +4365,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                                         </div>
                                     )}
 
-                                    <div className="text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest">
+                                    <div className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-widest">
                                         Sold: {t.quantitySold || 0}
                                         {t.priceAmount > 0 && (
                                             <span className="text-[#38BDF2] ml-2">
@@ -4302,7 +4377,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                             );
                         })}
                         {tickets.length === 0 && (
-                            <div className="py-24 text-center border-2 border-dashed border-[#2E2E2F]/15 rounded-[2rem] text-[#2E2E2F]/30 uppercase text-[10px] font-black tracking-widest">
+                            <div className="py-24 text-center border-2 border-dashed border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-[2rem] text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase text-[10px] font-black tracking-widest">
                                 No tickets configured
                             </div>
                         )}
@@ -4321,33 +4396,33 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                             <ICONS.CreditCard className="w-6 h-6 text-[#38BDF2]" strokeWidth={2.5} />
                         </div>
                         <div className="space-y-2">
-                            <p className="font-bold text-[#2E2E2F] text-[16px] tracking-tight">
+                            <p className="font-bold text-[#2E2E2F] dark:text-white dark:text-white text-[16px] tracking-tight">
                                 Setup HitPay to Gain More
                             </p>
-                            <p className="text-[13px] text-[#2E2E2F]/60 font-medium leading-relaxed">
+                            <p className="text-[13px] text-[#2E2E2F] dark:text-white dark:text-white/60 font-medium leading-relaxed">
                                 To create paid tickets and receive payouts, you need to connect your HitPay account first. This ensures all transactions are processed securely and funds are routed directly to you.
                             </p>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-3">
-                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl">
+                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl">
                             <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center font-bold text-xs">1</div>
-                            <p className="text-xs font-semibold text-[#2E2E2F]/70">Go to Payment Gateway settings</p>
+                            <p className="text-xs font-semibold text-[#2E2E2F] dark:text-white dark:text-white/70">Go to Payment Gateway settings</p>
                         </div>
-                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl">
+                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl">
                             <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center font-bold text-xs">2</div>
-                            <p className="text-xs font-semibold text-[#2E2E2F]/70">Enter your HitPay API Key and Salt</p>
+                            <p className="text-xs font-semibold text-[#2E2E2F] dark:text-white dark:text-white/70">Enter your HitPay API Key and Salt</p>
                         </div>
-                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-2xl">
+                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl">
                             <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center font-bold text-xs">3</div>
-                            <p className="text-xs font-semibold text-[#2E2E2F]/70">Save and return here to enable paid tickets</p>
+                            <p className="text-xs font-semibold text-[#2E2E2F] dark:text-white dark:text-white/70">Save and return here to enable paid tickets</p>
                         </div>
                     </div>
 
                     <div className="flex gap-4 pt-2">
                         <Button
-                            className="flex-1 py-1 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] text-[#2E2E2F] border-2 border-[#2E2E2F]/15"
+                            className="flex-1 py-1 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10"
                             onClick={() => setIsPaymentRestrictionOpen(false)}
                         >
                             Stay Free

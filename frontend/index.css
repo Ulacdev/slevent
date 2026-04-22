@@ -136,6 +136,9 @@ label {
   --color-primary: #38BDF2;
   --color-text: #2E2E2F;
   --color-background: #F2F2F2;
+  --color-surface: #F2F2F2;
+  --color-sidebar: #F2F2F2;
+  --color-sidebar-border: #E0E0E0;
 
   /* Extended Brand Colors (from guidelines) */
   --color-navy: #003E86;
@@ -152,6 +155,20 @@ label {
   --color-text-40: rgba(46, 46, 47, 0.4);
   --color-text-60: rgba(46, 46, 47, 0.6);
   --color-text-70: rgba(46, 46, 47, 0.7);
+}
+
+.dark {
+  --color-background: #09090B;
+  --color-text: #F2F2F2;
+  --color-surface: #18181B;
+  --color-sidebar: #09090B;
+  --color-sidebar-border: #27272A;
+
+  --color-text-10: rgba(242, 242, 242, 0.1);
+  --color-text-20: rgba(242, 242, 242, 0.2);
+  --color-text-40: rgba(242, 242, 242, 0.4);
+  --color-text-60: rgba(242, 242, 242, 0.6);
+  --color-text-70: rgba(242, 242, 242, 0.7);
 }
 
 /* ========================================

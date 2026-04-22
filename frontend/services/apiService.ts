@@ -1158,15 +1158,24 @@ export const apiService = {
 
   // --- Event Promotion APIs ---
 
-  toggleEventPromotion: async (eventId: string): Promise<{ promoted: boolean; promotionId?: string; expiresAt?: string; message: string }> => {
-    const res = await apiService._fetch(`${API_BASE}/api/events/${encodeURIComponent(eventId)}/toggle-promotion`, {
+  toggleEventPromotion: async (eventId: string | null, payload: { eventIds?: string[]; customExpiresAt?: string } = {}): Promise<any> => {
+    const url = eventId 
+      ? `${API_BASE}/api/events/${encodeURIComponent(eventId)}/toggle-promotion`
+      : `${API_BASE}/api/events/bulk-promote`;
+      
+    const res = await apiService._fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include'
+      credentials: 'include',
+      body: JSON.stringify(payload)
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data?.error || `Failed to toggle promotion: ${res.status}`);
     return data;
+  },
+
+  bulkPromoteEvents: async (eventIds: string[], customExpiresAt?: string): Promise<any> => {
+    return apiService.toggleEventPromotion(null, { eventIds, customExpiresAt });
   },
 
   getEventPromotionStatus: async (eventId: string): Promise<{ promoted: boolean; promotionId?: string; expiresAt?: string; remainingDays?: number }> => {
@@ -1188,8 +1197,7 @@ export const apiService = {
   },
 
   listMyPromotedEvents: async (): Promise<any[]> => {
-    const data = await apiService.getPromotedEvents();
-    return Array.isArray(data.events) ? data.events : [];
+    return apiService.getMyActivePromotions();
   },
 
   getPromotionQuota: async (): Promise<{ limit: number; used: number; remaining: number; durationDays: number; canPromote: boolean }> => {
@@ -1199,6 +1207,16 @@ export const apiService = {
     });
     if (!res.ok) throw new Error(`Failed to load promotion quota: ${res.status}`);
     return await res.json();
+  },
+
+  getMyActivePromotions: async (): Promise<any[]> => {
+    const res = await apiService._fetch(`${API_BASE}/api/promotions/my-promoted-events`, {
+      credentials: 'include',
+      cache: 'no-store'
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data?.promotedEvents) ? data.promotedEvents : [];
   },
 
   getPromotedEvents: async (limit = 10): Promise<{ events: Event[] }> => {
@@ -1650,8 +1668,18 @@ export const apiService = {
     return await res.json();
   },
 
+  deleteSupportTicket: async (ticketId: string): Promise<any> => {
+    const res = await apiService._fetch(`${API_BASE}/api/support/tickets/${encodeURIComponent(ticketId)}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error(`Failed to delete ticket: ${res.status}`);
+    return await res.json();
+  },
+
   bulkDeleteSupportTickets: async (ids: string[]): Promise<any> => {
-    const res = await apiService._fetch(`${API_BASE}/api/user/support/bulk-delete`, {
+    const res = await apiService._fetch(`${API_BASE}/api/support/tickets/bulk-delete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

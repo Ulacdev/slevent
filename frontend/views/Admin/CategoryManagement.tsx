@@ -123,8 +123,8 @@ export const CategoryManagement: React.FC = () => {
     <div className="space-y-8" style={{ zoom: 0.85 }}>
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-2">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-[#2E2E2F] tracking-tight">Smart Categories</h1>
-          <p className="text-[#2E2E2F] font-medium text-sm mt-1">Manage how events are automatically tagged and browsed.</p>
+          <h1 className="text-3xl font-bold text-text dark:text-white tracking-tight">Smart Categories</h1>
+          <p className="text-text dark:text-white/60 font-medium text-sm mt-1">Manage how events are automatically tagged and browsed.</p>
         </div>
         <Button 
           onClick={() => handleOpenModal()}
@@ -139,7 +139,7 @@ export const CategoryManagement: React.FC = () => {
         {categories.map((cat) => {
           const IconComp = (ICONS as any)[cat.icon_name] || ICONS.Layout;
           return (
-            <div key={cat.id} className="bg-[#F2F2F2] rounded-2xl p-6 border border-black/10 shadow-sm transition-all hover:shadow-md">
+            <div key={cat.id} className="bg-surface rounded-2xl p-6 border border-sidebar-border shadow-sm transition-all hover:shadow-md">
               <div className="flex items-start justify-between mb-6">
                 <div className="p-4 rounded-xl bg-[#38BDF2] text-white shadow-sm">
                   <IconComp className="w-8 h-8" strokeWidth={2.5} />
@@ -147,14 +147,14 @@ export const CategoryManagement: React.FC = () => {
                 <div className="flex gap-2">
                   <button 
                     onClick={() => handleOpenModal(cat)}
-                    className="p-2.5 rounded-lg bg-black/5 text-black hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-all"
+                    className="p-2.5 rounded-lg bg-text/5 text-text dark:bg-white/5 dark:text-white hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-all"
                     title="Edit"
                   >
                     <ICONS.Edit className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={() => handleDelete(cat)}
-                    className="p-2.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all"
+                    className="p-2.5 rounded-lg bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
                     title="Delete Permanently"
                   >
                     <ICONS.Trash className="w-4 h-4" />
@@ -163,7 +163,7 @@ export const CategoryManagement: React.FC = () => {
               </div>
                 
               <div className="mb-4">
-                <h3 className="text-xl font-black text-black mb-1">{cat.label}</h3>
+                <h3 className="text-xl font-black text-text dark:text-white mb-1">{cat.label}</h3>
                 <code className="text-[11px] font-bold uppercase tracking-wider text-[#38BDF2] bg-[#38BDF2]/5 px-2 py-0.5 rounded-md">
                   {cat.key}
                 </code>
@@ -171,12 +171,12 @@ export const CategoryManagement: React.FC = () => {
 
               <div className="flex flex-wrap gap-1.5">
                 {cat.keywords.slice(0, 5).map(k => (
-                  <span key={k} className="text-[10px] font-bold text-black/40 bg-black/5 px-2 py-1 rounded-lg">
+                  <span key={k} className="text-[10px] font-bold text-text dark:text-white/40 bg-text/5 dark:bg-white/5 px-2 py-1 rounded-lg">
                     {k}
                   </span>
                 ))}
                 {cat.keywords.length > 5 && (
-                  <span className="text-[10px] font-bold text-black/40 px-1 py-1">+{cat.keywords.length - 5} more</span>
+                  <span className="text-[10px] font-bold text-text dark:text-white/40 px-1 py-1">+{cat.keywords.length - 5} more</span>
                 )}
               </div>
             </div>
@@ -188,19 +188,19 @@ export const CategoryManagement: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setIsModalOpen(false)}></div>
-          <div className="bg-[#F2F2F2] rounded-3xl w-full max-w-lg shadow-2xl relative z-10 animate-in zoom-in-95 slide-in-from-bottom-5 duration-300 overflow-hidden transform scale-100 origin-center border border-white/20">
+          <div className="bg-surface rounded-3xl w-full max-w-lg shadow-2xl relative z-10 animate-in zoom-in-95 slide-in-from-bottom-5 duration-300 overflow-hidden transform scale-100 origin-center border border-sidebar-border">
             <div className="p-8 sm:p-10">
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-black text-black">{editingCategory ? 'Edit Category' : 'Add Category'}</h2>
-                <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-black/5 rounded-full transition-colors">
-                  <ICONS.X className="w-6 h-6 text-black" />
+                <h2 className="text-2xl font-black text-text dark:text-white">{editingCategory ? 'Edit Category' : 'Add Category'}</h2>
+                <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-text/5 dark:hover:bg-white/5 rounded-full transition-colors">
+                  <ICONS.X className="w-6 h-6 text-text dark:text-white" />
                 </button>
               </div>
 
               <form onSubmit={handleSave} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-black text-black uppercase tracking-wider">Label</label>
+                    <label className="text-sm font-black text-text dark:text-white/60 uppercase tracking-wider">Label</label>
                     <Input 
                       placeholder="e.g. Business" 
                       value={label} 
@@ -213,7 +213,7 @@ export const CategoryManagement: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-black text-black uppercase tracking-wider">Storage Key</label>
+                    <label className="text-sm font-black text-text dark:text-white/60 uppercase tracking-wider">Storage Key</label>
                     <Input 
                       placeholder="e.g. BUSINESS" 
                       value={key} 
@@ -225,8 +225,8 @@ export const CategoryManagement: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-black text-black uppercase tracking-wider">Select Icon</label>
-                  <div className="grid grid-cols-6 sm:grid-cols-10 gap-2 p-4 bg-black/5 rounded-2xl max-h-48 overflow-y-auto">
+                  <label className="text-sm font-black text-text dark:text-white/60 uppercase tracking-wider">Select Icon</label>
+                  <div className="grid grid-cols-6 sm:grid-cols-10 gap-2 p-4 bg-background border border-sidebar-border rounded-2xl max-h-48 overflow-y-auto">
                     {Object.keys(ICONS).map(name => {
                       const Icon = (ICONS as any)[name];
                       if (typeof Icon !== 'function') return null;
@@ -235,7 +235,7 @@ export const CategoryManagement: React.FC = () => {
                           key={name}
                           type="button"
                           onClick={() => setIconName(name)}
-                          className={`p-3 rounded-xl transition-all ${iconName === name ? 'bg-[#38BDF2] text-white' : 'bg-white text-black hover:bg-black/10'}`}
+                          className={`p-3 rounded-xl transition-all ${iconName === name ? 'bg-[#38BDF2] text-white' : 'bg-surface text-text dark:text-white hover:bg-text hover:text-background dark:hover:bg-white dark:hover:text-[#2E2E2F]'}`}
                           title={name}
                         >
                           <Icon className="w-5 h-5 shadow-sm" />
@@ -246,9 +246,9 @@ export const CategoryManagement: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-black text-black uppercase tracking-wider">Keywords (comma separated)</label>
+                  <label className="text-sm font-black text-text dark:text-white/60 uppercase tracking-wider">Keywords (comma separated)</label>
                   <textarea
-                    className="w-full h-24 p-4 rounded-xl border-2 border-black/5 focus:border-[#38BDF2] transition-colors outline-none font-medium placeholder:text-black/30 bg-black/5"
+                    className="w-full h-24 p-4 rounded-xl border-2 border-sidebar-border focus:border-[#38BDF2] transition-colors outline-none font-medium placeholder:text-text/30 bg-background dark:text-white dark:placeholder:text-white/20"
                     placeholder="e.g. startup, business, networking..."
                     value={keywords}
                     onChange={(e) => setKeywords(e.target.value)}
@@ -260,7 +260,7 @@ export const CategoryManagement: React.FC = () => {
                   <Button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="flex-1 py-4 !bg-[#E8E8E8] !text-black font-black rounded-xl hover:!bg-black hover:!text-white transition-all"
+                    className="flex-1 py-4 !bg-background !text-text dark:!text-white font-black rounded-xl hover:!bg-text hover:!text-background dark:hover:!bg-white dark:hover:!text-[#2E2E2F] transition-all border border-sidebar-border"
                   >
                     Cancel
                   </Button>

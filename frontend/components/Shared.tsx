@@ -9,11 +9,11 @@ export const Badge: React.FC<{
   title?: string
 }> = ({ children, type = 'neutral', className = '', onClick, title }) => {
   const styles = {
-    success: 'bg-green-100 text-green-700',
-    danger: 'bg-red-100 text-red-700',
-    warning: 'bg-amber-100 text-amber-700',
-    info: 'bg-[#38BDF2]/20 text-[#38BDF2]',
-    neutral: 'bg-[#2E2E2F]/10 text-[#2E2E2F]',
+    success: 'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400',
+    danger: 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400',
+    warning: 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
+    info: 'bg-[#38BDF2]/20 text-[#38BDF2] dark:bg-[#38BDF2]/10',
+    neutral: 'bg-[#2E2E2F]/10 text-[#2E2E2F] dark:bg-white/10 dark:text-white',
   };
   return (
     <span
@@ -37,7 +37,7 @@ export const Card: React.FC<{
   <div
     onClick={onClick}
     style={style}
-    className={`bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl ${overflowHidden ? 'overflow-hidden' : ''} ${className} shadow-sm hover:shadow-md transition-shadow`}
+    className={`bg-surface border border-sidebar-border rounded-xl ${overflowHidden ? 'overflow-hidden' : ''} ${className} shadow-sm hover:shadow-md transition-shadow`}
     {...props}
   >
     {children}
@@ -68,11 +68,11 @@ export const Button: React.FC<{
     const base = 'inline-flex items-center justify-center font-bold tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] sm:min-h-[44px] active:scale-95 px-4';
 
     const variants = {
-      primary: 'bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] active:bg-[#2E2E2F] focus:ring-[#38BDF2]',
-      secondary: 'bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] active:bg-[#2E2E2F] focus:ring-[#38BDF2]',
+      primary: 'bg-[#38BDF2] text-white hover:bg-[#2E2E2F] dark:hover:bg-white/90 dark:hover:text-[#2E2E2F] transition-all focus:ring-[#38BDF2]',
+      secondary: 'bg-[#38BDF2] text-white hover:bg-[#2E2E2F] dark:hover:bg-white/90 dark:hover:text-[#2E2E2F] transition-all focus:ring-[#38BDF2]',
       outline: 'bg-transparent border-2 border-[#38BDF2] text-[#38BDF2] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 focus:ring-[#38BDF2]',
       ghost: 'bg-transparent text-[#38BDF2] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 focus:ring-[#38BDF2]',
-      danger: 'bg-red-500 text-[#F2F2F2] hover:bg-red-600 active:bg-red-700 focus:ring-red-500'
+      danger: 'bg-red-500 text-white hover:bg-red-600 active:bg-red-700 focus:ring-red-500'
     };
 
     const sizes = {
@@ -111,9 +111,9 @@ export const Input: React.FC<{
 
   return (
     <div className="space-y-2 w-full">
-      {label && <label className="block text-[10px] font-bold text-[#2E2E2F] mb-1 uppercase tracking-wider">{label}</label>}
+      {label && <label className="block text-[10px] font-bold text-[#2E2E2F] dark:text-white/60 mb-1 uppercase tracking-wider">{label}</label>}
       <input
-        className={`block w-full px-4 py-3 bg-[#F2F2F2] border text-base sm:text-sm min-h-[48px] sm:min-h-[44px] ${error ? 'border-red-500' : 'border-[#2E2E2F]/20'} rounded-xl focus:outline-none focus:ring-2 ${error ? 'focus:ring-red-300/40' : 'focus:ring-[#38BDF2]/40'} transition-colors font-normal ${className}`}
+        className={`block w-full px-4 py-3 bg-background border text-base sm:text-sm min-h-[48px] sm:min-h-[44px] ${error ? 'border-red-500' : 'border-sidebar-border'} rounded-xl focus:outline-none focus:ring-2 ${error ? 'focus:ring-red-300/40' : 'focus:ring-[#38BDF2]/40'} transition-colors font-normal text-[#2E2E2F] dark:text-white ${className}`}
         {...inputProps}
       />
       {error && <p className="text-[13px] text-red-500 font-medium mt-1">{error}</p>}
@@ -144,7 +144,7 @@ export const PasswordInput: React.FC<{
   return (
     <div className={`relative group/input ${className}`}>
       {icon && (
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/20 group-focus-within/input:text-[#38BDF2] transition-colors z-10 w-5 h-5 flex items-center justify-center">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2E2E2F]/20 dark:text-white/20 group-focus-within/input:text-[#38BDF2] transition-colors z-10 w-5 h-5 flex items-center justify-center">
           {icon}
         </div>
       )}
@@ -154,13 +154,13 @@ export const PasswordInput: React.FC<{
         value={value}
         onChange={onChange}
         required={required}
-        className={`w-full min-h-[48px] sm:min-h-[44px] text-[14px] ${icon ? 'pl-12' : 'pl-4'} ${hideEye ? 'pr-4' : 'pr-12'} py-3 sm:py-2 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[#2E2E2F] placeholder-[#2E2E2F]/40 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal ${inputClassName}`}
+        className={`w-full min-h-[48px] sm:min-h-[44px] text-[14px] ${icon ? 'pl-12' : 'pl-4'} ${hideEye ? 'pr-4' : 'pr-12'} py-3 sm:py-2 bg-background border border-sidebar-border rounded-xl text-[#2E2E2F] dark:text-white placeholder-[#2E2E2F]/40 dark:placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/40 focus:border-[#38BDF2] transition-colors font-normal ${inputClassName}`}
       />
       {!hideEye && (
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-[#2E2E2F]/40 hover:text-[#38BDF2] transition-colors z-10 active:scale-95"
+          className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-[#2E2E2F]/40 dark:text-white/40 hover:text-[#38BDF2] transition-colors z-10 active:scale-95"
         >
           {showPassword ? <EyeOffIcon /> : <EyeIcon />}
         </button>
@@ -271,22 +271,22 @@ export const Modal: React.FC<{
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-title"
-          className={`relative w-full overflow-hidden bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-2xl shadow-2xl animate-in ${zoom ? '' : 'zoom-in-95'} duration-300 flex flex-col ${sizes[size]} max-h-[90vh] sm:max-h-[85vh] origin-center ${className}`}
+          className={`relative w-full overflow-hidden bg-surface border-2 border-sidebar-border rounded-2xl shadow-2xl animate-in ${zoom ? '' : 'zoom-in-95'} duration-300 flex flex-col ${sizes[size]} max-h-[90vh] sm:max-h-[85vh] origin-center ${className}`}
           style={{
             zIndex: zIndex,
             transform: zoom ? 'scale(0.8)' : undefined
           }}
         >
           {!hideHeader && (title || showClose) && (
-            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-[#2E2E2F]/10 flex items-start justify-between gap-3 sticky top-0 bg-[#F2F2F2] z-10">
+            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-sidebar-border flex items-start justify-between gap-3 sticky top-0 bg-surface z-10">
               <div className="min-w-0">
                 {title && (
-                  <h2 id="modal-title" className="text-base sm:text-xl font-black text-[#2E2E2F] break-words tracking-tight">
+                  <h2 id="modal-title" className="text-base sm:text-xl font-black text-[#2E2E2F] dark:text-white break-words tracking-tight">
                     {title}
                   </h2>
                 )}
                 {subtitle && (
-                  <p className="mt-1 text-[13px] sm:text-[13px] uppercase tracking-[0.15em] font-bold text-[#2E2E2F]">
+                  <p className="mt-1 text-[13px] sm:text-[13px] uppercase tracking-[0.15em] font-bold text-[#2E2E2F] dark:text-white/60">
                     {subtitle}
                   </p>
                 )}
@@ -387,7 +387,7 @@ export const PageLoader: React.FC<{
         <SkeletonContent />
         {label && (
           <div className="absolute inset-x-0 top-1/3 z-10 flex items-center justify-center pointer-events-none">
-             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] animate-pulse bg-[#F2F2F2]/90 px-6 py-3 rounded-2xl border border-[#2E2E2F]/10 shadow-xl backdrop-blur-md">{label}</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] animate-pulse bg-[#F2F2F2]/90 px-6 py-3 rounded-2xl border border-[#2E2E2F]/10 shadow-xl backdrop-blur-md">{label}</p>
           </div>
         )}
       </div>
@@ -455,18 +455,18 @@ export const PortalHeader: React.FC<{
   className?: string;
 }> = ({ title, subtitle, icon, actions, className = '' }) => {
   return (
-    <div className={`bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl p-8 md:p-12 mb-8 ${className}`}>
+    <div className={`bg-surface border-2 border-sidebar-border rounded-xl p-8 md:p-12 mb-8 ${className}`}>
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
         <div className="max-w-2xl">
-          <div className="w-12 h-12 rounded-xl bg-[#2E2E2F]/10 flex items-center justify-center mb-6">
-            <div className="w-6 h-6 text-[#2E2E2F]">
+          <div className="w-12 h-12 rounded-xl bg-background flex items-center justify-center mb-6">
+            <div className="w-6 h-6 text-[#2E2E2F] dark:text-white">
               {icon}
             </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-[#2E2E2F] tracking-tighter leading-tight mb-4 uppercase">
+          <h1 className="text-4xl md:text-5xl font-black text-[#2E2E2F] dark:text-white tracking-tighter leading-tight mb-4 uppercase">
             {title}
           </h1>
-          <p className="text-[#2E2E2F] text-base md:text-lg font-bold leading-relaxed max-w-xl italic">
+          <p className="text-[#2E2E2F] dark:text-white/80 text-base md:text-lg font-bold leading-relaxed max-w-xl italic">
             {subtitle}
           </p>
         </div>

@@ -345,32 +345,32 @@ export const ArchiveEvents: React.FC = () => {
       {/* Page Header */}
       <div className="px-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">Archive</h1>
-          <p className="mt-1 text-sm font-semibold text-[#2E2E2F]">
+          <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] dark:text-white tracking-tight uppercase">Archive</h1>
+          <p className="mt-1 text-sm font-semibold text-[#2E2E2F] dark:text-white/60">
             Manage your deleted {activeTab === 'support' ? 'Support Tickets' : (activeTab === 'transactions' ? 'Transaction Reports' : 'Events')}
           </p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-[#2E2E2F]/10 px-2 pb-px">
+      <div className="flex gap-2 border-b border-[#2E2E2F]/10 dark:border-white/10 px-2 pb-px">
         <button
           onClick={() => setActiveTab('events')}
-          className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'events' ? 'text-[#38BDF2]' : 'text-[#2E2E2F] hover:text-[#2E2E2F]'}`}
+          className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'events' ? 'text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white/60 hover:text-[#2E2E2F] dark:hover:text-white'}`}
         >
           Events
           {activeTab === 'events' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#38BDF2] rounded-full" />}
         </button>
         <button
           onClick={() => setActiveTab('transactions')}
-          className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'transactions' ? 'text-[#38BDF2]' : 'text-[#2E2E2F] hover:text-[#2E2E2F]'}`}
+          className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'transactions' ? 'text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white/60 hover:text-[#2E2E2F] dark:hover:text-white'}`}
         >
           Transaction Reports
           {activeTab === 'transactions' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#38BDF2] rounded-full" />}
         </button>
         <button
           onClick={() => setActiveTab('support')}
-          className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'support' ? 'text-[#38BDF2]' : 'text-[#2E2E2F] hover:text-[#2E2E2F]'}`}
+          className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'support' ? 'text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white/60 hover:text-[#2E2E2F] dark:hover:text-white'}`}
         >
           Support Tickets
           {activeTab === 'support' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#38BDF2] rounded-full" />}
@@ -386,14 +386,14 @@ export const ArchiveEvents: React.FC = () => {
 
       {/* Empty State */}
       {(activeTab === 'events' ? events.length === 0 : activeTab === 'transactions' ? transactions.length === 0 : supportTickets.length === 0) ? (
-        <Card className="p-12 rounded-xl border-[#2E2E2F]/10 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F2F2F2] flex items-center justify-center">
-            <svg className="w-8 h-8 text-[#2E2E2F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <Card className="p-12 rounded-xl border-[#2E2E2F]/10 dark:border-white/10 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F2F2F2] dark:bg-[#111111] flex items-center justify-center">
+            <svg className="w-8 h-8 text-[#2E2E2F] dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
             </svg>
           </div>
-          <h3 className="text-xl font-black text-[#2E2E2F]">No Archived {activeTab === 'events' ? 'Events' : activeTab === 'transactions' ? 'Reports' : 'Support Tickets'}</h3>
-          <p className="text-[#2E2E2F] mt-2">{activeTab === 'events' ? 'Events' : activeTab === 'transactions' ? 'Transactions' : 'Support tickets'} you archive will appear here</p>
+          <h3 className="text-xl font-black text-[#2E2E2F] dark:text-white">No Archived {activeTab === 'events' ? 'Events' : activeTab === 'transactions' ? 'Reports' : 'Support Tickets'}</h3>
+          <p className="text-[#2E2E2F] dark:text-white mt-2">{activeTab === 'events' ? 'Events' : activeTab === 'transactions' ? 'Transactions' : 'Support tickets'} you archive will appear here</p>
           <Button 
             onClick={() => navigate(activeTab === 'events' ? '/my-events' : activeTab === 'transactions' ? '/user/reports' : '/organizer-support')}
             className="mt-6 px-6 py-3 rounded-xl font-black text-[10px]"
@@ -403,9 +403,9 @@ export const ArchiveEvents: React.FC = () => {
         </Card>
       ) : (
         /* Table View */
-        <Card className="overflow-hidden rounded-xl border-[#2E2E2F]/10">
-          <div className="flex justify-between items-center px-6 py-4 border-b border-[#2E2E2F]/10">
-            <div className="text-sm font-semibold text-[#2E2E2F]">
+        <Card className="overflow-hidden rounded-xl border-[#2E2E2F]/10 dark:border-white/10">
+          <div className="flex justify-between items-center px-6 py-4 border-b border-[#2E2E2F]/10 dark:border-white/10">
+            <div className="text-sm font-semibold text-[#2E2E2F] dark:text-white">
               {selectedRows.size > 0 ? `${selectedRows.size} selected` : `${activeTab === 'events' ? events.length : activeTab === 'transactions' ? transactions.length : supportTickets.length} entries`}
             </div>
             <div className="flex items-center gap-3">
@@ -471,22 +471,22 @@ export const ArchiveEvents: React.FC = () => {
             {activeTab === 'events' ? (
               <table className="w-full">
                 <thead>
-                  <tr className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
-                    <th className="text-left p-4 text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest w-12 text-center align-middle">
+                  <tr className="bg-[#F2F2F2] dark:bg-[#111111] border-b border-[#2E2E2F]/10 dark:border-white/10">
+                    <th className="text-left p-4 text-[10px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest w-12 text-center align-middle">
                       <div className="flex justify-center">
                         <Checkbox checked={selectedRows.size === events.length && events.length > 0} onChange={toggleAll} />
                       </div>
                     </th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Event</th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Original Date</th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Archived Date</th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Location</th>
-                    <th className="text-center p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Actions</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">Event</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">Original Date</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">Archived Date</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">Location</th>
+                    <th className="text-center p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {events.map((event) => (
-                    <tr key={event.eventId} className="border-b border-[#2E2E2F]/5 hover:bg-[#38BDF2]/5 transition-colors">
+                    <tr key={event.eventId} className="border-b border-[#2E2E2F]/5 dark:border-white/5 hover:bg-[#38BDF2]/5 transition-colors">
                       <td className="p-4 align-middle">
                         <div className="flex justify-center">
                           <Checkbox checked={selectedRows.has(event.eventId)} onChange={() => toggleRow(event.eventId)} />
@@ -498,18 +498,18 @@ export const ArchiveEvents: React.FC = () => {
                             <img src={getImageUrl(event.imageUrl)} alt="" className="w-full h-full object-cover" />
                           </div>
                           <div>
-                            <p className="font-bold text-[#2E2E2F] text-[13px]">{event.eventName}</p>
-                            <p className="text-[12px] text-[#2E2E2F]">ID: {event.eventId.split('-')[0]}</p>
+                            <p className="font-bold text-[#2E2E2F] dark:text-white text-[13px]">{event.eventName}</p>
+                            <p className="text-[12px] text-[#2E2E2F] dark:text-white/60">ID: {event.eventId.split('-')[0]}</p>
                           </div>
                          </div>
                       </td>
-                      <td className="p-4 text-[12px] text-[#2E2E2F]">{event.startAt ? formatDate(event.startAt) : '-'}</td>
-                      <td className="p-4 text-[12px] text-[#2E2E2F]">{event.deleted_at ? formatDate(event.deleted_at) : '-'}</td>
-                      <td className="p-4 text-[12px] text-[#2E2E2F] truncate max-w-[200px]">{event.locationText || '-'}</td>
+                      <td className="p-4 text-[12px] text-[#2E2E2F] dark:text-white/80">{event.startAt ? formatDate(event.startAt) : '-'}</td>
+                      <td className="p-4 text-[12px] text-[#2E2E2F] dark:text-white/80">{event.deleted_at ? formatDate(event.deleted_at) : '-'}</td>
+                      <td className="p-4 text-[12px] text-[#2E2E2F] dark:text-white/80 truncate max-w-[200px]">{event.locationText || '-'}</td>
                       <td className="p-4 text-center">
                         <div className="flex justify-center items-center gap-2">
                           <button onClick={() => handleRestore(event.eventId)} disabled={!!actionLoading} className="p-2 text-green-500 hover:scale-110 transition-all disabled:opacity-50" title="Restore"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></button>
-                          <button onClick={() => openDeleteModal(event)} disabled={!!actionLoading} className="p-2 text-[#2E2E2F] hover:text-red-500 transition-colors disabled:opacity-50" title="Delete Permanently"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                          <button onClick={() => openDeleteModal(event)} disabled={!!actionLoading} className="p-2 text-[#2E2E2F] dark:text-white/60 hover:text-red-500 transition-colors disabled:opacity-50" title="Delete Permanently"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
                       </td>
                     </tr>
@@ -519,38 +519,38 @@ export const ArchiveEvents: React.FC = () => {
             ) : activeTab === 'transactions' ? (
               <table className="w-full">
                 <thead>
-                  <tr className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
-                    <th className="text-left p-4 text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest w-12 text-center align-middle">
+                  <tr className="bg-[#F2F2F2] dark:bg-[#111111] border-b border-[#2E2E2F]/10 dark:border-white/10">
+                    <th className="text-left p-4 text-[10px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest w-12 text-center align-middle">
                       <div className="flex justify-center">
                         <Checkbox checked={selectedRows.size === transactions.length && transactions.length > 0} onChange={toggleAll} />
                       </div>
                     </th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Transaction / Report</th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Event</th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Amount</th>
-                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Archived Date</th>
-                    <th className="text-center p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Actions</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">Transaction / Report</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">Event</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">Amount</th>
+                    <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">Archived Date</th>
+                    <th className="text-center p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {transactions.map((t) => (
-                    <tr key={t.orderId} className="border-b border-[#2E2E2F]/5 hover:bg-[#38BDF2]/5 transition-colors">
+                    <tr key={t.orderId} className="border-b border-[#2E2E2F]/5 dark:border-white/5 hover:bg-[#38BDF2]/5 transition-colors">
                       <td className="p-4 align-middle">
                         <div className="flex justify-center">
                           <Checkbox checked={selectedRows.has(t.orderId)} onChange={() => toggleRow(t.orderId)} />
                         </div>
                       </td>
                       <td className="p-4">
-                        <p className="font-bold text-[#2E2E2F] text-[13px]">{t.customerName}</p>
-                        <p className="text-[11px] text-[#2E2E2F] font-mono tracking-tighter">{t.orderId}</p>
+                        <p className="font-bold text-[#2E2E2F] dark:text-white text-[13px]">{t.customerName}</p>
+                        <p className="text-[11px] text-[#2E2E2F] dark:text-white/60 font-mono tracking-tighter">{t.orderId}</p>
                       </td>
-                      <td className="p-4 text-[12px] text-[#2E2E2F]">{t.eventName}</td>
-                      <td className="p-4 text-[12px] font-black text-[#2E2E2F]">{t.currency} {t.amount?.toFixed(2)}</td>
-                      <td className="p-4 text-[12px] text-[#2E2E2F]">{t.archivedAt ? formatDate(t.archivedAt) : '-'}</td>
+                      <td className="p-4 text-[12px] text-[#2E2E2F] dark:text-white/80">{t.eventName}</td>
+                      <td className="p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white">{t.currency} {t.amount?.toFixed(2)}</td>
+                      <td className="p-4 text-[12px] text-[#2E2E2F] dark:text-white/80">{t.archivedAt ? formatDate(t.archivedAt) : '-'}</td>
                       <td className="p-4 text-center">
                         <div className="flex justify-center items-center gap-2">
                           <button onClick={() => handleRestore(t.orderId)} disabled={!!actionLoading} className="p-2 text-green-500 hover:scale-110 transition-all disabled:opacity-50" title="Restore"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></button>
-                          <button onClick={() => { setTransactionToDelete(t); setDeleteModalOpen(true); }} disabled={!!actionLoading} className="p-2 text-[#2E2E2F] hover:text-red-500 transition-colors disabled:opacity-50" title="Delete Permanently"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                          <button onClick={() => { setTransactionToDelete(t); setDeleteModalOpen(true); }} disabled={!!actionLoading} className="p-2 text-[#2E2E2F] dark:text-white/60 hover:text-red-500 transition-colors disabled:opacity-50" title="Delete Permanently"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
                       </td>
                     </tr>
@@ -560,40 +560,40 @@ export const ArchiveEvents: React.FC = () => {
             ) : (
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
-                      <th className="text-left p-4 text-[10px] font-black text-[#2E2E2F] uppercase tracking-widest w-12 text-center align-middle">
+                    <tr className="bg-[#F2F2F2] dark:bg-[#111111] border-b border-[#2E2E2F]/10 dark:border-white/10">
+                      <th className="text-left p-4 text-[10px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest w-12 text-center align-middle">
                         <div className="flex justify-center">
                           <Checkbox checked={selectedRows.size === supportTickets.length && supportTickets.length > 0} onChange={toggleAll} />
                         </div>
                       </th>
-                      <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Subject</th>
-                      <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Status</th>
-                      <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Archived Date</th>
-                      <th className="text-center p-4 text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Actions</th>
+                      <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">Subject</th>
+                      <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">Status</th>
+                      <th className="text-left p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">Archived Date</th>
+                      <th className="text-center p-4 text-[12px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {supportTickets.map((t) => (
-                      <tr key={t.notification_id} className="border-b border-[#2E2E2F]/5 hover:bg-[#38BDF2]/5 transition-colors cursor-pointer" onClick={() => openThread(t)}>
+                      <tr key={t.notification_id} className="border-b border-[#2E2E2F]/5 dark:border-white/5 hover:bg-[#38BDF2]/5 transition-colors cursor-pointer" onClick={() => openThread(t)}>
                         <td className="p-4 align-middle" onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-center">
                             <Checkbox checked={selectedRows.has(t.notification_id)} onChange={() => toggleRow(t.notification_id)} />
                           </div>
                         </td>
                         <td className="p-4">
-                          <p className="font-bold text-[#2E2E2F] text-[13px]">{t.title}</p>
-                          <p className="text-[11px] text-[#2E2E2F] truncate max-w-sm">{t.message}</p>
+                          <p className="font-bold text-[#2E2E2F] dark:text-white text-[13px]">{t.title}</p>
+                          <p className="text-[11px] text-[#2E2E2F] dark:text-white/60 truncate max-w-sm">{t.message}</p>
                         </td>
                         <td className="p-4">
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-[#2E2E2F]/5 text-[#2E2E2F]">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-[#2E2E2F]/5 dark:bg-white/5 text-[#2E2E2F] dark:text-white/80">
                             Archived
                           </span>
                         </td>
-                        <td className="p-4 text-[12px] text-[#2E2E2F]">{new Date(t.created_at).toLocaleDateString()}</td>
+                        <td className="p-4 text-[12px] text-[#2E2E2F] dark:text-white/80">{new Date(t.created_at).toLocaleDateString()}</td>
                         <td className="p-4 text-center" onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-center items-center gap-2">
                             <button onClick={() => handleRestore(t.notification_id)} disabled={!!actionLoading} className="p-2 text-green-500 hover:scale-110 transition-all disabled:opacity-50" title="Restore"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></button>
-                            <button onClick={() => { setSupportTicketToDelete(t); setDeleteModalOpen(true); }} disabled={!!actionLoading} className="p-2 text-[#2E2E2F] hover:text-red-500 transition-colors disabled:opacity-50" title="Delete Permanently"><ICONS.Trash className="w-5 h-5" /></button>
+                            <button onClick={() => { setSupportTicketToDelete(t); setDeleteModalOpen(true); }} disabled={!!actionLoading} className="p-2 text-[#2E2E2F] dark:text-white/60 hover:text-red-500 transition-colors disabled:opacity-50" title="Delete Permanently"><ICONS.Trash className="w-5 h-5" /></button>
                           </div>
                         </td>
                       </tr>
@@ -607,10 +607,10 @@ export const ArchiveEvents: React.FC = () => {
 
       {selectedTicket && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[9999] flex items-center justify-center p-4 sm:p-6 transition-opacity animate-in fade-in duration-300" onClick={() => setSelectedTicket(null)}>
-          <div className="relative w-full max-w-2xl max-h-full bg-[#F2F2F2] shadow-2xl rounded-xl border border-[#2E2E2F]/10 overflow-hidden flex flex-col h-[90vh]" onClick={e => e.stopPropagation()} style={{ zoom: 0.85 }}>
+          <div className="relative w-full max-w-2xl max-h-full bg-[#F2F2F2] dark:bg-[#09090B] shadow-2xl rounded-xl border border-[#2E2E2F]/10 dark:border-white/10 overflow-hidden flex flex-col h-[90vh]" onClick={e => e.stopPropagation()} style={{ zoom: 0.85 }}>
               {/* Header */}
-              <div className="px-8 py-5 border-b border-[#2E2E2F]/5 flex items-center justify-between bg-transparent sticky top-0 z-10">
-                <button onClick={() => setSelectedTicket(null)} className="p-3 hover:bg-[#2E2E2F]/5 rounded-full text-[#2E2E2F] transition-all">
+              <div className="px-8 py-5 border-b border-[#2E2E2F]/5 dark:border-white/5 flex items-center justify-between bg-transparent sticky top-0 z-10">
+                <button onClick={() => setSelectedTicket(null)} className="p-3 hover:bg-[#2E2E2F]/5 dark:hover:bg-white/5 rounded-full text-[#2E2E2F] dark:text-white transition-all">
                   <ICONS.ArrowLeft className="w-6 h-6" />
                 </button>
                 <div className="flex items-center gap-3">
@@ -622,7 +622,7 @@ export const ArchiveEvents: React.FC = () => {
                 </div>
                 <button 
                   onClick={() => selectedTicket && loadMessages(selectedTicket.notification_id)}
-                  className="p-3 hover:bg-[#2E2E2F]/5 rounded-full text-[#2E2E2F] transition-all hover:text-[#38BDF2]"
+                  className="p-3 hover:bg-[#2E2E2F]/5 dark:hover:bg-white/5 rounded-full text-[#2E2E2F] dark:text-white transition-all hover:text-[#38BDF2]"
                   title="Refresh messages"
                 >
                   <ICONS.RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin text-[#38BDF2]' : ''}`} />
@@ -633,7 +633,7 @@ export const ArchiveEvents: React.FC = () => {
               <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar bg-transparent">
                 <div className="flex flex-col gap-2 max-w-[85%] items-end ml-auto">
                     <div className="flex items-end gap-3 flex-row-reverse">
-                      <div className="w-10 h-10 rounded-xl bg-transparent flex-shrink-0 flex items-center justify-center border border-[#2E2E2F]/5 shadow-sm overflow-hidden text-[#38BDF2]">
+                      <div className="w-10 h-10 rounded-xl bg-transparent flex-shrink-0 flex items-center justify-center border border-[#2E2E2F]/5 dark:border-white/5 shadow-sm overflow-hidden text-[#38BDF2]">
                           <ICONS.Users className="w-5 h-5" />
                       </div>
                       <div className="bg-[#38BDF2] px-4 py-3 rounded-xl rounded-br-none border-0 shadow-sm text-white">
@@ -643,7 +643,7 @@ export const ArchiveEvents: React.FC = () => {
                           </p>
                       </div>
                     </div>
-                    <p className="text-[10px] font-bold text-[#2E2E2F] uppercase tracking-[0.2em] mr-14">
+                    <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/60 uppercase tracking-[0.2em] mr-14">
                       You • {new Date(selectedTicket.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                 </div>
@@ -652,7 +652,7 @@ export const ArchiveEvents: React.FC = () => {
                   {(ticketMessages[selectedTicket.notification_id] || []).map((m) => (
                     <div key={m.message_id} className={`flex flex-col gap-2 max-w-[85%] ${m.is_admin_reply ? 'mr-auto items-start' : 'ml-auto items-end'}`}>
                       <div className={`flex items-end gap-3 ${m.is_admin_reply ? 'flex-row' : 'flex-row-reverse'}`}>
-                          <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center border border-[#2E2E2F]/5 shadow-sm overflow-hidden bg-transparent">
+                          <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center border border-[#2E2E2F]/5 dark:border-white/5 shadow-sm overflow-hidden bg-transparent">
                             {m.is_admin_reply ? (
                                 <img src="/lgo.webp" alt="Bot" className="w-full h-full object-contain p-1.5" />
                             ) : (
@@ -661,13 +661,13 @@ export const ArchiveEvents: React.FC = () => {
                           </div>
                           <div className={`px-4 py-3 rounded-xl shadow-sm ${
                             m.is_admin_reply 
-                              ? 'bg-[#2E2E2F]/5 text-[#2E2E2F] rounded-bl-none border border-[#2E2E2F]/5' 
+                              ? 'bg-[#2E2E2F]/5 dark:bg-white/5 text-[#2E2E2F] rounded-bl-none border border-[#2E2E2F]/5 dark:border-white/5' 
                               : 'bg-[#38BDF2] text-white rounded-br-none border-0'
                           }`}>
                             <p className="text-sm font-medium whitespace-pre-wrap leading-relaxed">{m.message}</p>
                           </div>
                       </div>
-                      <p className={`text-[10px] font-bold uppercase tracking-[0.2em] text-[#2E2E2F] ${m.is_admin_reply ? 'ml-14' : 'mr-14'}`}>
+                      <p className={`text-[10px] font-bold uppercase tracking-[0.2em] text-[#2E2E2F] dark:text-white/60 ${m.is_admin_reply ? 'ml-14' : 'mr-14'}`}>
                         {m.is_admin_reply ? 'Support Team' : 'You'} • {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
@@ -676,8 +676,8 @@ export const ArchiveEvents: React.FC = () => {
               </div>
 
               {/* Footer (Read Only) */}
-              <div className="p-8 bg-transparent border-t border-[#2E2E2F]/5 text-center">
-                <p className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.3em]">This ticket is archived and read-only</p>
+              <div className="p-8 bg-transparent border-t border-[#2E2E2F]/5 dark:border-white/5 text-center">
+                <p className="text-[11px] font-black text-[#2E2E2F] dark:text-white/60 uppercase tracking-[0.3em]">This ticket is archived and read-only</p>
               </div>
           </div>
         </div>
@@ -691,15 +691,15 @@ export const ArchiveEvents: React.FC = () => {
         showClose={true}
       >
         <div className="space-y-6" style={{ transform: 'scale(0.8)', transformOrigin: 'center' }}>
-          <div className="flex items-start gap-5 p-6 bg-red-50 border border-red-200 rounded-[1.75rem]">
-            <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center shrink-0">
+          <div className="flex items-start gap-5 p-6 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-[1.75rem]">
+            <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center shrink-0">
               <ICONS.Trash className="w-6 h-6 text-red-500" strokeWidth={2} />
             </div>
             <div>
-              <p className="font-bold text-[#2E2E2F] text-[16px] tracking-tight">
+              <p className="font-bold text-[#2E2E2F] dark:text-white text-[16px] tracking-tight">
                 {bulkDeleteConfirm ? `Permanently delete ${selectedRows.size} ${activeTab}?` : `Permanently delete this ${activeTab === 'events' ? 'event' : 'transaction'}?`}
               </p>
-              <p className="text-[13px] text-[#2E2E2F] font-medium mt-2 leading-relaxed">
+              <p className="text-[13px] text-[#2E2E2F] dark:text-white/70 font-medium mt-2 leading-relaxed">
                 {bulkDeleteConfirm 
                   ? `You are about to permanently delete ${selectedRows.size} selected items. This action cannot be undone.`
                   : activeTab === 'events' 

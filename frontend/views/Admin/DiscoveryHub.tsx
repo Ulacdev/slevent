@@ -206,10 +206,10 @@ export const DiscoveryHub: React.FC = () => {
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-2">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-             <h1 className="text-3xl font-bold text-[#2E2E2F] tracking-tight">Discovery Hub</h1>
+             <h1 className="text-3xl font-bold text-text dark:text-white tracking-tight">Discovery Hub</h1>
              <span className="px-3 py-1 bg-[#38BDF2] rounded-lg text-[10px] font-black text-white uppercase tracking-widest">Premium</span>
           </div>
-          <p className="text-[#2E2E2F] font-medium text-sm mt-1">Curate top-tier destinations for the marketplace discovery slider.</p>
+          <p className="text-text dark:text-white/60 font-medium text-sm mt-1">Curate top-tier destinations for the marketplace discovery slider.</p>
         </div>
         <Button 
           onClick={() => handleOpenModal()}
@@ -222,8 +222,8 @@ export const DiscoveryHub: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {destinations.map((dest) => (
-          <div key={dest.id} className={`group relative bg-white rounded-3xl overflow-hidden border border-black/5 shadow-2xl shadow-black/5 transition-all hover:-translate-y-2 ${!dest.is_active ? 'opacity-50 grayscale' : ''}`}>
-            <div className="aspect-[4/5] relative overflow-hidden bg-black/5">
+          <div key={dest.id} className={`group relative bg-surface rounded-3xl overflow-hidden border border-sidebar-border shadow-2xl shadow-black/5 transition-all hover:-translate-y-2 ${!dest.is_active ? 'opacity-50 grayscale' : ''}`}>
+            <div className="aspect-[4/5] relative overflow-hidden bg-background">
                 <img 
                     src={dest.image_url} 
                     alt={dest.city} 
@@ -263,9 +263,9 @@ export const DiscoveryHub: React.FC = () => {
         
         {/* Placeholder for empty state */}
         {destinations.length === 0 && !loading && (
-            <div className="col-span-full py-20 flex flex-col items-center justify-center border-4 border-dashed border-black/5 rounded-[3rem]">
-                <ICONS.MapPin className="w-16 h-16 text-black/10 mb-4" />
-                <p className="text-black/30 font-black uppercase tracking-widest">No featured destinations found.</p>
+            <div className="col-span-full py-20 flex flex-col items-center justify-center border-4 border-dashed border-sidebar-border rounded-[3rem]">
+                <ICONS.MapPin className="w-16 h-16 text-text/10 dark:text-white/10 mb-4" />
+                <p className="text-text/30 dark:text-white/30 font-black uppercase tracking-widest">No featured destinations found.</p>
                 <button onClick={() => handleOpenModal()} className="mt-4 text-[#38BDF2] font-black uppercase tracking-widest text-xs hover:underline">Start Curating Hubs</button>
             </div>
         )}
@@ -275,16 +275,16 @@ export const DiscoveryHub: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setIsModalOpen(false)}></div>
-          <div className="bg-[#F2F2F2] rounded-[2.5rem] w-full max-w-xl shadow-2xl relative z-10 animate-in zoom-in-95 slide-in-from-bottom-10 duration-500 overflow-hidden border border-white/20">
+          <div className="bg-surface rounded-[2.5rem] w-full max-w-xl shadow-2xl relative z-10 animate-in zoom-in-95 slide-in-from-bottom-10 duration-500 overflow-hidden border border-sidebar-border">
             <div className="p-10 sm:p-14">
               <div className="flex items-center justify-between mb-10">
                 <div className="space-y-1">
-                   <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">
+                   <h2 className="text-3xl font-black text-text dark:text-white uppercase tracking-tighter leading-none">
                      {editingDest ? 'Manage Destination' : 'Feature New City'}
                    </h2>
-                   <p className="text-black/40 text-[10px] font-bold uppercase tracking-widest">Populate the discovery hub with verified photography.</p>
+                   <p className="text-text/40 dark:text-white/40 text-[10px] font-bold uppercase tracking-widest">Populate the discovery hub with verified photography.</p>
                 </div>
-                <button onClick={() => setIsModalOpen(false)} className="w-12 h-12 flex items-center justify-center bg-black/5 hover:bg-black hover:text-white rounded-full transition-all">
+                <button onClick={() => setIsModalOpen(false)} className="w-12 h-12 flex items-center justify-center bg-text/5 dark:bg-white/5 hover:bg-text hover:text-background dark:hover:bg-white dark:hover:text-[#2E2E2F] rounded-full transition-all">
                   <ICONS.X className="w-6 h-6" />
                 </button>
               </div>
@@ -292,11 +292,11 @@ export const DiscoveryHub: React.FC = () => {
               <form onSubmit={handleSave} className="space-y-8">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                   <div className="space-y-3">
-                    <label className="text-[11px] font-black text-black/40 uppercase tracking-[0.2em] ml-1">City / Town Name</label>
+                    <label className="text-[11px] font-black text-text/40 dark:text-white/40 uppercase tracking-[0.2em] ml-1">City / Town Name</label>
                     <select
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="w-full bg-[#F2F2F2] rounded-2xl h-14 border-none shadow-inner px-4 text-sm outline-none focus:ring-2 focus:ring-[#38BDF2]/40 text-[#2E2E2F]"
+                      className="w-full bg-background rounded-2xl h-14 border-none shadow-inner px-4 text-sm outline-none focus:ring-2 focus:ring-[#38BDF2]/40 text-text dark:text-white dark:bg-background/50"
                       required
                     >
                       <option value="" disabled>Select a city from events</option>
@@ -307,14 +307,14 @@ export const DiscoveryHub: React.FC = () => {
                     </select>
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[11px] font-black text-black/40 uppercase tracking-[0.2em] ml-1">Country</label>
+                    <label className="text-[11px] font-black text-text/40 dark:text-white/40 uppercase tracking-[0.2em] ml-1">Country</label>
                     <select
                       value={country}
                       onChange={(e) => {
                         setCountry(e.target.value);
                         setCity('');
                       }}
-                      className="w-full bg-[#F2F2F2] rounded-2xl h-14 border-none shadow-inner px-4 text-sm outline-none focus:ring-2 focus:ring-[#38BDF2]/40 text-[#2E2E2F]"
+                      className="w-full bg-background rounded-2xl h-14 border-none shadow-inner px-4 text-sm outline-none focus:ring-2 focus:ring-[#38BDF2]/40 text-text dark:text-white dark:bg-background/50"
                       required
                     >
                       <option value="" disabled>Select a country from events</option>
@@ -327,10 +327,10 @@ export const DiscoveryHub: React.FC = () => {
                 </div>
 
                 <div className="space-y-3">
-                    <label className="text-[11px] font-black text-black/40 uppercase tracking-[0.2em] ml-1">Photography (High-Res)</label>
+                    <label className="text-[11px] font-black text-text/40 dark:text-white/40 uppercase tracking-[0.2em] ml-1">Photography (High-Res)</label>
                     <div className="flex gap-4">
                       {imageUrl && (
-                        <div className="w-14 h-14 rounded-xl overflow-hidden bg-black/5 border border-black/5">
+                        <div className="w-14 h-14 rounded-xl overflow-hidden bg-background border border-sidebar-border">
                           <img src={imageUrl} className="w-full h-full object-cover" alt="Preview" />
                         </div>
                       )}
@@ -344,7 +344,7 @@ export const DiscoveryHub: React.FC = () => {
                       <Button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className={`flex-1 !h-14 !rounded-2xl !bg-[#F2F2F2] !text-black !font-black !uppercase !text-[10px] !tracking-widest border-2 border-dashed border-black/10 hover:border-[#38BDF2] hover:text-[#38BDF2] transition-all flex items-center justify-center gap-3 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`flex-1 !h-14 !rounded-2xl !bg-background !text-text dark:!text-white !font-black !uppercase !text-[10px] !tracking-widest border-2 border-dashed border-sidebar-border hover:border-[#38BDF2] hover:text-[#38BDF2] transition-all flex items-center justify-center gap-3 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         disabled={isUploading}
                       >
                         {isUploading ? (

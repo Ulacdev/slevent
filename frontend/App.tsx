@@ -101,7 +101,7 @@ const WelcomeView = React.lazy(() => import('./views/User/WelcomeView'));
 const API = import.meta.env.VITE_API_BASE;
 const DEFAULT_HEADER_LOCATION = 'Your Location';
 const BROWSE_LOCATION_STORAGE_KEY = 'browse_events_location';
-const Branding: React.FC<{ className?: string, light?: boolean }> = ({ className = '', light = false }) => {
+const Branding: React.FC<{ className?: string, theme?: string }> = ({ className = '', theme = 'light' }) => {
   const { role, employerLogoUrl } = useUser();
   const isStaff = (role === UserRole.STAFF);
 
@@ -114,12 +114,16 @@ const Branding: React.FC<{ className?: string, light?: boolean }> = ({ className
     );
   }
 
+  // Use footer logo in dark mode for branding transition
+  const logoSrc = theme === 'dark' 
+    ? "/lgo-footer.png" 
+    : (employerLogoUrl || "https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg");
+
   return (
     <img
-      src={employerLogoUrl || "https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"}
+      src={logoSrc}
       alt="Logo"
-      className={`block max-w-full transform transition-all duration-300 hover:scale-[1.03] cursor-pointer ${className}`}
-      style={{ filter: light && !employerLogoUrl ? 'invert(1) grayscale(1) brightness(2)' : undefined }}
+      className={`block max-w-full transform transition-all duration-300 hover:scale-[1.03] cursor-pointer ${theme === 'dark' ? 'scale-110 origin-left' : ''} ${className}`}
     />
   );
 };
@@ -230,6 +234,24 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     return saved !== null ? JSON.parse(saved) : true;
   });
 
+  // Theme state
+  const [theme, setTheme] = React.useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved || 'light';
+  });
+
+  React.useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+      root.setAttribute('data-theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      root.setAttribute('data-theme', 'light');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
   // Session Inactivity Tracking (7 minutes limit as per security requirements)
   const lastActivityRef = React.useRef(Date.now());
   const INACTIVITY_LIMIT = 7 * 60 * 1000;
@@ -277,7 +299,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       setUnreadCount(data.unreadCount || 0);
     } catch (err: any) {
       if (err?.message?.includes('session missing') || err?.message?.includes('401')) {
-        return; 
+        return;
       }
       console.error('Failed to fetch notifications:', err);
     } finally {
@@ -626,24 +648,30 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#F2F2F2] font-sans selection:bg-[#38BDF2]/30">
+    <div className="min-h-screen flex flex-col md:flex-row bg-background font-sans selection:bg-[#38BDF2]/30">
       {/* Sidebar for desktop */}
       <aside
-        className={`bg-[#F2F2F2] border-r border-[#D1D5DB] hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-80' : 'w-24'}`}
+        className={`bg-sidebar border-r border-sidebar-border hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-80' : 'w-24'}`}
         style={{ overflow: desktopSidebarOpen ? 'hidden' : 'visible', zoom: 0.8 }}
       >
-        <div className={`flex items-center justify-center border-b border-[#D1D5DB] shrink-0 h-24`}>
+        <div className={`flex items-center justify-center border-b border-sidebar-border shrink-0 h-24`}>
           <Link to={role === UserRole.ADMIN ? "/dashboard" : (role === UserRole.STAFF ? "/events" : "/user-home")} className="flex items-center justify-center group transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98]">
             {employerLogoUrl ? (
               <img
-                src={employerLogoUrl}
+                src={theme === 'dark' ? "/lgo-footer.png" : employerLogoUrl}
                 alt={employerName || 'Logo'}
-                className={desktopSidebarOpen ? "h-20 w-auto max-w-full object-contain px-4" : "h-12 w-12 object-contain rounded-lg border border-[#E5E7EB]"}
+                className={desktopSidebarOpen 
+                  ? `${theme === 'dark' ? 'h-10' : 'h-20'} w-auto max-w-full object-contain px-4 transform ${theme === 'dark' ? 'scale-110 origin-left' : ''}` 
+                  : `h-12 w-12 object-contain rounded-lg border border-white/30 transform ${theme === 'dark' ? 'scale-110 origin-center' : ''}`}
               />
             ) : desktopSidebarOpen ? (
-              <Branding className="h-20 w-auto" />
+              <Branding className={`${theme === 'dark' ? 'h-10' : 'h-20'} w-auto`} theme={theme} />
             ) : (
-              <img src="/lgo.webp" alt="Logo" className="h-10 w-10 object-contain" />
+              <img 
+                src={theme === 'dark' ? "/lgo-footer.png" : "/lgo.webp"} 
+                alt="Logo" 
+                className={theme === 'dark' ? "h-10 w-auto max-w-[44px] object-contain transform scale-110 origin-center" : "h-10 w-10 object-contain"} 
+              />
             )}
           </Link>
         </div>
@@ -655,7 +683,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             return (
               <React.Fragment key={item.path || idx}>
                 {item.separator && (
-                  <div className={`mx-5 my-3 h-[1px] bg-[#D1D5DB] shrink-0 ${!desktopSidebarOpen ? 'mx-2' : ''}`} />
+                  <div className={`mx-5 my-3 h-[1px] bg-sidebar-border shrink-0 ${!desktopSidebarOpen ? 'mx-2' : ''}`} />
                 )}
                 <Link
                   to={item.path}
@@ -664,23 +692,23 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     : 'flex-col items-center justify-center w-11 h-11 mx-auto rounded-xl'
                     } ${isActive
                       ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20'
-                      : 'text-[#000000]/90 hover:bg-[#D1D5DB]/50 hover:text-[#000000]'
-                    }`}
+                    : 'text-[#2E2E2F] dark:text-white hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
+                  }`}
                 >
                   <div className="relative shrink-0 flex items-center justify-center">
                     {React.cloneElement(item.icon as React.ReactElement<any>, {
-                      className: `transition-colors duration-200 ${desktopSidebarOpen ? 'w-[18px] h-[18px]' : 'w-5 h-5 group-hover:scale-105'} ${isActive ? 'stroke-[2.5px] text-white' : 'stroke-[1.8px] text-[#000000] group-hover:text-[#000000]'}`
+                      className: `transition-colors duration-200 ${desktopSidebarOpen ? 'w-[18px] h-[18px]' : 'w-5 h-5 group-hover:scale-105'} ${isActive ? 'stroke-[2.5px] text-white' : 'stroke-[1.8px] text-[#2E2E2F] dark:text-white group-hover:text-[#38BDF2]'}`
                     })}
                     {item.premium && <CrownBadge />}
                   </div>
 
                   {desktopSidebarOpen ? (
-                    <span className={`text-[16px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#000000]'}`}>
+                    <span className={`text-[16px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#2E2E2F] dark:text-white group-hover:text-[#38BDF2]'}`}>
                       {item.label}
                     </span>
                   ) : (
-                    <div className="absolute left-full ml-5 px-3 py-1.5 bg-[#38BDF2] text-white text-[11px] font-bold rounded-md opacity-0 translate-x-[-10px] pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 z-[999] whitespace-nowrap shadow-xl flex items-center">
-                      <div className="absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 border-[4px] border-transparent border-r-[#38BDF2]" />
+                    <div className="absolute left-full ml-5 px-3 py-1.5 bg-[#2E2E2F] text-white text-[11px] font-bold rounded-md opacity-0 translate-x-[-10px] pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 z-[999] whitespace-nowrap shadow-xl flex items-center">
+                      <div className="absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 border-[4px] border-transparent border-r-[#2E2E2F]" />
                       {item.label}
                     </div>
                   )}
@@ -694,7 +722,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       <main
         className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}
       >
-        <header className="h-24 !bg-[#F2F2F2] border-b border-[#D1D5DB] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-[500] w-full" style={{ zoom: 0.8 }}>
+        <header className="h-24 !bg-background border-b border-sidebar-border px-4 sm:px-8 flex items-center justify-between sticky top-0 z-[500] w-full" style={{ zoom: 0.8 }}>
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
@@ -704,21 +732,34 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   setDesktopSidebarOpen(!desktopSidebarOpen);
                 }
               }}
-              className="p-2 w-11 h-11 flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-[#F2F2F2] hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all group active:scale-95"
+              className="p-2 w-11 h-11 flex items-center justify-center rounded-lg border border-sidebar-border bg-background hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all group active:scale-95"
               aria-label="Toggle Sidebar"
             >
-              <svg className={`w-5 h-5 transition-transform duration-500 ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 text-[#2E2E2F] dark:text-[#F2F2F2] transition-transform duration-500 ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             {/* Mobile Logo removed as per user request - branded inside sidebar only */}
             <div className="hidden sm:block">
-              <p className="text-[10px] uppercase font-black text-[#2E2E2F] tracking-[0.2em]">
+              <p className="text-[10px] uppercase font-black text-[#2E2E2F] dark:text-[#F2F2F2] tracking-[0.2em]">
                 {isStaff ? 'Staff Panel' : role === UserRole.ADMIN ? 'Admin Center' : 'Organizer Portal'}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-4 min-w-0">
+            {/* Theme Toggle Button */}
+            <button
+              onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
+              className="w-11 h-11 flex items-center justify-center rounded-xl border border-[#38BDF2]/20 bg-transparent hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/40 hover:scale-105 active:scale-95 transition-all shadow-sm"
+              aria-label="Toggle Theme"
+            >
+              {theme === 'light' ? (
+                <ICONS.Moon className="w-5 h-5 text-[#2E2E2F]" />
+              ) : (
+                <ICONS.Sun className="w-5 h-5 text-[#38BDF2]" />
+              )}
+            </button>
+
             {(!(role === UserRole.STAFF && canReceiveNotifications === false)) && (
               <div className="relative group">
                 <button
@@ -734,21 +775,21 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 </button>
                 {notificationOpen && (
                   <>
-                    <div className="fixed inset-0 z-[100] bg-[#2E2E2F]/10 backdrop-blur-[2px]" onClick={() => setNotificationOpen(false)} />
-                    <div className="fixed left-3 right-3 top-24 bottom-24 sm:left-auto sm:right-6 sm:bottom-6 w-auto sm:w-full sm:max-w-[420px] bg-[#F2F2F2] rounded-xl sm:rounded-xl border border-[#2E2E2F]/5 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.15)] z-[101] flex flex-col overflow-hidden animate-in slide-in-from-right-8 fade-in duration-500">
-                      <div className="p-8 border-b border-[#2E2E2F]/5 flex items-start justify-between bg-[#F2F2F2]/80 backdrop-blur-xl sticky top-0 z-10">
+                    <div className="fixed inset-0 z-[100] bg-black/20 backdrop-blur-[2px]" onClick={() => setNotificationOpen(false)} />
+                    <div className="fixed left-3 right-3 top-24 bottom-24 sm:left-auto sm:right-6 sm:bottom-6 w-auto sm:w-full sm:max-w-[420px] bg-surface rounded-xl sm:rounded-xl border border-sidebar-border shadow-[0_30px_90px_-20px_rgba(0,0,0,0.15)] z-[101] flex flex-col overflow-hidden animate-in slide-in-from-right-8 fade-in duration-500">
+                      <div className="p-8 border-b border-sidebar-border flex items-start justify-between bg-surface/80 backdrop-blur-xl sticky top-0 z-10">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <h2 className="text-2xl font-black tracking-tight text-[#2E2E2F]">Updates</h2>
+                            <h2 className="text-2xl font-black tracking-tight text-[#2E2E2F] dark:text-white">Updates</h2>
                             {unreadCount > 0 && (
                               <span className="bg-red-500/10 text-red-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">
                                 {unreadCount} New
                               </span>
                             )}
                           </div>
-                          <p className="text-[#2E2E2F] text-xs font-bold uppercase tracking-widest">Stay synchronized with your team</p>
+                          <p className="text-[#2E2E2F] dark:text-white/70 text-xs font-bold uppercase tracking-widest">Stay synchronized with your team</p>
                         </div>
-                        <button onClick={() => setNotificationOpen(false)} className="w-10 h-10 rounded-xl bg-[#F2F2F2] flex items-center justify-center text-[#2E2E2F] hover:text-[#2E2E2F] hover:bg-[#2E2E2F]/5 transition-all">
+                        <button onClick={() => setNotificationOpen(false)} className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-[#2E2E2F] dark:text-white hover:text-[#2E2E2F] hover:bg-[#2E2E2F]/5 transition-all">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                           </svg>
@@ -759,12 +800,12 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         {notificationsLoading && notifications.length === 0 ? (
                           <div className="flex flex-col items-center justify-center p-12 text-center h-full">
                             <div className="w-12 h-12 border-4 border-[#38BDF2]/20 border-t-[#38BDF2] rounded-full animate-spin mb-4" />
-                            <p className="text-[#2E2E2F] text-xs font-black uppercase tracking-widest">Syncing notifications...</p>
+                            <p className="text-[#2E2E2F] dark:text-white text-xs font-black uppercase tracking-widest">Syncing notifications...</p>
                           </div>
                         ) : notifications.length > 0 ? (
                           <div className="px-4 space-y-2">
                             <div className="px-4 py-2 flex justify-between items-center mb-4">
-                              <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">RECENT ACTIVITY</span>
+                              <span className="text-[10px] font-black text-[#2E2E2F] dark:text-white/50 uppercase tracking-[0.2em]">RECENT ACTIVITY</span>
                               <button
                                 onClick={handleMarkAllRead}
                                 className="text-[10px] font-black text-[#38BDF2] hover:text-[#2E2E2F] uppercase tracking-[0.2em] transition-colors"
@@ -847,9 +888,9 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   </div>
                 </div>
 
-                <div className="p-6 sm:p-8 rounded-2xl bg-[#F2F2F2] border border-[#2E2E2F]/5 relative overflow-hidden group">
+                <div className="p-6 sm:p-8 rounded-2xl bg-background border border-sidebar-border relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#38BDF2]/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[#38BDF2]/10 transition-all duration-700" />
-                  <div className="text-sm sm:text-base text-[#2E2E2F] font-medium leading-relaxed relative z-10">
+                  <div className="text-sm sm:text-base text-[#2E2E2F] dark:text-white font-medium leading-relaxed relative z-10">
                     {renderMessageContent(selectedNotification?.message)}
                   </div>
                 </div>
@@ -867,37 +908,37 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             {/* Profile Dropdown */}
             <div className="relative">
               <button
-                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-sidebar-border bg-background hover:bg-[#38BDF2]/10 transition-colors"
                 onClick={() => setUserMenuOpen((v) => !v)}
               >
-                <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] dark:text-white flex items-center justify-center">
                   {imageUrl ? (
                     <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="font-semibold text-xs text-[#2E2E2F]">{initials}</span>
+                    <span className="font-semibold text-xs text-[#2E2E2F] dark:text-white">{initials}</span>
                   )}
                 </div>
                 <div className="hidden sm:block text-left leading-tight">
-                  <p className="text-xs font-semibold text-[#2E2E2F]">{displayName}</p>
-                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-0.5">{roleLabel}</p>
+                  <p className="text-xs font-semibold text-[#2E2E2F] dark:text-white">{displayName}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] dark:text-white/60 mt-0.5">{roleLabel}</p>
                 </div>
-                <svg className="w-4 h-4 text-[#2E2E2F]" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[#2E2E2F] dark:text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
               {userMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                  <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl shadow-[0_10px_40px_-10px_rgba(46,46,47,0.1)] z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
-                    <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
-                      <p className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-widest mb-0.5">Account</p>
-                      <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
-                      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-1">{roleLabel}</p>
+                  <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-surface border border-sidebar-border rounded-xl shadow-[0_10px_40px_-10px_rgba(46,46,47,0.1)] z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
+                    <div className="px-4 py-3 border-b border-sidebar-border mb-1">
+                      <p className="text-[10px] font-medium text-[#2E2E2F] dark:text-white/40 uppercase tracking-widest mb-0.5">Account</p>
+                      <p className="text-xs font-semibold text-[#2E2E2F] dark:text-white truncate">{displayName}</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] dark:text-white/60 mt-1">{roleLabel}</p>
                     </div>
                     {role !== UserRole.STAFF && (
                       <>
                         <button
-                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] dark:text-white/80 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                           onClick={() => {
                             navigate('/settings?tab=team');
                             setUserMenuOpen(false);
@@ -907,7 +948,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           <span>Teams & Access</span>
                         </button>
                         <button
-                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] dark:text-white/80 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                           onClick={() => {
                             navigate('/settings?tab=plans');
                             setUserMenuOpen(false);
@@ -917,7 +958,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           <span>Subscription Plans</span>
                         </button>
                         <button
-                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] dark:text-white/80 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                           onClick={() => {
                             navigate('/settings?tab=email');
                             setUserMenuOpen(false);
@@ -927,7 +968,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           <span>Email Setup</span>
                         </button>
                         <button
-                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] dark:text-white/80 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                           onClick={() => {
                             navigate('/settings?tab=support');
                             setUserMenuOpen(false);
@@ -939,7 +980,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                       </>
                     )}
                     <button
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] dark:text-white/80 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                       onClick={() => {
                         navigate('/settings?tab=profile');
                         setUserMenuOpen(false);
@@ -949,7 +990,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                       <span>Profile & Security</span>
                     </button>
                     <button
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] dark:text-white/80 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 transition-colors text-left group"
                       onClick={() => {
                         setUserMenuOpen(false);
                         handleLogout();
@@ -1161,7 +1202,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       setScrolled(currentScrollY > 10);
-      
+
       if (currentScrollY <= 50) {
         setHeaderVisible(true);
       } else if (currentScrollY > lastScrollY.current) {
@@ -1171,7 +1212,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         // Scrolling up
         setHeaderVisible(true);
       }
-      
+
       lastScrollY.current = currentScrollY;
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -1242,8 +1283,8 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   const displayName = email?.trim() || name?.trim() || 'User';
   const roleLabel = isOrganizer && isAttendingView ? 'Attending' : getRoleLabel(role);
-  const publicUserMenuActionClass = 'w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group';
-  const landingLoginButtonClass = 'px-4 text-[11px] font-black uppercase tracking-widest !bg-transparent !text-[#2E2E2F] hover:!text-[#38BDF2] transition-colors';
+  const publicUserMenuActionClass = 'w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] dark:text-white/80 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group';
+  const landingLoginButtonClass = 'px-4 text-[11px] font-black uppercase tracking-widest !bg-transparent !text-[#2E2E2F] dark:!text-white hover:!text-[#38BDF2] transition-colors';
   const landingGetStartedButtonClass = 'px-6 text-[11px] font-black uppercase tracking-widest border border-[#38BDF2] bg-[#38BDF2] text-white shadow-[0_0_16px_rgba(56,189,242,0.45)] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] hover:text-white hover:shadow-[0_0_22px_rgba(56,189,242,0.5)] focus-visible:bg-[#2E2E2F] focus-visible:border-[#2E2E2F] focus-visible:shadow-[0_0_22px_rgba(56,189,242,0.5)] transition-all duration-300 ease-out active:scale-95';
   const initials = (email?.split('@')[0] || name?.trim() || displayName || 'U')
     .split(' ')
@@ -1448,7 +1489,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   }, [isAuthenticated]);
 
   const isHomePage = location.pathname === '/';
-  const showMobileNav = true; 
+  const showMobileNav = true;
   const showMainHeader = true;
 
   const navLinks: any[] = [];
@@ -1468,10 +1509,10 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const mobileMenuPanelClass = 'top-0 h-full';
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F2F2F2]" style={{ zoom: 0.9 }}>
+    <div className="min-h-screen flex flex-col bg-background" style={{ zoom: 0.9 }}>
       {showMainHeader && (
-        <header className={`fixed top-0 left-0 w-full z-[1000] bg-[#F2F2F2]/90 backdrop-blur-xl transition-all duration-500 ease-in-out ${headerVisible ? 'translate-y-0' : '-translate-y-full'} ${scrolled
-          ? 'border-b border-[#2E2E2F]/10'
+        <header className={`fixed top-0 left-0 w-full z-[1000] bg-background/90 dark:bg-background/80 backdrop-blur-xl transition-all duration-500 ease-in-out ${headerVisible ? 'translate-y-0' : '-translate-y-full'} ${scrolled
+          ? 'border-b border-sidebar-border'
           : 'border-b border-transparent'
           } shadow-none`} style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
           <div className="max-w-full w-full flex flex-col">
@@ -1501,436 +1542,436 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 </Link>
               </div>
 
-            {/* Center Segment: Search bar centered */}
-            <div className="hidden lg:flex flex-1 min-w-0 px-1 sm:px-4">
-              {showHeaderSearchBar && (
-                <form onSubmit={handleHeaderSearchSubmit} className="w-full">
-                  <div className="flex items-center h-12 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.1)] focus-within:border-[#38BDF2]/50 focus-within:shadow-[0_15px_35px_-12px_rgba(56,189,242,0.15)] transition-all duration-300">
-                    <label className="flex items-center gap-3 px-5 py-3 min-w-0 flex-1 border-r border-[#2E2E2F]/5 hover:bg-[#38BDF2]/5 transition-colors">
-                      <ICONS.Search className="w-4 h-4 text-[#2E2E2F] shrink-0" />
-                      <input
-                        type="text"
-                        value={headerSearchTerm}
-                        onChange={(event) => setHeaderSearchTerm(event.target.value)}
-                        placeholder={animatedPlaceholder || 'Find your events'}
-                        className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F] outline-none"
-                      />
-                    </label>
-                    <div
-                      className="relative min-w-0 flex-1 border-r border-[#2E2E2F]/5 bg-[#F2F2F2] hover:bg-[#38BDF2]/5 transition-colors"
-                      ref={headerLocationMenuRef}
-                    >
-                      <div className="w-full h-full flex items-center">
-                        <div className="flex-1 min-w-0 flex items-center gap-3 px-5 py-3 cursor-text" onClick={() => setHeaderLocationMenuOpen(true)}>
-                          <ICONS.MapPin className="w-4 h-4 text-[#2E2E2F] shrink-0" />
-                          <input
-                            type="text"
-                            value={hasHeaderExplicitLocation ? headerLocationTerm : ''}
-                            onChange={(event) => {
-                              const next = event.target.value;
-                              setHeaderLocationTerm(next || DEFAULT_HEADER_LOCATION);
-                              setHeaderLocationError('');
-                            }}
-                            onFocus={() => setHeaderLocationMenuOpen(true)}
-                            placeholder="Your Location"
-                            className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F] outline-none"
-                            aria-label="Search location"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          className={`w-11 h-11 flex items-center justify-center transition-all ${headerLocating
-                            ? 'text-[#38BDF2] animate-pulse'
-                            : 'text-[#2E2E2F] hover:text-[#38BDF2] hover:bg-[#38BDF2]/8'
-                            } rounded-xl mr-1 group/gps`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleUseCurrentLocationInHeader();
-                          }}
-                          disabled={headerLocating}
-                          title="Search near me"
-                        >
-                          {headerLocating ? (
-                            <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full inline-block animate-spin" />
-                          ) : (
-                            <div className="relative">
-                              <svg fill="none" stroke="currentColor" strokeWidth={2.4} viewBox="0 0 24 24" className="w-5 h-5 group-hover/gps:scale-110 transition-transform">
-                                <circle cx="12" cy="12" r="3" />
-                                <path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
-                              </svg>
-                              <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#38BDF2] rounded-full opacity-0 group-hover/gps:opacity-100 transition-opacity animate-ping" />
-                            </div>
-                          )}
-                        </button>
-                      </div>
-
-                      {headerLocationMenuOpen && (
-                        <div className="absolute left-0 right-0 top-[calc(100%+12px)] z-50 w-[320px] rounded-xl border border-[#2E2E2F]/10 bg-white shadow-[0_24px_48px_-20px_rgba(46,46,47,0.35)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              {/* Center Segment: Search bar centered */}
+              <div className="hidden lg:flex flex-1 min-w-0 px-1 sm:px-4">
+                {showHeaderSearchBar && (
+                  <form onSubmit={handleHeaderSearchSubmit} className="w-full">
+                    <div className="flex items-center h-12 rounded-xl border border-sidebar-border bg-background overflow-hidden shadow-[0_10px_30px_-15px_rgba(46,46,47,0.1)] focus-within:border-[#38BDF2]/50 focus-within:shadow-[0_15px_35px_-12px_rgba(56,189,242,0.15)] transition-all duration-300">
+                      <label className="flex items-center gap-3 px-5 py-3 min-w-0 flex-1 border-r border-sidebar-border hover:bg-[#38BDF2]/5 transition-colors">
+                        <ICONS.Search className="w-4 h-4 text-[#2E2E2F] dark:text-white shrink-0" />
+                        <input
+                          type="text"
+                          value={headerSearchTerm}
+                          onChange={(event) => setHeaderSearchTerm(event.target.value)}
+                          placeholder={animatedPlaceholder || 'Find your events'}
+                          className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] dark:text-white placeholder:text-[#2E2E2F] dark:placeholder:text-white/40 outline-none"
+                        />
+                      </label>
+                      <div
+                        className="relative min-w-0 flex-1 border-r border-sidebar-border bg-background hover:bg-[#38BDF2]/5 transition-colors"
+                        ref={headerLocationMenuRef}
+                      >
+                        <div className="w-full h-full flex items-center">
+                          <div className="flex-1 min-w-0 flex items-center gap-3 px-5 py-3 cursor-text" onClick={() => setHeaderLocationMenuOpen(true)}>
+                            <ICONS.MapPin className="w-4 h-4 text-[#2E2E2F] shrink-0" />
+                            <input
+                              type="text"
+                              value={hasHeaderExplicitLocation ? headerLocationTerm : ''}
+                              onChange={(event) => {
+                                const next = event.target.value;
+                                setHeaderLocationTerm(next || DEFAULT_HEADER_LOCATION);
+                                setHeaderLocationError('');
+                              }}
+                              onFocus={() => setHeaderLocationMenuOpen(true)}
+                              placeholder="Your Location"
+                              className="w-full bg-transparent text-[12px] font-bold text-[#2E2E2F] placeholder:text-[#2E2E2F] outline-none"
+                              aria-label="Search location"
+                            />
+                          </div>
                           <button
                             type="button"
-                            className="w-full px-5 py-4 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/5 transition-colors border-b border-[#2E2E2F]/5 disabled:opacity-60 group/btn"
+                            className={`w-11 h-11 flex items-center justify-center transition-all ${headerLocating
+                              ? 'text-[#38BDF2] animate-pulse'
+                              : 'text-[#2E2E2F] hover:text-[#38BDF2] hover:bg-[#38BDF2]/8'
+                              } rounded-xl mr-1 group/gps`}
                             onClick={(e) => {
-                              e.preventDefault();
+                              e.stopPropagation();
                               handleUseCurrentLocationInHeader();
                             }}
                             disabled={headerLocating}
+                            title="Search near me"
                           >
-                            <div className={`w-10 h-10 rounded-full border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/btn:bg-[#38BDF2] group-hover/btn:text-[#F2F2F2] transition-all shadow-sm ${headerLocating ? 'animate-pulse' : ''}`}>
-                              {headerLocating ? (
-                                <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full inline-block animate-spin" />
-                              ) : (
-                                <svg fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" className="w-5 h-5">
+                            {headerLocating ? (
+                              <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full inline-block animate-spin" />
+                            ) : (
+                              <div className="relative">
+                                <svg fill="none" stroke="currentColor" strokeWidth={2.4} viewBox="0 0 24 24" className="w-5 h-5 group-hover/gps:scale-110 transition-transform">
                                   <circle cx="12" cy="12" r="3" />
                                   <path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
                                 </svg>
-                              )}
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-sm font-black text-[#2E2E2F]">Detect My Location</span>
-                              <span className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-wider">Fast GPS Search</span>
-                            </div>
+                                <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#38BDF2] rounded-full opacity-0 group-hover/gps:opacity-100 transition-opacity animate-ping" />
+                              </div>
+                            )}
                           </button>
-
-                          <button
-                            type="button"
-                            className="w-full px-5 py-4 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/5 transition-colors group/online border-b border-[#2E2E2F]/5"
-                            onClick={() => handleSelectHeaderLocation(ONLINE_LOCATION_VALUE)}
-                          >
-                            <div className="w-10 h-10 rounded-xl border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/online:bg-[#38BDF2] group-hover/online:text-[#F2F2F2] transition-all shadow-sm">
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16v12H4z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M10 9l5 3-5 3V9z" />
-                              </svg>
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-sm font-black text-[#2E2E2F]">Online Events</span>
-                              <span className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-wider">Virtual Experiences</span>
-                            </div>
-                          </button>
-
-                          <button
-                            type="button"
-                            className="w-full px-5 py-3 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors group/reset"
-                            onClick={() => handleSelectHeaderLocation(DEFAULT_HEADER_LOCATION)}
-                          >
-                            <div className="w-10 h-10 rounded-full border border-current opacity-20 flex items-center justify-center transition-opacity group-hover/reset:opacity-100">
-                              <ICONS.Trash className="w-4 h-4" />
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-[11px] font-black uppercase tracking-widest">Clear Location</span>
-                              <span className="text-[9px] font-bold opacity-70">Reset to all areas</span>
-                            </div>
-                          </button>
-
-                          {headerLocationError && (
-                            <div className="px-5 py-3 text-[11px] font-bold text-red-500 bg-red-50 border-t border-red-100 flex items-center gap-2">
-                              <ICONS.AlertTriangle className="w-3.5 h-3.5" />
-                              {headerLocationError}
-                            </div>
-                          )}
-
-                          <div className="px-5 py-4 bg-[#F8F9FA] border-t border-[#2E2E2F]/5">
-                            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#2E2E2F] italic leading-relaxed">Tip: Type any city name in the input field above for custom filtering.</p>
-                          </div>
                         </div>
-                      )}
+
+                        {headerLocationMenuOpen && (
+                          <div className="absolute left-0 right-0 top-[calc(100%+12px)] z-50 w-[320px] rounded-xl border border-[#2E2E2F]/10 bg-white shadow-[0_24px_48px_-20px_rgba(46,46,47,0.35)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                            <button
+                              type="button"
+                              className="w-full px-5 py-4 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/5 transition-colors border-b border-[#2E2E2F]/5 disabled:opacity-60 group/btn"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleUseCurrentLocationInHeader();
+                              }}
+                              disabled={headerLocating}
+                            >
+                              <div className={`w-10 h-10 rounded-full border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/btn:bg-[#38BDF2] group-hover/btn:text-[#F2F2F2] transition-all shadow-sm ${headerLocating ? 'animate-pulse' : ''}`}>
+                                {headerLocating ? (
+                                  <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full inline-block animate-spin" />
+                                ) : (
+                                  <svg fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" className="w-5 h-5">
+                                    <circle cx="12" cy="12" r="3" />
+                                    <path strokeLinecap="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+                                  </svg>
+                                )}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-black text-[#2E2E2F]">Detect My Location</span>
+                                <span className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-wider">Fast GPS Search</span>
+                              </div>
+                            </button>
+
+                            <button
+                              type="button"
+                              className="w-full px-5 py-4 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-[#38BDF2]/5 transition-colors group/online border-b border-[#2E2E2F]/5"
+                              onClick={() => handleSelectHeaderLocation(ONLINE_LOCATION_VALUE)}
+                            >
+                              <div className="w-10 h-10 rounded-xl border border-[#38BDF2]/30 flex items-center justify-center text-[#38BDF2] group-hover/online:bg-[#38BDF2] group-hover/online:text-[#F2F2F2] transition-all shadow-sm">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16v12H4z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 9l5 3-5 3V9z" />
+                                </svg>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-black text-[#2E2E2F]">Online Events</span>
+                                <span className="text-[10px] text-[#2E2E2F] font-bold uppercase tracking-wider">Virtual Experiences</span>
+                              </div>
+                            </button>
+
+                            <button
+                              type="button"
+                              className="w-full px-5 py-3 flex items-center gap-4 text-left text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors group/reset"
+                              onClick={() => handleSelectHeaderLocation(DEFAULT_HEADER_LOCATION)}
+                            >
+                              <div className="w-10 h-10 rounded-full border border-current opacity-20 flex items-center justify-center transition-opacity group-hover/reset:opacity-100">
+                                <ICONS.Trash className="w-4 h-4" />
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-[11px] font-black uppercase tracking-widest">Clear Location</span>
+                                <span className="text-[9px] font-bold opacity-70">Reset to all areas</span>
+                              </div>
+                            </button>
+
+                            {headerLocationError && (
+                              <div className="px-5 py-3 text-[11px] font-bold text-red-500 bg-red-50 border-t border-red-100 flex items-center gap-2">
+                                <ICONS.AlertTriangle className="w-3.5 h-3.5" />
+                                {headerLocationError}
+                              </div>
+                            )}
+
+                            <div className="px-5 py-4 bg-[#F8F9FA] border-t border-[#2E2E2F]/5">
+                              <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#2E2E2F] italic leading-relaxed">Tip: Type any city name in the input field above for custom filtering.</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        type="submit"
+                        className="w-12 h-11 flex items-center justify-center transition-colors text-[#2E2E2F] hover:bg-[#38BDF2]/12 hover:text-[#38BDF2]"
+                        aria-label="Find events"
+                      >
+                        <ICONS.Search className="w-4 h-4" />
+                      </button>
                     </div>
-                    <button
-                      type="submit"
-                      className="w-12 h-11 flex items-center justify-center transition-colors text-[#2E2E2F] hover:bg-[#38BDF2]/12 hover:text-[#38BDF2]"
-                      aria-label="Find events"
-                    >
-                      <ICONS.Search className="w-4 h-4" />
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-
-            {/* Right Segment: Nav Links and Auth Actions */}
-            <div className="flex items-center justify-end gap-2 lg:gap-6 ml-auto flex-none">
-              {/* Mobile Search - Redirect to Search Page */}
-              {/* Create Event Shortcut */}
-              <button
-                onClick={() => navigate(isAuthenticated ? '/my-events/create' : '/signup')}
-                className="lg:hidden w-16 h-16 flex items-center justify-center rounded-xl transition-all text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20"
-                aria-label="Create Event"
-              >
-                <ICONS.Plus className="w-7 h-7" />
-              </button>
-
-              {showHeaderSearchBar && (
-                <button
-                  onClick={() => navigate('/search')}
-                  className="lg:hidden w-16 h-16 flex items-center justify-center rounded-xl transition-all text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20"
-                  aria-label="Search"
-                >
-                  <ICONS.Search className="w-7 h-7" />
-                </button>
-              )}
-              {/* Nav Links */}
-              <div className="hidden lg:flex items-center gap-8">
-                {navLinks.map((link: any) => (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2E2E2F] hover:text-[#38BDF2] transition-colors relative group whitespace-nowrap"
-                  >
-                    {link.label}
-                    {link.isLive && (
-                      <span className="relative flex h-2 w-2 ml-1 inline-block -top-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                      </span>
-                    )}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#38BDF2] transition-all group-hover:w-full" />
-                  </Link>
-                ))}
+                  </form>
+                )}
               </div>
 
+              {/* Right Segment: Nav Links and Auth Actions */}
+              <div className="flex items-center justify-end gap-2 lg:gap-6 ml-auto flex-none">
+                {/* Mobile Search - Redirect to Search Page */}
+                {/* Create Event Shortcut */}
+                <button
+                  onClick={() => navigate(isAuthenticated ? '/my-events/create' : '/signup')}
+                  className="lg:hidden w-16 h-16 flex items-center justify-center rounded-xl transition-all text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20"
+                  aria-label="Create Event"
+                >
+                  <ICONS.Plus className="w-7 h-7" />
+                </button>
 
-
-              <div className="flex items-center gap-1 shrink-0">
-                {isAuthenticated ? (
-                  <>
-                    <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
-                      Watch Live
-                      {hasLiveEvents && (
-                        <span className="relative flex h-2 w-2 ml-0.5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                {showHeaderSearchBar && (
+                  <button
+                    onClick={() => navigate('/search')}
+                    className="lg:hidden w-16 h-16 flex items-center justify-center rounded-xl transition-all text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20"
+                    aria-label="Search"
+                  >
+                    <ICONS.Search className="w-7 h-7" />
+                  </button>
+                )}
+                {/* Nav Links */}
+                <div className="hidden lg:flex items-center gap-8">
+                  {navLinks.map((link: any) => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2E2E2F] hover:text-[#38BDF2] transition-colors relative group whitespace-nowrap"
+                    >
+                      {link.label}
+                      {link.isLive && (
+                        <span className="relative flex h-2 w-2 ml-1 inline-block -top-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                         </span>
                       )}
+                      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#38BDF2] transition-all group-hover:w-full" />
                     </Link>
+                  ))}
+                </div>
 
-                    <div className="relative">
-                      <button
-                        className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] hover:bg-[#38BDF2]/10 transition-colors"
-                        onClick={() => setUserMenuOpen((v) => !v)}
-                      >
-                        <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] flex items-center justify-center">
-                          {imageUrl ? (
-                            <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="font-semibold text-xs text-[#2E2E2F]">{initials}</span>
-                          )}
-                        </div>
-                        <div className="hidden sm:block text-left leading-tight min-w-0">
-                          <p className="text-xs font-semibold text-[#2E2E2F] whitespace-nowrap">{displayName}</p>
-                          <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-0.5">{roleLabel}</p>
-                        </div>
-                        <svg className="w-4 h-4 text-[#2E2E2F]" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                      {userMenuOpen && (
-                        <>
-                          <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                          <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl shadow-xl z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
-                            <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
-                              <p className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-widest mb-0.5">Account</p>
-                              <p className="text-xs font-semibold text-[#2E2E2F]">{displayName}</p>
-                              <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-1">{roleLabel}</p>
-                            </div>
-                            {isOrganizer ? (
-                              isAttendingView ? (
+
+
+                <div className="flex items-center gap-1 shrink-0">
+                  {isAuthenticated ? (
+                    <>
+                      <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
+                        Watch Live
+                        {hasLiveEvents && (
+                          <span className="relative flex h-2 w-2 ml-0.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                          </span>
+                        )}
+                      </Link>
+
+                      <div className="relative">
+                        <button
+                          className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl border border-sidebar-border bg-background hover:bg-[#38BDF2]/10 transition-colors"
+                          onClick={() => setUserMenuOpen((v) => !v)}
+                        >
+                          <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] dark:text-white flex items-center justify-center">
+                            {imageUrl ? (
+                              <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="font-semibold text-xs text-[#2E2E2F] dark:text-white">{initials}</span>
+                            )}
+                          </div>
+                          <div className="hidden sm:block text-left leading-tight min-w-0">
+                            <p className="text-xs font-semibold text-[#2E2E2F] dark:text-white whitespace-nowrap">{displayName}</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] dark:text-white/60 mt-0.5">{roleLabel}</p>
+                          </div>
+                          <svg className="w-4 h-4 text-[#2E2E2F] dark:text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                        {userMenuOpen && (
+                          <>
+                            <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+                            <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-surface border border-sidebar-border rounded-xl shadow-xl z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
+                              <div className="px-4 py-3 border-b border-sidebar-border mb-1">
+                                <p className="text-[10px] font-medium text-[#2E2E2F] dark:text-white/40 uppercase tracking-widest mb-0.5">Account</p>
+                                <p className="text-xs font-semibold text-[#2E2E2F] dark:text-white">{displayName}</p>
+                                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] dark:text-white/60 mt-1">{roleLabel}</p>
+                              </div>
+                              {isOrganizer ? (
+                                isAttendingView ? (
+                                  <>
+                                    <button
+                                      className={publicUserMenuActionClass}
+                                      onClick={() => {
+                                        setPublicMode('attending');
+                                        setUserMenuOpen(false);
+                                        navigate('/browse-events');
+                                      }}
+                                    >
+                                      <ICONS.Calendar className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                      <span>Browse Events</span>
+                                    </button>
+                                    <button
+                                      className={publicUserMenuActionClass}
+                                      onClick={() => {
+                                        setPublicMode('attending');
+                                        setUserMenuOpen(false);
+                                        navigate('/my-tickets');
+                                      }}
+                                    >
+                                      <ICONS.Ticket className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                      <span>My Tickets</span>
+                                    </button>
+                                    <button
+                                      className={publicUserMenuActionClass}
+                                      onClick={() => {
+                                        setPublicMode('organizer');
+                                        setUserMenuOpen(false);
+                                        navigate('/my-events');
+                                      }}
+                                    >
+                                      <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                      <span>Organize Events</span>
+                                    </button>
+                                    <button
+                                      className={publicUserMenuActionClass}
+                                      onClick={() => {
+                                        setPublicMode('attending');
+                                        setUserMenuOpen(false);
+                                        navigate('/liked');
+                                      }}
+                                    >
+                                      <ICONS.Heart className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                      <span>Liked</span>
+                                    </button>
+                                    <button
+                                      className={publicUserMenuActionClass}
+                                      onClick={() => {
+                                        setPublicMode('attending');
+                                        setUserMenuOpen(false);
+                                        navigate('/followings');
+                                      }}
+                                    >
+                                      <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                      <span>Followings</span>
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <button
+                                      className={publicUserMenuActionClass}
+                                      onClick={() => {
+                                        setPublicMode('organizer');
+                                        setUserMenuOpen(false);
+                                        navigate('/user-settings?tab=organizer');
+                                      }}
+                                    >
+                                      <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                      <span>Organizer Profile</span>
+                                    </button>
+                                    <button
+                                      className={publicUserMenuActionClass}
+                                      onClick={() => {
+                                        setPublicMode('organizer');
+                                        setUserMenuOpen(false);
+                                        navigate('/user-settings?tab=team');
+                                      }}
+                                    >
+                                      <ICONS.Shield className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                      <span>Team & Access</span>
+                                    </button>
+                                    <button
+                                      className={publicUserMenuActionClass}
+                                      onClick={() => {
+                                        setPublicMode('organizer');
+                                        setUserMenuOpen(false);
+                                        navigate('/user-settings?tab=email');
+                                      }}
+                                    >
+                                      <ICONS.Mail className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                      <span>Email Settings</span>
+                                    </button>
+                                    <button
+                                      className={publicUserMenuActionClass}
+                                      onClick={() => {
+                                        setPublicMode('organizer');
+                                        setUserMenuOpen(false);
+                                        navigate('/user-settings?tab=payments');
+                                      }}
+                                    >
+                                      <ICONS.CreditCard className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                      <span>Payment Gateway</span>
+                                    </button>
+                                    <button
+                                      className={publicUserMenuActionClass}
+                                      onClick={() => {
+                                        setPublicMode('organizer');
+                                        setUserMenuOpen(false);
+                                        navigate('/user-settings?tab=account');
+                                      }}
+                                    >
+                                      <ICONS.Settings className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                                      <span>Account</span>
+                                    </button>
+                                  </>
+                                )
+                              ) : (
                                 <>
                                   <button
                                     className={publicUserMenuActionClass}
-                                    onClick={() => {
-                                      setPublicMode('attending');
-                                      setUserMenuOpen(false);
-                                      navigate('/browse-events');
-                                    }}
+                                    onClick={() => { setUserMenuOpen(false); navigate('/browse-events'); }}
                                   >
                                     <ICONS.Calendar className="w-4 h-4 opacity-70 group-hover:opacity-100" />
                                     <span>Browse Events</span>
                                   </button>
                                   <button
                                     className={publicUserMenuActionClass}
-                                    onClick={() => {
-                                      setPublicMode('attending');
-                                      setUserMenuOpen(false);
-                                      navigate('/my-tickets');
-                                    }}
+                                    onClick={() => { setUserMenuOpen(false); navigate('/my-tickets'); }}
                                   >
                                     <ICONS.Ticket className="w-4 h-4 opacity-70 group-hover:opacity-100" />
                                     <span>My Tickets</span>
                                   </button>
                                   <button
                                     className={publicUserMenuActionClass}
-                                    onClick={() => {
-                                      setPublicMode('organizer');
-                                      setUserMenuOpen(false);
-                                      navigate('/my-events');
-                                    }}
-                                  >
-                                    <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                    <span>Organize Events</span>
-                                  </button>
-                                  <button
-                                    className={publicUserMenuActionClass}
-                                    onClick={() => {
-                                      setPublicMode('attending');
-                                      setUserMenuOpen(false);
-                                      navigate('/liked');
-                                    }}
+                                    onClick={() => { setUserMenuOpen(false); navigate('/liked'); }}
                                   >
                                     <ICONS.Heart className="w-4 h-4 opacity-70 group-hover:opacity-100" />
                                     <span>Liked</span>
                                   </button>
                                   <button
                                     className={publicUserMenuActionClass}
-                                    onClick={() => {
-                                      setPublicMode('attending');
-                                      setUserMenuOpen(false);
-                                      navigate('/followings');
-                                    }}
+                                    onClick={() => { setUserMenuOpen(false); navigate('/followings'); }}
                                   >
                                     <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
                                     <span>Followings</span>
                                   </button>
                                 </>
-                              ) : (
-                                <>
-                                  <button
-                                    className={publicUserMenuActionClass}
-                                    onClick={() => {
-                                      setPublicMode('organizer');
-                                      setUserMenuOpen(false);
-                                      navigate('/user-settings?tab=organizer');
-                                    }}
-                                  >
-                                    <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                    <span>Organizer Profile</span>
-                                  </button>
-                                  <button
-                                    className={publicUserMenuActionClass}
-                                    onClick={() => {
-                                      setPublicMode('organizer');
-                                      setUserMenuOpen(false);
-                                      navigate('/user-settings?tab=team');
-                                    }}
-                                  >
-                                    <ICONS.Shield className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                    <span>Team & Access</span>
-                                  </button>
-                                  <button
-                                    className={publicUserMenuActionClass}
-                                    onClick={() => {
-                                      setPublicMode('organizer');
-                                      setUserMenuOpen(false);
-                                      navigate('/user-settings?tab=email');
-                                    }}
-                                  >
-                                    <ICONS.Mail className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                    <span>Email Settings</span>
-                                  </button>
-                                  <button
-                                    className={publicUserMenuActionClass}
-                                    onClick={() => {
-                                      setPublicMode('organizer');
-                                      setUserMenuOpen(false);
-                                      navigate('/user-settings?tab=payments');
-                                    }}
-                                  >
-                                    <ICONS.CreditCard className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                    <span>Payment Gateway</span>
-                                  </button>
-                                  <button
-                                    className={publicUserMenuActionClass}
-                                    onClick={() => {
-                                      setPublicMode('organizer');
-                                      setUserMenuOpen(false);
-                                      navigate('/user-settings?tab=account');
-                                    }}
-                                  >
-                                    <ICONS.Settings className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                    <span>Account</span>
-                                  </button>
-                                </>
-                              )
-                            ) : (
-                              <>
+                              )}
+                              <div className="border-t border-[#2E2E2F]/5 mt-1 pt-1">
                                 <button
-                                  className={publicUserMenuActionClass}
-                                  onClick={() => { setUserMenuOpen(false); navigate('/browse-events'); }}
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
+                                  onClick={() => {
+                                    setUserMenuOpen(false);
+                                    handleLogout();
+                                  }}
                                 >
-                                  <ICONS.Calendar className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                  <span>Browse Events</span>
+                                  <svg className="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                  </svg>
+                                  <span>Logout</span>
                                 </button>
-                                <button
-                                  className={publicUserMenuActionClass}
-                                  onClick={() => { setUserMenuOpen(false); navigate('/my-tickets'); }}
-                                >
-                                  <ICONS.Ticket className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                  <span>My Tickets</span>
-                                </button>
-                                <button
-                                  className={publicUserMenuActionClass}
-                                  onClick={() => { setUserMenuOpen(false); navigate('/liked'); }}
-                                >
-                                  <ICONS.Heart className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                  <span>Liked</span>
-                                </button>
-                                <button
-                                  className={publicUserMenuActionClass}
-                                  onClick={() => { setUserMenuOpen(false); navigate('/followings'); }}
-                                >
-                                  <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
-                                  <span>Followings</span>
-                                </button>
-                              </>
-                            )}
-                            <div className="border-t border-[#2E2E2F]/5 mt-1 pt-1">
-                              <button
-                                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
-                                onClick={() => {
-                                  setUserMenuOpen(false);
-                                  handleLogout();
-                                }}
-                              >
-                                <svg className="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
-                                <span>Logout</span>
-                              </button>
+                              </div>
                             </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => navigate('/login')}
-                      className={`hidden lg:flex ${landingLoginButtonClass}`}
-                    >
-                      Login
-                    </button>
-                    <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
-                      Watch Live
-                      {hasLiveEvents && (
-                        <span className="relative flex h-2 w-2 ml-0.5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
-                        </span>
-                      )}
-                    </Link>
-                  </>
-                )}
+                          </>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => navigate('/login')}
+                        className={`hidden lg:flex ${landingLoginButtonClass}`}
+                      >
+                        Login
+                      </button>
+                      <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
+                        Watch Live
+                        {hasLiveEvents && (
+                          <span className="relative flex h-2 w-2 ml-0.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                          </span>
+                        )}
+                      </Link>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Mobile search row replaced by /search page navigation */}
+              {/* Mobile search row replaced by /search page navigation */}
             </div>
 
             {/* Row 2 (Mobile Quick Links - Persistent) */}
             {showMobileNav && (
               <div className="lg:hidden flex items-center justify-around h-20 border-t border-[#2E2E2F]/10 bg-[#F2F2F2] relative">
                 <div className="absolute bottom-0 left-0 w-full h-[1px] bg-[#2E2E2F]/5" />
-                
+
                 <Link to="/" title="Home" className={`w-16 h-16 flex items-center justify-center rounded-2xl transition-all relative text-[#2E2E2F] hover:bg-black/5 active:bg-black/10`}>
                   <ICONS.Home className={`w-7 h-7 transition-all ${location.pathname === '/' ? 'opacity-100' : 'opacity-60'}`} />
                   {location.pathname === '/' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#38BDF2] rounded-full" />}
@@ -1950,12 +1991,12 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   <ICONS.Ticket className={`w-7 h-7 transition-all ${location.pathname === '/pricing' ? 'opacity-100' : 'opacity-60'}`} />
                   {location.pathname === '/pricing' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#38BDF2] rounded-full" />}
                 </Link>
-                
+
                 {isAuthenticated ? (
                   <div className="relative">
-                    <button 
-                      onClick={() => setMobileUserMenuOpen(!mobileUserMenuOpen)} 
-                      title="Profile" 
+                    <button
+                      onClick={() => setMobileUserMenuOpen(!mobileUserMenuOpen)}
+                      title="Profile"
                       className={`w-16 h-16 flex items-center justify-center rounded-2xl transition-all relative text-[#2E2E2F]`}
                     >
                       <div className={`w-10 h-10 rounded-xl overflow-hidden bg-[#2E2E2F]/5 text-[#2E2E2F] flex items-center justify-center border-2 ${mobileUserMenuOpen ? 'border-[#38BDF2]/50' : 'border-transparent'}`}>
@@ -1966,7 +2007,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         )}
                       </div>
                       {(location.pathname.startsWith('/my-tickets') || location.pathname.startsWith('/user-settings') || location.pathname.startsWith('/liked') || location.pathname.startsWith('/followings')) && (
-                         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#38BDF2] rounded-full" />
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#38BDF2] rounded-full" />
                       )}
                     </button>
 
@@ -1975,88 +2016,88 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                       <>
                         <div className="fixed inset-0 z-[110]" onClick={() => setMobileUserMenuOpen(false)} />
                         <div className="absolute top-[calc(100%+0.5rem)] right-[-1rem] w-64 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-[120] p-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                           <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
-                              <p className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-widest mb-0.5">Account</p>
-                              <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
-                              <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-1">{roleLabel}</p>
-                           </div>
-                           
-                           <div className="flex flex-col gap-1 max-h-[60vh] overflow-y-auto">
-                              {isOrganizer ? (
-                                isAttendingView ? (
-                                  <>
-                                    <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('attending'); setMobileUserMenuOpen(false); navigate('/browse-events'); }}>
-                                      <ICONS.Calendar className="w-4 h-4 opacity-70" />
-                                      <span>Browse Events</span>
-                                    </button>
-                                    <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('attending'); setMobileUserMenuOpen(false); navigate('/my-tickets'); }}>
-                                      <ICONS.Ticket className="w-4 h-4 opacity-70" />
-                                      <span>My Tickets</span>
-                                    </button>
-                                    <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('attending'); setMobileUserMenuOpen(false); navigate('/liked'); }}>
-                                      <ICONS.Heart className="w-4 h-4 opacity-70" />
-                                      <span>Liked</span>
-                                    </button>
-                                    <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('organizer'); setMobileUserMenuOpen(false); navigate('/my-events'); }}>
-                                      <ICONS.Zap className="w-4 h-4 opacity-70" />
-                                      <span>Organize Events</span>
-                                    </button>
-                                    <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('attending'); setMobileUserMenuOpen(false); navigate('/followings'); }}>
-                                      <ICONS.Users className="w-4 h-4 opacity-70" />
-                                      <span>Followings</span>
-                                    </button>
-                                  </>
-                                ) : (
-                                  <>
-                                    <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/user-settings?tab=organizer'); }}>
-                                      <ICONS.Users className="w-4 h-4 opacity-70" />
-                                      <span>Organizer Profile</span>
-                                    </button>
-                                    <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/user-settings?tab=account'); }}>
-                                      <ICONS.Settings className="w-4 h-4 opacity-70" />
-                                      <span>Account</span>
-                                    </button>
-                                  </>
-                                )
-                              ) : (
+                          <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
+                            <p className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-widest mb-0.5">Account</p>
+                            <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-1">{roleLabel}</p>
+                          </div>
+
+                          <div className="flex flex-col gap-1 max-h-[60vh] overflow-y-auto">
+                            {isOrganizer ? (
+                              isAttendingView ? (
                                 <>
-                                  <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/browse-events'); }}>
+                                  <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('attending'); setMobileUserMenuOpen(false); navigate('/browse-events'); }}>
                                     <ICONS.Calendar className="w-4 h-4 opacity-70" />
                                     <span>Browse Events</span>
                                   </button>
-                                  <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/my-tickets'); }}>
+                                  <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('attending'); setMobileUserMenuOpen(false); navigate('/my-tickets'); }}>
                                     <ICONS.Ticket className="w-4 h-4 opacity-70" />
                                     <span>My Tickets</span>
                                   </button>
-                                  <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/liked'); }}>
+                                  <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('attending'); setMobileUserMenuOpen(false); navigate('/liked'); }}>
                                     <ICONS.Heart className="w-4 h-4 opacity-70" />
                                     <span>Liked</span>
                                   </button>
-                                  <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/followings'); }}>
+                                  <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('organizer'); setMobileUserMenuOpen(false); navigate('/my-events'); }}>
+                                    <ICONS.Zap className="w-4 h-4 opacity-70" />
+                                    <span>Organize Events</span>
+                                  </button>
+                                  <button className={publicUserMenuActionClass} onClick={() => { setPublicMode('attending'); setMobileUserMenuOpen(false); navigate('/followings'); }}>
                                     <ICONS.Users className="w-4 h-4 opacity-70" />
                                     <span>Followings</span>
                                   </button>
                                 </>
-                              )}
-                              
-                              <div className="border-t border-[#2E2E2F]/5 mt-1 pt-1">
-                                <button 
-                                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
-                                  onClick={() => { setMobileUserMenuOpen(false); handleLogout(); }}
-                                >
-                                  <svg className="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                                  <span>Logout</span>
+                              ) : (
+                                <>
+                                  <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/user-settings?tab=organizer'); }}>
+                                    <ICONS.Users className="w-4 h-4 opacity-70" />
+                                    <span>Organizer Profile</span>
+                                  </button>
+                                  <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/user-settings?tab=account'); }}>
+                                    <ICONS.Settings className="w-4 h-4 opacity-70" />
+                                    <span>Account</span>
+                                  </button>
+                                </>
+                              )
+                            ) : (
+                              <>
+                                <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/browse-events'); }}>
+                                  <ICONS.Calendar className="w-4 h-4 opacity-70" />
+                                  <span>Browse Events</span>
                                 </button>
-                              </div>
-                           </div>
+                                <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/my-tickets'); }}>
+                                  <ICONS.Ticket className="w-4 h-4 opacity-70" />
+                                  <span>My Tickets</span>
+                                </button>
+                                <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/liked'); }}>
+                                  <ICONS.Heart className="w-4 h-4 opacity-70" />
+                                  <span>Liked</span>
+                                </button>
+                                <button className={publicUserMenuActionClass} onClick={() => { setMobileUserMenuOpen(false); navigate('/followings'); }}>
+                                  <ICONS.Users className="w-4 h-4 opacity-70" />
+                                  <span>Followings</span>
+                                </button>
+                              </>
+                            )}
+
+                            <div className="border-t border-[#2E2E2F]/5 mt-1 pt-1">
+                              <button
+                                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
+                                onClick={() => { setMobileUserMenuOpen(false); handleLogout(); }}
+                              >
+                                <svg className="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                                <span>Logout</span>
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </>
                     )}
                   </div>
                 ) : (
-                  <button 
-                    onClick={() => navigate('/login')} 
-                    title="Login" 
+                  <button
+                    onClick={() => navigate('/login')}
+                    title="Login"
                     className="w-16 h-16 flex items-center justify-center rounded-2xl text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20 transition-all"
                   >
                     <ICONS.User className="w-7 h-7" />
@@ -2075,7 +2116,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             {/* Drawer Header */}
             <div className="px-6 py-8 flex items-center justify-between border-b border-[#2E2E2F]/5 bg-[#F2F2F2]">
               <Branding className="h-14 w-auto" />
-              <button 
+              <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="w-12 h-12 flex items-center justify-center rounded-2xl bg-black/5 text-[#2E2E2F] hover:bg-black/10 transition-all"
               >
@@ -2084,85 +2125,85 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             </div>
 
             <div className="flex-1 overflow-y-auto">
-            {!isAuthenticated && (
-              <div className="px-3 pt-6 pb-2">
-                <p className="px-4 text-[10px] font-black uppercase tracking-[0.25em] text-[#2E2E2F]/50 mb-4">Explore StartupLab</p>
-                <nav className="flex flex-col gap-1">
-                  {guestMobileLinks.map((link) => (
-                    <Link
-                      key={link.path}
-                      to={link.path}
-                      className="flex items-center gap-4 rounded-2xl px-5 py-4 text-[15px] font-bold text-[#2E2E2F] transition-all hover:bg-[#38BDF2]/5 hover:text-[#38BDF2] active:scale-[0.98]"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <span className="shrink-0 flex items-center justify-center text-current">{link.icon}</span>
-                      <span>{link.label}</span>
-                    </Link>
-                  ))}
-                </nav>
-              </div>
-            )}
-
-            {/* Mobile Auth Buttons Dropdown Area */}
-            <div className="flex flex-col gap-0 px-3">
-              {!isAuthenticated ? (
-                <div className="mt-4 pt-4 border-t border-[#2E2E2F]/5">
-                  <button
-                    onClick={() => { setMobileMenuOpen(false); navigate('/signup'); }}
-                    className="flex items-center gap-4 px-5 py-4 text-[#38BDF2] hover:bg-[#38BDF2]/5 rounded-2xl text-[15px] font-bold w-full text-left"
-                  >
-                    <ICONS.Zap className="w-5 h-5 shrink-0" />
-                    <span>Get Started</span>
-                  </button>
-                  <button
-                    onClick={() => { setMobileMenuOpen(false); navigate('/login'); }}
-                    className="flex items-center gap-4 px-5 py-4 text-[#2E2E2F] hover:bg-black/5 rounded-2xl text-[15px] font-bold w-full text-left mt-1"
-                  >
-                    <ICONS.LogIn className="w-5 h-5 shrink-0" />
-                    <span>Login</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="pt-6">
-                  <div className="px-5 py-6 rounded-2xl bg-[#F2F2F2]/50 border border-[#2E2E2F]/5 mb-6">
-                    <p className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest mb-1">Signed in as</p>
-                    <p className="text-lg font-black text-[#2E2E2F] truncate">{displayName}</p>
-                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase mt-2">
-                       {roleLabel}
-                    </div>
-                  </div>
-
-                  {/* Supplemental links for authenticated users */}
-                  <p className="px-4 text-[10px] font-black uppercase tracking-[0.25em] text-[#2E2E2F]/50 mb-3">Resources</p>
-                  <div className="flex flex-col gap-1">
+              {!isAuthenticated && (
+                <div className="px-3 pt-6 pb-2">
+                  <p className="px-4 text-[10px] font-black uppercase tracking-[0.25em] text-[#2E2E2F]/50 mb-4">Explore StartupLab</p>
+                  <nav className="flex flex-col gap-1">
                     {guestMobileLinks.map((link) => (
                       <Link
                         key={link.path}
                         to={link.path}
-                        className="flex items-center gap-4 rounded-2xl px-5 py-4 text-[15px] font-bold text-[#2E2E2F] transition-all hover:bg-[#38BDF2]/5 hover:text-[#38BDF2]"
+                        className="flex items-center gap-4 rounded-2xl px-5 py-4 text-[15px] font-bold text-[#2E2E2F] transition-all hover:bg-[#38BDF2]/5 hover:text-[#38BDF2] active:scale-[0.98]"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <span className="shrink-0 flex items-center justify-center text-current">{link.icon}</span>
                         <span>{link.label}</span>
                       </Link>
                     ))}
-                  </div>
-
-                  <div className="mt-8 pt-4 border-t border-[#2E2E2F]/5 px-2">
-                    <button
-                      className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-red-500 hover:bg-red-50 transition-all text-[15px] font-bold text-left group"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        handleLogout();
-                      }}
-                    >
-                      <ICONS.LogOut className="w-5 h-5 shrink-0 group-hover:scale-110 transition-transform" />
-                      <span>Log Out</span>
-                    </button>
-                  </div>
+                  </nav>
                 </div>
               )}
-            </div>
+
+              {/* Mobile Auth Buttons Dropdown Area */}
+              <div className="flex flex-col gap-0 px-3">
+                {!isAuthenticated ? (
+                  <div className="mt-4 pt-4 border-t border-[#2E2E2F]/5">
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); navigate('/signup'); }}
+                      className="flex items-center gap-4 px-5 py-4 text-[#38BDF2] hover:bg-[#38BDF2]/5 rounded-2xl text-[15px] font-bold w-full text-left"
+                    >
+                      <ICONS.Zap className="w-5 h-5 shrink-0" />
+                      <span>Get Started</span>
+                    </button>
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); navigate('/login'); }}
+                      className="flex items-center gap-4 px-5 py-4 text-[#2E2E2F] hover:bg-black/5 rounded-2xl text-[15px] font-bold w-full text-left mt-1"
+                    >
+                      <ICONS.LogIn className="w-5 h-5 shrink-0" />
+                      <span>Login</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="pt-6">
+                    <div className="px-5 py-6 rounded-2xl bg-[#F2F2F2]/50 border border-[#2E2E2F]/5 mb-6">
+                      <p className="text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-widest mb-1">Signed in as</p>
+                      <p className="text-lg font-black text-[#2E2E2F] truncate">{displayName}</p>
+                      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase mt-2">
+                        {roleLabel}
+                      </div>
+                    </div>
+
+                    {/* Supplemental links for authenticated users */}
+                    <p className="px-4 text-[10px] font-black uppercase tracking-[0.25em] text-[#2E2E2F]/50 mb-3">Resources</p>
+                    <div className="flex flex-col gap-1">
+                      {guestMobileLinks.map((link) => (
+                        <Link
+                          key={link.path}
+                          to={link.path}
+                          className="flex items-center gap-4 rounded-2xl px-5 py-4 text-[15px] font-bold text-[#2E2E2F] dark:text-white transition-all hover:bg-[#38BDF2]/5 hover:text-[#38BDF2]"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <span className="shrink-0 flex items-center justify-center text-current">{link.icon}</span>
+                          <span>{link.label}</span>
+                        </Link>
+                      ))}
+                    </div>
+
+                    <div className="mt-8 pt-4 border-t border-sidebar-border px-2">
+                      <button
+                        className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all text-[15px] font-bold text-left group"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          handleLogout();
+                        }}
+                      >
+                        <ICONS.LogOut className="w-5 h-5 shrink-0 group-hover:scale-110 transition-transform" />
+                        <span>Log Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </>
@@ -2171,7 +2212,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       <footer className="bg-[#0F172A] text-white py-12 px-4 lg:px-10 border-t border-white/10 relative overflow-hidden" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
         {/* Subtle Background Glow */}
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#38BDF2]/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-        
+
         {/* Logo Watermark */}
         <div className="absolute top-1/2 right-0 -translate-y-1/2 opacity-[0.03] pointer-events-none select-none">
           <img src="/lgo-footer.png" className="w-[800px] h-auto object-contain" alt="" />
@@ -2216,8 +2257,8 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     className="flex-1 px-3 py-2.5 bg-white/5 text-white placeholder:text-gray-500 outline-none text-xs font-medium border-r border-white/10 disabled:opacity-50"
                     required
                   />
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     disabled={isSubscribing}
                     className="bg-[#38BDF2] text-white px-5 py-2.5 text-xs font-black transition-colors hover:bg-[#38BDF2]/90 disabled:opacity-50 flex items-center gap-2"
                   >
@@ -2343,6 +2384,25 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   const [unreadCount, setUnreadCount] = React.useState(0);
   const [notificationsLoading, setNotificationsLoading] = React.useState(false);
   const [selectedNotification, setSelectedNotification] = React.useState<any | null>(null);
+
+  // Theme state
+  const [theme, setTheme] = React.useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved || 'light';
+  });
+
+  React.useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+      root.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      root.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [theme]);
 
 
   // Fetch notifications for the notification bell
@@ -2570,13 +2630,13 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#F2F2F2] font-sans selection:bg-[#38BDF2]/30">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#F2F2F2] dark:bg-[#0A0A0B] font-sans selection:bg-[#38BDF2]/30 transition-colors duration-300">
       {/* Sidebar for desktop */}
       <aside
-        className={`bg-[#F2F2F2] border-r border-[#D1D5DB] hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-80' : 'w-24'}`}
+        className={`bg-[#F2F2F2] dark:bg-[#111111] border-r border-[#D1D5DB] dark:border-white/10 hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-80' : 'w-24'}`}
         style={{ overflow: desktopSidebarOpen ? 'hidden' : 'visible', zoom: 0.8 }}
       >
-        <div className={`flex items-center justify-center border-b border-[#D1D5DB] shrink-0 h-24`}>
+        <div className={`flex items-center justify-center border-b border-[#D1D5DB] dark:border-white/10 shrink-0 h-24`}>
           <Link to="/user-home" className="flex items-center justify-center group transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98]">
             {employerLogoUrl ? (
               <img
@@ -2588,7 +2648,10 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
               desktopSidebarOpen ? (
                 <Branding className="h-20 w-auto" />
               ) : (
-                <img src="/lgo.webp" alt="Logo" className="h-10 w-10 object-contain" />
+                <>
+                  <img src="/lgo.webp" alt="Logo" className="h-10 w-10 object-contain dark:hidden" />
+                  <img src="/lgo-footer.png" alt="Logo" className="h-10 w-10 object-contain hidden dark:block" />
+                </>
               )
             )}
           </Link>
@@ -2610,18 +2673,18 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     : 'flex-col items-center justify-center w-11 h-11 mx-auto rounded-xl'
                     } ${isActive
                       ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20'
-                      : 'text-[#000000]/90 hover:bg-[#D1D5DB]/50 hover:text-[#000000]'
+                      : 'text-[#000000]/90 dark:text-white/70 hover:bg-[#D1D5DB]/50 dark:hover:bg-white/5 hover:text-[#000000] dark:hover:text-white'
                     }`}
                 >
                   <div className="relative shrink-0 flex items-center justify-center">
                     {React.cloneElement(item.icon as React.ReactElement<any>, {
-                      className: `transition-colors duration-200 ${desktopSidebarOpen ? 'w-[18px] h-[18px]' : 'w-5 h-5 group-hover:scale-105'} ${isActive ? 'stroke-[2.5px] text-white' : 'stroke-[1.8px] text-[#000000] group-hover:text-[#000000]'}`
+                      className: `transition-colors duration-200 ${desktopSidebarOpen ? 'w-[18px] h-[18px]' : 'w-5 h-5 group-hover:scale-105'} ${isActive ? 'stroke-[2.5px] text-white' : 'stroke-[1.8px] text-[#000000] dark:text-white group-hover:text-[#000000] dark:group-hover:text-white'}`
                     })}
                     {item.premium && <CrownBadge />}
                   </div>
 
                   {desktopSidebarOpen ? (
-                    <span className={`text-[16px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#000000]'}`}>
+                    <span className={`text-[16px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#000000] dark:text-white'}`}>
                       {item.label}
                     </span>
                   ) : (
@@ -2640,7 +2703,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
       <main
         className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}
       >
-        <header className="h-24 !bg-[#F2F2F2] border-b border-[#D1D5DB] px-4 sm:px-8 flex items-center justify-between gap-4 sm:gap-6 sticky top-0 z-[500] w-full" style={{ zoom: 0.8 }}>
+        <header className="h-24 !bg-[#F2F2F2] dark:!bg-[#111111] border-b border-[#D1D5DB] dark:border-white/10 px-4 sm:px-8 flex items-center justify-between gap-4 sm:gap-6 sticky top-0 z-[500] w-full" style={{ zoom: 0.8 }}>
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
@@ -2650,29 +2713,41 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   setDesktopSidebarOpen(!desktopSidebarOpen);
                 }
               }}
-              className="p-2 w-11 h-11 flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-[#F2F2F2] hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all group active:scale-95"
+              className="p-2 w-11 h-11 flex items-center justify-center rounded-lg border border-[#D1D5DB] dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all group active:scale-95"
               aria-label="Toggle Sidebar"
             >
-              <svg className={`w-5 h-5 transition-transform duration-500 ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 transition-transform duration-500 dark:text-white ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             {/* Mobile Logo removed as per user request - branded inside sidebar only */}
             <div className="ml-1 hidden sm:block">
-              <p className="text-[10px] uppercase font-black text-[#111111] tracking-[0.2em]">
+              <p className="text-[10px] uppercase font-black text-[#111111] dark:text-white tracking-[0.2em]">
                 Organizer Portal
               </p>
             </div>
           </div>
 
           <div className="ml-auto flex items-center gap-4">
+            {/* Theme Toggle Button */}
+            <button
+              onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
+              className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#D1D5DB] dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] hover:bg-gray-100 dark:hover:bg-white/5 transition-all active:scale-95 shadow-sm"
+              aria-label="Toggle Theme"
+            >
+              {theme === 'light' ? (
+                <ICONS.Moon className="w-5 h-5 text-[#4B5563] dark:text-white" />
+              ) : (
+                <ICONS.Sun className="w-5 h-5 text-[#38BDF2]" />
+              )}
+            </button>
             {(!(role === UserRole.STAFF && canReceiveNotifications === false)) && (
               <div className="relative group">
                 <button
-                  className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#D1D5DB] bg-[#F2F2F2] hover:bg-gray-100 transition-all active:scale-95 shadow-sm relative"
+                  className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#D1D5DB] dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] hover:bg-gray-100 dark:hover:bg-white/5 transition-all active:scale-95 shadow-sm relative"
                   onClick={() => setNotificationOpen(!notificationOpen)}
                 >
-                  <ICONS.Bell className="w-5 h-5 text-[#4B5563]" />
+                  <ICONS.Bell className="w-5 h-5 text-[#4B5563] dark:text-white" />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-[#EF4444] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-[#F2F2F2] animate-in zoom-in duration-300">
                       {unreadCount > 99 ? '99+' : unreadCount}
@@ -2682,20 +2757,20 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 {notificationOpen && (
                   <>
                     <div className="fixed inset-0 z-[100] bg-[#2E2E2F]/10 backdrop-blur-[2px]" onClick={() => setNotificationOpen(false)} />
-                    <div className="fixed left-3 right-3 top-24 bottom-24 sm:left-auto sm:right-6 sm:bottom-6 w-auto sm:w-full sm:max-w-[420px] bg-[#F2F2F2] rounded-xl sm:rounded-xl border border-[#2E2E2F]/5 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.15)] z-[101] flex flex-col overflow-hidden animate-in slide-in-from-right-8 fade-in duration-500">
-                      <div className="p-8 border-b border-[#2E2E2F]/5 flex items-start justify-between bg-[#F2F2F2]/80 backdrop-blur-xl sticky top-0 z-10">
+                    <div className="fixed left-3 right-3 top-24 bottom-24 sm:left-auto sm:right-6 sm:bottom-6 w-auto sm:w-full sm:max-w-[420px] bg-[#F2F2F2] dark:bg-[#111111] rounded-xl sm:rounded-xl border border-[#2E2E2F]/5 dark:border-white/10 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.15)] z-[101] flex flex-col overflow-hidden animate-in slide-in-from-right-8 fade-in duration-500">
+                      <div className="p-8 border-b border-[#2E2E2F]/5 dark:border-white/10 flex items-start justify-between bg-[#F2F2F2]/80 dark:bg-[#111111]/80 backdrop-blur-xl sticky top-0 z-10">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <h2 className="text-2xl font-black tracking-tight text-[#2E2E2F]">Notifications</h2>
+                            <h2 className="text-2xl font-black tracking-tight text-[#2E2E2F] dark:text-white">Notifications</h2>
                             {unreadCount > 0 && (
                               <span className="bg-red-500/10 text-red-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">
                                 {unreadCount} New
                               </span>
                             )}
                           </div>
-                          <p className="text-[#2E2E2F] text-xs font-bold uppercase tracking-widest">Stay up to date on important information</p>
+                          <p className="text-[#2E2E2F] dark:text-white/60 text-xs font-bold uppercase tracking-widest">Stay up to date on important information</p>
                         </div>
-                        <button onClick={() => setNotificationOpen(false)} className="w-10 h-10 rounded-xl bg-[#F2F2F2] flex items-center justify-center text-[#2E2E2F] hover:text-[#2E2E2F] hover:bg-[#2E2E2F]/5 transition-all">
+                        <button onClick={() => setNotificationOpen(false)} className="w-10 h-10 rounded-xl bg-[#F2F2F2] dark:bg-[#2E2E2F]/10 flex items-center justify-center text-[#2E2E2F] dark:text-white hover:text-[#2E2E2F] dark:hover:text-white hover:bg-[#2E2E2F]/5 dark:hover:bg-white/5 transition-all">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                           </svg>
@@ -2706,12 +2781,12 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                         {notificationsLoading && notifications.length === 0 ? (
                           <div className="flex flex-col items-center justify-center p-12 text-center h-full">
                             <div className="w-12 h-12 border-4 border-[#38BDF2]/20 border-t-[#38BDF2] rounded-full animate-spin mb-4" />
-                            <p className="text-[#2E2E2F] text-xs font-black uppercase tracking-widest">Syncing notifications...</p>
+                            <p className="text-[#2E2E2F] dark:text-white/60 text-xs font-black uppercase tracking-widest">Syncing notifications...</p>
                           </div>
                         ) : notifications.length > 0 ? (
                           <div className="px-4 space-y-2">
                             <div className="px-4 py-2 flex justify-between items-center mb-4">
-                              <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">RECENT ACTIVITY</span>
+                              <span className="text-[10px] font-black text-[#2E2E2F] dark:text-white/40 uppercase tracking-[0.2em]">RECENT ACTIVITY</span>
                               <button
                                 onClick={handleMarkAllRead}
                                 className="text-[10px] font-black text-[#38BDF2] hover:text-[#2E2E2F] uppercase tracking-[0.2em] transition-colors"
@@ -2728,22 +2803,22 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                                 }}
                                 className={`p-5 rounded-xl transition-all group relative border cursor-pointer ${n.isRead
                                   ? 'bg-transparent border-transparent opacity-60'
-                                  : 'bg-[#F2F2F2] border-[#2E2E2F]/5 hover:border-[#38BDF2]/30 shadow-sm'
+                                  : 'bg-[#F2F2F2] dark:bg-white/5 border-[#2E2E2F]/5 dark:border-white/10 hover:border-[#38BDF2]/30 shadow-sm'
                                   }`}
                               >
                                 <div className="flex items-start gap-4">
-                                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${n.isRead ? 'bg-[#2E2E2F]/5 text-[#2E2E2F]' : 'bg-[#38BDF2]/10 text-[#38BDF2]'
+                                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${n.isRead ? 'bg-[#2E2E2F]/5 dark:bg-white/5 text-[#2E2E2F] dark:text-white/40' : 'bg-[#38BDF2]/10 text-[#38BDF2]'
                                     }`}>
                                     <ICONS.Bell className="w-5 h-5" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-1">
-                                      <h4 className="text-sm font-black text-[#2E2E2F] tracking-tight truncate">{n.title}</h4>
-                                      <span className="text-[9px] text-[#2E2E2F] font-black uppercase tracking-widest whitespace-nowrap ml-2">
+                                      <h4 className="text-sm font-black text-[#2E2E2F] dark:text-white tracking-tight truncate">{n.title}</h4>
+                                      <span className="text-[9px] text-[#2E2E2F] dark:text-white/40 font-black uppercase tracking-widest whitespace-nowrap ml-2">
                                         {n.createdAt ? new Date(n.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Now'}
                                       </span>
                                     </div>
-                                    <p className="text-xs text-[#2E2E2F] font-medium leading-relaxed line-clamp-2 mb-3">{n.message}</p>
+                                    <p className="text-xs text-[#2E2E2F] dark:text-white/60 font-medium leading-relaxed line-clamp-2 mb-3">{n.message}</p>
                                     {!n.isRead && (
                                       <button
                                         onClick={() => handleMarkNotificationRead(n.notificationId)}
@@ -2759,11 +2834,11 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                           </div>
                         ) : (
                           <div className="flex flex-col items-center justify-center p-12 text-center h-full">
-                            <div className="w-24 h-24 bg-[#F2F2F2] rounded-xl flex items-center justify-center mb-8">
-                              <ICONS.Bell className="w-10 h-10 text-[#2E2E2F]" />
+                            <div className="w-24 h-24 bg-[#F2F2F2] dark:bg-white/5 rounded-xl flex items-center justify-center mb-8">
+                              <ICONS.Bell className="w-10 h-10 text-[#2E2E2F] dark:text-white/20" />
                             </div>
-                            <h3 className="text-xl font-black text-[#2E2E2F] tracking-tighter uppercase mb-2">Clean Slate</h3>
-                            <p className="text-sm font-medium text-[#2E2E2F] max-w-[240px] leading-relaxed">
+                            <h3 className="text-xl font-black text-[#2E2E2F] dark:text-white tracking-tighter uppercase mb-2">Clean Slate</h3>
+                            <p className="text-sm font-medium text-[#2E2E2F] dark:text-white/60 max-w-[240px] leading-relaxed">
                               You're all caught up. We'll alert you when there's news.
                             </p>
                           </div>
@@ -3049,7 +3124,7 @@ const ScrollToTop: React.FC = () => {
     // 2. Dynamic Browser Titles
     const path = location.pathname;
     const baseTitle = 'StartupLab';
-    
+
     // Explicit mappings
     const titleMap: { [key: string]: string } = {
       '/': `${baseTitle} | Build. Connect. Launch.`,
@@ -3075,20 +3150,20 @@ const ScrollToTop: React.FC = () => {
 
     // Handle dynamic patterns
     if (path.startsWith('/events/')) {
-        const slug = path.split('/')[2];
-        if (path.endsWith('/register')) {
-            document.title = `Register for Event | ${baseTitle}`;
-        } else {
-            // Title will be updated by EventDetails component if it fetches data, 
-            // but we provide a solid fallback here.
-            document.title = `Event Details | ${baseTitle}`;
-        }
+      const slug = path.split('/')[2];
+      if (path.endsWith('/register')) {
+        document.title = `Register for Event | ${baseTitle}`;
+      } else {
+        // Title will be updated by EventDetails component if it fetches data, 
+        // but we provide a solid fallback here.
+        document.title = `Event Details | ${baseTitle}`;
+      }
     } else if (path.startsWith('/organizer/')) {
-        document.title = `Organizer Profile | ${baseTitle}`;
+      document.title = `Organizer Profile | ${baseTitle}`;
     } else if (path.startsWith('/tickets/')) {
-        document.title = `Your Ticket | ${baseTitle}`;
+      document.title = `Your Ticket | ${baseTitle}`;
     } else {
-        document.title = titleMap[path] || baseTitle;
+      document.title = titleMap[path] || baseTitle;
     }
   }, [location.pathname]);
 
@@ -3234,74 +3309,74 @@ const EventsPortal = () => {
 };
 
 const App: React.FC = () => (
-    <Router>
-      <ScrollToTop />
-      <HashBypassBridge />
-      <GlobalOnboardingGuard>
-        <React.Suspense fallback={<div className="suspense-progress"><div className="suspense-progress-bar" /></div>}>
-          <Routes>
-            <Route path="/login" element={<AuthPage />} />
-            <Route path="/signup" element={<AuthPage />} />
-            <Route path="/forgot-password" element={<AuthPage />} />
-            <Route path="/welcome" element={<WelcomeView />} />
-            <Route path="/reset-password" element={<AuthPage />} />
-            <Route path="/accept-invite" element={<AuthPage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/" element={<PublicLayout><EventList /></PublicLayout>} />
-            <Route path="/live" element={<PublicLayout><LivePage /></PublicLayout>} />
-            <Route path="/categories/:categoryKey" element={<PublicLayout><CategoryEvents /></PublicLayout>} />
-            <Route path="/events/:slug" element={<PublicLayout><EventDetails /></PublicLayout>} />
-            <Route path="/organizer/:id" element={<PublicLayout><OrganizerProfilePage /></PublicLayout>} />
-            <Route path="/events/:slug/register" element={<PublicLayout><RegistrationForm /></PublicLayout>} />
-            <Route path="/payment/status" element={<PublicLayout><PaymentStatusView /></PublicLayout>} />
-            <Route path="/tickets/:ticketId" element={<PublicLayout><TicketView /></PublicLayout>} />
-            <Route path="/about-us" element={<PublicLayout><AboutUsPage /></PublicLayout>} />
-            <Route path="/browse-events" element={<PublicLayout><PublicEventsPage /></PublicLayout>} />
-            <Route path="/liked" element={<PublicLayout><LikedEventsPage /></PublicLayout>} />
-            <Route path="/followings" element={<PublicLayout><FollowingsEventsPage /></PublicLayout>} />
-            <Route path="/my-tickets" element={<PublicLayout><MyTicketsPage /></PublicLayout>} />
-            <Route path="/privacy-policy" element={<PublicLayout><PrivacyPolicyPage /></PublicLayout>} />
-            <Route path="/terms-of-service" element={<PublicLayout><TermsOfServicePage /></PublicLayout>} />
-            <Route path="/contact-us" element={<PublicLayout><ContactUsPage /></PublicLayout>} />
-            <Route path="/pricing" element={<PublicLayout><PricingPage /></PublicLayout>} />
-            <Route path="/organizers/discover" element={<PublicLayout><OrganizerDiscoveryPage /></PublicLayout>} />
-            <Route path="/faq" element={<PublicLayout><FaqPage /></PublicLayout>} />
-            <Route path="/refund-policy" element={<PublicLayout><RefundPolicyPage /></PublicLayout>} />
-            <Route path="/onboarding" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><WelcomeView /></RequireRoleRoute>} />
+  <Router>
+    <ScrollToTop />
+    <HashBypassBridge />
+    <GlobalOnboardingGuard>
+      <React.Suspense fallback={<div className="suspense-progress"><div className="suspense-progress-bar" /></div>}>
+        <Routes>
+          <Route path="/login" element={<AuthPage />} />
+          <Route path="/signup" element={<AuthPage />} />
+          <Route path="/forgot-password" element={<AuthPage />} />
+          <Route path="/welcome" element={<WelcomeView />} />
+          <Route path="/reset-password" element={<AuthPage />} />
+          <Route path="/accept-invite" element={<AuthPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/" element={<PublicLayout><EventList /></PublicLayout>} />
+          <Route path="/live" element={<PublicLayout><LivePage /></PublicLayout>} />
+          <Route path="/categories/:categoryKey" element={<PublicLayout><CategoryEvents /></PublicLayout>} />
+          <Route path="/events/:slug" element={<PublicLayout><EventDetails /></PublicLayout>} />
+          <Route path="/organizer/:id" element={<PublicLayout><OrganizerProfilePage /></PublicLayout>} />
+          <Route path="/events/:slug/register" element={<PublicLayout><RegistrationForm /></PublicLayout>} />
+          <Route path="/payment/status" element={<PublicLayout><PaymentStatusView /></PublicLayout>} />
+          <Route path="/tickets/:ticketId" element={<PublicLayout><TicketView /></PublicLayout>} />
+          <Route path="/about-us" element={<PublicLayout><AboutUsPage /></PublicLayout>} />
+          <Route path="/browse-events" element={<PublicLayout><PublicEventsPage /></PublicLayout>} />
+          <Route path="/liked" element={<PublicLayout><LikedEventsPage /></PublicLayout>} />
+          <Route path="/followings" element={<PublicLayout><FollowingsEventsPage /></PublicLayout>} />
+          <Route path="/my-tickets" element={<PublicLayout><MyTicketsPage /></PublicLayout>} />
+          <Route path="/privacy-policy" element={<PublicLayout><PrivacyPolicyPage /></PublicLayout>} />
+          <Route path="/terms-of-service" element={<PublicLayout><TermsOfServicePage /></PublicLayout>} />
+          <Route path="/contact-us" element={<PublicLayout><ContactUsPage /></PublicLayout>} />
+          <Route path="/pricing" element={<PublicLayout><PricingPage /></PublicLayout>} />
+          <Route path="/organizers/discover" element={<PublicLayout><OrganizerDiscoveryPage /></PublicLayout>} />
+          <Route path="/faq" element={<PublicLayout><FaqPage /></PublicLayout>} />
+          <Route path="/refund-policy" element={<PublicLayout><RefundPolicyPage /></PublicLayout>} />
+          <Route path="/onboarding" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><WelcomeView /></RequireRoleRoute>} />
 
-            {/* User Portal Routes */}
-            <Route path="/user-home" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserHome /></UserPortalLayout></RequireRoleRoute>} />
-            <Route path="/my-events" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserEvents /></UserPortalLayout></RequireRoleRoute>} />
-            <Route path="/my-events/create" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserEvents /></UserPortalLayout></RequireRoleRoute>} />
-            <Route path="/my-events/edit/:eventId" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserEvents /></UserPortalLayout></RequireRoleRoute>} />
-            <Route path="/user-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserSettings /></UserPortalLayout></RequireRoleRoute>} />
-            <Route path="/organizer-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><Navigate to="/user-settings?tab=organizer" replace /></RequireRoleRoute>} />
-            <Route path="/payment-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><Navigate to="/user-settings?tab=payments" replace /></RequireRoleRoute>} />
-            <Route path="/account-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><Navigate to="/user-settings?tab=account" replace /></RequireRoleRoute>} />
-            <Route path="/user/attendees" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><RegistrationsList /></UserPortalLayout></RequireRoleRoute>} />
-            <Route path="/user/checkin" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><CheckIn /></UserPortalLayout></RequireRoleRoute>} />
-            <Route path="/user/archive" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><ArchiveEvents /></UserPortalLayout></RequireRoleRoute>} />
-            <Route path="/user/reports" element={<RequireRoleRoute allow={[UserRole.ORGANIZER, UserRole.STAFF]}><UserPortalLayout><OrganizerReports /></UserPortalLayout></RequireRoleRoute>} />
-            <Route path="/subscription" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerSubscription /></UserPortalLayout></RequireRoleRoute>} />
-            <Route path="/organizer-support" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerSupport /></UserPortalLayout></RequireRoleRoute>} />
-            <Route path="/organizer-support/archive" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><ArchiveSupport /></UserPortalLayout></RequireRoleRoute>} />
-            <Route path="/subscription/success" element={<PublicLayout><SubscriptionSuccess /></PublicLayout>} />
+          {/* User Portal Routes */}
+          <Route path="/user-home" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserHome /></UserPortalLayout></RequireRoleRoute>} />
+          <Route path="/my-events" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserEvents /></UserPortalLayout></RequireRoleRoute>} />
+          <Route path="/my-events/create" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserEvents /></UserPortalLayout></RequireRoleRoute>} />
+          <Route path="/my-events/edit/:eventId" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserEvents /></UserPortalLayout></RequireRoleRoute>} />
+          <Route path="/user-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><UserSettings /></UserPortalLayout></RequireRoleRoute>} />
+          <Route path="/organizer-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><Navigate to="/user-settings?tab=organizer" replace /></RequireRoleRoute>} />
+          <Route path="/payment-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><Navigate to="/user-settings?tab=payments" replace /></RequireRoleRoute>} />
+          <Route path="/account-settings" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><Navigate to="/user-settings?tab=account" replace /></RequireRoleRoute>} />
+          <Route path="/user/attendees" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><RegistrationsList /></UserPortalLayout></RequireRoleRoute>} />
+          <Route path="/user/checkin" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><CheckIn /></UserPortalLayout></RequireRoleRoute>} />
+          <Route path="/user/archive" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><ArchiveEvents /></UserPortalLayout></RequireRoleRoute>} />
+          <Route path="/user/reports" element={<RequireRoleRoute allow={[UserRole.ORGANIZER, UserRole.STAFF]}><UserPortalLayout><OrganizerReports /></UserPortalLayout></RequireRoleRoute>} />
+          <Route path="/subscription" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerSubscription /></UserPortalLayout></RequireRoleRoute>} />
+          <Route path="/organizer-support" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><OrganizerSupport /></UserPortalLayout></RequireRoleRoute>} />
+          <Route path="/organizer-support/archive" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><UserPortalLayout><ArchiveSupport /></UserPortalLayout></RequireRoleRoute>} />
+          <Route path="/subscription/success" element={<PublicLayout><SubscriptionSuccess /></PublicLayout>} />
 
-            {/* Admin Portal Routes */}
-            <Route path="/dashboard" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.ORGANIZER]}><DashboardWrapper /></RequireRoleRoute>} />
-            <Route path="/events" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><EventsPortal /></PortalLayout></RequireRoleRoute>} />
-            <Route path="/attendees" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><RegistrationsList /></PortalLayout></RequireRoleRoute>} />
-            <Route path="/checkin" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><CheckIn /></PortalLayout></RequireRoleRoute>} />
-            <Route path="/admin/categories" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><CategoryManagement /></PortalLayout></RequireRoleRoute>} />
-            <Route path="/admin/discovery" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><DiscoveryHub /></PortalLayout></RequireRoleRoute>} />
-            <Route path="/admin/announcements" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><Announcements /></PortalLayout></RequireRoleRoute>} />
-            <Route path="/settings" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><SettingsView /></PortalLayout></RequireRoleRoute>} />
+          {/* Admin Portal Routes */}
+          <Route path="/dashboard" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.ORGANIZER]}><DashboardWrapper /></RequireRoleRoute>} />
+          <Route path="/events" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><EventsPortal /></PortalLayout></RequireRoleRoute>} />
+          <Route path="/attendees" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><RegistrationsList /></PortalLayout></RequireRoleRoute>} />
+          <Route path="/checkin" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><CheckIn /></PortalLayout></RequireRoleRoute>} />
+          <Route path="/admin/categories" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><CategoryManagement /></PortalLayout></RequireRoleRoute>} />
+          <Route path="/admin/discovery" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><DiscoveryHub /></PortalLayout></RequireRoleRoute>} />
+          <Route path="/admin/announcements" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><Announcements /></PortalLayout></RequireRoleRoute>} />
+          <Route path="/settings" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><SettingsView /></PortalLayout></RequireRoleRoute>} />
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </React.Suspense>
-      </GlobalOnboardingGuard>
-    </Router>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </React.Suspense>
+    </GlobalOnboardingGuard>
+  </Router>
 );
 export default App;
 

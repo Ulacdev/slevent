@@ -29,13 +29,13 @@ const HeroCard = React.memo<{
   iconBg: string;
   trendColor: string;
 }>(({ title, value, sub, icon, iconBg, trendColor }) => (
-  <div className="p-4 sm:p-5 rounded-2xl border border-[#E0E0E0] bg-[#F2F2F2] flex items-center gap-4 hover:scale-[1.01] transition-transform cursor-default">
+  <div className="p-4 sm:p-5 rounded-2xl border border-sidebar-border bg-surface flex items-center gap-4 hover:scale-[1.01] transition-transform cursor-default shadow-sm">
     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white flex-shrink-0 ${iconBg}`}>
       <div className="[&>svg]:w-5 [&>svg]:h-5 sm:[&>svg]:w-6 sm:[&>svg]:h-6">{icon}</div>
     </div>
     <div>
-      <p className="text-[10px] sm:text-xs font-bold text-[#1E293B]/50 mb-0.5 uppercase tracking-wider">{title}</p>
-      <p className="text-xl sm:text-2xl font-black text-[#1E293B]">{value}</p>
+      <p className="text-[10px] sm:text-xs font-bold text-text/50 dark:text-white/40 mb-0.5 uppercase tracking-wider">{title}</p>
+      <p className="text-xl sm:text-2xl font-black text-text dark:text-white">{value}</p>
       <p className={`text-[9px] sm:text-[10px] font-bold mt-1 ${trendColor}`}>{sub}</p>
     </div>
   </div>
@@ -50,13 +50,13 @@ const MetricCard = React.memo<{
   icon: React.ReactNode;
   link?: () => void;
 }>(({ title, value, trend, trendColor, icon, link }) => (
-  <Card className="p-5 sm:p-6 bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm">
+  <Card className="p-5 sm:p-6 bg-surface border border-sidebar-border rounded-2xl shadow-sm">
     <div className="flex justify-between items-start">
       <div>
-        <p className="text-2xl sm:text-3xl font-black text-[#1E293B]">{value}</p>
-        <p className="text-xs sm:text-sm font-bold text-[#1E293B]/40 mt-1">{title}</p>
+        <p className="text-2xl sm:text-3xl font-black text-text dark:text-white">{value}</p>
+        <p className="text-xs sm:text-sm font-bold text-text/40 dark:text-white/40 mt-1">{title}</p>
       </div>
-      <div className="text-[#1E293B]/20 [&>svg]:w-6 [&>svg]:h-6 sm:[&>svg]:w-8 sm:[&>svg]:h-8">{icon}</div>
+      <div className="text-text/20 dark:text-white/20 [&>svg]:w-6 [&>svg]:h-6 sm:[&>svg]:w-8 sm:[&>svg]:h-8">{icon}</div>
     </div>
     <div className="flex justify-between items-center mt-6 sm:mt-8">
       <span className={`text-[10px] sm:text-xs font-black ${trendColor}`}>{trend}</span>
@@ -169,16 +169,16 @@ export const AdminDashboard: React.FC = () => {
     Basic: '#38BDF2',
     Silver: '#64748B',
     Gold: '#EAB308',
-    default: '#1E293B',
+    default: '#38BDF2',
   };
 
   return (
-    <div className="min-h-screen bg-[#F2F2F2] pb-16 space-y-6 px-2 font-sans" style={{ zoom: 0.85 }}>
+    <div className="min-h-screen bg-background pb-16 space-y-6 px-2 font-sans" style={{ zoom: 0.85 }}>
       {/* ── Header ── */}
-      <div className="pt-4 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="pt-4 flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
         <div>
-          <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">Dashboard</h1>
-          <p className="mt-1 text-sm font-semibold text-[#2E2E2F]">
+          <h1 className="text-3xl md:text-[2rem] font-black text-text dark:text-white tracking-tighter uppercase">Dashboard</h1>
+          <p className="mt-1 text-sm font-semibold text-text/60 dark:text-white/60">
             Manage organizers, subscriptions, and platform health
           </p>
         </div>
@@ -234,26 +234,26 @@ export const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
 
         {/* Organizer Growth Bar Chart */}
-        <Card className="p-8 bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm">
+        <Card className="p-8 bg-surface border border-sidebar-border rounded-2xl shadow-sm">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h3 className="text-base font-black text-[#1E293B]">Subscription Growth</h3>
-              <p className="text-[10px] font-bold text-[#1E293B]/40 mt-1">Last 10 Days</p>
+              <h3 className="text-base font-black text-text dark:text-white">Subscription Growth</h3>
+              <p className="text-[10px] font-bold text-text/40 dark:text-white/40 mt-1">Last 10 Days</p>
             </div>
-            <div className="bg-[#F2F2F2] border border-[#E0E0E0] px-3 py-1.5 rounded-lg text-xs font-black text-[#1E293B]/50">
+            <div className="bg-background border border-sidebar-border px-3 py-1.5 rounded-lg text-xs font-black text-text/50 dark:text-white/40">
               Daily New Subscribers
             </div>
           </div>
 
           <div className="flex gap-3 h-[260px]">
             {/* Y axis */}
-            <div className="flex flex-col justify-between text-[9px] font-bold text-[#1E293B]/30 text-right pr-2 pb-6 pt-1">
+            <div className="flex flex-col justify-between text-[9px] font-bold text-text/30 dark:text-white/20 text-right pr-2 pb-6 pt-1">
               {[barMax, Math.round(barMax * 0.75), Math.round(barMax * 0.5), Math.round(barMax * 0.25), 0].map((l, i) => (
                 <span key={`y-axis-${l}-${i}`}>{l}</span>
               ))}
             </div>
             {/* Bars */}
-            <div className="flex-1 flex items-end gap-2 pb-6 border-b border-l border-white/50">
+            <div className="flex-1 flex items-end gap-2 pb-6 border-b border-l border-sidebar-border">
               {barData.map((val, i) => {
                 const h = Math.max((val / barMax) * 100, 4);
                 return (
@@ -266,7 +266,7 @@ export const AdminDashboard: React.FC = () => {
                       className="w-full rounded-t-md bg-[#38BDF2] group-hover:bg-[#0E94C5] transition-colors"
                       style={{ height: `${h}%` }}
                     />
-                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#1E293B] text-white text-[9px] px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 whitespace-nowrap z-10 font-bold transition-all">
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-text dark:bg-white text-background dark:text-[#2E2E2F] text-[9px] px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 whitespace-nowrap z-10 font-bold transition-all shadow-xl">
                       {val} new
                     </div>
                   </div>
@@ -275,17 +275,17 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
           <div className="mt-4 flex justify-center gap-8">
-            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-[#38BDF2]/30" /><span className="text-[10px] font-bold text-[#1E293B]/40">Previous</span></div>
-            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-[#38BDF2]" /><span className="text-[10px] font-bold text-[#1E293B]/40">New Subscribers</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-[#38BDF2]/30" /><span className="text-[10px] font-bold text-text/40 dark:text-white/40">Previous</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-[#38BDF2]" /><span className="text-[10px] font-bold text-text/40 dark:text-white/40">New Subscribers</span></div>
           </div>
         </Card>
 
         {/* Plan Distribution + Org Overview */}
-        <Card className="p-5 sm:p-8 bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm">
+        <Card className="p-5 sm:p-8 bg-surface border border-sidebar-border rounded-2xl shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h3 className="text-base font-black text-[#1E293B]">Plan Overview</h3>
-              <p className="text-[10px] font-bold text-[#1E293B]/40 mt-1">Organizer Subscriptions</p>
+              <h3 className="text-base font-black text-text dark:text-white">Plan Overview</h3>
+              <p className="text-[10px] font-bold text-text/40 dark:text-white/40 mt-1">Organizer Subscriptions</p>
             </div>
           </div>
 
@@ -293,7 +293,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex items-center gap-8 py-4">
             <div className="relative w-36 h-36 flex-shrink-0">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="#E0E0E0" strokeWidth="12" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" className="text-background" strokeWidth="12" />
                 {/* Three ring tracks for plan distribution */}
                 <circle cx="50" cy="50" r="42" fill="none" stroke="#38BDF2" strokeWidth="12"
                   strokeDasharray={`${264 * 0.55} ${264 * 0.45}`} strokeLinecap="round" />
@@ -303,8 +303,8 @@ export const AdminDashboard: React.FC = () => {
                   strokeDasharray={`${100 * 0.15} ${100 * 0.85}`} strokeLinecap="round" />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <p className="text-lg font-black text-[#1E293B]">{activeSubscribers}</p>
-                <p className="text-[9px] font-bold text-[#1E293B]/40">Active</p>
+                <p className="text-lg font-black text-text dark:text-white">{activeSubscribers}</p>
+                <p className="text-[9px] font-bold text-text/40 dark:text-white/40">Active</p>
               </div>
             </div>
 
@@ -318,33 +318,33 @@ export const AdminDashboard: React.FC = () => {
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
                       <div>
-                        <p className="text-xs font-black text-[#1E293B]">{plan.name}</p>
-                        <p className="text-[9px] font-bold text-[#1E293B]/40">₱{(plan.monthlyPrice || 0).toLocaleString()}/mo</p>
+                        <p className="text-xs font-black text-text dark:text-white">{plan.name}</p>
+                        <p className="text-[9px] font-bold text-text/40 dark:text-white/40">₱{(plan.monthlyPrice || 0).toLocaleString()}/mo</p>
                       </div>
                     </div>
-                    <span className="text-xs font-black text-[#1E293B]/60">{distItem?.count ?? '—'} users</span>
+                    <span className="text-xs font-black text-text/60 dark:text-white/60">{distItem?.count ?? '—'} users</span>
                   </div>
                 );
               })}
               {plans.length === 0 && (
-                <p className="text-xs text-[#1E293B]/40 font-bold">No plans configured yet.</p>
+                <p className="text-xs text-[#1E293B]/40 dark:text-white/40 font-bold">No plans configured yet.</p>
               )}
             </div>
           </div>
 
           {/* Bottom stat strip */}
-          <div className="mt-auto pt-6 border-t border-white/60 grid grid-cols-3 text-center gap-4">
+          <div className="mt-auto pt-6 border-t border-sidebar-border grid grid-cols-3 text-center gap-4">
             <div>
-              <p className="text-2xl font-black text-[#1E293B]">{totalOrganizers}</p>
-              <p className="text-[9px] font-black text-[#1E293B]/30 mt-1">Organizers</p>
+              <p className="text-2xl font-black text-text dark:text-white">{totalOrganizers}</p>
+              <p className="text-[9px] font-black text-text/30 dark:text-white/30 mt-1">Organizers</p>
             </div>
             <div>
-              <p className="text-2xl font-black text-[#1E293B]">{activeSubscribers}</p>
-              <p className="text-[9px] font-black text-[#1E293B]/30 mt-1">Subscribers</p>
+              <p className="text-2xl font-black text-text dark:text-white">{activeSubscribers}</p>
+              <p className="text-[9px] font-black text-text/30 dark:text-white/30 mt-1">Subscribers</p>
             </div>
             <div>
-              <p className="text-2xl font-black text-[#1E293B]">{pendingSupport}</p>
-              <p className="text-[9px] font-black text-[#1E293B]/30 mt-1">Open Tickets</p>
+              <p className="text-2xl font-black text-text dark:text-white">{pendingSupport}</p>
+              <p className="text-[9px] font-black text-text/30 dark:text-white/30 mt-1">Open Tickets</p>
             </div>
           </div>
         </Card>
@@ -355,9 +355,9 @@ export const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
         {/* Recent Plan Transactions */}
-        <Card className="bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm overflow-hidden flex flex-col">
-          <div className="p-6 flex justify-between items-center border-b border-[#2E2E2F]/5 bg-[#F2F2F2]">
-            <h3 className="font-black text-[#1E293B] flex items-center gap-2">
+        <Card className="bg-surface border border-sidebar-border rounded-2xl shadow-sm overflow-hidden flex flex-col">
+          <div className="p-6 flex justify-between items-center border-b border-sidebar-border bg-surface">
+            <h3 className="font-black text-text dark:text-white flex items-center gap-2">
               Recent Transactions
             </h3>
           </div>
@@ -377,8 +377,8 @@ export const AdminDashboard: React.FC = () => {
                 >
                   <div className="flex items-center gap-3">
                     <div>
-                      <p className="text-sm font-black text-[#1E293B]">{tx.customerName || tx.buyerName || 'Organizer'}</p>
-                      <p className="text-[10px] font-bold text-[#1E293B]/40 mt-0.5">
+                      <p className="text-sm font-black text-text dark:text-white">{tx.customerName || tx.buyerName || 'Organizer'}</p>
+                      <p className="text-[10px] font-bold text-text/40 dark:text-white/40 mt-0.5">
                         <span className="text-[#38BDF2]">{tx.planName || 'Plan'}</span> · {new Date(tx.createdAt || tx.created_at).toLocaleDateString()}
                       </p>
                     </div>
@@ -390,7 +390,7 @@ export const AdminDashboard: React.FC = () => {
                         {statusStr}
                       </span>
                     </div>
-                    <p className="text-sm font-black text-[#1E293B]">₱{Number(tx.amount || 0).toLocaleString()}</p>
+                    <p className="text-sm font-black text-text dark:text-white">₱{Number(tx.amount || 0).toLocaleString()}</p>
                     {tx.kind === 'order' && (
                         <p className="text-[9px] font-bold text-orange-500 mt-0.5">
                             Ticketing Cut: ₱{(Number(tx.amount || 0) - Number(tx.netAmount || tx.amount || 0)).toLocaleString()}
@@ -404,11 +404,11 @@ export const AdminDashboard: React.FC = () => {
         </Card>
 
         {/* System Activity Hub (Audit Logs) */}
-        <Card className="bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-[#2E2E2F]/5 flex justify-between items-center bg-[#F2F2F2]">
+        <Card className="bg-surface border border-sidebar-border rounded-2xl shadow-sm overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-sidebar-border flex justify-between items-center bg-surface">
             <div>
-              <h3 className="text-base font-black text-[#1E293B]">Activity Logs</h3>
-              <p className="text-[10px] font-bold text-[#1E293B]/40 mt-1">Actions performed across the platform</p>
+              <h3 className="text-base font-black text-text dark:text-white">Activity Logs</h3>
+              <p className="text-[10px] font-bold text-text/40 dark:text-white/40 mt-1">Actions performed across the platform</p>
             </div>
             <span className="text-xs font-bold text-[#38BDF2] bg-[#38BDF2]/10 px-2 py-1 rounded-full">Live</span>
           </div>
@@ -416,13 +416,13 @@ export const AdminDashboard: React.FC = () => {
             {auditLogs.length === 0 && (
               <div className="p-20 text-center">
                 <ICONS.Activity className="w-8 h-8 text-[#38BDF2]/40 mx-auto mb-4" />
-                <p className="text-[10px] font-bold text-[#2E2E2F]">No Activity Found</p>
+                <p className="text-[10px] font-bold text-text/40 dark:text-white/40">No Activity Found</p>
               </div>
             )}
             {auditLogs.map((log, i) => (
               <div 
                 key={log.id || i} 
-                className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#38BDF2]/5 transition-colors group/log cursor-pointer active:bg-[#38BDF2]/10"
+                className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#38BDF2]/5 transition-colors group/log cursor-pointer active:bg-[#38BDF2]/10 border-b border-sidebar-border last:border-0"
                 onClick={() => setSelectedLog(log)}
               >
                 <div className="flex items-center gap-5">
@@ -430,23 +430,23 @@ export const AdminDashboard: React.FC = () => {
                     {log.action?.includes('LOGIN') ? <ICONS.Shield className="w-4 h-4" /> : <ICONS.Activity className="w-4 h-4" />}
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-bold text-[#2E2E2F]">{log.action || 'System Action'}</p>
+                    <p className="text-sm font-bold text-[#2E2E2F] dark:text-white">{log.action || 'System Action'}</p>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-bold text-[#38BDF2] bg-[#38BDF2]/5 px-1.5 py-0.5 rounded-sm">{log.actorName || log.performedBy || 'System'}</span>
-                      <span className="text-[10px] text-[#2E2E2F] font-bold">•</span>
-                      <p className="text-[10px] font-bold text-[#2E2E2F]">Target — {log.target || 'General'}</p>
+                      <span className="text-[10px] text-[#2E2E2F] dark:text-white/40 font-bold">•</span>
+                      <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/60">Target — {log.target || 'General'}</p>
                     </div>
                   </div>
                 </div>
                 <div className="text-left md:text-right">
-                  <p className="text-xs font-bold text-[#2E2E2F]">{new Date(log.timestamp).toLocaleDateString()}</p>
-                  <p className="text-[10px] font-bold text-[#2E2E2F]">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                  <p className="text-xs font-bold text-[#2E2E2F] dark:text-white/80">{new Date(log.timestamp).toLocaleDateString()}</p>
+                  <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/40">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
               </div>
             ))}
           </div>
-          <div className="p-4 border-t border-[#2E2E2F]/5 text-center bg-[#F2F2F2]/50">
-            <p className="text-[10px] font-bold text-[#2E2E2F] italic">System Audit Tracking Enabled</p>
+          <div className="p-4 border-t border-sidebar-border text-center bg-background">
+            <p className="text-[10px] font-bold text-text/40 dark:text-white/40 italic">System Audit Tracking Enabled</p>
           </div>
         </Card>
 
@@ -462,31 +462,31 @@ export const AdminDashboard: React.FC = () => {
       >
         {selectedTx && (
           <div className="space-y-6">
-            <div className="flex items-center gap-4 p-4 bg-[#F2F2F2] rounded-xl border border-[#E0E0E0]">
+            <div className="flex items-center gap-4 p-4 bg-background border border-sidebar-border rounded-xl">
               <div className="w-12 h-12 rounded-full bg-[#38BDF2] flex items-center justify-center text-white text-xl font-black">
                 {(selectedTx.customerName || selectedTx.buyerName || 'O').charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="text-lg font-black text-[#1E293B]">{selectedTx.customerName || selectedTx.buyerName || 'Organizer'}</p>
-                <p className="text-xs font-bold text-[#1E293B]/40">{selectedTx.customerEmail || selectedTx.buyerEmail || 'No email provided'}</p>
+                <p className="text-lg font-black text-text dark:text-white">{selectedTx.customerName || selectedTx.buyerName || 'Organizer'}</p>
+                <p className="text-xs font-bold text-text/40 dark:text-white/40">{selectedTx.customerEmail || selectedTx.buyerEmail || 'No email provided'}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-[#F2F2F2] rounded-xl border border-[#E0E0E0]">
-                <p className="text-[10px] font-black text-[#1E293B]/30 mb-1">Source / Event</p>
-                <p className="text-sm font-black text-[#1E293B] truncate">{selectedTx.planName || selectedTx.eventName || 'N/A'}</p>
+              <div className="p-4 bg-background border border-sidebar-border rounded-xl">
+                <p className="text-[10px] font-black text-text/30 dark:text-white/20 mb-1">Source / Event</p>
+                <p className="text-sm font-black text-text dark:text-white truncate">{selectedTx.planName || selectedTx.eventName || 'N/A'}</p>
               </div>
-              <div className="p-4 bg-[#F2F2F2] rounded-xl border border-[#E0E0E0]">
-                <p className="text-[10px] font-black text-[#1E293B]/30 mb-1 tracking-tight">Date</p>
-                <p className="text-xs font-black text-[#1E293B]">{new Date(selectedTx.createdAt || selectedTx.created_at).toLocaleString()}</p>
+              <div className="p-4 bg-background border border-sidebar-border rounded-xl">
+                <p className="text-[10px] font-black text-text/30 dark:text-white/20 mb-1 tracking-tight">Date</p>
+                <p className="text-xs font-black text-text dark:text-white">{new Date(selectedTx.createdAt || selectedTx.created_at).toLocaleString()}</p>
               </div>
             </div>
 
-            <div className="p-5 bg-white rounded-2xl border border-[#E0E0E0] space-y-4">
+            <div className="p-5 bg-surface border border-sidebar-border rounded-2xl shadow-sm space-y-4">
                 <div className="flex justify-between items-center text-sm">
-                    <span className="font-bold text-[#1E293B]/50">Gross Amount</span>
-                    <span className="font-black text-[#1E293B]">₱{Number(selectedTx.amount || 0).toLocaleString()}</span>
+                    <span className="font-bold text-text/50 dark:text-white/50">Gross Amount</span>
+                    <span className="font-black text-text dark:text-white">₱{Number(selectedTx.amount || 0).toLocaleString()}</span>
                 </div>
                 {selectedTx.kind === 'order' && (
                     <div className="flex justify-between items-center text-sm">
@@ -494,17 +494,17 @@ export const AdminDashboard: React.FC = () => {
                         <span className="font-black text-orange-500">- ₱{(Number(selectedTx.amount || 0) - Number(selectedTx.netAmount || selectedTx.amount || 0)).toLocaleString()}</span>
                     </div>
                 )}
-                <div className="h-px bg-[#F2F2F2]" />
+                <div className="h-px bg-sidebar-border" />
                 <div className="flex justify-between items-center">
-                    <span className="text-base font-black text-[#1E293B]">{selectedTx.kind === 'order' ? 'Organizer Payout' : 'Net Total'}</span>
-                    <span className={`text-xl font-black ${selectedTx.kind === 'order' ? 'text-[#1E293B]' : 'text-[#38BDF2]'}`}>
+                    <span className="text-base font-black text-text dark:text-white">{selectedTx.kind === 'order' ? 'Organizer Payout' : 'Net Total'}</span>
+                    <span className={`text-xl font-black ${selectedTx.kind === 'order' ? 'text-text dark:text-white' : 'text-[#38BDF2]'}`}>
                         ₱{Number(selectedTx.netAmount || selectedTx.amount || 0).toLocaleString()}
                     </span>
                 </div>
             </div>
 
-            <div className="p-4 bg-[#F2F2F2] rounded-xl border border-[#E0E0E0]">
-              <p className="text-[10px] font-black text-[#1E293B]/30 uppercase mb-2">Transaction Status</p>
+            <div className="p-4 bg-background border border-sidebar-border rounded-xl">
+              <p className="text-[10px] font-black text-text/30 dark:text-white/20 uppercase mb-2">Transaction Status</p>
               <div className="flex items-center gap-2">
                 <div 
                   className={`w-2 h-2 rounded-full ${
@@ -515,7 +515,7 @@ export const AdminDashboard: React.FC = () => {
                         : 'bg-[#38BDF2]'
                   }`} 
                 />
-                <span className="text-sm font-black text-[#1E293B]">
+                <span className="text-sm font-black text-text dark:text-white">
                   {selectedTx.paymentStatus || selectedTx.status || 'COMPLETED'}
                 </span>
               </div>
@@ -532,41 +532,41 @@ export const AdminDashboard: React.FC = () => {
       >
         {selectedLog && (
           <div className="space-y-6">
-            <div className="flex items-center gap-4 p-5 bg-[#F2F2F2] rounded-2xl border border-[#E0E0E0]">
+            <div className="flex items-center gap-4 p-5 bg-background border border-sidebar-border rounded-2xl shadow-sm">
               <div className="w-14 h-14 rounded-full bg-[#38BDF2] flex items-center justify-center text-white text-xl font-bold shadow-sm">
                 {selectedLog.action?.includes('LOGIN') ? <ICONS.Shield className="w-6 h-6" /> : <ICONS.Activity className="w-6 h-6" />}
               </div>
               <div>
-                <p className="text-lg font-black text-[#1E293B]">{selectedLog.action || 'System Action'}</p>
-                <p className="text-xs font-bold text-[#1E293B]/40">
+                <p className="text-lg font-black text-text dark:text-white">{selectedLog.action || 'System Action'}</p>
+                <p className="text-xs font-bold text-text/40 dark:text-white/40">
                   {new Date(selectedLog.timestamp).toLocaleString()}
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-5 bg-[#F2F2F2] rounded-2xl border border-[#E0E0E0]">
-                <p className="text-[10px] font-black text-[#1E293B]/30 mb-1 flex items-center gap-2">
+              <div className="p-5 bg-background border border-sidebar-border rounded-2xl shadow-sm">
+                <p className="text-[10px] font-black text-text/30 dark:text-white/20 mb-1 flex items-center gap-2">
                   <ICONS.Users className="w-3 h-3" /> Actor
                 </p>
-                <p className="text-sm font-black text-[#1E293B]">{selectedLog.actorName || selectedLog.performedBy || 'System'}</p>
+                <p className="text-sm font-black text-text dark:text-white">{selectedLog.actorName || selectedLog.performedBy || 'System'}</p>
               </div>
-              <div className="p-5 bg-[#F2F2F2] rounded-2xl border border-[#E0E0E0]">
-                <p className="text-[10px] font-black text-[#1E293B]/30 mb-1 flex items-center gap-2">
+              <div className="p-5 bg-background border border-sidebar-border rounded-2xl shadow-sm">
+                <p className="text-[10px] font-black text-text/30 dark:text-white/20 mb-1 flex items-center gap-2">
                   <ICONS.Users className="w-3 h-3" /> Target
                 </p>
-                <p className="text-sm font-black text-[#1E293B] truncate">{selectedLog.target || 'N/A'}</p>
+                <p className="text-sm font-black text-text dark:text-white truncate">{selectedLog.target || 'N/A'}</p>
               </div>
             </div>
 
             {selectedLog.details && Object.keys(selectedLog.details).length > 0 && (
-              <div className="p-5 bg-[#F2F2F2] rounded-2xl border border-[#E0E0E0] space-y-3">
-                <p className="text-[10px] font-black text-[#1E293B]/30 mb-2">Extended Details</p>
+              <div className="p-5 bg-background border border-sidebar-border rounded-2xl shadow-sm space-y-3">
+                <p className="text-[10px] font-black text-text/30 dark:text-white/20 mb-2">Extended Details</p>
                 <div className="space-y-2">
                   {Object.entries(selectedLog.details).map(([k, v]) => (
                     <div key={k} className="flex flex-col">
-                      <span className="text-[10px] font-bold text-[#1E293B]/40">{k}</span>
-                      <pre className="text-sm font-bold text-[#1E293B] font-mono whitespace-pre-wrap break-all bg-transparent p-2 rounded-lg border border-[#E0E0E0]/80 mt-1">
+                      <span className="text-[10px] font-bold text-text/40 dark:text-white/30">{k}</span>
+                      <pre className="text-sm font-bold text-text dark:text-white font-mono whitespace-pre-wrap break-all bg-transparent p-2 rounded-lg border border-sidebar-border mt-1">
                         {(() => {
                           if (v && typeof v === 'object') {
                             const vAny = v as any;
@@ -594,7 +594,7 @@ export const AdminDashboard: React.FC = () => {
             )}
             
             <div className="flex justify-end pt-2">
-              <button onClick={() => setSelectedLog(null)} className="px-6 py-2 bg-[#F2F2F2] border border-[#E0E0E0] rounded-xl font-bold text-xs text-[#1E293B]/60 hover:text-[#1E293B] hover:border-[#E0E0E0] transition-colors">
+              <button onClick={() => setSelectedLog(null)} className="px-6 py-2 bg-background border border-sidebar-border rounded-xl font-bold text-xs text-text/60 dark:text-white/40 hover:text-text dark:hover:text-white transition-colors shadow-sm">
                 Close
               </button>
             </div>

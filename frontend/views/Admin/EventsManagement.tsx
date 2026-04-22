@@ -34,6 +34,13 @@ export const EventsManagement: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState<Event | null>(null);
   const [isBulkMode, setIsBulkMode] = useState(false);
+  const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
+  const [promotionIds, setPromotionIds] = useState<string[]>([]);
+  const [promotionExpiresAt, setPromotionExpiresAt] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().split('T')[0];
+  });
   const [deleteReason, setDeleteReason] = useState('DUPLICATE');
   const [customReason, setCustomReason] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,6 +55,7 @@ export const EventsManagement: React.FC = () => {
   const { role, canEditEvents } = useUser();
   const { showToast } = useToast();
   const isStaff = role === UserRole.STAFF;
+  const isAdmin = role === UserRole.ADMIN;
 
   const initialFormData = {
     eventName: '',
@@ -150,6 +158,13 @@ export const EventsManagement: React.FC = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearch]);
+
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(1);
@@ -357,6 +372,12 @@ export const EventsManagement: React.FC = () => {
   };
 
   const handleTogglePromotion = async (event: Event) => {
+    if (isAdmin) {
+      setPromotionIds([event.eventId]);
+      setIsPromotionModalOpen(true);
+      return;
+    }
+
     try {
       const result = await apiService.toggleEventPromotion(event.eventId);
       showToast('success', result.promoted
@@ -365,6 +386,27 @@ export const EventsManagement: React.FC = () => {
       fetchEvents();
     } catch (err) {
       showToast('error', 'Failed to update promotion status.');
+    }
+  };
+
+  const handleBulkPromote = async () => {
+    if (selectedIds.length === 0) return;
+    setPromotionIds(selectedIds);
+    setIsPromotionModalOpen(true);
+  };
+
+  const executePromotion = async () => {
+    setSubmitting(true);
+    try {
+      await apiService.bulkPromoteEvents(promotionIds, promotionExpiresAt);
+      showToast('success', `${promotionIds.length} event(s) have been promoted until ${new Date(promotionExpiresAt).toDateString()}.`);
+      setIsPromotionModalOpen(false);
+      setSelectedIds([]);
+      fetchEvents();
+    } catch (err) {
+      showToast('error', 'Failed to execute promotion.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -391,12 +433,12 @@ export const EventsManagement: React.FC = () => {
 
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-2">
         <div>
-          <h1 className="text-3xl font-bold text-[#2E2E2F] tracking-tight">Moderation Hub</h1>
-          <p className="text-[#2E2E2F] font-medium text-sm mt-1">Centralized control for event oversight and compliance removal.</p>
+          <h1 className="text-3xl font-bold text-text dark:text-white tracking-tight">Moderation Hub</h1>
+          <p className="text-text dark:text-white/60 font-medium text-sm mt-1">Centralized control for event oversight and compliance removal.</p>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-end gap-3 w-full lg:w-auto">
           <div className="relative w-full sm:w-72">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#2E2E2F]">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text dark:text-white/40">
               <ICONS.Search className="h-4 w-4" strokeWidth={3} />
             </div>
             <input
@@ -404,7 +446,7 @@ export const EventsManagement: React.FC = () => {
               placeholder="Search platform events..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-10 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors"
+              className="block w-full pl-10 pr-10 py-3 bg-background border border-sidebar-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors dark:text-white"
             />
           </div>
           {selectedIds.length > 0 && (
@@ -436,46 +478,53 @@ export const EventsManagement: React.FC = () => {
                 <ICONS.CheckCircle className="w-5 h-5 text-[#38BDF2] group-hover:text-white transition-colors" />
                 DISMISS RISK ({selectedIds.length})
               </Button>
+              <Button
+                onClick={handleBulkPromote}
+                className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-emerald-500 !text-emerald-500 px-6 py-2.5 text-[13px] hover:!bg-emerald-500 hover:!text-white flex items-center gap-2 group"
+              >
+                <ICONS.Star className="w-5 h-5 text-emerald-500 group-hover:text-white transition-colors" />
+                BULK PROMOTE ({selectedIds.length})
+              </Button>
             </div>
           )}
         </div>
       </div>
 
-      <Card className="overflow-hidden border-[#2E2E2F]/10 rounded-xl bg-[#F2F2F2]">
+      <Card className="overflow-hidden border-sidebar-border rounded-xl bg-surface">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
+            <thead className="bg-background border-b border-sidebar-border">
               <tr>
                 <th className="px-8 py-5">
                   <div className="flex items-center">
                     <input
                       type="checkbox"
-                      className="w-4 h-4 rounded border-[#2E2E2F]/20 accent-[#38BDF2]"
+                      className="w-4 h-4 rounded border-sidebar-border accent-[#38BDF2]"
                       checked={selectedIds.length === currentItems.length && currentItems.length > 0}
                       onChange={toggleSelectAll}
                     />
                   </div>
                 </th>
-                <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Event Identity</th>
-                <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Date & Location</th>
-                <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide text-center">Safety Insight</th>
-                <th className="px-8 py-5 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide text-center">Actions</th>
+                <th className="px-8 py-5 text-[11px] font-semibold text-text dark:text-white/60 uppercase tracking-wide">Event Identity</th>
+                <th className="px-8 py-5 text-[11px] font-semibold text-text dark:text-white/60 uppercase tracking-wide">Date & Location</th>
+                <th className="px-8 py-5 text-[11px] font-semibold text-text dark:text-white/60 uppercase tracking-wide text-center">Safety Insight</th>
+                <th className="px-8 py-5 text-[11px] font-semibold text-text dark:text-white/60 uppercase tracking-wide text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#2E2E2F]/10">
+            <tbody className="divide-y divide-sidebar-border">
               {currentItems.map(event => (
-                <tr key={event.eventId} className={`hover:bg-[#38BDF2]/10 transition-colors group ${selectedIds.includes(event.eventId) ? 'bg-[#38BDF2]/5' : ''}`}>
+                <tr key={event.eventId} className={`hover:bg-[#38BDF2]/5 transition-colors group ${selectedIds.includes(event.eventId) ? 'bg-[#38BDF2]/10' : ''}`}>
                   <td className="px-8 py-7">
                     <input
                       type="checkbox"
-                      className="w-4 h-4 rounded border-[#2E2E2F]/20 accent-[#38BDF2]"
+                      className="w-4 h-4 rounded border-sidebar-border accent-[#38BDF2]"
                       checked={selectedIds.includes(event.eventId)}
                       onChange={() => toggleSelect(event.eventId)}
                     />
                   </td>
                   <td className="px-8 py-7">
                     <div className="flex items-center gap-5">
-                      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-[#2E2E2F]/20">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-sidebar-border">
                         <img
                           src={getImageUrl(event.imageUrl)}
                           alt=""
@@ -483,29 +532,53 @@ export const EventsManagement: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <div className="font-bold text-[#2E2E2F] text-[16px] tracking-tight group-hover:text-[#2E2E2F] transition-colors">{event.eventName}</div>
-                        <p className="text-[10px] font-bold text-[#2E2E2F]/40 uppercase tracking-widest mt-0.5 flex items-center gap-2">
+                        <div className="font-bold text-text dark:text-white text-[16px] tracking-tight transition-colors">{event.eventName}</div>
+                        <div className="text-[10px] font-bold text-text/40 dark:text-white/40 uppercase tracking-widest mt-0.5 flex flex-wrap items-center gap-2">
                           Status: {event.status}
-                          {(event.is_promoted || event.isPromoted) && (
-                            <span className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] animate-pulse uppercase ${
-                              event.promotedByOrganizer 
-                                ? 'text-emerald-600 bg-emerald-50 border-emerald-200' 
-                                : 'text-[#38BDF2] bg-[#38BDF2]/10 border-[#38BDF2]/20'
-                            }`}>
-                              {event.promotedByOrganizer ? 'PROMOTED BY ORGANIZER' : 'PROMOTED'}
-                            </span>
-                          )}
-                        </p>
+                          {(event.is_promoted || event.isPromoted) && (() => {
+                            const expiresAtStr = (event as any).promotion_expires_at || (event as any).promotionExpiresAt || (event as any).expiresAt;
+                            const expiresAt = expiresAtStr ? new Date(expiresAtStr) : null;
+                            const isExpired = expiresAt ? now > expiresAt : false;
+                            
+                            return (
+                              <div className="flex flex-col gap-1">
+                                <span className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] uppercase ${
+                                  isExpired ? 'text-red-500 bg-red-50 border-red-200' :
+                                  event.promotedByOrganizer 
+                                    ? 'text-emerald-600 bg-emerald-50 border-emerald-200 animate-pulse' 
+                                    : 'text-[#38BDF2] bg-[#38BDF2]/10 border-[#38BDF2]/20 animate-pulse'
+                                }`}>
+                                  <ICONS.Zap className="w-2.5 h-2.5" />
+                                  {isExpired ? 'PROMOTED DONE' : (event.promotedByOrganizer ? 'PROMOTED BY ORGANIZER' : 'PROMOTED')}
+                                </span>
+                                {!isExpired && expiresAt && (
+                                  <div className="flex items-center gap-1 tabular-nums text-[8px] font-black text-emerald-600 bg-emerald-500/5 px-2 py-0.5 rounded-full border border-emerald-500/10 uppercase tracking-tighter">
+                                    <ICONS.Clock className="w-2 h-2" />
+                                    {(() => {
+                                      const diff = expiresAt.getTime() - now.getTime();
+                                      if (diff <= 0) return '0s';
+                                      const d = Math.floor(diff / 86400000);
+                                      const h = Math.floor((diff % 86400000) / 3600000);
+                                      const m = Math.floor((diff % 3600000) / 60000);
+                                      const s = Math.floor((diff % 60000) / 1000);
+                                      return `${d > 0 ? d + 'd ' : ''}${h}h ${m}m ${s}s`;
+                                    })()}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-8 py-7">
-                    <div className="text-[14px] font-semibold text-[#2E2E2F] tracking-tight">
+                    <div className="text-[14px] font-semibold text-text dark:text-white tracking-tight">
                       {new Date(event.startAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </div>
-                    <div className="text-[12px] text-[#2E2E2F] font-medium mt-1.5 flex items-center justify-between gap-2">
+                    <div className="text-[12px] text-text dark:text-white/60 font-medium mt-1.5 flex items-center justify-between gap-2">
                       <span className="truncate max-w-[200px]">{event.locationText}</span>
-                      <ICONS.MapPin className="w-3.5 h-3.5 text-[#2E2E2F]" strokeWidth={2.5} />
+                      <ICONS.MapPin className="w-3.5 h-3.5 text-text dark:text-white/40" strokeWidth={2.5} />
                     </div>
                   </td>
                   <td className="px-8 py-7 text-center">
@@ -525,10 +598,11 @@ export const EventsManagement: React.FC = () => {
                     <div className="flex justify-center items-center gap-6 opacity-70 group-hover:opacity-100 transition-colors">
                       <button
                         onClick={() => handleTogglePromotion(event)}
-                        className={`transition-all p-2 rounded-lg group/btn flex items-center gap-2 ${event.is_promoted || event.isPromoted ? 'text-[#38BDF2] bg-[#38BDF2]/10' : 'text-[#2E2E2F]/40 hover:text-[#38BDF2] hover:bg-[#38BDF2]/5'}`}
-                        title={event.is_promoted || event.isPromoted ? "Featured (Click to Demote)" : "Featured this event"}
+                        disabled={event.is_promoted || event.isPromoted}
+                        className={`transition-all p-2 rounded-lg group/btn flex items-center gap-2 ${(event.is_promoted || event.isPromoted) ? 'text-emerald-500 bg-emerald-500/10 cursor-not-allowed' : 'text-text/40 dark:text-white/40 hover:text-[#38BDF2] hover:bg-[#38BDF2]/5'}`}
+                        title={event.is_promoted || event.isPromoted ? "Already Promoted" : "Featured this event"}
                       >
-                        <ICONS.Star className={`w-[1.2rem] h-[1.2rem] group-hover/btn:scale-110 ${event.is_promoted || event.isPromoted ? 'fill-current' : ''}`} strokeWidth={2.2} />
+                        <ICONS.Star className={`w-[1.2rem] h-[1.2rem] group-hover/btn:scale-110 ${(event.is_promoted || event.isPromoted) ? 'fill-current' : ''}`} strokeWidth={2.2} />
                       </button>
 
                       <button
@@ -549,14 +623,14 @@ export const EventsManagement: React.FC = () => {
 
       {totalPages > 1 && (
         <div className="mt-8 flex items-center justify-center gap-2">
-          <div className="flex items-center gap-2 px-3 py-2 bg-[#F2F2F2] rounded-full border border-[#2E2E2F]/10">
+          <div className="flex items-center gap-2 px-3 py-2 bg-background rounded-full border border-sidebar-border shadow-sm">
             {Array.from({ length: totalPages }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => handlePageChange(i + 1)}
                 className={`min-h-[32px] px-4 rounded-full text-[11px] font-semibold uppercase tracking-wide transition-colors focus:outline-none focus:ring-2 focus:ring-[#38BDF2] focus:ring-offset-2 ${currentPage === i + 1
-                  ? 'bg-[#38BDF2] text-[#F2F2F2]'
-                  : 'bg-[#F2F2F2] text-[#2E2E2F] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]'
+                  ? 'bg-[#38BDF2] text-white shadow-sm'
+                  : 'bg-background text-text hover:bg-text hover:text-background dark:bg-white/5 dark:text-white/60 dark:hover:bg-white dark:hover:text-[#2E2E2F]'
                   }`}
               >
                 {i + 1}
@@ -575,29 +649,29 @@ export const EventsManagement: React.FC = () => {
       >
         <div>
           {/* HIGH-FIDELITY LIVE PREVIEW SECTION - Edge-to-Edge Coverage & Highlight */}
-          <div className="bg-[#F2F2F2] -mx-4 sm:-mx-6 -mt-4 sm:-mt-6 mb-12 p-8 sm:p-12 border-b-[5px] border-[#38BDF2] shadow-xl transition-all duration-700 select-none">
+          <div className="bg-background -mx-4 sm:-mx-6 -mt-4 sm:-mt-6 mb-12 p-8 sm:p-12 border-b-[5px] border-[#38BDF2] shadow-xl transition-all duration-700 select-none">
             <div className="space-y-8">
               {/* Event Identity Group */}
               <div className="space-y-4">
-                <h1 className="text-4xl md:text-5xl font-black text-[#2E2E2F] tracking-tight leading-tight">
+                <h1 className="text-4xl md:text-5xl font-black text-text dark:text-white tracking-tight leading-tight">
                   {formData.eventName || 'Untitled Session'}
                 </h1>
 
                 {/* Performance & Status Summary Row */}
                 <div className="flex flex-wrap items-center gap-3">
                   <div className={`px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-wide border ${formData.status === 'PUBLISHED'
-                    ? 'bg-[#38BDF2]/20 border-[#38BDF2]/40 text-[#2E2E2F]'
-                    : 'bg-[#F2F2F2] border-[#2E2E2F]/20 text-[#2E2E2F]'
+                    ? 'bg-[#38BDF2]/20 border-[#38BDF2]/40 text-text dark:text-white'
+                    : 'bg-background border-sidebar-border text-text dark:text-white'
                     }`}>
                     {formData.status}
                   </div>
                   {isEditMode && (
                     <>
-                      <div className="px-4 py-1.5 rounded-xl bg-[#38BDF2]/10 border border-[#38BDF2]/40 text-[#2E2E2F] text-[10px] font-semibold uppercase tracking-wide flex items-center gap-2">
+                      <div className="px-4 py-1.5 rounded-xl bg-[#38BDF2]/10 border border-[#38BDF2]/40 text-text dark:text-white text-[10px] font-semibold uppercase tracking-wide flex items-center gap-2">
                         <ICONS.Users className="w-3 h-3" strokeWidth={3} />
                         {eventStats.registrations} REGISTRATIONS
                       </div>
-                      <div className="px-4 py-1.5 rounded-xl bg-[#38BDF2] text-[#F2F2F2] text-[10px] font-semibold uppercase tracking-wide flex items-center gap-2">
+                      <div className="px-4 py-1.5 rounded-xl bg-[#38BDF2] text-white text-[10px] font-semibold uppercase tracking-wide flex items-center gap-2 shadow-sm">
                         <ICONS.CreditCard className="w-3 h-3" strokeWidth={3} />
                         PHP {eventStats.revenue.toLocaleString()} REVENUE
                       </div>
@@ -606,20 +680,20 @@ export const EventsManagement: React.FC = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-4 pt-2">
-                  <div className="flex items-center gap-3 bg-[#F2F2F2] px-5 py-3 rounded-xl border border-[#2E2E2F]/20">
-                    <div className="w-8 h-8 bg-[#38BDF2]/10 text-[#2E2E2F] rounded-xl flex items-center justify-center">
+                  <div className="flex items-center gap-3 bg-surface px-5 py-3 rounded-xl border border-sidebar-border shadow-sm">
+                    <div className="w-8 h-8 bg-[#38BDF2]/10 text-text dark:text-[#38BDF2] rounded-xl flex items-center justify-center">
                       <ICONS.Calendar className="w-4 h-4" strokeWidth={2.5} />
                     </div>
-                    <span className="text-[13px] font-semibold text-[#2E2E2F] uppercase tracking-tight">
+                    <span className="text-[13px] font-semibold text-text dark:text-white uppercase tracking-tight">
                       {formData.eventDate ? new Date(`${formData.eventDate}T${formData.eventTime}`).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Set Date & Time'}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-3 bg-[#F2F2F2] px-5 py-3 rounded-xl border border-[#2E2E2F]/20">
-                    <div className="w-8 h-8 bg-[#38BDF2]/10 text-[#2E2E2F] rounded-xl flex items-center justify-center">
+                  <div className="flex items-center gap-3 bg-surface px-5 py-3 rounded-xl border border-sidebar-border shadow-sm">
+                    <div className="w-8 h-8 bg-[#38BDF2]/10 text-text dark:text-[#38BDF2] rounded-xl flex items-center justify-center">
                       <ICONS.MapPin className="w-4 h-4" strokeWidth={2.5} />
                     </div>
-                    <span className="text-[13px] font-semibold text-[#2E2E2F] uppercase tracking-tight truncate max-w-[200px]">
+                    <span className="text-[13px] font-semibold text-text dark:text-white uppercase tracking-tight truncate max-w-[200px]">
                       {formData.location || 'Set Venue / Connection'}
                     </span>
                   </div>
@@ -627,9 +701,9 @@ export const EventsManagement: React.FC = () => {
               </div>
 
               {/* Description Block */}
-              <div className="p-8 bg-white/40 backdrop-blur-sm rounded-xl border border-[#2E2E2F]/10">
-                <h4 className="text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide mb-4">Event Overview</h4>
-                <p className="text-[#2E2E2F] text-[15px] font-medium leading-relaxed line-clamp-4">
+              <div className="p-8 bg-surface dark:bg-white/5 backdrop-blur-sm rounded-xl border border-sidebar-border shadow-sm">
+                <h4 className="text-[11px] font-semibold text-text dark:text-white/40 uppercase tracking-wide mb-4">Event Overview</h4>
+                <p className="text-text dark:text-white/80 text-[15px] font-medium leading-relaxed line-clamp-4">
                   {formData.description || 'Provide an executive summary of this event session...'}
                 </p>
               </div>
@@ -640,13 +714,13 @@ export const EventsManagement: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-10 px-4 sm:px-6 pb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="md:col-span-2">
-                <label className="block text-[11px] font-medium text-[#2E2E2F] uppercase tracking-wide mb-3 ml-1">Event Details</label>
+                <label className="block text-[11px] font-medium text-text dark:text-white/60 uppercase tracking-wide mb-3 ml-1">Event Details</label>
                 <div className="flex gap-4">
                   <div className="flex-1">
                     <Input placeholder="Session Name" value={formData.eventName} onChange={(e: any) => setFormData({ ...formData, eventName: e.target.value })} />
                   </div>
                   <select
-                    className="px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]"
+                    className="px-4 py-3 bg-background border border-sidebar-border dark:border-white/10 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] dark:text-white dark:bg-background/50"
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as EventStatus })}
                   >
@@ -658,9 +732,9 @@ export const EventsManagement: React.FC = () => {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-[11px] font-medium text-[#2E2E2F] uppercase tracking-wide mb-3 ml-1">Description</label>
+                <label className="block text-[11px] font-medium text-text dark:text-white/60 uppercase tracking-wide mb-3 ml-1">Description</label>
                 <textarea
-                  className="w-full px-5 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-sm min-h-[120px] focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors outline-none"
+                  className="w-full px-5 py-4 bg-background border border-sidebar-border dark:border-white/10 rounded-xl text-sm min-h-[120px] focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors outline-none dark:text-white dark:placeholder:text-white/20"
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
                 />
@@ -668,21 +742,20 @@ export const EventsManagement: React.FC = () => {
 
               <div className="md:col-span-2">
                 <div className="flex flex-col gap-2 mb-3 px-1">
-                  <label className="text-[11px] font-medium text-[#2E2E2F] uppercase tracking-wide">Visual Media</label>
-                  <div className="relative group w-full h-40 rounded-xl border-2 border-dashed border-[#2E2E2F]/30 bg-[#F2F2F2] flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#38BDF2] hover:bg-[#38BDF2]/10 transition-colors" onClick={() => fileInputRef.current?.click()}>
+                  <label className="text-[11px] font-medium text-text dark:text-white/60 uppercase tracking-wide">Visual Media</label>
+                  <div className="relative group w-full h-40 rounded-xl border-2 border-dashed border-sidebar-border dark:border-white/10 bg-background flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#38BDF2] hover:bg-[#38BDF2]/5 transition-colors shadow-inner" onClick={() => fileInputRef.current?.click()}>
                     {formData.imageUrl ? (
                       <img src={getImageUrl(formData.imageUrl)} alt="Preview" className="w-full h-full object-cover rounded-xl" />
                     ) : (
                       <div className="flex flex-col items-center justify-center w-full h-full">
-                        <svg className="w-10 h-10 text-[#2E2E2F] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="2.5" /><path d="M21 15l-5-5L5 21" /></svg>
-                        <span className="text-[12px] font-medium text-[#2E2E2F] uppercase tracking-wide">Upload Event Image</span>
+                        <svg className="w-10 h-10 text-text dark:text-white/20 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="2.5" /><path d="M21 15l-5-5L5 21" /></svg>
+                        <span className="text-[12px] font-medium text-text dark:text-white/40 uppercase tracking-wide">Upload Event Image</span>
                       </div>
                     )}
-                    <div className="absolute bottom-3 right-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl px-3 py-1 text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors pointer-events-none">Browse</div>
+                    <div className="absolute bottom-3 right-3 bg-background border border-sidebar-border dark:border-white/10 rounded-xl px-3 py-1 text-[11px] font-semibold text-text dark:text-white uppercase tracking-wide group-hover:bg-[#38BDF2] group-hover:text-white transition-colors pointer-events-none shadow-sm">Browse</div>
                   </div>
-                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
                 </div>
-              </div>
+              </div>  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
 
               <Input label="Session Date" type="date" value={formData.eventDate} onChange={(e: any) => setFormData({ ...formData, eventDate: e.target.value })} />
               <Input label="Start Time" type="time" value={formData.eventTime} onChange={(e: any) => setFormData({ ...formData, eventTime: e.target.value })} />
@@ -690,9 +763,9 @@ export const EventsManagement: React.FC = () => {
               <Input label="End Time" type="time" value={formData.endTime} onChange={(e: any) => setFormData({ ...formData, endTime: e.target.value })} />
               <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-medium text-[#2E2E2F] uppercase tracking-wide mb-2 ml-1">Location Type</label>
+                  <label className="block text-[11px] font-medium text-text dark:text-white/60 uppercase tracking-wide mb-2 ml-1">Location Type</label>
                   <select
-                    className="w-full px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2]"
+                    className="w-full px-4 py-3 bg-background border border-sidebar-border dark:border-white/10 rounded-xl text-[11px] font-medium uppercase tracking-wide outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] dark:text-white dark:bg-background/50"
                     value={formData.locationType}
                     onChange={(e) => setFormData({ ...formData, locationType: e.target.value as Event['locationType'] })}
                   >
@@ -702,18 +775,18 @@ export const EventsManagement: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-[#2E2E2F] uppercase tracking-wide mb-2 ml-1">Timezone</label>
+                  <label className="block text-[11px] font-medium text-text dark:text-white/60 uppercase tracking-wide mb-2 ml-1">Timezone</label>
                   <Input value={formData.timezone} onChange={(e: any) => setFormData({ ...formData, timezone: e.target.value })} />
                 </div>
               </div>
               <div className="md:col-span-2 space-y-8">
                 {/* Physical Venue Section */}
-                <div className="p-6 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/15">
+                <div className="p-6 bg-background rounded-xl border border-sidebar-border dark:border-white/10 shadow-sm">
                   <div className="flex items-center gap-3 mb-5">
                     <div className="w-8 h-8 rounded-xl bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]">
                       <ICONS.MapPin className="w-4 h-4" />
                     </div>
-                    <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Venue Details</h4>
+                    <h4 className="text-[12px] font-black text-text dark:text-white uppercase tracking-widest">Venue Details</h4>
                   </div>
                   <Input
                     label={formData.locationType === 'ONLINE' ? 'Physical Hub (Optional)' : 'Venue Address'}
@@ -730,12 +803,12 @@ export const EventsManagement: React.FC = () => {
                 </div>
 
                 {/* Broadcast Section */}
-                <div className="p-6 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/15">
+                <div className="p-6 bg-background rounded-xl border border-sidebar-border dark:border-white/10 shadow-sm">
                   <div className="flex items-center gap-3 mb-5">
                     <div className="w-8 h-8 rounded-xl bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]">
                       <ICONS.Monitor className="w-4 h-4" />
                     </div>
-                    <h4 className="text-[12px] font-black text-[#2E2E2F] uppercase tracking-widest">Broadcast Settings</h4>
+                    <h4 className="text-[12px] font-black text-text dark:text-white uppercase tracking-widest">Broadcast Settings</h4>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Input
@@ -755,9 +828,9 @@ export const EventsManagement: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex gap-4 pt-10 border-t border-[#2E2E2F]/10">
-              <Button className="flex-1 py-1 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-transparent border-2 border-[#2E2E2F]/10 text-[#2E2E2F] hover:bg-[#2E2E2F]/5 transition-all min-h-[48px]" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-              <Button type="submit" className="flex-[2] py-1 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] transition-all min-h-[48px] shadow-lg shadow-[#38BDF2]/20" disabled={submitting}>
+            <div className="flex gap-4 pt-10 border-t border-sidebar-border">
+              <Button className="flex-1 py-1 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-transparent border-2 border-sidebar-border text-text dark:text-white hover:bg-text hover:text-background dark:hover:bg-white dark:hover:text-[#2E2E2F] transition-all min-h-[48px]" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+              <Button type="submit" className="flex-[2] py-1 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[#38BDF2] text-white hover:bg-[#2E2E2F] transition-all min-h-[48px] shadow-lg shadow-[#38BDF2]/20" disabled={submitting}>
                 {submitting ? 'Propagating...' : (isEditMode ? 'Sync Changes' : 'Launch Session')}
               </Button>
             </div>
@@ -789,25 +862,25 @@ export const EventsManagement: React.FC = () => {
         <div>
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Confirmed Registrations</span>
+              <span className="text-[11px] font-semibold text-text dark:text-white/60 uppercase tracking-wide">Confirmed Registrations</span>
               <Badge type="info" className="px-3 py-1 font-semibold text-[10px] tracking-wide">{attendees.filter(r => r.eventId === selectedEvent?.eventId).length} GUESTS</Badge>
             </div>
 
             <div className="max-h-[500px] overflow-y-auto pr-2 space-y-4">
               {attendees.filter(r => r.eventId === selectedEvent?.eventId).map((reg) => (
-                <div key={reg.id} className="flex items-center justify-between p-5 bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl hover:border-[#38BDF2]/30 transition-colors group">
+                <div key={reg.id} className="flex items-center justify-between p-5 bg-background border border-sidebar-border rounded-xl hover:border-[#38BDF2]/30 transition-colors group">
                   <div className="flex items-center gap-5">
-                    <div className="w-11 h-11 rounded-xl bg-[#F2F2F2] flex items-center justify-center text-[#2E2E2F] font-semibold text-sm border border-[#2E2E2F]/20 group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors">
+                    <div className="w-11 h-11 rounded-xl bg-surface flex items-center justify-center text-text dark:text-white font-semibold text-sm border border-sidebar-border group-hover:bg-[#38BDF2] group-hover:text-white transition-colors">
                       {reg.attendeeName.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-semibold text-[#2E2E2F] text-[15px] tracking-tight">{reg.attendeeName}</p>
-                      <p className="text-[12px] text-[#2E2E2F] font-medium uppercase tracking-tight mt-0.5">{reg.attendeeEmail}</p>
+                      <p className="font-semibold text-text dark:text-white text-[15px] tracking-tight">{reg.attendeeName}</p>
+                      <p className="text-[12px] text-text/60 dark:text-white/60 font-medium uppercase tracking-tight mt-0.5">{reg.attendeeEmail}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-[11px] font-medium text-[#2E2E2F] uppercase tracking-wide mb-1.5">{reg.ticketName}</p>
-                    <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-semibold uppercase tracking-wide ${reg.status === 'USED' ? 'bg-[#38BDF2]/20 text-[#2E2E2F]' : 'bg-[#2E2E2F]/10 text-[#2E2E2F]'
+                    <p className="text-[11px] font-medium text-text/60 dark:text-white/60 uppercase tracking-wide mb-1.5">{reg.ticketName}</p>
+                    <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-semibold uppercase tracking-wide ${reg.status === 'USED' ? 'bg-[#38BDF2]/20 text-[#38BDF2]' : 'bg-text/10 text-text/60 dark:bg-white/10 dark:text-white/40'
                       }`}>
                       {reg.status}
                     </span>
@@ -815,7 +888,7 @@ export const EventsManagement: React.FC = () => {
                 </div>
               ))}
               {attendees.filter(r => r.eventId === selectedEvent?.eventId).length === 0 && (
-                <div className="py-24 text-center text-[#2E2E2F]">
+                <div className="py-24 text-center text-text dark:text-white/40">
                   <ICONS.Users className="w-14 h-14 mx-auto mb-5 opacity-20" />
                   <p className="font-medium uppercase tracking-wide text-[11px]">No confirmed guests detected</p>
                 </div>
@@ -823,7 +896,7 @@ export const EventsManagement: React.FC = () => {
             </div>
             <Button
               variant="outline"
-              className="w-full py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-[#F2F2F2] hover:bg-[#2E2E2F] hover:text-[#F2F2F2] transition-colors min-h-[32px]"
+              className="w-full py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-white hover:bg-text hover:text-background dark:hover:bg-white dark:hover:text-[#2E2E2F] transition-colors min-h-[32px] shadow-lg shadow-[#38BDF2]/20"
               onClick={() => navigate('/attendees')}
             >
               Open Full Directory
@@ -908,6 +981,57 @@ export const EventsManagement: React.FC = () => {
               disabled={submitting || (deleteReason === 'OTHER' && !customReason.trim())}
             >
               {submitting ? 'Deleting...' : 'Confirm Permanent Deletion'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Promotion Duration Modal */}
+      <Modal
+        isOpen={isPromotionModalOpen}
+        onClose={() => setIsPromotionModalOpen(false)}
+        title="Promote Events"
+        size="sm"
+      >
+        <div className="space-y-6">
+          <div className="p-4 bg-[#38BDF2]/10 rounded-xl border border-[#38BDF2]/20">
+            <p className="text-[11px] font-bold text-[#38BDF2] uppercase tracking-widest mb-1">Promotion Duration</p>
+            <p className="text-[13px] font-medium text-text dark:text-white/80">
+              Select the end date for this promotion. The event will be featured in the discovery hub until the selected date.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-[10px] font-black text-text/40 dark:text-white/40 uppercase tracking-[0.2em] ml-1">End Date (Calendar)</label>
+            <div className="relative">
+              <input
+                type="date"
+                value={promotionExpiresAt}
+                min={new Date().toISOString().split('T')[0]}
+                onChange={(e) => setPromotionExpiresAt(e.target.value)}
+                className="w-full px-5 py-4 bg-background border border-sidebar-border rounded-2xl font-black text-sm outline-none focus:ring-2 focus:ring-[#38BDF2]/30 transition-all dark:text-white"
+              />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-text/20">
+                <ICONS.Calendar className="w-5 h-5" />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-4 pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setIsPromotionModalOpen(false)}
+              className="flex-1 rounded-xl py-4 border-sidebar-border hover:bg-text hover:text-background transition-all font-black text-[11px] uppercase tracking-widest"
+              disabled={submitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={executePromotion}
+              className="flex-[2] rounded-xl py-4 bg-[#38BDF2] text-white shadow-xl shadow-[#38BDF2]/20 font-black text-[11px] uppercase tracking-[0.2em]"
+              disabled={submitting || !promotionExpiresAt}
+            >
+              {submitting ? 'Promoting...' : `Confirm Promotion (${promotionIds.length})`}
             </Button>
           </div>
         </div>

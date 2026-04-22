@@ -27,13 +27,13 @@ const HeroCard: React.FC<{
   iconBg: string;
   trendColor: string;
 }> = ({ title, value, sub, icon, iconBg, trendColor }) => (
-  <div className="p-5 rounded-2xl border border-[#E0E0E0] bg-[#F2F2F2] flex items-center gap-4 hover:scale-[1.01] transition-transform cursor-default">
+  <div className="p-5 rounded-2xl border border-sidebar-border bg-surface flex items-center gap-4 hover:scale-[1.01] transition-transform cursor-default shadow-sm">
     <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white flex-shrink-0 ${iconBg}`}>
       <div className="[&>svg]:w-6 [&>svg]:h-6">{icon}</div>
     </div>
     <div>
-      <p className="text-xs font-bold text-[#1E293B]/50 uppercase tracking-tight mb-0.5">{title}</p>
-      <p className="text-2xl font-black text-[#1E293B]">{value}</p>
+      <p className="text-xs font-bold text-[#1E293B]/50 dark:text-white/40 uppercase tracking-tight mb-0.5">{title}</p>
+      <p className="text-2xl font-black text-[#1E293B] dark:text-white">{value}</p>
       <p className={`text-[10px] font-bold mt-1 ${trendColor}`}>{sub}</p>
     </div>
   </div>
@@ -48,13 +48,13 @@ const MetricCard: React.FC<{
   icon: React.ReactNode;
   link?: () => void;
 }> = ({ title, value, trend, trendColor, icon, link }) => (
-  <Card className="p-6 bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm">
+  <Card className="p-6 bg-surface border border-sidebar-border rounded-2xl shadow-sm">
     <div className="flex justify-between items-start">
       <div>
-        <p className="text-3xl font-black text-[#1E293B]">{value}</p>
-        <p className="text-sm font-bold text-[#1E293B]/40 mt-1">{title}</p>
+        <p className="text-3xl font-black text-[#1E293B] dark:text-white">{value}</p>
+        <p className="text-sm font-bold text-[#1E293B]/40 dark:text-white/40 mt-1">{title}</p>
       </div>
-      <div className="text-[#1E293B]/20 [&>svg]:w-8 [&>svg]:h-8">{icon}</div>
+      <div className="text-[#1E293B]/20 dark:text-white/20 [&>svg]:w-8 [&>svg]:h-8">{icon}</div>
     </div>
     <div className="flex justify-between items-center mt-8">
       <span className={`text-xs font-black ${trendColor}`}>{trend}</span>
@@ -130,13 +130,13 @@ export const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F2F2F2] pb-16 space-y-8 px-4 lg:px-8 font-sans">
+    <div className="min-h-screen bg-background pb-16 space-y-8 px-4 lg:px-8 font-sans">
 
       {/* ── Header ── */}
       <div className="pt-8 flex justify-between items-end">
         <div>
-          <h1 className="text-2xl font-black text-[#1E293B]">Dashboard</h1>
-          <p className="text-sm font-bold text-[#1E293B]/40 mt-0.5">
+          <h1 className="text-2xl font-black text-[#1E293B] dark:text-white uppercase tracking-tighter">Dashboard</h1>
+          <p className="text-sm font-bold text-[#1E293B]/40 dark:text-white/40 mt-0.5">
             Manage organizers, subscriptions, and platform health
           </p>
         </div>
@@ -189,13 +189,13 @@ export const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
 
         {/* Organizer Growth Bar Chart */}
-        <Card className="p-8 bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm">
+        <Card className="p-8 bg-surface border border-sidebar-border rounded-2xl shadow-sm">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h3 className="text-base font-black text-[#1E293B]">Subscription Growth</h3>
-              <p className="text-[10px] font-bold text-[#1E293B]/40 mt-1 uppercase tracking-widest">Last 10 Days</p>
+              <h3 className="text-base font-black text-[#1E293B] dark:text-white">Subscription Growth</h3>
+              <p className="text-[10px] font-bold text-[#1E293B]/40 dark:text-white/40 mt-1 uppercase tracking-widest">Last 10 Days</p>
             </div>
-            <div className="bg-white border border-[#E0E0E0] px-3 py-1.5 rounded-lg text-xs font-black text-[#1E293B]/50">
+            <div className="bg-background border border-sidebar-border px-3 py-1.5 rounded-lg text-xs font-black text-[#1E293B]/50 dark:text-white/40">
               Daily New Subscribers
             </div>
           </div>
@@ -236,11 +236,11 @@ export const AdminDashboard: React.FC = () => {
         </Card>
 
         {/* Plan Distribution + Org Overview */}
-        <Card className="p-8 bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm flex flex-col">
+        <Card className="p-8 bg-surface border border-sidebar-border rounded-2xl shadow-sm flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h3 className="text-base font-black text-[#1E293B]">Plan Overview</h3>
-              <p className="text-[10px] font-bold text-[#1E293B]/40 mt-1 uppercase tracking-widest">Organizer Subscriptions</p>
+              <h3 className="text-base font-black text-[#1E293B] dark:text-white">Plan Overview</h3>
+              <p className="text-[10px] font-bold text-[#1E293B]/40 dark:text-white/40 mt-1 uppercase tracking-widest">Organizer Subscriptions</p>
             </div>
           </div>
 
@@ -248,7 +248,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex items-center gap-8 py-4">
             <div className="relative w-36 h-36 flex-shrink-0">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="#E0E0E0" strokeWidth="12" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" className="text-background" strokeWidth="12" />
                 {/* Three ring tracks for plan distribution */}
                 <circle cx="50" cy="50" r="42" fill="none" stroke="#38BDF2" strokeWidth="12"
                   strokeDasharray={`${264 * 0.55} ${264 * 0.45}`} strokeLinecap="round" />
@@ -258,8 +258,8 @@ export const AdminDashboard: React.FC = () => {
                   strokeDasharray={`${100 * 0.15} ${100 * 0.85}`} strokeLinecap="round" />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <p className="text-lg font-black text-[#1E293B]">{activeSubscribers}</p>
-                <p className="text-[9px] font-bold text-[#1E293B]/40 uppercase">Active</p>
+                <p className="text-lg font-black text-[#1E293B] dark:text-white">{activeSubscribers}</p>
+                <p className="text-[9px] font-bold text-[#1E293B]/40 dark:text-white/40 uppercase">Active</p>
               </div>
             </div>
 
@@ -273,11 +273,11 @@ export const AdminDashboard: React.FC = () => {
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
                       <div>
-                        <p className="text-xs font-black text-[#1E293B]">{plan.name}</p>
-                        <p className="text-[9px] font-bold text-[#1E293B]/40">₱{(plan.monthlyPrice || 0).toLocaleString()}/mo</p>
+                        <p className="text-xs font-black text-[#1E293B] dark:text-white">{plan.name}</p>
+                        <p className="text-[9px] font-bold text-[#1E293B]/40 dark:text-white/40">₱{(plan.monthlyPrice || 0).toLocaleString()}/mo</p>
                       </div>
                     </div>
-                    <span className="text-xs font-black text-[#1E293B]/60">{distItem?.count ?? '—'} users</span>
+                    <span className="text-xs font-black text-[#1E293B]/60 dark:text-white/60">{distItem?.count ?? '—'} users</span>
                   </div>
                 );
               })}
@@ -288,18 +288,18 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           {/* Bottom stat strip */}
-          <div className="mt-auto pt-6 border-t border-white/60 grid grid-cols-3 text-center gap-4">
+          <div className="mt-auto pt-6 border-t border-sidebar-border grid grid-cols-3 text-center gap-4">
             <div>
-              <p className="text-2xl font-black text-[#1E293B]">{totalOrganizers}</p>
-              <p className="text-[9px] font-black text-[#1E293B]/30 uppercase mt-1">Organizers</p>
+              <p className="text-2xl font-black text-[#1E293B] dark:text-white">{totalOrganizers}</p>
+              <p className="text-[9px] font-black text-[#1E293B]/30 dark:text-white/30 uppercase mt-1">Organizers</p>
             </div>
             <div>
-              <p className="text-2xl font-black text-[#1E293B]">{activeSubscribers}</p>
-              <p className="text-[9px] font-black text-[#1E293B]/30 uppercase mt-1">Subscribers</p>
+              <p className="text-2xl font-black text-[#1E293B] dark:text-white">{activeSubscribers}</p>
+              <p className="text-[9px] font-black text-[#1E293B]/30 dark:text-white/30 uppercase mt-1">Subscribers</p>
             </div>
             <div>
-              <p className="text-2xl font-black text-[#1E293B]">{pendingSupport}</p>
-              <p className="text-[9px] font-black text-[#1E293B]/30 uppercase mt-1">Open Tickets</p>
+              <p className="text-2xl font-black text-[#1E293B] dark:text-white">{pendingSupport}</p>
+              <p className="text-[9px] font-black text-[#1E293B]/30 dark:text-white/30 uppercase mt-1">Open Tickets</p>
             </div>
           </div>
         </Card>
@@ -310,40 +310,40 @@ export const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
         {/* Recent Plan Transactions */}
-        <Card className="bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-6 flex justify-between items-center border-b border-white/60">
-            <h3 className="font-black text-[#1E293B] flex items-center gap-2">
+        <Card className="bg-surface border border-sidebar-border rounded-2xl shadow-sm overflow-hidden">
+          <div className="p-6 flex justify-between items-center border-b border-sidebar-border bg-surface">
+            <h3 className="font-black text-[#1E293B] dark:text-white flex items-center gap-2">
               <ICONS.CreditCard className="w-5 h-5 opacity-40" /> Recent Transactions
             </h3>
             <ICONS.MoreHorizontal className="w-5 h-5 text-[#1E293B]/20" />
           </div>
-          <div className="divide-y divide-white/40">
+          <div className="divide-y divide-sidebar-border">
             {recentTx.length === 0 && (
               <p className="p-6 text-xs font-bold text-[#1E293B]/40">No transactions yet.</p>
             )}
             {recentTx.slice(0, 5).map((tx, i) => (
-              <div key={tx.orderId || i} className="px-6 py-4 flex items-center justify-between">
+              <div key={tx.orderId || i} className="px-6 py-4 flex items-center justify-between hover:bg-[#38BDF2]/5 transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-white border border-[#E0E0E0] flex items-center justify-center text-[#1E293B]/30">
+                  <div className="w-9 h-9 rounded-full bg-background border border-sidebar-border flex items-center justify-center text-[#1E293B]/30 dark:text-white/30">
                     <ICONS.Users className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-black text-[#1E293B]">{tx.customerName || tx.buyerName || 'Organizer'}</p>
-                    <p className="text-[10px] font-bold text-[#1E293B]/30 mt-0.5">
+                    <p className="text-sm font-black text-[#1E293B] dark:text-white">{tx.customerName || tx.buyerName || 'Organizer'}</p>
+                    <p className="text-[10px] font-bold text-[#1E293B]/30 dark:text-white/30 mt-0.5">
                       <span className="text-[#38BDF2]">{tx.planName || 'Plan'}</span> · {new Date(tx.createdAt || tx.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
-                <p className="text-sm font-black text-[#1E293B]">₱{Number(tx.amount || 0).toLocaleString()}</p>
+                <p className="text-sm font-black text-[#1E293B] dark:text-white">₱{Number(tx.amount || 0).toLocaleString()}</p>
               </div>
             ))}
           </div>
         </Card>
 
         {/* Plan Catalog */}
-        <Card className="bg-[#F2F2F2] border border-[#E0E0E0] rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-6 flex justify-between items-center border-b border-white/60">
-            <h3 className="font-black text-[#1E293B] flex items-center gap-2">
+        <Card className="bg-surface border border-sidebar-border rounded-2xl shadow-sm overflow-hidden">
+          <div className="p-6 flex justify-between items-center border-b border-sidebar-border bg-surface">
+            <h3 className="font-black text-[#1E293B] dark:text-white flex items-center gap-2">
               <ICONS.Layout className="w-5 h-5 opacity-40" /> Active Plans
             </h3>
             <button
@@ -353,22 +353,22 @@ export const AdminDashboard: React.FC = () => {
               Manage
             </button>
           </div>
-          <div className="divide-y divide-white/40">
+          <div className="divide-y divide-sidebar-border">
             {plans.length === 0 && (
               <p className="p-6 text-xs font-bold text-[#1E293B]/40">No plans created yet.</p>
             )}
             {plans.slice(0, 5).map((plan) => {
               const color = planColors[plan.name] || planColors.default;
               return (
-                <div key={plan.planId} className="px-6 py-4 flex items-center justify-between">
+                <div key={plan.planId} className="px-6 py-4 flex items-center justify-between hover:bg-[#38BDF2]/5 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />
                     <div>
-                      <p className="text-sm font-black text-[#1E293B]">{plan.name}</p>
-                      <p className="text-[10px] font-bold text-[#1E293B]/30 mt-0.5">₱{(plan.monthlyPrice || 0).toLocaleString()}/month</p>
+                      <p className="text-sm font-black text-[#1E293B] dark:text-white">{plan.name}</p>
+                      <p className="text-[10px] font-bold text-[#1E293B]/30 dark:text-white/30 mt-0.5">₱{(plan.monthlyPrice || 0).toLocaleString()}/month</p>
                     </div>
                   </div>
-                  <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-md ${plan.isActive ? 'bg-[#38BDF2]/10 text-[#38BDF2]' : 'bg-[#1E293B]/10 text-[#1E293B]/40'}`}>
+                  <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-md ${plan.isActive ? 'bg-[#38BDF2]/10 text-[#38BDF2]' : 'bg-[#1E293B]/10 text-[#1E293B]/40 dark:text-white/20'}`}>
                     {plan.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </div>
@@ -377,7 +377,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
           <button
             onClick={() => navigate('/settings?tab=plans&openPlanModal=1')}
-            className="w-full py-4 text-sm font-black text-[#38BDF2] hover:text-white hover:bg-[#38BDF2] transition-colors border-t border-white/60"
+            className="w-full py-4 text-sm font-black text-[#38BDF2] hover:text-white hover:bg-[#38BDF2] transition-colors border-t border-sidebar-border"
           >
             + Create New Plan
           </button>

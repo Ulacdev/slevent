@@ -136,7 +136,27 @@ export const markAllMyNotificationsRead = async (req, res) => {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
+    // 1. Mark user's private notifications
     await markAllNotificationsReadForUser(userId);
+
+    // 2. If Admin/Staff, also mark shared platform alerts as read
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('userId', userId)
+      .maybeSingle();
+
+    if (userData?.role === 'ADMIN' || userData?.role === 'STAFF') {
+      await supabase
+        .from('notifications')
+        .update({
+          is_read: true,
+          read_at: new Date().toISOString(),
+        })
+        .in('type', ['EVENT_REPORT', 'SUPPORT_TICKET', 'ADMIN_ALERT'])
+        .eq('is_read', false);
+    }
+
     return res.json({ success: true });
   } catch (err) {
     if (isNotificationsSchemaError(err)) {

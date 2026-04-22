@@ -726,23 +726,42 @@ export const bulkArchiveSupportTickets = async (req, res) => {
 
 export const bulkDeleteSupportTickets = async (req, res) => {
   try {
-    const { ids } = req.body;
+    const { ids: bodyIds } = req.body;
+    const { id: paramId } = req.params;
+    const ids = paramId ? [paramId] : bodyIds;
     const userId = req.user?.id;
-    if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'List of ticket IDs is required' });
 
-    // 1. Delete associated messages first
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'List of ticket IDs is required' });
+    }
+
+    // 1. Get user role to see if they are admin
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('userId', userId)
+      .maybeSingle();
+
+    const isAdmin = userData?.role === 'ADMIN' || userData?.role === 'STAFF';
+
+    // 2. Delete associated messages first
     await supabase.from('support_messages').delete().in('notification_id', ids);
 
-    // 2. Delete the actual notifications
-    const { error } = await supabase.from('notifications')
-      .delete()
-      .in('notification_id', ids)
-      .eq('actor_user_id', userId);
+    // 3. Delete the actual notifications
+    let deleteQuery = supabase.from('notifications').delete().in('notification_id', ids);
+
+    // If not admin, can only delete their OWN tickets (as actor)
+    if (!isAdmin) {
+      deleteQuery = deleteQuery.eq('actor_user_id', userId);
+    }
+
+    const { error } = await deleteQuery;
 
     if (error) throw error;
 
     res.json({ success: true, message: `${ids.length} tickets deleted.` });
   } catch (err) {
+    console.error('[Support] Delete Error:', err);
     res.status(500).json({ error: err.message });
   }
 };

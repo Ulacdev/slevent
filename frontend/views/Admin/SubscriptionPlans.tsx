@@ -51,7 +51,7 @@ const defaultDraft: PlanDraft = {
   <button
     type="button"
     onClick={() => onChange(!enabled)}
-    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-300 ease-in-out focus:outline-none ${enabled ? 'bg-[#38BDF2]' : 'bg-[#2E2E2F]/20'}`}
+    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-300 ease-in-out focus:outline-none ${enabled ? 'bg-[#38BDF2]' : 'bg-text/20 dark:bg-white/20'}`}
   >
     <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-300 ease-in-out ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
   </button>
@@ -255,27 +255,27 @@ export const SubscriptionPlans: React.FC = () => {
   return (
     <div className="space-y-10 animate-in fade-in duration-700 pb-20">
       {notification && (
-        <Card className={`px-5 py-4 rounded-xl border ${notification.type === 'success' ? 'bg-[#38BDF2]/20 border-[#38BDF2]/40 text-[#2E2E2F]' : 'bg-[#2E2E2F]/10 border-[#2E2E2F]/30 text-[#2E2E2F]'}`}>
+        <Card className={`px-5 py-4 rounded-xl border ${notification.type === 'success' ? 'bg-[#38BDF2]/20 border-[#38BDF2]/40 text-text dark:text-white' : 'bg-background border-sidebar-border text-text dark:text-white'}`}>
           <p className="font-bold text-sm tracking-tight">{notification.message}</p>
         </Card>
       )}
 
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
         <div>
-          <label className="block text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-[0.2em] mb-3 ml-1">Pricing Plans</label>
-          <div className="bg-[#F2F2F2] p-1 rounded-xl border border-[#2E2E2F]/10 flex items-center self-start">
+          <label className="block text-[10px] font-black text-text/60 dark:text-white/60 uppercase tracking-[0.2em] mb-3 ml-1">Pricing Plans</label>
+          <div className="bg-background p-1 rounded-xl border border-sidebar-border flex items-center self-start">
             <button
               onClick={() => setBillingCycle('monthly')}
-              className={`min-h-[32px] px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors ${billingCycle === 'monthly' ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#F2F2F2] text-[#2E2E2F] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]'}`}
+              className={`min-h-[32px] px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors ${billingCycle === 'monthly' ? 'bg-[#38BDF2] text-white' : 'bg-background text-text dark:text-white/60 hover:bg-text hover:text-background dark:hover:bg-white dark:hover:text-[#2E2E2F]'}`}
             >
               Monthly
             </button>
             <button
               onClick={() => setBillingCycle('yearly')}
-              className={`min-h-[32px] px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-2 ${billingCycle === 'yearly' ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'bg-[#F2F2F2] text-[#2E2E2F] hover:bg-[#2E2E2F] hover:text-[#F2F2F2]'}`}
+              className={`min-h-[32px] px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-2 ${billingCycle === 'yearly' ? 'bg-[#38BDF2] text-white' : 'bg-background text-text dark:text-white/60 hover:bg-text hover:text-background dark:hover:bg-white dark:hover:text-[#2E2E2F]'}`}
             >
               Yearly
-              <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest ${billingCycle === 'yearly' ? 'bg-[#F2F2F2] text-[#38BDF2]' : 'bg-[#38BDF2] text-white'}`}>SAVE 20%</span>
+              <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest ${billingCycle === 'yearly' ? 'bg-background text-[#38BDF2] shadow-sm' : 'bg-[#38BDF2] text-white'}`}>SAVE 20%</span>
             </button>
           </div>
         </div>
@@ -305,13 +305,12 @@ export const SubscriptionPlans: React.FC = () => {
         title={editingPlan ? 'Edit Pricing Plan' : 'Create New Pricing Plan'}
         subtitle={editingPlan ? `Editing: ${editingPlan.name}` : 'Set up a new subscription plan for organizers'}
         size="xl"
-        zoom
       >
         <div className="space-y-12 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="space-y-8">
               <div>
-                <label className="block text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-3 ml-1">Plan Details & Pricing</label>
+                <label className="block text-[10px] font-black text-text/40 dark:text-white/40 uppercase tracking-[0.2em] mb-3 ml-1">Plan Details & Pricing</label>
                 <div className="space-y-6">
                   <Input
                     label="Plan Name"
@@ -336,9 +335,9 @@ export const SubscriptionPlans: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-[10px] font-black text-[#2E2E2F]/60 uppercase tracking-widest ml-1">Description</label>
+                    <label className="block text-[10px] font-black text-text/60 dark:text-white/60 uppercase tracking-widest ml-1">Description</label>
                     <textarea
-                      className="block w-full px-5 py-4 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 transition-all font-bold text-sm min-h-[140px] resize-none text-[#2E2E2F]"
+                      className="block w-full px-5 py-4 bg-background border border-sidebar-border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 transition-all font-bold text-sm min-h-[140px] resize-none text-text dark:text-white"
                       placeholder="Describe what this plan includes..."
                       value={draft.description}
                       onChange={(e) => setDraft((prev) => ({ ...prev, description: e.target.value }))}
@@ -350,7 +349,7 @@ export const SubscriptionPlans: React.FC = () => {
 
             <div className="space-y-8">
               <div>
-                <label className="block text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] mb-3 ml-1">Plan Limits & Promotions</label>
+                <label className="block text-[10px] font-black text-text/40 dark:text-white/40 uppercase tracking-[0.2em] mb-3 ml-1">Plan Limits & Promotions</label>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-6">
                   <Input label="Max Promoted Event Slots" type="number" value={draft.promotions?.max_promoted_events ?? 0} onChange={(e: any) => setDraft((prev) => ({ ...prev, promotions: { ...prev.promotions, max_promoted_events: Math.max(0, parseNumeric(e.target.value, 0)) } }))} />
                   <Input label="Promoted Event Duration (Days)" type="number" value={draft.promotions?.promotion_duration_days ?? 0} onChange={(e: any) => setDraft((prev) => ({ ...prev, promotions: { ...prev.promotions, promotion_duration_days: Math.max(0, parseNumeric(e.target.value, 0)) } }))} />
@@ -365,7 +364,7 @@ export const SubscriptionPlans: React.FC = () => {
           </div>
 
           <div className="space-y-6">
-            <label className="block text-[10px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em] ml-1">Plan Features</label>
+            <label className="block text-[10px] font-black text-text/40 dark:text-white/40 uppercase tracking-[0.2em] ml-1">Plan Features</label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 {
@@ -418,10 +417,10 @@ export const SubscriptionPlans: React.FC = () => {
                   onToggle: (value: boolean) => setDraft((prev) => ({ ...prev, isActive: value })),
                 },
               ].map((toggle) => (
-                <div key={toggle.id} className="flex items-center justify-between p-6 rounded-xl bg-[#F2F2F2] border border-[#2E2E2F]/5 group/modal-toggle hover:border-[#38BDF2]/20 transition-all">
+                <div key={toggle.id} className="flex items-center justify-between p-6 rounded-xl bg-background border border-sidebar-border group/modal-toggle hover:border-[#38BDF2]/20 transition-all shadow-sm">
                   <div>
-                    <p className="text-[13px] font-black text-[#2E2E2F] uppercase tracking-tight">{toggle.label}</p>
-                    <p className="text-[10px] text-[#2E2E2F]/50 font-bold uppercase tracking-widest mt-0.5">{toggle.desc}</p>
+                    <p className="text-[13px] font-black text-text dark:text-white uppercase tracking-tight">{toggle.label}</p>
+                    <p className="text-[10px] text-text/50 dark:text-white/40 font-bold uppercase tracking-widest mt-0.5">{toggle.desc}</p>
                   </div>
                   <Toggle enabled={toggle.enabled || false} onChange={toggle.onToggle} />
                 </div>
@@ -429,11 +428,11 @@ export const SubscriptionPlans: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex gap-4 pt-10 border-t border-[#2E2E2F]/5">
+          <div className="flex gap-4 pt-10 border-t border-sidebar-border">
             <Button
               variant="outline"
               onClick={closeModal}
-              className="flex-1 rounded-xl py-4 !bg-[#F2F2F2] !text-[#2E2E2F] border-[#2E2E2F]/10 hover:!bg-[#E0E0E0] font-black text-[11px] uppercase tracking-widest"
+              className="flex-1 rounded-xl py-4 !bg-background !text-text dark:!text-white border-sidebar-border hover:!bg-text hover:!text-background dark:hover:!bg-white dark:hover:!text-[#2E2E2F] transition-all font-black text-[11px] uppercase tracking-widest shadow-sm"
               disabled={submitting}
             >
               Cancel

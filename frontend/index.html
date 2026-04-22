@@ -13,8 +13,15 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
+          colors: {
+            background: 'var(--color-background)',
+            surface: 'var(--color-surface)',
+            sidebar: 'var(--color-sidebar)',
+            'sidebar-border': 'var(--color-sidebar-border)',
+          },
           borderRadius: {
             'none': '0',
             'sm': '12px',

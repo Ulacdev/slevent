@@ -38,5 +38,7 @@ router.get('/support/tickets/:id/messages', authMiddleware, getSupportMessages);
 // Admin: View and manage all tickets
 router.get('/support/admin/tickets', authMiddleware, getAdminSupportTickets);
 router.patch('/support/tickets/:id/resolve', authMiddleware, resolveSupportTicket);
+router.delete('/support/tickets/:id', authMiddleware, bulkDeleteSupportTickets); // Reuse bulk logic for single
+router.post('/support/tickets/bulk-delete', authMiddleware, bulkDeleteSupportTickets);
 
 export default router;

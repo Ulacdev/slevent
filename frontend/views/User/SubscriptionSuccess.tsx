@@ -149,14 +149,14 @@ export const SubscriptionSuccess: React.FC = () => {
 
     return (
         <div className="min-h-[70vh] flex items-center justify-center p-6">
-            <Card className="max-w-md w-full p-10 text-center rounded-xl border-[#2E2E2F]/10 shadow-2xl">
+            <Card className="max-w-md w-full p-10 text-center rounded-xl border-[#2E2E2F]/10 dark:border-white/10 shadow-2xl">
                 {status === 'loading' ? (
                     <div className="space-y-6">
-                        <div className="w-20 h-20 bg-[#38BDF8]/10 rounded-full flex items-center justify-center mx-auto animate-pulse">
+                        <div className="w-20 h-20 bg-[#F2F2F2] dark:bg-[#111111]/10 rounded-full flex items-center justify-center mx-auto animate-pulse">
                             <ICONS.CreditCard className="w-10 h-10 text-[#38BDF8]" />
                         </div>
-                        <h1 className="text-2xl font-black text-[#2E2E2F]">Processing Payment...</h1>
-                        <p className="text-[#2E2E2F]">{message}</p>
+                        <h1 className="text-2xl font-black text-[#2E2E2F] dark:text-white">Processing Payment...</h1>
+                        <p className="text-[#2E2E2F] dark:text-white">{message}</p>
                         <PageLoader variant="section" />
                     </div>
                 ) : status === 'success' ? (
@@ -164,8 +164,8 @@ export const SubscriptionSuccess: React.FC = () => {
                         <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-green-500/30">
                             <ICONS.CheckCircle className="w-10 h-10 text-white" strokeWidth={3} />
                         </div>
-                        <h1 className="text-3xl font-black text-[#2E2E2F]">Subscription Active!</h1>
-                        <p className="text-[#2E2E2F] px-4">
+                        <h1 className="text-3xl font-black text-[#2E2E2F] dark:text-white">Subscription Active!</h1>
+                        <p className="text-[#2E2E2F] dark:text-white px-4">
                             {message}
                         </p>
 
@@ -179,7 +179,7 @@ export const SubscriptionSuccess: React.FC = () => {
                             <Button
                                 variant="outline"
                                 onClick={() => navigate('/subscription')}
-                                className="w-full py-4 rounded-xl font-black tracking-widest text-xs border-[#2E2E2F]/10"
+                                className="w-full py-4 rounded-xl font-black tracking-widest text-xs border-[#2E2E2F]/10 dark:border-white/10"
                             >
                                 VIEW BILLING
                             </Button>
@@ -190,8 +190,8 @@ export const SubscriptionSuccess: React.FC = () => {
                         <div className="w-20 h-20 bg-yellow-500 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-yellow-500/30">
                             <ICONS.CreditCard className="w-10 h-10 text-white" strokeWidth={3} />
                         </div>
-                        <h1 className="text-3xl font-black text-[#2E2E2F]">Payment Processing</h1>
-                        <p className="text-[#2E2E2F] px-4">
+                        <h1 className="text-3xl font-black text-[#2E2E2F] dark:text-white">Payment Processing</h1>
+                        <p className="text-[#2E2E2F] dark:text-white px-4">
                             {message}
                         </p>
 
@@ -209,8 +209,8 @@ export const SubscriptionSuccess: React.FC = () => {
                         <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-red-500/30">
                             <ICONS.XCircle className="w-10 h-10 text-white" strokeWidth={3} />
                         </div>
-                        <h1 className="text-3xl font-black text-[#2E2E2F]">Verification Issue</h1>
-                        <p className="text-[#2E2E2F] px-4">
+                        <h1 className="text-3xl font-black text-[#2E2E2F] dark:text-white">Verification Issue</h1>
+                        <p className="text-[#2E2E2F] dark:text-white px-4">
                             {message}
                         </p>
 
@@ -224,7 +224,7 @@ export const SubscriptionSuccess: React.FC = () => {
                             <Button
                                 variant="outline"
                                 onClick={() => navigate('/user-home')}
-                                className="w-full py-4 rounded-xl font-black tracking-widest text-xs border-[#2E2E2F]/10"
+                                className="w-full py-4 rounded-xl font-black tracking-widest text-xs border-[#2E2E2F]/10 dark:border-white/10"
                             >
                                 GO TO DASHBOARD
                             </Button>

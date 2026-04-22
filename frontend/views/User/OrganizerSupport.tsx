@@ -293,8 +293,8 @@ export const OrganizerSupport: React.FC = () => {
         <div className="w-24 h-24 bg-[#38BDF2]/10 rounded-xl flex items-center justify-center mb-10 text-[#38BDF2] shadow-xl shadow-[#38BDF2]/10 border border-[#38BDF2]/20">
           <ICONS.Lock className="w-10 h-10" strokeWidth={3} />
         </div>
-        <h2 className="text-3xl font-black text-[#2E2E2F] mb-4 uppercase tracking-tighter">Support Restricted</h2>
-        <p className="text-[#2E2E2F] max-w-[360px] mx-auto mb-12 text-sm font-bold uppercase tracking-widest leading-relaxed">
+        <h2 className="text-3xl font-black text-[#2E2E2F] dark:text-white mb-4 uppercase tracking-tighter">Support Restricted</h2>
+        <p className="text-[#2E2E2F] dark:text-white/60 max-w-[360px] mx-auto mb-12 text-sm font-bold uppercase tracking-widest leading-relaxed">
           The Support Center is exclusive to organizations with Priority Support enabled in their current plan.
         </p>
         <div className="flex flex-col sm:flex-row gap-5">
@@ -315,7 +315,7 @@ export const OrganizerSupport: React.FC = () => {
       <div className="flex items-center justify-end gap-3 mb-2">
         <button 
           onClick={() => setShowHistory(!showHistory)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-transparent border border-[#2E2E2F]/5 rounded-xl text-[#2E2E2F] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-[#2E2E2F]/5 transition-all"
+          className="flex items-center gap-2 px-5 py-2.5 bg-transparent border border-[#2E2E2F]/5 dark:border-white/5 rounded-xl text-[#2E2E2F] dark:text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-[#2E2E2F]/5 dark:bg-white/5 transition-all"
         >
           {showHistory ? (
             <>
@@ -331,16 +331,16 @@ export const OrganizerSupport: React.FC = () => {
         </button>
       </div>
 
-      <div className="bg-transparent border border-[#2E2E2F]/5 rounded-xl p-6 md:p-8 relative overflow-hidden group">
+      <div className="bg-transparent border border-[#2E2E2F]/5 dark:border-white/5 rounded-xl p-6 md:p-8 relative overflow-hidden group">
         <div className="flex flex-col gap-4 relative z-10">
           <div className="max-w-2xl">
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-widest mb-4 flex-shrink-0 w-fit ${hasPrioritySupport ? 'bg-[#38BDF2]/10 border-[#38BDF2]/20 text-[#38BDF2]' : 'bg-[#2E2E2F]/5 border-[#2E2E2F]/10 text-[#2E2E2F]'}`}>
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-widest mb-4 flex-shrink-0 w-fit ${hasPrioritySupport ? 'bg-[#38BDF2]/10 border-[#38BDF2]/20 text-[#38BDF2]' : 'bg-[#2E2E2F]/5 dark:bg-white/5 border-[#2E2E2F]/10 dark:border-white/10 text-[#2E2E2F] dark:text-white'}`}>
               {hasPrioritySupport ? 'Pro Support Active' : 'Standard Support'}
             </div>
-            <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] tracking-tight">
+            <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] dark:text-white tracking-tight uppercase">
               {showHistory ? 'Support History' : 'Organizer Support'}
             </h1>
-            <p className="mt-1 text-sm font-semibold text-[#2E2E2F]">
+            <p className="mt-1 text-sm font-semibold text-[#2E2E2F] dark:text-white/60">
               {showHistory 
                 ? 'Review your previous conversations and admin responses.'
                 : hasPrioritySupport
@@ -356,12 +356,12 @@ export const OrganizerSupport: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             {!profile?.plan ? (
-              <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center bg-transparent rounded-xl border border-[#2E2E2F]/5 shadow-sm">
-                <div className="w-16 h-16 bg-[#2E2E2F]/5 rounded-full flex items-center justify-center mb-6 text-[#2E2E2F]">
+              <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center bg-transparent rounded-xl border border-[#2E2E2F]/5 dark:border-white/5 shadow-sm">
+                <div className="w-16 h-16 bg-[#2E2E2F]/5 dark:bg-white/5 rounded-full flex items-center justify-center mb-6 text-[#2E2E2F] dark:text-white">
                   <ICONS.Lock className="w-8 h-8" />
                 </div>
-                <h2 className="text-xl font-black text-[#2E2E2F] mb-3 uppercase tracking-tight">Support Restricted</h2>
-                <p className="text-[#2E2E2F] max-w-[280px] mx-auto mb-8 text-sm font-medium leading-relaxed">
+                <h2 className="text-xl font-black text-[#2E2E2F] dark:text-white mb-3 uppercase tracking-tight">Support Restricted</h2>
+                <p className="text-[#2E2E2F] dark:text-white/60 max-w-[280px] mx-auto mb-8 text-sm font-medium leading-relaxed">
                   Direct messaging services are available for organizations with an active subscription plan.
                 </p>
                 <button
@@ -372,11 +372,11 @@ export const OrganizerSupport: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <Card className="bg-transparent border text-[#2E2E2F] border-[#2E2E2F]/5 rounded-xl p-6 md:p-8 shadow-sm transition-all hover:shadow-md">
-                <h2 className="text-xl font-bold text-[#2E2E2F] mb-6">Submit a Request</h2>
+              <Card className="bg-transparent border text-[#2E2E2F] dark:text-white border-[#2E2E2F]/5 dark:border-white/5 rounded-xl p-6 md:p-8 shadow-sm transition-all hover:shadow-md">
+                <h2 className="text-xl font-bold text-[#2E2E2F] dark:text-white mb-6">Submit a Request</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-widest text-[#2E2E2F] mb-2 block ml-1">Subject</label>
+                    <label className="text-xs font-bold uppercase tracking-widest text-[#2E2E2F] dark:text-white mb-2 block ml-1">Subject</label>
                     <Input
                       value={ticketSubject}
                       onChange={(e) => setTicketSubject(e.target.value)}
@@ -386,13 +386,13 @@ export const OrganizerSupport: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-widest text-[#2E2E2F] mb-2 block ml-1">Message</label>
+                    <label className="text-xs font-bold uppercase tracking-widest text-[#2E2E2F] dark:text-white mb-2 block ml-1">Message</label>
                     <textarea
                       value={ticketMessage}
                       onChange={(e) => setTicketMessage(e.target.value)}
                       placeholder="Describe your issue in detail..."
                       required
-                      className="w-full bg-transparent text-[#2E2E2F] text-sm font-medium border-2 border-[#2E2E2F]/20 rounded-xl px-4 py-3 focus:outline-none focus:border-[#38BDF2] focus:ring-1 focus:ring-[#38BDF2] transition-colors resize-y min-h-[160px]"
+                      className="w-full bg-transparent text-[#2E2E2F] dark:text-white text-sm font-medium border-2 border-[#2E2E2F]/20 rounded-xl px-4 py-3 focus:outline-none focus:border-[#38BDF2] focus:ring-1 focus:ring-[#38BDF2] transition-colors resize-y min-h-[160px]"
                     />
                   </div>
                   <Button type="submit" disabled={submitting} className={`w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${submitting ? 'opacity-70' : 'hover:-translate-y-0.5 shadow-sm'}`}>
@@ -404,31 +404,31 @@ export const OrganizerSupport: React.FC = () => {
           </div>
 
           <div className="space-y-6">
-            <Card className={`border rounded-xl p-6 md:p-8 transition-all bg-transparent ${hasPrioritySupport ? 'border-[#38BDF2]/30 shadow-sm' : 'border-[#2E2E2F]/5'}`}>
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${hasPrioritySupport ? 'bg-[#38BDF2]/10 text-[#38BDF2]' : 'bg-transparent border border-[#2E2E2F]/10 text-[#2E2E2F]'}`}>
+            <Card className={`border rounded-xl p-6 md:p-8 transition-all bg-transparent ${hasPrioritySupport ? 'border-[#38BDF2]/30 shadow-sm' : 'border-[#2E2E2F]/5 dark:border-white/5'}`}>
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${hasPrioritySupport ? 'bg-[#38BDF2]/10 text-[#38BDF2]' : 'bg-transparent border border-[#2E2E2F]/10 dark:border-white/10 text-[#2E2E2F] dark:text-white'}`}>
                 {hasPrioritySupport ? <ICONS.Zap className="w-6 h-6" /> : <ICONS.MessageSquare className="w-6 h-6" />}
               </div>
-              <h3 className="text-lg font-bold text-[#2E2E2F] tracking-tight mb-2">
+              <h3 className="text-lg font-bold text-[#2E2E2F] dark:text-white tracking-tight mb-2">
                 {hasPrioritySupport ? 'Priority Queue Active' : 'Help Center'}
               </h3>
-              <p className="text-sm font-medium leading-relaxed text-[#2E2E2F]">
+              <p className="text-sm font-medium leading-relaxed text-[#2E2E2F] dark:text-white/70">
                 {hasPrioritySupport
                   ? 'Because you are on a premium plan, your tickets automatically skip the line and are assigned to our specialists.'
                   : 'Need more features? Upgrade your plan to unlock priority support and get faster responses.'}
               </p>
             </Card>
 
-            <Card className="bg-transparent border border-[#2E2E2F]/5 rounded-xl p-6 md:p-8 text-[#2E2E2F] relative overflow-hidden shadow-sm">
+            <Card className="bg-transparent border border-[#2E2E2F]/5 dark:border-white/5 rounded-xl p-6 md:p-8 text-[#2E2E2F] dark:text-white relative overflow-hidden shadow-sm">
               <div className="relative z-10">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#2E2E2F] mb-4">Other Ways to Connect</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-[#2E2E2F] dark:text-white mb-4">Other Ways to Connect</p>
                 <div className="space-y-4">
                   <a href="mailto:support@startuplab.ph" className="flex items-center gap-3 group">
-                    <div className="w-9 h-9 rounded-xl bg-[#2E2E2F]/5 flex items-center justify-center group-hover:bg-[#38BDF2]/10 transition-all">
-                      <ICONS.Mail className="w-4 h-4 text-[#2E2E2F] group-hover:text-[#38BDF2]" />
+                    <div className="w-9 h-9 rounded-xl bg-[#2E2E2F]/5 dark:bg-white/5 flex items-center justify-center group-hover:bg-[#38BDF2]/10 transition-all">
+                      <ICONS.Mail className="w-4 h-4 text-[#2E2E2F] dark:text-white group-hover:text-[#38BDF2]" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-[#2E2E2F]">Email Us</h4>
-                      <p className="text-xs text-[#2E2E2F]">support@startuplab.ph</p>
+                      <h4 className="text-sm font-bold text-[#2E2E2F] dark:text-white">Email Us</h4>
+                      <p className="text-xs text-[#2E2E2F] dark:text-white/60">support@startuplab.ph</p>
                     </div>
                   </a>
                 </div>
@@ -440,7 +440,7 @@ export const OrganizerSupport: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] dark:text-white">
                 {selectedRows.size > 0 ? `${selectedRows.size} selected` : `Total ${history.length} tickets`}
               </p>
             </div>
@@ -483,9 +483,9 @@ export const OrganizerSupport: React.FC = () => {
           <div className="bg-transparent border border-[#2E2E2F]/10 rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
-                <thead className="bg-[#F2F2F2] border-b border-[#2E2E2F]/5">
+                <thead className="bg-[#F2F2F2] dark:bg-[#111111] border-b border-[#2E2E2F]/5 dark:border-white/5">
                   <tr>
-                    <th className="px-4 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] w-12">
+                    <th className="px-4 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] dark:text-white w-12">
                       <div className="flex justify-center">
                         <Checkbox 
                           checked={selectedRows.size === history.length && history.length > 0} 
@@ -494,9 +494,9 @@ export const OrganizerSupport: React.FC = () => {
                         />
                       </div>
                     </th>
-                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">Subject</th>
-                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">Status</th>
-                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] text-right">Date Posted</th>
+                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] dark:text-white">Subject</th>
+                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] dark:text-white">Status</th>
+                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] dark:text-white text-right">Date Posted</th>
                   </tr>
                 </thead>
               <tbody className="divide-y divide-[#2E2E2F]/5">
@@ -513,11 +513,11 @@ export const OrganizerSupport: React.FC = () => {
                     </td>
                     <td className="px-8 py-6">
                       <div className="space-y-1">
-                        <p className="text-sm font-bold text-[#2E2E2F] flex items-center gap-2">
+                        <p className="text-sm font-bold text-[#2E2E2F] dark:text-white flex items-center gap-2">
                            {t.is_read ? null : <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF2]"></span>}
                            {t.title}
                         </p>
-                        <p className="text-xs text-[#2E2E2F] truncate max-w-sm font-medium">{t.message}</p>
+                        <p className="text-xs text-[#2E2E2F] dark:text-white/60 truncate max-w-sm font-medium">{t.message}</p>
                       </div>
                     </td>
                     <td className="px-8 py-6">
@@ -526,8 +526,8 @@ export const OrganizerSupport: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <p className="text-[10px] font-black text-[#2E2E2F]">{new Date(t.created_at).toLocaleDateString()}</p>
-                      <p className="text-[9px] font-bold text-[#2E2E2F] uppercase tracking-tighter">{new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                      <p className="text-[10px] font-black text-[#2E2E2F] dark:text-white/60">{new Date(t.created_at).toLocaleDateString()}</p>
+                      <p className="text-[9px] font-bold text-[#2E2E2F] dark:text-white/40 uppercase tracking-tighter">{new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                     </td>
                   </tr>
                 ))}
@@ -540,10 +540,10 @@ export const OrganizerSupport: React.FC = () => {
 
       {selectedTicket && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[9999] flex items-center justify-center p-4 sm:p-6 transition-opacity animate-in fade-in duration-300" onClick={() => setSelectedTicket(null)}>
-          <div className="relative w-full max-w-2xl max-h-full bg-[#F2F2F2] shadow-2xl rounded-xl border border-[#2E2E2F]/10 overflow-hidden flex flex-col h-[90vh]" onClick={e => e.stopPropagation()} style={{ zoom: 0.85 }}>
+          <div className="relative w-full max-w-2xl max-h-full bg-[#F2F2F2] dark:bg-[#09090B] shadow-2xl rounded-xl border border-[#2E2E2F]/10 dark:border-white/10 overflow-hidden flex flex-col h-[90vh]" onClick={e => e.stopPropagation()} style={{ zoom: 0.85 }}>
              {/* Header */}
-             <div className="px-8 py-5 border-b border-[#2E2E2F]/5 flex items-center justify-between bg-transparent sticky top-0 z-10">
-               <button onClick={() => setSelectedTicket(null)} className="p-3 hover:bg-[#2E2E2F]/5 rounded-full text-[#2E2E2F] transition-all">
+             <div className="px-8 py-5 border-b border-[#2E2E2F]/5 dark:border-white/5 flex items-center justify-between bg-transparent sticky top-0 z-10">
+               <button onClick={() => setSelectedTicket(null)} className="p-3 hover:bg-[#2E2E2F]/5 dark:hover:bg-white/5 rounded-full text-[#2E2E2F] dark:text-white transition-all">
                  <ICONS.ArrowLeft className="w-6 h-6" />
                </button>
                <div className="flex items-center gap-3">
@@ -589,7 +589,7 @@ export const OrganizerSupport: React.FC = () => {
                   {(ticketMessages[selectedTicket.notification_id] || []).map((m) => (
                     <div key={m.message_id} className={`flex flex-col gap-2 max-w-[85%] ${m.is_admin_reply ? 'mr-auto items-start' : 'ml-auto items-end'}`}>
                       <div className={`flex items-end gap-3 ${m.is_admin_reply ? 'flex-row' : 'flex-row-reverse'}`}>
-                         <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center border border-[#2E2E2F]/5 shadow-sm overflow-hidden bg-transparent">
+                         <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center border border-[#2E2E2F]/5 dark:border-white/5 shadow-sm overflow-hidden bg-transparent">
                             {m.is_admin_reply ? (
                                <img src="/lgo.webp" alt="Bot" className="w-full h-full object-contain p-1.5" />
                             ) : (
@@ -602,13 +602,13 @@ export const OrganizerSupport: React.FC = () => {
                          </div>
                          <div className={`px-4 py-3 rounded-xl shadow-sm ${
                            m.is_admin_reply 
-                             ? 'bg-[#2E2E2F]/5 text-[#2E2E2F] rounded-bl-none border border-[#2E2E2F]/5' 
+                             ? 'bg-[#2E2E2F]/5 dark:bg-white/5 text-[#2E2E2F] dark:text-white rounded-bl-none border border-[#2E2E2F]/5 dark:border-white/5' 
                              : 'bg-[#38BDF2] text-white rounded-br-none border-0'
                          }`}>
                             {renderMessageContent(m.message)}
                          </div>
                       </div>
-                      <p className={`text-[10px] font-bold uppercase tracking-[0.2em] text-[#2E2E2F] ${m.is_admin_reply ? 'ml-14' : 'mr-14'}`}>
+                       <p className={`text-[10px] font-bold uppercase tracking-[0.2em] text-[#2E2E2F] dark:text-white/60 ${m.is_admin_reply ? 'ml-14' : 'mr-14'}`}>
                         {m.is_admin_reply ? 'Support Team' : 'You'} • {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
@@ -624,7 +624,7 @@ export const OrganizerSupport: React.FC = () => {
                       <input
                         type="text"
                         placeholder="Reply to support..."
-                        className="w-full h-14 pl-6 pr-16 bg-[#F2F2F2]/50 border-2 border-[#2E2E2F]/20 rounded-full text-sm font-medium focus:border-[#38BDF2]/20 transition-all outline-none placeholder:text-[#2E2E2F] text-[#2E2E2F]"
+                        className="w-full h-14 pl-6 pr-16 bg-[#F2F2F2] dark:bg-[#111111]/50 border-2 border-[#2E2E2F]/20 rounded-full text-sm font-medium focus:border-[#38BDF2]/20 transition-all outline-none placeholder:text-[#2E2E2F] text-[#2E2E2F]"
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleReply()}

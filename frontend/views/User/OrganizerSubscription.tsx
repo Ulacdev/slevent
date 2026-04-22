@@ -89,7 +89,7 @@ export const OrganizerSubscription: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F2F2F2] pb-20">
+    <div className="min-h-screen bg-[#F2F2F2] dark:bg-[#111111] pb-20">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] py-12">
         <div className="max-w-6xl mx-auto px-5">
@@ -101,21 +101,21 @@ export const OrganizerSubscription: React.FC = () => {
       <div className="max-w-6xl mx-auto px-5 -mt-8">
         {/* Current Plan */}
         {currentSubscription && (
-          <Card className="mb-8 p-8 rounded-xl border-2 border-[#2E2E2F]/15 shadow-sm">
+          <Card className="mb-8 p-8 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 shadow-sm">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-black text-[#38BDF8] uppercase tracking-widest mb-2">Current Plan</p>
-                <h2 className="text-2xl font-black text-[#2E2E2F] mb-1">{currentSubscription.plan.name}</h2>
+                <h2 className="text-2xl font-black text-[#2E2E2F] dark:text-white mb-1">{currentSubscription.plan.name}</h2>
                 <div className="flex items-center gap-3">
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${currentSubscription.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                     {currentSubscription.status === 'active' ? 'Active' : currentSubscription.status}
                   </span>
-                  <span className="text-sm text-[#2E2E2F]">
+                  <span className="text-sm text-[#2E2E2F] dark:text-white">
                     {currentSubscription.billingInterval === 'yearly' ? 'Yearly' : 'Monthly'} billing
                   </span>
                 </div>
                 {currentSubscription.endDate && (
-                  <p className="text-sm text-[#2E2E2F] mt-2">
+                  <p className="text-sm text-[#2E2E2F] dark:text-white mt-2">
                     {currentSubscription.subscription.cancelAtPeriodEnd
                       ? `Cancels on ${new Date(currentSubscription.endDate).toLocaleDateString()}`
                       : `Renews on ${new Date(currentSubscription.endDate).toLocaleDateString()}`
@@ -135,11 +135,11 @@ export const OrganizerSubscription: React.FC = () => {
             </div>
 
             {/* Current Plan Features */}
-            <div className="mt-8 pt-8 border-t-2 border-[#2E2E2F]/10">
+            <div className="mt-8 pt-8 border-t-2 border-[#2E2E2F]/10 dark:border-white/10">
               <div className="space-y-10">
                 {/* Plan Features */}
                 <div>
-                  <p className="text-xs font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-4 ml-1">Plan Features</p>
+                  <p className="text-xs font-black text-[#2E2E2F] dark:text-white uppercase tracking-[0.2em] mb-4 ml-1">Plan Features</p>
                   <div className="grid grid-cols-1 gap-3">
                     {[
                       { label: 'Custom Branding', enabled: (currentSubscription.plan.features as any)?.enable_custom_branding || (currentSubscription.plan.features as any)?.custom_branding },
@@ -147,14 +147,14 @@ export const OrganizerSubscription: React.FC = () => {
                       { label: 'Advanced Reports', enabled: (currentSubscription.plan.features as any)?.enable_advanced_reports || (currentSubscription.plan.features as any)?.advanced_reports },
                       { label: 'Priority Support', enabled: (currentSubscription.plan.features as any)?.enable_priority_support || (currentSubscription.plan.features as any)?.priority_support },
                     ].map((feature, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-4 rounded-xl bg-[#F2F2F2]/50 border-2 border-[#2E2E2F]/10 group/feat transition-all hover:border-[#38BDF2]/30 hover:shadow-sm">
-                        <span className={`text-[11px] font-black uppercase tracking-widest ${feature.enabled ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]'}`}>{feature.label}</span>
+                      <div key={idx} className="flex items-center justify-between p-4 rounded-xl bg-[#F2F2F2] dark:bg-[#111111]/50 border-2 border-[#2E2E2F]/10 dark:border-white/10 group/feat transition-all hover:border-[#38BDF2]/30 hover:shadow-sm">
+                        <span className={`text-[11px] font-black uppercase tracking-widest ${feature.enabled ? 'text-[#2E2E2F] dark:text-white' : 'text-[#2E2E2F] dark:text-white'}`}>{feature.label}</span>
                         {feature.enabled ? (
                           <div className="w-6 h-6 rounded-xl bg-[#38BDF2]/10 text-[#38BDF2] flex items-center justify-center">
                             <ICONS.CheckCircle className="w-4 h-4" strokeWidth={3} />
                           </div>
                         ) : (
-                          <div className="w-6 h-6 rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F] flex items-center justify-center">
+                          <div className="w-6 h-6 rounded-xl bg-[#2E2E2F]/5 dark:bg-white/5 text-[#2E2E2F] dark:text-white flex items-center justify-center">
                             <ICONS.XCircle className="w-4 h-4" strokeWidth={3} />
                           </div>
                         )}
@@ -165,7 +165,7 @@ export const OrganizerSubscription: React.FC = () => {
 
                 {/* Plan Limits & Promotion */}
                 <div>
-                  <p className="text-xs font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-4 ml-1">Plan Limits & Promotion</p>
+                  <p className="text-xs font-black text-[#2E2E2F] dark:text-white uppercase tracking-[0.2em] mb-4 ml-1">Plan Limits & Promotion</p>
                   <div className="grid grid-cols-2 gap-3">
                     {[
                       { label: 'Promoted Event Slots', val: (currentSubscription.plan as any)?.promotions?.max_promoted_events || 0, icon: <ICONS.TrendingUp /> },
@@ -175,12 +175,12 @@ export const OrganizerSubscription: React.FC = () => {
                       { label: 'Paid Events Limit', val: currentSubscription.plan.limits?.max_priced_events || 0, icon: <ICONS.Zap /> },
                       { label: 'Daily Email Quota', val: (currentSubscription.plan.limits?.email_quota_per_day || 500) + ' /day', icon: <ICONS.Mail /> },
                     ].map((limit, idx) => (
-                      <div key={idx} className="p-4 bg-[#F2F2F2]/50 rounded-xl border-2 border-[#2E2E2F]/10 hover:border-[#38BDF2]/30 transition-all group/limit hover:shadow-sm">
+                      <div key={idx} className="p-4 bg-[#F2F2F2] dark:bg-[#111111]/50 rounded-xl border-2 border-[#2E2E2F]/10 dark:border-white/10 hover:border-[#38BDF2]/30 transition-all group/limit hover:shadow-sm">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="text-[#38BDF2] w-4 h-4 opacity-70 group-hover/limit:opacity-100 transition-opacity">
                             {React.cloneElement(limit.icon as React.ReactElement<any>, { className: 'w-full h-full', strokeWidth: 3 })}
                           </div>
-                          <span className={`font-black text-[#2E2E2F] tracking-tighter leading-none ${typeof limit.val === 'string' && limit.val.includes(' ') ? 'text-sm' : 'text-[16px]'}`}>{limit.val}</span>
+                          <span className={`font-black text-[#2E2E2F] dark:text-white tracking-tighter leading-none ${typeof limit.val === 'string' && limit.val.includes(' ') ? 'text-sm' : 'text-[16px]'}`}>{limit.val}</span>
                         </div>
                         <p className="text-[8px] font-black uppercase tracking-[0.2em] text-[#38BDF2]/50">{limit.label}</p>
                       </div>
@@ -194,14 +194,14 @@ export const OrganizerSubscription: React.FC = () => {
 
         {/* No Subscription */}
         {!currentSubscription && (
-          <Card className="mb-8 p-8 rounded-xl border-2 border-[#2E2E2F]/15 bg-gradient-to-r from-[#38BDF8]/10 to-transparent shadow-sm">
+          <Card className="mb-8 p-8 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 bg-gradient-to-r from-[#38BDF8]/10 to-transparent shadow-sm">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-xl bg-[#38BDF8]/20 flex items-center justify-center">
                 <ICONS.CreditCard className="w-8 h-8 text-[#38BDF8]" strokeWidth={2} />
               </div>
               <div>
-                <h2 className="text-xl font-black text-[#2E2E2F]">No Active Subscription</h2>
-                <p className="text-[#2E2E2F]">Subscribe to a plan to unlock full features</p>
+                <h2 className="text-xl font-black text-[#2E2E2F] dark:text-white">No Active Subscription</h2>
+                <p className="text-[#2E2E2F] dark:text-white">Subscribe to a plan to unlock full features</p>
               </div>
             </div>
           </Card>

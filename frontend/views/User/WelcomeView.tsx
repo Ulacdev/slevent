@@ -60,12 +60,12 @@ const WelcomeView: React.FC = () => {
 
   if (isAuthenticated && role === UserRole.ORGANIZER && isProfileStep) {
     return (
-      <div className="h-screen bg-[#F2F2F2] px-4 py-6 sm:px-6 sm:py-8 overflow-y-auto">
+      <div className="h-screen bg-[#F2F2F2] dark:bg-[#111111] px-4 py-6 sm:px-6 sm:py-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto" style={{ zoom: '0.8', transformOrigin: 'top center' }}>
           <div className="mb-4">
             <button
               onClick={() => setIsProfileStep(false)}
-              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] hover:bg-[#2E2E2F]/5 hover:text-[#2E2E2F] transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white hover:bg-[#2E2E2F]/5 dark:bg-white/5 hover:text-[#2E2E2F] dark:text-white transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -82,7 +82,7 @@ const WelcomeView: React.FC = () => {
   }
 
   return (
-    <div className="fixed inset-0 bg-[#F2F2F2] flex flex-col font-sans selection:bg-[#38BDF2]/20 overflow-hidden">
+    <div className="fixed inset-0 bg-[#F2F2F2] dark:bg-[#111111] flex flex-col font-sans selection:bg-[#38BDF2]/20 overflow-hidden">
       {/* Top Left Logo */}
       <div className="absolute top-0 left-8 z-20">
         <img
@@ -96,11 +96,11 @@ const WelcomeView: React.FC = () => {
       <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24 px-10 lg:px-24">
         {/* Left Side: Content */}
         <div className="w-full lg:w-[480px] flex flex-col text-left mb-8 lg:mb-0">
-          <h1 className="text-[42px] lg:text-[50px] font-black tracking-tight text-[#2E2E2F] leading-[1.05] mb-4">
+          <h1 className="text-[42px] lg:text-[50px] font-black tracking-tight text-[#2E2E2F] dark:text-white leading-[1.05] mb-4">
             Welcome to <span className="text-[#38BDF2]">Startup</span>Lab!
           </h1>
           
-          <p className="text-[20px] lg:text-[24px] font-bold text-[#2E2E2F] leading-tight mb-10 max-w-[400px]">
+          <p className="text-[20px] lg:text-[24px] font-bold text-[#2E2E2F] dark:text-white leading-tight mb-10 max-w-[400px]">
             Thanks for being here. What can we help you with first?
           </p>
 
@@ -129,8 +129,8 @@ const WelcomeView: React.FC = () => {
         {/* Right Side: Hero Image - Respecting max height to prevent scroll */}
         <div className="w-full max-w-[400px] lg:max-w-none lg:w-[480px] xl:w-[540px] aspect-square relative group">
           <div className="absolute -inset-4 bg-[#38BDF2]/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-          <div className="relative w-full h-full rounded-[12px] overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] bg-white/40 border border-[#2E2E2F]/5">
-            <div className="absolute inset-0 bg-black/5"></div>
+          <div className="relative w-full h-full rounded-[12px] overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] bg-white/40 border border-[#2E2E2F]/15 dark:border-white/10">
+            <div className="absolute inset-0 bg-black/5 dark:bg-white/5"></div>
             <img
               src="/welcome-hero.png"
               alt="Welcome Hero"

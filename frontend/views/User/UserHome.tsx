@@ -55,6 +55,8 @@ export const UserHome: React.FC = () => {
     const [loadingStats, setLoadingStats] = useState(true);
     const [organizerProfile, setOrganizerProfile] = useState<any>(null);
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+    const [promotedEvents, setPromotedEvents] = useState<any[]>([]);
+    const [now, setNow] = useState(new Date());
 
     // Check if organizer's plan has priority support
     const hasPrioritySupport = organizerProfile?.plan?.features?.enable_priority_support ||
@@ -87,6 +89,14 @@ export const UserHome: React.FC = () => {
                 setOrganizerProfile(organizer);
                 if (quota) setEmailQuota(quota);
 
+                // Fetch promoted events
+                try {
+                    const promos = await apiService.getMyActivePromotions();
+                    setPromotedEvents(promos);
+                } catch (err) {
+                    console.error('Failed to fetch promoted events:', err);
+                }
+
                 const hideModal = sessionStorage.getItem('hideUpgradeModal');
                 if (!hideModal) {
                     setIsUpgradeModalOpen(true);
@@ -99,6 +109,13 @@ export const UserHome: React.FC = () => {
         };
         fetchData();
     }, []);
+
+    // Live countdown tick every second
+    React.useEffect(() => {
+        if (promotedEvents.length === 0) return;
+        const interval = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(interval);
+    }, [promotedEvents.length]);
 
     /* Removed local notification effect
     React.useEffect(() => {
@@ -215,11 +232,11 @@ export const UserHome: React.FC = () => {
             {organizerProfile && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Current Plan Card */}
-                    <div className="bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
+                    <div className="bg-[#F2F2F2] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 rounded-xl p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
                         <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] mb-2">Current Plan</p>
-                            <p className="text-2xl font-black text-[#2E2E2F] tracking-tight">{organizerProfile.plan?.name || 'No Active Plan'}</p>
-                            <p className="text-[10px] text-[#2E2E2F] font-medium mt-2">{organizerProfile.plan?.description || (organizerProfile?.currentPlanId ? 'Basic events only' : 'Please select a plan to begin')}</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white mb-2">Current Plan</p>
+                            <p className="text-2xl font-black text-[#2E2E2F] dark:text-white tracking-tight">{organizerProfile.plan?.name || 'No Active Plan'}</p>
+                            <p className="text-[10px] text-[#2E2E2F] dark:text-white font-medium mt-2">{organizerProfile.plan?.description || (organizerProfile?.currentPlanId ? 'Basic events only' : 'Please select a plan to begin')}</p>
                         </div>
                         {!organizerProfile?.currentPlanId && (
                             <Button
@@ -232,7 +249,7 @@ export const UserHome: React.FC = () => {
                     </div>
 
                     {/* Paid Events Limit Widget */}
-                    <div className="bg-[#F2F2F2] border-2 border-[#2E2E2F]/15 rounded-xl p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
+                    <div className="bg-[#F2F2F2] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 rounded-xl p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
                         {organizerProfile && (() => {
                             const pricedLimit = Number(organizerProfile.plan?.limits?.max_priced_events || organizerProfile.plan?.max_priced_events || organizerProfile.plan?.maxPricedEvents || 0);
                             const usedCount = stats.paidEventsCount;
@@ -244,15 +261,15 @@ export const UserHome: React.FC = () => {
                                             <ICONS.CreditCard className="w-5 h-5 text-white" />
                                         </div>
                                         <div>
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F]">Paid Events Used</p>
-                                            <p className="text-lg font-black text-[#2E2E2F]">
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white">Paid Events Used</p>
+                                            <p className="text-lg font-black text-[#2E2E2F] dark:text-white">
                                                 {usedCount} / {pricedLimit}
                                             </p>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <div className="w-full h-2 bg-[#2E2E2F]/10 rounded-full overflow-hidden">
+                                        <div className="w-full h-2 bg-[#2E2E2F]/10 dark:bg-white/10 rounded-full overflow-hidden">
                                             <div
                                                 className={`h-full rounded-full transition-all ${usedCount >= pricedLimit
                                                     ? 'bg-[#2E2E2F]/20'
@@ -261,7 +278,7 @@ export const UserHome: React.FC = () => {
                                                 style={{ width: `${Math.min(100, (usedCount / (pricedLimit || 1)) * 100)}%` }}
                                             />
                                         </div>
-                                        <p className="text-[9px] font-bold text-[#2E2E2F] mt-2 uppercase tracking-tight">
+                                        <p className="text-[9px] font-bold text-[#2E2E2F] dark:text-white mt-2 uppercase tracking-tight">
                                             {pricedLimit === 0
                                                 ? 'No paid events allowed on current plan'
                                                 : `${Math.max(0, pricedLimit - usedCount)} paid events remaining`}
@@ -274,26 +291,26 @@ export const UserHome: React.FC = () => {
 
                     {/* Email Quota Widget */}
                     {emailQuota && (
-                        <div className="bg-[#F2F2F2] border-[#2E2E2F]/15 border-2 rounded-xl p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
+                        <div className="bg-[#F2F2F2] dark:bg-[#111111] border-[#2E2E2F]/15 dark:border-white/10 border-2 rounded-xl p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="p-2.5 bg-[#38BDF2] rounded-xl shadow-[0_8px_16px_-4px_rgba(56,189,242,0.4)]">
                                     <ICONS.Mail className="w-5 h-5 text-white" strokeWidth={2} />
                                 </div>
                                 <div>
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F]">Email Quota</p>
-                                    <p className="text-lg font-black text-[#2E2E2F]">
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white">Email Quota</p>
+                                    <p className="text-lg font-black text-[#2E2E2F] dark:text-white">
                                         {organizerProfile?.currentPlanId ? emailQuota.remaining : '0'}
                                     </p>
                                 </div>
                             </div>
 
                             <div>
-                                <p className="text-[10px] font-black text-[#2E2E2F] mb-2">
+                                <p className="text-[10px] font-black text-[#2E2E2F] dark:text-white mb-2">
                                     {organizerProfile?.currentPlanId ? `${emailQuota.sent}/${emailQuota.limit}` : 'No Active Plan'}
                                 </p>
                                 {organizerProfile?.currentPlanId ? (
                                     <div className="space-y-3">
-                                        <div className="w-full h-2 bg-[#2E2E2F]/10 rounded-full overflow-hidden">
+                                        <div className="w-full h-2 bg-[#2E2E2F]/10 dark:bg-white/10 rounded-full overflow-hidden">
                                             <div
                                                 className={`h-full rounded-full transition-all ${emailQuota.canSend ? 'bg-[#2E2E2F]/40' : 'bg-red-500'}`}
                                                 style={{ width: `${Math.min(100, (emailQuota.sent / emailQuota.limit) * 100)}%` }}
@@ -309,8 +326,8 @@ export const UserHome: React.FC = () => {
                                         )}
                                     </div>
                                 ) : (
-                                    <div className="w-full h-2 bg-[#2E2E2F]/5 rounded-full overflow-hidden">
-                                        <div className="h-full rounded-full bg-[#2E2E2F]/10 w-full" />
+                                    <div className="w-full h-2 bg-[#2E2E2F]/5 dark:bg-white/5 rounded-full overflow-hidden">
+                                        <div className="h-full rounded-full bg-[#2E2E2F]/10 dark:bg-white/10 w-full" />
                                     </div>
                                 )}
                             </div>
@@ -319,55 +336,145 @@ export const UserHome: React.FC = () => {
                 </div>
             )}
 
+            {/* Promoted Events Countdown Timer */}
+            {promotedEvents.length > 0 && (
+                <div className="bg-[#F2F2F2] dark:bg-[#111111] border-2 border-[#2E2E2F]/10 dark:border-white/10 rounded-xl overflow-hidden shadow-sm">
+                    <div className="p-6 border-b-2 border-[#2E2E2F]/5 dark:border-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-[#38BDF2] flex items-center justify-center text-white shadow-[0_8px_16px_-4px_rgba(56,189,242,0.4)]">
+                                <ICONS.TrendingUp className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-black text-[#2E2E2F] dark:text-white tracking-tight">Promoted Events</h3>
+                                <p className="text-[9px] font-bold text-[#2E2E2F] dark:text-white/40 mt-0.5 uppercase tracking-widest">Live on Discovery Hub</p>
+                            </div>
+                        </div>
+                        <span className="text-[9px] font-black text-[#38BDF2] bg-[#38BDF2]/10 px-3 py-1.5 rounded-full border border-[#38BDF2]/20 uppercase tracking-widest animate-pulse">LIVE</span>
+                    </div>
+                    <div className="divide-y divide-[#2E2E2F]/5 dark:divide-white/5">
+                        {promotedEvents.map((promo: any) => {
+                            const expiresAt = new Date(promo.expiresAt);
+                            const remainingMs = Math.max(0, expiresAt.getTime() - now.getTime());
+                            const days = Math.floor(remainingMs / (1000 * 60 * 60 * 24));
+                            const hours = Math.floor((remainingMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+                            const seconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
+                            const totalDuration = (promo.durationDays || 7) * 24 * 60 * 60 * 1000;
+                            const elapsed = totalDuration - remainingMs;
+                            const progressPct = totalDuration > 0 ? Math.min(100, (elapsed / totalDuration) * 100) : 100;
+                            const isExpiring = days === 0 && hours < 12;
+                            const isExpired = remainingMs <= 0;
+
+                            return (
+                                <div key={promo.promotionId} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#38BDF2]/5 transition-colors">
+                                    <div className="flex items-center gap-4 min-w-0">
+                                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#38BDF2] to-[#38BDF2]/80 flex items-center justify-center text-white shadow-md shrink-0 text-base font-black">
+                                            {promo.eventName?.charAt(0)?.toUpperCase() || '?'}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="font-black text-sm text-[#2E2E2F] dark:text-white dark:text-white truncate">{promo.eventName}</p>
+                                            <p className="text-[9px] font-bold text-[#2E2E2F] dark:text-white/40 dark:text-white/40 mt-0.5 uppercase tracking-wide">
+                                                Expires {expiresAt.toLocaleDateString()} at {expiresAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4 shrink-0">
+                                        {/* Progress bar */}
+                                        <div className="w-28 h-1.5 bg-[#2E2E2F]/10 dark:bg-white/10 dark:bg-white/10 rounded-full overflow-hidden hidden md:block">
+                                            <div
+                                                className={`h-full rounded-full transition-all duration-1000 ${
+                                                    isExpired ? 'bg-red-400' : isExpiring ? 'bg-amber-400' : 'bg-[#38BDF2]'
+                                                }`}
+                                                style={{ width: `${100 - progressPct}%` }}
+                                            />
+                                        </div>
+                                        {/* Countdown digits */}
+                                        {isExpired ? (
+                                            <span className="text-[9px] font-black text-red-500 bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/20 uppercase tracking-widest">PROMOTED DONE</span>
+                                        ) : (
+                                            <div className="flex items-center gap-1">
+                                                {days > 0 && (
+                                                    <>
+                                                        <div className="flex flex-col items-center px-2 py-1 bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 rounded-lg min-w-[38px]">
+                                                            <span className={`text-base font-black leading-none ${isExpiring ? 'text-amber-500' : 'text-[#2E2E2F] dark:text-white dark:text-white'}`}>{days}</span>
+                                                            <span className="text-[7px] font-bold text-[#2E2E2F] dark:text-white/30 dark:text-white/30 uppercase tracking-wider">day{days !== 1 ? 's' : ''}</span>
+                                                        </div>
+                                                        <span className="text-[#2E2E2F] dark:text-white/15 dark:text-white/15 font-black text-xs">:</span>
+                                                    </>
+                                                )}
+                                                <div className="flex flex-col items-center px-2 py-1 bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 rounded-lg min-w-[38px]">
+                                                    <span className={`text-base font-black leading-none ${isExpiring ? 'text-amber-500' : 'text-[#2E2E2F] dark:text-white dark:text-white'}`}>{String(hours).padStart(2, '0')}</span>
+                                                    <span className="text-[7px] font-bold text-[#2E2E2F] dark:text-white/30 dark:text-white/30 uppercase tracking-wider">hrs</span>
+                                                </div>
+                                                <span className="text-[#2E2E2F] dark:text-white/15 dark:text-white/15 font-black text-xs">:</span>
+                                                <div className="flex flex-col items-center px-2 py-1 bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 rounded-lg min-w-[38px]">
+                                                    <span className={`text-base font-black leading-none ${isExpiring ? 'text-amber-500' : 'text-[#2E2E2F] dark:text-white dark:text-white'}`}>{String(minutes).padStart(2, '0')}</span>
+                                                    <span className="text-[7px] font-bold text-[#2E2E2F] dark:text-white/30 dark:text-white/30 uppercase tracking-wider">min</span>
+                                                </div>
+                                                <span className="text-[#2E2E2F] dark:text-white/15 dark:text-white/15 font-black text-xs">:</span>
+                                                <div className="flex flex-col items-center px-2 py-1 bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 rounded-lg min-w-[38px]">
+                                                    <span className={`text-base font-black tabular-nums leading-none ${isExpiring ? 'text-amber-500' : 'text-[#2E2E2F] dark:text-white dark:text-white'}`}>{String(seconds).padStart(2, '0')}</span>
+                                                    <span className="text-[7px] font-bold text-[#2E2E2F] dark:text-white/30 dark:text-white/30 uppercase tracking-wider">sec</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Create First Event Card */}
                 <div
-                    className="group relative bg-[#F2F2F2] border-2 border-[#2E2E2F]/5 rounded-xl p-8 flex flex-col items-start transition-all duration-300 hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/5 hover:shadow-[0_20px_40px_-20px_rgba(56,189,242,0.15)] hover:-translate-y-1"
+                    className="group relative bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/5 dark:border-white/5 dark:border-white/10 rounded-xl p-8 flex flex-col items-start transition-all duration-300 hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/5 dark:hover:bg-[#38BDF2]/5 hover:shadow-[0_20px_40px_-20px_rgba(56,189,242,0.15)] hover:-translate-y-1"
                     onClick={() => navigate('/my-events/create')}
                 >
                     <div className="w-14 h-14 rounded-xl bg-[#38BDF2] text-white flex items-center justify-center mb-8 shadow-[0_10px_20px_-5px_rgba(56,189,242,0.3)] transition-all">
                         <ICONS.Plus className="w-8 h-8 stroke-[3]" />
                     </div>
-                    <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tight mb-3">Create First Event</h2>
-                    <p className="text-[#2E2E2F] font-medium leading-relaxed mb-8 flex-1">
+                    <h2 className="text-2xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight mb-3">Create First Event</h2>
+                    <p className="text-[#2E2E2F] dark:text-white dark:text-white/70 font-medium leading-relaxed mb-8 flex-1">
                         Follow the organizer workflow: complete your identity, set up your organization profile, pick a subscription plan, save your event as a draft, then add tickets before finally publishing.
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F] tracking-[0.2em] group-hover:text-[#38BDF2] transition-colors">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-[0.2em] group-hover:text-[#38BDF2] transition-colors">
                         Start Wizard <ICONS.ChevronRight className="w-4 h-4" />
                     </div>
                 </div>
 
                 {/* Manage Events Card */}
                 <div
-                    className="group relative bg-[#F2F2F2] border-2 border-[#2E2E2F]/5 rounded-xl p-8 flex flex-col items-start transition-all duration-300 hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/5 hover:shadow-[0_20px_40px_-20px_rgba(56,189,242,0.15)] hover:-translate-y-1"
+                    className="group relative bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/5 dark:border-white/5 dark:border-white/10 rounded-xl p-8 flex flex-col items-start transition-all duration-300 hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/5 dark:hover:bg-[#38BDF2]/5 hover:shadow-[0_20px_40px_-20px_rgba(56,189,242,0.15)] hover:-translate-y-1"
                     onClick={() => navigate('/my-events')}
                 >
                     <div className="w-14 h-14 rounded-xl bg-[#38BDF2] text-white flex items-center justify-center mb-8 shadow-[0_10px_20px_-5px_rgba(56,189,242,0.3)] transition-all">
                         <ICONS.Calendar className="w-7 h-7 stroke-[2]" />
                     </div>
-                    <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tight mb-3">Manage My Events</h2>
-                    <p className="text-[#2E2E2F] font-medium leading-relaxed mb-8 flex-1">
+                    <h2 className="text-2xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight mb-3">Manage My Events</h2>
+                    <p className="text-[#2E2E2F] dark:text-white dark:text-white/70 font-medium leading-relaxed mb-8 flex-1">
                         View, edit, and track the performance of all your existing events. Stay on top of registrations.
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F] tracking-[0.2em] group-hover:text-[#38BDF2] transition-colors">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-[0.2em] group-hover:text-[#38BDF2] transition-colors">
                         Open Library <ICONS.ChevronRight className="w-4 h-4" />
                     </div>
                 </div>
 
                 {/* Help & Support Card */}
                 <div
-                    className="group relative bg-[#F2F2F2] border-2 border-[#2E2E2F]/5 rounded-xl p-8 flex flex-col items-start transition-all duration-300 hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/5 hover:shadow-[0_20px_40px_-20px_rgba(56,189,242,0.15)] hover:-translate-y-1"
+                    className="group relative bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/5 dark:border-white/5 dark:border-white/10 rounded-xl p-8 flex flex-col items-start transition-all duration-300 hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/5 dark:hover:bg-[#38BDF2]/5 hover:shadow-[0_20px_40px_-20px_rgba(56,189,242,0.15)] hover:-translate-y-1"
                     onClick={() => navigate('/organizer-support')}
                 >
                     <div className="w-14 h-14 rounded-xl bg-[#38BDF2] text-white flex items-center justify-center mb-8 shadow-[0_10px_20px_-5px_rgba(56,189,242,0.3)] transition-all">
                         <ICONS.MessageSquare className="w-7 h-7 stroke-[2]" />
                     </div>
-                    <h2 className="text-2xl font-black text-[#2E2E2F] tracking-tight mb-3">Help & Support</h2>
-                    <p className="text-[#2E2E2F] font-medium leading-relaxed mb-8 flex-1">
+                    <h2 className="text-2xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight mb-3">Help & Support</h2>
+                    <p className="text-[#2E2E2F] dark:text-white dark:text-white/70 font-medium leading-relaxed mb-8 flex-1">
                         Need assistance? Our support team is here to help you optimize your event operations and resolve any technical issues.
                     </p>
-                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F] tracking-[0.2em] group-hover:text-[#38BDF2] transition-colors">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-[0.2em] group-hover:text-[#38BDF2] transition-colors">
                         Open Support <ICONS.ChevronRight className="w-4 h-4" />
                     </div>
                 </div>
@@ -430,9 +537,9 @@ export const UserHome: React.FC = () => {
                                         />
                                     </div>
                                     <div className="w-1/3">
-                                        <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] mb-2.5">Status</label>
+                                        <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white mb-2.5">Status</label>
                                         <select
-                                            className="w-full px-4 py-[13.5px] bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-xl text-[11px] font-black uppercase tracking-widest outline-none focus:border-[#38BDF2] transition-colors appearance-none"
+                                            className="w-full px-4 py-[13.5px] bg-[#F2F2F2] dark:bg-[#111111] border-2 border-[#2E2E2F]/10 dark:border-white/10 rounded-xl text-[11px] font-black uppercase tracking-widest outline-none focus:border-[#38BDF2] transition-colors appearance-none"
                                             value={formData.status}
                                             onChange={(e) => setFormData({ ...formData, status: e.target.value as EventStatus })}
                                         >
@@ -442,9 +549,9 @@ export const UserHome: React.FC = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] mb-2.5">The Narrative</label>
+                                    <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white mb-2.5">The Narrative</label>
                                     <textarea
-                                        className="w-full px-5 py-4 bg-[#F2F2F2] border-2 border-[#2E2E2F]/10 rounded-xl text-sm min-h-[140px] focus:border-[#38BDF2] transition-colors outline-none resize-none"
+                                        className="w-full px-5 py-4 bg-[#F2F2F2] dark:bg-[#111111] border-2 border-[#2E2E2F]/10 dark:border-white/10 rounded-xl text-sm min-h-[140px] focus:border-[#38BDF2] transition-colors outline-none resize-none"
                                         placeholder="Tell the story of your event..."
                                         value={formData.description}
                                         onChange={e => setFormData({ ...formData, description: e.target.value })}
@@ -462,7 +569,7 @@ export const UserHome: React.FC = () => {
                             </div>
 
                             <div className="md:col-span-2">
-                                <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] mb-2.5">Operational Presence</label>
+                                <label className="block text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white mb-2.5">Operational Presence</label>
                                 <div className="flex gap-4">
                                     {['ONSITE', 'ONLINE', 'HYBRID'].map((type) => (
                                         <button
@@ -471,7 +578,7 @@ export const UserHome: React.FC = () => {
                                             onClick={() => setFormData({ ...formData, locationType: type as any })}
                                             className={`flex-1 py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${formData.locationType === type
                                                 ? 'bg-[#2E2E2F] border-[#2E2E2F] text-white shadow-lg'
-                                                : 'bg-[#F2F2F2] border-[#2E2E2F]/5 text-[#2E2E2F] hover:bg-[#2E2E2F]/5'}`}
+                                                : 'bg-[#F2F2F2] dark:bg-[#111111] border-[#2E2E2F]/5 dark:border-white/5 text-[#2E2E2F] dark:text-white hover:bg-[#2E2E2F]/5 dark:bg-white/5'}`}
                                         >
                                             {type}
                                         </button>
@@ -495,9 +602,9 @@ export const UserHome: React.FC = () => {
                             )}
                         </div>
 
-                        <div className="flex gap-6 pt-10 border-t-2 border-[#2E2E2F]/5">
+                        <div className="flex gap-6 pt-10 border-t-2 border-[#2E2E2F]/5 dark:border-white/5">
                             <Button
-                                className="flex-1 min-h-[56px] text-[#2E2E2F] bg-transparent border-2 border-[#2E2E2F]/10 hover:bg-[#2E2E2F]/5 hover:border-[#2E2E2F]/20"
+                                className="flex-1 min-h-[56px] text-[#2E2E2F] dark:text-white bg-transparent border-2 border-[#2E2E2F]/10 dark:border-white/10 hover:bg-[#2E2E2F]/5 dark:bg-white/5 hover:border-[#2E2E2F]/20"
                                 onClick={() => setIsModalOpen(false)}
                             >
                                 Abort

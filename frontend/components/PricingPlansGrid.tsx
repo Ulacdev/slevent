@@ -115,6 +115,11 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
               icon: <ICONS.Sparkles className="w-4 h-4" /> 
             },
             { 
+              label: `${(plan as any)?.promotions?.promotion_duration_days || 7} Days Promotion Duration`, 
+              enabled: Number((plan as any)?.promotions?.max_promoted_events || 0) > 0, 
+              icon: <ICONS.Calendar className="w-4 h-4" /> 
+            },
+            { 
               label: `${formatLimitValue(plan.limits?.email_quota_per_day || 0)} Daily Email Quota`, 
               enabled: Number(plan.limits?.email_quota_per_day || 0) > 0, 
               icon: <ICONS.Mail className="w-4 h-4" /> 

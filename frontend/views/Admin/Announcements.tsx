@@ -149,8 +149,8 @@ export const Announcements: React.FC = () => {
     <div className="space-y-8" style={{ zoom: 0.85 }}>
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-2">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-[#2E2E2F] tracking-tight">Platform Announcements</h1>
-          <p className="text-[#2E2E2F] font-medium text-sm mt-1">Broadcast updates, maintenance alerts, and news to the community.</p>
+          <h1 className="text-3xl font-bold text-text dark:text-white tracking-tight">Platform Announcements</h1>
+          <p className="text-text dark:text-white/60 font-medium text-sm mt-1">Broadcast updates, maintenance alerts, and news to the community.</p>
         </div>
         <Button 
           onClick={() => handleOpenModal()}
@@ -164,7 +164,7 @@ export const Announcements: React.FC = () => {
       <div className="grid grid-cols-1 gap-4">
         {announcements.length > 0 ? (
           announcements.map((ann) => (
-            <div key={ann.id} className="bg-[#F2F2F2] rounded-2xl p-6 border border-black/10 shadow-sm transition-all hover:shadow-md flex flex-col md:flex-row gap-6 items-start">
+            <div key={ann.id} className="bg-surface rounded-2xl p-6 border border-sidebar-border shadow-sm transition-all hover:shadow-md flex flex-col md:flex-row gap-6 items-start">
               <div className={`p-4 rounded-xl shrink-0 ${
                 ann.type === 'INFO' ? 'bg-blue-500' : 
                 ann.type === 'SUCCESS' ? 'bg-emerald-500' : 
@@ -174,7 +174,7 @@ export const Announcements: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0 space-y-2">
                 <div className="flex flex-wrap items-center gap-3">
-                  <h3 className="text-xl font-bold text-[#2E2E2F] truncate">{ann.title}</h3>
+                  <h3 className="text-xl font-bold text-text dark:text-white truncate">{ann.title}</h3>
                   <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${
                     ann.type === 'INFO' ? 'bg-blue-50 text-blue-600 border-blue-200' : 
                     ann.type === 'SUCCESS' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 
@@ -183,17 +183,17 @@ export const Announcements: React.FC = () => {
                   }`}>
                     {ann.type}
                   </span>
-                  <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-black/5 text-black/60 border border-black/10">
+                  <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-background text-text/60 dark:text-white/60 border border-sidebar-border">
                     Target: {ann.target_audience}
                   </span>
                   {!ann.is_published && (
-                    <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+                    <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-background text-text/40 dark:text-white/40 border border-sidebar-border">
                       Draft
                     </span>
                   )}
                 </div>
-                <p className="text-[#2E2E2F]/80 text-sm leading-relaxed whitespace-pre-wrap">{ann.content}</p>
-                <div className="flex items-center gap-4 text-[10px] text-black/40 font-bold uppercase tracking-widest pt-2">
+                <p className="text-text/80 dark:text-white/80 text-sm leading-relaxed whitespace-pre-wrap">{ann.content}</p>
+                <div className="flex items-center gap-4 text-[10px] text-text/40 dark:text-white/40 font-bold uppercase tracking-widest pt-2">
                   <span>Created {new Date(ann.created_at).toLocaleDateString()}</span>
                   {ann.scheduled_at && (
                     <span className="text-[#38BDF2]">Scheduled for {new Date(ann.scheduled_at).toLocaleString()}</span>
@@ -206,14 +206,14 @@ export const Announcements: React.FC = () => {
               <div className="flex gap-2 shrink-0 self-start md:self-center">
                 <button 
                   onClick={() => handleOpenModal(ann)}
-                  className="p-3 rounded-xl bg-black/5 text-black hover:bg-[#38BDF2] hover:text-white transition-all shadow-sm"
+                  className="p-3 rounded-xl bg-background text-text dark:text-white hover:bg-[#38BDF2] hover:text-white transition-all shadow-sm border border-sidebar-border"
                   title="Edit"
                 >
                   <ICONS.Edit className="w-5 h-5" />
                 </button>
                 <button 
                   onClick={() => handleDelete(ann.id)}
-                  className="p-3 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm"
+                  className="p-3 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm border border-rose-200"
                   title="Delete Permanently"
                 >
                   <ICONS.Trash className="w-5 h-5" />
@@ -222,12 +222,12 @@ export const Announcements: React.FC = () => {
             </div>
           ))
         ) : (
-          <div className="bg-[#F2F2F2] rounded-2xl p-12 border border-dashed border-black/20 flex flex-col items-center justify-center text-center">
-            <div className="w-20 h-20 bg-black/5 rounded-full flex items-center justify-center mb-6">
-              <ICONS.Megaphone className="w-10 h-10 text-black/20" />
+          <div className="bg-surface rounded-2xl p-12 border border-dashed border-sidebar-border flex flex-col items-center justify-center text-center">
+            <div className="w-20 h-20 bg-background rounded-full flex items-center justify-center mb-6">
+              <ICONS.Megaphone className="w-10 h-10 text-text/20 dark:text-white/20" />
             </div>
-            <h3 className="text-xl font-bold text-[#2E2E2F] mb-2">No Announcements Yet</h3>
-            <p className="text-black/50 text-sm max-w-sm">Broadcast your first update to the StartupLab community.</p>
+            <h3 className="text-xl font-bold text-text dark:text-white mb-2">No Announcements Yet</h3>
+            <p className="text-text/50 dark:text-white/50 text-sm max-w-sm">Broadcast your first update to the StartupLab community.</p>
           </div>
         )}
       </div>
@@ -249,9 +249,9 @@ export const Announcements: React.FC = () => {
             />
             
             <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.15em]">Reason / Content</label>
+              <label className="text-[11px] font-black text-text dark:text-white uppercase tracking-[0.15em]">Reason / Content</label>
               <textarea 
-                className="w-full px-5 py-4 bg-[#F2F2F2] border border-black/10 rounded-xl text-sm min-h-[200px] outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-all"
+                className="w-full px-5 py-4 bg-background border border-sidebar-border rounded-xl text-sm min-h-[200px] outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-all text-text dark:text-white"
                 placeholder="Details of the announcement..."
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
@@ -261,9 +261,9 @@ export const Announcements: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.15em]">Alert Level</label>
+                <label className="text-[11px] font-black text-text dark:text-white uppercase tracking-[0.15em]">Alert Level</label>
                 <select 
-                  className="w-full px-5 py-4 bg-[#F2F2F2] border border-black/10 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#38BDF2]/30"
+                  className="w-full px-5 py-4 bg-background border border-sidebar-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#38BDF2]/30 text-text dark:text-white"
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
                 >
@@ -274,9 +274,9 @@ export const Announcements: React.FC = () => {
                 </select>
               </div>
               <div className="space-y-1.5">
-                <label className="text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.15em]">Target Audience</label>
+                <label className="text-[11px] font-black text-text dark:text-white uppercase tracking-[0.15em]">Target Audience</label>
                 <select 
-                  className="w-full px-5 py-4 bg-[#F2F2F2] border border-black/10 rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#38BDF2]/30"
+                  className="w-full px-5 py-4 bg-background border border-sidebar-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#38BDF2]/30 text-text dark:text-white"
                   value={formData.target_audience}
                   onChange={(e) => setFormData({ ...formData, target_audience: e.target.value as any })}
                 >
@@ -310,7 +310,7 @@ export const Announcements: React.FC = () => {
           <div className="flex gap-4 pt-4">
             <Button 
               type="button"
-              className="flex-1 py-4 bg-[#F2F2F2] text-[#2E2E2F] border border-black/10 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-black/5"
+              className="flex-1 py-4 !bg-background !text-text dark:!text-white border border-sidebar-border rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-text hover:text-background dark:hover:bg-white dark:hover:text-[#2E2E2F] transition-all"
               onClick={() => setModalOpen(false)}
             >
               Cancel

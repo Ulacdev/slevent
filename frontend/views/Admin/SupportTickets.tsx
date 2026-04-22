@@ -216,6 +216,43 @@ export const SupportTickets: React.FC = () => {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedRows.size === 0) return;
+    if (!window.confirm(`Are you sure you want to delete ${selectedRows.size} records? This action cannot be undone.`)) return;
+    
+    try {
+      setRefreshing(true);
+      const ids = Array.from(selectedRows);
+      await apiService.bulkDeleteSupportTickets(ids);
+
+      setTickets(prev => prev.filter(t => !selectedRows.has(t.notification_id)));
+      showToast('success', `${selectedRows.size} records deleted`);
+      setSelectedRows(new Set());
+    } catch (err) {
+      showToast('error', 'Failed to delete some records');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleDelete = async (ticketId: string) => {
+    if (!window.confirm('Are you sure you want to delete this record? This action cannot be undone.')) return;
+    
+    try {
+      setRefreshing(true);
+      await apiService.deleteSupportTicket(ticketId);
+      setTickets(prev => prev.filter(t => t.notification_id !== ticketId));
+      showToast('success', 'Record deleted successfully');
+      if (selectedTicket?.notification_id === ticketId) {
+        setSelectedTicket(null);
+      }
+    } catch (err) {
+      showToast('error', 'Failed to delete record');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const loadMessages = async (ticketId: string) => {
     try {
       setRefreshing(true);
@@ -300,8 +337,8 @@ export const SupportTickets: React.FC = () => {
     <div className="space-y-6 max-w-7xl pb-20 relative min-h-[600px]">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 px-2">
         <div className="hidden">
-          <h1 className="text-3xl font-bold text-[#2E2E2F] tracking-tight">Support Inbox</h1>
-          <p className="text-[#2E2E2F] font-medium text-sm mt-1">Manage administrative inquiries and investigation reports.</p>
+          <h1 className="text-3xl font-bold text-text dark:text-white tracking-tight">Support Inbox</h1>
+          <p className="text-text dark:text-white/60 font-medium text-sm mt-1">Manage administrative inquiries and investigation reports.</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -314,7 +351,14 @@ export const SupportTickets: React.FC = () => {
                 <ICONS.CheckCircle className="w-5 h-5 text-[#38BDF2] group-hover:text-white transition-colors" />
                 BULK DISMISS ({selectedRows.size})
               </button>
-              <div className="w-[1px] h-6 bg-[#2E2E2F]/10 mx-1" />
+              <button 
+                onClick={handleBulkDelete}
+                className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-red-500 !text-red-500 px-6 py-2.5 text-[13px] hover:!bg-red-500 hover:!text-white flex items-center gap-2 group"
+              >
+                <ICONS.Trash className="w-5 h-5 text-red-500 group-hover:text-white transition-colors" />
+                BULK DELETE ({selectedRows.size})
+              </button>
+              <div className="w-[1px] h-6 bg-sidebar-border mx-1" />
             </div>
           )}
           
@@ -333,7 +377,7 @@ export const SupportTickets: React.FC = () => {
             >
               <ICONS.Download className="w-5 h-5" />
             </button>
-            <button onClick={loadTickets} className="w-10 h-10 flex items-center justify-center bg-transparent border-2 border-[#2E2E2F]/10 rounded-full hover:bg-[#F2F2F2] transition-all group" title="Refresh">
+            <button onClick={loadTickets} className="w-10 h-10 flex items-center justify-center bg-transparent border-2 border-sidebar-border rounded-full hover:bg-background transition-all group dark:text-white" title="Refresh">
               <ICONS.RefreshCw className={`w-4 h-4 group-hover:rotate-180 transition-transform duration-500`} />
             </button>
           </div>
@@ -345,43 +389,43 @@ export const SupportTickets: React.FC = () => {
           {error}
         </Card>
       ) : tickets.length === 0 ? (
-        <Card className="p-16 text-center border-2 border-dashed border-[#2E2E2F]/10 rounded-xl bg-transparent">
-          <div className="w-20 h-20 mx-auto bg-[#F2F2F2] text-[#2E2E2F] rounded-full flex items-center justify-center mb-6 text-[#2E2E2F]/20">
+        <Card className="p-16 text-center border-2 border-dashed border-sidebar-border rounded-xl bg-surface">
+          <div className="w-20 h-20 mx-auto bg-background text-text dark:text-white rounded-full flex items-center justify-center mb-6 text-text/20 dark:text-white/20">
             <ICONS.ShieldCheck className="w-10 h-10" />
           </div>
-          <h3 className="text-2xl font-bold text-[#2E2E2F] mb-2 tracking-tight">Queue is Clear</h3>
-          <p className="text-[#2E2E2F]/40 text-sm font-semibold uppercase tracking-widest">No pending reports or support tickets</p>
+          <h3 className="text-2xl font-bold text-text dark:text-white mb-2 tracking-tight">Queue is Clear</h3>
+          <p className="text-text/40 dark:text-white/40 text-sm font-semibold uppercase tracking-widest">No pending reports or support tickets</p>
         </Card>
       ) : (
-        <div className="border-2 border-[#2E2E2F]/5 rounded-xl overflow-hidden bg-transparent shadow-sm">
+        <div className="border border-sidebar-border rounded-xl overflow-hidden bg-surface shadow-sm">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-[#F2F2F2]/80 border-b-2 border-[#2E2E2F]/5">
+            <thead className="bg-background border-b border-sidebar-border">
               <tr>
-                <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] w-12 text-center">
+                <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest text-text dark:text-white/60 w-12 text-center">
                   <input
                     type="checkbox"
                     checked={tickets.length > 0 && selectedRows.size === tickets.length}
                     onChange={toggleAll}
-                    className="w-4 h-4 rounded border-2 border-[#2E2E2F]/30 cursor-pointer accent-[#38BDF2]"
+                    className="w-4 h-4 rounded border-2 border-sidebar-border cursor-pointer accent-[#38BDF2]"
                   />
                 </th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]">Type</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]">Source</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]">Subject / Reason</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#2E2E2F]">Status</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] text-right">Date</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] text-right">View</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text dark:text-white/60">Type</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text dark:text-white/60">Source</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text dark:text-white/60">Subject / Reason</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text dark:text-white/60">Status</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text dark:text-white/60 text-right">Date</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text dark:text-white/60 text-right">View</th>
               </tr>
             </thead>
-            <tbody className="divide-y-2 divide-[#2E2E2F]/5">
+            <tbody className="divide-y divide-sidebar-border">
               {tickets.map((t) => (
-                <tr key={t.notification_id} className={`hover:bg-[#F2F2F2] transition-colors cursor-pointer ${selectedRows.has(t.notification_id) ? 'bg-[#38BDF2]/5' : ''} ${(t.metadata?.status === 'resolved' || t.is_read) ? 'opacity-50' : ''}`} onClick={() => openThread(t)}>
+                <tr key={t.notification_id} className={`hover:bg-background transition-colors cursor-pointer ${selectedRows.has(t.notification_id) ? 'bg-[#38BDF2]/5' : ''} ${(t.metadata?.status === 'resolved' || t.is_read) ? 'opacity-50' : ''}`} onClick={() => openThread(t)}>
                   <td className="px-4 py-5" onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       checked={selectedRows.has(t.notification_id)}
                       onChange={() => toggleRow(t.notification_id)}
-                      className="w-4 h-4 rounded border-2 border-[#2E2E2F]/30 cursor-pointer accent-[#38BDF2]"
+                      className="w-4 h-4 rounded border-2 border-sidebar-border cursor-pointer accent-[#38BDF2]"
                     />
                   </td>
                   <td className="px-6 py-5">
@@ -393,7 +437,7 @@ export const SupportTickets: React.FC = () => {
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-white border border-[#2E2E2F]/10 text-[#2E2E2F] rounded-lg flex items-center justify-center text-[11px] font-black shadow-sm overflow-hidden">
+                      <div className="w-8 h-8 bg-surface border border-sidebar-border text-text dark:text-white rounded-lg flex items-center justify-center text-[11px] font-black shadow-sm overflow-hidden">
                         {t.organizer?.profileImageUrl ? (
                           <img src={t.organizer.profileImageUrl} alt="Logo" className="w-full h-full object-cover" />
                         ) : (
@@ -401,16 +445,16 @@ export const SupportTickets: React.FC = () => {
                         )}
                       </div>
                       <div>
-                        <p className="text-xs font-black text-[#2E2E2F] truncate max-w-[120px]">
+                        <p className="text-xs font-black text-text dark:text-white truncate max-w-[120px]">
                           {t.organizer?.organizerName || t.metadata?.orgName || t.actor?.name || (t.type === 'EVENT_REPORT' ? 'Guest Reporter' : 'Someone')}
                         </p>
-                        <p className="text-[10px] font-bold text-[#2E2E2F]/40">{t.actor?.email || t.metadata?.reporterEmail}</p>
+                        <p className="text-[10px] font-bold text-text/40 dark:text-white/40">{t.actor?.email || t.metadata?.reporterEmail}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-5">
-                    <p className="text-[13px] font-bold text-[#2E2E2F]">{t.title}</p>
-                    <p className="text-[11px] text-[#2E2E2F]/60 font-medium truncate max-w-[200px]">
+                    <p className="text-[13px] font-bold text-text dark:text-white">{t.title}</p>
+                    <p className="text-[11px] text-text/60 dark:text-white/60 font-medium truncate max-w-[200px]">
                       {t.message?.replace(/\[IMAGE_URL: (.*?)\]/g, ' [Image] ')}
                     </p>
                   </td>
@@ -418,17 +462,28 @@ export const SupportTickets: React.FC = () => {
                     {getStatusBadge(t)}
                   </td>
                   <td className="px-6 py-5 text-right w-32">
-                    <p className="text-[11px] font-black text-[#2E2E2F]">
+                    <p className="text-[11px] font-black text-text dark:text-white">
                       {new Date(t.created_at).toLocaleDateString()}
                     </p>
-                    <p className="text-[9px] font-black text-[#2E2E2F]/30 uppercase tracking-tighter">
+                    <p className="text-[9px] font-black text-text/30 dark:text-white/30 uppercase tracking-tighter">
                       {new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </td>
                   <td className="px-6 py-5 text-right">
-                    <button className="w-8 h-8 rounded-full border border-[#2E2E2F]/10 flex items-center justify-center text-[#2E2E2F]/40 hover:bg-[#38BDF2] hover:text-white hover:border-[#38BDF2] transition-all">
-                      <ICONS.Eye className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button 
+                        className="w-8 h-8 rounded-full border border-sidebar-border flex items-center justify-center text-text/40 dark:text-white/40 hover:bg-[#38BDF2] hover:text-white hover:border-[#38BDF2] transition-all"
+                        onClick={(e) => { e.stopPropagation(); openThread(t); }}
+                      >
+                        <ICONS.Eye className="w-4 h-4" />
+                      </button>
+                      <button 
+                        className="w-8 h-8 rounded-full border border-sidebar-border flex items-center justify-center text-text/40 dark:text-white/40 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"
+                        onClick={(e) => { e.stopPropagation(); handleDelete(t.notification_id); }}
+                      >
+                        <ICONS.Trash className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -439,39 +494,46 @@ export const SupportTickets: React.FC = () => {
 
       {selectedTicket && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[9999] flex items-center justify-center p-4 transition-opacity animate-in fade-in duration-300" onClick={() => setSelectedTicket(null)}>
-          <div className="relative w-full max-w-xl max-h-[85vh] bg-[#F2F2F2] shadow-2xl rounded-2xl border border-[#2E2E2F]/10 overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+          <div className="relative w-full max-w-xl max-h-[85vh] bg-surface shadow-2xl rounded-2xl border border-sidebar-border overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
             {/* Header */}
-            <div className="px-6 py-4 border-b border-[#2E2E2F]/5 flex items-center justify-between bg-[#F2F2F2]/50 backdrop-blur-xl">
+            <div className="px-6 py-4 border-b border-sidebar-border flex items-center justify-between bg-surface/50 backdrop-blur-xl">
               <div className="flex items-center gap-3">
-                <button onClick={() => setSelectedTicket(null)} className="w-8 h-8 flex items-center justify-center hover:bg-[#2E2E2F]/5 rounded-lg text-[#2E2E2F] transition-all">
+                <button onClick={() => setSelectedTicket(null)} className="w-8 h-8 flex items-center justify-center hover:bg-background rounded-lg text-text dark:text-white transition-all">
                   <ICONS.ArrowLeft className="w-4 h-4" />
                 </button>
                 <div>
-                  <h3 className="text-base font-black text-[#2E2E2F] tracking-tight">{selectedTicket.type === 'EVENT_REPORT' ? 'Incident Investigation' : 'Ticket Resolution'}</h3>
-                  <p className="text-[8px] font-black text-[#2E2E2F]/40 uppercase tracking-[0.2em]">{selectedTicket.notification_id}</p>
+                  <h3 className="text-base font-black text-text dark:text-white tracking-tight">{selectedTicket.type === 'EVENT_REPORT' ? 'Incident Investigation' : 'Ticket Resolution'}</h3>
+                  <p className="text-[8px] font-black text-text/40 dark:text-white/40 uppercase tracking-[0.2em]">{selectedTicket.notification_id}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 {selectedTicket.type !== 'EVENT_REPORT' && (
                   <button
                     onClick={() => loadMessages(selectedTicket.notification_id)}
-                    className="p-1.5 hover:bg-[#2E2E2F]/5 rounded-lg text-[#2E2E2F] transition-all"
+                    className="p-1.5 hover:bg-background rounded-lg text-text dark:text-white transition-all"
                     title="Refresh thread"
                   >
                     <ICONS.RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
                   </button>
                 )}
-                <div className="px-2 py-0.5 bg-[#2E2E2F]/5 border border-[#2E2E2F]/5 rounded-md text-[9px] font-black uppercase text-[#2E2E2F]/60">
+                <div className="px-2 py-0.5 bg-background border border-sidebar-border rounded-md text-[9px] font-black uppercase text-text/60 dark:text-white/60">
                   {selectedTicket.type === 'EVENT_REPORT' ? 'Public' : 'Private'}
                 </div>
+                <button
+                  onClick={() => handleDelete(selectedTicket.notification_id)}
+                  className="p-1.5 hover:bg-red-500/10 rounded-lg text-red-500 transition-all"
+                  title="Delete case"
+                >
+                  <ICONS.Trash className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar flex flex-col items-center">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar flex flex-col items-center bg-background/30">
               {/* Main Message (Incident or Ticket Start) */}
               <div className="w-full max-w-sm flex flex-col items-center text-center">
-                <div className="w-12 h-12 rounded-xl bg-[#2E2E2F]/5 border border-[#2E2E2F]/5 flex shrink-0 items-center justify-center shadow-sm overflow-hidden mb-4">
+                <div className="w-12 h-12 rounded-xl bg-background border border-sidebar-border flex shrink-0 items-center justify-center shadow-sm overflow-hidden mb-4">
                   {selectedTicket.organizer?.profileImageUrl ? (
                     <img src={selectedTicket.organizer.profileImageUrl} alt="O" className="w-full h-full object-cover" />
                   ) : (
@@ -482,24 +544,24 @@ export const SupportTickets: React.FC = () => {
                 <div className="w-full space-y-4">
                   <div className="space-y-3">
                     <div className="flex flex-col items-center">
-                      <h4 className="text-base font-black text-[#2E2E2F] tracking-tight">{selectedTicket.title}</h4>
-                      <span className="text-[8px] font-black text-[#2E2E2F]/30 uppercase tracking-widest mt-1">{new Date(selectedTicket.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+                      <h4 className="text-base font-black text-text dark:text-white tracking-tight">{selectedTicket.title}</h4>
+                      <span className="text-[8px] font-black text-text/30 dark:text-white/30 uppercase tracking-widest mt-1">{new Date(selectedTicket.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
                     </div>
 
-                    <div className="p-4 bg-[#2E2E2F]/5 rounded-2xl border border-[#2E2E2F]/5 w-full">
-                      <p className="text-[8px] font-black text-[#2E2E2F]/30 uppercase tracking-widest mb-2">Message Payload</p>
-                      <div className="text-[12px] text-[#2E2E2F]/70 leading-relaxed">
+                    <div className="p-4 bg-background rounded-2xl border border-sidebar-border w-full shadow-inner">
+                      <p className="text-[8px] font-black text-text/30 dark:text-white/30 uppercase tracking-widest mb-2">Message Payload</p>
+                      <div className="text-[12px] text-text/70 dark:text-white/70 leading-relaxed">
                         {renderMessageContent(selectedTicket.message)}
                       </div>
 
                       {/* If it's an Event Report, show the imageUrl if provided in metadata */}
                       {selectedTicket.type === 'EVENT_REPORT' && selectedTicket.metadata?.imageUrl && (
                         <div className="mt-4">
-                          <p className="text-[8px] font-black text-[#2E2E2F]/30 uppercase tracking-widest mb-2">Attachment</p>
+                          <p className="text-[8px] font-black text-text/30 dark:text-white/30 uppercase tracking-widest mb-2">Attachment</p>
                           <img
                             src={selectedTicket.metadata.imageUrl}
                             alt="Report Proof"
-                            className="w-full max-h-[180px] object-contain rounded-xl border border-[#2E2E2F]/5 cursor-pointer hover:opacity-90 transition-opacity"
+                            className="w-full max-h-[180px] object-contain rounded-xl border border-sidebar-border cursor-pointer hover:opacity-90 transition-opacity"
                             onClick={() => window.open(selectedTicket.metadata.imageUrl, '_blank')}
                           />
                         </div>
@@ -507,27 +569,27 @@ export const SupportTickets: React.FC = () => {
 
                       {/* Additional Info for Reports */}
                       {selectedTicket.type === 'EVENT_REPORT' && (
-                        <div className="mt-5 pt-4 border-t border-[#2E2E2F]/5">
+                        <div className="mt-5 pt-4 border-t border-sidebar-border">
                           <div className="grid grid-cols-2 gap-3 text-left">
                             <div className="min-w-0">
-                              <p className="text-[7px] font-black text-[#2E2E2F]/20 uppercase tracking-widest mb-0.5">Reporter</p>
-                              <p className="text-[10px] font-bold text-[#2E2E2F] truncate">{selectedTicket.metadata?.reporterEmail}</p>
+                              <p className="text-[7px] font-black text-text/20 dark:text-white/20 uppercase tracking-widest mb-0.5">Reporter</p>
+                              <p className="text-[10px] font-bold text-text dark:text-white truncate">{selectedTicket.metadata?.reporterEmail}</p>
                             </div>
                             <div className="min-w-0">
-                              <p className="text-[7px] font-black text-[#2E2E2F]/20 uppercase tracking-widest mb-0.5">Event</p>
+                              <p className="text-[7px] font-black text-text/20 dark:text-white/20 uppercase tracking-widest mb-0.5">Event</p>
                               <p className="text-[10px] font-bold text-[#38BDF2] truncate">{selectedTicket.metadata?.eventName || 'Unknown'}</p>
                             </div>
                           </div>
                           <div className="mt-5 flex gap-2">
                             <button
                               onClick={() => navigate('/events')}
-                              className="flex-1 bg-[#2E2E2F] text-white py-2 rounded-lg text-[9px] font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-md"
+                              className="flex-1 bg-text dark:bg-white text-background dark:text-[#2E2E2F] py-2 rounded-lg text-[9px] font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-md"
                             >
                               Moderate
                             </button>
                             <button
                               onClick={() => handleResolve(selectedTicket.notification_id)}
-                              className="flex-1 bg-[#2E2E2F]/10 text-[#2E2E2F] py-2 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-[#2E2E2F]/20 transition-all"
+                              className="flex-1 bg-text/10 dark:bg-white/10 text-text dark:text-white py-2 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-text/20 dark:hover:bg-white/20 transition-all"
                             >
                               Dismiss
                             </button>
@@ -543,25 +605,25 @@ export const SupportTickets: React.FC = () => {
                       {(ticketMessages[selectedTicket.notification_id] || []).map((m) => (
                         <div key={m.message_id} className={`flex flex-col gap-1 ${m.is_admin_reply ? 'items-end' : 'items-start'}`}>
                           <div className={`flex items-end gap-2 ${m.is_admin_reply ? 'flex-row-reverse' : 'flex-row'}`}>
-                            <div className={`w-6 h-6 rounded-lg flex-shrink-0 flex items-center justify-center border border-[#2E2E2F]/5 bg-[#2E2E2F]/5`}>
+                            <div className={`w-6 h-6 rounded-lg flex-shrink-0 flex items-center justify-center border border-sidebar-border bg-background shadow-sm overflow-hidden`}>
                               {m.is_admin_reply ? (
                                 <img src="/lgo.webp" alt="S" className="w-full h-full object-contain p-0.5" />
                               ) : (
                                 selectedTicket.organizer?.profileImageUrl ? (
                                   <img src={selectedTicket.organizer.profileImageUrl} alt="O" className="w-full h-full object-cover" />
                                 ) : (
-                                  <ICONS.User className="w-3 h-3 text-[#2E2E2F]/20" />
+                                  <ICONS.User className="w-3 h-3 text-text/20 dark:text-white/20" />
                                 )
                               )}
                             </div>
-                            <div className={`px-3 py-2 rounded-xl text-[11px] text-left ${m.is_admin_reply
+                            <div className={`px-3 py-2 rounded-xl text-[11px] text-left shadow-sm ${m.is_admin_reply
                                 ? 'bg-[#38BDF2] text-white rounded-br-none'
-                                : 'bg-[#2E2E2F]/5 text-[#2E2E2F] rounded-bl-none'
+                                : 'bg-background text-text dark:text-white rounded-bl-none border border-sidebar-border'
                               }`}>
                               {renderMessageContent(m.message)}
                             </div>
                           </div>
-                          <p className={`text-[7px] font-black uppercase tracking-tighter text-[#2E2E2F]/30 ${m.is_admin_reply ? 'mr-8' : 'ml-8'}`}>
+                          <p className={`text-[7px] font-black uppercase tracking-tighter text-text/30 dark:text-white/30 ${m.is_admin_reply ? 'mr-8' : 'ml-8'}`}>
                             {m.is_admin_reply ? 'Admin' : (selectedTicket.organizer?.organizerName || 'Org')} • {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
@@ -574,13 +636,13 @@ export const SupportTickets: React.FC = () => {
 
             {/* Reply Footer (Only for Support Tickets) */}
             {selectedTicket.type !== 'EVENT_REPORT' && (
-              <div className="p-4 bg-[#F2F2F2] border-t border-[#2E2E2F]/5">
+              <div className="p-4 bg-surface border-t border-sidebar-border">
                 {!(selectedTicket.metadata?.status === 'resolved' || selectedTicket.is_read) ? (
                   <div className="space-y-2">
                     <div className="relative">
                       <textarea
                         placeholder="Type response..."
-                        className="w-full py-2.5 pl-4 pr-12 bg-[#2E2E2F]/5 border-2 border-transparent rounded-xl text-[11px] font-bold focus:border-[#38BDF2]/40 transition-all outline-none text-[#2E2E2F] resize-none min-h-[60px]"
+                        className="w-full py-2.5 pl-4 pr-12 bg-background border-2 border-transparent rounded-xl text-[11px] font-bold focus:border-[#38BDF2]/40 transition-all outline-none text-text dark:text-white resize-none min-h-[60px]"
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                       />
@@ -594,14 +656,14 @@ export const SupportTickets: React.FC = () => {
                     </div>
                     <button
                       onClick={() => handleResolve(selectedTicket.notification_id)}
-                      className="w-full text-[8px] font-black uppercase tracking-widest text-[#2E2E2F]/20 hover:text-[#2E2E2F] transition-all py-1"
+                      className="w-full text-[8px] font-black uppercase tracking-widest text-text/20 dark:text-white/20 hover:text-text dark:hover:text-white transition-all py-1"
                     >
                       Mark Resolved
                     </button>
                   </div>
                 ) : (
                   <div className="py-4 text-center">
-                    <p className="text-[11px] font-black text-[#2E2E2F]/20 uppercase tracking-[0.4em]">Administrative Case Closed</p>
+                    <p className="text-[11px] font-black text-text/20 dark:text-white/20 uppercase tracking-[0.4em]">Administrative Case Closed</p>
                   </div>
                 )}
               </div>
