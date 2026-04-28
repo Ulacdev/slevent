@@ -361,8 +361,16 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Missing login credentials or tokens" });
     }
 
-    // --- SELF-HEALING: Ensure user and organizer profiles exist ---
-    let { data: dbUser } = await db.from('users').select('*').eq('userId', user.id).maybeSingle();
+    // --- SELF-HEALING & SESSION SYNC: Combined lookup ---
+    // Performance Optimization: Fetch user and organizer in one go with a join
+    let { data: dbUserExtended } = await db
+      .from('users')
+      .select('*, organizers(*)')
+      .eq('userId', user.id)
+      .maybeSingle();
+
+    let dbUser = dbUserExtended;
+    let orgData = dbUserExtended?.organizers?.[0] || null;
 
     if (!dbUser) {
       // B.1 Check if user with this email exists under a different userId (Identity Migration)
@@ -378,16 +386,13 @@ export const login = async (req, res) => {
         // Update organizers table
         await db.from('organizers').update({ ownerUserId: user.id }).eq('ownerUserId', oldId);
         
-        // 3. Update events table (Fix createdBy link)
+        // Update events table (Fix createdBy link)
         await db.from('events').update({ createdBy: user.id }).eq('createdBy', oldId);
         
-        // 4. Also ensure any events created by this email (regardless of ID) are linked to the organizer
-        const { data: currentOrg } = await db.from('organizers').select('organizerId').eq('ownerUserId', user.id).maybeSingle();
-        if (currentOrg) {
-           await db.from('events').update({ organizerId: currentOrg.organizerId }).eq('createdBy', user.id).is('organizerId', null);
-        }
-        
-        dbUser = { ...userByEmail, userId: user.id };
+        // Fetch again after fix
+        const { data: fixedUser } = await db.from('users').select('*, organizers(*)').eq('userId', user.id).maybeSingle();
+        dbUser = fixedUser;
+        orgData = fixedUser?.organizers?.[0] || null;
       } else {
         console.log(`[Auth] Syncing missing DB user: ${user.email}`);
         const { data: insertedUser, error: insertError } = await db.from('users').insert({
@@ -401,28 +406,25 @@ export const login = async (req, res) => {
       }
     }
 
-    // Now evaluate role and status after potential sync/reconciliation
-    let finalRole = dbUser?.role || ORGANIZER_ROLE;
-
-    if (dbUser && dbUser.status === 'Inactive') {
-      console.warn(`[Auth] Blocked login for inactive user: ${user.email}`);
-      // Clear cookies if they exist to prevent persistent re-auth attempts
-      res.cookie("access_token", "", { maxAge: 0 });
-      res.cookie("refresh_token", "", { maxAge: 0 });
-      return res.status(403).json({ message: "Your account is currently INACTIVE. Please contact support or your organization administrator for assistance." });
-    }
-
-
-    const { data: orgData } = await db.from('organizers').select('organizerId, isOnboarded').eq('ownerUserId', user.id).maybeSingle();
-    let isOnboarded = orgData?.isOnboarded || false;
-
-    if (!orgData) {
+    if (!orgData && dbUser) {
       console.log(`[Auth] Syncing missing Organizer profile for: ${user.id}`);
-      await db.from('organizers').insert({
+      const { data: newOrg } = await db.from('organizers').insert({
         ownerUserId: user.id,
         organizerName: user.user_metadata?.name || 'My Organization',
         isOnboarded: false
-      });
+      }).select().single();
+      orgData = newOrg;
+    }
+
+    // Evaluate role and status
+    let finalRole = dbUser?.role || ORGANIZER_ROLE;
+    let isOnboarded = orgData?.isOnboarded || false;
+
+    if (dbUser && dbUser.status === 'Inactive') {
+      console.warn(`[Auth] Blocked login for inactive user: ${user.email}`);
+      res.cookie("access_token", "", { maxAge: 0 });
+      res.cookie("refresh_token", "", { maxAge: 0 });
+      return res.status(403).json({ message: "Your account is currently INACTIVE. Please contact support." });
     }
 
     // ✅ Store tokens in secure httpOnly cookies
@@ -516,41 +518,33 @@ export async function logout(req, res) {
     const accessToken = req.cookies?.[ACCESS_COOKIE] ?? null;
     const refreshToken = req.cookies?.[REFRESH_COOKIE] ?? null;
 
-    // Best-effort: bind session; ignore errors
-    if (accessToken && refreshToken) {
+    if (accessToken) {
+      // Performance & Reliability Fix: Use a client initialized with the user's token
+      // This ensures Supabase knows exactly which session to invalidate.
+      const userAuthClient = createAuthClient(accessToken);
+      
       try {
-        await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
+        // Log logout before revoking
+        const { data: userData } = await userAuthClient.auth.getUser();
+        if (userData?.user) {
+          await logAudit({ actionType: 'LOGOUT', actorUserId: userData.user.id, req });
+        }
+
+        // Revoke session on Supabase side
+        // scope: 'local' ends only the current device session, which is safer for load testing
+        await userAuthClient.auth.signOut({ scope: "local" });
       } catch (e) {
-        // ignore (session may not map)
+        console.warn("[Auth] Supabase signOut error (ignoring):", e.message);
       }
     }
 
-    // Best-effort revoke; ignore benign errors (e.g., missing session_id)
-    try {
-      await supabase.auth.signOut({ scope: "global" });
-    } catch (e) {
-      // ignore
-    }
-
-    // Log logout
-    if (accessToken) {
-      // Best effort decode for logging
-      try {
-        const { data: user } = await supabase.auth.getUser(accessToken);
-        if (user?.user) await logAudit({ actionType: 'LOGOUT', actorUserId: user.user.id, req });
-      } catch {}
-    }
-
-    // Always expire cookies; names and attributes must match how you set them at login
+    // Always expire cookies
     res.cookie(ACCESS_COOKIE, "", { ...cookieBase, expires: new Date(0) });
     res.cookie(REFRESH_COOKIE, "", { ...cookieBase, expires: new Date(0) });
 
     return res.status(204).send();
   } catch (err) {
-    // Still expire on unexpected errors and finish with 204
+    console.error("[Auth] Logout fatal error:", err);
     res.cookie(ACCESS_COOKIE, "", { ...cookieBase, expires: new Date(0) });
     res.cookie(REFRESH_COOKIE, "", { ...cookieBase, expires: new Date(0) });
     return res.status(204).send();

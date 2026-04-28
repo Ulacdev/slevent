@@ -18,6 +18,7 @@ export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 
                     subscriptionStatus,
                     planExpiresAt,
                     currentPlanId,
+                    invite_count,
                     plan:plans(*)
                 `)
                 .eq('organizerId', organizerId)
@@ -206,42 +207,57 @@ export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 
             }
 
             case 'max_staff_accounts': {
-                const ownerUserId = organizer.ownerUserId;
-
-                // 1. Get all current staff IDs
-                const { data: staffUsers } = await supabase
-                    .from('users')
-                    .select('userId')
-                    .eq('employerId', ownerUserId);
-
-                const staffIds = (staffUsers || []).map(u => u.userId);
-                staffIds.push(ownerUserId); // Include owner to find their invites too
-
-                // 2. Count current staff (excluding owner if they aren't counted as staff)
-                const confirmedCount = (staffUsers || []).length;
-
-                // 3. Count pending invites from anyone in the organization
-                const { count: inviteCount } = await supabase
-                    .from('invites')
-                    .select('*', { count: 'exact', head: true })
-                    .in('invitedBy', staffIds);
-
-                const totalStaffPotential = confirmedCount + (inviteCount || 0);
                 const limitValue = (limits.max_staff_accounts ?? 2);
+                
+                // Performance Optimization: Use pre-computed invite_count from organizer table if available
+                if (organizer.invite_count !== undefined && organizer.invite_count !== null) {
+                    const totalStaffPotential = organizer.invite_count;
+                    if (totalStaffPotential >= limitValue) {
+                        return {
+                            allowed: false,
+                            message: `Staff account limit reached. Your current plan allows up to ${limitValue} staff accounts.`,
+                            limit: limitValue,
+                            current: totalStaffPotential
+                        };
+                    }
+                } else {
+                    // Fallback to legacy slow count if column doesn't exist yet
+                    const ownerUserId = organizer.ownerUserId;
 
-                if (totalStaffPotential >= limitValue) {
-                    return {
-                        allowed: false,
-                        message: `Staff account limit reached. Your current plan allows up to ${limitValue} staff accounts.`,
-                        limit: limitValue,
-                        current: totalStaffPotential
-                    };
+                    // 1. Get all current staff IDs
+                    const { data: staffUsers } = await supabase
+                        .from('users')
+                        .select('userId')
+                        .eq('employerId', ownerUserId);
+
+                    const staffIds = (staffUsers || []).map(u => u.userId);
+                    staffIds.push(ownerUserId);
+
+                    // 2. Count current staff (excluding owner if they aren't counted as staff)
+                    const confirmedCount = (staffUsers || []).length;
+
+                    // 3. Count pending invites
+                    const { count: inviteCount } = await supabase
+                        .from('invites')
+                        .select('*', { count: 'exact', head: true })
+                        .in('invitedBy', staffIds);
+
+                    const totalStaffPotential = confirmedCount + (inviteCount || 0);
+
+                    if (totalStaffPotential >= limitValue) {
+                        return {
+                            allowed: false,
+                            message: `Staff account limit reached. Your current plan allows up to ${limitValue} staff accounts.`,
+                            limit: limitValue,
+                            current: totalStaffPotential
+                        };
+                    }
                 }
                 
                 return {
                     allowed: true,
                     limit: limitValue,
-                    current: totalStaffPotential
+                    current: organizer.invite_count || 0
                 };
             }
 

@@ -317,26 +317,25 @@ export const getPromotedEvents = async (req, res) => {
       regCountMap.set(att.eventId, (regCountMap.get(att.eventId) || 0) + 1);
     });
 
-    // Get organizer data for each event
-    const eventsWithOrganizers = await Promise.all((events || []).map(async (event) => {
-      const eventWithData = {
-        ...event,
-        ticketTypes: ttMap.get(event.eventId) || [],
-        likesCount: likeCountsMap.get(event.eventId) || 0,
-        registrationCount: regCountMap.get(event.eventId) || 0
-      };
-      if (event.organizerId) {
-        const { data: organizer, error: orgErr } = await supabase
-          .from('organizers')
-          .select('organizerId, organizerName, profileImageUrl, bio, website, followersCount')
-          .eq('organizerId', event.organizerId)
-          .single();
+    // Performance Optimization: Batch fetch organizers instead of N+1 loop
+    const organizerIds = [...new Set((events || []).map(e => e.organizerId).filter(Boolean))];
+    let organizerMap = new Map();
 
-        if (!orgErr && organizer) {
-          return { ...eventWithData, organizer };
-        }
-      }
-      return { ...eventWithData, organizer: null };
+    if (organizerIds.length > 0) {
+      const { data: orgs } = await supabase
+        .from('organizers')
+        .select('organizerId, organizerName, profileImageUrl, bio, website, followersCount')
+        .in('organizerId', organizerIds);
+      
+      (orgs || []).forEach(o => organizerMap.set(o.organizerId, o));
+    }
+
+    const eventsWithOrganizers = (events || []).map(event => ({
+      ...event,
+      ticketTypes: ttMap.get(event.eventId) || [],
+      likesCount: likeCountsMap.get(event.eventId) || 0,
+      registrationCount: regCountMap.get(event.eventId) || 0,
+      organizer: organizerMap.get(event.organizerId) || null
     }));
 
     return res.json({ events: eventsWithOrganizers });

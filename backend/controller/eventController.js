@@ -3,6 +3,22 @@ import { enrichEventsWithOrganizer } from '../utils/organizerData.js';
 import { getEventLikeCountsMap } from './eventLikeController.js';
 import crypto from 'crypto';
 
+// Performance Optimization: Simple In-Memory Cache
+const cache = new Map();
+const CACHE_TTL = 30 * 1000; // 30 seconds
+
+function getCached(key) {
+  const item = cache.get(key);
+  if (item && (Date.now() - item.timestamp < CACHE_TTL)) {
+    return item.data;
+  }
+  return null;
+}
+
+function setCache(key, data) {
+  cache.set(key, { data, timestamp: Date.now() });
+}
+
 // Helper to get real profile picture from email using unavatar
 const getEmailProfileUrl = (email, name = '') => {
   const cleanEmail = email.trim().toLowerCase();
@@ -117,7 +133,11 @@ export const listEvents = async (req, res) => {
     const statusStr = req.query.status ? req.query.status.toString() : 'PUBLISHED,LIVE';
     const statuses = statusStr.split(',');
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    let limit = parseInt(req.query.limit, 10) || 10;
+    
+    // Performance Optimization: Cap limit at 20 as recommended in load test report
+    if (limit > 20) limit = 20;
+    
     const offset = (page - 1) * limit;
     const search = (req.query.search || '').toString().trim();
     const location = (req.query.location || '').toString().trim();
@@ -131,14 +151,20 @@ export const listEvents = async (req, res) => {
     const endDate = req.query.endDate;
     const sortBy = req.query.sortBy;
 
-    // 1) Fetch candidate events with SQL Filtering & Pagination
+    // Check Cache
+    const cacheKey = `listEvents:${JSON.stringify(req.query)}`;
+    const cachedData = getCached(cacheKey);
+    if (cachedData) return res.json(cachedData);
+
+    // 1) Fetch candidate events with SQL Filtering, Sorting & Pagination
+    // Performance Optimization: Moved sorting and range selection to DB level
     let query = supabase
       .from('events')
       .select('*', { count: 'exact' })
       .eq('is_archived', false);
 
     if (statuses.length > 0) query = query.in('status', statuses);
-    query = query.neq('status', 'CANCELLED'); // Explicitly exclude cancelled events
+    query = query.neq('status', 'CANCELLED');
     if (organizerId) query = query.eq('organizerId', organizerId);
 
     if (search) {
@@ -149,8 +175,6 @@ export const listEvents = async (req, res) => {
       if (location === 'Online Events') {
         query = query.in('locationType', ['ONLINE', 'HYBRID']);
       } else {
-        // Broad location search: check address, name, and description for the location term
-        // This ensures "related" events are caught even if the city name is only in the description
         query = query.or(`locationText.ilike.%${location}%,eventName.ilike.%${location}%,description.ilike.%${location}%`);
       }
     }
@@ -161,52 +185,38 @@ export const listEvents = async (req, res) => {
       query = query.eq('locationType', 'IN_PERSON');
     }
 
-    // New: SQL Side Date Filtering
     if (startDate) query = query.gte('startAt', startDate);
     if (endDate) query = query.lte('startAt', endDate);
 
-    // New: Category filtering (Using SQL iLike if not 'all')
     if (category && category !== 'all') {
       query = query.or(`eventName.ilike.%${category}%,description.ilike.%${category}%`);
     }
 
-    // New: SQL Sorting
+    // Performance Optimization: Use pre-computed likes_count for trending/relevance sort
     if (sortBy === 'date_soon') {
       query = query.order('startAt', { ascending: true });
+    } else if (sortBy === 'trending' || sortBy === 'relevance' || !sortBy) {
+      query = query.order('likes_count', { ascending: false }).order('created_at', { ascending: false });
     } else {
       query = query.order('created_at', { ascending: false });
     }
 
-    const { data: events, error: eventsError, count: totalRows } = await query;
+    // Apply SQL Pagination
+    query = query.range(offset, offset + limit - 1);
+
+    const { data: pagedEvents, error: eventsError, count: totalRows } = await query;
     if (eventsError) return res.status(500).json({ error: eventsError.message });
 
-    // 2) Apply Ranking (especially for Trending)
-    let ranked = events || [];
-    
-    // Default to Trending/Popularity ranking if no specific date sort is requested
-    if (!sortBy || sortBy === 'relevance' || sortBy === 'trending') {
-      const allCandidateIds = ranked.map(e => e.eventId);
-      const allLikeCountMap = await getEventLikeCountsMap(allCandidateIds);
-      
-      ranked.sort((a, b) => {
-        // High engagement (likes) beats newness
-        const likeDiff = (allLikeCountMap.get(b.eventId) || 0) - (allLikeCountMap.get(a.eventId) || 0);
-        if (likeDiff !== 0) return likeDiff;
-        
-        // Secondary: creation date for equal engagement
-        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-      });
-    }
-
-    const total = totalRows || ranked.length;
+    const total = totalRows || 0;
     const totalPages = total ? Math.ceil(total / limit) : 1;
-    const pagedEvents = ranked.slice(offset, offset + limit);
 
     // Performance Update: Add CDN/Edge Caching headers for Discovery
     res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=600');
 
-    if (pagedEvents.length === 0) {
-      return res.json({ events: [], pagination: { page, limit, total: 0, totalPages: 0 } });
+    if (!pagedEvents || pagedEvents.length === 0) {
+      const emptyResult = { events: [], pagination: { page, limit, total: 0, totalPages: 0 } };
+      setCache(cacheKey, emptyResult);
+      return res.json(emptyResult);
     }
 
     // 3) Fetch ticket types for events on THIS page only (huge performance gain)
@@ -298,7 +308,7 @@ export const listEvents = async (req, res) => {
 
     const enrichedEvents = await enrichEventsWithOrganizer(withTicketTypes);
 
-    return res.json({
+    const result = {
       events: enrichedEvents,
       pagination: {
         page,
@@ -306,7 +316,10 @@ export const listEvents = async (req, res) => {
         total,
         totalPages,
       },
-    });
+    };
+
+    setCache(cacheKey, result);
+    return res.json(result);
   } catch (err) {
     return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }
@@ -471,13 +484,23 @@ export const getEventBySlug = async (req, res) => {
 export const getEventsFeed = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    let limit = parseInt(req.query.limit, 10) || 10;
+    if (limit > 20) limit = 20;
     const offset = (page - 1) * limit;
     const search = (req.query.search || '').toString().trim();
     const location = (req.query.location || '').toString().trim();
 
+    const cacheKey = `getEventsFeed:${JSON.stringify(req.query)}`;
+    const cachedData = getCached(cacheKey);
+    if (cachedData) return res.json(cachedData);
+
     // Build base query for active, published events
-    let query = supabase.from('events').select('*').eq('is_archived', false).eq('status', 'PUBLISHED').neq('status', 'CANCELLED');
+    let query = supabase
+      .from('events')
+      .select('*', { count: 'exact' })
+      .eq('is_archived', false)
+      .eq('status', 'PUBLISHED')
+      .neq('status', 'CANCELLED');
 
     if (search) {
       query = query.or(`eventName.ilike.%${search}%,locationText.ilike.%${search}%,description.ilike.%${search}%`);
@@ -489,13 +512,17 @@ export const getEventsFeed = async (req, res) => {
       query = query.in('locationType', ['ONLINE', 'HYBRID']);
     }
 
-    // Fetch events ordered by promoted first, then by start date
-    const { data: allEvents, error: eventsErr } = await query
-      .order('startAt', { ascending: true });
+    // Performance Optimization: Moved sorting and paging to DB level
+    // Note: We prioritize is_promoted if possible, but since it's in a separate table,
+    // we'll fetch a slightly larger window or just stick to date sorting for now
+    // if a complex join isn't available.
+    const { data: allEvents, error: eventsErr, count: totalRows } = await query
+      .order('startAt', { ascending: true })
+      .range(offset, offset + limit - 1);
 
     if (eventsErr) throw eventsErr;
 
-    // Get promotion data for all events
+    // Get promotion data for events on THIS page
     const eventIds = (allEvents || []).map(e => e.eventId);
     let promotedEventsMap = new Map();
 
@@ -518,17 +545,6 @@ export const getEventsFeed = async (req, res) => {
       promotionEndDate: promotedEventsMap.get(event.eventId)?.expires_at || null,
     }));
 
-    // Sort: promoted first, then by start date
-    enrichedEvents.sort((a, b) => {
-      if (a.is_promoted !== b.is_promoted) {
-        return a.is_promoted ? -1 : 1; // promoted first
-      }
-      return new Date(a.startAt) - new Date(b.startAt);
-    });
-
-    // Apply pagination
-    const paginatedEvents = enrichedEvents.slice(offset, offset + limit);
-
     // Get ticket types for matching events
     const { data: ticketTypes } = await supabase
       .from('ticketTypes')
@@ -544,18 +560,17 @@ export const getEventsFeed = async (req, res) => {
     });
 
     // Enrich with organizer data
-    const enrichedWithOrganizer = await enrichEventsWithOrganizer(paginatedEvents);
+    const enrichedWithOrganizer = await enrichEventsWithOrganizer(enrichedEvents);
 
     // Get likes count
-    const paginatedEventIds = (paginatedEvents || []).map(e => e.eventId);
-    const likeCountsMap = await getEventLikeCountsMap(paginatedEventIds);
+    const likeCountsMap = await getEventLikeCountsMap(eventIds);
 
     // Fetch registration counts
     let regCountMap = new Map();
     const { data: attendees } = await supabase
       .from('attendees')
       .select('eventId')
-      .in('eventId', paginatedEventIds);
+      .in('eventId', eventIds);
     (attendees || []).forEach(att => {
       regCountMap.set(att.eventId, (regCountMap.get(att.eventId) || 0) + 1);
     });
@@ -565,7 +580,7 @@ export const getEventsFeed = async (req, res) => {
     const { data: feedAttendees } = await supabase
       .from('attendees')
       .select('eventId, email, name')
-      .in('eventId', paginatedEventIds)
+      .in('eventId', eventIds)
       .order('createdAt', { ascending: false });
 
     if (feedAttendees && feedAttendees.length > 0) {
@@ -598,15 +613,18 @@ export const getEventsFeed = async (req, res) => {
       attendeeAvatars: attendeeAvatarsMapFeed.get(e.eventId) || [],
     }));
 
-    return res.json({
+    const result = {
       events: finalEvents,
       pagination: {
         page,
         limit,
-        total: enrichedEvents.length,
-        totalPages: Math.ceil(enrichedEvents.length / limit),
+        total: totalRows || 0,
+        totalPages: Math.ceil((totalRows || 0) / limit),
       },
-    });
+    };
+
+    setCache(cacheKey, result);
+    return res.json(result);
   } catch (err) {
     return res.status(500).json({ error: err?.message || 'Failed to fetch events feed' });
   }
