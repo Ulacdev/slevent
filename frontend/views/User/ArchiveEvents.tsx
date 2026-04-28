@@ -386,14 +386,14 @@ export const ArchiveEvents: React.FC = () => {
 
       {/* Empty State */}
       {(activeTab === 'events' ? events.length === 0 : activeTab === 'transactions' ? transactions.length === 0 : supportTickets.length === 0) ? (
-        <Card className="p-12 rounded-xl border-[#2E2E2F]/10 dark:border-white/10 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F2F2F2] dark:bg-[#111111] flex items-center justify-center">
+        <Card className="p-12 rounded-xl border-sidebar-border text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-background flex items-center justify-center">
             <svg className="w-8 h-8 text-[#2E2E2F] dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
             </svg>
           </div>
           <h3 className="text-xl font-black text-[#2E2E2F] dark:text-white">No Archived {activeTab === 'events' ? 'Events' : activeTab === 'transactions' ? 'Reports' : 'Support Tickets'}</h3>
-          <p className="text-[#2E2E2F] dark:text-white mt-2">{activeTab === 'events' ? 'Events' : activeTab === 'transactions' ? 'Transactions' : 'Support tickets'} you archive will appear here</p>
+          <p className="text-[#2E2E2F] dark:text-white/60 mt-2">{activeTab === 'events' ? 'Events' : activeTab === 'transactions' ? 'Transactions' : 'Support tickets'} you archive will appear here</p>
           <Button 
             onClick={() => navigate(activeTab === 'events' ? '/my-events' : activeTab === 'transactions' ? '/user/reports' : '/organizer-support')}
             className="mt-6 px-6 py-3 rounded-xl font-black text-[10px]"
@@ -403,8 +403,8 @@ export const ArchiveEvents: React.FC = () => {
         </Card>
       ) : (
         /* Table View */
-        <Card className="overflow-hidden rounded-xl border-[#2E2E2F]/10 dark:border-white/10">
-          <div className="flex justify-between items-center px-6 py-4 border-b border-[#2E2E2F]/10 dark:border-white/10">
+        <Card className="overflow-hidden rounded-xl border-sidebar-border bg-surface">
+          <div className="flex justify-between items-center px-6 py-4 border-b border-sidebar-border">
             <div className="text-sm font-semibold text-[#2E2E2F] dark:text-white">
               {selectedRows.size > 0 ? `${selectedRows.size} selected` : `${activeTab === 'events' ? events.length : activeTab === 'transactions' ? transactions.length : supportTickets.length} entries`}
             </div>
@@ -471,7 +471,7 @@ export const ArchiveEvents: React.FC = () => {
             {activeTab === 'events' ? (
               <table className="w-full">
                 <thead>
-                  <tr className="bg-[#F2F2F2] dark:bg-[#111111] border-b border-[#2E2E2F]/10 dark:border-white/10">
+                  <tr className="bg-background border-b border-sidebar-border">
                     <th className="text-left p-4 text-[10px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest w-12 text-center align-middle">
                       <div className="flex justify-center">
                         <Checkbox checked={selectedRows.size === events.length && events.length > 0} onChange={toggleAll} />
@@ -486,7 +486,7 @@ export const ArchiveEvents: React.FC = () => {
                 </thead>
                 <tbody>
                   {events.map((event) => (
-                    <tr key={event.eventId} className="border-b border-[#2E2E2F]/5 dark:border-white/5 hover:bg-[#38BDF2]/5 transition-colors">
+                    <tr key={event.eventId} className="border-b border-sidebar-border hover:bg-[#38BDF2]/5 transition-colors">
                       <td className="p-4 align-middle">
                         <div className="flex justify-center">
                           <Checkbox checked={selectedRows.has(event.eventId)} onChange={() => toggleRow(event.eventId)} />
@@ -519,7 +519,7 @@ export const ArchiveEvents: React.FC = () => {
             ) : activeTab === 'transactions' ? (
               <table className="w-full">
                 <thead>
-                  <tr className="bg-[#F2F2F2] dark:bg-[#111111] border-b border-[#2E2E2F]/10 dark:border-white/10">
+                  <tr className="bg-background border-b border-sidebar-border">
                     <th className="text-left p-4 text-[10px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest w-12 text-center align-middle">
                       <div className="flex justify-center">
                         <Checkbox checked={selectedRows.size === transactions.length && transactions.length > 0} onChange={toggleAll} />
@@ -534,7 +534,7 @@ export const ArchiveEvents: React.FC = () => {
                 </thead>
                 <tbody>
                   {transactions.map((t) => (
-                    <tr key={t.orderId} className="border-b border-[#2E2E2F]/5 dark:border-white/5 hover:bg-[#38BDF2]/5 transition-colors">
+                    <tr key={t.orderId} className="border-b border-sidebar-border hover:bg-[#38BDF2]/5 transition-colors">
                       <td className="p-4 align-middle">
                         <div className="flex justify-center">
                           <Checkbox checked={selectedRows.has(t.orderId)} onChange={() => toggleRow(t.orderId)} />

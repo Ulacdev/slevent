@@ -90,12 +90,12 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
               checked={dontShowAgain}
               onChange={setDontShowAgain}
               label={
-                <span className="text-sm font-semibold text-[#2E2E2F]">
+                <span className="text-sm font-semibold text-[#2E2E2F] dark:text-white">
                   {dontShowAgain ? "Won't show again until next login" : 'Don\'t show again'}
                 </span>
               }
             />
-          <Button variant="outline" onClick={handleClose} className="border-[#2E2E2F]/20 text-[#2E2E2F]">
+          <Button variant="outline" onClick={handleClose} className="border-sidebar-border text-[#2E2E2F] dark:text-white hover:bg-[#38BDF2]/10 transition-colors">
             Cancel / Close
           </Button>
         </div>
@@ -103,13 +103,13 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
     >
       <div className="flex flex-col h-full min-h-0 max-h-[85vh]">
         {/* Header */}
-        <div className="p-6 pb-4 shrink-0 flex flex-col gap-4 relative z-20 bg-[#F2F2F2] border-b border-[#2E2E2F]/10">
+        <div className="p-6 pb-4 shrink-0 flex flex-col gap-4 relative z-20 bg-background border-b border-sidebar-border">
           <div className="flex justify-between items-start gap-4">
             <div>
-              <h2 className="text-2xl font-black tracking-tighter text-[#2E2E2F] mb-1">
+              <h2 className="text-2xl font-black tracking-tighter text-[#2E2E2F] dark:text-white mb-1">
                 Upgrade Plan for {organizerName || 'Company'}
               </h2>
-              <p className="text-[#2E2E2F] font-medium">
+              <p className="text-[#2E2E2F] dark:text-white/60 font-medium">
                 {currentPlanId 
                   ? "Manage your current plan or upgrade to unlock more features for your business."
                   : "Select a new plan to unlock more features for your business."}
@@ -127,13 +127,13 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
           </div>
           
           <div className="flex justify-center w-full">
-            <div className="bg-[#EAEAEA] p-1.5 rounded-xl border border-[#2E2E2F]/10 flex items-center shadow-sm">
+            <div className="bg-surface p-1.5 rounded-xl border border-sidebar-border flex items-center shadow-sm">
               <button
                 type="button"
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${billingCycle === 'monthly'
                   ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/25'
-                  : 'text-[#2E2E2F] hover:text-[#2E2E2F] hover:bg-[#D9D9D9]'
+                  : 'text-[#2E2E2F] dark:text-white/70 hover:text-[#2E2E2F] dark:hover:text-white hover:bg-sidebar-border'
                   }`}
               >
                 Monthly
@@ -143,7 +143,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
                 onClick={() => setBillingCycle('yearly')}
                 className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${billingCycle === 'yearly'
                   ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/25'
-                  : 'text-[#2E2E2F] hover:text-[#2E2E2F] hover:bg-[#D9D9D9]'
+                  : 'text-[#2E2E2F] dark:text-white/70 hover:text-[#2E2E2F] dark:hover:text-white hover:bg-sidebar-border'
                   }`}
               >
                 Yearly
@@ -154,7 +154,7 @@ export const PlanUpgradeModal: React.FC<PlanUpgradeModalProps> = ({
         </div>
 
         {/* Content Body */}
-        <div className="px-6 py-6 overflow-y-auto flex-1 min-h-0 scrollbar-thin bg-transparent">
+        <div className="px-6 py-6 overflow-y-auto flex-1 min-h-0 scrollbar-thin bg-background">
           {loading ? (
             <div className="py-20 flex justify-center">
               <PageLoader variant="section" label="Loading plans..." />

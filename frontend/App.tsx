@@ -722,7 +722,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       <main
         className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}
       >
-        <header className="h-24 !bg-background border-b border-sidebar-border px-4 sm:px-8 flex items-center justify-between sticky top-0 z-[500] w-full" style={{ zoom: 0.8 }}>
+        <header className="h-24 bg-background border-b border-sidebar-border px-4 sm:px-8 flex items-center justify-between sticky top-0 z-[500] w-full" style={{ zoom: 0.8 }}>
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
@@ -750,13 +750,13 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             {/* Theme Toggle Button */}
             <button
               onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
-              className="w-11 h-11 flex items-center justify-center rounded-xl border border-[#38BDF2]/20 bg-transparent hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/40 hover:scale-105 active:scale-95 transition-all shadow-sm"
+              className="w-11 h-11 flex items-center justify-center rounded-xl border border-accent/20 bg-transparent hover:bg-accent/10 hover:border-accent/40 hover:scale-105 active:scale-95 transition-all shadow-sm"
               aria-label="Toggle Theme"
             >
               {theme === 'light' ? (
-                <ICONS.Moon className="w-5 h-5 text-[#2E2E2F]" />
+                <ICONS.Moon className="w-5 h-5 text-primary-text" />
               ) : (
-                <ICONS.Sun className="w-5 h-5 text-[#38BDF2]" />
+                <ICONS.Sun className="w-5 h-5 text-accent" />
               )}
             </button>
 
@@ -768,7 +768,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 >
                   <ICONS.Bell className="w-5 h-5 text-[#2E2E2F] group-hover:text-[#38BDF2] transition-colors" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center px-1 border-2 border-[#F2F2F2] shadow-sm">
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center px-1 border-2 border-background shadow-sm">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   )}
@@ -822,11 +822,11 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                                 }}
                                 className={`p-5 rounded-xl transition-all group relative border cursor-pointer ${n.isRead
                                   ? 'bg-transparent border-transparent opacity-60'
-                                  : 'bg-[#F2F2F2] border-[#2E2E2F]/5 hover:border-[#38BDF2]/30 shadow-sm'
+                                  : 'bg-surface border-sidebar-border hover:border-[#38BDF2]/30 shadow-sm'
                                   }`}
                               >
                                 <div className="flex items-start gap-4">
-                                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${n.isRead ? 'bg-[#2E2E2F]/5 text-[#2E2E2F]' : 'bg-[#38BDF2]/10 text-[#38BDF2]'
+                                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${n.isRead ? 'bg-background/50 text-[#2E2E2F]' : 'bg-[#38BDF2]/10 text-[#38BDF2]'
                                     }`}>
                                     <ICONS.Bell className="w-5 h-5" />
                                   </div>
@@ -855,8 +855,8 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           </div>
                         ) : (
                           <div className="flex flex-col items-center justify-center p-12 text-center h-full">
-                            <div className="w-24 h-24 bg-[#F2F2F2] rounded-xl flex items-center justify-center mb-8">
-                              <ICONS.Bell className="w-10 h-10 text-[#2E2E2F]" />
+                            <div className="w-24 h-24 bg-surface rounded-xl flex items-center justify-center mb-8">
+                              <ICONS.Bell className="w-10 h-10 text-[#2E2E2F] dark:text-white" />
                             </div>
                             <h3 className="text-xl font-black text-[#2E2E2F] tracking-tighter uppercase mb-2">Clean Slate</h3>
                             <p className="text-sm font-medium text-[#2E2E2F] max-w-[240px] leading-relaxed">
@@ -908,7 +908,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             {/* Profile Dropdown */}
             <div className="relative">
               <button
-                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-sidebar-border bg-background hover:bg-[#38BDF2]/10 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-sidebar-border bg-surface hover:bg-[#38BDF2]/10 transition-colors shadow-sm"
                 onClick={() => setUserMenuOpen((v) => !v)}
               >
                 <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] dark:text-white flex items-center justify-center">
@@ -930,7 +930,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
                   <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-surface border border-sidebar-border rounded-xl shadow-[0_10px_40px_-10px_rgba(46,46,47,0.1)] z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
-                    <div className="px-4 py-3 border-b border-sidebar-border mb-1">
+                    <div className="px-4 py-3 border-b border-sidebar-border mb-1 bg-background/50">
                       <p className="text-[10px] font-medium text-[#2E2E2F] dark:text-white/40 uppercase tracking-widest mb-0.5">Account</p>
                       <p className="text-xs font-semibold text-[#2E2E2F] dark:text-white truncate">{displayName}</p>
                       <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] dark:text-white/60 mt-1">{roleLabel}</p>
@@ -1011,8 +1011,8 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         {sidebarOpen && (
           <div className="fixed inset-0 z-[1000] flex md:hidden">
             <div className="fixed inset-0 bg-[#2E2E2F]/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-            <aside className="relative w-[min(18.5rem,calc(100vw-2.5rem))] bg-[#F2F2F2] border-r border-[#E5E7EB] flex flex-col h-full z-[1100] animate-in slide-in-from-left duration-300 shadow-2xl">
-              <div className="p-6 flex items-center justify-between border-b border-[#E5E7EB] shrink-0 h-20">
+            <aside className="relative w-[min(18.5rem,calc(100vw-2.5rem))] bg-background border-r border-sidebar-border flex flex-col h-full z-[1100] animate-in slide-in-from-left duration-300 shadow-2xl">
+              <div className="p-6 flex items-center justify-between border-b border-sidebar-border shrink-0 h-20">
                 <Link to={role === UserRole.ADMIN ? "/dashboard" : (role === UserRole.STAFF ? "/events" : "/user-home")} onClick={() => setSidebarOpen(false)} className="flex items-center gap-3 group transition-all">
                   {employerLogoUrl ? (
                     <img
@@ -1030,7 +1030,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   )}
                 </Link>
                 <button
-                  className="w-11 h-11 flex items-center justify-center rounded-xl bg-[#2E2E2F]/5 text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors"
+                  className="w-11 h-11 flex items-center justify-center rounded-xl bg-background text-[#2E2E2F] dark:text-white hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors"
                   onClick={() => setSidebarOpen(false)}
                   aria-label="Close navigation"
                 >
@@ -1048,11 +1048,11 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                       to={item.path}
                       className={`flex items-center gap-4 px-4 py-3 mx-2 rounded-lg transition-all duration-200 group ${isActive
                         ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20'
-                        : 'text-[#000000]/90 hover:bg-[#E5E7EB]/50 hover:text-[#000000]'
+                        : 'text-[#2E2E2F] dark:text-white/80 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
                         }`}
                       onClick={() => setSidebarOpen(false)}
                     >
-                      <div className={isActive ? 'text-white' : 'text-[#000000]/90 group-hover:text-[#000000]'}>
+                      <div className={isActive ? 'text-white' : 'text-[#2E2E2F] dark:text-white/80 group-hover:text-[#38BDF2]'}>
                         {React.cloneElement(item.icon as React.ReactElement<any>, { className: 'w-5 h-5 ' + (isActive ? 'stroke-[2px]' : 'stroke-[1.5px]') })}
                       </div>
                       <span className={`text-sm tracking-tight ${isActive ? 'font-black' : 'font-bold'}`}>{item.label}</span>
@@ -1060,7 +1060,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   );
                 })}
 
-                <div className="mt-auto pt-8 border-t border-[#E5E7EB]">
+                <div className="mt-auto pt-8 border-t border-sidebar-border">
                   <button
                     onClick={() => { handleLogout(); setSidebarOpen(false); }}
                     className="w-full flex items-center gap-4 px-5 py-4 rounded-xl text-[#111827]/80 hover:bg-red-50 hover:text-red-500 transition-all duration-300 group"
@@ -1097,7 +1097,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         >
           <div className="space-y-5">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-xl overflow-hidden border border-[#2E2E2F]/10 bg-[#F2F2F2] flex items-center justify-center">
+              <div className="w-16 h-16 rounded-xl overflow-hidden border border-sidebar-border bg-background flex items-center justify-center">
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Profile preview" className="w-full h-full object-cover" />
                 ) : (
@@ -2220,15 +2220,10 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
         <div className="max-w-full mx-auto relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1px_1.8fr] gap-6 lg:gap-10">
-            {/* Left Section: Branding & Newsletter */}
+            {/* Left Section: Branding */}
             <div className="flex flex-col items-start text-left">
               <img src="/lgo-footer.png" className="h-20 w-auto mb-1" alt="StartupLab" />
-              <h3 className="mt-3 text-lg font-black text-white">Build. Connect. Launch.</h3>
-              <p className="mt-2 text-xs font-medium max-w-sm text-gray-400 leading-relaxed">
-                Your gateway to StartupLab events — from internal workshops to public showcases,
-                this platform delivers seamless registration for every gathering.
-              </p>
-
+              
               {/* Social Links */}
               <div className="mt-4 flex items-center gap-2">
                 <a href="https://www.facebook.com/StartupLabAI/" target="_blank" rel="noopener noreferrer" className="w-7 h-7 flex items-center justify-center rounded-full bg-[#1877F2] text-white hover:brightness-110 transition-all">
@@ -2243,31 +2238,6 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 <a href="https://www.linkedin.com/in/startup-lab-center-36a15734b/" target="_blank" rel="noopener noreferrer" className="w-7 h-7 flex items-center justify-center rounded-full bg-[#0A66C2] text-white hover:brightness-110 transition-all">
                   <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
                 </a>
-              </div>
-
-              {/* Newsletter */}
-              <div className="mt-6 max-w-[320px] w-full">
-                <form className="flex focus-within:ring-2 focus-within:ring-[#38BDF2]/30 rounded-xl overflow-hidden transition-all shadow-sm" onSubmit={handleNewsletterSubscribe}>
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    value={newsletterEmail}
-                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                    disabled={isSubscribing}
-                    className="flex-1 px-3 py-2.5 bg-white/5 text-white placeholder:text-gray-500 outline-none text-xs font-medium border-r border-white/10 disabled:opacity-50"
-                    required
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSubscribing}
-                    className="bg-[#38BDF2] text-white px-5 py-2.5 text-xs font-black transition-colors hover:bg-[#38BDF2]/90 disabled:opacity-50 flex items-center gap-2"
-                  >
-                    {isSubscribing ? (
-                      <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : null}
-                    {isSubscribing ? '...' : 'Subscribe'}
-                  </button>
-                </form>
               </div>
             </div>
 
@@ -2307,9 +2277,8 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     <Link to="/faq" className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors">Faq</Link>
                     <button
                       onClick={() => setIsSupportModalOpen(true)}
-                      className="text-[#38BDF2] hover:text-white font-bold text-[14px] mt-1 flex items-center gap-1.5"
+                      className="text-gray-400 hover:text-[#38BDF2] font-semibold text-[14px] transition-colors text-left"
                     >
-                      <ICONS.AlertTriangle className="w-3.5 h-3.5" />
                       Support
                     </button>
                   </nav>
@@ -2630,19 +2599,19 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#F2F2F2] dark:bg-[#0A0A0B] font-sans selection:bg-[#38BDF2]/30 transition-colors duration-300">
+    <div className="min-h-screen flex flex-col md:flex-row bg-background font-sans selection:bg-[#38BDF2]/30 transition-colors duration-300">
       {/* Sidebar for desktop */}
       <aside
-        className={`bg-[#F2F2F2] dark:bg-[#111111] border-r border-[#D1D5DB] dark:border-white/10 hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-80' : 'w-24'}`}
+        className={`bg-surface border-r border-sidebar-border hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-80' : 'w-24'}`}
         style={{ overflow: desktopSidebarOpen ? 'hidden' : 'visible', zoom: 0.8 }}
       >
-        <div className={`flex items-center justify-center border-b border-[#D1D5DB] dark:border-white/10 shrink-0 h-24`}>
+        <div className={`flex items-center justify-center border-b border-sidebar-border shrink-0 h-24`}>
           <Link to="/user-home" className="flex items-center justify-center group transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98]">
             {employerLogoUrl ? (
               <img
                 src={employerLogoUrl}
                 alt={employerName || 'Logo'}
-                className={desktopSidebarOpen ? "h-20 w-auto max-w-full object-contain px-4 font-black" : "h-12 w-12 object-contain rounded-lg border border-[#E5E7EB]"}
+                className={desktopSidebarOpen ? "h-20 w-auto max-w-full object-contain px-4 font-black" : "h-12 w-12 object-contain rounded-lg border border-sidebar-border"}
               />
             ) : (
               desktopSidebarOpen ? (
@@ -2664,7 +2633,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             return (
               <React.Fragment key={item.path || idx}>
                 {item.separator && (
-                  <div className={`mx-5 my-3 h-[1px] bg-[#D1D5DB] shrink-0 ${!desktopSidebarOpen ? 'mx-2' : ''}`} />
+                  <div className={`mx-5 my-3 h-[1px] bg-sidebar-border shrink-0 ${!desktopSidebarOpen ? 'mx-2' : ''}`} />
                 )}
                 <Link
                   to={item.path}
@@ -2673,18 +2642,18 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     : 'flex-col items-center justify-center w-11 h-11 mx-auto rounded-xl'
                     } ${isActive
                       ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20'
-                      : 'text-[#000000]/90 dark:text-white/70 hover:bg-[#D1D5DB]/50 dark:hover:bg-white/5 hover:text-[#000000] dark:hover:text-white'
+                      : 'text-primary-text hover:bg-background dark:hover:bg-white/5'
                     }`}
                 >
                   <div className="relative shrink-0 flex items-center justify-center">
                     {React.cloneElement(item.icon as React.ReactElement<any>, {
-                      className: `transition-colors duration-200 ${desktopSidebarOpen ? 'w-[18px] h-[18px]' : 'w-5 h-5 group-hover:scale-105'} ${isActive ? 'stroke-[2.5px] text-white' : 'stroke-[1.8px] text-[#000000] dark:text-white group-hover:text-[#000000] dark:group-hover:text-white'}`
+                      className: `transition-colors duration-200 ${desktopSidebarOpen ? 'w-[18px] h-[18px]' : 'w-5 h-5 group-hover:scale-105'} ${isActive ? 'stroke-[2.5px] text-white' : 'stroke-[1.8px] text-primary-text dark:text-white group-hover:text-[#000000] dark:group-hover:text-white'}`
                     })}
                     {item.premium && <CrownBadge />}
                   </div>
 
                   {desktopSidebarOpen ? (
-                    <span className={`text-[16px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-[#000000] dark:text-white'}`}>
+                    <span className={`text-[16px] tracking-tight truncate ${isActive ? 'font-bold text-white' : 'font-semibold text-primary-text dark:text-white'}`}>
                       {item.label}
                     </span>
                   ) : (
@@ -2703,7 +2672,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
       <main
         className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}
       >
-        <header className="h-24 !bg-[#F2F2F2] dark:!bg-[#111111] border-b border-[#D1D5DB] dark:border-white/10 px-4 sm:px-8 flex items-center justify-between gap-4 sm:gap-6 sticky top-0 z-[500] w-full" style={{ zoom: 0.8 }}>
+        <header className="h-24 bg-surface border-b border-sidebar-border px-4 sm:px-8 flex items-center justify-between gap-4 sm:gap-6 sticky top-0 z-[500] w-full" style={{ zoom: 0.8 }}>
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
@@ -2713,7 +2682,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   setDesktopSidebarOpen(!desktopSidebarOpen);
                 }
               }}
-              className="p-2 w-11 h-11 flex items-center justify-center rounded-lg border border-[#D1D5DB] dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all group active:scale-95"
+              className="p-2 w-11 h-11 flex items-center justify-center rounded-lg border border-sidebar-border bg-background hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all group active:scale-95"
               aria-label="Toggle Sidebar"
             >
               <svg className={`w-5 h-5 transition-transform duration-500 dark:text-white ${!desktopSidebarOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2722,7 +2691,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             </button>
             {/* Mobile Logo removed as per user request - branded inside sidebar only */}
             <div className="ml-1 hidden sm:block">
-              <p className="text-[10px] uppercase font-black text-[#111111] dark:text-white tracking-[0.2em]">
+              <p className="text-[10px] uppercase font-black text-primary-text tracking-[0.2em]">
                 Organizer Portal
               </p>
             </div>
@@ -2732,7 +2701,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             {/* Theme Toggle Button */}
             <button
               onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
-              className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#D1D5DB] dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] hover:bg-gray-100 dark:hover:bg-white/5 transition-all active:scale-95 shadow-sm"
+              className="w-10 h-10 flex items-center justify-center rounded-lg border border-sidebar-border bg-background hover:bg-gray-100 dark:hover:bg-white/5 transition-all active:scale-95 shadow-sm"
               aria-label="Toggle Theme"
             >
               {theme === 'light' ? (
@@ -2744,12 +2713,12 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             {(!(role === UserRole.STAFF && canReceiveNotifications === false)) && (
               <div className="relative group">
                 <button
-                  className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#D1D5DB] dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] hover:bg-gray-100 dark:hover:bg-white/5 transition-all active:scale-95 shadow-sm relative"
+                  className="w-10 h-10 flex items-center justify-center rounded-lg border border-sidebar-border bg-background hover:bg-gray-100 dark:hover:bg-white/5 transition-all active:scale-95 shadow-sm relative"
                   onClick={() => setNotificationOpen(!notificationOpen)}
                 >
                   <ICONS.Bell className="w-5 h-5 text-[#4B5563] dark:text-white" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-[#EF4444] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-[#F2F2F2] animate-in zoom-in duration-300">
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-[#EF4444] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-background animate-in zoom-in duration-300">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   )}
@@ -2757,20 +2726,20 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 {notificationOpen && (
                   <>
                     <div className="fixed inset-0 z-[100] bg-[#2E2E2F]/10 backdrop-blur-[2px]" onClick={() => setNotificationOpen(false)} />
-                    <div className="fixed left-3 right-3 top-24 bottom-24 sm:left-auto sm:right-6 sm:bottom-6 w-auto sm:w-full sm:max-w-[420px] bg-[#F2F2F2] dark:bg-[#111111] rounded-xl sm:rounded-xl border border-[#2E2E2F]/5 dark:border-white/10 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.15)] z-[101] flex flex-col overflow-hidden animate-in slide-in-from-right-8 fade-in duration-500">
-                      <div className="p-8 border-b border-[#2E2E2F]/5 dark:border-white/10 flex items-start justify-between bg-[#F2F2F2]/80 dark:bg-[#111111]/80 backdrop-blur-xl sticky top-0 z-10">
+                    <div className="fixed left-3 right-3 top-24 bottom-24 sm:left-auto sm:right-6 sm:bottom-6 w-auto sm:w-full sm:max-w-[420px] bg-surface rounded-xl border border-sidebar-border shadow-[0_30px_90px_-20px_rgba(0,0,0,0.15)] z-[101] flex flex-col overflow-hidden animate-in slide-in-from-right-8 fade-in duration-500">
+                      <div className="p-8 border-b border-sidebar-border flex items-start justify-between bg-surface/80 backdrop-blur-xl sticky top-0 z-10">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <h2 className="text-2xl font-black tracking-tight text-[#2E2E2F] dark:text-white">Notifications</h2>
+                            <h2 className="text-2xl font-black tracking-tight text-primary-text">Notifications</h2>
                             {unreadCount > 0 && (
                               <span className="bg-red-500/10 text-red-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">
                                 {unreadCount} New
                               </span>
                             )}
                           </div>
-                          <p className="text-[#2E2E2F] dark:text-white/60 text-xs font-bold uppercase tracking-widest">Stay up to date on important information</p>
+                          <p className="text-primary-text dark:text-white/60 text-xs font-bold uppercase tracking-widest">Stay up to date on important information</p>
                         </div>
-                        <button onClick={() => setNotificationOpen(false)} className="w-10 h-10 rounded-xl bg-[#F2F2F2] dark:bg-[#2E2E2F]/10 flex items-center justify-center text-[#2E2E2F] dark:text-white hover:text-[#2E2E2F] dark:hover:text-white hover:bg-[#2E2E2F]/5 dark:hover:bg-white/5 transition-all">
+                        <button onClick={() => setNotificationOpen(false)} className="w-10 h-10 rounded-xl bg-background flex items-center justify-center text-primary-text dark:text-white hover:bg-background/80 transition-all">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                           </svg>
@@ -2781,12 +2750,12 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                         {notificationsLoading && notifications.length === 0 ? (
                           <div className="flex flex-col items-center justify-center p-12 text-center h-full">
                             <div className="w-12 h-12 border-4 border-[#38BDF2]/20 border-t-[#38BDF2] rounded-full animate-spin mb-4" />
-                            <p className="text-[#2E2E2F] dark:text-white/60 text-xs font-black uppercase tracking-widest">Syncing notifications...</p>
+                            <p className="text-primary-text dark:text-white/60 text-xs font-black uppercase tracking-widest">Syncing notifications...</p>
                           </div>
                         ) : notifications.length > 0 ? (
                           <div className="px-4 space-y-2">
                             <div className="px-4 py-2 flex justify-between items-center mb-4">
-                              <span className="text-[10px] font-black text-[#2E2E2F] dark:text-white/40 uppercase tracking-[0.2em]">RECENT ACTIVITY</span>
+                              <span className="text-[10px] font-black text-primary-text dark:text-white/40 uppercase tracking-[0.2em]">RECENT ACTIVITY</span>
                               <button
                                 onClick={handleMarkAllRead}
                                 className="text-[10px] font-black text-[#38BDF2] hover:text-[#2E2E2F] uppercase tracking-[0.2em] transition-colors"
@@ -2803,22 +2772,22 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                                 }}
                                 className={`p-5 rounded-xl transition-all group relative border cursor-pointer ${n.isRead
                                   ? 'bg-transparent border-transparent opacity-60'
-                                  : 'bg-[#F2F2F2] dark:bg-white/5 border-[#2E2E2F]/5 dark:border-white/10 hover:border-[#38BDF2]/30 shadow-sm'
+                                  : 'bg-surface border-sidebar-border hover:border-[#38BDF2]/30 shadow-sm'
                                   }`}
                               >
                                 <div className="flex items-start gap-4">
-                                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${n.isRead ? 'bg-[#2E2E2F]/5 dark:bg-white/5 text-[#2E2E2F] dark:text-white/40' : 'bg-[#38BDF2]/10 text-[#38BDF2]'
+                                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${n.isRead ? 'bg-background text-primary-text dark:text-white/40' : 'bg-[#38BDF2]/10 text-[#38BDF2]'
                                     }`}>
                                     <ICONS.Bell className="w-5 h-5" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-1">
                                       <h4 className="text-sm font-black text-[#2E2E2F] dark:text-white tracking-tight truncate">{n.title}</h4>
-                                      <span className="text-[9px] text-[#2E2E2F] dark:text-white/40 font-black uppercase tracking-widest whitespace-nowrap ml-2">
+                                      <span className="text-[9px] text-primary-text dark:text-white/40 font-black uppercase tracking-widest whitespace-nowrap ml-2">
                                         {n.createdAt ? new Date(n.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Now'}
                                       </span>
                                     </div>
-                                    <p className="text-xs text-[#2E2E2F] dark:text-white/60 font-medium leading-relaxed line-clamp-2 mb-3">{n.message}</p>
+                                    <p className="text-xs text-primary-text dark:text-white/60 font-medium leading-relaxed line-clamp-2 mb-3">{n.message}</p>
                                     {!n.isRead && (
                                       <button
                                         onClick={() => handleMarkNotificationRead(n.notificationId)}
@@ -2834,11 +2803,11 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                           </div>
                         ) : (
                           <div className="flex flex-col items-center justify-center p-12 text-center h-full">
-                            <div className="w-24 h-24 bg-[#F2F2F2] dark:bg-white/5 rounded-xl flex items-center justify-center mb-8">
+                            <div className="w-24 h-24 bg-background rounded-xl flex items-center justify-center mb-8">
                               <ICONS.Bell className="w-10 h-10 text-[#2E2E2F] dark:text-white/20" />
                             </div>
                             <h3 className="text-xl font-black text-[#2E2E2F] dark:text-white tracking-tighter uppercase mb-2">Clean Slate</h3>
-                            <p className="text-sm font-medium text-[#2E2E2F] dark:text-white/60 max-w-[240px] leading-relaxed">
+                            <p className="text-sm font-medium text-primary-text dark:text-white/60 max-w-[240px] leading-relaxed">
                               You're all caught up. We'll alert you when there's news.
                             </p>
                           </div>
@@ -2853,19 +2822,19 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
 
           <div className="relative">
             <button
-              className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border border-[#E5E7EB] bg-[#F2F2F2] hover:bg-gray-100 transition-all active:scale-95"
+              className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border border-sidebar-border bg-background hover:bg-surface transition-all active:scale-95"
               onClick={() => setUserMenuOpen((v) => !v)}
             >
-              <div className="w-8 h-8 rounded-lg overflow-hidden bg-gray-200 text-[#111827] flex items-center justify-center border border-[#E5E7EB]">
+              <div className="w-8 h-8 rounded-lg overflow-hidden bg-background text-primary-text flex items-center justify-center border border-sidebar-border">
                 {imageUrl ? (
                   <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="font-medium text-xs text-[#4B5563]">{initials}</span>
+                  <span className="font-medium text-xs text-primary-text">{initials}</span>
                 )}
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-[13px] font-bold text-[#111827] leading-none">{displayName}</p>
-                <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wide mt-1">{roleLabel}</p>
+                <p className="text-[13px] font-bold text-primary-text leading-none">{displayName}</p>
+                <p className="text-[10px] font-bold text-primary-text/60 uppercase tracking-wide mt-1">{roleLabel}</p>
               </div>
               <svg className="w-4 h-4 text-[#9CA3AF]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -2874,14 +2843,14 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             {userMenuOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                <div className="absolute right-0 top-[calc(100%+8px)] w-60 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl shadow-xl z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
-                  <div className="px-4 py-3 border-b border-[#2E2E2F]/5 mb-1">
-                    <p className="text-[10px] font-medium text-[#2E2E2F] uppercase tracking-widest mb-0.5">Account</p>
-                    <p className="text-xs font-semibold text-[#2E2E2F] truncate">{displayName}</p>
-                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#2E2E2F] mt-1">{roleLabel}</p>
+                <div className="absolute right-0 top-[calc(100%+8px)] w-60 bg-surface border border-sidebar-border rounded-xl shadow-xl z-50 p-2 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
+                  <div className="px-4 py-3 border-b border-sidebar-border mb-1">
+                    <p className="text-[10px] font-medium text-primary-text uppercase tracking-widest mb-0.5">Account</p>
+                    <p className="text-xs font-semibold text-primary-text truncate">{displayName}</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-primary-text mt-1">{roleLabel}</p>
                   </div>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-primary-text hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       setPublicMode('organizer');
                       navigate('/my-events');
@@ -2893,7 +2862,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   </button>
                   {role === UserRole.ORGANIZER && (
                     <button
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-primary-text hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                       onClick={handleToggleAttendingMode}
                     >
                       <ICONS.Users className="w-4 h-4 opacity-70 group-hover:opacity-100" />
@@ -2901,7 +2870,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     </button>
                   )}
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-primary-text hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate(organizerProfilePath);
                       setUserMenuOpen(false);
@@ -2911,7 +2880,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Org Profile</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-primary-text hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=team');
                       setUserMenuOpen(false);
@@ -2921,7 +2890,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Teams & Access</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-primary-text hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=email');
                       setUserMenuOpen(false);
@@ -2931,7 +2900,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Email Setup</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-primary-text hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=payments');
                       setUserMenuOpen(false);
@@ -2941,7 +2910,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     <span>Payment Gateway</span>
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-primary-text hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                     onClick={() => {
                       navigate('/user-settings?tab=account');
                       setUserMenuOpen(false);
@@ -2952,7 +2921,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                   </button>
                   {hasPrioritySupport === true && (
                     <button
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-primary-text hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-colors text-left group"
                       onClick={() => {
                         navigate('/organizer-support');
                         setUserMenuOpen(false);
@@ -2963,7 +2932,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                     </button>
                   )}
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-[#2E2E2F] hover:bg-red-50 hover:text-red-500 transition-colors text-left group"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-primary-text hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 transition-colors text-left group"
                     onClick={() => {
                       setUserMenuOpen(false);
                       handleLogout();

@@ -180,13 +180,13 @@ export const PasswordRequirements: React.FC<{ password: string }> = ({ password 
   const hasPassword = password.length > 0;
 
   return (
-    <div className={`mt-1 space-y-1 p-2 bg-[#F2F2F2] rounded-[4px] border border-black/5 transition-all duration-300 ${hasPassword ? 'opacity-100 translate-y-0 max-h-[300px]' : 'opacity-0 -translate-y-2 pointer-events-none max-h-0 !mt-0 !p-0 border-0 overflow-hidden'}`}>
-      <p className="text-[9px] font-black uppercase tracking-widest text-black/30 mb-1">Passcode Security</p>
+    <div className={`mt-1 space-y-1 p-2 bg-background rounded-[4px] border border-sidebar-border transition-all duration-300 ${hasPassword ? 'opacity-100 translate-y-0 max-h-[300px]' : 'opacity-0 -translate-y-2 pointer-events-none max-h-0 !mt-0 !p-0 border-0 overflow-hidden'}`}>
+      <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/30 mb-1">Passcode Security</p>
       <div className="grid grid-cols-1 gap-y-0.5">
         {requirements.map((req, i) => (
           <div key={i} className="flex items-center gap-1.5">
-            <div className={`w-1 h-1 rounded-full transition-all duration-300 ${req.test ? 'bg-[#38BDF2] scale-110' : 'bg-black/10'}`} />
-            <span className={`text-[9px] font-bold tracking-tight transition-colors duration-300 ${req.test ? 'text-[#38BDF2]' : 'text-black/30'}`}>
+            <div className={`w-1 h-1 rounded-full transition-all duration-300 ${req.test ? 'bg-[#38BDF2] scale-110' : 'bg-sidebar-border'}`} />
+            <span className={`text-[9px] font-bold tracking-tight transition-colors duration-300 ${req.test ? 'text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white/30'}`}>
               {req.label}
             </span>
           </div>
@@ -238,7 +238,7 @@ export const Modal: React.FC<{
             {children}
           </div>
           {footer && (
-            <div className="border-t border-[#2E2E2F]/10 bg-[#F2F2F2]">
+            <div className="border-t border-sidebar-border bg-background">
               {footer}
             </div>
           )}
@@ -306,7 +306,7 @@ export const Modal: React.FC<{
             {children}
           </div>
           {footer && (
-            <div className="px-4 sm:px-6 py-4 sm:py-5 border-t border-[#2E2E2F]/10 bg-[#F2F2F2]">
+            <div className="px-4 sm:px-6 py-4 sm:py-5 border-t border-sidebar-border bg-background">
               {footer}
             </div>
           )}
@@ -328,7 +328,7 @@ export const PageLoader: React.FC<{
       <div className={`flex flex-col gap-10 w-full px-4 sm:px-8 py-10 animate-in fade-in duration-700 ${className}`}>
         {/* Header Skeleton (Top Nav) */}
         <div className="w-full flex items-center justify-between mb-2">
-          <div className="w-32 h-10 bg-[#E0E0E0]/30 rounded-xl" />
+          <div className="w-32 h-10 bg-sidebar-border/30 rounded-xl" />
           <div className="flex gap-4">
             <div className="w-10 h-10 bg-[#E0E0E0]/20 rounded-full" />
             <div className="w-10 h-10 bg-[#E0E0E0]/20 rounded-full" />
@@ -368,13 +368,13 @@ export const PageLoader: React.FC<{
 
     if (variant === 'viewport') {
       return (
-        <div className="fixed inset-0 z-[10000] bg-[#F2F2F2] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-[10000] bg-background flex flex-col overflow-hidden">
           <div className="w-full h-1 bg-[#38BDF2]/20 relative overflow-hidden">
             <div className="absolute inset-0 bg-[#38BDF2] w-1/2 animate-[suspense-loading_2s_infinite]" />
           </div>
           {label && (
             <div className="mt-8 px-8 py-2 text-center">
-              <p className="text-[12px] font-black uppercase tracking-[0.3em] text-[#2E2E2F] animate-pulse">{label}</p>
+              <p className="text-[12px] font-black uppercase tracking-[0.3em] text-[#2E2E2F] dark:text-white animate-pulse">{label}</p>
             </div>
           )}
           <SkeletonContent />
@@ -387,7 +387,7 @@ export const PageLoader: React.FC<{
         <SkeletonContent />
         {label && (
           <div className="absolute inset-x-0 top-1/3 z-10 flex items-center justify-center pointer-events-none">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] animate-pulse bg-[#F2F2F2]/90 px-6 py-3 rounded-2xl border border-[#2E2E2F]/10 shadow-xl backdrop-blur-md">{label}</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] dark:text-white animate-pulse bg-background/90 px-6 py-3 rounded-2xl border border-sidebar-border shadow-xl backdrop-blur-md">{label}</p>
           </div>
         )}
       </div>
@@ -425,7 +425,7 @@ export const Checkbox: React.FC<{
     <label className={`flex items-start gap-3 cursor-pointer group select-none ${className}`}>
       <div
         onClick={(e) => { e.stopPropagation(); onChange(!checked); }}
-        className={`${sizes[size]} ${rounding[rounded]} border-2 flex items-center justify-center transition-all ${checked ? 'bg-[#38BDF2] border-[#38BDF2]' : 'border-[#2E2E2F]/20 bg-white group-hover:border-[#38BDF2]/50'}`}
+        className={`${sizes[size]} ${rounding[rounded]} border-2 flex items-center justify-center transition-all ${checked ? 'bg-[#38BDF2] border-[#38BDF2]' : 'border-sidebar-border bg-background group-hover:border-[#38BDF2]/50'}`}
       >
         {checked && (
           <svg xmlns="http://www.w3.org/2000/svg" className={`${iconSizes[size]} text-white`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
@@ -433,7 +433,7 @@ export const Checkbox: React.FC<{
           </svg>
         )}
       </div>
-      {label && <span className="text-[13px] font-medium text-[#2E2E2F] leading-tight group-hover:text-[#2E2E2F] transition-colors mt-0.5">{label}</span>}
+      {label && <span className="text-[13px] font-medium text-[#2E2E2F] dark:text-white leading-tight group-hover:text-[#2E2E2F] dark:group-hover:text-[#38BDF2] transition-colors mt-0.5">{label}</span>}
     </label>
   );
 };

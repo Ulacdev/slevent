@@ -283,7 +283,7 @@ export const EventCard: React.FC<EventCardProps> = ({
       <div
         onClick={handleSingleClick}
         onDoubleClick={handleDoubleClick}
-        className="relative cursor-pointer group flex flex-col sm:flex-row p-4 gap-6 rounded-2xl bg-[#F2F2F2] hover:bg-[#E5E7EB] transition-all duration-200 border border-transparent hover:border-[#D1D5DB] w-full"
+        className="relative cursor-pointer group flex flex-col sm:flex-row p-4 gap-6 rounded-2xl bg-surface dark:bg-surface border border-transparent hover:border-sidebar-border w-full transition-all duration-200"
         style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
       >
         {/* Image Container */}
@@ -369,7 +369,7 @@ export const EventCard: React.FC<EventCardProps> = ({
 
   return (
     <Card
-      className="group relative flex flex-col h-full border border-black/5 rounded-[5px] bg-[#F2F2F2] transition-all duration-500 cursor-pointer hover:shadow-xl hover:translate-y-[-4px]"
+      className="group relative flex flex-col h-full border border-sidebar-border/10 rounded-[5px] bg-surface dark:bg-surface transition-all duration-500 cursor-pointer hover:shadow-xl hover:translate-y-[-4px]"
       onClick={() => navigate(`/events/${event.slug || event.eventId}`)}
       style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
     >
@@ -1243,9 +1243,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
               </div>
             </div>
 
-            {/* Category Rail (Top of Available Events) */}
             <div className="mt-44 mb-28 overflow-visible relative z-10">
-              <div className="rounded-2xl border border-black/10 bg-[#F2F2F2] px-6 py-8 md:px-8 shadow-sm">
+              <div className="rounded-2xl border border-sidebar-border bg-surface dark:bg-surface px-6 py-8 md:px-8 shadow-sm">
                 <div className="mb-8">
                   <h2 className="text-[16px] font-black tracking-tight text-black">Event smart categories</h2>
                 </div>
@@ -1835,18 +1834,18 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 )}
 
                 {displayEvents.length === 0 && (
-                  <div className="py-12 px-6 text-center bg-white rounded-3xl border border-black/5 animate-in zoom-in-95 duration-500 shadow-sm">
-                    <div className="w-14 h-14 bg-[#F2F2F2] border border-black/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                      <ICONS.Search className="w-7 h-7 text-black opacity-40" />
+                  <div className="py-16 px-6 text-center bg-surface dark:bg-surface rounded-3xl border border-sidebar-border animate-in zoom-in-95 duration-700 shadow-sm">
+                    <div className="w-16 h-16 bg-background dark:bg-background border border-sidebar-border rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-inner">
+                      <ICONS.Search className="w-8 h-8 text-primary-text opacity-30" />
                     </div>
-                    <h3 className="text-xl font-black text-black tracking-tight mb-3 uppercase">
+                    <h3 className="text-xl font-black text-primary-text tracking-tight mb-3 uppercase">
                       {isLandingAllListing
                         ? 'No Trending Hubs Yet'
                         : selectedLocation !== DEFAULT_LOCATION
                           ? `No Sessions in ${selectedLocation}`
                           : 'No matches found'}
                     </h3>
-                    <p className="text-xs font-bold text-black/60 mb-8 max-w-[280px] mx-auto leading-relaxed">
+                    <p className="text-xs font-bold text-primary-text/60 mb-8 max-w-[280px] mx-auto leading-relaxed">
                       {isLandingAllListing
                         ? 'Be the first to like a session to see it trending here, or explore our full catalog below.'
                         : `We couldn't find any upcoming events in this local hub. Try broadening your location or checking "All areas".`}
@@ -2049,8 +2048,8 @@ const FAQSection: React.FC = () => {
                 }`}
             >
               <div className="overflow-hidden">
-                <div className="px-8 pb-6 border-t border-black/5 mt-2">
-                  <p className="text-black text-base font-medium leading-relaxed mt-4">
+                <div className="px-8 pb-6 border-t border-sidebar-border mt-2">
+                  <p className="text-primary-text text-base font-medium leading-relaxed mt-4">
                     {faq.answer}
                   </p>
                 </div>
@@ -2159,8 +2158,8 @@ const FeaturedOrganizers: React.FC = () => {
       <div className="flex flex-col items-center mb-10 gap-6">
         <div className="flex flex-col text-center items-center max-w-2xl">
           <p className="text-xs font-bold text-[#38BDF2] mb-3 tracking-tight uppercase">Verified Showcase</p>
-          <h2 className="text-2xl md:text-3xl font-black text-black tracking-tighter mb-2">Featured Organizers</h2>
-          <p className="text-xs md:text-sm font-normal text-black leading-relaxed max-w-[500px]">Stay connected with our top event creators and never miss a highlight session.</p>
+          <h2 className="text-2xl md:text-3xl font-black text-primary-text tracking-tighter mb-2">Featured Organizers</h2>
+          <p className="text-xs md:text-sm font-normal text-primary-text leading-relaxed max-w-[500px]">Stay connected with our top event creators and never miss a highlight session.</p>
         </div>
 
       </div>
@@ -2200,7 +2199,7 @@ const FeaturedOrganizers: React.FC = () => {
 
       <div className="flex items-center justify-center gap-2 mt-4">
         {Array.from({ length: dotsCount }).map((_, i) => (
-          <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === activeDot ? 'bg-[#38BDF2] scale-125 shadow-sm shadow-[#38BDF2]/40' : 'bg-[#D1D5DB]'}`} />
+          <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === activeDot ? 'bg-[#38BDF2] scale-125 shadow-sm shadow-[#38BDF2]/40' : 'bg-sidebar-border'}`} />
         ))}
       </div>
 

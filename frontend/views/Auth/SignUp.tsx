@@ -151,25 +151,26 @@ export const SignUpView: React.FC = () => {
       </div>
 
       {/* RIGHT COLUMN: Auth Form */}
-      <div className="w-full lg:w-[40%] flex flex-col items-center justify-center p-8 sm:p-12 relative overflow-y-auto bg-white">
-        {/* Mobile Logo Only */}
-        <div className="lg:hidden absolute top-8 left-8">
-          <img
-            src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
-            alt="StartupLab Logo"
-            className="w-32 h-auto"
-          />
-        </div>
+      <div className="w-full lg:w-[40%] flex flex-col relative overflow-y-auto bg-white scrollbar-none">
+        <div className="min-h-full flex flex-col items-center justify-center p-8 sm:p-12 w-full">
+          {/* Mobile Logo Only */}
+          <div className="lg:hidden absolute top-8 left-8">
+            <img
+              src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
+              alt="StartupLab Logo"
+              className="w-32 h-auto"
+            />
+          </div>
 
-        <button
-          onClick={() => navigate('/')}
-          className="absolute top-8 right-8 p-3 rounded-2xl bg-[#F2F2F2] text-[#2E2E2F] hover:bg-[#38BDF2] hover:text-white transition-all group shadow-sm z-50"
-          title="Back to Home"
-        >
-          <ICONS.Home className="w-5 h-5" />
-        </button>
+          <button
+            onClick={() => navigate('/')}
+            className="absolute top-8 right-8 p-3 rounded-2xl bg-[#F2F2F2] text-[#2E2E2F] hover:bg-[#38BDF2] hover:text-white transition-all group shadow-sm z-50"
+            title="Back to Home"
+          >
+            <ICONS.Home className="w-5 h-5" />
+          </button>
 
-        <div className="w-full max-w-[440px] pt-12 lg:pt-0">
+          <div className="w-full max-w-[440px] pb-12 lg:-translate-y-24">
           <div className="mb-8">
             <span className="text-[#38BDF2] text-[11px] font-black uppercase tracking-widest mb-2 block">Get Started</span>
             <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tight">Create your account.</h2>
@@ -304,6 +305,7 @@ export const SignUpView: React.FC = () => {
             <p className="text-[#2E2E2F]/40 text-[11px] font-medium">
               Need help? Contact us at <a href="mailto:hello@upskwela.com" className="hover:text-[#38BDF2] transition-colors">hello@upskwela.com</a>
             </p>
+          </div>
           </div>
         </div>
       </div>

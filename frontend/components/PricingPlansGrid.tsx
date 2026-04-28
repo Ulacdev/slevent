@@ -35,13 +35,13 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
     <>
       {showBillingToggle && onBillingCycleChange && (
         <div className="mb-12 flex justify-center">
-          <div className="bg-[#F2F2F2] p-1.5 rounded-xl border border-[#2E2E2F]/10 flex items-center shadow-sm">
+          <div className="bg-background p-1.5 rounded-xl border border-sidebar-border flex items-center shadow-sm">
             <button
               type="button"
               onClick={() => onBillingCycleChange('monthly')}
               className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${billingCycle === 'monthly'
                 ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/25'
-                : 'text-[#2E2E2F] hover:text-[#2E2E2F] hover:bg-[#EAEAEA]'
+                : 'text-[#2E2E2F] dark:text-white/70 hover:bg-sidebar-border'
                 }`}
             >
               Monthly
@@ -51,7 +51,7 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
               onClick={() => onBillingCycleChange('yearly')}
               className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${billingCycle === 'yearly'
                 ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/25'
-                : 'text-[#2E2E2F] hover:text-[#2E2E2F] hover:bg-[#EAEAEA]'
+                : 'text-[#2E2E2F] dark:text-white/70 hover:bg-sidebar-border'
                 }`}
             >
               Yearly
@@ -62,8 +62,8 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
       )}
 
       {visiblePlans.length === 0 && (
-        <Card className="p-10 text-center border-[#2E2E2F]/10 bg-[#F2F2F2]">
-          <p className="text-sm font-bold text-[#2E2E2F] uppercase tracking-widest">No active plans available right now.</p>
+        <Card className="p-10 text-center border-sidebar-border bg-surface">
+          <p className="text-sm font-bold text-[#2E2E2F] dark:text-white uppercase tracking-widest">No active plans available right now.</p>
         </Card>
       )}
 
@@ -136,12 +136,12 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
                   </span>
                 </div>
               )}
-              <Card className={`h-full flex flex-col border border-[#2E2E2F]/10 rounded-2xl bg-[#F2F2F2] text-[#2E2E2F] transition-all duration-500 group-hover:shadow-xl group-hover:shadow-[#2E2E2F]/5 ${!isCurrentPlan && plan.isRecommended ? 'ring-2 ring-[#38BDF2] ring-offset-0' : ''}`}>
+              <Card className={`h-full flex flex-col border border-sidebar-border rounded-2xl bg-surface text-[#2E2E2F] dark:text-white transition-all duration-500 group-hover:shadow-xl group-hover:shadow-[#2E2E2F]/5 ${!isCurrentPlan && plan.isRecommended ? 'ring-2 ring-[#38BDF2] ring-offset-0' : ''}`}>
                 <div className="p-8 flex-1 flex flex-col items-start text-left">
                   {/* Top: Name and Description */}
                   <div className="mb-4 w-full">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-2xl font-black tracking-tight text-[#2E2E2F]">{plan.name}</h3>
+                      <h3 className="text-2xl font-black tracking-tight text-[#2E2E2F] dark:text-white">{plan.name}</h3>
                       {isCurrentPlan && (
                         <span className="bg-[#38BDF2]/10 text-[#38BDF2] text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-[#38BDF2]/20 shadow-sm">ACTIVE</span>
                       )}
@@ -151,27 +151,27 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
                   {/* Price Section */}
                   <div className="mb-4 w-full">
                     <div className="flex items-start gap-0.5">
-                      <span className="text-sm font-black mt-1 text-[#2E2E2F] leading-none">₱</span>
-                      <span className="text-5xl font-black tracking-tighter text-[#2E2E2F] leading-none">
+                      <span className="text-sm font-black mt-1 text-[#2E2E2F] dark:text-white leading-none">₱</span>
+                      <span className="text-5xl font-black tracking-tighter text-[#2E2E2F] dark:text-white leading-none">
                         {Number(amount || 0).toLocaleString()}
                       </span>
                       <div className="flex flex-col ml-2 mt-2">
-                        <span className="text-[12px] font-black uppercase tracking-widest text-[#2E2E2F] leading-tight">
+                        <span className="text-[12px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/60 leading-tight">
                           PHP /
                         </span>
-                        <span className="text-[12px] font-black uppercase tracking-widest text-[#2E2E2F] leading-tight">
+                        <span className="text-[12px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/60 leading-tight">
                           {billingCycle === 'monthly' ? 'month' : 'year'}
                         </span>
                       </div>
                     </div>
                     {billingCycle === 'yearly' && Number(amount) > 0 && (
-                      <p className="text-[12px] font-bold mt-1.5 uppercase tracking-widest text-[#2E2E2F] italic">
+                      <p className="text-[12px] font-bold mt-1.5 uppercase tracking-widest text-[#2E2E2F] dark:text-white/40 italic">
                         Billed annually (₱{Number(plan.yearlyPrice).toLocaleString()} per year)
                       </p>
                     )}
                   </div>
 
-                  <p className="text-[14px] font-medium text-[#2E2E2F] mb-8 leading-snug">
+                  <p className="text-[14px] font-medium text-[#2E2E2F] dark:text-white/60 mb-8 leading-snug">
                     {plan.description || "The ideal solution for organizers looking to scale."}
                   </p>
 
@@ -202,10 +202,10 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
                   <div className="flex flex-col gap-y-3.5 text-sm w-full">
                     {allFeatures.map((feature, idx) => (
                       <div key={idx} className={`flex items-start gap-3 transition-all duration-300 ${feature.enabled ? 'opacity-100' : 'opacity-30'}`}>
-                        <div className={`shrink-0 w-3.5 h-3.5 flex items-center justify-center ${feature.enabled ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]'}`}>
+                        <div className={`shrink-0 w-3.5 h-3.5 flex items-center justify-center ${feature.enabled ? 'text-[#38BDF2]' : 'text-sidebar-border'}`}>
                           {feature.icon}
                         </div>
-                        <span className={`text-[14px] font-medium tracking-tight leading-tight pt-0.5 ${feature.enabled ? 'text-[#2E2E2F]' : 'text-[#2E2E2F]'}`}>
+                        <span className={`text-[14px] font-medium tracking-tight leading-tight pt-0.5 ${feature.enabled ? 'text-[#2E2E2F] dark:text-white' : 'text-[#2E2E2F]/40 dark:text-white/20'}`}>
                           {feature.label}
                         </span>
                       </div>

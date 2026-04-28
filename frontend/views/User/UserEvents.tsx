@@ -114,11 +114,11 @@ const EventMobileCard = React.memo<{
 
     return (
         <Card
-            className="p-5 border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 hover:border-[#38BDF2]/40 transition-colors cursor-pointer group"
+            className="p-5 border-2 border-sidebar-border hover:border-[#38BDF2]/40 transition-colors cursor-pointer group"
             onClick={onOpenEdit}
         >
             <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
+                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 border-sidebar-border">
                     <img src={getImageUrl(event.imageUrl)} alt="" crossOrigin="use-credentials" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -158,19 +158,19 @@ const EventMobileCard = React.memo<{
                         )}
                     </div>
                     <div className="mb-2">
-                        <span className="text-[10px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/40 truncate">
+                        <span className="text-[10px] font-medium text-[#2E2E2F] dark:text-white/40 truncate">
                             ID: {event.eventId.split('-')[0]}
                         </span>
-                        <h3 className="font-bold text-[#2E2E2F] dark:text-white dark:text-white text-base truncate mt-0.5">
+                        <h3 className="font-bold text-[#2E2E2F] dark:text-white text-base truncate mt-0.5">
                             {event.eventName}
                         </h3>
                     </div>
                     <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-[11px] text-[#2E2E2F] dark:text-white dark:text-white/60 font-medium">
+                        <div className="flex items-center gap-2 text-[11px] text-[#2E2E2F] dark:text-white/60 font-medium">
                             <ICONS.Calendar className="w-3 h-3 text-[#38BDF2]" />
                             {new Date(event.startAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </div>
-                        <div className="flex items-center gap-2 text-[11px] text-[#2E2E2F] dark:text-white dark:text-white/60 font-medium">
+                        <div className="flex items-center gap-2 text-[11px] text-[#2E2E2F] dark:text-white/60 font-medium">
                             <ICONS.MapPin className="w-3 h-3 text-[#38BDF2]" />
                             <span className="truncate">{event.locationText}</span>
                         </div>
@@ -179,16 +179,16 @@ const EventMobileCard = React.memo<{
                 <div className="relative shrink-0">
                     <button
                         onClick={(e) => { e.stopPropagation(); setOpenDropdownId(isDropdownOpen ? null : event.eventId); }}
-                        className={`p-1.5 rounded-xl transition-all duration-300 ${isDropdownOpen ? 'bg-[#38BDF2] text-[#F2F2F2]' : 'hover:bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
+                        className={`p-1.5 rounded-xl transition-all duration-300 ${isDropdownOpen ? 'bg-[#38BDF2] text-white' : 'hover:bg-background/5 dark:bg-white/5 text-[#2E2E2F] dark:text-white/40 hover:text-[#2E2E2F] dark:hover:text-white'}`}
                     >
                         <MoreVerticalIcon className="w-5 h-5" />
                     </button>
 
                     <div
-                        className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${isDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}`}
+                        className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-background dark:bg-surface border-2 border-sidebar-border rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${isDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}`}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <EyeIcon className="w-4 h-4" /> View
                         </button>
                         <button onClick={(e) => { e.stopPropagation(); onOpenAnalytics(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
@@ -229,7 +229,7 @@ const EventMobileCard = React.memo<{
                     </div>
                 </div>
             </div>
-            <div className="mt-5 pt-4 border-t border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 flex items-center justify-between text-[11px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest">
+            <div className="mt-5 pt-4 border-t border-sidebar-border flex items-center justify-between text-[11px] font-bold text-[#2E2E2F] dark:text-white/40 uppercase tracking-widest">
                 <span>Inventory</span>
                 <span className="text-[#38BDF2]">{event.capacityTotal} Slots</span>
             </div>
@@ -276,12 +276,12 @@ const EventTableRow = React.memo<{
             </td>
             <td className="px-8 py-7">
                 <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 relative">
+                    <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border-2 border-sidebar-border relative">
                         <img src={getImageUrl(event.imageUrl)} alt="" crossOrigin="use-credentials" className="w-full h-full object-cover" />
                     </div>
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                            <div className="font-bold text-[#2E2E2F] dark:text-white dark:text-white text-[16px] tracking-tight transition-colors">{event.eventName}</div>
+                            <div className="font-bold text-[#2E2E2F] dark:text-white text-[16px] tracking-tight transition-colors">{event.eventName}</div>
                             {isPromoted && (
                                 <div className="flex flex-col gap-1 items-start">
                                     <Badge
@@ -311,41 +311,30 @@ const EventTableRow = React.memo<{
                             )}
                         </div>
                         <div className="flex items-center gap-3">
-                            <span className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest">{event.eventId.split('-')[0]}</span>
+                            <span className="text-[11px] font-medium text-[#2E2E2F] dark:text-white/40 uppercase tracking-widest">{event.eventId.split('-')[0]}</span>
                             <span className="w-1 h-1 rounded-full bg-[#2E2E2F]/10"></span>
-                            <span className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 tracking-tight">/{event.slug}</span>
+                            <span className="text-[11px] font-medium text-[#2E2E2F] dark:text-white/60 tracking-tight">/{event.slug}</span>
                         </div>
                     </div>
                 </div>
             </td>
             <td className="px-8 py-7">
-                <div className="text-[14px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white tracking-tight">
+                <div className="text-[14px] font-semibold text-[#2E2E2F] dark:text-white tracking-tight">
                     {new Date(event.startAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                 </div>
-                <div className="text-[12px] text-[#2E2E2F] dark:text-white dark:text-white/60 font-medium mt-1.5 flex items-center gap-2">
-                    <ICONS.MapPin className="w-3 h-3 text-[#2E2E2F] dark:text-white dark:text-white/50" />
+                <div className="text-[12px] text-[#2E2E2F] dark:text-white/60 font-medium mt-1.5 flex items-center gap-2">
+                    <ICONS.MapPin className="w-3 h-3 text-[#2E2E2F] dark:text-white/50" />
                     <span className="truncate max-w-[200px]">{event.locationText}</span>
                 </div>
             </td>
-            <td className="px-8 py-7">
-                <div className={`inline-flex px-3.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${isCompleted
-                    ? 'bg-[#2E2E2F]/10 text-[#2E2E2F] dark:text-white dark:text-white'
-                    : event.status === 'PUBLISHED'
-                        ? 'bg-[#38BDF2]/20 text-[#2E2E2F] dark:text-white dark:text-white'
-                        : event.status === 'DRAFT'
-                            ? 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white/60 border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10'
-                            : 'bg-[#2E2E2F]/10 text-[#2E2E2F] dark:text-white dark:text-white'
-                    }`}>
-                    {isCompleted ? 'COMPLETED' : event.status}
-                </div>
-            </td>
+
             <td className="px-8 py-7">
                 <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
-                        <span className="text-base font-black text-[#2E2E2F] dark:text-white dark:text-white">{event.capacityTotal}</span>
-                        <span className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase tracking-widest">Slots</span>
+                        <span className="text-base font-black text-[#2E2E2F] dark:text-white">{event.capacityTotal}</span>
+                        <span className="text-[10px] font-black text-[#2E2E2F] dark:text-white/30 uppercase tracking-widest">Slots</span>
                     </div>
-                    <div className="w-[100px] h-1.5 bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 rounded-full overflow-hidden">
+                    <div className="w-[100px] h-1.5 bg-background dark:bg-white/5 rounded-full overflow-hidden">
                         <div className="h-full bg-[#38BDF2]" style={{ width: '100%' }} />
                     </div>
                 </div>
@@ -360,10 +349,10 @@ const EventTableRow = React.memo<{
                     </button>
 
                     <div
-                        className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${isDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}`}
+                        className={`absolute right-1 top-1/2 -translate-y-1/2 w-48 bg-background dark:bg-surface border-2 border-sidebar-border rounded-2xl shadow-2xl z-[100] overflow-hidden py-2 transition-all duration-200 origin-right ${isDropdownOpen ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}`}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <EyeIcon className="w-4 h-4" /> View
                         </button>
                         <button onClick={(e) => { e.stopPropagation(); onOpenAnalytics(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
@@ -380,7 +369,7 @@ const EventTableRow = React.memo<{
                         </button>
                         <button 
                             onClick={onTogglePromotion} 
-                            className={`w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-colors ${isPromoted ? 'text-[#38BDF2] bg-[#38BDF2]/05 cursor-default' : 'text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'}`}
+                            className={`w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-colors ${isPromoted ? 'text-[#38BDF2] bg-[#38BDF2]/05 cursor-default' : 'text-[#2E2E2F] dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'}`}
                         >
                             <ICONS.Zap className="w-4 h-4" fill={isPromoted ? "currentColor" : "none"} /> {isPromoted ? (isExpiredPromotion ? 'Promotion Ended' : 'Promoted') : 'Promote'}
                         </button>
@@ -451,7 +440,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
     const organizerPreviewInitial = (organizerProfile?.organizerName || name || 'O').charAt(0).toUpperCase();
 
     return (
-        <div className={`w-full bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] ${window.innerWidth < 768 ? 'block pb-24' : 'flex flex-col h-full'}`}>
+        <div className={`w-full bg-background dark:bg-background ${window.innerWidth < 768 ? 'block pb-24' : 'flex flex-col h-full'}`}>
             {/* Mobile Header Bar */}
             {(previewDevice as string) === 'mobile' && (
                 <>
@@ -466,21 +455,21 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                     {/* Inline Header Bar - Only visible on Desktop POV */}
                     <div className="hidden md:flex items-center justify-between flex-shrink-0 px-5 pt-5 pb-4">
                         <div>
-                            <h4 className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em] hidden md:block">PREVIEW MODE</h4>
+                            <h4 className="text-[10px] font-black text-[#2E2E2F] dark:text-white/60 uppercase tracking-[0.2em] hidden md:block">PREVIEW MODE</h4>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="inline-flex items-center rounded-2xl border-2 border-[#2E2E2F]/5 dark:border-white/5 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] p-1 shadow-sm">
+                            <div className="inline-flex items-center rounded-2xl border-2 border-sidebar-border bg-background p-1 shadow-sm">
                                 <button
                                     type="button"
                                     onClick={() => setPreviewDevice('mobile')}
-                                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border border-[#2E2E2F]/10 dark:border-white/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white dark:text-white/45 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
+                                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-background dark:bg-surface border border-sidebar-border shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white/45 hover:text-[#2E2E2F] dark:hover:text-white'}`}
                                 >
                                     <MobilePreviewIcon className="w-4 h-4" />
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setPreviewDevice('desktop')}
-                                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border border-[#2E2E2F]/10 dark:border-white/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white dark:text-white/45 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
+                                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-background dark:bg-surface border border-sidebar-border shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white/45 hover:text-[#2E2E2F] dark:hover:text-white'}`}
                                 >
                                     <DesktopPreviewIcon className="w-4 h-4" />
                                 </button>
@@ -494,11 +483,11 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                 <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center pt-32 pb-12 px-6">
                     {/* Centered Browser Window Frame - Scaled to 75% POV */}
                     <div
-                        className="w-full max-w-[1300px] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.12)] border border-[#2E2E2F]/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] min-h-[90vh] flex flex-col"
+                        className="w-full max-w-[1300px] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.12)] border border-sidebar-border bg-background dark:bg-background min-h-[90vh] flex flex-col"
                         style={{ transform: 'scale(0.75)', transformOrigin: 'top center' }}
                     >
                         {/* Browser Bar - Integrated Controls */}
-                        <div className="h-12 bg-[#F3F3F3] border-b border-[#2E2E2F]/10 dark:border-white/10 flex items-center px-4 gap-4 shrink-0 overflow-hidden">
+                        <div className="h-12 bg-background border-b border-sidebar-border flex items-center px-4 gap-4 shrink-0 overflow-hidden">
                             <div className="flex gap-1.5 shrink-0">
                                 <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
                                 <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
@@ -506,7 +495,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                             </div>
 
                             <div className="flex-1">
-                                <div className="bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border border-[#2E2E2F]/10 dark:border-white/10 rounded-lg px-3 py-1 text-[10px] text-[#2E2E2F] dark:text-white dark:text-white/40 font-medium truncate flex items-center gap-1.5 max-w-[400px]">
+                                <div className="bg-background dark:bg-surface border border-sidebar-border rounded-lg px-3 py-1 text-[10px] text-[#2E2E2F] dark:text-white/40 font-medium truncate flex items-center gap-1.5 max-w-[400px]">
                                     <ICONS.Lock className="w-2.5 h-2.5" />
                                     startuplab.io/{(formData.eventName || 'event').toLowerCase().replace(/\s+/g, '-')}
                                 </div>
@@ -514,18 +503,18 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
 
                             <div className="flex items-center gap-4 shrink-0">
                                 {/* Integrated Toggle Pill */}
-                                <div className="inline-flex items-center rounded-xl border border-[#2E2E2F]/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] p-1">
+                                <div className="inline-flex items-center rounded-xl border border-sidebar-border bg-background p-1">
                                     <button
                                         type="button"
                                         onClick={() => setPreviewDevice('mobile')}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border border-[#2E2E2F]/10 dark:border-white/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${(previewDevice as string) === 'mobile' ? 'bg-background dark:bg-surface border border-sidebar-border shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white/40 hover:text-[#2E2E2F] dark:hover:text-white'}`}
                                     >
                                         <MobilePreviewIcon className="w-3.5 h-3.5" />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setPreviewDevice('desktop')}
-                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border border-[#2E2E2F]/10 dark:border-white/10 shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
+                                        className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${(previewDevice as string) === 'desktop' ? 'bg-background dark:bg-surface border border-sidebar-border shadow-sm text-[#38BDF2]' : 'text-[#2E2E2F] dark:text-white/40 hover:text-[#2E2E2F] dark:hover:text-white'}`}
                                     >
                                         <DesktopPreviewIcon className="w-3.5 h-3.5" />
                                     </button>
@@ -535,7 +524,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                 <button
                                     type="button"
                                     onClick={() => setIsPreviewMode(false)}
-                                    className="flex items-center gap-1.5 text-[#2E2E2F] dark:text-white dark:text-white/60 hover:text-black transition-colors group px-2"
+                                    className="flex items-center gap-1.5 text-[#2E2E2F] dark:text-white/60 hover:text-black dark:hover:text-white transition-colors group px-2"
                                 >
                                     <ICONS.ChevronRight className="w-4 h-4 rotate-180 transition-transform group-hover:-translate-x-0.5" />
                                     <span className="text-[11px] font-bold uppercase tracking-widest">Close Preview</span>
@@ -544,16 +533,16 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                         </div>
 
                         {/* Internal Site Layout */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar bg-background">
                             {/* Header - ONLY MOBILE/Internal hidden for clean desktop preview as requested */}
                             {false && (
-                                <div className="h-14 border-b border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 px-6 flex items-center justify-between bg-white sticky top-0 z-10">
+                                <div className="h-14 border-b border-sidebar-border px-6 flex items-center justify-between bg-surface sticky top-0 z-10">
                                     <img
                                         src={brandingEnabled && organizerProfile?.profileImageUrl ? getImageUrl(organizerProfile.profileImageUrl) : BRAND_LOGO_URL}
                                         alt="Event Logo"
                                         className="h-8 w-auto object-contain"
                                     />
-                                    <div className="flex items-center gap-3 text-[#2E2E2F] dark:text-white dark:text-white/50">
+                                    <div className="flex items-center gap-3 text-[#2E2E2F] dark:text-white/50">
                                         <ICONS.Users className="w-4 h-4" />
                                         <ICONS.MoreHorizontal className="w-4 h-4" />
                                     </div>
@@ -570,47 +559,47 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                             </div>
 
                                             <div className="flex items-start justify-between gap-4 mb-4">
-                                                <h2 className="text-3xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tighter leading-tight">
+                                                <h2 className="text-3xl font-black text-[#2E2E2F] dark:text-white tracking-tighter leading-tight">
                                                     {formData.eventName || 'Event title'}
                                                 </h2>
                                                 <div className="flex items-center gap-2 shrink-0">
-                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 flex items-center justify-center">
-                                                        <ICONS.Heart className="w-4 h-4 text-[#2E2E2F] dark:text-white dark:text-white/40" />
+                                                    <div className="w-9 h-9 rounded-xl border bg-background border-sidebar-border flex items-center justify-center">
+                                                        <ICONS.Heart className="w-4 h-4 text-[#2E2E2F] dark:text-white/40" />
                                                     </div>
-                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 flex items-center justify-center">
-                                                        <ICONS.Download className="w-4 h-4 text-[#2E2E2F] dark:text-white dark:text-white/40" />
+                                                    <div className="w-9 h-9 rounded-xl border bg-background border-sidebar-border flex items-center justify-center">
+                                                        <ICONS.Download className="w-4 h-4 text-[#2E2E2F] dark:text-white/40" />
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="rounded-[2.5rem] overflow-hidden border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 mb-6 shadow-sm">
+                                            <div className="rounded-[2.5rem] overflow-hidden border-2 border-sidebar-border mb-6 shadow-sm">
                                                 <img src={getImageUrl(formData.imageUrl)} alt="Event Preview" crossOrigin="use-credentials" className="w-full aspect-video object-cover" />
                                             </div>
 
-                                            <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F] dark:text-white dark:text-white/70">
-                                                <div className="flex items-center text-[#2E2E2F] dark:text-white dark:text-white/80 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 text-[10px] font-bold">
+                                            <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F] dark:text-white/70">
+                                                <div className="flex items-center text-[#2E2E2F] dark:text-white/80 bg-background px-3 py-1.5 rounded-xl border-2 border-sidebar-border text-[10px] font-bold">
                                                     <ICONS.Calendar className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
                                                     {previewDateLabel}
                                                 </div>
-                                                <div className="flex items-center text-[#2E2E2F] dark:text-white dark:text-white/80 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 text-[10px] font-bold">
+                                                <div className="flex items-center text-[#2E2E2F] dark:text-white/80 bg-background px-3 py-1.5 rounded-xl border-2 border-sidebar-border text-[10px] font-bold">
                                                     <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
                                                     {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
                                                 </div>
-                                                <div className="flex items-center text-[#2E2E2F] dark:text-white dark:text-white/80 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 text-[10px] font-bold">
+                                                <div className="flex items-center text-[#2E2E2F] dark:text-white/80 bg-background px-3 py-1.5 rounded-xl border-2 border-sidebar-border text-[10px] font-bold">
                                                     CAPACITY: {formData.capacityTotal}
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="p-8 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
-                                            <h3 className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
-                                            <p className="text-[#2E2E2F] dark:text-white dark:text-white/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
+                                        <div className="p-8 bg-background rounded-[2rem] border-2 border-sidebar-border">
+                                            <h3 className="text-[10px] font-black text-[#2E2E2F] dark:text-white/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
+                                            <p className="text-[#2E2E2F] dark:text-white/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
                                                 {formData.description || 'Provide an executive summary of this event session...'}
                                             </p>
                                         </div>
 
-                                        <div className="p-8 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
-                                            <h3 className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
-                                            <div className="rounded-[1.5rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] p-5 flex flex-col gap-4">
+                                        <div className="p-8 bg-background rounded-[2rem] border-2 border-sidebar-border">
+                                            <h3 className="text-[10px] font-black text-[#2E2E2F] dark:text-white/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
+                                            <div className="rounded-[1.5rem] border-2 border-sidebar-border bg-background p-5 flex flex-col gap-4">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-14 h-14 rounded-full overflow-hidden text-[#F2F2F2] flex items-center justify-center text-xl font-bold shrink-0" style={{ backgroundColor: previewAccentColor }}>
                                                         {organizerProfile?.profileImageUrl ? (
@@ -620,7 +609,7 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                                         )}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight truncate">
+                                                        <p className="text-xl font-black text-[#2E2E2F] dark:text-white tracking-tight truncate">
                                                             {organizerProfile?.organizerName || 'Organizer Profile'}
                                                         </p>
                                                     </div>
@@ -629,13 +618,13 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                         </div>
 
                                         {hasPreviewPhysicalLocation && (
-                                            <div className="p-8 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
+                                            <div className="p-8 bg-background rounded-[2rem] border-2 border-sidebar-border">
                                                 <div className="flex items-center justify-between gap-3 mb-4">
-                                                    <h3 className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
+                                                    <h3 className="text-[10px] font-black text-[#2E2E2F] dark:text-white/60 uppercase tracking-[0.2em]">EXACT LOCATION</h3>
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-[#38BDF2]">Open in Maps</span>
                                                 </div>
-                                                <p className="text-[13px] text-[#2E2E2F] dark:text-white dark:text-white/70 font-medium mb-5">{formData.location}</p>
-                                                <div className="rounded-2xl overflow-hidden border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]">
+                                                <p className="text-[13px] text-[#2E2E2F] dark:text-white/70 font-medium mb-5">{formData.location}</p>
+                                                <div className="rounded-2xl overflow-hidden border-2 border-sidebar-border bg-background">
                                                     <iframe src={previewMapEmbedUrl} title="Preview map" className="w-full h-64" loading="lazy" />
                                                 </div>
                                             </div>
@@ -643,23 +632,23 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                     </div>
 
                                     <div className="w-[340px] shrink-0 space-y-6 sticky top-0">
-                                        <div className="p-8 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 shadow-sm">
-                                            <h3 className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em] mb-6">SECURE ACCESS</h3>
+                                        <div className="p-8 bg-background rounded-[2rem] border-2 border-sidebar-border shadow-sm">
+                                            <h3 className="text-[10px] font-black text-[#2E2E2F] dark:text-white/60 uppercase tracking-[0.2em] mb-6">SECURE ACCESS</h3>
                                             <div className="space-y-4">
                                                 {formData.ticketTypes && formData.ticketTypes.length > 0 ? (
                                                     formData.ticketTypes.map((ticket: any) => (
-                                                        <div key={ticket.ticketTypeId || ticket.name} className="p-6 rounded-[1.5rem] border-2 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]" style={{ borderColor: `${previewAccentColor}1A` }}>
+                                                        <div key={ticket.ticketTypeId || ticket.name} className="p-6 rounded-[1.5rem] border-2 bg-background" style={{ borderColor: `${previewAccentColor}1A` }}>
                                                             <div className="flex justify-between items-start mb-1">
-                                                                <p className="text-[11px] font-black text-[#2E2E2F] dark:text-white dark:text-white uppercase tracking-wider">{ticket.name}</p>
+                                                                <p className="text-[11px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-wider">{ticket.name}</p>
                                                                 <span className="text-[9px] font-black px-2 py-0.5 rounded text-white" style={{ backgroundColor: previewAccentColor }}>AVAILABLE</span>
                                                             </div>
-                                                            <p className="text-[18px] font-black text-[#2E2E2F] dark:text-white dark:text-white">
+                                                            <p className="text-[18px] font-black text-[#2E2E2F] dark:text-white">
                                                                 {ticket.priceAmount === 0 ? 'FREE' : `PHP ${ticket.priceAmount.toLocaleString()}.00`}
                                                             </p>
-                                                            <div className="mt-5 pt-5 border-t border-[#2E2E2F]/5 dark:border-white/5 flex items-center justify-between">
-                                                                <span className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase tracking-widest">Quantity</span>
+                                                            <div className="mt-5 pt-5 border-t border-sidebar-border flex items-center justify-between">
+                                                                <span className="text-[9px] font-black text-[#2E2E2F] dark:text-white/30 uppercase tracking-widest">Quantity</span>
                                                                 <div className="flex items-center gap-3">
-                                                                    <div className="w-7 h-7 rounded-xl bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 flex items-center justify-center text-[#2E2E2F] dark:text-white dark:text-white/20 text-sm">-</div>
+                                                                    <div className="w-7 h-7 rounded-xl bg-background dark:bg-white/5 flex items-center justify-center text-[#2E2E2F] dark:text-white/20 text-sm">-</div>
                                                                     <span className="text-sm font-black">1</span>
                                                                     <div className="w-7 h-7 rounded-xl flex items-center justify-center text-sm text-white" style={{ backgroundColor: previewAccentColor }}>+</div>
                                                                 </div>
@@ -667,8 +656,8 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                                         </div>
                                                     ))
                                                 ) : (
-                                                    <div className="py-14 text-center border-2 border-dashed border-[#2E2E2F]/10 dark:border-white/10 rounded-[2rem]">
-                                                        <p className="text-[11px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/30 uppercase tracking-widest">No tickets set</p>
+                                                    <div className="py-14 text-center border-2 border-dashed border-sidebar-border rounded-[2rem]">
+                                                        <p className="text-[11px] font-bold text-[#2E2E2F] dark:text-white/30 uppercase tracking-widest">No tickets set</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -688,38 +677,38 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                 </div>
             ) : (
                 /* Mobile Preview Mode - Phone Shell Implementation */
-                <div className={`w-full bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] ${window.innerWidth < 768 ? 'block min-h-screen' : 'flex-1 flex flex-col items-center'}`}>
+                <div className={`w-full bg-background dark:bg-background ${window.innerWidth < 768 ? 'block min-h-screen' : 'flex-1 flex flex-col items-center'}`}>
                     {/* Shell / Content Wrapper - Phone feel only on desktop pov */}
                     <div
-                        className={`relative bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] ${window.innerWidth < 768
+                        className={`relative bg-background dark:bg-background ${window.innerWidth < 768
                             ? 'w-full block h-auto'
-                            : 'w-[375px] h-[780px] rounded-[3.5rem] border-[12px] border-[#F2F2F2] overflow-hidden flex flex-col shadow-[0_40px_100px_rgba(0,0,0,0.15)]'}`}
+                            : 'w-[375px] h-[780px] rounded-[3.5rem] border-[12px] border-sidebar-border overflow-hidden flex flex-col shadow-[0_40px_100px_rgba(0,0,0,0.15)]'}`}
                         style={window.innerWidth < 768 ? {} : { transform: 'scale(0.8)', transformOrigin: 'top center' }}
                     >
                         {/* Stylized Notch for Mobile Preview - Hidden on actual mobile device */}
                         {window.innerWidth >= 768 && (
-                            <div className="h-8 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] flex items-center justify-center relative shrink-0">
-                                <div className="w-24 h-5 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-b-2xl absolute top-0" />
+                            <div className="h-8 bg-background flex items-center justify-center relative shrink-0">
+                                <div className="w-24 h-5 bg-background rounded-b-2xl absolute top-0" />
                             </div>
                         )}
 
                         {/* Main Content Area */}
                         <div className={`${window.innerWidth >= 768 ? 'flex-1 overflow-y-auto custom-scrollbar' : 'w-full block h-auto'}`}>
                             <div className="w-full pb-48">
-                                <div className="h-14 border-b border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 px-5 flex items-center justify-between bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]">
+                                <div className="h-14 border-b border-sidebar-border px-5 flex items-center justify-between bg-background">
                                     <img
                                         src={organizerProfile?.profileImageUrl ? getImageUrl(organizerProfile.profileImageUrl) : BRAND_LOGO_URL}
                                         alt="Event Logo"
                                         className="h-8 w-auto object-contain"
                                         onError={(e) => { e.currentTarget.src = '/lgo.webp'; }}
                                     />
-                                    <div className="flex items-center gap-3 text-[#2E2E2F] dark:text-white dark:text-white/70">
+                                    <div className="flex items-center gap-3 text-[#2E2E2F] dark:text-white/70">
                                         <ICONS.Users className="w-4 h-4" />
                                         <ICONS.MoreHorizontal className="w-4 h-4" />
                                     </div>
                                 </div>
 
-                                <div className="bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] p-5 space-y-6">
+                                <div className="bg-background p-5 space-y-6">
                                     <div className="w-full space-y-6">
                                         <div className="mb-4">
                                             <div className="flex items-center gap-2 text-[8px] font-black tracking-widest uppercase mb-6" style={{ color: previewAccentColor }}>
@@ -728,19 +717,19 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                             </div>
 
                                             <div className="flex items-start justify-between gap-4 mb-4">
-                                                <h2 className="text-2xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tighter leading-tight">
+                                                <h2 className="text-2xl font-black text-[#2E2E2F] dark:text-white tracking-tighter leading-tight">
                                                     {formData.eventName || 'Event title'}
                                                 </h2>
                                                 <div className="flex items-center gap-2 shrink-0">
-                                                    <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 flex items-center justify-center">
-                                                        <ICONS.Heart className="w-4 h-4 text-[#2E2E2F] dark:text-white dark:text-white/40" />
+                                                    <div className="w-9 h-9 rounded-xl border bg-background border-sidebar-border flex items-center justify-center">
+                                                        <ICONS.Heart className="w-4 h-4 text-[#2E2E2F] dark:text-white/40" />
                                                     </div>
                                                     <div className="w-9 h-9 rounded-xl border bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 flex items-center justify-center">
                                                         <ICONS.Download className="w-4 h-4 text-[#2E2E2F] dark:text-white dark:text-white/40" />
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="rounded-[2rem] overflow-hidden border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 mb-6 group">
+                                            <div className="rounded-[2rem] overflow-hidden border-2 border-sidebar-border mb-6 group">
                                                 <img
                                                     src={getImageUrl(formData.imageUrl)}
                                                     alt="Event Preview"
@@ -749,36 +738,36 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                                 />
                                             </div>
 
-                                            <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F] dark:text-white dark:text-white/70">
-                                                <div className="flex items-center text-[#2E2E2F] dark:text-white dark:text-white/80 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 text-[10px] font-bold">
+                                            <div className="flex flex-wrap gap-2 mb-6 text-[#2E2E2F] dark:text-white/70">
+                                                <div className="flex items-center text-[#2E2E2F] dark:text-white/80 bg-background px-3 py-1.5 rounded-xl border-2 border-sidebar-border text-[10px] font-bold">
                                                     <ICONS.Calendar className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
                                                     {previewDateLabel}
                                                 </div>
-                                                <div className="flex items-center text-[#2E2E2F] dark:text-white dark:text-white/80 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 text-[10px] font-bold">
+                                                <div className="flex items-center text-[#2E2E2F] dark:text-white/80 bg-background px-3 py-1.5 rounded-xl border-2 border-sidebar-border text-[10px] font-bold">
                                                     <ICONS.Monitor className="w-3.5 h-3.5 mr-2" style={{ color: previewAccentColor }} />
                                                     {formData.locationType === 'ONLINE' ? 'DIGITAL SESSION' : formData.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
                                                 </div>
                                                 {formData.streamingPlatform && (
-                                                    <div className="flex items-center bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3 py-1.5 rounded-xl border text-[10px] font-black tracking-wide" style={{ color: previewAccentColor, borderColor: `${previewAccentColor}33`, backgroundColor: `${previewAccentColor}0D` }}>
+                                                    <div className="flex items-center bg-background px-3 py-1.5 rounded-xl border text-[10px] font-black tracking-wide" style={{ color: previewAccentColor, borderColor: `${previewAccentColor}33`, backgroundColor: `${previewAccentColor}0D` }}>
                                                         VIA {formData.streamingPlatform.toUpperCase()}
                                                     </div>
                                                 )}
-                                                <div className="flex items-center text-[#2E2E2F] dark:text-white dark:text-white/80 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] px-3 py-1.5 rounded-xl border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 text-[10px] font-bold">
+                                                <div className="flex items-center text-[#2E2E2F] dark:text-white/80 bg-background px-3 py-1.5 rounded-xl border-2 border-sidebar-border text-[10px] font-bold">
                                                     CAPACITY: {formData.capacityTotal}
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[1.5rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
-                                            <h3 className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
-                                            <p className="text-[#2E2E2F] dark:text-white dark:text-white/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
+                                        <div className="p-6 bg-background rounded-[1.5rem] border-2 border-sidebar-border">
+                                            <h3 className="text-[9px] font-black text-[#2E2E2F] dark:text-white/60 uppercase tracking-[0.2em] mb-4">EVENT DETAILS</h3>
+                                            <p className="text-[#2E2E2F] dark:text-white/70 leading-relaxed text-sm font-medium whitespace-pre-wrap">
                                                 {formData.description || 'Provide an executive summary of this event session...'}
                                             </p>
                                         </div>
 
-                                        <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[1.5rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
-                                            <h3 className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
-                                            <div className="rounded-[1.2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] p-4 flex flex-col gap-4">
+                                        <div className="p-6 bg-background rounded-[1.5rem] border-2 border-sidebar-border">
+                                            <h3 className="text-[9px] font-black text-[#2E2E2F] dark:text-white/60 uppercase tracking-[0.2em] mb-4">ORGANIZED BY</h3>
+                                            <div className="rounded-[1.2rem] border-2 border-sidebar-border bg-background p-4 flex flex-col gap-4">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-12 h-12 rounded-full overflow-hidden text-[#F2F2F2] flex items-center justify-center text-lg font-bold shrink-0" style={{ backgroundColor: previewAccentColor }}>
                                                         {organizerProfile?.profileImageUrl ? (
@@ -788,12 +777,12 @@ const EventPreviewContent = React.memo<EventPreviewProps>(({ previewDevice, isPr
                                                         )}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-lg font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight truncate">
+                                                        <p className="text-lg font-black text-[#2E2E2F] dark:text-white tracking-tight truncate">
                                                             {organizerProfile?.organizerName || 'Organizer Profile'}
                                                         </p>
                                                         <div className="flex items-center gap-4 mt-1">
                                                             <div>
-                                                                <p className="text-[8px] uppercase tracking-widest font-black text-[#2E2E2F] dark:text-white dark:text-white/40">Followers</p>
+                                                                <p className="text-[8px] uppercase tracking-widest font-black text-[#2E2E2F] dark:text-white/40">Followers</p>
                                                                 <p className="text-sm font-black">{organizerProfile?.followersCount || 0}</p>
                                                             </div>
                                                             <div>

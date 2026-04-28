@@ -17,9 +17,9 @@ const HeroCard: React.FC<{
             <div className="[&>svg]:w-6 [&>svg]:h-6">{icon}</div>
         </div>
         <div>
-            <p className="text-xs font-bold text-[#2E2E2F] dark:text-white dark:text-white/60 tracking-tight mb-0.5">{title}</p>
-            <p className="text-2xl font-black text-[#2E2E2F] dark:text-white dark:text-white">{value}</p>
-            <p className="text-[10px] font-bold mt-1 text-[#38BDF2]">{sub}</p>
+            <p className="text-xs font-bold text-[#2E2E2F] dark:text-white/60 tracking-tight mb-0.5">{title}</p>
+            <p className="text-2xl font-black text-[#2E2E2F] dark:text-white">{value}</p>
+            <p className="text-[10px] font-bold mt-1 text-[#38BDF2] dark:text-[#38BDF2]/80">{sub}</p>
         </div>
     </div>
 );
@@ -85,8 +85,8 @@ export const OrganizerDashboard: React.FC = () => {
             {/* ── Header ── */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] dark:text-white dark:text-white tracking-tighter uppercase">Dashboard Overview</h1>
-                    <p className="mt-1 text-sm font-semibold text-[#2E2E2F] dark:text-white dark:text-white/60">
+                    <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] dark:text-white tracking-tighter uppercase">Dashboard Overview</h1>
+                    <p className="mt-1 text-sm font-semibold text-[#2E2E2F] dark:text-white/60">
                         See your latest registrations, tickets, and revenue at a glance.
                     </p>
                 </div>
@@ -158,9 +158,9 @@ export const OrganizerDashboard: React.FC = () => {
                         <h3 className="text-base font-black text-[#2E2E2F] dark:text-white">All Transactions</h3>
                         <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/40 mt-1">Recent payments</p>
                     </div>
-                    <div className="divide-y divide-[#2E2E2F]/5 dark:divide-white/5 overflow-y-auto max-h-[400px]">
+                    <div className="divide-y divide-sidebar-border overflow-y-auto max-h-[400px]">
                         {recentTx.length === 0 && (
-                            <p className="p-10 text-center text-xs font-bold text-[#2E2E2F] dark:text-white">No Transactions Found</p>
+                            <p className="p-10 text-center text-xs font-bold text-[#2E2E2F] dark:text-white/60">No Transactions Found</p>
                         )}
                         {recentTx.map((tx, i) => (
                             <div 
@@ -169,15 +169,15 @@ export const OrganizerDashboard: React.FC = () => {
                                 className="p-6 flex justify-between items-center hover:bg-[#38BDF2]/5 transition-colors cursor-pointer group/item border-b border-sidebar-border last:border-0"
                             >
                                 <div className="space-y-1">
-                                    <p className="font-bold text-sm text-[#2E2E2F] dark:text-white dark:text-white group-hover/item:text-[#38BDF2] transition-colors">{tx.customerName || tx.buyerName || 'Organizer'}</p>
-                                    <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40">
+                                    <p className="font-bold text-sm text-[#2E2E2F] dark:text-white group-hover/item:text-[#38BDF2] transition-colors">{tx.customerName || tx.buyerName || 'Organizer'}</p>
+                                    <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/40">
                                         {tx.planName || tx.eventName || 'Ticket Purchase'} • {new Date(tx.createdAt || tx.created_at).toLocaleString()}
                                     </p>
                                 </div>
                                 <div className="text-right">
                                     <span className="text-[9px] font-bold bg-[#38BDF2]/10 text-[#38BDF2] px-2 py-1 rounded-md mb-2 inline-block">PAID</span>
-                                    <p className="font-bold text-sm text-[#2E2E2F] dark:text-white dark:text-white">PHP {Number(tx.netAmount || tx.amount || 0).toLocaleString()}</p>
-                                    <p className="text-[10px] font-bold text-[#1E293B] dark:text-white/30 dark:text-white/20 tracking-tight">Net Payout</p>
+                                    <p className="font-bold text-sm text-[#2E2E2F] dark:text-white">PHP {Number(tx.netAmount || tx.amount || 0).toLocaleString()}</p>
+                                    <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/30 tracking-tight">Net Payout</p>
                                 </div>
                             </div>
                         ))}
@@ -193,9 +193,9 @@ export const OrganizerDashboard: React.FC = () => {
                         <h3 className="text-base font-black text-[#2E2E2F] dark:text-white">Recent Orders</h3>
                         <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/40 mt-1">Ticket purchases</p>
                     </div>
-                    <div className="divide-y divide-[#2E2E2F]/5 dark:divide-white/5 overflow-y-auto max-h-[400px]">
+                    <div className="divide-y divide-sidebar-border overflow-y-auto max-h-[400px]">
                         {recentOrders.length === 0 && (
-                            <p className="p-10 text-center text-xs font-bold text-[#2E2E2F] dark:text-white">No Orders Yet</p>
+                            <p className="p-10 text-center text-xs font-bold text-[#2E2E2F] dark:text-white/60">No Orders Yet</p>
                         )}
                         {recentOrders.map((order, i) => (
                             <div 
@@ -211,8 +211,8 @@ export const OrganizerDashboard: React.FC = () => {
                                 </div>
                                 <div className="text-right">
                                     <span className="text-[9px] font-bold bg-[#38BDF2]/10 text-[#38BDF2] px-2 py-1 rounded-md mb-2 inline-block">PAID</span>
-                                    <p className="font-bold text-sm text-[#2E2E2F] dark:text-white dark:text-white">PHP {Number(order.netAmount || order.totalAmount || 0).toLocaleString()}</p>
-                                    <p className="text-[10px] font-bold text-[#1E293B] dark:text-white/30 dark:text-white/20 tracking-tight">Net Payout</p>
+                                    <p className="font-bold text-sm text-[#2E2E2F] dark:text-white">PHP {Number(order.netAmount || order.totalAmount || 0).toLocaleString()}</p>
+                                    <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/30 tracking-tight">Net Payout</p>
                                 </div>
                             </div>
                         ))}
@@ -233,7 +233,7 @@ export const OrganizerDashboard: React.FC = () => {
                     </div>
                     <span className="text-xs font-bold text-[#38BDF2] bg-[#38BDF2]/10 px-2 py-1 rounded-full">Live</span>
                 </div>
-                <div className="divide-y divide-[#2E2E2F]/5 dark:divide-white/5 overflow-y-auto max-h-[500px]">
+                <div className="divide-y divide-sidebar-border overflow-y-auto max-h-[500px]">
                     {auditLogs.length === 0 && (
                         <div className="p-20 text-center">
                             <ICONS.Activity className="w-8 h-8 text-[#38BDF2]/40 mx-auto mb-4" />
@@ -251,11 +251,11 @@ export const OrganizerDashboard: React.FC = () => {
                                     {log.action?.includes('LOGIN') ? <ICONS.Shield className="w-4 h-4" /> : <ICONS.Activity className="w-4 h-4" />}
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white">{log.action || 'System Action'}</p>
+                                    <p className="text-sm font-bold text-[#2E2E2F] dark:text-white">{log.action || 'System Action'}</p>
                                     <div className="flex items-center gap-2">
                                         <span className="text-[10px] font-bold text-[#38BDF2] bg-[#38BDF2]/5 px-1.5 py-0.5 rounded-sm">{log.actorName || log.performedBy || 'System'}</span>
-                                        <span className="text-[10px] text-[#2E2E2F] dark:text-white dark:text-white/40 font-bold">•</span>
-                                        <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/60">Target — {log.target || 'General'}</p>
+                                        <span className="text-[10px] text-[#2E2E2F] dark:text-white/40 font-bold">•</span>
+                                        <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/60">Target — {log.target || 'General'}</p>
                                     </div>
                                 </div>
                             </div>

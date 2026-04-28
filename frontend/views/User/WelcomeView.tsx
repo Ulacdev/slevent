@@ -60,7 +60,7 @@ const WelcomeView: React.FC = () => {
 
   if (isAuthenticated && role === UserRole.ORGANIZER && isProfileStep) {
     return (
-      <div className="h-screen bg-[#F2F2F2] dark:bg-[#111111] px-4 py-6 sm:px-6 sm:py-8 overflow-y-auto">
+      <div className="h-screen bg-background px-4 py-6 sm:px-6 sm:py-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto" style={{ zoom: '0.8', transformOrigin: 'top center' }}>
           <div className="mb-4">
             <button
@@ -82,7 +82,7 @@ const WelcomeView: React.FC = () => {
   }
 
   return (
-    <div className="fixed inset-0 bg-[#F2F2F2] dark:bg-[#111111] flex flex-col font-sans selection:bg-[#38BDF2]/20 overflow-hidden">
+    <div className="fixed inset-0 bg-background flex flex-col font-sans selection:bg-[#38BDF2]/20 overflow-hidden">
       {/* Top Left Logo */}
       <div className="absolute top-0 left-8 z-20">
         <img
@@ -129,7 +129,7 @@ const WelcomeView: React.FC = () => {
         {/* Right Side: Hero Image - Respecting max height to prevent scroll */}
         <div className="w-full max-w-[400px] lg:max-w-none lg:w-[480px] xl:w-[540px] aspect-square relative group">
           <div className="absolute -inset-4 bg-[#38BDF2]/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-          <div className="relative w-full h-full rounded-[12px] overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] bg-white/40 border border-[#2E2E2F]/15 dark:border-white/10">
+          <div className="relative w-full h-full rounded-[12px] overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] bg-surface border border-sidebar-border">
             <div className="absolute inset-0 bg-black/5 dark:bg-white/5"></div>
             <img
               src="/welcome-hero.png"

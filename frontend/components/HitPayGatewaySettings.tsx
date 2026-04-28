@@ -49,13 +49,13 @@ const EyeOffIcon = (props: any) => (
 );
 
 const DummyGatewayCard = ({ name }: { name: string }) => (
-  <div className="flex items-center justify-between border border-[#2E2E2F]/10 bg-[#F2F2F2] rounded-xl p-4 mb-4">
+  <div className="flex items-center justify-between border border-sidebar-border bg-background rounded-xl p-4 mb-4">
     <div className="flex items-center gap-3">
-      <ICONS.CreditCard className="w-5 h-5 text-gray-600" />
-      <span className="font-semibold text-gray-800 text-sm">{name}</span>
+      <ICONS.CreditCard className="w-5 h-5 text-[#2E2E2F] dark:text-white/40" />
+      <span className="font-semibold text-[#2E2E2F] dark:text-white text-sm">{name}</span>
     </div>
-    <div className="w-11 h-6 bg-gray-200 rounded-full flex items-center px-1">
-      <div className="w-4 h-4 bg-white rounded-full shadow-sm"></div>
+    <div className="w-11 h-6 bg-sidebar-border rounded-full flex items-center px-1">
+      <div className="w-4 h-4 bg-white dark:bg-white/20 rounded-full shadow-sm"></div>
     </div>
   </div>
 );
@@ -185,14 +185,14 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
 
     return (
       <div className="flex-1">
-        <label className="block text-sm font-semibold text-gray-800 mb-1.5">{label}</label>
+        <label className="block text-sm font-semibold text-[#2E2E2F] dark:text-white mb-1.5">{label}</label>
         <div className="relative group">
           <input
             type={isEditing ? (show ? "text" : "password") : (show ? "text" : "password")}
             value={isEditing ? value : (hasStored ? (show ? value || '••••••••' : maskedValue || '') : '')}
             onChange={(e) => handleInputChange(field, e.target.value)}
             placeholder={hasStored && !isEditing ? "••••••••••••••••" : "Enter credential..."}
-            className={`w-full text-sm font-mono border border-[#2E2E2F]/10 rounded-xl py-2.5 pl-3 pr-10 focus:outline-none focus:border-[#38BDF2] focus:ring-1 focus:ring-[#38BDF2] text-gray-800 transition-colors bg-[#F2F2F2]`}
+            className={`w-full text-sm font-mono border border-sidebar-border rounded-xl py-2.5 pl-3 pr-10 focus:outline-none focus:border-[#38BDF2] focus:ring-1 focus:ring-[#38BDF2] text-[#2E2E2F] dark:text-white transition-colors bg-background`}
             disabled={!formData.enabled}
             readOnly={!isEditing && hasStored && !show}
           />
@@ -200,7 +200,7 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
             <button
               type="button"
               onClick={() => setShow(!show)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 dark:text-white/20 hover:text-[#38BDF2] focus:outline-none"
               disabled={!formData.enabled}
             >
               {show ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
@@ -210,14 +210,14 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
             <button
               type="button"
               onClick={() => setShow(!show)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2E2E2F]/40 dark:text-white/20 hover:text-[#38BDF2] focus:outline-none"
             >
                {show ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
             </button>
           )}
         </div>
         {hasStored && !isEditing && formData.enabled && (
-          <p className="mt-1.5 text-[10px] font-black uppercase tracking-widest text-[#38BDF2] cursor-pointer hover:text-gray-600 transition-colors flex items-center gap-1.5" onClick={handleEditClick}>
+          <p className="mt-1.5 text-[10px] font-black uppercase tracking-widest text-[#38BDF2] cursor-pointer hover:text-[#2E2E2F] dark:hover:text-white transition-colors flex items-center gap-1.5" onClick={handleEditClick}>
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
             Edit / Clear Credential
           </p>
@@ -227,7 +227,7 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-500 text-sm">Loading gateways...</div>;
+    return <div className="p-8 text-center text-[#2E2E2F] dark:text-white/60 text-sm">Loading gateways...</div>;
   }
 
   return (
@@ -236,17 +236,17 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
       {/* Disabled / Dummy Gateways to match the screenshot layout */}
 
       {/* HitPay Gateway */}
-      <div className="border border-[#2E2E2F]/10 bg-[#F2F2F2] rounded-xl mb-6 shadow-sm overflow-hidden transition-all duration-300">
-        <div className="flex items-center justify-between p-4 border-b border-gray-100">
+      <div className="border border-sidebar-border bg-surface rounded-xl mb-6 shadow-sm overflow-hidden transition-all duration-300">
+        <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-            <ICONS.CreditCard className="w-5 h-5 text-gray-700" />
-            <span className="font-semibold text-gray-800 text-sm">HitPay</span>
+            <ICONS.CreditCard className="w-5 h-5 text-[#2E2E2F] dark:text-white/60" />
+            <span className="font-semibold text-[#2E2E2F] dark:text-white text-sm">HitPay</span>
           </div>
 
           <button
             type="button"
             onClick={() => handleToggle(!formData.enabled)}
-            className={`w-11 h-6 rounded-full flex items-center px-[3px] transition-colors duration-200 ease-in-out focus:outline-none ${formData.enabled ? 'bg-black' : 'bg-gray-200'}`}
+            className={`w-11 h-6 rounded-full flex items-center px-[3px] transition-colors duration-200 ease-in-out focus:outline-none ${formData.enabled ? 'bg-[#38BDF2]' : 'bg-sidebar-border'}`}
           >
             <div className={`w-[18px] h-[18px] bg-white rounded-full shadow-sm transform transition-transform duration-200 ease-in-out ${formData.enabled ? 'translate-x-[20px]' : 'translate-x-0'}`}></div>
           </button>
@@ -255,18 +255,18 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
         {formData.enabled && (
           <div className="p-5 md:p-6 space-y-6 animate-in slide-in-from-top-2 fade-in duration-200">
 
-            <div className="flex items-start gap-3 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl p-4">
-              <AlertCircleIcon className="w-4 h-4 mt-[3px] text-gray-600 shrink-0" />
-              <p className="text-sm text-gray-600">
+            <div className="flex items-start gap-3 bg-background border border-sidebar-border rounded-xl p-4">
+              <AlertCircleIcon className="w-4 h-4 mt-[3px] text-[#2E2E2F]/60 dark:text-white/40 shrink-0" />
+              <p className="text-sm text-[#2E2E2F] dark:text-white/60">
                 Get your HitPay API credentials from your{' '}
-                <a href="https://dashboard.hit-pay.com" target="_blank" rel="noopener noreferrer" className="text-gray-600 underline hover:text-gray-900 font-medium">Dashboard</a>
+                <a href="https://dashboard.hit-pay.com" target="_blank" rel="noopener noreferrer" className="text-[#38BDF2] underline hover:text-[#2E2E2F] dark:hover:text-white font-medium">Dashboard</a>
               </p>
             </div>
 
             <div className="space-y-3">
-              <label className="block text-sm font-semibold text-gray-800">Mode</label>
+              <label className="block text-sm font-semibold text-[#2E2E2F] dark:text-white">Mode</label>
               <div className="flex items-center gap-6">
-                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer group">
+                <label className="flex items-center gap-2 text-sm text-[#2E2E2F] dark:text-white/70 cursor-pointer group">
                   <div className="relative flex items-center justify-center">
                     <input
                       type="radio"
@@ -275,14 +275,14 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
                       checked={formData.mode === 'sandbox'}
                       onChange={() => handleModeChange('sandbox')}
                     />
-                    <div className="w-4 h-4 rounded-full border border-gray-300 peer-checked:border-black flex items-center justify-center transition-colors">
-                      {formData.mode === 'sandbox' && <div className="w-2 h-2 rounded-full bg-black"></div>}
+                    <div className="w-4 h-4 rounded-full border border-sidebar-border peer-checked:border-[#38BDF2] flex items-center justify-center transition-colors">
+                      {formData.mode === 'sandbox' && <div className="w-2 h-2 rounded-full bg-[#38BDF2]"></div>}
                     </div>
                   </div>
                   Sandbox
                 </label>
 
-                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer group">
+                <label className="flex items-center gap-2 text-sm text-[#2E2E2F] dark:text-white/70 cursor-pointer group">
                   <div className="relative flex items-center justify-center">
                     <input
                       type="radio"
@@ -291,8 +291,8 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
                       checked={formData.mode === 'live'}
                       onChange={() => handleModeChange('live')}
                     />
-                    <div className="w-4 h-4 rounded-full border border-gray-300 peer-checked:border-black flex items-center justify-center transition-colors">
-                      {formData.mode === 'live' && <div className="w-2 h-2 rounded-full bg-black"></div>}
+                    <div className="w-4 h-4 rounded-full border border-sidebar-border peer-checked:border-[#38BDF2] flex items-center justify-center transition-colors">
+                      {formData.mode === 'live' && <div className="w-2 h-2 rounded-full bg-[#38BDF2]"></div>}
                     </div>
                   </div>
                   Live
@@ -328,7 +328,7 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
         )}
 
         {/* Global Save Button for HitPay Gateway */}
-        <div className="px-6 py-5 bg-[#F2F2F2] border-t border-[#2E2E2F]/5 flex justify-end">
+        <div className="px-6 py-5 bg-background border-t border-sidebar-border flex justify-end">
           <button
             onClick={() => handleSave()}
             disabled={saving}
@@ -339,9 +339,9 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
         </div>
       </div>
 
-      <div className="flex items-start gap-3 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl p-4">
-        <AlertCircleIcon className="w-4 h-4 mt-[3px] text-gray-600 shrink-0" />
-        <p className="text-sm text-gray-600 leading-relaxed">
+      <div className="flex items-start gap-3 bg-surface border border-sidebar-border rounded-xl p-4">
+        <AlertCircleIcon className="w-4 h-4 mt-[3px] text-[#2E2E2F]/60 dark:text-white/40 shrink-0" />
+        <p className="text-sm text-[#2E2E2F] dark:text-white/60 leading-relaxed font-medium">
           These payment settings will be used for all {scope === 'admin' ? 'subscription plan payments' : 'event ticket payments'}. Make sure to test your configuration before going live.
         </p>
       </div>

@@ -259,13 +259,13 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
     <div className="space-y-8 pb-20">
 
       <form onSubmit={handleSave} className="space-y-6">
-        <Card className="p-8 rounded-xl border-2 border-[#2E2E2F]/15 bg-[#F2F2F2] dark:bg-white/5 dark:border-white/10">
+        <Card className="p-8 rounded-xl border-2 border-sidebar-border bg-surface">
           <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8 items-start">
             <div className="space-y-6">
               <div className="space-y-3">
                 <label className="text-[11px] font-semibold text-[#2E2E2F] dark:text-white uppercase tracking-wide">Cover Photo</label>
                 <div
-                  className={`relative rounded-xl border-2 border-dashed ${dragActive ? 'border-[#38BDF2] bg-[#38BDF2]/10' : 'border-[#2E2E2F]/20 bg-[#F2F2F2] dark:bg-white/5'
+                  className={`relative rounded-xl border-2 border-dashed ${dragActive ? 'border-[#38BDF2] bg-[#38BDF2]/10' : 'border-sidebar-border bg-background'
                     } p-4 transition-colors group cursor-pointer`}
                   onClick={() => {
                     const input = document.createElement('input');
@@ -281,7 +281,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                   onDragLeave={() => setDragActive(false)}
                   onDrop={(e) => handleDrop(e, true)}
                 >
-                  <div className="aspect-[3/1] rounded-xl overflow-hidden bg-[#F2F2F2] dark:bg-[#111111] border border-[#2E2E2F]/10 dark:border-white/10 flex items-center justify-center">
+                  <div className="aspect-[3/1] rounded-xl overflow-hidden bg-background border border-sidebar-border flex items-center justify-center">
                     {formData.coverImageUrl || localCoverPreviewUrl ? (
                       <img src={formData.coverImageUrl || localCoverPreviewUrl} alt="Cover" className="w-full h-full object-cover" />
                     ) : (
@@ -302,14 +302,14 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
               <div className="space-y-3">
                 <label className="text-[11px] font-semibold text-[#2E2E2F] dark:text-white uppercase tracking-wide">Brand Logo / Avatar</label>
                 <div
-                  className={`w-32 relative rounded-xl border-2 border-dashed ${dragActive ? 'border-[#38BDF2] bg-[#38BDF2]/10' : 'border-[#2E2E2F]/20 bg-[#F2F2F2] dark:bg-white/5'
+                  className={`w-32 relative rounded-xl border-2 border-dashed ${dragActive ? 'border-[#38BDF2] bg-[#38BDF2]/10' : 'border-sidebar-border bg-background'
                     } p-3 transition-colors`}
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                   onDragLeave={() => setDragActive(false)}
                   onDrop={(e) => handleDrop(e, false)}
                 >
                   <div
-                    className="aspect-square rounded-xl overflow-hidden bg-[#F2F2F2] dark:bg-[#111111] border border-[#2E2E2F]/10 dark:border-white/10 flex items-center justify-center cursor-pointer"
+                    className="aspect-square rounded-xl overflow-hidden bg-background border border-sidebar-border flex items-center justify-center cursor-pointer"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     {displayImageUrl ? (
@@ -343,7 +343,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                     {!canCustomBrand && <Badge type="info" className="text-[8px] bg-[#2E2E2F] text-white uppercase px-2 font-black">Professional Feature</Badge>}
                   </div>
 
-                  <div className="p-5 rounded-xl border-2 border-[#2E2E2F]/10 dark:border-white/10 bg-white/50 space-y-4 relative overflow-hidden group">
+                  <div className="p-5 rounded-xl border-2 border-sidebar-border bg-background/50 space-y-4 relative overflow-hidden group">
                     <div className={`flex items-center gap-5 ${!canCustomBrand ? 'opacity-40 grayscale' : ''}`}>
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest ml-1">Brand Color</label>
@@ -410,7 +410,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                   </label>
                   <textarea
                     required
-                    className="w-full px-3 py-2 bg-[#F2F2F2] dark:bg-[#111111] border border-[#2E2E2F]/10 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-[#38BDF2]/40 min-h-[120px]"
+                    className="w-full px-3 py-2 bg-background border border-sidebar-border rounded-xl outline-none focus:ring-2 focus:ring-[#38BDF2]/40 min-h-[120px]"
                     value={formData.bio}
                     onChange={(event) => handleFormChange('bio', stripHtml(event.target.value))}
                     placeholder="Introduce your organization..."
@@ -422,7 +422,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                     Event Page Description (Short)
                   </label>
                   <textarea
-                    className="w-full px-3 py-2 bg-[#F2F2F2] dark:bg-[#111111] border border-[#2E2E2F]/10 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-[#38BDF2]/40 min-h-[90px]"
+                    className="w-full px-3 py-2 bg-background border border-sidebar-border rounded-xl outline-none focus:ring-2 focus:ring-[#38BDF2]/40 min-h-[90px]"
                     maxLength={280}
                     value={formData.eventPageDescription}
                     onChange={(event) => handleFormChange('eventPageDescription', stripHtml(event.target.value))}
@@ -448,14 +448,14 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                   }
                 />
 
-                <div className="md:col-span-2 mt-4 pt-6 border-t-2 border-[#2E2E2F]/10 dark:border-white/10">
+                <div className="md:col-span-2 mt-4 pt-6 border-t-2 border-sidebar-border">
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <label className="block text-[11px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest mb-1">Brand Identity</label>
                       <p className="text-[12px] text-[#2E2E2F] dark:text-white font-medium">This color will be applied to your event pages and buttons.</p>
                     </div>
-                    {!canCustomBrand && (
-                      <Badge type="neutral" className="bg-[#2E2E2F]/5 dark:bg-white/5 text-[#2E2E2F] dark:text-white border-none text-[9px] font-black py-1 px-3">PRO FEATURE</Badge>
+                     {!canCustomBrand && (
+                      <Badge type="neutral" className="bg-background text-[#2E2E2F] dark:text-white border-none text-[9px] font-black py-1 px-3">PRO FEATURE</Badge>
                     )}
                   </div>
 
@@ -464,7 +464,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                       <label className="text-[10px] font-bold text-[#2E2E2F] dark:text-white uppercase tracking-widest">Hex Code</label>
                       <div className="flex items-center gap-3">
                         <div
-                          className="w-12 h-12 rounded-xl shadow-sm border border-[#2E2E2F]/10 dark:border-white/10 transition-transform hover:scale-105"
+                          className="w-12 h-12 rounded-xl shadow-sm border border-sidebar-border transition-transform hover:scale-105"
                           style={{ backgroundColor: formData.brandColor }}
                         />
                         <input
@@ -472,7 +472,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                           value={formData.brandColor}
                           disabled={!canCustomBrand}
                           onChange={(e) => handleFormChange('brandColor', e.target.value)}
-                          className={`w-32 px-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 ${!canCustomBrand ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          className={`w-32 px-4 py-3 bg-background border border-sidebar-border rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 ${!canCustomBrand ? 'opacity-50 cursor-not-allowed' : ''}`}
                           placeholder="#000000"
                         />
                         <input
@@ -485,7 +485,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                       </div>
                     </div>
 
-                    <div className="flex-1 p-5 rounded-xl bg-white/50 border border-[#2E2E2F]/5 dark:border-white/5 hidden sm:block">
+                    <div className="flex-1 p-5 rounded-xl bg-background border border-sidebar-border hidden sm:block">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px]" style={{ backgroundColor: formData.brandColor }}>
                           <ICONS.CheckCircle className="w-4 h-4" />
@@ -500,7 +500,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
           </div>
         </Card>
 
-        <Card className="p-6 rounded-xl border-2 border-[#2E2E2F]/15 bg-[#F2F2F2]">
+        <Card className="p-6 rounded-xl border-2 border-sidebar-border bg-surface">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <p className="text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Organizer Snapshot</p>

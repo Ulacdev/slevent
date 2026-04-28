@@ -232,7 +232,7 @@ export const UserHome: React.FC = () => {
             {organizerProfile && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Current Plan Card */}
-                    <div className="bg-[#F2F2F2] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 rounded-xl p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
+                    <div className="bg-surface border-2 border-sidebar-border rounded-xl p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
                         <div>
                             <p className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white mb-2">Current Plan</p>
                             <p className="text-2xl font-black text-[#2E2E2F] dark:text-white tracking-tight">{organizerProfile.plan?.name || 'No Active Plan'}</p>
@@ -249,7 +249,7 @@ export const UserHome: React.FC = () => {
                     </div>
 
                     {/* Paid Events Limit Widget */}
-                    <div className="bg-[#F2F2F2] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 rounded-xl p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
+                    <div className="bg-surface border-2 border-sidebar-border rounded-xl p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
                         {organizerProfile && (() => {
                             const pricedLimit = Number(organizerProfile.plan?.limits?.max_priced_events || organizerProfile.plan?.max_priced_events || organizerProfile.plan?.maxPricedEvents || 0);
                             const usedCount = stats.paidEventsCount;
@@ -291,7 +291,7 @@ export const UserHome: React.FC = () => {
 
                     {/* Email Quota Widget */}
                     {emailQuota && (
-                        <div className="bg-[#F2F2F2] dark:bg-[#111111] border-[#2E2E2F]/15 dark:border-white/10 border-2 rounded-xl p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
+                        <div className="bg-surface border-sidebar-border border-2 rounded-xl p-6 flex flex-col justify-between min-h-[160px] shadow-sm transition-all hover:border-[#38BDF2]/30">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="p-2.5 bg-[#38BDF2] rounded-xl shadow-[0_8px_16px_-4px_rgba(56,189,242,0.4)]">
                                     <ICONS.Mail className="w-5 h-5 text-white" strokeWidth={2} />
@@ -338,7 +338,7 @@ export const UserHome: React.FC = () => {
 
             {/* Promoted Events Countdown Timer */}
             {promotedEvents.length > 0 && (
-                <div className="bg-[#F2F2F2] dark:bg-[#111111] border-2 border-[#2E2E2F]/10 dark:border-white/10 rounded-xl overflow-hidden shadow-sm">
+                <div className="bg-surface border-2 border-sidebar-border rounded-xl overflow-hidden shadow-sm">
                     <div className="p-6 border-b-2 border-[#2E2E2F]/5 dark:border-white/5 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-[#38BDF2] flex items-center justify-center text-white shadow-[0_8px_16px_-4px_rgba(56,189,242,0.4)]">
@@ -372,7 +372,7 @@ export const UserHome: React.FC = () => {
                                             {promo.eventName?.charAt(0)?.toUpperCase() || '?'}
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="font-black text-sm text-[#2E2E2F] dark:text-white dark:text-white truncate">{promo.eventName}</p>
+                                            <p className="font-black text-sm text-[#2E2E2F] dark:text-white truncate">{promo.eventName}</p>
                                             <p className="text-[9px] font-bold text-[#2E2E2F] dark:text-white/40 dark:text-white/40 mt-0.5 uppercase tracking-wide">
                                                 Expires {expiresAt.toLocaleDateString()} at {expiresAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>
@@ -395,8 +395,8 @@ export const UserHome: React.FC = () => {
                                             <div className="flex items-center gap-1">
                                                 {days > 0 && (
                                                     <>
-                                                        <div className="flex flex-col items-center px-2 py-1 bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 rounded-lg min-w-[38px]">
-                                                            <span className={`text-base font-black leading-none ${isExpiring ? 'text-amber-500' : 'text-[#2E2E2F] dark:text-white dark:text-white'}`}>{days}</span>
+                                                <div className="flex flex-col items-center px-2 py-1 bg-background rounded-lg min-w-[38px]">
+                                                            <span className={`text-base font-black leading-none ${isExpiring ? 'text-amber-500' : 'text-[#2E2E2F] dark:text-white'}`}>{days}</span>
                                                             <span className="text-[7px] font-bold text-[#2E2E2F] dark:text-white/30 dark:text-white/30 uppercase tracking-wider">day{days !== 1 ? 's' : ''}</span>
                                                         </div>
                                                         <span className="text-[#2E2E2F] dark:text-white/15 dark:text-white/15 font-black text-xs">:</span>
@@ -430,7 +430,7 @@ export const UserHome: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Create First Event Card */}
                 <div
-                    className="group relative bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/5 dark:border-white/5 dark:border-white/10 rounded-xl p-8 flex flex-col items-start transition-all duration-300 hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/5 dark:hover:bg-[#38BDF2]/5 hover:shadow-[0_20px_40px_-20px_rgba(56,189,242,0.15)] hover:-translate-y-1"
+                    className="group relative bg-surface border-2 border-sidebar-border rounded-xl p-8 flex flex-col items-start transition-all duration-300 hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/5 dark:hover:bg-[#38BDF2]/5 hover:shadow-[0_20px_40px_-20px_rgba(56,189,242,0.15)] hover:-translate-y-1"
                     onClick={() => navigate('/my-events/create')}
                 >
                     <div className="w-14 h-14 rounded-xl bg-[#38BDF2] text-white flex items-center justify-center mb-8 shadow-[0_10px_20px_-5px_rgba(56,189,242,0.3)] transition-all">
@@ -453,7 +453,7 @@ export const UserHome: React.FC = () => {
                     <div className="w-14 h-14 rounded-xl bg-[#38BDF2] text-white flex items-center justify-center mb-8 shadow-[0_10px_20px_-5px_rgba(56,189,242,0.3)] transition-all">
                         <ICONS.Calendar className="w-7 h-7 stroke-[2]" />
                     </div>
-                    <h2 className="text-2xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight mb-3">Manage My Events</h2>
+                    <h2 className="text-2xl font-black text-[#2E2E2F] dark:text-white tracking-tight mb-3">Manage My Events</h2>
                     <p className="text-[#2E2E2F] dark:text-white dark:text-white/70 font-medium leading-relaxed mb-8 flex-1">
                         View, edit, and track the performance of all your existing events. Stay on top of registrations.
                     </p>
@@ -470,7 +470,7 @@ export const UserHome: React.FC = () => {
                     <div className="w-14 h-14 rounded-xl bg-[#38BDF2] text-white flex items-center justify-center mb-8 shadow-[0_10px_20px_-5px_rgba(56,189,242,0.3)] transition-all">
                         <ICONS.MessageSquare className="w-7 h-7 stroke-[2]" />
                     </div>
-                    <h2 className="text-2xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight mb-3">Help & Support</h2>
+                    <h2 className="text-2xl font-black text-[#2E2E2F] dark:text-white tracking-tight mb-3">Help & Support</h2>
                     <p className="text-[#2E2E2F] dark:text-white dark:text-white/70 font-medium leading-relaxed mb-8 flex-1">
                         Need assistance? Our support team is here to help you optimize your event operations and resolve any technical issues.
                     </p>

@@ -21,6 +21,8 @@
             surface: 'var(--color-surface)',
             sidebar: 'var(--color-sidebar)',
             'sidebar-border': 'var(--color-sidebar-border)',
+            'primary-text': 'var(--color-text)',
+            accent: '#38BDF2',
           },
           borderRadius: {
             'none': '0',
@@ -65,7 +67,7 @@
   <link rel="stylesheet" href="/index.css">
 </head>
 
-<body class="bg-[#F2F2F2] text-[#2E2E2F]">
+<body class="bg-background text-primary-text transition-colors duration-300">
   <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>

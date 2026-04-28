@@ -34,7 +34,7 @@ const IconInput = (props: any) => {
       )}
       <input
         {...inputProps}
-        className={`w-full px-5 py-3 bg-[#F2F2F2] border border-black/[0.03] rounded-[16px] text-[14px] font-medium text-black outline-none focus:border-[#38BDF2] transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] ${icon ? 'pl-11' : 'pl-4'} ${inputProps.className || ''}`}
+        className={`w-full px-5 py-3 bg-[#F2F2F2] border-b border-black/[0.08] rounded-[16px] text-[14px] font-medium text-black outline-none focus:border-[#38BDF2] transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] ${icon ? 'pl-11' : 'pl-4'} ${inputProps.className || ''}`}
       />
     </div>
   );
@@ -362,7 +362,7 @@ export const AuthPage: React.FC = () => {
     <>
       <div className="relative min-h-screen w-full flex bg-[#F2F2F2] lg:overflow-y-auto font-sans">
         {/* LEFT: Branding (55%) */}
-        <div className="hidden lg:flex w-[60%] lg:h-screen lg:sticky lg:top-0 flex-col pl-10 pr-4 pt-4 justify-between bg-[#F2F2F2] border-r border-black/5 relative overflow-hidden isolate">
+        <div className="hidden lg:flex w-[70%] lg:h-screen lg:sticky lg:top-0 flex-col pl-10 pr-4 pt-4 justify-between bg-[#F2F2F2] border-r border-black/[0.05] relative overflow-hidden isolate">
 
           {/* Mockup Display: Premium Dark Shells */}
           <div className="absolute left-[74%] -translate-x-1/2 top-[40%] -translate-y-1/2 z-0 pointer-events-none transform scale-[0.6] lg:scale-[0.75] opacity-[0.9] transition-opacity duration-700">
@@ -634,7 +634,7 @@ export const AuthPage: React.FC = () => {
                 { title: 'Manage attendees', desc: 'Track check-ins and engagement in real-time.', icon: ICONS.CheckCircle },
                 { title: 'Sell tickets effortlessly', desc: 'Boost sales with seamless QR code ticketing.', icon: ICONS.Zap }
               ].map((card, i) => (
-                <div key={i} className="w-full bg-[#F2F2F2] p-4 rounded-[1.2rem] border border-black/[0.02] flex items-center gap-4 transition-transform hover:scale-[1.02] shadow-[0_15px_30px_rgba(0,0,0,0.04),inset_0_-6px_12px_rgba(0,0,0,0.04),inset_0_6px_12px_rgba(255,255,255,0.9)] animate-in fade-in slide-in-from-left duration-700 cursor-default" style={{ animationDelay: `${i * 150 + 200}ms` }}>
+                <div key={i} className="w-full bg-[#F2F2F2] p-4 rounded-[1.2rem] flex items-center gap-4 transition-transform hover:scale-[1.02] animate-in fade-in slide-in-from-left duration-700 cursor-default" style={{ animationDelay: `${i * 150 + 200}ms` }}>
                   <div className="w-11 h-11 rounded-[14px] bg-[#38BDF2] flex items-center justify-center flex-shrink-0 shadow-[0_4px_12px_rgba(56,189,242,0.3),inset_0_-2px_4px_rgba(0,0,0,0.1),inset_0_2px_4px_rgba(255,255,255,0.4)]">
                     <card.icon className="w-5 h-5 text-white drop-shadow-sm" />
                   </div>
@@ -649,347 +649,349 @@ export const AuthPage: React.FC = () => {
         </div>
 
         {/* RIGHT: Auth Forms (45%) */}
-        <div className="w-full lg:w-[40%] min-h-full flex flex-col items-center justify-start pt-8 lg:pt-[4vh] p-8 bg-[#F2F2F2] overflow-visible relative custom-scrollbar">
-          <div className="w-full max-w-[380px] py-10 lg:py-0">
+        <div className="w-full lg:w-[30%] min-h-full flex flex-col relative overflow-y-auto bg-[#F2F2F2] scrollbar-none">
+          <div className="min-h-full flex flex-col items-center justify-center p-8 w-full relative">
+            <div className="w-full max-w-[350px] pb-12 lg:-translate-y-24">
 
-            {/* MOBILE ONLY LOGO */}
-            <div className="lg:hidden flex justify-center mb-6">
-              <Link to="/" className="inline-block hover:opacity-80 transition-opacity">
-                <img
-                  src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
-                  alt="StartupLab"
-                  className="h-24 w-auto"
-                />
-              </Link>
-            </div>
+              {/* MOBILE ONLY LOGO */}
+              <div className="lg:hidden flex justify-center mb-6">
+                <Link to="/" className="inline-block hover:opacity-80 transition-opacity">
+                  <img
+                    src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
+                    alt="StartupLab"
+                    className="h-24 w-auto"
+                  />
+                </Link>
+              </div>
 
-            <div className="hidden lg:block text-left mb-4">
-              <span className="text-[#38BDF2] text-[11px] font-black mb-1.5 block">
-                {view === 'login' ? 'Returning user' :
-                  view === 'signup' ? 'New creator' :
-                    view === 'forgot-password' ? 'Security help' :
-                      view === 'reset-password' ? 'New Access' :
-                        'Join Organization'}
-              </span>
-              <h2 className="text-2xl font-black text-black tracking-tight leading-tight mb-1">
-                {view === 'login' ? 'Welcome back 👋' :
-                  view === 'signup' ? 'Join StartupLab' :
-                    view === 'forgot-password' ? 'Trouble signing in?' :
-                      view === 'reset-password' ? 'Setup your password' :
-                        (inviteInfo?.accountExists ? 'Join Organization' : 'Create your account')}
-              </h2>
-              <p className="text-[11px] text-black/40 font-bold max-w-[280px] leading-relaxed">
-                {view === 'login' ? "Let's get your events running." :
-                  view === 'signup' ? 'Scale your event business effortlessly with our tools.' :
-                    view === 'forgot-password' ? "Enter your email and we'll send you a link to get back into your account." :
-                      view === 'reset-password' ? 'Please enter a new password that you haven\'t used before.' :
-                        `Invited as ${inviteInfo?.email || 'new member'}`}
-              </p>
-            </div>
+              <div className="hidden lg:block text-left mb-4">
+                <span className="text-[#38BDF2] text-[11px] font-black mb-1.5 block">
+                  {view === 'login' ? 'Returning user' :
+                    view === 'signup' ? 'New creator' :
+                      view === 'forgot-password' ? 'Security help' :
+                        view === 'reset-password' ? 'New Access' :
+                          'Join Organization'}
+                </span>
+                <h2 className="text-2xl font-black text-black tracking-tight leading-tight mb-1">
+                  {view === 'login' ? 'Welcome back 👋' :
+                    view === 'signup' ? 'Join StartupLab' :
+                      view === 'forgot-password' ? 'Trouble signing in?' :
+                        view === 'reset-password' ? 'Setup your password' :
+                          (inviteInfo?.accountExists ? 'Join Organization' : 'Create your account')}
+                </h2>
+                <p className="text-[11px] text-black/40 font-bold max-w-[280px] leading-relaxed">
+                  {view === 'login' ? "Let's get your events running." :
+                    view === 'signup' ? 'Scale your event business effortlessly with our tools.' :
+                      view === 'forgot-password' ? "Enter your email and we'll send you a link to get back into your account." :
+                        view === 'reset-password' ? 'Please enter a new password that you haven\'t used before.' :
+                          `Invited as ${inviteInfo?.email || 'new member'}`}
+                </p>
+              </div>
 
-            <div className="w-full lg:bg-[#F2F2F2] lg:p-8 lg:rounded-[24px] lg:border lg:border-black/[0.03] lg:shadow-[0_20px_40px_rgba(0,0,0,0.05),inset_0_-8px_16px_rgba(0,0,0,0.05),inset_0_8px_16px_rgba(255,255,255,0.8)] overflow-visible">
-              {view === 'login' && (
-                <form onSubmit={handleLogin} className="flex flex-col items-stretch">
-                  <div className="space-y-3">
-                    <div className="space-y-0.5 text-left relative">
-                      <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Email Address <span className="text-red-500">*</span></label>
-                      <IconInput
-                        type="email"
-                        placeholder="you@domain.com"
-                        value={email}
-                        onChange={(e: any) => setEmail(e.target.value)}
-                        required
-                        icon={<EnvelopeIcon className="w-4 h-4" />}
-                      />
-                    </div>
-
-                    <div className="space-y-0.5 text-left relative">
-                      <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Password <span className="text-red-500">*</span></label>
-                      <PasswordInput value={password} onChange={(e: any) => setPassword(e.target.value)} required placeholder="••••••••"
-                        icon={<LockIcon className="w-4 h-4" />}
-                        inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all" />
-                      <button type="button" onClick={() => setView('forgot-password')} className="text-[11px] font-bold text-[#38BDF2] hover:underline mt-1.5 flex justify-end w-full">Forgot password?</button>
-                    </div>
-                  </div>
-
-                  {showLoginCaptcha && (
-                    <div className="flex justify-center overflow-visible h-[78px] mt-2">
-                      <ReCAPTCHA
-                        ref={recaptchaRef}
-                        sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'}
-                        onChange={(val) => setCaptchaValue(val)}
-                        theme="light"
-                      />
-                    </div>
-                  )}
-
-                  <Button type="submit" className="mt-1.5 w-full py-3.5 text-[13.5px] font-black rounded-[16px] border-none bg-gradient-to-r from-[#38BDF2] to-[#2DAADF] text-white shadow-[0_10px_20px_rgba(56,189,242,0.2),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" loading={loading} disabled={loading}>
-                    Login
-                  </Button>
-
-                  <div className="flex items-center gap-3 mt-2 mb-2">
-                    <div className="h-px bg-black/5 flex-1"></div>
-                    <span className="text-[13px] font-bold text-black/20">Or continue with</span>
-                    <div className="h-px bg-black/5 flex-1"></div>
-                  </div>
-
-                  <button type="button" onClick={() => handleSocialLogin('google')} disabled={!!socialLoading}
-                    className="flex items-center justify-center gap-3 w-full py-3 bg-[#F2F2F2] !border-[1px] !border-solid !border-black/[0.05] rounded-[16px] shadow-[inset_0_-2px_6px_rgba(0,0,0,0.02),inset_0_2px_6px_rgba(255,255,255,0.7),0_4px_12px_rgba(0,0,0,0.03)] hover:scale-[1.02] transition-all"
-                  >
-                    <ICONS.Google className="w-4 h-4" />
-                    <span className="text-[13px] font-bold text-black/80">Continue with Google</span>
-                  </button>
-
-                  <p className="text-black/40 text-[13px] font-bold text-center mt-2">
-                    Don't have an account? <button type="button" onClick={() => setView('signup')} className="text-[#38BDF2] hover:underline">Create account</button>
-                  </p>
-                </form>
-
-              )}
-
-              {view === 'signup' && (
-                <div className="w-full">
-                  <form onSubmit={handleSignup} className="flex flex-col pb-10 items-stretch">
+              <div className="w-full lg:bg-[#F2F2F2] lg:p-0 lg:rounded-[24px] overflow-visible">
+                {view === 'login' && (
+                  <form onSubmit={handleLogin} className="flex flex-col items-stretch">
                     <div className="space-y-3">
-                      <div className="space-y-0.5">
-                        <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Full Name <span className="text-red-500">*</span></label>
-                        <IconInput
-                          placeholder="Juan Dela Cruz"
-                          required
-                          value={name}
-                          onChange={(e: any) => setName(e.target.value)}
-                          icon={<UserIcon className="w-4 h-4" />}
-                          inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium"
-                        />
-                      </div>
-                      <div className="space-y-0.5">
+                      <div className="space-y-0.5 text-left relative">
                         <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Email Address <span className="text-red-500">*</span></label>
                         <IconInput
                           type="email"
                           placeholder="you@domain.com"
-                          required
                           value={email}
                           onChange={(e: any) => setEmail(e.target.value)}
+                          required
                           icon={<EnvelopeIcon className="w-4 h-4" />}
-                          inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium"
                         />
                       </div>
-                      <div className="space-y-0.5">
+
+                      <div className="space-y-0.5 text-left relative">
                         <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Password <span className="text-red-500">*</span></label>
-                        <PasswordInput placeholder="Create password" required value={password} onChange={(e: any) => setPassword(e.target.value)}
+                        <PasswordInput value={password} onChange={(e: any) => setPassword(e.target.value)} required placeholder="••••••••"
                           icon={<LockIcon className="w-4 h-4" />}
-                          inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all" />
-                      </div>
-                      <div className="space-y-0.5">
-                        <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Confirm Password <span className="text-red-500">*</span></label>
-                        <PasswordInput placeholder="Confirm password" required value={confirmPassword} onChange={(e: any) => setConfirmPassword(e.target.value)}
-                          icon={<LockIcon className="w-4 h-4" />}
-                          inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all" />
+                          inputClassName="!bg-[#F2F2F2] !border-b !border-black/[0.08] !rounded-[16px] !py-3 !text-[14px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all" />
+                        <button type="button" onClick={() => setView('forgot-password')} className="text-[11px] font-bold text-[#38BDF2] hover:underline mt-1.5 flex justify-end w-full">Forgot password?</button>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-2.5 p-1 bg-black/[0.01] rounded-[11px] mt-2 mb-1">
-                      <div className="pt-0.5">
-                        <Checkbox checked={agreedToTerms} onChange={setAgreedToTerms} size="sm" />
+                    {showLoginCaptcha && (
+                      <div className="flex justify-center overflow-visible h-[78px] mt-2">
+                        <ReCAPTCHA
+                          ref={recaptchaRef}
+                          sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'}
+                          onChange={(val) => setCaptchaValue(val)}
+                          theme="light"
+                        />
                       </div>
-                      <span className="text-[11px] text-black/60 font-medium leading-relaxed">
-                        I agree to the <button type="button" onClick={() => setShowTerms(true)} className="text-[#38BDF2] font-bold hover:underline">Terms of Service</button> and <button type="button" onClick={() => setShowPrivacy(true)} className="text-[#38BDF2] font-bold hover:underline">Privacy Policy</button>.
-                      </span>
-                    </div>
+                    )}
 
-                    <Button
-                      type="submit"
-                      className="mt-1 w-full py-3.5 text-[13.5px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
-                      loading={loading}
-                      disabled={loading}
-                    >
-                      Create account
+                    <Button type="submit" className="mt-1.5 w-full py-3.5 text-[13.5px] font-black rounded-[16px] border-none bg-gradient-to-r from-[#38BDF2] to-[#2DAADF] text-white shadow-[0_10px_20px_rgba(56,189,242,0.2),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all" loading={loading} disabled={loading}>
+                      Login
                     </Button>
 
                     <div className="flex items-center gap-3 mt-2 mb-2">
-                      <div className="h-px bg-black/5 flex-1"></div>
-                      <span className="text-[13px] font-bold text-black/20">Or sign up with</span>
-                      <div className="h-px bg-black/5 flex-1"></div>
+                      <div className="h-px bg-transparent flex-1"></div>
+                      <span className="text-[13px] font-bold text-black/20">Or continue with</span>
+                      <div className="h-px bg-transparent flex-1"></div>
                     </div>
 
                     <button type="button" onClick={() => handleSocialLogin('google')} disabled={!!socialLoading}
-                      className="flex items-center justify-center gap-3 w-full py-3 bg-[#F2F2F2] !border-[1px] !border-solid !border-black/[0.05] rounded-[16px] shadow-[inset_0_-2px_6px_rgba(0,0,0,0.02),inset_0_2px_6px_rgba(255,255,255,0.7),0_4px_12px_rgba(0,0,0,0.03)] hover:scale-[1.02] transition-all"
+                      className="flex items-center justify-center gap-3 w-full py-3 bg-[#F2F2F2] border-none rounded-[16px] shadow-[inset_0_-2px_6px_rgba(0,0,0,0.02),inset_0_2px_6px_rgba(255,255,255,0.7),0_4px_12px_rgba(0,0,0,0.03)] hover:scale-[1.02] transition-all"
                     >
                       <ICONS.Google className="w-4 h-4" />
                       <span className="text-[13px] font-bold text-black/80">Continue with Google</span>
                     </button>
 
                     <p className="text-black/40 text-[13px] font-bold text-center mt-2">
-                      Already have an account? <button type="button" onClick={() => setView('login')} className="text-[#38BDF2] hover:underline">Sign In</button>
+                      Don't have an account? <button type="button" onClick={() => setView('signup')} className="text-[#38BDF2] hover:underline">Create account</button>
                     </p>
                   </form>
-                </div>
-              )}
 
-              {view === 'forgot-password' && (
-                <div className="space-y-4">
-                  {!forgotMessage ? (
-                    <form
-                      onSubmit={async (e) => {
-                        e.preventDefault();
-                        setError('');
-                        setLoading(true);
-                        try {
-                          const res = await fetch(`${API}/api/auth/forgot-password`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email: email.trim().toLowerCase() })
-                          });
-                          const data = await res.json().catch(() => ({}));
-                          if (!res.ok) {
-                            setError(data.error || 'Failed to send reset link.');
-                          } else {
-                            setForgotMessage('Success');
-                            showToast('success', 'Reset link sent! Please check your email inbox.');
+                )}
+
+                {view === 'signup' && (
+                  <div className="w-full">
+                    <form onSubmit={handleSignup} className="flex flex-col pb-10 items-stretch">
+                      <div className="space-y-3">
+                        <div className="space-y-0.5">
+                          <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Full Name <span className="text-red-500">*</span></label>
+                          <IconInput
+                            placeholder="Juan Dela Cruz"
+                            required
+                            value={name}
+                            onChange={(e: any) => setName(e.target.value)}
+                            icon={<UserIcon className="w-4 h-4" />}
+                            inputClassName="!bg-[#F2F2F2] !border-b !border-black/[0.08] !rounded-[16px] !py-3 !text-[14px] !font-medium"
+                          />
+                        </div>
+                        <div className="space-y-0.5">
+                          <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Email Address <span className="text-red-500">*</span></label>
+                          <IconInput
+                            type="email"
+                            placeholder="you@domain.com"
+                            required
+                            value={email}
+                            onChange={(e: any) => setEmail(e.target.value)}
+                            icon={<EnvelopeIcon className="w-4 h-4" />}
+                            inputClassName="!bg-[#F2F2F2] !border-b !border-black/[0.08] !rounded-[16px] !py-3 !text-[14px] !font-medium"
+                          />
+                        </div>
+                        <div className="space-y-0.5">
+                          <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Password <span className="text-red-500">*</span></label>
+                          <PasswordInput placeholder="Create password" required value={password} onChange={(e: any) => setPassword(e.target.value)}
+                            icon={<LockIcon className="w-4 h-4" />}
+                            inputClassName="!bg-[#F2F2F2] !border-b !border-black/[0.08] !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Confirm Password <span className="text-red-500">*</span></label>
+                          <PasswordInput placeholder="Confirm password" required value={confirmPassword} onChange={(e: any) => setConfirmPassword(e.target.value)}
+                            icon={<LockIcon className="w-4 h-4" />}
+                            inputClassName="!bg-[#F2F2F2] !border-b !border-black/[0.08] !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all" />
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-2.5 p-1 bg-black/[0.01] rounded-[11px] mt-2 mb-1">
+                        <div className="pt-0.5">
+                          <Checkbox checked={agreedToTerms} onChange={setAgreedToTerms} size="sm" />
+                        </div>
+                        <span className="text-[11px] text-black/60 font-medium leading-relaxed">
+                          I agree to the <button type="button" onClick={() => setShowTerms(true)} className="text-[#38BDF2] font-bold hover:underline">Terms of Service</button> and <button type="button" onClick={() => setShowPrivacy(true)} className="text-[#38BDF2] font-bold hover:underline">Privacy Policy</button>.
+                        </span>
+                      </div>
+
+                      <Button
+                        type="submit"
+                        className="mt-1 w-full py-3.5 text-[13.5px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                        loading={loading}
+                        disabled={loading}
+                      >
+                        Create account
+                      </Button>
+
+                      <div className="flex items-center gap-3 mt-2 mb-2">
+                        <div className="h-px bg-transparent flex-1"></div>
+                        <span className="text-[13px] font-bold text-black/20">Or sign up with</span>
+                        <div className="h-px bg-transparent flex-1"></div>
+                      </div>
+
+                      <button type="button" onClick={() => handleSocialLogin('google')} disabled={!!socialLoading}
+                        className="flex items-center justify-center gap-3 w-full py-3 bg-[#F2F2F2] border-none rounded-[16px] shadow-[inset_0_-2px_6px_rgba(0,0,0,0.02),inset_0_2px_6px_rgba(255,255,255,0.7),0_4px_12px_rgba(0,0,0,0.03)] hover:scale-[1.02] transition-all"
+                      >
+                        <ICONS.Google className="w-4 h-4" />
+                        <span className="text-[13px] font-bold text-black/80">Continue with Google</span>
+                      </button>
+
+                      <p className="text-black/40 text-[13px] font-bold text-center mt-2">
+                        Already have an account? <button type="button" onClick={() => setView('login')} className="text-[#38BDF2] hover:underline">Sign In</button>
+                      </p>
+                    </form>
+                  </div>
+                )}
+
+                {view === 'forgot-password' && (
+                  <div className="space-y-4">
+                    {!forgotMessage ? (
+                      <form
+                        onSubmit={async (e) => {
+                          e.preventDefault();
+                          setError('');
+                          setLoading(true);
+                          try {
+                            const res = await fetch(`${API}/api/auth/forgot-password`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ email: email.trim().toLowerCase() })
+                            });
+                            const data = await res.json().catch(() => ({}));
+                            if (!res.ok) {
+                              setError(data.error || 'Failed to send reset link.');
+                            } else {
+                              setForgotMessage('Success');
+                              showToast('success', 'Reset link sent! Please check your email inbox.');
+                            }
+                          } catch (err) {
+                            setError('Connection error. Please try again.');
+                          } finally {
+                            setLoading(false);
                           }
-                        } catch (err) {
-                          setError('Connection error. Please try again.');
-                        } finally {
-                          setLoading(false);
-                        }
-                      }}
-                      className="space-y-3"
-                    >
-                      <div className="space-y-0.5">
-                        <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Account Email <span className="text-red-500">*</span></label>
-                        <IconInput
-                          type="email"
-                          placeholder="you@domain.com"
-                          value={email}
-                          onChange={(e: any) => setEmail(e.target.value)}
-                          required
-                          icon={<EnvelopeIcon className="w-4 h-4" />}
-                        />
-                      </div>
-
-                      {error && (
-                        <div className="p-3 bg-red-50/50 border border-red-100 rounded-[16px] flex items-center gap-2 animate-in fade-in slide-in-from-top-1 duration-300 shadow-[inset_0_2px_4px_rgba(255,0,0,0.02)]">
-                          <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                          <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
+                        }}
+                        className="space-y-3"
+                      >
+                        <div className="space-y-0.5">
+                          <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Account Email <span className="text-red-500">*</span></label>
+                          <IconInput
+                            type="email"
+                            placeholder="you@domain.com"
+                            value={email}
+                            onChange={(e: any) => setEmail(e.target.value)}
+                            required
+                            icon={<EnvelopeIcon className="w-4 h-4" />}
+                          />
                         </div>
-                      )}
 
-                      <Button type="submit" className="w-full py-4 text-[13.5px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all disabled:opacity-50" loading={loading} disabled={loading}>
-                        Send Link
-                      </Button>
-                    </form>
-                  ) : (
-                    <div className="text-center py-6 bg-green-50/30 rounded-[16px] border border-green-100/50 text-[11px] font-bold text-green-600 shadow-sm">Check your email for reset instructions.</div>
-                  )}
-                  <button type="button" onClick={() => { setView('login'); setError(''); }} className="w-full text-center text-[11px] font-black text-black/40 hover:text-[#38BDF2] transition-colors mt-2">Back to login</button>
-                </div>
-              )}
-
-              {view === 'reset-password' && (
-                <div className="space-y-4">
-                  {!successMessage ? (
-                    <form onSubmit={handleResetPassword} className="space-y-3">
-                      <div className="space-y-0.5">
-                        <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">New Password <span className="text-red-500">*</span></label>
-                        <PasswordInput
-                          value={password}
-                          onChange={(e: any) => setPassword(e.target.value)}
-                          required
-                          placeholder="••••••••"
-                          icon={<LockIcon className="w-4 h-4" />}
-                          inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all"
-                        />
-                        <PasswordRequirements password={password} />
-                      </div>
-                      <div className="space-y-0.5">
-                        <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Confirm New Password <span className="text-red-500">*</span></label>
-                        <PasswordInput
-                          value={confirmPassword}
-                          onChange={(e: any) => setConfirmPassword(e.target.value)}
-                          required
-                          placeholder="••••••••"
-                          icon={<LockIcon className="w-4 h-4" />}
-                          inputClassName="!bg-[#F2F2F2] !border-black/[0.03] !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all"
-                        />
-                      </div>
-
-                      {error && (
-                        <div className="p-2.5 bg-red-50 border border-red-100 rounded-[16px] flex items-center gap-2 shadow-[inset_0_2px_4px_rgba(255,0,0,0.02)]">
-                          <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                          <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
-                        </div>
-                      )}
-
-                      <Button type="submit" className="w-full py-4 bg-[#38BDF2] rounded-[16px] text-[13.5px] font-black border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all" loading={loading} disabled={loading}>
-                        Update Password
-                      </Button>
-                    </form>
-                  ) : (
-                    <div className="text-center py-4 text-[11px] font-black text-[#38BDF2]">{successMessage}</div>
-                  )}
-                </div>
-              )}
-
-              {view === 'accept-invite' && (
-                <div className="space-y-4">
-                  {!successMessage ? (
-                    <form onSubmit={handleAcceptInvite} className="space-y-3">
-                      <div className="space-y-0.5">
-                        <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Full Name <span className="text-red-500">*</span></label>
-                        <IconInput
-                          placeholder="e.g. John Doe"
-                          value={name}
-                          onChange={(e: any) => setName(e.target.value)}
-                          required
-                          icon={<UserIcon className="w-4 h-4" />}
-                          inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium"
-                        />
-                      </div>
-
-                      {!inviteInfo?.accountExists && (
-                        <>
-                          <div className="space-y-0.5">
-                            <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Create Password <span className="text-red-500">*</span></label>
-                            <PasswordInput
-                              value={password}
-                              onChange={(e: any) => setPassword(e.target.value)}
-                              required
-                              placeholder="••••••••"
-                              icon={<LockIcon className="w-4 h-4" />}
-                              inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all"
-                            />
-                            <PasswordRequirements password={password} />
+                        {error && (
+                          <div className="p-3 bg-red-50/50 border border-red-100 rounded-[16px] flex items-center gap-2 animate-in fade-in slide-in-from-top-1 duration-300 shadow-[inset_0_2px_4px_rgba(255,0,0,0.02)]">
+                            <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                            <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
                           </div>
-                          <div className="space-y-0.5">
-                            <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Confirm Password <span className="text-red-500">*</span></label>
-                            <PasswordInput
-                              value={confirmPassword}
-                              onChange={(e: any) => setConfirmPassword(e.target.value)}
-                              required
-                              placeholder="••••••••"
-                              icon={<LockIcon className="w-4 h-4" />}
-                              inputClassName="!bg-[#F2F2F2] !border-black/5 !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all"
-                            />
-                          </div>
-                        </>
-                      )}
+                        )}
 
-                      {error && (
-                        <div className="p-2.5 bg-red-50 border border-red-100 rounded-[16px] flex items-center gap-2 shadow-[inset_0_2px_4px_rgba(255,0,0,0.02)]">
-                          <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                          <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
+                        <Button type="submit" className="w-full py-4 text-[13.5px] font-black bg-[#38BDF2] rounded-[16px] border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all disabled:opacity-50" loading={loading} disabled={loading}>
+                          Send Link
+                        </Button>
+                      </form>
+                    ) : (
+                      <div className="text-center py-6 bg-green-50/30 rounded-[16px] border border-green-100/50 text-[11px] font-bold text-green-600 shadow-sm">Check your email for reset instructions.</div>
+                    )}
+                    <button type="button" onClick={() => { setView('login'); setError(''); }} className="w-full text-center text-[11px] font-black text-black/40 hover:text-[#38BDF2] transition-colors mt-2">Back to login</button>
+                  </div>
+                )}
+
+                {view === 'reset-password' && (
+                  <div className="space-y-4">
+                    {!successMessage ? (
+                      <form onSubmit={handleResetPassword} className="space-y-3">
+                        <div className="space-y-0.5">
+                          <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">New Password <span className="text-red-500">*</span></label>
+                          <PasswordInput
+                            value={password}
+                            onChange={(e: any) => setPassword(e.target.value)}
+                            required
+                            placeholder="••••••••"
+                            icon={<LockIcon className="w-4 h-4" />}
+                            inputClassName="!bg-[#F2F2F2] !border-b !border-black/[0.08] !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all"
+                          />
+                          <PasswordRequirements password={password} />
                         </div>
-                      )}
+                        <div className="space-y-0.5">
+                          <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Confirm New Password <span className="text-red-500">*</span></label>
+                          <PasswordInput
+                            value={confirmPassword}
+                            onChange={(e: any) => setConfirmPassword(e.target.value)}
+                            required
+                            placeholder="••••••••"
+                            icon={<LockIcon className="w-4 h-4" />}
+                            inputClassName="!bg-[#F2F2F2] !border-b !border-black/[0.08] !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] !outline-none focus:!border-[#38BDF2] !transition-all"
+                          />
+                        </div>
 
-                      <Button type="submit" className="w-full py-4 bg-[#38BDF2] rounded-[16px] text-[13.5px] font-black border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all" loading={loading} disabled={loading}>
-                        {inviteInfo?.accountExists ? 'Join Organization' : 'Create & Join'}
-                      </Button>
-                    </form>
-                  ) : (
-                    <div className="text-center py-4 text-[11px] font-black text-[#38BDF2]">{successMessage}</div>
-                  )}
-                </div>
-              )}
+                        {error && (
+                          <div className="p-2.5 bg-red-50 border border-red-100 rounded-[16px] flex items-center gap-2 shadow-[inset_0_2px_4px_rgba(255,0,0,0.02)]">
+                            <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                            <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
+                          </div>
+                        )}
+
+                        <Button type="submit" className="w-full py-4 bg-[#38BDF2] rounded-[16px] text-[13.5px] font-black border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all" loading={loading} disabled={loading}>
+                          Update Password
+                        </Button>
+                      </form>
+                    ) : (
+                      <div className="text-center py-4 text-[11px] font-black text-[#38BDF2]">{successMessage}</div>
+                    )}
+                  </div>
+                )}
+
+                {view === 'accept-invite' && (
+                  <div className="space-y-4">
+                    {!successMessage ? (
+                      <form onSubmit={handleAcceptInvite} className="space-y-3">
+                        <div className="space-y-0.5">
+                          <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Full Name <span className="text-red-500">*</span></label>
+                          <IconInput
+                            placeholder="e.g. John Doe"
+                            value={name}
+                            onChange={(e: any) => setName(e.target.value)}
+                            required
+                            icon={<UserIcon className="w-4 h-4" />}
+                            inputClassName="!bg-[#F2F2F2] !border-b !border-black/[0.08] !rounded-[16px] !py-3 !text-[14px] !font-medium"
+                          />
+                        </div>
+
+                        {!inviteInfo?.accountExists && (
+                          <>
+                            <div className="space-y-0.5">
+                              <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Create Password <span className="text-red-500">*</span></label>
+                              <PasswordInput
+                                value={password}
+                                onChange={(e: any) => setPassword(e.target.value)}
+                                required
+                                placeholder="••••••••"
+                                icon={<LockIcon className="w-4 h-4" />}
+                                inputClassName="!bg-[#F2F2F2] !border-b !border-black/[0.08] !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all"
+                              />
+                              <PasswordRequirements password={password} />
+                            </div>
+                            <div className="space-y-0.5">
+                              <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Confirm Password <span className="text-red-500">*</span></label>
+                              <PasswordInput
+                                value={confirmPassword}
+                                onChange={(e: any) => setConfirmPassword(e.target.value)}
+                                required
+                                placeholder="••••••••"
+                                icon={<LockIcon className="w-4 h-4" />}
+                                inputClassName="!bg-[#F2F2F2] !border-b !border-black/[0.08] !rounded-[16px] !py-3 !text-[14px] !font-medium !shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] !outline-none focus:!border-[#38BDF2] !transition-all"
+                              />
+                            </div>
+                          </>
+                        )}
+
+                        {error && (
+                          <div className="p-2.5 bg-red-50 border border-red-100 rounded-[16px] flex items-center gap-2 shadow-[inset_0_2px_4px_rgba(255,0,0,0.02)]">
+                            <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                            <p className="text-[10px] font-black text-red-600 leading-tight uppercase tracking-tight">{error}</p>
+                          </div>
+                        )}
+
+                        <Button type="submit" className="w-full py-4 bg-[#38BDF2] rounded-[16px] text-[13.5px] font-black border-none text-white shadow-[0_10px_20px_rgba(56,189,242,0.1),inset_0_-4px_8px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.3)] hover:scale-[1.02] transition-all" loading={loading} disabled={loading}>
+                          {inviteInfo?.accountExists ? 'Join Organization' : 'Create & Join'}
+                        </Button>
+                      </form>
+                    ) : (
+                      <div className="text-center py-4 text-[11px] font-black text-[#38BDF2]">{successMessage}</div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

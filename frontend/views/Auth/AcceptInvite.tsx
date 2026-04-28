@@ -83,26 +83,43 @@ export const AcceptInvite: React.FC = () => {
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#F2F2F2]"><div className="w-12 h-12 border-4 border-[#38BDF2] border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-[#F2F2F2] px-4 overflow-hidden relative"
-      style={{ zoom: 0.8 }}
-    >
-      {/* Decorative side elements */}
-      <div className="hidden lg:block absolute left-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
-        <ICONS.Zap className="w-64 h-64 text-[#2E2E2F]" />
-      </div>
-      <div className="hidden lg:block absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
-        <ICONS.Calendar className="w-64 h-64 text-[#2E2E2F]" />
-      </div>
-      <Card className="p-10 w-full max-w-[540px] bg-[#F2F2F2] border border-[#2E2E2F]/20 rounded-xl origin-center shadow-2xl">
-        <div className="mb-8">
-            <h2 className="text-2xl font-black text-[#2E2E2F] mb-1">
-                {inviteInfo?.accountExists ? 'Join Organization' : `Become a ${inviteInfo?.role || 'Staff'}`}
-            </h2>
-            <p className="text-[11px] font-bold text-[#2E2E2F]/50 uppercase tracking-widest">
-                Invited as {inviteInfo?.email}
-            </p>
-        </div>
+    <div className="min-h-screen flex bg-white overflow-hidden relative">
+      <div className="w-full flex flex-col relative overflow-y-auto bg-[#F2F2F2] scrollbar-none">
+        <div className="min-h-full flex flex-col items-center justify-center p-8 sm:p-12 w-full relative">
+          {/* Mobile Logo Only */}
+          <div className="lg:hidden absolute top-8 left-8">
+            <img
+              src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg"
+              alt="StartupLab Logo"
+              className="w-32 h-auto"
+            />
+          </div>
+
+          <button
+            onClick={() => navigate('/')}
+            className="absolute top-8 right-8 p-3 rounded-2xl bg-white/50 text-[#2E2E2F] hover:bg-[#38BDF2] hover:text-white transition-all group shadow-sm"
+            title="Back to Home"
+          >
+            <ICONS.Home className="w-5 h-5" />
+          </button>
+
+          {/* Decorative side elements (Only visible on Desktop) */}
+          <div className="hidden lg:block absolute left-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
+            <ICONS.Zap className="w-64 h-64 text-[#2E2E2F]" />
+          </div>
+          <div className="hidden lg:block absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none">
+            <ICONS.Calendar className="w-64 h-64 text-[#2E2E2F]" />
+          </div>
+
+          <Card className="p-10 w-full max-w-[540px] bg-white border border-[#2E2E2F]/10 rounded-[2.5rem] shadow-2xl mb-12 lg:-translate-y-24">
+            <div className="mb-8">
+                <h2 className="text-3xl font-black text-[#2E2E2F] mb-1 tracking-tight">
+                    {inviteInfo?.accountExists ? 'Join Organization' : `Become a ${inviteInfo?.role || 'Staff'}`}
+                </h2>
+                <p className="text-[11px] font-black text-[#38BDF2] uppercase tracking-widest">
+                    Invited as {inviteInfo?.email}
+                </p>
+            </div>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-1.5 w-full">
@@ -158,6 +175,8 @@ export const AcceptInvite: React.FC = () => {
           </Button>
         </form>
       </Card>
+        </div>
+      </div>
     </div>
   );
 };

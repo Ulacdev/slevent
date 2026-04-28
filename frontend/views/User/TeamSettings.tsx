@@ -37,7 +37,7 @@ const PermissionShield: React.FC<{
                 ${disabled ? 'opacity-30 cursor-not-allowed grayscale' : 'cursor-pointer hover:scale-105 active:scale-95'}
                 ${active 
                     ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20' 
-                    : 'bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 text-[#2E2E2F] dark:text-white dark:text-white/20'
+                    : 'bg-background text-[#2E2E2F] dark:text-white/20'
                 }
             `}
         >
@@ -268,29 +268,29 @@ export const TeamSettings: React.FC = () => {
             {/* Staff Quota Bar - Top Aligned */}
             <div className="flex items-center gap-4">
                 <div className="flex-1 flex gap-3">
-                    <div className="px-5 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border border-[#2E2E2F]/5 dark:border-white/5 dark:border-white/5 rounded-2xl shadow-sm flex items-center gap-4">
+                    <div className="px-5 py-3 bg-surface border border-sidebar-border rounded-2xl shadow-sm flex items-center gap-4">
                         <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center">
                             <ICONS.Users className="w-4 h-4 text-[#38BDF2]" />
                         </div>
                         <div>
-                            <p className="text-[14px] font-black text-[#2E2E2F] dark:text-white dark:text-white leading-none mb-0.5">{staffLimit?.current || 0}</p>
-                            <p className="text-[8px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest leading-none">Active Staff</p>
+                            <p className="text-[14px] font-black text-[#2E2E2F] dark:text-white leading-none mb-0.5">{staffLimit?.current || 0}</p>
+                            <p className="text-[8px] font-bold text-[#2E2E2F] dark:text-white/40 uppercase tracking-widest leading-none">Active Staff</p>
                         </div>
                     </div>
-                    <div className="px-5 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border border-[#2E2E2F]/5 dark:border-white/5 dark:border-white/5 rounded-2xl shadow-sm flex items-center gap-4">
-                        <div className="w-8 h-8 rounded-lg bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 flex items-center justify-center">
-                            <ICONS.Monitor className="w-4 h-4 text-[#2E2E2F] dark:text-white dark:text-white/40" />
+                    <div className="px-5 py-3 bg-surface border border-sidebar-border rounded-2xl shadow-sm flex items-center gap-4">
+                        <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center">
+                            <ICONS.Monitor className="w-4 h-4 text-[#2E2E2F] dark:text-white/40" />
                         </div>
                         <div>
-                            <p className="text-[14px] font-black text-[#2E2E2F] dark:text-white dark:text-white leading-none mb-0.5">{staffLimit?.limit || 0}</p>
-                            <p className="text-[8px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest leading-none">Staff Limit</p>
+                            <p className="text-[14px] font-black text-[#2E2E2F] dark:text-white leading-none mb-0.5">{staffLimit?.limit || 0}</p>
+                            <p className="text-[8px] font-bold text-[#2E2E2F] dark:text-white/40 uppercase tracking-widest leading-none">Staff Limit</p>
                         </div>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button 
                         variant="outline" 
-                        className="!h-8 !min-h-0 px-4 rounded-lg border-[#2E2E2F]/10 dark:border-white/10 dark:border-white/10 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white/60 hover:bg-[#38BDF2] hover:text-white transition-all duration-300 font-bold uppercase tracking-widest text-[8px]" 
+                        className="!h-8 !min-h-0 px-4 rounded-lg border-sidebar-border bg-surface text-[#2E2E2F] dark:text-white/60 hover:bg-[#38BDF2] hover:text-white transition-all duration-300 font-bold uppercase tracking-widest text-[8px]" 
                         onClick={handlePrintTeam}
                     >
                         <ICONS.Download className="w-3 h-3 mr-1.5" /> Export
@@ -304,23 +304,23 @@ export const TeamSettings: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex gap-1.5 p-1 bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 rounded-xl w-fit border border-[#2E2E2F]/5 dark:border-white/5 dark:border-white/5">
+            <div className="flex gap-1.5 p-1 bg-background rounded-xl w-fit border border-sidebar-border">
                 <button 
                     onClick={() => setActiveSubTab('directory')} 
-                    className={`h-8 px-5 rounded-lg font-black uppercase tracking-[0.1em] text-[10px] transition-all duration-300 ${activeSubTab === 'directory' ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20' : 'text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white/60'}`}
+                    className={`h-8 px-5 rounded-lg font-black uppercase tracking-[0.1em] text-[10px] transition-all duration-300 ${activeSubTab === 'directory' ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20' : 'text-[#2E2E2F] dark:text-white/40 hover:text-[#2E2E2F] dark:hover:text-white/60'}`}
                 >
                     Directory
                 </button>
                 <button 
                     onClick={() => setActiveSubTab('permissions')} 
-                    className={`h-8 px-5 rounded-lg font-black uppercase tracking-[0.1em] text-[10px] transition-all duration-300 ${activeSubTab === 'permissions' ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20' : 'text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white/60'}`}
+                    className={`h-8 px-5 rounded-lg font-black uppercase tracking-[0.1em] text-[10px] transition-all duration-300 ${activeSubTab === 'permissions' ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20' : 'text-[#2E2E2F] dark:text-white/40 hover:text-[#2E2E2F] dark:hover:text-white/60'}`}
                 >
                     Permissions
                 </button>
             </div>
 
             <div className="space-y-6">
-                <div className="bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border border-[#2E2E2F]/5 dark:border-white/5 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-surface border border-sidebar-border rounded-2xl overflow-hidden shadow-sm">
                     {loadingTeam ? (
                         <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-[#38BDF2]/20 border-t-[#38BDF2] rounded-full animate-spin" /></div>
                     ) : teamMembers.length === 0 ? (
@@ -330,8 +330,8 @@ export const TeamSettings: React.FC = () => {
                                     <ICONS.Users className="w-6 h-6 text-[#38BDF2]" />
                                 </div>
                                 <div className="space-y-1">
-                                    <h3 className="font-black text-[#2E2E2F] dark:text-white dark:text-white uppercase text-[10px] tracking-widest">No members found</h3>
-                                    <p className="text-[10px] text-[#2E2E2F] dark:text-white dark:text-white/50 font-medium tracking-tight">Invite your first team member.</p>
+                                    <h3 className="font-black text-[#2E2E2F] dark:text-white uppercase text-[10px] tracking-widest">No members found</h3>
+                                    <p className="text-[10px] text-[#2E2E2F] dark:text-white/50 font-medium tracking-tight">Invite your first team member.</p>
                                 </div>
                             </div>
                         </div>
@@ -339,30 +339,30 @@ export const TeamSettings: React.FC = () => {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
                                 <thead>
-                                    <tr className="bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]/40 border-b border-[#2E2E2F]/5 dark:border-white/5 dark:border-white/5">
-                                        <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/40">Staff Name</th>
+                                    <tr className="bg-surface dark:bg-surface/40 border-b border-sidebar-border">
+                                        <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/40">Staff Name</th>
                                         {activeSubTab === 'directory' ? (
                                             <>
-                                                <th className="px-4 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/40 text-center">Status</th>
-                                                <th className="px-4 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/40 text-center">Hierarchy</th>
-                                                <th className="px-4 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/40 text-center">Actions</th>
+                                                <th className="px-4 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/40 text-center">Status</th>
+                                                <th className="px-4 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/40 text-center">Hierarchy</th>
+                                                <th className="px-4 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/40 text-center">Actions</th>
                                             </>
                                         ) : (
                                             <>
-                                                <th className="px-4 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/40 text-center">View</th>
-                                                <th className="px-4 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/40 text-center">Edit</th>
-                                                <th className="px-4 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/40 text-center">Check-In</th>
-                                                <th className="px-4 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/40 text-center">Inbox</th>
+                                                <th className="px-4 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/40 text-center">View</th>
+                                                <th className="px-4 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/40 text-center">Edit</th>
+                                                <th className="px-4 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/40 text-center">Check-In</th>
+                                                <th className="px-4 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/40 text-center">Inbox</th>
                                             </>
                                         )}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {teamMembers.map(member => (
-                                        <tr key={member.id} className="border-b border-[#2E2E2F]/5 dark:border-white/5 dark:border-white/5 hover:bg-[#38BDF2]/5 transition-colors">
-                                            <td className="px-6 py-4 font-bold text-[#2E2E2F] dark:text-white dark:text-white">
+                                        <tr key={member.id} className="border-b border-sidebar-border hover:bg-[#38BDF2]/5 transition-colors">
+                                            <td className="px-6 py-4 font-bold text-[#2E2E2F] dark:text-white">
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] ${member.isOwner ? 'bg-[#38BDF2] text-white' : 'bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]'}`}>
+                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] ${member.isOwner ? 'bg-[#38BDF2] text-white' : 'bg-background'}`}>
                                                         {member.imageUrl ? <img src={member.imageUrl} className="w-full h-full object-cover rounded-lg" /> : member.name.charAt(0)}
                                                     </div>
                                                     <div>
@@ -379,7 +379,7 @@ export const TeamSettings: React.FC = () => {
                                                         </div>
                                                     </td>
                                                     <td className="px-4 py-4 text-center">
-                                                        <span className="text-[9px] font-black uppercase text-[#2E2E2F] dark:text-white dark:text-white/60 tracking-wider">
+                                                        <span className="text-[9px] font-black uppercase text-[#2E2E2F] dark:text-white/60 tracking-wider">
                                                             {member.role}
                                                         </span>
                                                     </td>

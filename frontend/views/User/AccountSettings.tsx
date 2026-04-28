@@ -140,7 +140,7 @@ export const AccountSettings: React.FC = () => {
         <div className="space-y-10 pb-20">
 
             {/* Profile Section */}
-            <Card className="p-10 border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] shadow-sm">
+            <Card className="p-10 border-2 border-sidebar-border rounded-xl bg-surface shadow-sm">
                 <div className="flex items-center gap-3 mb-10">
                     <div className="w-10 h-10 rounded-xl bg-[#38BDF2]/10 text-[#38BDF2] flex items-center justify-center">
                         <UserIcon className="w-5 h-5" strokeWidth={2.5} />
@@ -154,7 +154,7 @@ export const AccountSettings: React.FC = () => {
                 <div className="space-y-10">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-8">
                         <div
-                            className="relative group w-28 h-28 rounded-xl overflow-hidden border-2 border-[#2E2E2F]/5 dark:border-white/5 dark:border-white/5 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] flex items-center justify-center cursor-pointer hover:border-[#38BDF2] transition-all"
+                            className="relative group w-28 h-28 rounded-xl overflow-hidden border-2 border-sidebar-border bg-background flex items-center justify-center cursor-pointer hover:border-[#38BDF2] transition-all"
                             onClick={() => fileInputRef.current?.click()}
                         >
                             {previewUrl ? (
@@ -173,7 +173,7 @@ export const AccountSettings: React.FC = () => {
                             </p>
                             <div className="flex gap-2">
                                 <Button
-                                    className="rounded-xl px-5 py-2 text-[10px] font-black uppercase tracking-widest border-[#2E2E2F]/10 dark:border-white/10 dark:border-white/5"
+                                    className="rounded-xl px-5 py-2 text-[10px] font-black uppercase tracking-widest border-sidebar-border"
                                     onClick={() => fileInputRef.current?.click()}
                                     disabled={saving}
                                 >
@@ -184,19 +184,19 @@ export const AccountSettings: React.FC = () => {
                         <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarUpload} />
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t-2 border-[#2E2E2F]/10 dark:border-white/10 dark:border-white/5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t-2 border-sidebar-border">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white uppercase tracking-[0.2em] ml-1">Full Name</label>
+                            <label className="text-[10px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-[0.2em] ml-1">Full Name</label>
                             <Input
                                 value={formName}
                                 onChange={(e: any) => setFormName(e.target.value)}
                                 placeholder="StartupLab Admin"
-                                className="font-bold text-[#2E2E2F] dark:text-white dark:text-white"
+                                className="font-bold text-[#2E2E2F] dark:text-white"
                             />
                         </div>
                         <div className="space-y-1.5 opacity-60">
                             <label className="text-[10px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-[0.2em] ml-1">Email Address</label>
-                            <div className="px-5 py-3.5 bg-[#F2F2F2] dark:bg-white/5 border-2 border-[#2E2E2F]/10 dark:border-white/10 rounded-xl text-xs text-[#2E2E2F] dark:text-white font-bold">
+                            <div className="px-5 py-3.5 bg-background border-2 border-sidebar-border rounded-xl text-xs text-[#2E2E2F] dark:text-white font-bold">
                                 {email}
                             </div>
                         </div>
@@ -215,7 +215,7 @@ export const AccountSettings: React.FC = () => {
             </Card>
 
             {/* Security Section */}
-            <Card className="p-10 border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] shadow-sm">
+            <Card className="p-10 border-2 border-sidebar-border rounded-xl bg-surface shadow-sm">
                 <div className="flex items-center gap-3 mb-10">
                     <div className="w-10 h-10 rounded-xl bg-[#38BDF2]/10 text-[#38BDF2] flex items-center justify-center">
                         <ShieldIcon className="w-5 h-5" strokeWidth={2.5} />
@@ -227,14 +227,14 @@ export const AccountSettings: React.FC = () => {
                 </div>
 
                 <div className="space-y-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 rounded-xl bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/10 dark:border-white/10 dark:border-white/5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 rounded-xl bg-background border-2 border-sidebar-border">
                         <div className="space-y-1">
                             <h4 className="text-xs font-bold text-[#2E2E2F] dark:text-white">Password</h4>
                             <p className="text-[11px] text-[#2E2E2F] dark:text-white/60 font-medium">Last changed: (Not recorded)</p>
                         </div>
                         <Button
                             variant="outline"
-                            className="rounded-xl px-5 py-2 text-[10px] font-black uppercase tracking-widest border-[#2E2E2F]/10 dark:border-white/10 dark:border-white/5 hover:border-[#38BDF2] hover:text-[#38BDF2] transition-colors"
+                            className="rounded-xl px-5 py-2 text-[10px] font-black uppercase tracking-widest border-sidebar-border hover:border-[#38BDF2] hover:text-[#38BDF2] transition-colors"
                             onClick={handleResetPassword}
                             disabled={passwordLoading}
                         >
