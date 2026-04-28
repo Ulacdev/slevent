@@ -52,6 +52,7 @@ const getFilteredEventIds = async (req) => {
   try {
     const requesterId = req.user?.id || null;
     const requesterEmail = String(req.user?.email || '').toLowerCase().trim();
+    const specificEventId = req.query?.eventId;
     let userProfile = null;
 
     // Primary lookup: canonical users.userId mapping from auth user id.
@@ -86,47 +87,57 @@ const getFilteredEventIds = async (req) => {
     const userRole = normalizeRole(userProfile?.role);
     const effectiveUserId = userProfile?.userId || (isUuid(requesterId) ? requesterId : null);
 
+    let allowedEventIds = [];
+
     if (userRole === 'ADMIN') {
       // Admins should ONLY see events created by Admins, isolating them from Organizer data
       const { data: adminUsers } = await supabase.from('users').select('userId').eq('role', 'ADMIN');
       const adminIds = sanitizeUuidList((adminUsers || []).map(u => u.userId));
       const { data: adminEvents } = await supabase.from('events').select('eventId').in('createdBy', adminIds);
-      return sanitizeUuidList((adminEvents || []).map(e => e.eventId));
-    }
+      allowedEventIds = sanitizeUuidList((adminEvents || []).map(e => e.eventId));
+    } else if (effectiveUserId) {
+      let allowedCreatorIds = [effectiveUserId];
 
-    if (!effectiveUserId) return [];
-
-    let allowedCreatorIds = [effectiveUserId];
-
-    if (userRole === 'STAFF') {
-      // Staff sees their own events + their employer's events + their invited organizers' events
-      if (userProfile?.employerId) {
-        allowedCreatorIds.push(userProfile.employerId);
+      if (userRole === 'STAFF') {
+        // Staff sees their own events + their employer's events + their invited organizers' events
+        if (userProfile?.employerId) {
+          allowedCreatorIds.push(userProfile.employerId);
+        }
+        const { data: invitedUsers } = await supabase
+          .from('users')
+          .select('userId')
+          .eq('employerId', effectiveUserId);
+        if (invitedUsers && invitedUsers.length > 0) {
+          allowedCreatorIds = allowedCreatorIds.concat(
+            invitedUsers.map(u => u.userId).filter(Boolean)
+          );
+        }
       }
-      const { data: invitedUsers } = await supabase
-        .from('users')
-        .select('userId')
-        .eq('employerId', effectiveUserId);
-      if (invitedUsers && invitedUsers.length > 0) {
-        allowedCreatorIds = allowedCreatorIds.concat(
-          invitedUsers.map(u => u.userId).filter(Boolean)
-        );
+
+      // Regular users (Organizers) and Staff only see events they created or are allowed to see
+      const { data: myEvents, error: myEventsErr } = await supabase
+        .from('events')
+        .select('eventId')
+        .in('createdBy', allowedCreatorIds);
+
+      if (myEventsErr) {
+        logAnalyticsError('getFilteredEventIds.myEvents', myEventsErr, { requesterId, effectiveUserId });
+        // Fail-open to global scope ONLY for ADMIN, for Staff/Organizer fail closed to empty array
+        return [];
       }
+
+      allowedEventIds = sanitizeUuidList((myEvents || []).map(e => e.eventId));
     }
 
-    // Regular users (Organizers) and Staff only see events they created or are allowed to see
-    const { data: myEvents, error: myEventsErr } = await supabase
-      .from('events')
-      .select('eventId')
-      .in('createdBy', allowedCreatorIds);
-
-    if (myEventsErr) {
-      logAnalyticsError('getFilteredEventIds.myEvents', myEventsErr, { requesterId, effectiveUserId });
-      // Fail-open to global scope ONLY for ADMIN, for Staff/Organizer fail closed to empty array
-      return [];
+    // If a specific eventId is requested, verify the user is allowed to see it
+    if (specificEventId && isUuid(specificEventId)) {
+      if (allowedEventIds.includes(specificEventId)) {
+        return [specificEventId];
+      }
+      return []; // Requested a specific event they don't have access to
     }
 
-    return sanitizeUuidList((myEvents || []).map(e => e.eventId));
+    return allowedEventIds;
   } catch (err) {
     logAnalyticsError('getFilteredEventIds', err, { requesterId: req.user?.id, requesterEmail: req.user?.email });
     // Fail-secure to empty array instead of exposing global scope
@@ -389,6 +400,37 @@ export const getSummary = async (req, res) => {
       console.warn('[Analytics] Failed to fetch subscription summary:', subsExc);
     }
 
+    // Likes and Followers Analytics
+    let totalLikes = 0;
+    let totalFollowers = 0;
+
+    try {
+      if (req.query.eventId) {
+        // Specific Event Stats
+        const [likesResp, followersResp] = await Promise.all([
+          supabase.from('eventLikes').select('*', { count: 'exact', head: true }).eq('eventId', req.query.eventId),
+          supabase.from('organizerFollowers').select('*', { count: 'exact', head: true }).eq('sourceEventId', req.query.eventId)
+        ]);
+        totalLikes = likesResp.count || 0;
+        totalFollowers = followersResp.count || 0;
+      } else {
+        // Aggregated Stats for all authorized events
+        const { data: eventDetails } = await supabase.from('events').select('organizerId').in('eventId', filteredEventIds);
+        const organizerIds = Array.from(new Set((eventDetails || []).map(e => e.organizerId).filter(Boolean)));
+        
+        const [likesResp, followersResp] = await Promise.all([
+          supabase.from('eventLikes').select('*', { count: 'exact', head: true }).in('eventId', filteredEventIds),
+          organizerIds.length > 0 
+            ? supabase.from('organizerFollowers').select('*', { count: 'exact', head: true }).in('organizerId', organizerIds)
+            : Promise.resolve({ count: 0 })
+        ]);
+        totalLikes = likesResp.count || 0;
+        totalFollowers = followersResp.count || 0;
+      }
+    } catch (metricExc) {
+      console.warn('[Analytics] Failed to fetch engagement metrics:', metricExc);
+    }
+
     return res.json({
       totalRegistrations,
       ticketsSoldToday,
@@ -400,7 +442,10 @@ export const getSummary = async (req, res) => {
       paymentSuccessRate,
       totalPaidEvents,
       totalPlanRevenue,
-      activeSubscriptions
+      activeSubscriptions,
+      totalLikes,
+      totalFollowers,
+      totalTickets: totalRegistrations // Aligning UI expectation for 'Ticket Access'
     });
   } catch (err) {
     logAnalyticsError('getSummary.catch', err, { requesterId: req.user?.id });

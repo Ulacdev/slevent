@@ -115,8 +115,8 @@ const Branding: React.FC<{ className?: string, theme?: string }> = ({ className 
   }
 
   // Use footer logo in dark mode for branding transition
-  const logoSrc = theme === 'dark' 
-    ? "/lgo-footer.png" 
+  const logoSrc = theme === 'dark'
+    ? "/lgo-footer.png"
     : (employerLogoUrl || "https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg");
 
   return (
@@ -660,17 +660,17 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               <img
                 src={theme === 'dark' ? "/lgo-footer.png" : employerLogoUrl}
                 alt={employerName || 'Logo'}
-                className={desktopSidebarOpen 
-                  ? `${theme === 'dark' ? 'h-10' : 'h-20'} w-auto max-w-full object-contain px-4 transform ${theme === 'dark' ? 'scale-110 origin-left' : ''}` 
+                className={desktopSidebarOpen
+                  ? `${theme === 'dark' ? 'h-10' : 'h-20'} w-auto max-w-full object-contain px-4 transform ${theme === 'dark' ? 'scale-110 origin-left' : ''}`
                   : `h-12 w-12 object-contain rounded-lg border border-white/30 transform ${theme === 'dark' ? 'scale-110 origin-center' : ''}`}
               />
             ) : desktopSidebarOpen ? (
               <Branding className={`${theme === 'dark' ? 'h-10' : 'h-20'} w-auto`} theme={theme} />
             ) : (
-              <img 
-                src={theme === 'dark' ? "/lgo-footer.png" : "/lgo.webp"} 
-                alt="Logo" 
-                className={theme === 'dark' ? "h-10 w-auto max-w-[44px] object-contain transform scale-110 origin-center" : "h-10 w-10 object-contain"} 
+              <img
+                src={theme === 'dark' ? "/lgo-footer.png" : "/lgo.webp"}
+                alt="Logo"
+                className={theme === 'dark' ? "h-10 w-auto max-w-[44px] object-contain transform scale-110 origin-center" : "h-10 w-10 object-contain"}
               />
             )}
           </Link>
@@ -692,8 +692,8 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     : 'flex-col items-center justify-center w-11 h-11 mx-auto rounded-xl'
                     } ${isActive
                       ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20'
-                    : 'text-[#2E2E2F] dark:text-white hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
-                  }`}
+                      : 'text-[#2E2E2F] dark:text-white hover:bg-[#38BDF2]/10 hover:text-[#38BDF2]'
+                    }`}
                 >
                   <div className="relative shrink-0 flex items-center justify-center">
                     {React.cloneElement(item.icon as React.ReactElement<any>, {

@@ -644,7 +644,7 @@ export const EventDetails: React.FC = () => {
       return;
     }
     try {
-      const { following: nextFollowing, confirmationEmailSent } = await toggleFollowing(organizerId);
+      const { following: nextFollowing, confirmationEmailSent } = await toggleFollowing(organizerId, event.eventId);
       setEvent((prev) => {
         if (!prev?.organizer) return prev;
         const currentCount = Number(prev.organizer.followersCount || 0);

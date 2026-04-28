@@ -101,10 +101,11 @@ const EventMobileCard = React.memo<{
     openDropdownId: string | null;
     setOpenDropdownId: (id: string | null) => void;
     navigate: any;
+    onOpenAnalytics: () => void;
     isExpiredPromotion?: boolean;
     expiresAt?: string;
     now?: Date;
-}>(({ event, isPromoted, onOpenEdit, onOpenTickets, onOpenAttendeePop, onTogglePromotion, onArchive, onCancel, onNotify, openDropdownId, setOpenDropdownId, navigate, isExpiredPromotion, expiresAt, now }) => {
+}>(({ event, isPromoted, onOpenEdit, onOpenTickets, onOpenAttendeePop, onOpenAnalytics, onTogglePromotion, onArchive, onCancel, onNotify, openDropdownId, setOpenDropdownId, navigate, isExpiredPromotion, expiresAt, now }) => {
     const isDropdownOpen = openDropdownId === event.eventId;
     const currentTime = now || new Date();
     const eventEnd = event.endAt ? new Date(event.endAt) : new Date(new Date(event.startAt).getTime() + 2 * 60 * 60 * 1000);
@@ -190,6 +191,9 @@ const EventMobileCard = React.memo<{
                         <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <EyeIcon className="w-4 h-4" /> View
                         </button>
+                        <button onClick={(e) => { e.stopPropagation(); onOpenAnalytics(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <ICONS.BarChart className="w-4 h-4" /> View Analytics
+                        </button>
                         <button onClick={(e) => { e.stopPropagation(); onOpenTickets(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <ICONS.CreditCard className="w-4 h-4" /> Tickets
                         </button>
@@ -247,10 +251,11 @@ const EventTableRow = React.memo<{
     isPromoted: boolean;
     openDropdownId: string | null;
     setOpenDropdownId: (id: string | null) => void;
+    onOpenAnalytics: () => void;
     isExpiredPromotion?: boolean;
     expiresAt?: string;
     now?: Date;
-}>(({ event, isSelected, onToggle, onOpenEdit, onOpenTickets, onOpenAttendeePop, onTogglePromotion, onArchive, onCancel, onNotify, isPromoted, openDropdownId, setOpenDropdownId, isExpiredPromotion, expiresAt, now }) => {
+}>(({ event, isSelected, onToggle, onOpenEdit, onOpenTickets, onOpenAttendeePop, onOpenAnalytics, onTogglePromotion, onArchive, onCancel, onNotify, isPromoted, openDropdownId, setOpenDropdownId, isExpiredPromotion, expiresAt, now }) => {
     const navigate = useNavigate();
     const isDropdownOpen = openDropdownId === event.eventId;
     const currentTime = now || new Date();
@@ -360,6 +365,9 @@ const EventTableRow = React.memo<{
                     >
                         <button onClick={(e) => { e.stopPropagation(); navigate(`/event/${event.slug || event.eventId}`); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <EyeIcon className="w-4 h-4" /> View
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); onOpenAnalytics(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
+                            <ICONS.BarChart className="w-4 h-4" /> View Analytics
                         </button>
                         <button onClick={(e) => { e.stopPropagation(); onOpenTickets(); }} className="w-full px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/70 hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] flex items-center gap-3 transition-colors">
                             <ICONS.CreditCard className="w-4 h-4" /> Tickets
@@ -2087,6 +2095,9 @@ export const UserEvents: React.FC = () => {
     const [previewDevice, setPreviewDevice] = useState<'mobile' | 'desktop'>('mobile');
     const [finalStatusDecision, setFinalStatusDecision] = useState<EventStatus | ''>('');
     const [isPaymentRestrictionOpen, setIsPaymentRestrictionOpen] = useState(false);
+    const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
+    const [analyticsLoading, setAnalyticsLoading] = useState(false);
+    const [analyticsData, setAnalyticsData] = useState<any>(null);
 
     // No-op effect to replace previous scroll locking
     useEffect(() => {
@@ -2852,6 +2863,20 @@ export const UserEvents: React.FC = () => {
             setSubmitting(false);
         }
     };
+    
+    const handleViewAnalytics = async (event: Event) => {
+        setSelectedEvent(event);
+        setIsAnalyticsModalOpen(true);
+        setAnalyticsLoading(true);
+        try {
+            const data = await apiService.getAnalytics(event.eventId);
+            setAnalyticsData(data);
+        } catch (err: any) {
+            showToast('error', 'Failed to load event analytics');
+        } finally {
+            setAnalyticsLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (cancelConfirm) {
@@ -3093,6 +3118,7 @@ export const UserEvents: React.FC = () => {
                                             onOpenEdit={() => handleOpenEdit(event)}
                                             onOpenTickets={() => handleOpenTickets(event)}
                                             onOpenAttendeePop={() => handleOpenAttendeePop(event)}
+                                            onOpenAnalytics={() => handleViewAnalytics(event)}
                                             onTogglePromotion={(e) => {
                                                 e.stopPropagation();
                                                 const promoData = promotedEventsMap[event.eventId];
@@ -3192,6 +3218,7 @@ export const UserEvents: React.FC = () => {
                                                         onOpenEdit={() => handleOpenEdit(event)}
                                                         onOpenTickets={() => handleOpenTickets(event)}
                                                         onOpenAttendeePop={() => handleOpenAttendeePop(event)}
+                                                        onOpenAnalytics={() => handleViewAnalytics(event)}
                                                         onTogglePromotion={(e) => {
                                                             e.stopPropagation();
                                                             const promoData = promotedEventsMap[event.eventId];
@@ -3771,6 +3798,121 @@ export const UserEvents: React.FC = () => {
                     </div>
                 </form>
             </Modal>
+            
+            <Modal
+                isOpen={isAnalyticsModalOpen}
+                onClose={() => setIsAnalyticsModalOpen(false)}
+                title={`Event Performance: ${selectedEvent?.eventName || ''}`}
+                size="lg"
+            >
+                {analyticsLoading ? (
+                    <div className="py-24 flex flex-col items-center justify-center space-y-4">
+                        <div className="w-12 h-12 border-4 border-[#38BDF2]/20 border-t-[#38BDF2] rounded-full animate-spin" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F] dark:text-white dark:text-white/40 animate-pulse">Aggregating Metrics...</p>
+                    </div>
+                ) : analyticsData ? (
+                    <div className="space-y-8">
+                        {/* Summary Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
+                                <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest mb-2">Total Likes</p>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center">
+                                        <ICONS.Heart className="w-5 h-5" fill="currentColor" />
+                                    </div>
+                                    <p className="text-3xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tighter">{analyticsData.totalLikes || 0}</p>
+                                </div>
+                            </div>
+                            
+                            <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
+                                <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest mb-2">Ticket Access</p>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-[#38BDF2]/10 text-[#38BDF2] flex items-center justify-center">
+                                        <ICONS.CreditCard className="w-5 h-5" />
+                                    </div>
+                                    <p className="text-3xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tighter">{analyticsData.totalTickets || 0}</p>
+                                </div>
+                            </div>
+
+                            <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
+                                <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest mb-2">New Followers</p>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-green-500/10 text-green-600 flex items-center justify-center">
+                                        <ICONS.Users className="w-5 h-5" />
+                                    </div>
+                                    <p className="text-3xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tighter">{analyticsData.totalFollowers || 0}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Additional Context */}
+                        <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
+                            <h4 className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em] mb-4">Engagement Insights</h4>
+                            <p className="text-[13px] text-[#2E2E2F] dark:text-white dark:text-white/70 font-medium leading-relaxed">
+                                This event has driven <strong>{analyticsData.totalFollowers || 0} new followers</strong> to your organization. 
+                                Organizers with high engagement usually see a 20% increase in ticket sales for their subsequent events.
+                            </p>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="py-12 text-center">
+                        <p className="text-[#2E2E2F] dark:text-white dark:text-white/40">No analytics data available for this event.</p>
+                    </div>
+                )}
+            </Modal>
+
+            <Modal
+                isOpen={isPaymentRestrictionOpen}
+                onClose={() => setIsPaymentRestrictionOpen(false)}
+                title="Payment Gateway Required"
+            >
+                <div className="space-y-6">
+                    <div className="flex items-start gap-5 p-6 bg-[#38BDF2]/10 border border-[#38BDF2]/20 rounded-[1.75rem]">
+                        <div className="w-12 h-12 bg-[#38BDF2]/20 rounded-2xl flex items-center justify-center shrink-0">
+                            <ICONS.CreditCard className="w-6 h-6 text-[#38BDF2]" strokeWidth={2.5} />
+                        </div>
+                        <div className="space-y-2">
+                            <p className="font-bold text-[#2E2E2F] dark:text-white dark:text-white text-[16px] tracking-tight">
+                                Setup HitPay to Gain More
+                            </p>
+                            <p className="text-[13px] text-[#2E2E2F] dark:text-white dark:text-white/60 font-medium leading-relaxed">
+                                To create paid tickets and receive payouts, you need to connect your HitPay account first. This ensures all transactions are processed securely and funds are routed directly to you.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3">
+                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl">
+                            <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center font-bold text-xs">1</div>
+                            <p className="text-xs font-semibold text-[#2E2E2F] dark:text-white dark:text-white/70">Go to Payment Gateway settings</p>
+                        </div>
+                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl">
+                            <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center font-bold text-xs">2</div>
+                            <p className="text-xs font-semibold text-[#2E2E2F] dark:text-white dark:text-white/70">Enter your HitPay API Key and Salt</p>
+                        </div>
+                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl">
+                            <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center font-bold text-xs">3</div>
+                            <p className="text-xs font-semibold text-[#2E2E2F] dark:text-white dark:text-white/70">Save and return here to enable paid tickets</p>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4 pt-2">
+                        <Button
+                            className="flex-1 py-1 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10"
+                            onClick={() => setIsPaymentRestrictionOpen(false)}
+                        >
+                            Stay Free
+                        </Button>
+                        <Button
+                            className="flex-[2] py-1 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-white hover:bg-black transition-colors min-h-[32px]"
+                            onClick={() => navigate('/user-settings?tab=payments')}
+                        >
+                            Set up HitPay now
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
+
 
         </div>
     );
@@ -4385,57 +4527,7 @@ function TicketManager({ event, onSave, submitting, maxEventCapacity, isPaymentR
                 </div>
             </div>
 
-            <Modal
-                isOpen={isPaymentRestrictionOpen}
-                onClose={() => setIsPaymentRestrictionOpen(false)}
-                title="Payment Gateway Required"
-            >
-                <div className="space-y-6">
-                    <div className="flex items-start gap-5 p-6 bg-[#38BDF2]/10 border border-[#38BDF2]/20 rounded-[1.75rem]">
-                        <div className="w-12 h-12 bg-[#38BDF2]/20 rounded-2xl flex items-center justify-center shrink-0">
-                            <ICONS.CreditCard className="w-6 h-6 text-[#38BDF2]" strokeWidth={2.5} />
-                        </div>
-                        <div className="space-y-2">
-                            <p className="font-bold text-[#2E2E2F] dark:text-white dark:text-white text-[16px] tracking-tight">
-                                Setup HitPay to Gain More
-                            </p>
-                            <p className="text-[13px] text-[#2E2E2F] dark:text-white dark:text-white/60 font-medium leading-relaxed">
-                                To create paid tickets and receive payouts, you need to connect your HitPay account first. This ensures all transactions are processed securely and funds are routed directly to you.
-                            </p>
-                        </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 gap-3">
-                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl">
-                            <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center font-bold text-xs">1</div>
-                            <p className="text-xs font-semibold text-[#2E2E2F] dark:text-white dark:text-white/70">Go to Payment Gateway settings</p>
-                        </div>
-                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl">
-                            <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center font-bold text-xs">2</div>
-                            <p className="text-xs font-semibold text-[#2E2E2F] dark:text-white dark:text-white/70">Enter your HitPay API Key and Salt</p>
-                        </div>
-                        <div className="flex items-center gap-3 p-4 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-2xl">
-                            <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center font-bold text-xs">3</div>
-                            <p className="text-xs font-semibold text-[#2E2E2F] dark:text-white dark:text-white/70">Save and return here to enable paid tickets</p>
-                        </div>
-                    </div>
-
-                    <div className="flex gap-4 pt-2">
-                        <Button
-                            className="flex-1 py-1 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10"
-                            onClick={() => setIsPaymentRestrictionOpen(false)}
-                        >
-                            Stay Free
-                        </Button>
-                        <Button
-                            className="flex-[2] py-1 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-white hover:bg-black transition-colors min-h-[32px]"
-                            onClick={() => navigate('/user-settings?tab=payments')}
-                        >
-                            Set up HitPay now
-                        </Button>
-                    </div>
-                </div>
-            </Modal>
         </div>
     );
 };

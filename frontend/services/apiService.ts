@@ -424,11 +424,12 @@ export const apiService = {
     return await res.json();
   },
 
-  followOrganizer: async (organizerId: string): Promise<{ organizerId: string; following: boolean; followersCount: number; confirmationEmailSent: boolean }> => {
+  followOrganizer: async (organizerId: string, eventId?: string): Promise<{ organizerId: string; following: boolean; followersCount: number; confirmationEmailSent: boolean }> => {
     const res = await apiService._fetch(`${API_BASE}/api/organizer/${encodeURIComponent(organizerId)}/follow`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eventId })
     });
     if (!res.ok) {
       const errorPayload = await res.json().catch(() => ({}));
@@ -1235,8 +1236,9 @@ export const apiService = {
     return data;
   },
 
-  getAnalytics: async (): Promise<AnalyticsSummary> => {
-    const res = await apiService._fetch(`${API_BASE}/api/analytics/summary`, {
+  getAnalytics: async (eventId?: string): Promise<AnalyticsSummary> => {
+    const url = eventId ? `${API_BASE}/api/analytics/summary?eventId=${encodeURIComponent(eventId)}` : `${API_BASE}/api/analytics/summary`;
+    const res = await apiService._fetch(url, {
       method: 'GET',
       credentials: 'include',
       cache: 'no-store'

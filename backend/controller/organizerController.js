@@ -555,6 +555,7 @@ export const followOrganizer = async (req, res) => {
         .insert({
           [candidate.organizerIdCol]: organizerId,
           [candidate.followerUserIdCol]: followerUserId,
+          sourceEventId: req.body?.eventId || null
         })
     ));
     debugLog(`👤 [Follow] Follow Record Result: Error=${followError?.message || 'NONE'}, Code=${followError?.code || 'NONE'}, Variant=${variant?.tableName || 'NONE'}`);

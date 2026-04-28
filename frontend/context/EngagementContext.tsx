@@ -16,7 +16,7 @@ interface EngagementContextValue {
   setPublicMode: (mode: PublicMode) => void;
   toggleLike: (eventId: string) => Promise<boolean>;
   isLiked: (eventId: string) => boolean;
-  toggleFollowing: (organizerId: string) => Promise<{ following: boolean; confirmationEmailSent: boolean }>;
+  toggleFollowing: (organizerId: string, eventId?: string) => Promise<{ following: boolean; confirmationEmailSent: boolean }>;
   isFollowing: (organizerId: string) => boolean;
 }
 
@@ -179,7 +179,7 @@ export const EngagementProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const isLiked = React.useCallback((eventId: string) => likedEventIds.includes(eventId), [likedEventIds]);
 
-  const toggleFollowing = React.useCallback(async (organizerId: string) => {
+  const toggleFollowing = React.useCallback(async (organizerId: string, eventId?: string) => {
     if (!organizerId) return { following: false, confirmationEmailSent: false };
 
     const currentlyFollowing = followedOrganizerIds.includes(organizerId);
@@ -196,7 +196,7 @@ export const EngagementProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (currentlyFollowing) {
           await apiService.unfollowOrganizer(organizerId);
         } else {
-          const res = await apiService.followOrganizer(organizerId);
+          const res = await apiService.followOrganizer(organizerId, eventId);
           return {
             following: nextFollowing,
             confirmationEmailSent: !!res.confirmationEmailSent
