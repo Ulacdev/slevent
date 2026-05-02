@@ -2222,10 +2222,35 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1px_1.8fr] gap-6 lg:gap-10">
             {/* Left Section: Branding */}
             <div className="flex flex-col items-start text-left">
-              <img src="/lgo-footer.png" className="h-20 w-auto mb-1" alt="StartupLab" />
+              <img src="/lgo-footer.png" className="h-14 w-auto" alt="StartupLab" />
               
+              {/* Subscribe Section */}
+              <div className="mt-6 w-full max-w-[280px]">
+                <h4 className="font-black text-white text-[13px] mb-2 uppercase tracking-wider">Join our newsletter</h4>
+                <p className="text-gray-400 text-[11px] mb-4 font-semibold leading-relaxed">
+                  Be the first to know about upcoming events, startup news, and exclusive opportunities.
+                </p>
+                <form onSubmit={handleNewsletterSubscribe} className="relative group">
+                  <input
+                    type="email"
+                    placeholder="Email address"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-gray-500 focus:outline-none focus:border-[#38BDF2]/50 transition-all group-hover:border-white/20"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubscribing}
+                    className="absolute right-1 top-1 bottom-1 px-3 bg-[#38BDF2] text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-[#38BDF2] transition-all disabled:opacity-50"
+                  >
+                    {isSubscribing ? '...' : 'Join'}
+                  </button>
+                </form>
+              </div>
+
               {/* Social Links */}
-              <div className="mt-4 flex items-center gap-2">
+              <div className="mt-8 flex items-center gap-2">
                 <a href="https://www.facebook.com/StartupLabAI/" target="_blank" rel="noopener noreferrer" className="w-7 h-7 flex items-center justify-center rounded-full bg-[#1877F2] text-white hover:brightness-110 transition-all">
                   <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
                 </a>
