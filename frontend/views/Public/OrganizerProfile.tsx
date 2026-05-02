@@ -58,6 +58,67 @@ const formatCompactCount = (value: number) => (
     )
 );
 
+const EventMiniCard: React.FC<{ event: Event; brandColor: string; isPast?: boolean }> = ({ event, brandColor, isPast }) => {
+    const navigate = useNavigate();
+    const { isAuthenticated } = useUser();
+    const { isLiked, toggleLike, canLikeFollow } = useEngagement();
+    const liked = isLiked(event.eventId);
+
+    const handleLike = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!isAuthenticated) { navigate('/signup'); return; }
+        if (!canLikeFollow) return;
+        try {
+            await toggleLike(event.eventId);
+        } catch (err) { }
+    };
+
+    return (
+        <Card
+            className="group overflow-hidden border border-[#CED0D4] rounded-2xl bg-[#F2F2F2] transition-all cursor-pointer shadow-sm hover:shadow-xl hover:-translate-y-1"
+            onClick={() => navigate(`/events/${event.slug}`)}
+        >
+            <div className="relative h-52">
+                <img
+                    src={getImageUrl(event.imageUrl)}
+                    alt={event.eventName}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+
+                <div className="absolute top-4 left-4 z-10">
+                    <div className={`rounded-xl px-3 py-1.5 text-[10px] font-black uppercase tracking-widest shadow-lg backdrop-blur-md ${isPast ? 'bg-black/40 text-white' : 'bg-[#38BDF2] text-white'}`}>
+                        {isPast ? 'Past Event' : 'Upcoming'}
+                    </div>
+                </div>
+
+                <button
+                    onClick={handleLike}
+                    className={`absolute top-4 right-4 w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-md active:scale-90 ${liked ? 'bg-[#38BDF2] text-white' : 'bg-white/90 text-[#050505] border border-black/5'}`}
+                >
+                    <ICONS.Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
+                </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+                <div>
+                    <h3 className="text-xl font-bold text-[#050505] line-clamp-1 group-hover:text-[#38BDF2] transition-colors">{event.eventName}</h3>
+                    <p className="text-[11px] font-black text-[#65676B] uppercase tracking-wider mt-1">
+                        {formatDate(event.startAt, event.timezone, { day: 'numeric', month: 'short', year: 'numeric' })} · {formatTime(event.startAt, event.timezone)}
+                    </p>
+                </div>
+                
+                <div className="flex items-center justify-between pt-2 border-t border-[#CED0D4]/50">
+                    <div className="flex items-center gap-1.5 text-[#65676B]">
+                        <ICONS.MapPin className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-black uppercase tracking-widest truncate max-w-[120px]">{event.locationText}</span>
+                    </div>
+                    <span className="text-[11px] font-black uppercase text-[#38BDF2] tracking-widest group-hover:mr-2 transition-all">View Detail</span>
+                </div>
+            </div>
+        </Card>
+    );
+};
+
 export const OrganizerProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -69,6 +130,11 @@ export const OrganizerProfilePage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [interactionNotice, setInteractionNotice] = useState('');
     const [liveEvent, setLiveEvent] = useState<Event | null>(null);
+    const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
+    const [showRatingModal, setShowRatingModal] = useState(false);
+    const [submittingRating, setSubmittingRating] = useState(false);
+    const [ratingStars, setRatingStars] = useState(0);
+    const [ratingComment, setRatingComment] = useState('');
 
     useEffect(() => {
         const loadData = async () => {
@@ -106,13 +172,43 @@ export const OrganizerProfilePage: React.FC = () => {
         loadData();
     }, [id]);
 
+    const handleRate = async (rating: number, comment?: string) => {
+        if (!isAuthenticated) {
+            navigate('/signup');
+            return;
+        }
+        if (!id) return;
+
+        setSubmittingRating(true);
+        try {
+            const result = await apiService.rateOrganizer(id, rating, comment);
+            if (result.success) {
+                setOrganizer(prev => prev ? { 
+                    ...prev, 
+                    averageRating: result.average, 
+                    ratingCount: result.count 
+                } : null);
+                setInteractionNotice('Thank you for your feedback!');
+                setShowRatingModal(false);
+                setRatingStars(0);
+                setRatingComment('');
+                setTimeout(() => setInteractionNotice(''), 3000);
+            }
+        } catch (err: any) {
+            console.error('Rating failed:', err);
+            setInteractionNotice(err.message || 'Failed to submit rating');
+            setTimeout(() => setInteractionNotice(''), 3000);
+        } finally {
+            setSubmittingRating(false);
+        }
+    };
+
     useEffect(() => {
         if (organizer?.organizerName) {
             document.title = `${organizer.organizerName} | StartupLab`;
         }
     }, [organizer?.organizerName]);
 
-    const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
     const now = new Date();
 
     useEffect(() => {
@@ -175,10 +271,10 @@ export const OrganizerProfilePage: React.FC = () => {
     const embedUrl = liveEvent ? getEmbedUrl(liveEvent.streaming_url || liveEvent.locationText) : null;
 
     return (
-        <div className="bg-[#F2F2F2] min-h-screen" style={{ transform: 'scale(0.9)', transformOrigin: 'top center' }}>
+        <div className="bg-[#F2F2F2] min-h-screen lg:scale-[0.9] lg:origin-top">
             <div className="max-w-[1200px] mx-auto bg-[#F2F2F2]">
                 {/* Cover Photo Area - Facebook style */}
-                <div className="relative w-full aspect-[3/1] lg:aspect-[3.5/1] bg-[#E5E5E5] overflow-hidden rounded-b-2xl shadow-sm border-x border-b border-[#2E2E2F]/5">
+                <div className="relative w-full aspect-[3/2] sm:aspect-[3/1] lg:h-[480px] bg-[#E5E5E5] overflow-hidden sm:rounded-b-2xl shadow-sm border-x border-b border-[#2E2E2F]/5">
                     {liveEvent ? (
                         <div className="w-full h-full relative">
                             {embedUrl ? (
@@ -221,7 +317,7 @@ export const OrganizerProfilePage: React.FC = () => {
 
                 {/* Profile Header Details - Controlled Overlap */}
                 <div className="px-5 sm:px-10 pb-8">
-                    <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8 -mt-16 md:-mt-24 relative z-20 text-center md:text-left">
+                    <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8 -mt-20 md:-mt-24 relative z-20 text-center md:text-left">
                         {/* Circle Profile Pic - Floating effect */}
                         <div className="shrink-0">
                             <div className="w-32 h-32 md:w-48 md:h-48 rounded-full border-[6px] border-[#F2F2F2] overflow-hidden bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] shadow-2xl transition-transform hover:scale-105 duration-300">
@@ -235,28 +331,49 @@ export const OrganizerProfilePage: React.FC = () => {
  
                         {/* Name and Stats - Pushed below the cover line visually */}
                         <div className="flex-1 pb-2 md:pt-24">
-                            <h1 className="text-3xl md:text-5xl font-black text-[#2E2E2F] tracking-tighter leading-[1.1] mb-4 drop-shadow-sm">
-                                {organizer.organizerName}
-                            </h1>
+                            <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2">
+                                <h1 className="text-3xl md:text-4xl font-bold text-[#2E2E2F] tracking-tighter leading-tight drop-shadow-sm">
+                                    {organizer.organizerName}
+                                </h1>
+                                {organizer.averageRating > 0 && (
+                                    <div className="flex items-center gap-1.5 bg-[#38BDF2]/10 px-3 py-1.5 rounded-xl border border-[#38BDF2]/20">
+                                        <ICONS.Star className="w-3.5 h-3.5 text-[#38BDF2] fill-[#38BDF2]" />
+                                        <span className="text-[11px] font-black text-[#38BDF2] uppercase tracking-widest whitespace-nowrap">
+                                            {organizer.averageRating} ({organizer.ratingCount})
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {/* Bio Section - Directly under name */}
+                            <div className="mt-2 mb-6 max-w-[650px] mx-auto md:mx-0">
+                                <p className="text-[14px] md:text-[15px] text-[#050505] leading-relaxed whitespace-pre-wrap font-medium opacity-90">
+                                    {organizer.bio || 'Welcome to our official community page. Stay tuned for upcoming premium event sessions and updates.'}
+                                </p>
+                            </div>
                             {/* Mobile Only Prominent Stats */}
-                            <div className="md:hidden grid grid-cols-2 gap-px bg-[#CED0D4]/50 w-full mt-6 border-y border-[#CED0D4]/50">
-                                <div className="bg-[#F2F2F2] py-4 text-center">
+                            <div className="md:hidden grid grid-cols-2 gap-px bg-[#CED0D4]/30 w-full mt-8 rounded-2xl overflow-hidden border border-[#CED0D4]/50 shadow-sm">
+                                <div className="bg-[#F2F2F2] py-5 text-center flex flex-col items-center gap-1">
+                                    <ICONS.Users className="w-5 h-5 text-[#38BDF2] mb-1" />
                                     <p className="text-2xl font-black text-[#050505]">{formatCompactCount(organizer.followersCount)}</p>
-                                    <p className="text-[10px] font-bold text-[#65676B] uppercase tracking-widest mt-1">Active Followers</p>
+                                    <p className="text-[10px] font-bold text-[#65676B] uppercase tracking-[0.2em]">Followers</p>
                                 </div>
-                                <div className="bg-[#F2F2F2] py-4 text-center">
+                                <div className="bg-[#F2F2F2] py-5 text-center flex flex-col items-center gap-1">
+                                    <ICONS.Calendar className="w-5 h-5 text-[#38BDF2] mb-1" />
                                     <p className="text-2xl font-black text-[#050505]">{organizer.eventsHostedCount || 0}</p>
-                                    <p className="text-[10px] font-bold text-[#65676B] uppercase tracking-widest mt-1">Events Hosted</p>
+                                    <p className="text-[10px] font-bold text-[#65676B] uppercase tracking-[0.2em]">Events</p>
                                 </div>
                             </div>
 
                             <div className="hidden md:flex flex-wrap items-center gap-4 text-[#65676B] font-bold text-sm">
                                 <div className="flex items-center gap-2">
+                                    <ICONS.Users className="w-4 h-4 text-[#38BDF2]/60" />
                                     <span className="text-[#050505] font-black">{formatCompactCount(organizer.followersCount)}</span>
                                     <span>Active Followers</span>
                                 </div>
                                 <div className="w-1 h-1 bg-[#65676B]/40 rounded-full hidden sm:block" />
                                 <div className="flex items-center gap-2">
+                                    <ICONS.Calendar className="w-4 h-4 text-[#38BDF2]/60" />
                                     <span className="text-[#050505] font-black">{organizer.eventsHostedCount || 0}</span>
                                     <span>Events Hosted</span>
                                 </div>
@@ -270,7 +387,19 @@ export const OrganizerProfilePage: React.FC = () => {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex items-center gap-3 pb-2">
+                        <div className="flex flex-col gap-6 pb-2 w-full md:w-auto">
+                            {/* Mobile Rate Action - Simplified to match desktop style */}
+                            <div className="md:hidden">
+                                <button
+                                    onClick={() => setShowRatingModal(true)}
+                                    className="w-full flex items-center justify-center gap-2 bg-[#F2F2F2] py-4 rounded-2xl border border-[#CED0D4] shadow-sm active:scale-95 transition-all"
+                                >
+                                    <ICONS.Star className="w-5 h-5 text-[#38BDF2] fill-[#38BDF2]" />
+                                    <span className="text-sm font-bold text-[#2E2E2F]">Rate Organizer</span>
+                                </button>
+                            </div>
+
+                            <div className="flex items-center gap-3">
                             <button
                                 onClick={handleFollow}
                                 className="flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-3 rounded-xl font-bold text-sm transition-all shadow-md bg-[#38BDF2] text-white hover:brightness-95 active:scale-95"
@@ -310,15 +439,21 @@ export const OrganizerProfilePage: React.FC = () => {
                             >
                                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
                             </button>
+
+                            {/* Desktop-only Rate Action */}
+                            <button
+                                onClick={() => setShowRatingModal(true)}
+                                className="hidden md:flex items-center gap-2 bg-[#F2F2F2] px-5 py-3 rounded-xl border border-[#CED0D4] shadow-sm hover:bg-[#E4E6EB] transition-all group/rate"
+                                title="Rate Organizer"
+                            >
+                                <ICONS.Star className="w-5 h-5 text-[#38BDF2] fill-[#38BDF2] group-hover/rate:scale-110 transition-transform" />
+                                <span className="text-sm font-bold text-[#2E2E2F]">Rate</span>
+                            </button>
                         </div>
                     </div>
+                </div>
 
-                    {/* Bio Section - Directly under name/profile */}
-                    <div className="mt-8 mb-6 max-w-[800px]">
-                        <p className="text-[15px] text-[#050505] leading-relaxed whitespace-pre-wrap font-medium">
-                            {organizer.bio || 'Welcome to our official community page. Stay tuned for upcoming premium event sessions and updates.'}
-                        </p>
-                    </div>
+
 
                     {/* Tabs / Navigation */}
                     <div className="flex items-center gap-2 border-t border-[#CED0D4] mt-8">
@@ -373,67 +508,77 @@ export const OrganizerProfilePage: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* Rating Modal */}
+            {showRatingModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !submittingRating && setShowRatingModal(false)} />
+                    
+                    <div className="relative bg-white w-full max-w-md rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
+                        <div className="p-8">
+                            <div className="text-center mb-8">
+                                <div className="w-16 h-16 bg-[#38BDF2]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <ICONS.Star className="w-8 h-8 text-[#38BDF2] fill-[#38BDF2]" />
+                                </div>
+                                <h2 className="text-2xl font-black text-[#050505] tracking-tight">Rate this Organization</h2>
+                                <p className="text-[#65676B] font-medium text-sm mt-1">Your feedback helps the community grow.</p>
+                            </div>
+
+                            <div className="space-y-8">
+                                {/* Star Selection */}
+                                <div className="flex justify-center gap-3">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            onMouseEnter={() => setRatingStars(star)}
+                                            onMouseLeave={() => ratingStars === 0 && setRatingStars(0)}
+                                            onClick={() => setRatingStars(star)}
+                                            className="transition-all transform hover:scale-125 active:scale-95"
+                                        >
+                                            <ICONS.Star
+                                                className={`w-10 h-10 ${star <= ratingStars ? 'text-[#38BDF2] fill-[#38BDF2]' : 'text-[#CED0D4]'}`}
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Comment Area */}
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-[#65676B] ml-1">Your Thoughts (Optional)</label>
+                                    <textarea
+                                        value={ratingComment}
+                                        onChange={(e) => setRatingComment(e.target.value)}
+                                        placeholder="Tell us what you like about this organizer..."
+                                        className="w-full h-32 p-4 bg-[#F2F2F2] rounded-2xl border-2 border-transparent focus:border-[#38BDF2] focus:bg-white transition-all resize-none font-medium text-sm outline-none"
+                                        maxLength={500}
+                                    />
+                                </div>
+
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        onClick={() => setShowRatingModal(false)}
+                                        disabled={submittingRating}
+                                        className="flex-1 py-4 font-bold text-sm text-[#65676B] hover:bg-[#F2F2F2] rounded-2xl transition-all active:scale-95 disabled:opacity-50"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => ratingStars > 0 && handleRate(ratingStars, ratingComment)}
+                                        disabled={submittingRating || ratingStars === 0}
+                                        className="flex-[2] py-4 bg-[#38BDF2] text-white font-bold text-sm rounded-2xl shadow-lg shadow-[#38BDF2]/20 hover:brightness-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2"
+                                    >
+                                        {submittingRating ? (
+                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        ) : (
+                                            'Submit Rating'
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-    );
-};
-
-const EventMiniCard: React.FC<{ event: Event; brandColor: string; isPast?: boolean }> = ({ event, brandColor, isPast }) => {
-    const navigate = useNavigate();
-    const { isAuthenticated } = useUser();
-    const { isLiked, toggleLike, canLikeFollow } = useEngagement();
-    const liked = isLiked(event.eventId);
-
-    const handleLike = async (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!isAuthenticated) { navigate('/signup'); return; }
-        if (!canLikeFollow) return;
-        try {
-            await toggleLike(event.eventId);
-        } catch (err) { }
-    };
-
-    return (
-        <Card
-            className="group overflow-hidden border border-[#CED0D4] rounded-2xl bg-[#F2F2F2] transition-all cursor-pointer shadow-sm hover:shadow-xl hover:-translate-y-1"
-            onClick={() => navigate(`/events/${event.slug}`)}
-        >
-            <div className="relative h-52">
-                <img
-                    src={getImageUrl(event.imageUrl)}
-                    alt={event.eventName}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-
-                <div className="absolute top-4 left-4 z-10">
-                    <div className={`rounded-xl px-3 py-1.5 text-[10px] font-black uppercase tracking-widest shadow-lg backdrop-blur-md ${isPast ? 'bg-black/40 text-white' : 'bg-[#38BDF2] text-white'}`}>
-                        {isPast ? 'Past Event' : 'Upcoming'}
-                    </div>
-                </div>
-
-                <button
-                    onClick={handleLike}
-                    className={`absolute top-4 right-4 w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-md active:scale-90 ${liked ? 'bg-[#38BDF2] text-white' : 'bg-white/90 text-[#050505] border border-black/5'}`}
-                >
-                    <ICONS.Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
-                </button>
-            </div>
-            
-            <div className="p-6 space-y-4">
-                <div>
-                    <h3 className="text-xl font-bold text-[#050505] line-clamp-1 group-hover:text-[#38BDF2] transition-colors">{event.eventName}</h3>
-                    <p className="text-[11px] font-black text-[#65676B] uppercase tracking-wider mt-1">
-                        {formatDate(event.startAt, event.timezone, { day: 'numeric', month: 'short', year: 'numeric' })} · {formatTime(event.startAt, event.timezone)}
-                    </p>
-                </div>
-                
-                <div className="flex items-center justify-between pt-2 border-t border-[#CED0D4]/50">
-                    <div className="flex items-center gap-1.5 text-[#65676B]">
-                        <ICONS.MapPin className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-black uppercase tracking-widest truncate max-w-[120px]">{event.locationText}</span>
-                    </div>
-                    <span className="text-[11px] font-black uppercase text-[#38BDF2] tracking-widest group-hover:mr-2 transition-all">View Detail</span>
-                </div>
-            </div>
-        </Card>
     );
 };

@@ -383,6 +383,7 @@ async function renderEmailHtml(payload) {
       ORDER_PLACED: 'NEW ORDER',
       TICKET_CANCELLED: 'CANCELLED',
       ADMIN_ALERT: 'SYSTEM',
+      ORGANIZER_RATED: 'NEW RATING',
     };
 
     const typeIconMap = {
@@ -393,6 +394,7 @@ async function renderEmailHtml(payload) {
       ORDER_PLACED: '💰',
       TICKET_CANCELLED: '🚫',
       ADMIN_ALERT: '⚡',
+      ORGANIZER_RATED: '🌟',
     };
 
     const replacements = {

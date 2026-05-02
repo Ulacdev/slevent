@@ -177,6 +177,10 @@ export const listAdminEvents = async (req, res) => {
       query = query.or(`eventName.ilike.%${search}%,locationText.ilike.%${search}%,description.ilike.%${search}%`);
     }
 
+    const { startDate, endDate } = req.query;
+    if (startDate) query = query.gte('startAt', startDate);
+    if (endDate) query = query.lte('startAt', endDate);
+
     const { data: events, error } = await query;
     if (error) return res.status(500).json({ error: error.message });
 
@@ -209,27 +213,41 @@ export const listAdminEvents = async (req, res) => {
         }
     });
 
-    // 3) Fetch report counts only for the fetched events
+    // 3) Fetch report counts and registration counts only for the fetched events
     if (enrichedEvents.length > 0) {
       const eventIds = enrichedEvents.map(e => e.eventId);
-      const { data: reportNotifs, error: reportErr } = await supabase
+      
+      // Fetch report counts
+      const { data: reportNotifs } = await supabase
         .from('notifications')
         .select('notification_id, metadata')
         .eq('type', 'EVENT_REPORT')
         .is('deleted_at', null);
       
-      if (!reportErr && reportNotifs) {
-        const reportMap = {};
-        reportNotifs.forEach(n => {
-          const eId = n.metadata?.eventId;
-          if (eId && eventIds.includes(eId)) {
-            reportMap[eId] = (reportMap[eId] || 0) + 1;
-          }
-        });
-        enrichedEvents.forEach(e => {
-          e.reportCount = reportMap[e.eventId] || 0;
-        });
-      }
+      // Fetch registration counts (ISSUED or USED)
+      const { data: regCounts } = await supabase
+        .from('registrations')
+        .select('eventId, status')
+        .in('eventId', eventIds)
+        .in('status', ['ISSUED', 'USED']);
+
+      const reportMap = {};
+      (reportNotifs || []).forEach(n => {
+        const eId = n.metadata?.eventId;
+        if (eId && eventIds.includes(eId)) {
+          reportMap[eId] = (reportMap[eId] || 0) + 1;
+        }
+      });
+
+      const regMap = {};
+      (regCounts || []).forEach(r => {
+        regMap[r.eventId] = (regMap[r.eventId] || 0) + 1;
+      });
+
+      enrichedEvents.forEach(e => {
+        e.reportCount = reportMap[e.eventId] || 0;
+        e.registrationCount = regMap[e.eventId] || 0;
+      });
     }
 
     return res.json(enrichedEvents || []);
@@ -299,6 +317,10 @@ export const listUserEvents = async (req, res) => {
     if (search) {
       query = query.or(`eventName.ilike.%${search}%,locationText.ilike.%${search}%,description.ilike.%${search}%`);
     }
+
+    const { startDate, endDate } = req.query;
+    if (startDate) query = query.gte('startAt', startDate);
+    if (endDate) query = query.lte('startAt', endDate);
 
     console.log(`[listUserEvents] 🚀 Querying for role: ${requesterRole}, userId: ${userId}`);
     const { data, error } = await query;

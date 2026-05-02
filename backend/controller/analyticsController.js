@@ -44,9 +44,16 @@ const buildPagination = (page, limit, total) => {
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
 const isUuid = (value) => UUID_RE.test(String(value || ''));
 const sanitizeUuidList = (values) => Array.from(new Set((values || []).filter(isUuid)));
+
+const resolveDateRange = (req) => {
+  const { startDate, endDate } = req.query;
+  return {
+    startDate: startDate || null,
+    endDate: endDate || null
+  };
+};
 
 const getFilteredEventIds = async (req) => {
   try {
@@ -288,6 +295,7 @@ export const getSummary = async (req, res) => {
     res.set('x-analytics-build', ANALYTICS_BUILD);
     console.log(`[Analytics] getSummary build=${ANALYTICS_BUILD} user=${req.user?.id || 'unknown'}`);
     const filteredEventIds = await getFilteredEventIds(req);
+    const { startDate, endDate } = resolveDateRange(req);
 
     // If no events allowed, return zero stats immediately to avoid global leak
     if (!Array.isArray(filteredEventIds) || filteredEventIds.length === 0) {
@@ -303,10 +311,15 @@ export const getSummary = async (req, res) => {
     }
 
     // Tickets and attendance
-    const { data: tickets, error: ticketErr } = await supabase
+    let ticketQuery = supabase
       .from('tickets')
       .select('ticketId, status, issuedAt, eventId')
       .in('eventId', filteredEventIds);
+
+    if (startDate) ticketQuery = ticketQuery.gte('issuedAt', startDate);
+    if (endDate) ticketQuery = ticketQuery.lte('issuedAt', endDate);
+
+    const { data: tickets, error: ticketErr } = await ticketQuery;
 
     if (ticketErr) {
       logAnalyticsError('getSummary.tickets', ticketErr, { requesterId: req.user?.id });
@@ -318,10 +331,15 @@ export const getSummary = async (req, res) => {
     const attendanceRate = totalRegistrations ? (usedCount / totalRegistrations) * 100 : 0;
 
     // Orders and revenue
-    const { data: orders, error: orderErr } = await supabase
+    let orderQuery = supabase
       .from('orders')
-      .select('orderId, totalAmount, status, created_at, eventId')
+      .select('orderId, totalAmount, status, created_at, eventId, metadata')
       .in('eventId', filteredEventIds);
+
+    if (startDate) orderQuery = orderQuery.gte('created_at', startDate);
+    if (endDate) orderQuery = orderQuery.lte('created_at', endDate);
+
+    const { data: orders, error: orderErr } = await orderQuery;
 
     if (orderErr) {
       logAnalyticsError('getSummary.orders', orderErr, { requesterId: req.user?.id });
@@ -387,10 +405,15 @@ export const getSummary = async (req, res) => {
     let activeSubscriptions = 0;
 
     try {
-      const { data: subsData, error: subsErr } = await supabase
+      let subsQuery = supabase
         .from('organizersubscriptions')
-        .select('priceAmount, status')
+        .select('priceAmount, status, created_at')
         .in('status', ['active', 'paid', 'ACTIVE', 'PAID']);
+
+      if (startDate) subsQuery = subsQuery.gte('created_at', startDate);
+      if (endDate) subsQuery = subsQuery.lte('created_at', endDate);
+
+      const { data: subsData, error: subsErr } = await subsQuery;
 
       if (!subsErr && subsData) {
         totalPlanRevenue = subsData.reduce((sum, s) => sum + (Number(s.priceAmount) || 0), 0);
@@ -481,12 +504,19 @@ export const getRecentTransactions = async (req, res) => {
       });
     }
 
+    const { startDate, endDate } = resolveDateRange(req);
+
+    const queryParams = supabase
+      .from('orders')
+      .select('orderId, eventId, buyerName, buyerEmail, totalAmount, currency, status, created_at, metadata', { count: 'exact' })
+      .in('eventId', filteredEventIds)
+      .eq('status', 'PAID');
+
+    if (startDate) queryParams.gte('created_at', startDate);
+    if (endDate) queryParams.lte('created_at', endDate);
+
     const { data, error, count } = Array.isArray(filteredEventIds) && filteredEventIds.length
-      ? await supabase
-        .from('orders')
-        .select('orderId, eventId, buyerName, buyerEmail, totalAmount, currency, status, created_at', { count: 'exact' })
-        .in('eventId', filteredEventIds)
-        .eq('status', 'PAID')
+      ? await queryParams
         .order('created_at', { ascending: false })
         .range(from, to)
       : { data: [], error: null, count: 0 };
@@ -542,11 +572,15 @@ export const getRecentTransactions = async (req, res) => {
     let subscriptionItems = [];
     let subscriptionTotal = 0;
     if (userRole === 'ADMIN') {
-      const { data: subs, error: subsErr, count: subsCount } = await supabase
+      let subsQuery = supabase
         .from('organizersubscriptions')
         .select('subscriptionId, organizerId, planId, priceAmount, currency, status, billingInterval, created_at, plan:plans(name), organizers:organizers(organizerName, ownerUserId)', { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .range(from, to);
+        .order('created_at', { ascending: false });
+
+      if (startDate) subsQuery = subsQuery.gte('created_at', startDate);
+      if (endDate) subsQuery = subsQuery.lte('created_at', endDate);
+
+      const { data: subs, error: subsErr, count: subsCount } = await subsQuery.range(from, to);
 
       if (subsErr) {
         logAnalyticsError('getRecentTransactions.subscriptions', subsErr, { requesterId });
@@ -1200,13 +1234,19 @@ export const bulkRestoreTransactions = async (req, res) => {
 
 export const getPlanMetrics = async (req, res) => {
   try {
+    const { startDate, endDate } = resolveDateRange(req);
     const { data: plans } = await supabase.from('plans').select('planId, name');
     const planMap = new Map((plans || []).map(p => [p.planId, p.name]));
 
-    const { data: subs, error } = await supabase
+    let subsQuery = supabase
       .from('organizersubscriptions')
       .select('planId, priceAmount, created_at, status')
       .in('status', ['active', 'paid', 'ACTIVE', 'PAID']);
+
+    if (startDate) subsQuery = subsQuery.gte('created_at', startDate);
+    if (endDate) subsQuery = subsQuery.lte('created_at', endDate);
+
+    const { data: subs, error } = await subsQuery;
 
     if (error) throw error;
 
@@ -1217,21 +1257,23 @@ export const getPlanMetrics = async (req, res) => {
       revenueByPlan[name] = (revenueByPlan[name] || 0) + (Number(s.priceAmount) || 0);
     });
 
-    // Subscriptions over time (last 30 days)
-    const last30Days = [];
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      last30Days.push({
-        date: d.toISOString().split('T')[0],
+    // Subscriptions over time
+    const start = startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 29));
+    const end = endDate ? new Date(endDate) : new Date();
+    const rangeDays = [];
+    const curr = new Date(start);
+    while (curr <= end) {
+      rangeDays.push({
+        date: curr.toISOString().split('T')[0],
         count: 0,
         revenue: 0
       });
+      curr.setDate(curr.getDate() + 1);
     }
 
     (subs || []).forEach(s => {
       const date = new Date(s.created_at).toISOString().split('T')[0];
-      const day = last30Days.find(d => d.date === date);
+      const day = rangeDays.find(d => d.date === date);
       if (day) {
         day.count++;
         day.revenue += (Number(s.priceAmount) || 0);
@@ -1240,7 +1282,7 @@ export const getPlanMetrics = async (req, res) => {
 
     return res.json({
       revenueByPlan: Object.entries(revenueByPlan).map(([name, value]) => ({ name, value })),
-      dailyMetrics: last30Days
+      dailyMetrics: rangeDays
     });
   } catch (err) {
     console.error('[Analytics] getPlanMetrics error:', err);
@@ -1250,11 +1292,18 @@ export const getPlanMetrics = async (req, res) => {
 
 export const getSubscriptionHealth = async (req, res) => {
   try {
+    const { startDate, endDate } = resolveDateRange(req);
     const { data: plans } = await supabase.from('plans').select('planId, name');
-    const { data: subs } = await supabase
+    
+    let subsQuery = supabase
       .from('organizersubscriptions')
-      .select('planId, status')
+      .select('planId, status, created_at')
       .in('status', ['active', 'paid', 'ACTIVE', 'PAID']);
+
+    if (startDate) subsQuery = subsQuery.gte('created_at', startDate);
+    if (endDate) subsQuery = subsQuery.lte('created_at', endDate);
+
+    const { data: subs } = await subsQuery;
 
     const planCounts = {};
     (subs || []).forEach(s => {
@@ -1266,10 +1315,15 @@ export const getSubscriptionHealth = async (req, res) => {
       count: planCounts[p.planId] || 0
     }));
 
-    // Get total organizers for conversion rate
-    const { count: totalOrganizers } = await supabase
+    // Get total organizers for conversion rate (filtered by range)
+    let orgsQuery = supabase
       .from('organizers')
       .select('organizerId', { count: 'exact', head: true });
+
+    if (startDate) orgsQuery = orgsQuery.gte('created_at', startDate);
+    if (endDate) orgsQuery = orgsQuery.lte('created_at', endDate);
+
+    const { count: totalOrganizers } = await orgsQuery;
 
     return res.json({
       planDistribution: metrics,

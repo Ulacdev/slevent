@@ -45,6 +45,8 @@ export interface OrganizerProfile {
   followersCount: number;
   likesCount?: number;
   eventsHostedCount?: number;
+  averageRating?: number;
+  ratingCount?: number;
   currentPlanId?: string | null;
   subscriptionStatus?: string | null;
   planExpiresAt?: string | null;

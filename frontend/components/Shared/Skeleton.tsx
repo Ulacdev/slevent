@@ -141,36 +141,79 @@ export const OrganizerCardSkeleton: React.FC = () => (
 );
 
 export const ProfileSkeleton: React.FC = () => (
-  <div className="bg-background min-h-screen">
+  <div className="bg-white min-h-screen">
     {/* Cover Header */}
-    <Skeleton variant="rect" width="100%" height={320} className="!rounded-none" />
+    <div className="w-full h-[300px] md:h-[480px] bg-[#F2F2F2] animate-shimmer" />
     
-    <div className="max-w-6xl mx-auto px-6 -mt-16">
-      <div className="flex flex-col md:flex-row gap-8 items-start">
+    <div className="max-w-[1200px] mx-auto px-5 relative -mt-16 md:-mt-24">
+      <div className="flex flex-col md:flex-row md:items-end gap-6 mb-12">
         {/* Avatar */}
-        <Skeleton variant="circle" width={160} height={160} className="border-4 border-background shadow-2xl shrink-0" />
+        <Skeleton variant="circle" width={128} height={128} className="md:!w-[192px] md:!h-[192px] border-[6px] border-white shadow-2xl shrink-0" />
         
-        <div className="flex-1 space-y-6 pt-16 md:pt-20">
-          <Skeleton variant="text" width="60%" height={56} className="rounded-xl" />
-          <Skeleton variant="text" width="40%" height={24} />
-          
-          <div className="flex gap-4 mt-8">
-            <Skeleton variant="rect" width={160} height={48} className="rounded-full" />
-            <Skeleton variant="rect" width={160} height={48} className="rounded-full" />
+        <div className="flex-1 space-y-5 pb-2 md:pt-24">
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <Skeleton variant="text" width={300} height={48} className="rounded-xl" />
+            <Skeleton variant="rect" width={80} height={28} className="rounded-lg" />
           </div>
+          
+          <div className="flex items-center gap-3">
+             <Skeleton variant="circle" width={32} height={32} />
+             <Skeleton variant="circle" width={32} height={32} />
+             <Skeleton variant="circle" width={32} height={32} />
+          </div>
+
+          <div className="space-y-2">
+            <Skeleton variant="text" width="90%" height={18} />
+            <Skeleton variant="text" width="70%" height={18} />
+          </div>
+        </div>
+        
+        {/* Actions */}
+        <div className="flex gap-3 w-full md:w-auto">
+          <Skeleton variant="rect" width="100%" height={56} className="md:w-44 rounded-2xl" />
+          <Skeleton variant="rect" width="100%" height={56} className="md:w-44 rounded-2xl" />
+        </div>
+      </div>
+
+      {/* Stats Row */}
+      <div className="flex items-center gap-8 mb-12 py-6 border-y border-[#F2F2F2]">
+        <div className="flex items-center gap-3">
+           <Skeleton variant="rect" width={40} height={40} className="rounded-xl" />
+           <div className="space-y-1">
+             <Skeleton variant="text" width={60} height={20} />
+             <Skeleton variant="text" width={40} height={12} />
+           </div>
+        </div>
+        <div className="flex items-center gap-3">
+           <Skeleton variant="rect" width={40} height={40} className="rounded-xl" />
+           <div className="space-y-1">
+             <Skeleton variant="text" width={60} height={20} />
+             <Skeleton variant="text" width={40} height={12} />
+           </div>
         </div>
       </div>
       
-      {/* Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mt-20">
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
-          <EventCardSkeleton />
-          <EventCardSkeleton />
-        </div>
-        <div className="space-y-8">
-          <Skeleton variant="rect" width="100%" height={240} className="rounded-2xl" />
-          <Skeleton variant="rect" width="100%" height={120} className="rounded-2xl" />
-        </div>
+      {/* Tabs */}
+      <div className="flex gap-8 border-b border-[#F2F2F2] mb-10 pb-4">
+        <Skeleton variant="rect" width={120} height={24} className="rounded-lg" />
+        <Skeleton variant="rect" width={120} height={24} className="rounded-lg" />
+      </div>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="bg-[#F2F2F2]/50 rounded-3xl p-4 border border-black/[0.03] space-y-4">
+            <Skeleton variant="rect" width="100%" height={220} className="rounded-2xl" />
+            <div className="space-y-3 px-2">
+              <Skeleton variant="text" width="80%" height={24} />
+              <Skeleton variant="text" width="50%" height={16} />
+              <div className="pt-4 flex justify-between">
+                 <Skeleton variant="text" width="40%" height={14} />
+                 <Skeleton variant="text" width="30%" height={14} />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   </div>
@@ -313,6 +356,58 @@ export const DestinationSliderSkeleton: React.FC = () => (
           <Skeleton className="w-full h-full !rounded-none opacity-20" />
         </div>
       ))}
+    </div>
+  </div>
+);
+
+export const DiscoverySkeleton: React.FC = () => (
+  <div className="bg-[#F2F2F2] min-h-screen">
+    {/* Hero Skeleton */}
+    <div className="w-full h-[260px] sm:h-[350px] bg-[#38BDF2]/20 animate-shimmer" />
+    
+    <div className="max-w-full px-6 sm:px-10 py-12">
+      {/* Controls Skeleton */}
+      <div className="hidden lg:flex justify-between items-center mb-12">
+        <div className="flex gap-4">
+          <Skeleton variant="rect" width={160} height={48} className="rounded-xl" />
+          <Skeleton variant="rect" width={200} height={48} className="rounded-xl" />
+        </div>
+        <Skeleton variant="rect" width={320} height={48} className="rounded-xl" />
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-12">
+        {/* Sidebar Skeleton */}
+        <div className="hidden lg:block w-72 shrink-0 space-y-8">
+          <Skeleton variant="text" width="60%" height={32} />
+          <div className="space-y-4">
+            <Skeleton variant="rect" width="100%" height={48} className="rounded-xl" />
+            <Skeleton variant="rect" width="100%" height={48} className="rounded-xl" />
+          </div>
+        </div>
+
+        {/* Grid Skeleton */}
+        <div className="flex-1">
+          <div className="mb-8">
+            <Skeleton variant="text" width="40%" height={40} className="mb-2" />
+            <Skeleton variant="text" width="20%" height={20} />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-8">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="rounded-2xl p-6 border border-black/[0.03] space-y-4">
+                <div className="flex flex-col items-center">
+                  <Skeleton variant="circle" width={80} height={80} className="mb-4" />
+                  <Skeleton variant="text" width="70%" height={24} className="rounded-lg" />
+                  <Skeleton variant="text" width="40%" height={16} />
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Skeleton variant="rect" width="50%" height={44} className="rounded-xl" />
+                  <Skeleton variant="rect" width="50%" height={44} className="rounded-xl" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 );

@@ -525,7 +525,8 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
   const [selectedFormat, setSelectedFormat] = useState<'all' | 'online' | 'in-person'>('all');
   const [selectedDate, setSelectedDate] = useState<string>('all');
   const [showCategoriesFull, setShowCategoriesFull] = useState(false);
-  const [sortBy, setSortBy] = useState<string>('relevance');
+  const [showMobileFilterModal, setShowMobileFilterModal] = useState(false);
+  const [sortBy, setSortBy] = useState('relevance');
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
@@ -1504,7 +1505,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
 
         {isLanding && !isSpecialListing && (
           <section className="mb-0 px-0 pt-0 pb-4">
-            <div id="marketplace-results" className="scroll-mt-32">
+            <div id="marketplace-results" className="scroll-mt-32 sticky top-0 z-30 bg-[#F2F2F2] -mx-4 px-4 py-2 sm:static sm:bg-transparent sm:p-0 sm:mx-0">
               <BrowseEventsNavigator
                 activeTab={activeBrowseTab}
                 onTabChange={setActiveBrowseTab}
@@ -1521,11 +1522,11 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                   setActiveBrowseTab('ALL');
                 }}
                 isLoading={isFetching}
-                className="mt-0 mb-5 mx-0"
+                className="mt-0 mb-0 mx-0"
               />
             </div>
 
-            <div id="marketplace-results-grid" className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-2 mb-6 pb-0 px-0 scroll-mt-24">
+            <div id="marketplace-results-grid" className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-2 mb-6 pb-0 px-0 scroll-mt-24 sticky top-[72px] sm:static z-20 bg-[#F2F2F2] -mx-4 px-4 py-3 sm:bg-transparent sm:p-0 sm:mx-0 sm:mb-6">
               <div className="flex-1 space-y-1.5">
                 <h2 className="text-2xl md:text-3xl font-black text-black tracking-tight leading-none">
                   {selectedLocation === DEFAULT_LOCATION ? 'Global Trending Events' : `Trending in ${selectedLocation}`}
@@ -1562,14 +1563,67 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
         )}
 
         <div style={{ zoom: !isLanding ? 0.8 : undefined }} className="origin-top transition-transform duration-500">
-          <div className={`flex flex-col sm:flex-row items-center justify-between gap-6 px-0 ${isLanding ? 'hidden' : 'mb-8 mt-2'}`}>
+          {/* Mobile Sticky Filter UI (Unified Header) */}
+          <div className="lg:hidden sticky top-0 z-40 bg-[#F2F2F2] border-b border-[#2E2E2F]/10 -mx-6 px-6 py-4 space-y-4 mb-4">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-black/40">
+                  <ICONS.Search className="h-4 w-4" strokeWidth={3} />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search events..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="block w-full pl-10 pr-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[14px] font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-black/30"
+                />
+              </div>
+              <button
+                onClick={() => setShowMobileFilterModal(true)}
+                className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all shadow-sm ${selectedDate !== 'all' || selectedPrice !== 'all' || selectedFormat !== 'all' ? 'bg-[#38BDF2] text-white' : 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/20'}`}
+              >
+                {isFetching ? (
+                  <ICONS.Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <ICONS.SlidersHorizontal className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+
+            {/* Horizontal Categories Scroll */}
+            <div className="flex flex-row overflow-x-auto gap-2 pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <button
+                onClick={() => setSelectedCategory('all')}
+                className={`flex items-center gap-2 shrink-0 whitespace-nowrap rounded-full px-5 py-2.5 text-[13px] font-black transition-all ${selectedCategory === 'all' ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20' : 'bg-[#E5E7EB]/50 border border-[#2E2E2F]/5 text-[#2E2E2F]'}`}
+              >
+                All Events
+              </button>
+              {categories.map((cat) => (
+                <button
+                  key={cat.key}
+                  onClick={() => setSelectedCategory(selectedCategory === cat.key ? 'all' : cat.key)}
+                  className={`flex items-center gap-2 shrink-0 whitespace-nowrap rounded-full px-5 py-2.5 text-[13px] font-black transition-all ${selectedCategory === cat.key ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20' : 'bg-[#E5E7EB]/50 border border-[#2E2E2F]/5 text-[#2E2E2F]'}`}
+                >
+                  {cat.Icon && <cat.Icon className="w-3.5 h-3.5" />}
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop Controls Row */}
+          <div className={`hidden lg:flex flex-col sm:flex-row items-center justify-between gap-6 mb-8 mt-2 ${isLanding ? 'hidden' : ''}`}>
             {!isLanding && !isSpecialListing && (
               <div className="flex items-center gap-4 w-full sm:w-auto">
                 <button
                   onClick={() => setIsSidebarVisible(!isSidebarVisible)}
-                  className="flex items-center gap-2 bg-[#F2F2F2] px-4 py-2.5 rounded-xl border border-[#E5E7EB] shadow-sm text-[10px] font-black uppercase tracking-widest text-black hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all"
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border shadow-sm text-[10px] font-black uppercase tracking-widest transition-all ${isFetching ? 'bg-[#38BDF2]/20 border-[#38BDF2]/30 text-[#38BDF2]' : 'bg-[#F2F2F2] border-[#E5E7EB] text-black hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30'}`}
                 >
-                  <ICONS.Filter className="w-4 h-4" />
+                  {isFetching ? (
+                    <ICONS.Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <ICONS.SlidersHorizontal className="w-4 h-4" />
+                  )}
                   {isSidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
                 </button>
 
@@ -1595,10 +1649,10 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 </div>
                 <input
                   type="text"
-                  placeholder={`Search in ${selectedLocation}...`}
+                  placeholder={`Search events...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-9 py-3 bg-[#F2F2F2] border border-[#D1D5DB] rounded-xl text-[12px] font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-black"
+                  className="block w-full pl-10 pr-9 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-xl text-[12px] font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-black/30"
                 />
               </div>
             </div>
@@ -1611,10 +1665,10 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
           )}
 
           <div className="flex flex-col lg:flex-row gap-10">
-            {/* Sidebar Filter - Eventbrite style */}
+            {/* Sidebar Filter - Desktop Only */}
             {!isLanding && !isSpecialListing && isSidebarVisible && (
               <aside
-                className="w-full lg:w-72 shrink-0 lg:sticky lg:top-28 lg:self-start lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-4 lg:custom-scrollbar animate-in fade-in slide-in-from-left-4 duration-700"
+                className="hidden lg:block w-72 shrink-0 lg:sticky lg:top-28 lg:self-start lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-4 lg:custom-scrollbar animate-in fade-in slide-in-from-left-4 duration-700"
                 style={{ zoom: 1.1 }}
               >
                 {/* Active Filters Header */}
@@ -1977,6 +2031,98 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 Got it, Thanks!
               </Button>
             </div>
+          </div>
+        </div>
+      </Modal>
+      {/* Mobile Filter Modal */}
+      <Modal
+        isOpen={showMobileFilterModal}
+        onClose={() => setShowMobileFilterModal(false)}
+        title="Filter Events"
+      >
+        <div className="space-y-8 py-4 bg-[#F2F2F2]">
+          {/* Date Section */}
+          <div className="space-y-4">
+            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">When</h4>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'all', label: 'Anytime' },
+                { id: 'today', label: 'Today' },
+                { id: 'weekend', label: 'This Weekend' },
+                { id: 'next_week', label: 'Next Week' }
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setSelectedDate(opt.id)}
+                  className={`px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all ${selectedDate === opt.id ? 'bg-[#38BDF2] text-white shadow-lg' : 'bg-white border border-[#2E2E2F]/10 text-[#2E2E2F]'}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Price Section */}
+          <div className="space-y-4">
+            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Price</h4>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'all', label: 'All Prices' },
+                { id: 'free', label: 'Free' },
+                { id: 'paid', label: 'Paid' }
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setSelectedPrice(opt.id as any)}
+                  className={`px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all ${selectedPrice === opt.id ? 'bg-[#38BDF2] text-white shadow-lg' : 'bg-white border border-[#2E2E2F]/10 text-[#2E2E2F]'}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Format Section */}
+          <div className="space-y-4">
+            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-black">Format</h4>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'all', label: 'All Formats' },
+                { id: 'online', label: 'Online' },
+                { id: 'in-person', label: 'In-person' }
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setSelectedFormat(opt.id as any)}
+                  className={`px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all ${selectedFormat === opt.id ? 'bg-[#38BDF2] text-white shadow-lg' : 'bg-white border border-[#2E2E2F]/10 text-[#2E2E2F]'}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-[#2E2E2F]/5 flex gap-3">
+            <Button
+              variant="outline"
+              className="flex-1 py-4 text-[13px] font-black uppercase tracking-widest"
+              onClick={() => {
+                setSelectedCategory('all');
+                setSelectedDate('all');
+                setSelectedPrice('all');
+                setSelectedFormat('all');
+                setSearchTerm('');
+                setShowMobileFilterModal(false);
+              }}
+            >
+              Reset
+            </Button>
+            <Button
+              className="flex-[2] py-4 text-[13px] font-black uppercase tracking-widest"
+              onClick={() => setShowMobileFilterModal(false)}
+            >
+              Apply Filters
+            </Button>
           </div>
         </div>
       </Modal>

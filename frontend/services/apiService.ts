@@ -451,6 +451,20 @@ export const apiService = {
     return await res.json();
   },
 
+  rateOrganizer: async (id: string, rating: number, comment?: string): Promise<{ success: boolean; average: number; count: number }> => {
+    const res = await apiService._fetch(`${API_BASE}/api/organizer/${encodeURIComponent(id)}/rate`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating, comment })
+    });
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to submit rating: ${res.status}`);
+    }
+    return await res.json();
+  },
+
   // --- User Orders ---
   getMyOrders: async (): Promise<{ orders: any[]; count: number }> => {
     const res = await apiService._fetch(`${API_BASE}/api/orders/my`, {
@@ -955,9 +969,13 @@ export const apiService = {
     return await res.json();
   },
 
-  getAdminEvents: async (search = ''): Promise<Event[]> => {
-    const searchParam = search ? `?search=${encodeURIComponent(search)}` : '';
-    const res = await apiService._fetch(`${API_BASE}/api/admin/events${searchParam}`, {
+  getAdminEvents: async (search = '', startDate?: string, endDate?: string): Promise<Event[]> => {
+    const query = new URLSearchParams();
+    if (search) query.append('search', search);
+    if (startDate) query.append('startDate', startDate);
+    if (endDate) query.append('endDate', endDate);
+    
+    const res = await apiService._fetch(`${API_BASE}/api/admin/events?${query.toString()}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -972,9 +990,13 @@ export const apiService = {
   },
 
   // User-specific events (only events created by the logged-in user)
-  getUserEvents: async (search = ''): Promise<Event[]> => {
-    const searchParam = search ? `?search=${encodeURIComponent(search)}` : '';
-    const res = await apiService._fetch(`${API_BASE}/api/user/events${searchParam}`, {
+  getUserEvents: async (search = '', startDate?: string, endDate?: string): Promise<Event[]> => {
+    const query = new URLSearchParams();
+    if (search) query.append('search', search);
+    if (startDate) query.append('startDate', startDate);
+    if (endDate) query.append('endDate', endDate);
+
+    const res = await apiService._fetch(`${API_BASE}/api/user/events?${query.toString()}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1236,8 +1258,15 @@ export const apiService = {
     return data;
   },
 
-  getAnalytics: async (eventId?: string): Promise<AnalyticsSummary> => {
-    const url = eventId ? `${API_BASE}/api/analytics/summary?eventId=${encodeURIComponent(eventId)}` : `${API_BASE}/api/analytics/summary`;
+  getAnalytics: async (eventId?: string, startDate?: string, endDate?: string): Promise<AnalyticsSummary> => {
+    let url = eventId ? `${API_BASE}/api/analytics/summary?eventId=${encodeURIComponent(eventId)}` : `${API_BASE}/api/analytics/summary`;
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    const queryString = params.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
     const res = await apiService._fetch(url, {
       method: 'GET',
       credentials: 'include',
@@ -1250,8 +1279,11 @@ export const apiService = {
     return res.json();
   },
 
-  getRecentTransactions: async (page = 1, limit = 10) => {
-    const res = await apiService._fetch(`${API_BASE}/api/analytics/transactions?page=${page}&limit=${limit}`, {
+  getRecentTransactions: async (page = 1, limit = 10, startDate?: string, endDate?: string) => {
+    let url = `${API_BASE}/api/analytics/transactions?page=${page}&limit=${limit}`;
+    if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
+    if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
+    const res = await apiService._fetch(url, {
       method: 'GET',
       credentials: 'include',
       cache: 'no-store'
@@ -1596,8 +1628,15 @@ export const apiService = {
     return await res.json();
   },
 
-  getAdminSupportTickets: async (): Promise<any[]> => {
-    const res = await apiService._fetch(`${API_BASE}/api/support/admin/tickets`, {
+  getAdminSupportTickets: async (startDate?: string, endDate?: string): Promise<any[]> => {
+    let url = `${API_BASE}/api/support/admin/tickets`;
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    const queryString = params.toString();
+    if (queryString) url += `?${queryString}`;
+
+    const res = await apiService._fetch(url, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -1724,8 +1763,12 @@ export const apiService = {
     return await res.json();
   },
 
-  getPlanMetrics: async () => {
-    const res = await apiService._fetch(`${API_BASE}/api/analytics/plan-metrics`, {
+  getPlanMetrics: async (startDate?: string, endDate?: string) => {
+    let url = `${API_BASE}/api/analytics/plan-metrics`;
+    if (startDate) url += `?startDate=${encodeURIComponent(startDate)}`;
+    if (endDate) url += (url.includes('?') ? '&' : '?') + `endDate=${encodeURIComponent(endDate)}`;
+    
+    const res = await apiService._fetch(url, {
       credentials: 'include',
       cache: 'no-store'
     });
@@ -1736,8 +1779,12 @@ export const apiService = {
     return res.json();
   },
 
-  getSubscriptionHealth: async () => {
-    const res = await apiService._fetch(`${API_BASE}/api/analytics/subscription-health`, {
+  getSubscriptionHealth: async (startDate?: string, endDate?: string) => {
+    let url = `${API_BASE}/api/analytics/subscription-health`;
+    if (startDate) url += `?startDate=${encodeURIComponent(startDate)}`;
+    if (endDate) url += (url.includes('?') ? '&' : '?') + `endDate=${encodeURIComponent(endDate)}`;
+
+    const res = await apiService._fetch(url, {
       credentials: 'include',
       cache: 'no-store'
     });

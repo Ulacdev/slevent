@@ -39,6 +39,42 @@ export const OrganizerDashboard: React.FC = () => {
     const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
     const [selectedLog, setSelectedLog] = useState<any | null>(null);
 
+    // Date Range Filter
+    const [dateRange, setDateRange] = useState({
+        start: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0],
+        end: new Date().toISOString().split('T')[0]
+    });
+
+    const handlePrint = () => {
+        window.print();
+    };
+
+    const handleExport = () => {
+        const csvRows = [
+            ['Organizer Dashboard Summary Report'],
+            ['Date Range', `${dateRange.start} to ${dateRange.end}`],
+            [''],
+            ['Metric', 'Value'],
+            ['Total Registrations', analytics?.totalRegistrations || 0],
+            ['Tickets Sold Today', analytics?.ticketsSoldToday || 0],
+            ['Total Net Revenue', `PHP ${(analytics?.netRevenue || 0).toLocaleString()}`],
+            ['Net Revenue Today', `PHP ${(analytics?.netRevenueToday || 0).toLocaleString()}`],
+            ['Attendance Rate', `${(analytics?.attendanceRate || 0).toFixed(1)}%`],
+            ['Payment Success', `${(analytics?.paymentSuccessRate || 0).toFixed(1)}%`]
+        ];
+
+        const csvContent = csvRows.map(row => row.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `organizer_dashboard_report_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const fetchDashboardData = async () => {
         try {
             setLoading(true);
@@ -81,22 +117,250 @@ export const OrganizerDashboard: React.FC = () => {
     if (loading) return <PageLoader variant="page" label="Loading Organizer Dashboard..." />;
 
     return (
-        <div className="space-y-10 max-w-7xl mx-auto pt-4 px-2 font-sans">
+        <>
+            {/* Fixed Watermark - Outside container for multi-page support */}
+            <div className="print-watermark no-print-screen">
+                <img src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg" alt="Watermark" />
+            </div>
+
+            <div className="space-y-10 max-w-7xl mx-auto pt-4 px-2 font-sans">
+            <style>{`
+                @media print {
+                    body {
+                        background: white !important;
+                        color: black !important;
+                        -webkit-print-color-adjust: exact !important;
+                    }
+                    
+                    .sidebar, .nav-header, button, .no-print, .date-range-picker {
+                        display: none !important;
+                    }
+
+                    /* Watermark - Repeats on every page due to position: fixed */
+                    .print-watermark {
+                        display: flex !important;
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100vw !important;
+                        height: 100vh !important;
+                        opacity: 0.12 !important;
+                        z-index: -1 !important;
+                        pointer-events: none;
+                        justify-content: center;
+                        align-items: center;
+                    }
+
+                    .print-watermark img {
+                        width: 800px;
+                        height: auto;
+                    }
+
+                    .print-header {
+                        display: block !important;
+                        margin-bottom: 40px;
+                        border-bottom: 2px solid #38BDF2;
+                        padding-bottom: 20px;
+                    }
+
+                    .print-header h1 {
+                        font-size: 28px !important;
+                        font-weight: 800 !important;
+                        margin-bottom: 4px !important;
+                    }
+
+                    .print-header p {
+                        font-size: 14px !important;
+                        color: #64748B !important;
+                    }
+
+                    .p-4, .p-5, .p-6, .bg-surface {
+                        border: 1px solid #E2E8F0 !important;
+                        box-shadow: none !important;
+                        break-inside: avoid;
+                        background: white !important;
+                    }
+
+                    p, h1, h2, h3, span, td, th {
+                        color: black !important;
+                    }
+
+                    /* Hide main dashboard layout */
+                    .dashboard-main-content {
+                        display: none !important;
+                    }
+
+                    .print-report-content {
+                        display: block !important;
+                    }
+
+                    table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                        margin-bottom: 30px !important;
+                    }
+
+                    th, td {
+                        border: 1px solid #E2E8F0 !important;
+                        padding: 12px !important;
+                        text-align: left !important;
+                        font-size: 12px !important;
+                    }
+
+                    th {
+                        background-color: #F8FAFC !important;
+                        font-weight: 800 !important;
+                        text-transform: uppercase !important;
+                        font-size: 10px !important;
+                    }
+                }
+                
+                @media screen {
+                    .no-print-screen { display: none !important; }
+                }
+
+                .print-watermark, .print-header, .print-report-content {
+                    display: none;
+                }
+            `}</style>
+
+            {/* Print-Only Elements */}
+            <div className="print-watermark">
+                <img src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg" alt="Watermark" />
+            </div>
+
+            <div className="print-header">
+                <div className="flex justify-between items-end">
+                    <div>
+                        <img src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg" className="h-12 mb-4" alt="Logo" />
+                        <h1 className="text-3xl font-black">Organizer Performance Report</h1>
+                        <p className="text-sm">Generated on {new Date().toLocaleString()} • Range: {dateRange.start} to {dateRange.end}</p>
+                    </div>
+                    <div className="text-right">
+                        <p className="font-bold">StartupLab Business Ticketing</p>
+                        <p className="text-xs">Organizer Business Intelligence</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Print-Only Report Content (Numbers and Data) */}
+            <div className="print-report-content space-y-10">
+                <section>
+                    <h2 className="text-xl font-black mb-4 border-b-2 border-black pb-2 uppercase tracking-widest">I. Financial & Growth Metrics</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metric Name</th>
+                                <th>Current Value</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td className="font-bold">Total Gross Revenue</td>
+                                <td>₱{analytics?.totalRevenue?.toLocaleString() || '0'}</td>
+                                <td>Total earnings from ticket sales within range</td>
+                            </tr>
+                            <tr>
+                                <td className="font-bold">Tickets Issued</td>
+                                <td>{analytics?.totalRegistrations || '0'}</td>
+                                <td>Number of tickets sold across all events</td>
+                            </tr>
+                            <tr>
+                                <td className="font-bold">Active Events</td>
+                                <td>{analytics?.activeEventsCount || '0'}</td>
+                                <td>Currently live and selling events</td>
+                            </tr>
+                            <tr>
+                                <td className="font-bold">Attendance Rate</td>
+                                <td>{analytics?.attendanceRate?.toFixed(1) || '0'}%</td>
+                                <td>Percentage of issued tickets that were used</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section>
+                    <h2 className="text-xl font-black mb-4 border-b-2 border-black pb-2 uppercase tracking-widest">II. Recent Ticket Orders</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order Date</th>
+                                <th>Customer Name</th>
+                                <th>Event Name</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {recentOrders.slice(0, 20).map((order, idx) => (
+                                <tr key={idx}>
+                                    <td>{new Date(order.created_at).toLocaleDateString()}</td>
+                                    <td>{order.buyerName}</td>
+                                    <td>{order.eventName || 'N/A'}</td>
+                                    <td>₱{order.totalAmount?.toLocaleString()}</td>
+                                    <td className="uppercase font-bold">{order.status}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </section>
+
+                <div className="pt-20 text-center border-t border-dashed border-gray-300">
+                    <p className="text-[10px] uppercase tracking-widest text-gray-400">End of Report • Generated via StartupLab Organizer Dashboard</p>
+                </div>
+            </div>
+
+            <div className="dashboard-main-content">
             {/* ── Header ── */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                 <div>
                     <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] dark:text-white tracking-tighter uppercase">Dashboard Overview</h1>
                     <p className="mt-1 text-sm font-semibold text-[#2E2E2F] dark:text-white/60">
                         See your latest registrations, tickets, and revenue at a glance.
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => navigate('/my-events?openModal=true')}
-                        className="bg-[#38BDF2] text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg hover:scale-105 transition-transform active:scale-95"
-                    >
-                        <ICONS.Plus className="w-4 h-4" /> Create New Event
-                    </button>
+                <div className="flex flex-col items-end gap-4 no-print">
+                    <div className="flex items-center gap-2 bg-background border border-sidebar-border p-1.5 rounded-xl shadow-sm">
+                        <input
+                            type="date"
+                            value={dateRange.start}
+                            onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                            className="bg-transparent text-[11px] font-bold text-[#2E2E2F] dark:text-white outline-none px-2 py-1"
+                        />
+                        <span className="text-[#2E2E2F]/30 text-[10px] font-black uppercase">to</span>
+                        <input
+                            type="date"
+                            value={dateRange.end}
+                            onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                            className="bg-transparent text-[11px] font-bold text-[#2E2E2F] dark:text-white outline-none px-2 py-1"
+                        />
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={handlePrint}
+                                className="w-9 h-9 flex items-center justify-center bg-[#38BDF2] border-2 border-[#38BDF2] rounded-full text-white hover:bg-[#2E2E2F] dark:hover:bg-white dark:hover:text-[#2E2E2F] transition-all shadow-lg group active:scale-95"
+                                title="Print Dashboard"
+                            >
+                                <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                            </button>
+                            <button
+                                onClick={handleExport}
+                                className="w-9 h-9 flex items-center justify-center bg-[#38BDF2] border-2 border-[#38BDF2] rounded-full text-white hover:bg-[#2E2E2F] dark:hover:bg-white dark:hover:text-[#2E2E2F] transition-all shadow-lg group active:scale-95"
+                                title="Export Report"
+                            >
+                                <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            </button>
+                        </div>
+                        <button
+                            onClick={() => navigate('/my-events?openModal=true')}
+                            className="bg-[#38BDF2] text-white px-6 py-2.5 rounded-xl font-black text-[13px] uppercase tracking-wide flex items-center gap-2 shadow-lg hover:bg-[#2E2E2F] dark:hover:bg-white dark:hover:text-[#2E2E2F] transition-all active:scale-95 whitespace-nowrap"
+                        >
+                            <ICONS.Plus className="w-4 h-4" /> Create New Event
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -468,6 +732,8 @@ export const OrganizerDashboard: React.FC = () => {
                     </div>
                 )}
             </Modal>
+            </div>
         </div>
-    );
+    </>
+  );
 };

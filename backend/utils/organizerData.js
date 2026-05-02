@@ -34,7 +34,7 @@ export function isOrganizerTableMissingError(error) {
   return isMissingRelationError(error, 'organizers');
 }
 
-export function serializeOrganizerRecord(record, eventsHostedCount = 0, recentFollowers = [], likesCount = 0) {
+export function serializeOrganizerRecord(record, eventsHostedCount = 0, recentFollowers = [], likesCount = 0, ratingStats = { average: 0, count: 0 }) {
   if (!record) return null;
   return {
     ...record,
@@ -47,6 +47,8 @@ export function serializeOrganizerRecord(record, eventsHostedCount = 0, recentFo
     likesCount: Number.isFinite(Number(likesCount))
       ? Number(likesCount)
       : 0,
+    averageRating: Number(ratingStats?.average || 0),
+    ratingCount: Number(ratingStats?.count || 0),
     recentFollowers: Array.isArray(recentFollowers) ? recentFollowers : [],
   };
 }
@@ -153,6 +155,25 @@ export async function getEventsHostedCounts(organizerIds = []) {
 /**
  * Aggregates total likes from all events owned by an organizer.
  */
+export async function getOrganizerRatingStats(organizerId) {
+  try {
+    const { data, error } = await supabase
+      .from('organizer_ratings')
+      .select('rating')
+      .eq('organizer_id', organizerId);
+
+    if (error || !data || data.length === 0) return { average: 0, count: 0 };
+
+    const count = data.length;
+    const sum = data.reduce((acc, curr) => acc + (curr.rating || 0), 0);
+    const average = parseFloat((sum / count).toFixed(1));
+
+    return { average, count };
+  } catch (err) {
+    return { average: 0, count: 0 };
+  }
+}
+
 export async function getOrganizersTotalLikes(organizerIds = []) {
   const likeMap = new Map();
   const uniqueIds = [...new Set((organizerIds || []).filter(Boolean))];
@@ -241,8 +262,11 @@ export async function getOrganizerByOwnerUserId(ownerUserId) {
     data.plan = planData;
   }
 
-  const counts = await getEventsHostedCounts([data.organizerId]);
-  return serializeOrganizerRecord(data, counts.get(data.organizerId) || 0);
+  const [counts, ratingStats] = await Promise.all([
+    getEventsHostedCounts([data.organizerId]),
+    getOrganizerRatingStats(data.organizerId)
+  ]);
+  return serializeOrganizerRecord(data, counts.get(data.organizerId) || 0, [], 0, ratingStats);
 }
 
 /**
@@ -330,8 +354,11 @@ export async function getOrganizerWithStatsById(organizerId) {
     data.plan = planData;
   }
 
-  const counts = await getEventsHostedCounts([organizerId]);
-  return serializeOrganizerRecord(data, counts.get(organizerId) || 0);
+  const [counts, ratingStats] = await Promise.all([
+    getEventsHostedCounts([organizerId]),
+    getOrganizerRatingStats(organizerId)
+  ]);
+  return serializeOrganizerRecord(data, counts.get(organizerId) || 0, [], 0, ratingStats);
 }
 
 export async function getOrCreateOrganizerForUser(ownerUserId) {

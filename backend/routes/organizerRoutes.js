@@ -12,6 +12,7 @@ import {
   getMyFollowings,
   getAllOrganizers,
   getEmailQuotaStatus,
+  rateOrganizer,
 } from '../controller/organizerController.js';
 
 const router = express.Router();
@@ -49,5 +50,8 @@ router.post('/organizer/image', authMiddleware, upload.single('image'), uploadOr
 
 // POST /api/organizer/cover
 router.post('/organizer/cover', authMiddleware, upload.single('image'), uploadOrganizerCoverImage);
+
+// POST /api/organizer/:id/rate
+router.post('/organizer/:id/rate', authMiddleware, rateOrganizer);
 
 export default router;

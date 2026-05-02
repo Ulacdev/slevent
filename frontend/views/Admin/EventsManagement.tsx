@@ -50,6 +50,16 @@ export const EventsManagement: React.FC = () => {
   const initialLoadRef = useRef(true);
   const requestIdRef = useRef(0);
 
+  const [dateRange, setDateRange] = useState(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 30);
+    return {
+      start: start.toISOString().split('T')[0],
+      end: end.toISOString().split('T')[0]
+    };
+  });
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { role, canEditEvents } = useUser();
@@ -104,7 +114,7 @@ export const EventsManagement: React.FC = () => {
       setIsFetching(true);
     }
     try {
-      const data = await apiService.getAdminEvents(searchValue);
+      const data = await apiService.getAdminEvents(searchValue, dateRange.start, dateRange.end);
       if (requestId !== requestIdRef.current) return;
       setEvents(data);
 
@@ -137,7 +147,7 @@ export const EventsManagement: React.FC = () => {
 
   useEffect(() => {
     fetchEvents(debouncedSearch);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, dateRange]);
 
   useEffect(() => {
     if (searchParams.get('openModal') === 'true' && !isStaff) {
@@ -381,8 +391,8 @@ export const EventsManagement: React.FC = () => {
     try {
       const result = await apiService.toggleEventPromotion(event.eventId);
       showToast('success', result.promoted
-          ? `"${event.eventName}" is now promoted on the discovery feed.`
-          : `Promotion removed for "${event.eventName}".`);
+        ? `"${event.eventName}" is now promoted on the discovery feed.`
+        : `Promotion removed for "${event.eventName}".`);
       fetchEvents();
     } catch (err) {
       showToast('error', 'Failed to update promotion status.');
@@ -427,18 +437,78 @@ export const EventsManagement: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  return (
-    <div className="space-y-8" style={{ zoom: 0.85 }}>
-      {/* Local notification JSX removed */}
+  const handlePrint = () => {
+    window.print();
+  };
 
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-2">
-        <div>
-          <h1 className="text-3xl font-bold text-text dark:text-white tracking-tight">Moderation Hub</h1>
-          <p className="text-text dark:text-white/60 font-medium text-sm mt-1">Centralized control for event oversight and compliance removal.</p>
+  const handleExport = () => {
+    const headers = ['Event Name', 'Start Date', 'Location', 'Status', 'Reg Count', 'Revenue'];
+    const csvRows = [
+      headers.join(','),
+      ...events.map(event => {
+        const stats = { registrations: 0, revenue: 0 };
+        const eventRegs = attendees.filter(r => r.eventId === event.eventId && (r.status === 'ISSUED' || r.status === 'USED'));
+        stats.registrations = eventRegs.length;
+        stats.revenue = eventRegs.reduce((acc, curr) => acc + (curr.amountPaid || 0), 0);
+
+        return [
+          `"${event.eventName}"`,
+          new Date(event.startAt).toLocaleDateString(),
+          `"${event.locationText}"`,
+          event.status,
+          stats.registrations,
+          stats.revenue
+        ].join(',');
+      })
+    ];
+
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    const dateStr = new Date().toISOString().split('T')[0];
+    const rangeStr = `${dateRange.start}_to_${dateRange.end}`;
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `events_report_${rangeStr}_exp_${dateStr}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <React.Fragment>
+      {/* Print-Only Elements - Placed outside zoomed container for fixed positioning to work on all pages */}
+      <div className="print-watermark no-print-screen">
+        <img src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg" alt="Watermark" />
+      </div>
+
+      <div className="print-report-header-repeated no-print-screen">
+        <div className="flex items-center justify-between border-b-2 border-[#38BDF2] pb-3 mb-6">
+          <div>
+            <p className="text-lg font-black text-[#1E3A8A] leading-tight">StartupLab Business Ticketing</p>
+            <p className="text-[10px] font-bold text-[#38BDF2] uppercase tracking-[0.2em]">Platform Moderation Report</p>
+          </div>
+          <div className="text-right flex flex-col justify-end">
+            <p className="text-[10px] font-bold text-gray-800">Range: {dateRange.start} — {dateRange.end}</p>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Admin Report • {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</p>
+          </div>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-end gap-3 w-full lg:w-auto">
-          <div className="relative w-full sm:w-72">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text dark:text-white/40">
+      </div>
+
+      <div className="space-y-8" style={{ zoom: 0.85 }}>
+      {/* ── Header Section (Mirrored from Dashboard) ── */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-text dark:text-white uppercase tracking-tight">Moderation Hub</h1>
+          <p className="text-[10px] sm:text-xs font-bold text-text/40 dark:text-white/40 mt-1 uppercase tracking-widest">Centralized control for event oversight and compliance removal.</p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          {/* Search bar */}
+          <div className="relative w-full sm:w-64 no-print">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text/30">
               <ICONS.Search className="h-4 w-4" strokeWidth={3} />
             </div>
             <input
@@ -446,10 +516,54 @@ export const EventsManagement: React.FC = () => {
               placeholder="Search platform events..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-10 py-3 bg-background border border-sidebar-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors dark:text-white"
+              className="block w-full pl-10 pr-4 py-2.5 bg-background border border-sidebar-border rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-all dark:text-white placeholder:text-text/20"
             />
           </div>
-          {selectedIds.length > 0 && (
+
+          {/* Date Range Picker (Dashboard Style) */}
+          <div className="flex items-center gap-2 bg-surface border border-sidebar-border rounded-xl p-1.5 shadow-sm">
+            <div className="flex items-center gap-2 px-2">
+              <span className="text-[10px] font-black text-text/30 dark:text-white/30 uppercase tracking-widest pl-1">From</span>
+              <input
+                type="date"
+                value={dateRange.start}
+                onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                className="bg-transparent text-[11px] font-bold text-text dark:text-white outline-none px-2 py-1 cursor-pointer"
+              />
+            </div>
+            <div className="w-[1px] h-4 bg-sidebar-border" />
+            <div className="flex items-center gap-2 px-2">
+              <span className="text-[10px] font-black text-text/30 dark:text-white/30 uppercase tracking-widest">To</span>
+              <input
+                type="date"
+                value={dateRange.end}
+                onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                className="bg-transparent text-[11px] font-bold text-text dark:text-white outline-none px-2 py-1 cursor-pointer"
+              />
+            </div>
+          </div>
+
+          {/* Circular Print/Export Buttons (Dashboard Style) - Moved to far right */}
+          <div className="flex items-center gap-2 no-print">
+            <button
+              onClick={handlePrint}
+              className="w-9 h-9 flex items-center justify-center bg-[#38BDF2] border-2 border-[#38BDF2] rounded-full text-white hover:bg-text dark:hover:bg-white dark:hover:text-background transition-all shadow-lg group active:scale-95"
+              title="Print Moderation Report"
+            >
+              <ICONS.Printer className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </button>
+            <button
+              onClick={handleExport}
+              className="w-9 h-9 flex items-center justify-center bg-[#38BDF2] border-2 border-[#38BDF2] rounded-full text-white hover:bg-text dark:hover:bg-white dark:hover:text-background transition-all shadow-lg group active:scale-95"
+              title="Export Documentation"
+            >
+              <ICONS.FileText className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {selectedIds.length > 0 && (
             <div className="flex items-center gap-3 animate-in fade-in slide-in-from-right-4">
               <Button
                 onClick={() => { setIsBulkMode(true); setDeleteReason('DUPLICATE'); }}
@@ -487,8 +601,6 @@ export const EventsManagement: React.FC = () => {
               </Button>
             </div>
           )}
-        </div>
-      </div>
 
       <Card className="overflow-hidden border-sidebar-border rounded-xl bg-surface">
         <div className="overflow-x-auto">
@@ -539,15 +651,14 @@ export const EventsManagement: React.FC = () => {
                             const expiresAtStr = (event as any).promotion_expires_at || (event as any).promotionExpiresAt || (event as any).expiresAt;
                             const expiresAt = expiresAtStr ? new Date(expiresAtStr) : null;
                             const isExpired = expiresAt ? now > expiresAt : false;
-                            
+
                             return (
                               <div className="flex flex-col gap-1">
-                                <span className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] uppercase ${
-                                  isExpired ? 'text-red-500 bg-red-50 border-red-200' :
-                                  event.promotedByOrganizer 
-                                    ? 'text-emerald-600 bg-emerald-50 border-emerald-200 animate-pulse' 
-                                    : 'text-[#38BDF2] bg-[#38BDF2]/10 border-[#38BDF2]/20 animate-pulse'
-                                }`}>
+                                <span className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] uppercase ${isExpired ? 'text-red-500 bg-red-50 border-red-200' :
+                                    event.promotedByOrganizer
+                                      ? 'text-emerald-600 bg-emerald-50 border-emerald-200 animate-pulse'
+                                      : 'text-[#38BDF2] bg-[#38BDF2]/10 border-[#38BDF2]/20 animate-pulse'
+                                  }`}>
                                   <ICONS.Zap className="w-2.5 h-2.5" />
                                   {isExpired ? 'PROMOTED DONE' : (event.promotedByOrganizer ? 'PROMOTED BY ORGANIZER' : 'PROMOTED')}
                                 </span>
@@ -1036,7 +1147,177 @@ export const EventsManagement: React.FC = () => {
           </div>
         </div>
       </Modal>
-    </div>
+      </div>
+      {/* PRINT-ONLY REPORT CONTAINER */}
+      <style>{`
+        @media screen {
+          .no-print-screen { display: none !important; }
+        }
+        @media print {
+          body {
+            background: white !important;
+            color: black !important;
+            -webkit-print-color-adjust: exact !important;
+          }
+          
+          /* Hide screen-only UI */
+          .space-y-8, .no-print, .sidebar, .nav-header, button {
+            display: none !important;
+          }
+
+          .print-report-content,
+          .print-report-header-repeated { 
+            display: block !important;
+          }
+          .print-watermark {
+            display: flex !important;
+          }
+          
+          .print-report-content {
+            display: block !important;
+            position: absolute;
+            left: 0;
+            top: 100px; /* Offset for repeated header */
+            width: 100%;
+            background: white !important;
+            padding: 0 !important;
+          }
+
+          .print-watermark {
+            display: flex !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            opacity: 0.1 !important; /* Slightly lower to ensure text readability from front */
+            z-index: 9999 !important; /* Bring to very front */
+            pointer-events: none !important;
+            justify-content: center;
+            align-items: center;
+            -webkit-print-color-adjust: exact !important;
+          }
+
+          .print-watermark img {
+            width: 700px;
+            height: auto;
+            max-width: 80% !important;
+          }
+
+          .print-report-header-repeated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: white !important;
+            z-index: 1000;
+          }
+
+          .no-print { display: none !important; }
+          @page { 
+            margin: 2.5cm 1.5cm 1.5cm 1.5cm; 
+          }
+          
+          .print-table {
+            display: table !important;
+            width: 100% !important;
+            table-layout: auto !important;
+            border-collapse: collapse !important;
+            margin-top: 20px !important;
+            margin-bottom: 40px !important;
+            border: 1px solid #E5E7EB !important;
+            background-color: transparent !important;
+          }
+          thead { display: table-header-group !important; }
+          tbody { display: table-row-group !important; }
+          tr { display: table-row !important; }
+          .print-table th, .print-table td {
+            display: table-cell !important;
+            border: 1px solid #E5E7EB !important;
+            padding: 14px 18px !important;
+            text-align: left !important;
+            font-size: 13px !important;
+            color: #111827 !important;
+            vertical-align: middle !important;
+          }
+          .print-table th {
+            background-color: #F9FAFB !important;
+            color: #6B7280 !important;
+            font-weight: 700 !important;
+            text-transform: none !important;
+            font-size: 14px !important;
+          }
+        }
+      `}</style>
+
+      <div className="no-print-screen print-report-content">
+        <div style={{ marginBottom: '20px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '900', color: '#1e293b', textTransform: 'uppercase', letterSpacing: '-0.025em' }}>Administrative Activity Logs</h2>
+          <p style={{ fontSize: '12px', color: '#64748b' }}>Detailed event moderation and safety oversight data.</p>
+        </div>
+
+        {/* Executive Summary Section */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px', marginBottom: '30px' }}>
+          <div style={{ padding: '15px', background: '#f8fafc', border: '1px solid #eee', borderRadius: '8px' }}>
+            <p style={{ fontSize: '10px', fontWeight: '900', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Total Events</p>
+            <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e3a8a' }}>{events.length}</p>
+          </div>
+          <div style={{ padding: '15px', background: '#f8fafc', border: '1px solid #eee', borderRadius: '8px' }}>
+            <p style={{ fontSize: '10px', fontWeight: '900', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Total Registrations</p>
+            <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e3a8a' }}>
+              {events.reduce((acc, ev) => acc + ((ev as any).registrationCount || 0), 0)}
+            </p>
+          </div>
+          <div style={{ padding: '15px', background: '#f8fafc', border: '1px solid #eee', borderRadius: '8px' }}>
+            <p style={{ fontSize: '10px', fontWeight: '900', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Reported Content</p>
+            <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#ef4444' }}>
+              {events.reduce((acc, ev) => acc + ((ev as any).reportCount || 0), 0)}
+            </p>
+          </div>
+          <div style={{ padding: '15px', background: '#f8fafc', border: '1px solid #eee', borderRadius: '8px' }}>
+            <p style={{ fontSize: '10px', fontWeight: '900', color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Reporting Period</p>
+            <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#1e3a8a' }}>{dateRange.start} — {dateRange.end}</p>
+          </div>
+        </div>
+
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>Platform Events Overview</h2>
+        <table className="print-table">
+          <thead>
+            <tr>
+              <th>Event Name</th>
+              <th>Date</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Reports</th>
+              <th>Registrations</th>
+            </tr>
+          </thead>
+          <tbody>
+            {events.map(event => (
+              <tr key={event.eventId}>
+                <td style={{ fontWeight: 'bold' }}>{event.eventName}</td>
+                <td>{new Date(event.startAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                <td>{event.locationText}</td>
+                <td>{event.status}</td>
+                <td style={{ color: (event as any).reportCount > 0 ? 'red' : 'black' }}>
+                  {(event as any).reportCount || 0}
+                </td>
+                <td>
+                  {(event as any).registrationCount || 0}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <div style={{ marginTop: '40px', fontSize: '12px', color: '#666', fontStyle: 'italic', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+          This document is a confidential moderation report for administrative use only. Any unauthorized distribution is strictly prohibited.
+        </div>
+      </div>
+    </React.Fragment>
   );
 };
 

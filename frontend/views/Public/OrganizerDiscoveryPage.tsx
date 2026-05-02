@@ -6,7 +6,7 @@ import { ICONS } from '../../constants';
 import { useEngagement } from '../../context/EngagementContext';
 import { useUser } from '../../context/UserContext';
 import { PageLoader } from '../../components/Shared';
-import { OrganizerCardSkeleton } from '../../components/Shared/Skeleton';
+import { OrganizerCardSkeleton, DiscoverySkeleton } from '../../components/Shared/Skeleton';
 import { OrganizerCard } from '../../components/OrganizerCard';
 
 export const OrganizerDiscoveryPage: React.FC = () => {
@@ -121,19 +121,7 @@ export const OrganizerDiscoveryPage: React.FC = () => {
         return ranks;
     }, [filteredOrganizers, filterMode]);
 
-    if (loading) {
-        return (
-            <div className="bg-[#F2F2F2] min-h-screen flex items-center justify-center p-4">
-                <div className="max-w-[88rem] w-full mx-auto px-4 sm:px-10">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 place-items-center">
-                        {Array.from({ length: 9 }).map((_, i) => (
-                            <OrganizerCardSkeleton key={i} />
-                        ))}
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    if (loading) return <DiscoverySkeleton />;
 
     return (
         <div className="bg-[#F2F2F2] min-h-screen">
@@ -156,15 +144,50 @@ export const OrganizerDiscoveryPage: React.FC = () => {
             {/* Main Layout - Content with Sidebar BELOW Hero */}
             <div className="max-w-full px-6 sm:px-10 py-12">
 
-                {/* Controls Row */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-12">
+                {/* Mobile Sticky Filter UI (Unified Header) */}
+                <div className="lg:hidden sticky top-0 z-40 bg-[#F2F2F2] border-b border-[#2E2E2F]/10 -mx-6 px-6 py-4 space-y-4 mb-4">
+                    <div className="flex items-center gap-2">
+                        <div className="flex-1 relative group">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-black/40">
+                                <ICONS.Search className="h-4 w-4" strokeWidth={3} />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Search communities..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="block w-full pl-10 pr-4 py-3 bg-[#F2F2F2] border border-[#2E2E2F]/10 rounded-2xl text-[14px] font-bold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/20 focus:border-[#38BDF2] placeholder:text-black/30"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Horizontal Mode Scroll */}
+                    <div className="flex flex-row overflow-x-auto gap-2 pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                        {[
+                            { id: 'discover', label: 'Discover Organizers', icon: ICONS.Compass },
+                            { id: 'following', label: 'Organizers You Follow', icon: ICONS.Heart },
+                        ].map((opt) => (
+                            <button
+                                key={opt.id}
+                                onClick={() => setFilterMode(opt.id as any)}
+                                className={`flex items-center gap-2 shrink-0 whitespace-nowrap rounded-full px-5 py-2.5 text-[13px] font-black transition-all ${filterMode === opt.id ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/20' : 'bg-[#E5E7EB]/50 border border-[#2E2E2F]/5 text-[#2E2E2F]'}`}
+                            >
+                                <opt.icon className="w-3.5 h-3.5" />
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Desktop Controls Row */}
+                <div className="hidden lg:flex flex-col sm:flex-row items-center justify-between gap-6 mb-12">
                     <div className="flex items-center gap-4 w-full sm:w-auto">
                         <button
                             onClick={() => setIsSidebarVisible(!isSidebarVisible)}
                             className="flex items-center gap-2 bg-[#F2F2F2] px-5 py-3 rounded-xl border border-[#2E2E2F]/10 shadow-sm text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] hover:bg-[#38BDF2]/10 hover:border-[#38BDF2]/30 transition-all"
                         >
-                            <ICONS.Filter className="w-4 h-4" />
-                            {isSidebarVisible ? 'Hide Filters' : 'Show Filters'}
+                            <ICONS.SlidersHorizontal className="w-4 h-4" />
+                            {isSidebarVisible ? 'Hide Sidebar' : 'Show Sidebar'}
                         </button>
 
                         <div className="flex items-center gap-3 bg-[#F2F2F2] px-5 py-3 rounded-xl border border-[#2E2E2F]/10 shadow-sm text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]">
@@ -198,9 +221,9 @@ export const OrganizerDiscoveryPage: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-12">
-                    {/* Sidebar Filter - Matching All Events style */}
+                    {/* Sidebar Filter - Desktop Only */}
                     {isSidebarVisible && (
-                        <aside className="w-full lg:w-72 shrink-0 space-y-10 lg:sticky lg:top-28 lg:self-start lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-4">
+                        <aside className="hidden lg:block w-72 shrink-0 space-y-10 lg:sticky lg:top-28 lg:self-start lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto lg:pr-4">
                             <div className="flex items-center justify-between pb-6 border-b border-[#2E2E2F]/5">
                                 <h3 className="text-xl font-black text-[#2E2E2F] tracking-tight">Refine Hub</h3>
                                 {(searchTerm || filterMode !== 'discover') && (

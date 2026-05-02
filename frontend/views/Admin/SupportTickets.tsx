@@ -16,9 +16,15 @@ export const SupportTickets: React.FC = () => {
   const [replyText, setReplyText] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
-  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [dateRange, setDateRange] = useState({
+    start: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0],
+    end: new Date().toISOString().split('T')[0]
+  });
 
   const toggleRow = (id: string) => {
     setSelectedRows(prev => {
@@ -41,106 +47,7 @@ export const SupportTickets: React.FC = () => {
   };
 
   const handlePrintTickets = () => {
-    const selected = tickets.filter(t => selectedRows.has(t.notification_id));
-    const printData = selected.length > 0 ? selected : tickets;
-    const watermarkLogo = 'https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg';
-
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Support Tickets Report</title>
-        <style>
-          @page { size: portrait; margin: 20mm; }
-          body { font-family: 'Inter', sans-serif; color: #2E2E2F; padding: 0; margin: 0; position: relative; min-height: 100vh; }
-          .watermark-container {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center;
-            z-index: -1000;
-            pointer-events: none;
-            overflow: hidden;
-          }
-          .watermark {
-            width: 120%;
-            max-width: none;
-            opacity: 0.04; 
-            transform: rotate(-25deg);
-            filter: grayscale(100%);
-          }
-          .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #38BDF2; padding-bottom: 15px; margin-bottom: 40px; }
-          .logo { height: 70px; object-fit: contain; }
-          .report-info { text-align: right; font-size: 11px; font-weight: bold; text-transform: uppercase; color: #2E2E2F; line-height: 1.5; }
-          h1 { margin: 0; font-size: 32px; letter-spacing: -0.06em; font-weight: 900; text-transform: uppercase; }
-          table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; position: relative; z-index: 10; background: rgba(255,255,255,0.7); }
-          th { background: #2E2E2F; color: white; border: 1px solid #2E2E2F; padding: 14px 10px; text-align: left; text-transform: uppercase; letter-spacing: 0.15em; font-size: 11px; }
-          td { border: 1px solid #ddd; padding: 14px 10px; vertical-align: top; background: transparent; }
-          .status { font-weight: 900; text-transform: uppercase; font-size: 10px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; }
-          .resolved { color: #10B981; border-color: #10B981; }
-          .pending { color: #F59E0B; border-color: #F59E0B; }
-        </style>
-      </head>
-      <body>
-        <div class="watermark-container">
-          <img src="${watermarkLogo}" class="watermark" />
-        </div>
-        <div class="header">
-          <div>
-            <h1>Administrative Support Inbox</h1>
-            <p style="margin: 5px 0 0; font-size: 14px; font-weight: 600; color: #38BDF2;">Ticketing & Safety Control Logs</p>
-          </div>
-          <div class="report-info">
-            <img src="${watermarkLogo}" class="logo" /><br/>
-            Ref: ADM-LOG-${Date.now().toString().slice(-6)}<br/>
-            Date: ${new Date().toLocaleDateString()}<br/>
-            Inbound: ${printData.length} Records
-          </div>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Type / Source</th>
-              <th>Subject / Incident</th>
-              <th style="width: 100px;">Status</th>
-              <th style="width: 110px;">Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${printData.map(t => {
-      const typeLabel = t.type === 'EVENT_REPORT' ? 'INCIDENT' : 'SUPPORT';
-      const sourceLabel = t.type === 'EVENT_REPORT' ? (t.metadata?.reporterEmail || 'Reporter') : (t.organizer?.organizerName || t.metadata?.orgName || t.actor?.name || 'Someone');
-      return `
-              <tr>
-                <td style="font-size: 10px; font-weight: 900; color: #666;">
-                  ${typeLabel}<br/>
-                  <span style="color: #000; text-transform: none; font-size: 11px;">${sourceLabel}</span>
-                </td>
-                <td>
-                  <div style="font-weight: 800; font-size: 13px; margin-bottom: 4px; color: #000;">${t.title}</div>
-                  <div style="font-size: 11px; color: #444; line-height: 1.4;">
-                    ${t.message ? t.message.substring(0, 200) + (t.message.length > 200 ? '...' : '') : 'N/A'}
-                  </div>
-                </td>
-                <td style="text-align: center;">
-                  <span class="status ${t.metadata?.status === 'resolved' || t.is_read ? 'resolved' : 'pending'}">
-                    ${t.metadata?.status === 'resolved' || t.is_read ? 'Resolved' : 'Pending'}
-                  </span>
-                </td>
-                <td style="text-align: right; font-weight: 600;">${new Date(t.created_at).toLocaleDateString()}</td>
-              </tr>
-            `}).join('')}
-          </tbody>
-        </table>
-      </body>
-      </html>
-    `;
-
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(printContent);
-      printWindow.document.close();
-      printWindow.print();
-    }
+    window.print();
   };
 
   const handleExportTickets = () => {
@@ -157,14 +64,19 @@ export const SupportTickets: React.FC = () => {
   };
 
   useEffect(() => {
+    const handler = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 350);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  useEffect(() => {
     loadTickets();
-  }, []);
+  }, [debouncedSearch, dateRange]);
 
   const loadTickets = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiService.getAdminSupportTickets();
+      const data = await apiService.getAdminSupportTickets(dateRange.start, dateRange.end);
       setTickets(data || []);
     } catch (err: any) {
       setError(err.message || 'Failed to load inquiries');
@@ -334,55 +246,123 @@ export const SupportTickets: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl pb-20 relative min-h-[600px]">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 px-2">
-        <div className="hidden">
-          <h1 className="text-3xl font-bold text-text dark:text-white tracking-tight">Support Inbox</h1>
-          <p className="text-text dark:text-white/60 font-medium text-sm mt-1">Manage administrative inquiries and investigation reports.</p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          {selectedRows.size > 0 && (
-            <div className="flex items-center gap-3 animate-in fade-in slide-in-from-right-4">
-              <button 
-                onClick={handleBulkResolve}
-                className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-[#38BDF2] !text-[#38BDF2] px-6 py-2.5 text-[13px] hover:!bg-[#38BDF2] hover:!text-white flex items-center gap-2 group"
-              >
-                <ICONS.CheckCircle className="w-5 h-5 text-[#38BDF2] group-hover:text-white transition-colors" />
-                BULK DISMISS ({selectedRows.size})
-              </button>
-              <button 
-                onClick={handleBulkDelete}
-                className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-red-500 !text-red-500 px-6 py-2.5 text-[13px] hover:!bg-red-500 hover:!text-white flex items-center gap-2 group"
-              >
-                <ICONS.Trash className="w-5 h-5 text-red-500 group-hover:text-white transition-colors" />
-                BULK DELETE ({selectedRows.size})
-              </button>
-              <div className="w-[1px] h-6 bg-sidebar-border mx-1" />
-            </div>
-          )}
-          
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handlePrintTickets}
-              className="w-10 h-10 flex items-center justify-center bg-[#38BDF2] border-2 border-[#38BDF2] rounded-full text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group"
-              title="Print List"
-            >
-              <ICONS.Printer className="w-5 h-5" />
-            </button>
-            <button
-              onClick={handleExportTickets}
-              className="w-10 h-10 flex items-center justify-center bg-[#38BDF2] border-2 border-[#38BDF2] rounded-full text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group"
-              title="Export CSV"
-            >
-              <ICONS.Download className="w-5 h-5" />
-            </button>
-            <button onClick={loadTickets} className="w-10 h-10 flex items-center justify-center bg-transparent border-2 border-sidebar-border rounded-full hover:bg-background transition-all group dark:text-white" title="Refresh">
-              <ICONS.RefreshCw className={`w-4 h-4 group-hover:rotate-180 transition-transform duration-500`} />
-            </button>
+    <React.Fragment>
+      {/* Print-Only Elements */}
+      <div className="print-watermark no-print-screen">
+        <img src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg" alt="Watermark" />
+      </div>
+
+      <div className="print-report-header-repeated no-print-screen">
+        <div className="flex items-center justify-between border-b-2 border-[#38BDF2] pb-3 mb-6">
+          <div>
+            <p className="text-lg font-black text-[#1E3A8A] leading-tight">StartupLab Business Ticketing</p>
+            <p className="text-[10px] font-bold text-[#38BDF2] uppercase tracking-[0.2em]">Support & Incident Report</p>
+          </div>
+          <div className="text-right flex flex-col justify-end">
+            <p className="text-[10px] font-bold text-gray-800">Range: {dateRange.start} — {dateRange.end}</p>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Support Audit • {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</p>
           </div>
         </div>
       </div>
+
+      <div className="support-main-content space-y-6 max-w-7xl pb-20 relative min-h-[600px]">
+        {/* Modern Header Controls */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8 px-2">
+          {/* Left: Search */}
+          <div className="relative w-full md:w-96 group">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+              <ICONS.Search className="w-4 h-4 text-text/40 dark:text-white/40 group-focus-within:text-[#38BDF2] transition-colors" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search by subject or source..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-11 pr-4 py-3 bg-surface border-2 border-sidebar-border rounded-2xl text-sm font-bold focus:border-[#38BDF2]/40 transition-all outline-none text-text dark:text-white shadow-sm"
+            />
+          </div>
+
+          {/* Right: Actions & Date Range */}
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            {/* Center: Date Range */}
+            <div className="flex items-center gap-2 bg-surface p-1.5 rounded-xl border border-sidebar-border shadow-sm">
+              <div className="flex items-center gap-2 px-2">
+                <span className="text-[10px] font-black text-text/30 dark:text-white/30 uppercase tracking-widest">From</span>
+                <input 
+                  type="date" 
+                  value={dateRange.start}
+                  onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                  className="bg-transparent border-none text-[11px] font-bold text-text dark:text-white focus:ring-0 p-0 cursor-pointer"
+                />
+              </div>
+              <div className="w-[1px] h-4 bg-sidebar-border" />
+              <div className="flex items-center gap-2 px-2">
+                <span className="text-[10px] font-black text-text/30 dark:text-white/30 uppercase tracking-widest">To</span>
+                <input 
+                  type="date" 
+                  value={dateRange.end}
+                  onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                  className="bg-transparent border-none text-[11px] font-bold text-text dark:text-white focus:ring-0 p-0 cursor-pointer"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handlePrintTickets}
+                  className="w-9 h-9 flex items-center justify-center bg-[#38BDF2] border-2 border-[#38BDF2] rounded-full text-white hover:bg-text dark:hover:bg-white dark:hover:text-background transition-all shadow-lg group active:scale-95"
+                  title="Print Audit Report"
+                >
+                  <ICONS.Printer className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                </button>
+                <button
+                  onClick={handleExportTickets}
+                  className="w-9 h-9 flex items-center justify-center bg-[#38BDF2] border-2 border-[#38BDF2] rounded-full text-white hover:bg-text dark:hover:bg-white dark:hover:text-background transition-all shadow-lg group active:scale-95"
+                  title="Export CSV Logs"
+                >
+                  <ICONS.Download className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                </button>
+              </div>
+              <div className="w-[1px] h-6 bg-sidebar-border mx-1" />
+              <button 
+                onClick={loadTickets} 
+                className="w-9 h-9 flex items-center justify-center bg-transparent border-2 border-sidebar-border rounded-full hover:bg-surface transition-all group dark:text-white" 
+                title="Refresh Queue"
+              >
+                <ICONS.RefreshCw className={`w-4 h-4 group-hover:rotate-180 transition-transform duration-500 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Bulk Actions Bar */}
+        {selectedRows.size > 0 && (
+          <div className="flex items-center gap-3 mb-6 animate-in fade-in slide-in-from-top-2 bg-[#38BDF2]/5 p-4 rounded-2xl border-2 border-[#38BDF2]/20">
+            <div className="flex items-center gap-2 mr-4">
+              <div className="w-2 h-2 bg-[#38BDF2] rounded-full animate-pulse" />
+              <span className="text-[11px] font-black text-[#38BDF2] uppercase tracking-widest">{selectedRows.size} selected for moderation</span>
+            </div>
+            <button 
+              onClick={handleBulkResolve}
+              className="px-4 py-2 bg-[#38BDF2] text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#2E2E2F] transition-all shadow-md"
+            >
+              Resolve All
+            </button>
+            <button 
+              onClick={handleBulkDelete}
+              className="px-4 py-2 bg-transparent border-2 border-red-500 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
+            >
+              Delete Records
+            </button>
+            <button 
+              onClick={() => setSelectedRows(new Set())}
+              className="ml-auto text-[10px] font-black text-text/40 dark:text-white/40 uppercase tracking-widest hover:text-text dark:hover:text-white"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
 
       {error ? (
         <Card className="p-6 bg-red-50 text-red-700 border-red-200 font-bold border rounded-xl">
@@ -491,6 +471,165 @@ export const SupportTickets: React.FC = () => {
           </table>
         </div>
       )}
+    </div>
+
+      {/* PRINT-ONLY REPORT CONTENT */}
+      <style>{`
+        /* Default hidden */
+        .print-watermark, .print-header, .print-report-content, .print-report-header-repeated {
+          display: none;
+        }
+
+        @media screen {
+          .no-print-screen { display: none !important; }
+        }
+        @media print {
+          body {
+            background: white !important;
+            color: black !important;
+            -webkit-print-color-adjust: exact !important;
+          }
+          
+          /* Hide screen-only UI */
+          .support-main-content, .no-print, .sidebar, .nav-header, button {
+            display: none !important;
+          }
+
+          .print-report-content { 
+            display: block !important;
+          }
+
+          .print-report-header-repeated {
+            display: block !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            padding: 10px 40px !important;
+            z-index: 9998 !important;
+            background: white !important;
+          }
+
+          .print-watermark {
+            display: flex !important;
+            position: fixed !important;
+            top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+            width: 100% !important; height: 100% !important;
+            opacity: 0.1 !important;
+            z-index: 9999 !important;
+            pointer-events: none !important;
+            justify-content: center;
+            align-items: center;
+          }
+
+          .print-watermark img {
+            width: 700px;
+            height: auto;
+            max-width: 80% !important;
+          }
+          
+          .print-report-content {
+            display: block !important;
+            margin-top: 80px !important;
+            background: white !important;
+          }
+
+          .print-table {
+            display: table !important;
+            width: 100% !important;
+            border-collapse: collapse !important;
+            margin-top: 20px !important;
+            border: 2px solid #2E2E2F !important;
+          }
+          th, td {
+            display: table-cell !important;
+            border: 1px solid #E5E7EB !important;
+            padding: 12px 15px !important;
+            text-align: left !important;
+            font-size: 11px !important;
+          }
+          th {
+            background-color: #F2F2F2 !important;
+            font-weight: 900 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            border-bottom: 2px solid #2E2E2F !important;
+          }
+          tr:nth-child(even) {
+            background-color: #FAFAFA !important;
+          }
+          .report-page {
+            background: white !important;
+            padding: 40px !important;
+            min-height: 1000px !important;
+          }
+        }
+      `}</style>
+
+      <div className="no-print-screen print-report-content report-page">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px', borderBottom: '3px solid #2E2E2F', paddingBottom: '15px' }}>
+          <div>
+            <h2 style={{ fontSize: '24px', fontWeight: '900', color: '#000', textTransform: 'uppercase', letterSpacing: '-0.02em', margin: 0 }}>Administrative Support Logs</h2>
+            <p style={{ fontSize: '11px', color: '#666', fontWeight: 'bold', textTransform: 'uppercase', marginTop: '4px' }}>System Audit • Formal Documentation</p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ padding: '4px 10px', border: '2px solid #000', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase' }}>Confidential Report</div>
+          </div>
+        </div>
+
+        {/* Executive Summary Table */}
+        <div style={{ marginBottom: '40px' }}>
+          <h3 style={{ fontSize: '12px', fontWeight: '900', textTransform: 'uppercase', marginBottom: '10px', borderLeft: '4px solid #38BDF2', paddingLeft: '10px' }}>I. Executive Summary</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #E5E7EB' }}>
+            <thead>
+              <tr style={{ background: '#F8F8F8' }}>
+                <th style={{ padding: '10px', fontSize: '10px', border: '1px solid #E5E7EB' }}>Total Records</th>
+                <th style={{ padding: '10px', fontSize: '10px', border: '1px solid #E5E7EB' }}>Incident Reports</th>
+                <th style={{ padding: '10px', fontSize: '10px', border: '1px solid #E5E7EB' }}>Resolved Items</th>
+                <th style={{ padding: '10px', fontSize: '10px', border: '1px solid #E5E7EB' }}>Audit Range</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ padding: '15px', fontSize: '16px', fontWeight: 'bold', textAlign: 'center', border: '1px solid #E5E7EB' }}>{tickets.length}</td>
+                <td style={{ padding: '15px', fontSize: '16px', fontWeight: 'bold', textAlign: 'center', border: '1px solid #E5E7EB', color: '#EF4444' }}>{tickets.filter(t => t.type === 'EVENT_REPORT').length}</td>
+                <td style={{ padding: '15px', fontSize: '16px', fontWeight: 'bold', textAlign: 'center', border: '1px solid #E5E7EB', color: '#10B981' }}>{tickets.filter(t => t.metadata?.status === 'resolved' || t.is_read).length}</td>
+                <td style={{ padding: '15px', fontSize: '11px', fontWeight: 'bold', textAlign: 'center', border: '1px solid #E5E7EB' }}>{dateRange.start} — {dateRange.end}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style={{ marginBottom: '10px' }}>
+          <h3 style={{ fontSize: '12px', fontWeight: '900', textTransform: 'uppercase', marginBottom: '10px', borderLeft: '4px solid #38BDF2', paddingLeft: '10px' }}>II. Detailed Audit Logs</h3>
+        </div>
+
+        <table className="print-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Source</th>
+              <th>Subject / Incident</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tickets.map(t => (
+              <tr key={t.notification_id}>
+                <td style={{ fontWeight: 'bold', fontSize: '11px' }}>{t.type === 'EVENT_REPORT' ? 'INCIDENT' : 'SUPPORT'}</td>
+                <td>{t.organizer?.organizerName || t.metadata?.orgName || t.actor?.name || t.metadata?.reporterEmail}</td>
+                <td>
+                  <div style={{ fontWeight: 'bold' }}>{t.title}</div>
+                  <div style={{ fontSize: '11px', color: '#666' }}>{t.message?.substring(0, 150)}...</div>
+                </td>
+                <td>{t.metadata?.status === 'resolved' || t.is_read ? 'Resolved' : 'Pending'}</td>
+                <td>{new Date(t.created_at).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {selectedTicket && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[9999] flex items-center justify-center p-4 transition-opacity animate-in fade-in duration-300" onClick={() => setSelectedTicket(null)}>
@@ -671,6 +810,6 @@ export const SupportTickets: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </React.Fragment>
   );
 };

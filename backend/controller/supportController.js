@@ -225,11 +225,17 @@ export const getAdminSupportTickets = async (req, res) => {
 
     const userRole = userData?.role || req.user?.role;
 
+    const { startDate, endDate } = req.query;
+
     let query = supabase
       .from('notifications')
       .select('*, actor:users!actor_user_id(name, email), organizer:organizers!organizer_id("organizerId", "profileImageUrl", "organizerName")')
-      .in('type', ['SUPPORT_TICKET', 'EVENT_REPORT'])
-      .order('created_at', { ascending: false });
+      .in('type', ['SUPPORT_TICKET', 'EVENT_REPORT']);
+
+    if (startDate) query = query.gte('created_at', startDate);
+    if (endDate) query = query.lte('created_at', endDate);
+
+    query = query.order('created_at', { ascending: false });
 
     // If superadmin or staff, show all tickets regardless of intended recipient
     // (Tickets are technically 'assigned' to the first admin by default)

@@ -8,6 +8,7 @@ import {
   serializeOrganizerRecord,
   getEventsHostedCounts,
   getOrganizersTotalLikes,
+  getOrganizerRatingStats,
   isOrganizerTableMissingError,
   isMissingColumnError,
   isMissingRelationError,
@@ -891,20 +892,12 @@ async function getFollowerProfiles(organizerIds) {
 export const getEmailQuotaStatus = async (req, res) => {
   try {
     const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    // Import emailQuotaManager
     const emailQuotaManager = (await import('../utils/emailQuotaManager.js')).default;
-
-    // Get organizer associated with this user
     const organizer = await getOrganizerByOwnerUserId(userId);
-    if (!organizer) {
-      return res.status(404).json({ error: 'Organizer not found' });
-    }
+    if (!organizer) return res.status(404).json({ error: 'Organizer not found' });
 
-    // Get quota status
     const quotaStatus = await emailQuotaManager.getQuotaStatus(organizer.organizerId);
 
     return res.json({
@@ -917,5 +910,66 @@ export const getEmailQuotaStatus = async (req, res) => {
   } catch (err) {
     console.error('Error fetching email quota status:', err);
     return res.status(500).json({ error: err?.message || 'Failed to fetch email quota status' });
+  }
+};
+
+export const rateOrganizer = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const organizerId = req.params?.id;
+    const { rating, comment } = req.body;
+
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    if (!organizerId) return res.status(400).json({ error: 'organizerId is required' });
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+    }
+
+    const { error } = await supabase
+      .from('organizer_ratings')
+      .upsert({
+        user_id: userId,
+        organizer_id: organizerId,
+        rating,
+        comment: comment || null,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'organizer_id, user_id'
+      });
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    const stats = await getOrganizerRatingStats(organizerId);
+
+    await logAudit({
+      actionType: 'ORGANIZER_RATED',
+      details: { organizerId, rating, comment },
+      req
+    });
+
+    // Notify Organizer Team
+    try {
+      const actorProfile = await getUserProfileByAuthId(userId);
+      const actorName = actorProfile?.name || 'A community member';
+      
+      await notifyTeamByPreference({
+        organizerId,
+        type: 'ORGANIZER_RATED',
+        title: `New ${rating}-Star Rating!`,
+        message: `${actorName} just rated your organization ${rating} stars.${comment ? `\n\nFeedback: "${comment}"` : ''}`,
+        emailSubject: `New ${rating}-Star Rating for your organization`,
+        actorUserId: userId
+      });
+    } catch (notifyErr) {
+      console.warn('[Rating] Failed to send notification:', notifyErr.message);
+    }
+
+    return res.json({
+      success: true,
+      average: stats.averageRating,
+      count: stats.ratingCount
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err?.message || 'Unexpected error' });
   }
 };
