@@ -48,6 +48,7 @@ export const OrganizerReports: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'completed' | 'pending' | 'failed'>('all');
   const [dateRange, setDateRange] = useState<'week' | 'month' | 'all'>('all');
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+  const [reviewAnalytics, setReviewAnalytics] = useState<any>(null);
 
   const toggleRow = (id: string) => {
     setSelectedRows(prev => {
@@ -75,20 +76,60 @@ export const OrganizerReports: React.FC = () => {
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
-        <html><head><title>Transactions Report</title>
+        <html><head><title>Performance Report</title>
         <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          table { width: 100%; border-collapse: collapse; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-          th { background: #f5f5f5; }
+          body { font-family: Arial, sans-serif; padding: 40px; color: #2E2E2F; }
+          .header { border-bottom: 2px solid #38BDF2; padding-bottom: 20px; margin-bottom: 40px; }
+          .section { margin-bottom: 40px; }
+          h1 { margin: 0; font-size: 28px; }
+          h2 { text-transform: uppercase; font-size: 14px; letter-spacing: 2px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid #eee; padding: 12px; text-align: left; font-size: 12px; }
+          th { background: #f9f9f9; font-weight: bold; }
+          .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+          .stat-card { border: 1px solid #eee; padding: 20px; border-radius: 8px; }
+          .stat-label { font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+          .stat-value { font-size: 24px; font-weight: bold; }
         </style></head><body>
-        <h1>Transactions Report</h1>
-        <table>
-          <thead><tr><th>Order ID</th><th>Event</th><th>Attendee</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
-          <tbody>
-            ${printContent.map(t => `<tr><td>${t.orderId || ''}</td><td>${t.eventName || ''}</td><td>${t.customerName || ''}</td><td>${t.amount || 0}</td><td>${t.paymentStatus || ''}</td><td>${t.createdAt ? new Date(t.createdAt).toLocaleDateString() : ''}</td></tr>`).join('')}
-          </tbody>
-        </table></body></html>`);
+        <div class="header">
+          <h1>Organizer Performance Report</h1>
+          <p>Generated on ${new Date().toLocaleString()}</p>
+        </div>
+
+        ${reviewAnalytics ? `
+        <div class="section">
+          <h2>I. Attendee Satisfaction Metrics</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Average Rating</div>
+              <div class="stat-value">${reviewAnalytics.avgRating} / 5.0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Total Feedbacks</div>
+              <div class="stat-value">${reviewAnalytics.totalReviews}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Response Rate</div>
+              <div class="stat-value">${reviewAnalytics.replyRate}%</div>
+            </div>
+          </div>
+        </div>
+        ` : ''}
+
+        <div class="section">
+          <h2>II. Transaction Records</h2>
+          <table>
+            <thead><tr><th>Order ID</th><th>Event</th><th>Attendee</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody>
+              ${printContent.map(t => `<tr><td>${t.orderId || ''}</td><td>${t.eventName || ''}</td><td>${t.customerName || ''}</td><td>${t.amount || 0}</td><td>${t.paymentStatus || ''}</td><td>${t.createdAt ? new Date(t.createdAt).toLocaleDateString() : ''}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        
+        <div style="text-align: center; margin-top: 50px; font-size: 10px; color: #888;">
+          End of Report - StartupLab Business Intelligence
+        </div>
+        </body></html>`);
       printWindow.document.close();
       printWindow.print();
     }
@@ -130,7 +171,17 @@ export const OrganizerReports: React.FC = () => {
   useEffect(() => {
     loadTransactions();
     loadProfile();
+    loadReviewAnalytics();
   }, [page, filter]);
+
+  const loadReviewAnalytics = async () => {
+    try {
+      const data = await apiService.getAnalytics();
+      setReviewAnalytics(data.reviewStats);
+    } catch (err) {
+      console.error('Failed to load review analytics:', err);
+    }
+  };
 
   const loadProfile = async () => {
     try {

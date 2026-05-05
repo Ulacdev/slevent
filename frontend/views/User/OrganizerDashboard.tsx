@@ -413,6 +413,73 @@ export const OrganizerDashboard: React.FC = () => {
                 />
             </div>
 
+            {/* ── Review Analytics ── */}
+            <div className="mt-10">
+                <div className="mb-6">
+                    <h2 className="text-xl font-black text-[#2E2E2F] dark:text-white uppercase tracking-tighter">Feedback Intelligence</h2>
+                    <p className="text-xs font-bold text-[#2E2E2F]/40 uppercase tracking-widest mt-1">Attendee Satisfaction Metrics</p>
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Review Stats Cards */}
+                    <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <HeroCard
+                            title="Avg. Attendee Rating"
+                            value={`${analytics?.reviewStats?.avgRating || '0.0'} / 5.0`}
+                            sub="Overall satisfaction score"
+                            icon={<ICONS.Star className="fill-current" />}
+                        />
+                        <HeroCard
+                            title="Total Reviews"
+                            value={analytics?.reviewStats?.totalReviews || 0}
+                            sub="Attendee feedbacks"
+                            icon={<ICONS.MessageSquare />}
+                        />
+                        <HeroCard
+                            title="Organizer Response Rate"
+                            value={`${analytics?.reviewStats?.replyRate || 0}%`}
+                            sub="Engagement level"
+                            icon={<ICONS.CheckCircle />}
+                        />
+                        <HeroCard
+                            title="Total Helpful Votes"
+                            value={analytics?.reviewStats?.helpfulTotal || 0}
+                            sub="Community impact"
+                            icon={<ICONS.Heart className="fill-current" />}
+                        />
+                    </div>
+
+                    {/* Rating Distribution Chart */}
+                    <Card className="p-6 bg-background border border-sidebar-border rounded-2xl shadow-sm">
+                        <h3 className="text-sm font-black text-[#2E2E2F] dark:text-white mb-6 uppercase tracking-widest">Rating Distribution</h3>
+                        <div className="space-y-4">
+                            {[5, 4, 3, 2, 1].map((star) => {
+                                const count = analytics?.reviewStats?.ratingBreakdown?.[star] || 0;
+                                const total = analytics?.reviewStats?.totalReviews || 1;
+                                const percentage = (count / total) * 100;
+                                return (
+                                    <div key={star} className="space-y-1">
+                                        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-[#2E2E2F]">{star}</span>
+                                                <ICONS.Star className="w-3 h-3 text-yellow-400 fill-current" />
+                                            </div>
+                                            <span className="text-[#2E2E2F]/40">{count} Reviews</span>
+                                        </div>
+                                        <div className="h-2 bg-[#2E2E2F]/5 rounded-full overflow-hidden">
+                                            <div 
+                                                className="h-full bg-[#38BDF2] rounded-full transition-all duration-1000"
+                                                style={{ width: `${percentage}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </Card>
+                </div>
+            </div>
+
             {/* ── Lists Section ── */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-10">
 

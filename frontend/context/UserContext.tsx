@@ -23,7 +23,7 @@ interface UserContextValue extends UserContextState {
   setUser: (payload: { userId: string; role: UserRole; email: string; name?: string | null; imageUrl?: string | null; canViewEvents?: boolean; canEditEvents?: boolean; canManualCheckIn?: boolean; canReceiveNotifications?: boolean; isOnboarded?: boolean; employerId?: string | null; employerLogoUrl?: string | null; employerName?: string | null }) => void;
   clearUser: () => void;
   authModal: { isOpen: boolean; view: 'login' | 'signup' | 'forgot-password' };
-  openAuthModal: (view?: 'login' | 'signup' | 'forgot-password') => void;
+  openAuthModal: (view?: 'login' | 'signup' | 'forgot-password', redirect?: string) => void;
   closeAuthModal: () => void;
 }
 
@@ -119,11 +119,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     view: 'login'
   });
 
-  const openAuthModal = React.useCallback((view: 'login' | 'signup' | 'forgot-password' = 'login') => {
+  const openAuthModal = React.useCallback((view: 'login' | 'signup' | 'forgot-password' = 'login', redirect?: string) => {
     // Transitioning from Modal to Page-based Auth
-    if (view === 'signup') window.location.assign('#/signup');
-    else if (view === 'forgot-password') window.location.assign('#/forgot-password');
-    else window.location.assign('#/login');
+    const redirectSuffix = redirect ? `?redirect=${encodeURIComponent(redirect)}` : '';
+    
+    if (view === 'signup') window.location.assign(`#/signup${redirectSuffix}`);
+    else if (view === 'forgot-password') window.location.assign(`#/forgot-password${redirectSuffix}`);
+    else window.location.assign(`#/login${redirectSuffix}`);
   }, []);
 
   const closeAuthModal = React.useCallback(() => {

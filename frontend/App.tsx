@@ -97,6 +97,7 @@ const ArchiveSupport = React.lazy(() => import('./views/User/ArchiveSupport').th
 const SubscriptionSuccess = React.lazy(() => import('./views/User/SubscriptionSuccess').then(module => ({ default: module.SubscriptionSuccess })));
 const SearchPage = React.lazy(() => import('./views/Public/SearchPage').then(module => ({ default: module.SearchPage })));
 const MyTicketsPage = React.lazy(() => import('./views/Public/MyTicketsPage'));
+const EventReviewsPage = React.lazy(() => import('./views/Public/EventReviewsPage').then(module => ({ default: module.EventReviewsPage })));
 const WelcomeView = React.lazy(() => import('./views/User/WelcomeView'));
 const API = import.meta.env.VITE_API_BASE;
 const DEFAULT_HEADER_LOCATION = 'Your Location';
@@ -3320,6 +3321,7 @@ const App: React.FC = () => (
           <Route path="/live" element={<PublicLayout><LivePage /></PublicLayout>} />
           <Route path="/categories/:categoryKey" element={<PublicLayout><CategoryEvents /></PublicLayout>} />
           <Route path="/events/:slug" element={<PublicLayout><EventDetails /></PublicLayout>} />
+          <Route path="/events/:slug/reviews" element={<PublicLayout><EventReviewsPage /></PublicLayout>} />
           <Route path="/organizer/:id" element={<PublicLayout><OrganizerProfilePage /></PublicLayout>} />
           <Route path="/events/:slug/register" element={<PublicLayout><RegistrationForm /></PublicLayout>} />
           <Route path="/payment/status" element={<PublicLayout><PaymentStatusView /></PublicLayout>} />

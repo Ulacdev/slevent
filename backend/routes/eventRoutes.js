@@ -1,5 +1,6 @@
 import express from 'express';
 import { listEvents, getEventBySlug, listLiveEvents, getEventsFeed, getEventDetails, getLocationSummary } from '../controller/eventController.js';
+import { submitEventReview } from '../controller/reviewController.js';
 import { getMyLikedEvents, likeEvent, unlikeEvent } from '../controller/eventLikeController.js';
 import { createEvent } from '../controller/adminEventController.js';
 import { authMiddleware } from '../middleware/auth.js';
@@ -26,6 +27,9 @@ router.get('/likes/me', authMiddleware, getMyLikedEvents);
 
 // GET /api/events/:id/details - Event details with promotion data
 router.get('/:id/details', getEventDetails);
+
+// POST /api/events/:id/reviews - Submit review
+router.post('/:id/reviews', authMiddleware, submitEventReview);
 
 // POST /api/events/:id/like
 router.post('/:id/like', authMiddleware, likeEvent);

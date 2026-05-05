@@ -10,6 +10,7 @@ import { useEngagement } from '../../context/EngagementContext';
 import { getEventCategoryKeys } from '../../utils/eventCategories';
 import { EventReportModal } from '../../components/Public/EventReportModal';
 import { getImageUrl } from '../../utils/imageUtils';
+import { EventReviews } from '../../components/Public/EventReviews';
 
 const BRAND_LOGO_URL = 'https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg';
 
@@ -138,25 +139,28 @@ const StreamStatusBanner: React.FC<{ event: Event; isOwner?: boolean }> = ({ eve
   return (
     <div className={`overflow-hidden rounded-xl border border-[#2E2E2F]/10 mb-10 shadow-2xl ${isOwner && hasLink ? 'ring-2 ring-[#2E2E2F]/30' : ''}`}>
       {/* Header */}
-      <div className="bg-[#38BDF2] p-6 text-white text-left flex justify-between items-center border-b border-[#38BDF2]/20 shadow-[0_4px_20px_rgba(56,189,242,0.3)]">
+      <div className="bg-[#38BDF2] p-5 sm:p-6 text-white text-left flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 border-b border-[#38BDF2]/20 shadow-[0_4px_20px_rgba(56,189,242,0.3)]">
         <div>
-          <h2 className="text-xl font-black tracking-tight leading-tight">{event.eventName} <span className="ml-2 px-2 py-0.5 bg-red-600 rounded text-[9px] animate-pulse text-white">LIVE</span></h2>
-          <p className="text-[11px] font-bold opacity-90 mt-1 uppercase tracking-widest text-[#F2F2F2]">
+          <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight flex items-center gap-2">
+            {event.eventName} 
+            <span className="px-2 py-0.5 bg-red-600 rounded text-[9px] animate-pulse text-white">LIVE</span>
+          </h2>
+          <p className="text-[10px] sm:text-[11px] font-bold opacity-90 mt-1 uppercase tracking-widest text-[#F2F2F2]">
             {formatDate(event.startAt, event.timezone, { weekday: 'long' })} AT {formatDate(event.startAt, event.timezone, { timeStyle: 'short' })}
           </p>
         </div>
-        <div className="flex items-center gap-2 z-10 bg-red-600 px-4 py-1.5 rounded-full border border-red-500 shadow-[0_0_15px_rgba(220,38,38,0.4)] animate-pulse">
-          <div className="w-2 h-2 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-          <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">BROADCASTING</span>
+        <div className="flex items-center gap-2 z-10 bg-red-600 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-red-500 shadow-[0_0_15px_rgba(220,38,38,0.4)] animate-pulse">
+          <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
+          <span className="text-[9px] sm:text-[10px] font-black text-white uppercase tracking-[0.2em]">BROADCASTING</span>
         </div>
       </div>
 
       {/* Body */}
-      <div className={`bg-[#F2F2F2] ${showingLive ? 'p-4' : 'p-12'} flex flex-col items-center justify-center text-center relative border-t border-[#2E2E2F]/10`}>
+      <div className={`bg-[#F2F2F2] ${showingLive ? 'p-3 sm:p-4' : 'p-8 sm:p-12'} flex flex-col items-center justify-center text-center relative border-t border-[#2E2E2F]/10`}>
         {isOwner && showingLive && (
-          <div className="absolute top-4 left-4 flex items-center gap-2 z-10 bg-[#2E2E2F]/5 px-2 py-1 rounded-xl border border-[#2E2E2F]/10">
-            <ICONS.Monitor className="w-2.5 h-2.5 text-[#2E2E2F]" />
-            <span className="text-[8px] font-black text-[#2E2E2F] uppercase tracking-[0.1em]">Organizer Preview</span>
+          <div className="absolute top-2 left-2 sm:top-4 sm:left-4 flex items-center gap-2 z-10 bg-[#2E2E2F]/5 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl border border-[#2E2E2F]/10">
+            <ICONS.Monitor className="w-2 sm:w-2.5 h-2 sm:h-2.5 text-[#2E2E2F]" />
+            <span className="text-[7px] sm:text-[8px] font-black text-[#2E2E2F] uppercase tracking-[0.1em]">Organizer Preview</span>
           </div>
         )}
 
@@ -211,7 +215,7 @@ const StreamStatusBanner: React.FC<{ event: Event; isOwner?: boolean }> = ({ eve
                 href={normalizedUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex flex-col items-center justify-center p-14 rounded-xl bg-[#F2F2F2] border border-[#2E2E2F]/10 hover:bg-[#2E2E2F]/5 hover:border-[#2E2E2F]/30 transition-all group shadow-sm text-[#2E2E2F]"
+                className="flex flex-col items-center justify-center p-8 sm:p-14 rounded-xl bg-[#F2F2F2] border border-[#2E2E2F]/10 hover:bg-[#2E2E2F]/5 hover:border-[#2E2E2F]/30 transition-all group shadow-sm text-[#2E2E2F]"
               >
                 <div className="w-20 h-20 rounded-full bg-[#2E2E2F]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
                   <ICONS.Monitor className="w-10 h-10 text-[#2E2E2F]" />
@@ -257,11 +261,11 @@ const CompactEventRow: React.FC<{ event: Event; brandColor: string }> = ({ event
         window.scrollTo(0, 0);
       }}
     >
-      <div className="flex-1 pr-6 min-w-0">
-        <h4 className="text-[17px] font-black text-[#2E2E2F] mb-1 leading-tight transition-colors line-clamp-1" style={{ '--hover-color': brandColor } as any}>
+      <div className="flex-1 pr-3 sm:pr-6 min-w-0">
+        <h4 className="text-[15px] sm:text-[17px] font-black text-[#2E2E2F] mb-1 leading-tight transition-colors line-clamp-1" style={{ '--hover-color': brandColor } as any}>
           {event.eventName}
         </h4>
-        <p className="text-[13px] font-bold text-[#2E2E2F] mb-0.5">
+        <p className="text-[11px] sm:text-[13px] font-bold text-[#2E2E2F] mb-0.5">
           {formatDate(event.startAt, event.timezone, { weekday: 'short', day: 'numeric', month: 'long' })} • {formatDate(event.startAt, event.timezone, { timeStyle: 'short' })}
         </p>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -332,12 +336,23 @@ export const EventDetails: React.FC = () => {
     const loadEvent = async () => {
       if (!slug) return;
       try {
-        const data = await apiService.getEventBySlug(slug);
+        const basicEvent = await apiService.getEventBySlug(slug);
         if (!mounted) return;
+        
+        let data = basicEvent;
+        if (basicEvent?.eventId) {
+          try {
+            const detailed = await apiService.getEventDetails(basicEvent.eventId);
+            if (detailed) data = detailed;
+          } catch (err) {
+            console.warn('[EventDetails] Failed to fetch enriched details, falling back to basic data');
+          }
+        }
+
         setEvent(data);
-        if (data && data.ticketTypes.length > 0) {
+        if (data && (data.ticketTypes?.length || 0) > 0) {
           const initialQuantities: Record<string, number> = {};
-          data.ticketTypes.forEach((ticketType) => {
+          data.ticketTypes.forEach((ticketType: any) => {
             initialQuantities[ticketType.ticketTypeId] = 0;
           });
           setQuantities(initialQuantities);
@@ -403,11 +418,20 @@ export const EventDetails: React.FC = () => {
     // Refresh event data periodically to capture status changes (e.g. going LIVE)
     const intervalId = window.setInterval(async () => {
       try {
-        const updated = await apiService.getEventBySlug(slug);
-        if (updated) {
+        const basic = await apiService.getEventBySlug(slug);
+        if (basic) {
+          let updated = basic;
+          if (basic.eventId) {
+            try {
+              const detailed = await apiService.getEventDetails(basic.eventId);
+              if (detailed) updated = detailed;
+            } catch (err) {
+              console.warn('[EventDetails] Failed to refresh enriched details');
+            }
+          }
+          
           setEvent(prev => {
             if (!prev) return updated;
-            // Preserve local states if needed, but here we just want the latest from server
             return updated;
           });
         }
@@ -507,7 +531,7 @@ export const EventDetails: React.FC = () => {
 
   const now = new Date();
   const totalQuantity = (Object.values(quantities) as number[]).reduce((acc: number, q: number) => acc + q, 0);
-  const grandTotal = event.ticketTypes.reduce((acc: number, t: TicketType) => acc + (t.priceAmount * (Number(quantities[t.ticketTypeId]) || 0)), 0);
+  const grandTotal = (event.ticketTypes || []).reduce((acc: number, t: TicketType) => acc + (t.priceAmount * (Number(quantities[t.ticketTypeId]) || 0)), 0);
   
   // Event Completion Check
   const eventStart = event.startAt ? new Date(event.startAt) : null;
@@ -715,7 +739,7 @@ export const EventDetails: React.FC = () => {
                 </div>
               )}
               <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-5">
-                <h1 className="text-4xl lg:text-5xl font-black text-[#2E2E2F] tracking-tighter leading-tight">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#2E2E2F] tracking-tighter leading-tight">
                   {event.eventName}
                 </h1>
                 <div className="flex items-center gap-2">
@@ -761,35 +785,36 @@ export const EventDetails: React.FC = () => {
                 </div>
               )}
 
-              <div id="event-schedule-info" className="flex flex-wrap gap-4 mt-10 mb-12">
-                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-2 rounded-xl border border-[#2E2E2F]/10 text-[14px]">
-                  <ICONS.Calendar className="w-5 h-5 mr-3" strokeWidth={3} style={{ color: brandColor }} />
-                  {formatRange(event.startAt, event.endAt, event.timezone)}{event.timezone ? ` TZ: ${event.timezone}` : ''}
+              <div id="event-schedule-info" className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-3 sm:gap-4 mt-8 sm:mt-10 mb-10 sm:mb-12">
+                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-3 rounded-xl border border-[#2E2E2F]/10 text-[13px] sm:text-[14px]">
+                  <ICONS.Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-3 shrink-0" strokeWidth={3} style={{ color: brandColor }} />
+                  <span className="font-medium">{formatRange(event.startAt, event.endAt, event.timezone)}{event.timezone ? ` (${event.timezone})` : ''}</span>
                 </div>
-                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-2 rounded-xl border border-[#2E2E2F]/10 text-[13px] font-bold">
-                  <ICONS.Monitor className="w-5 h-5 mr-2" strokeWidth={3} style={{ color: brandColor }} />
-                  {event.locationType === 'ONLINE' ? 'DIGITAL SESSION' : event.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}
+                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-3 rounded-xl border border-[#2E2E2F]/10 text-[12px] sm:text-[13px] font-bold">
+                  <ICONS.Monitor className="w-4 h-4 sm:w-5 sm:h-5 mr-3 shrink-0" strokeWidth={3} style={{ color: brandColor }} />
+                  <span className="uppercase tracking-wider">{event.locationType === 'ONLINE' ? 'DIGITAL SESSION' : event.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}</span>
                 </div>
                 {event.streamingPlatform && (event.locationType === 'ONLINE' || event.locationType === 'HYBRID') && (
                   <div
-                    className="flex items-center px-4 py-2 rounded-xl border text-[13px] font-black tracking-wide"
+                    className="flex items-center px-4 py-3 rounded-xl border text-[12px] sm:text-[13px] font-black tracking-wide"
                     style={{ color: brandColor, backgroundColor: `${brandColor}10`, borderColor: `${brandColor}20` }}
                   >
                     VIA {event.streamingPlatform.toUpperCase()}
                   </div>
                 )}
-                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-2 rounded-xl border border-[#2E2E2F]/10 text-[13px] font-bold">
-                  CAPACITY: {(event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0)}
+                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-3 rounded-xl border border-[#2E2E2F]/10 text-[12px] sm:text-[13px] font-bold">
+                  <ICONS.Users className="w-4 h-4 sm:w-5 sm:h-5 mr-3 shrink-0" strokeWidth={3} style={{ color: brandColor }} />
+                  <span>CAPACITY: {(event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0)}</span>
                 </div>
                 {regState && (
-                  <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-2 rounded-xl border border-[#2E2E2F]/10 text-[13px] font-black uppercase">
+                  <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-3 rounded-xl border border-[#2E2E2F]/10 text-[12px] sm:text-[13px] font-black uppercase tracking-wider">
                     {regState}
                   </div>
                 )}
               </div>
 
               {/* Event Description */}
-              <div className="p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10 w-full">
+              <div className="p-6 sm:p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10 w-full">
                 <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] mb-6">EVENT DETAILS</h3>
                 <p className="text-[#2E2E2F] leading-relaxed text-base font-medium whitespace-pre-wrap break-all max-w-full">
                   {event.description}
@@ -797,7 +822,7 @@ export const EventDetails: React.FC = () => {
               </div>
 
               {/* Organizer Card */}
-              <div className="p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10">
+              <div className="p-6 sm:p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10">
                 <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] mb-6">ORGANIZED BY</h3>
                 <div className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-5 flex flex-col md:flex-row md:items-center gap-5">
                   <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-md bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] flex items-center justify-center shrink-0">
@@ -830,13 +855,13 @@ export const EventDetails: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                     {organizerWebsite ? (
                       <a
                         href={organizerWebsite}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-6 py-2.5 rounded-xl border font-semibold text-sm transition-colors text-white hover:opacity-90 shadow-md"
+                        className="px-6 py-3 rounded-xl border font-bold text-xs uppercase tracking-widest transition-colors text-white hover:opacity-90 shadow-md text-center"
                         style={{ backgroundColor: brandColor, borderColor: brandColor }}
                       >
                         Contact
@@ -845,7 +870,7 @@ export const EventDetails: React.FC = () => {
                       <button
                         type="button"
                         disabled
-                        className="px-6 py-2.5 rounded-xl border-2 border-[#2E2E2F]/10 text-[#2E2E2F] font-semibold text-sm cursor-not-allowed bg-white"
+                        className="px-6 py-3 rounded-xl border-2 border-[#2E2E2F]/10 text-[#2E2E2F] font-bold text-xs uppercase tracking-widest cursor-not-allowed bg-white"
                       >
                         Contact
                       </button>
@@ -854,7 +879,7 @@ export const EventDetails: React.FC = () => {
                       type="button"
                       onClick={handleFollow}
                       disabled={!organizerId}
-                      className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 shadow-md ${following
+                      className={`px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all duration-300 shadow-md ${following
                         ? 'bg-[#2E2E2F] !text-white opacity-40 cursor-default border-none shadow-none'
                         : !organizerId 
                           ? 'bg-[#F2F2F2] !text-[#2E2E2F] border border-[#2E2E2F]/20 cursor-not-allowed shadow-none'
@@ -941,7 +966,7 @@ export const EventDetails: React.FC = () => {
 
               {/* Location Card */}
               {hasPhysicalLocation && (
-                <div className="p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10">
+                <div className="p-6 sm:p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10">
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em]">EXACT LOCATION</h3>
                     <a
@@ -1055,6 +1080,16 @@ export const EventDetails: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Review Section */}
+              <EventReviews 
+                eventSlug={event.slug} 
+                brandColor={brandColor}
+                reviews={event.reviews}
+                avgRating={event.avgRating}
+                reviewCount={event.reviewCount}
+                isOrganizer={isOwnEvent}
+              />
             </div>
           </div>
 
@@ -1338,20 +1373,19 @@ export const EventDetails: React.FC = () => {
                     </button>
                   </div>
                 </div>
-
-                {/* Ticket List */}
-                <div className="flex-1 overflow-y-auto px-7 py-5 space-y-4 custom-scrollbar">
+                        {/* Ticket List */}
+                <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-4 space-y-3 custom-scrollbar">
                   {event.ticketTypes.map(ticket => {
                     const qty = quantities[ticket.ticketTypeId] || 0;
                     const available = ticket.quantityTotal - ticket.quantitySold;
                     const isSoldOut = available <= 0;
                     const salesEnded = ticket.salesEndAt && new Date() > new Date(ticket.salesEndAt);
                     const salesNotStarted = ticket.salesStartAt && new Date() < new Date(ticket.salesStartAt);
-
+ 
                     return (
                       <div
                         key={ticket.ticketTypeId}
-                        className="p-6 rounded-2xl border-2 transition-colors bg-[#F2F2F2]"
+                        className="p-5 rounded-2xl border-2 transition-colors bg-[#F2F2F2]"
                         style={{ borderColor: qty > 0 ? brandColor : '#2E2E2F1A' }}
                       >
                         <div className="flex justify-between items-start mb-2">

@@ -329,6 +329,19 @@ const EventTableRow = React.memo<{
             </td>
 
             <td className="px-8 py-7">
+                <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${
+                        event.status === 'PUBLISHED' ? 'bg-green-500' :
+                        event.status === 'DRAFT' ? 'bg-amber-500' :
+                        event.status === 'CANCELLED' ? 'bg-red-500' : 'bg-[#2E2E2F]/30'
+                    }`} />
+                    <span className="text-[11px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white">
+                        {event.status}
+                    </span>
+                </div>
+            </td>
+
+            <td className="px-8 py-7">
                 <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
                         <span className="text-base font-black text-[#2E2E2F] dark:text-white">{event.capacityTotal}</span>
@@ -3792,7 +3805,8 @@ export const UserEvents: React.FC = () => {
                 isOpen={isAnalyticsModalOpen}
                 onClose={() => setIsAnalyticsModalOpen(false)}
                 title={`Event Performance: ${selectedEvent?.eventName || ''}`}
-                size="lg"
+                className="!max-w-[80%] !w-[80%]"
+                zoom={true}
             >
                 {analyticsLoading ? (
                     <div className="py-24 flex flex-col items-center justify-center space-y-4">
@@ -3803,43 +3817,107 @@ export const UserEvents: React.FC = () => {
                     <div className="space-y-8">
                         {/* Summary Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
-                                <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest mb-2">Total Likes</p>
+                            <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10">
+                                <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white/40 uppercase tracking-widest mb-2">Total Likes</p>
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center">
                                         <ICONS.Heart className="w-5 h-5" fill="currentColor" />
                                     </div>
-                                    <p className="text-3xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tighter">{analyticsData.totalLikes || 0}</p>
+                                    <p className="text-3xl font-black text-[#2E2E2F] dark:text-white tracking-tighter">{analyticsData.totalLikes || 0}</p>
                                 </div>
                             </div>
                             
-                            <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
-                                <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest mb-2">Ticket Access</p>
+                            <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10">
+                                <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white/40 uppercase tracking-widest mb-2">Ticket Access</p>
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-xl bg-[#38BDF2]/10 text-[#38BDF2] flex items-center justify-center">
                                         <ICONS.CreditCard className="w-5 h-5" />
                                     </div>
-                                    <p className="text-3xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tighter">{analyticsData.totalTickets || 0}</p>
+                                    <p className="text-3xl font-black text-[#2E2E2F] dark:text-white tracking-tighter">{analyticsData.totalTickets || 0}</p>
                                 </div>
                             </div>
 
-                            <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
-                                <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white dark:text-white/40 uppercase tracking-widest mb-2">New Followers</p>
+                            <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10">
+                                <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white/40 uppercase tracking-widest mb-2">New Followers</p>
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-xl bg-green-500/10 text-green-600 flex items-center justify-center">
                                         <ICONS.Users className="w-5 h-5" />
                                     </div>
-                                    <p className="text-3xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tighter">{analyticsData.totalFollowers || 0}</p>
+                                    <p className="text-3xl font-black text-[#2E2E2F] dark:text-white tracking-tighter">{analyticsData.totalFollowers || 0}</p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Additional Context */}
-                        <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
-                            <h4 className="text-[10px] font-black text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-[0.2em] mb-4">Engagement Insights</h4>
-                            <p className="text-[13px] text-[#2E2E2F] dark:text-white dark:text-white/70 font-medium leading-relaxed">
+                        {/* Review Performance Section */}
+                        <div className="space-y-4">
+                            <h4 className="text-[10px] font-black text-[#2E2E2F] dark:text-white/60 uppercase tracking-[0.2em]">Attendee Feedback</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10">
+                                    <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white/40 uppercase tracking-widest mb-2">Avg. Rating</p>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-yellow-500/10 text-yellow-500 flex items-center justify-center">
+                                            <ICONS.Star className="w-5 h-5 fill-current" />
+                                        </div>
+                                        <p className="text-3xl font-black text-[#2E2E2F] dark:text-white tracking-tighter">{analyticsData.reviewStats?.avgRating || '0.0'}</p>
+                                    </div>
+                                </div>
+                                <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10">
+                                    <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white/40 uppercase tracking-widest mb-2">Total Feedbacks</p>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                                            <ICONS.MessageSquare className="w-5 h-5" />
+                                        </div>
+                                        <p className="text-3xl font-black text-[#2E2E2F] dark:text-white tracking-tighter">{analyticsData.reviewStats?.totalReviews || 0}</p>
+                                    </div>
+                                </div>
+                                <div className="p-6 bg-[#F2F2F2] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10">
+                                    <p className="text-[9px] font-black text-[#2E2E2F] dark:text-white/40 uppercase tracking-widest mb-2">Helpful Community Votes</p>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
+                                            <ICONS.Heart className="w-5 h-5" />
+                                        </div>
+                                        <p className="text-3xl font-black text-[#2E2E2F] dark:text-white tracking-tighter">{analyticsData.reviewStats?.helpfulTotal || 0}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Rating Distribution */}
+                        <div className="p-8 bg-[#F2F2F2] dark:bg-[#111111] rounded-[2rem] border-2 border-[#2E2E2F]/15 dark:border-white/10">
+                            <h4 className="text-[10px] font-black text-[#2E2E2F] dark:text-white/60 uppercase tracking-[0.2em] mb-6">Star Breakdown</h4>
+                            <div className="space-y-4">
+                                {[5, 4, 3, 2, 1].map((star) => {
+                                    const count = analyticsData.reviewStats?.ratingBreakdown?.[star] || 0;
+                                    const total = analyticsData.reviewStats?.totalReviews || 1;
+                                    const percentage = (count / total) * 100;
+                                    return (
+                                        <div key={star} className="flex items-center gap-4">
+                                            <div className="flex items-center gap-1.5 w-12">
+                                                <span className="text-[11px] font-black text-[#2E2E2F] dark:text-white">{star}</span>
+                                                <ICONS.Star className="w-3 h-3 text-yellow-400 fill-current" />
+                                            </div>
+                                            <div className="flex-1 h-2 bg-background dark:bg-white/5 rounded-full overflow-hidden">
+                                                <div 
+                                                    className="h-full bg-[#38BDF2] rounded-full transition-all duration-1000"
+                                                    style={{ width: `${percentage}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-[10px] font-bold text-[#2E2E2F]/40 dark:text-white/30 w-16 text-right uppercase tracking-tighter">{count} Reviews</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Engagement Insights */}
+                        <div className="p-8 bg-gradient-to-br from-[#38BDF2]/10 to-transparent dark:from-[#38BDF2]/5 rounded-[2rem] border-2 border-[#38BDF2]/20">
+                            <h4 className="text-[10px] font-black text-[#38BDF2] uppercase tracking-[0.2em] mb-4">Engagement Insights</h4>
+                            <p className="text-[14px] text-[#2E2E2F] dark:text-white/70 font-medium leading-relaxed">
                                 This event has driven <strong>{analyticsData.totalFollowers || 0} new followers</strong> to your organization. 
-                                Organizers with high engagement usually see a 20% increase in ticket sales for their subsequent events.
+                                {analyticsData.reviewStats?.avgRating >= 4.5 && (
+                                    <span> With an exceptional rating of <strong>{analyticsData.reviewStats.avgRating}/5.0</strong>, </span>
+                                )}
+                                Organizers with high engagement and positive feedback usually see a <strong>20% increase in ticket sales</strong> for their subsequent events.
                             </p>
                         </div>
                     </div>

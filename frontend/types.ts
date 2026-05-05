@@ -168,6 +168,11 @@ export interface Event {
   isPromoted?: boolean;
   is_promoted?: boolean;
   promotedByOrganizer?: boolean;
+
+  // Review & Rating fields
+  reviews?: any[];
+  avgRating?: number;
+  reviewCount?: number;
 }
 
 export interface TicketType {
@@ -283,4 +288,20 @@ export interface AnalyticsSummary {
   totalPaidEvents?: number;
   totalPlanRevenue?: number;
   activeSubscriptions?: number;
+  
+  // Engagement Metrics
+  totalLikes?: number;
+  totalTickets?: number;
+  totalFollowers?: number;
+  
+  // Review Analytics
+  reviewStats?: {
+    avgRating: number;
+    totalReviews: number;
+    helpfulTotal: number;
+    replyRate: number;
+    ratingBreakdown: {
+      [key: number]: number;
+    };
+  };
 }

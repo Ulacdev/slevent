@@ -117,6 +117,18 @@ export const apiService = {
     return await res.json();
   },
 
+  uploadReviewImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await apiService._fetch(`${API_BASE}/api/reviews/upload`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Image upload failed');
+    return await res.json();
+  },
+
   // --- SMTP Settings APIs ---
   getSmtpSettings: async () => {
     const res = await apiService._fetch(`${API_BASE}/api/settings/smtp`, {
@@ -663,9 +675,7 @@ export const apiService = {
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`Failed to load event: ${res.status}`);
     const data = await res.json() as Event;
-    if (data.ticketTypes) {
-      data.ticketTypes = data.ticketTypes.map(apiService._mapTicketType);
-    }
+    data.ticketTypes = (data.ticketTypes || []).map(apiService._mapTicketType);
     return data;
   },
 
@@ -711,9 +721,7 @@ export const apiService = {
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`Failed to load event details: ${res.status}`);
     const data = await res.json();
-    if (data.ticketTypes) {
-      data.ticketTypes = data.ticketTypes.map(apiService._mapTicketType);
-    }
+    data.ticketTypes = (data.ticketTypes || []).map(apiService._mapTicketType);
     return data;
   },
 
@@ -778,6 +786,47 @@ export const apiService = {
       credentials: 'include'
     });
     if (!res.ok) throw new Error(`Failed to load tickets: ${res.status}`);
+    return await res.json();
+  },
+
+  submitEventReview: async (eventId: string, payload: { rating: number; comment: string; images?: string[]; attendeeId?: string }): Promise<{ success: boolean; average: number; count: number }> => {
+    const res = await apiService._fetch(`${API_BASE}/api/events/${encodeURIComponent(eventId)}/reviews`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Failed to submit review: ${res.status}`);
+    }
+    return await res.json();
+  },
+
+  toggleReviewHelpful: async (reviewId: string): Promise<{ success: boolean; liked: boolean }> => {
+    const res = await apiService._fetch(`${API_BASE}/api/reviews/${encodeURIComponent(reviewId)}/helpful`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Action failed: ${res.status}`);
+    }
+    return await res.json();
+  },
+
+  submitReviewReply: async (reviewId: string, comment: string): Promise<{ success: boolean; reply: any }> => {
+    const res = await apiService._fetch(`${API_BASE}/api/reviews/${encodeURIComponent(reviewId)}/reply`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ comment })
+    });
+    if (!res.ok) {
+      const errorPayload = await res.json().catch(() => ({}));
+      throw new Error(errorPayload?.error || `Reply failed: ${res.status}`);
+    }
     return await res.json();
   },
 

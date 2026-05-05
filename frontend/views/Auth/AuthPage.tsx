@@ -253,6 +253,15 @@ export const AuthPage: React.FC = () => {
       });
 
       showToast('success', 'Logged in successfully!');
+      
+      const redirectPath = searchParams.get('redirect');
+      if (redirectPath) {
+        // Ensure the path is relative to avoid external redirects
+        const safePath = redirectPath.startsWith('/') ? redirectPath : `/${redirectPath}`;
+        navigate(safePath);
+        return;
+      }
+
       if (normalizedRole === UserRole.ADMIN) navigate('/dashboard');
       else if (normalizedRole === UserRole.STAFF) navigate('/events');
       else if (normalizedRole === UserRole.ORGANIZER) navigate(isOnboarded ? '/user-home' : '/onboarding');

@@ -426,29 +426,70 @@ export const getSummary = async (req, res) => {
     // Likes and Followers Analytics
     let totalLikes = 0;
     let totalFollowers = 0;
+    let reviewStats = {
+      avgRating: 0,
+      totalReviews: 0,
+      helpfulTotal: 0,
+      replyRate: 0,
+      ratingBreakdown: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+    };
 
     try {
       if (req.query.eventId) {
         // Specific Event Stats
-        const [likesResp, followersResp] = await Promise.all([
+        const [likesResp, followersResp, reviewsResp] = await Promise.all([
           supabase.from('eventLikes').select('*', { count: 'exact', head: true }).eq('eventId', req.query.eventId),
-          supabase.from('organizerFollowers').select('*', { count: 'exact', head: true }).eq('sourceEventId', req.query.eventId)
+          supabase.from('organizerFollowers').select('*', { count: 'exact', head: true }).eq('sourceEventId', req.query.eventId),
+          supabase.from('reviews').select('rating, helpful_count, review_replies(replyId)').eq('eventId', req.query.eventId)
         ]);
         totalLikes = likesResp.count || 0;
         totalFollowers = followersResp.count || 0;
+
+        if (reviewsResp.data && reviewsResp.data.length > 0) {
+          const revs = reviewsResp.data;
+          reviewStats.totalReviews = revs.length;
+          reviewStats.avgRating = Number((revs.reduce((sum, r) => sum + (r.rating || 0), 0) / revs.length).toFixed(1));
+          reviewStats.helpfulTotal = revs.reduce((sum, r) => sum + (r.helpful_count || 0), 0);
+          
+          const repliedCount = revs.filter(r => r.review_replies && r.review_replies.length > 0).length;
+          reviewStats.replyRate = Number(((repliedCount / revs.length) * 100).toFixed(1));
+          
+          revs.forEach(r => {
+            if (r.rating >= 1 && r.rating <= 5) {
+              reviewStats.ratingBreakdown[r.rating]++;
+            }
+          });
+        }
       } else {
         // Aggregated Stats for all authorized events
         const { data: eventDetails } = await supabase.from('events').select('organizerId').in('eventId', filteredEventIds);
         const organizerIds = Array.from(new Set((eventDetails || []).map(e => e.organizerId).filter(Boolean)));
         
-        const [likesResp, followersResp] = await Promise.all([
+        const [likesResp, followersResp, reviewsResp] = await Promise.all([
           supabase.from('eventLikes').select('*', { count: 'exact', head: true }).in('eventId', filteredEventIds),
           organizerIds.length > 0 
             ? supabase.from('organizerFollowers').select('*', { count: 'exact', head: true }).in('organizerId', organizerIds)
-            : Promise.resolve({ count: 0 })
+            : Promise.resolve({ count: 0 }),
+          supabase.from('reviews').select('rating, helpful_count, review_replies(replyId)').in('eventId', filteredEventIds)
         ]);
         totalLikes = likesResp.count || 0;
         totalFollowers = followersResp.count || 0;
+
+        if (reviewsResp.data && reviewsResp.data.length > 0) {
+          const revs = reviewsResp.data;
+          reviewStats.totalReviews = revs.length;
+          reviewStats.avgRating = Number((revs.reduce((sum, r) => sum + (r.rating || 0), 0) / revs.length).toFixed(1));
+          reviewStats.helpfulTotal = revs.reduce((sum, r) => sum + (r.helpful_count || 0), 0);
+          
+          const repliedCount = revs.filter(r => r.review_replies && r.review_replies.length > 0).length;
+          reviewStats.replyRate = Number(((repliedCount / revs.length) * 100).toFixed(1));
+          
+          revs.forEach(r => {
+            if (r.rating >= 1 && r.rating <= 5) {
+              reviewStats.ratingBreakdown[r.rating]++;
+            }
+          });
+        }
       }
     } catch (metricExc) {
       console.warn('[Analytics] Failed to fetch engagement metrics:', metricExc);
@@ -468,6 +509,7 @@ export const getSummary = async (req, res) => {
       activeSubscriptions,
       totalLikes,
       totalFollowers,
+      reviewStats,
       totalTickets: totalRegistrations // Aligning UI expectation for 'Ticket Access'
     });
   } catch (err) {

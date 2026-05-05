@@ -659,7 +659,7 @@ export const getEventDetails = async (req, res) => {
     // Fetch reviews
     const { data: reviews } = await supabase
       .from('reviews')
-      .select('*')
+      .select('*, review_replies(*)')
       .eq('eventId', eventId)
       .order('created_at', { ascending: false });
 
@@ -703,7 +703,7 @@ export const getEventDetails = async (req, res) => {
       is_promoted: !!promotion,
       promotionEndDate: promotion?.expires_at || null,
       organizer,
-      reviews: (reviews || []).slice(0, 10), // Top 10 reviews
+      reviews: (reviews || []).slice(0, 50), // Top 50 reviews
       avgRating: parseFloat(avgRating),
       reviewCount: reviews?.length || 0,
       viewsThisWeek: viewsWeek,

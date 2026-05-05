@@ -29,6 +29,7 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 import { authMiddleware } from "./middleware/auth.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import { startReservationCleanup } from "./utils/reservationCleanup.js";
+import { startEventFeedbackReminders } from "./utils/eventFeedbackReminders.js";
 import ticketRoutes from "./routes/ticketRoutes.js";
 import ticketTypeRoutes from "./routes/ticketTypeRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
@@ -47,6 +48,7 @@ import discoveryRoutes from "./routes/discoveryRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import searchHistoryRoutes from "./routes/searchHistoryRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 const PORT = process.env.BACKEND_PORT
 const app = express();
 
@@ -160,6 +162,7 @@ app.use(express.json({ limit: "50mb", verify: rawBodySaver }));
 app.use(express.urlencoded({ limit: "50mb", extended: true, verify: rawBodySaver }));
 
 app.use("/api/events", eventRoutes);
+app.use("/api/reviews", reviewRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/ticket-types", ticketTypeRoutes);
 app.use("/api", orderRoutes);
@@ -193,6 +196,7 @@ app.get("/", (req, res) => {
 
 if (process.env.VERCEL !== "1") {
   startReservationCleanup();
+  startEventFeedbackReminders();
 }
 
 app.get("/api/cron/cleanup", async (req, res) => {
