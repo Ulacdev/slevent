@@ -156,7 +156,7 @@ const StreamStatusBanner: React.FC<{ event: Event; isOwner?: boolean }> = ({ eve
       </div>
 
       {/* Body */}
-      <div className={`bg-[#F2F2F2] ${showingLive ? 'p-3 sm:p-4' : 'p-8 sm:p-12'} flex flex-col items-center justify-center text-center relative border-t border-[#2E2E2F]/10`}>
+      <div className={`bg-[#F2F2F2] ${showingLive ? 'p-2 sm:p-4' : 'p-6 sm:p-12'} flex flex-col items-center justify-center text-center relative border-t border-[#2E2E2F]/10`}>
         {isOwner && showingLive && (
           <div className="absolute top-2 left-2 sm:top-4 sm:left-4 flex items-center gap-2 z-10 bg-[#2E2E2F]/5 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl border border-[#2E2E2F]/10">
             <ICONS.Monitor className="w-2 sm:w-2.5 h-2 sm:h-2.5 text-[#2E2E2F]" />
@@ -215,7 +215,7 @@ const StreamStatusBanner: React.FC<{ event: Event; isOwner?: boolean }> = ({ eve
                 href={normalizedUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex flex-col items-center justify-center p-8 sm:p-14 rounded-xl bg-[#F2F2F2] border border-[#2E2E2F]/10 hover:bg-[#2E2E2F]/5 hover:border-[#2E2E2F]/30 transition-all group shadow-sm text-[#2E2E2F]"
+                className="flex flex-col items-center justify-center p-6 sm:p-14 rounded-xl bg-[#F2F2F2] border border-[#2E2E2F]/10 hover:bg-[#2E2E2F]/5 hover:border-[#2E2E2F]/30 transition-all group shadow-sm text-[#2E2E2F]"
               >
                 <div className="w-20 h-20 rounded-full bg-[#2E2E2F]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
                   <ICONS.Monitor className="w-10 h-10 text-[#2E2E2F]" />
@@ -255,7 +255,7 @@ const CompactEventRow: React.FC<{ event: Event; brandColor: string }> = ({ event
 
   return (
     <div
-      className="group flex items-center justify-between py-6 border-b border-[#2E2E2F]/10 cursor-pointer hover:bg-black/[0.02] active:scale-[0.99] transition-all px-2 -mx-2 rounded-xl"
+      className="group flex items-center justify-between py-4 sm:py-6 border-b border-[#2E2E2F]/10 cursor-pointer hover:bg-black/[0.02] active:scale-[0.99] transition-all px-2 -mx-2 rounded-xl"
       onClick={() => {
         navigate(`/events/${event.slug}`);
         window.scrollTo(0, 0);
@@ -703,19 +703,19 @@ export const EventDetails: React.FC = () => {
   const brandColor = event.organizer?.brandColor || '#38BDF2';
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pb-24 sm:pb-32 lg:py-16 lg:pb-16">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-12 pb-24 sm:pb-32 lg:py-16 lg:pb-16">
       <div className="mb-8">
         <button
           onClick={() => navigate('/')}
-          className="hover:opacity-75 text-[#2E2E2F] text-[11px] font-black tracking-widest uppercase flex items-center mb-10 gap-2 transition-colors"
+          className="hover:opacity-75 text-[#2E2E2F] text-[11px] font-black tracking-widest uppercase flex items-center mb-6 sm:mb-10 gap-2 transition-all hover:-translate-x-1"
           style={{ color: brandColor }}
         >
           <svg className="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
           BACK TO EVENTS
         </button>
 
-        <div className="flex flex-col lg:flex-row gap-16 items-start">
-          <div className="flex-1 space-y-10">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
+          <div className="flex-1 space-y-6 sm:space-y-10 w-full min-w-0">
             {/* Event Profile Body */}
             <div>
               {(event.isPromoted || (event as any).is_promoted) && (
@@ -739,7 +739,7 @@ export const EventDetails: React.FC = () => {
                 </div>
               )}
               <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-5">
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#2E2E2F] tracking-tighter leading-tight">
+                <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-[#2E2E2F] tracking-tighter leading-tight">
                   {event.eventName}
                 </h1>
                 <div className="flex items-center gap-2">
@@ -768,12 +768,24 @@ export const EventDetails: React.FC = () => {
               </div>
 
               {/* Visual Header / Hero Background */}
-              <div className="relative w-screen left-[50%] right-[50%] ml-[-50vw] mr-[-50vw] md:static md:w-full md:ml-0 md:mr-0 overflow-hidden md:rounded-xl md:border border-[#2E2E2F]/10">
+              <div className="relative -mx-4 sm:mx-0 mb-8 overflow-hidden sm:rounded-[2rem] border-b sm:border border-[#2E2E2F]/10 shadow-2xl group">
                 <img
                   src={getImageUrl(event.imageUrl)}
                   alt={event.eventName}
-                  className="w-full aspect-video object-cover"
+                  className="w-full aspect-[4/3] sm:aspect-video object-cover transition-transform duration-700 group-hover:scale-105"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent sm:hidden" />
+                
+                {/* Category Badge - Mobile Overlay */}
+                <div className="absolute bottom-4 left-4 sm:hidden">
+                   <div className="flex flex-wrap gap-2">
+                     {getEventCategoryKeys(event).map(cat => (
+                       <span key={cat} className="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-[10px] font-black text-white uppercase tracking-widest">
+                         {cat}
+                       </span>
+                     ))}
+                   </div>
+                </div>
               </div>
 
               {interactionNotice && (
@@ -785,38 +797,57 @@ export const EventDetails: React.FC = () => {
                 </div>
               )}
 
-              <div id="event-schedule-info" className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-3 sm:gap-4 mt-8 sm:mt-10 mb-10 sm:mb-12">
-                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-3 rounded-xl border border-[#2E2E2F]/10 text-[13px] sm:text-[14px]">
-                  <ICONS.Calendar className="w-4 h-4 sm:w-5 sm:h-5 mr-3 shrink-0" strokeWidth={3} style={{ color: brandColor }} />
-                  <span className="font-medium">{formatRange(event.startAt, event.endAt, event.timezone)}{event.timezone ? ` (${event.timezone})` : ''}</span>
-                </div>
-                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-3 rounded-xl border border-[#2E2E2F]/10 text-[12px] sm:text-[13px] font-bold">
-                  <ICONS.Monitor className="w-4 h-4 sm:w-5 sm:h-5 mr-3 shrink-0" strokeWidth={3} style={{ color: brandColor }} />
-                  <span className="uppercase tracking-wider">{event.locationType === 'ONLINE' ? 'DIGITAL SESSION' : event.locationType === 'HYBRID' ? 'HYBRID ACCESS' : 'IN-PERSON EVENT'}</span>
-                </div>
-                {event.streamingPlatform && (event.locationType === 'ONLINE' || event.locationType === 'HYBRID') && (
-                  <div
-                    className="flex items-center px-4 py-3 rounded-xl border text-[12px] sm:text-[13px] font-black tracking-wide"
-                    style={{ color: brandColor, backgroundColor: `${brandColor}10`, borderColor: `${brandColor}20` }}
-                  >
-                    VIA {event.streamingPlatform.toUpperCase()}
+              <div id="event-schedule-info" className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-3 sm:gap-4 mt-8 sm:mt-10 mb-10">
+                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-3.5 rounded-[1.25rem] border border-[#2E2E2F]/10 shadow-sm text-[12px] group hover:border-[#2E2E2F]/20 transition-all">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center mr-3 shrink-0 transition-transform group-hover:scale-110" style={{ backgroundColor: `${brandColor}10` }}>
+                    <ICONS.Calendar className="w-4.5 h-4.5" strokeWidth={2.5} style={{ color: brandColor }} />
                   </div>
-                )}
-                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-3 rounded-xl border border-[#2E2E2F]/10 text-[12px] sm:text-[13px] font-bold">
-                  <ICONS.Users className="w-4 h-4 sm:w-5 sm:h-5 mr-3 shrink-0" strokeWidth={3} style={{ color: brandColor }} />
-                  <span>CAPACITY: {(event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0)}</span>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[9px] font-black text-[#2E2E2F]/40 uppercase tracking-widest mb-0.5">Date & Time</span>
+                    <span className="font-bold leading-tight truncate">{formatRange(event.startAt, event.endAt, event.timezone)}</span>
+                  </div>
                 </div>
+
+                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-3.5 rounded-[1.25rem] border border-[#2E2E2F]/10 shadow-sm text-[12px] group hover:border-[#2E2E2F]/20 transition-all">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center mr-3 shrink-0 transition-transform group-hover:scale-110" style={{ backgroundColor: `${brandColor}10` }}>
+                    <ICONS.Monitor className="w-4.5 h-4.5" strokeWidth={2.5} style={{ color: brandColor }} />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[9px] font-black text-[#2E2E2F]/40 uppercase tracking-widest mb-0.5">Experience</span>
+                    <span className="font-bold uppercase tracking-tight truncate">{event.locationType === 'ONLINE' ? 'Digital Session' : event.locationType === 'HYBRID' ? 'Hybrid Access' : 'In-Person Event'}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-3.5 rounded-[1.25rem] border border-[#2E2E2F]/10 shadow-sm text-[12px] group hover:border-[#2E2E2F]/20 transition-all">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center mr-3 shrink-0 transition-transform group-hover:scale-110" style={{ backgroundColor: `${brandColor}10` }}>
+                    <ICONS.Users className="w-4.5 h-4.5" strokeWidth={2.5} style={{ color: brandColor }} />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[9px] font-black text-[#2E2E2F]/40 uppercase tracking-widest mb-0.5">Capacity</span>
+                    <span className="font-bold truncate">{(event.ticketTypes || []).reduce((sum, t) => sum + (t.quantityTotal || 0), 0)} Total</span>
+                  </div>
+                </div>
+
                 {regState && (
-                  <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-3 rounded-xl border border-[#2E2E2F]/10 text-[12px] sm:text-[13px] font-black uppercase tracking-wider">
-                    {regState}
+                  <div className="flex items-center text-[#2E2E2F] bg-[#F2F2F2] px-4 py-3.5 rounded-[1.25rem] border border-[#2E2E2F]/10 shadow-sm text-[12px] group hover:border-[#2E2E2F]/20 transition-all">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center mr-3 shrink-0 transition-transform group-hover:scale-110" style={{ backgroundColor: `${brandColor}10` }}>
+                      <ICONS.Info className="w-4.5 h-4.5" strokeWidth={2.5} style={{ color: brandColor }} />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[9px] font-black text-[#2E2E2F]/40 uppercase tracking-widest mb-0.5">Reg Status</span>
+                      <span className="font-black uppercase tracking-tight truncate" style={{ color: brandColor }}>{regState}</span>
+                    </div>
                   </div>
                 )}
               </div>
 
               {/* Event Description */}
-              <div className="p-6 sm:p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10 w-full">
-                <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] mb-6">EVENT DETAILS</h3>
-                <p className="text-[#2E2E2F] leading-relaxed text-base font-medium whitespace-pre-wrap break-all max-w-full">
+              <div className="p-6 sm:p-10 bg-[#F2F2F2] rounded-[1.5rem] sm:rounded-[2rem] border border-[#2E2E2F]/10 mb-8 sm:mb-10 w-full shadow-sm">
+                <div className="flex items-center gap-3 mb-6 sm:mb-8">
+                  <div className="w-1.5 h-5 sm:h-6 rounded-full" style={{ backgroundColor: brandColor }} />
+                  <h3 className="text-[10px] sm:text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.3em]">The Experience</h3>
+                </div>
+                <p className="text-[#2E2E2F] leading-relaxed text-[15px] sm:text-[17px] font-medium whitespace-pre-wrap break-words max-w-full">
                   {event.description}
                 </p>
               </div>
@@ -824,22 +855,27 @@ export const EventDetails: React.FC = () => {
               {/* Organizer Card */}
               <div className="p-6 sm:p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10">
                 <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] mb-6">ORGANIZED BY</h3>
-                <div className="rounded-xl border border-[#2E2E2F]/10 bg-[#F2F2F2] p-5 flex flex-col md:flex-row md:items-center gap-5">
-                  <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-md bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] flex items-center justify-center shrink-0">
-                    {organizer?.profileImageUrl ? (
-                      <img src={organizerImage} alt={organizer?.organizerName || 'Organizer'} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-2xl font-black text-white drop-shadow-lg">
-                        {(organizer?.organizerName || 'O').charAt(0).toUpperCase()}
-                      </span>
-                    )}
+                <div className="rounded-[1.5rem] sm:rounded-[2rem] border border-[#2E2E2F]/10 bg-[#F2F2F2] p-5 sm:p-8 flex flex-col md:flex-row md:items-center gap-6 shadow-sm">
+                  <div className="relative group/org w-fit">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[1.25rem] sm:rounded-[2rem] overflow-hidden border-4 border-[#F2F2F2] shadow-xl bg-gradient-to-br from-[#38BDF2] to-[#A5E1FF] flex items-center justify-center shrink-0 transition-transform group-hover/org:scale-105 duration-500">
+                      {organizer?.profileImageUrl ? (
+                        <img src={organizerImage} alt={organizer?.organizerName || 'Organizer'} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-2xl sm:text-3xl font-black text-white drop-shadow-lg">
+                          {(organizer?.organizerName || 'O').charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-[#F2F2F2] border border-[#2E2E2F]/10 shadow-lg flex items-center justify-center">
+                       <ICONS.Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" strokeWidth={4} />
+                    </div>
                   </div>
 
-                  <div className="flex-1">
-                    <p className="text-xl sm:text-2xl font-bold text-[#2E2E2F] tracking-tight">
-                      {organizer?.organizerName || 'Organizer profile coming soon'}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-lg sm:text-2xl font-bold text-[#2E2E2F] tracking-tight truncate">
+                      {organizer?.organizerName || 'Organizer'}
                     </p>
-                    <div className="flex flex-wrap items-center gap-6 mt-3 text-[#2E2E2F]">
+                    <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-3 text-[#2E2E2F]">
                       <div>
                         <p className="text-[10px] uppercase tracking-widest font-bold text-[#2E2E2F]/70">Followers</p>
                         <p className="text-xl font-bold mt-0.5">{organizer?.followersCount || 0}</p>
@@ -966,26 +1002,35 @@ export const EventDetails: React.FC = () => {
 
               {/* Location Card */}
               {hasPhysicalLocation && (
-                <div className="p-6 sm:p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10">
-                  <div className="flex items-center justify-between gap-3 mb-4">
-                    <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em]">EXACT LOCATION</h3>
+                <div className="p-6 sm:p-10 bg-[#F2F2F2] rounded-[1.5rem] sm:rounded-[2rem] border border-[#2E2E2F]/10 mb-8 sm:mb-10 shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+                    <div className="flex items-center gap-3">
+                      <div className="w-1.5 h-5 sm:h-6 rounded-full" style={{ backgroundColor: brandColor }} />
+                      <h3 className="text-[10px] sm:text-[11px] font-black text-[#2E2E2F] uppercase tracking-[0.3em]">Exact Location</h3>
+                    </div>
                     <a
                       href={openMapUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-colors"
+                      className="w-full sm:w-auto text-center px-4 py-2.5 rounded-xl bg-black/5 text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all shadow-sm"
                       style={{ color: brandColor }}
                     >
                       Open in Maps
                     </a>
                   </div>
-                  <p className="text-sm text-[#2E2E2F] font-medium mb-5">{event.locationText}</p>
                   
-                  <div className="rounded-xl overflow-hidden border border-[#2E2E2F]/10 bg-[#F2F2F2]">
+                  <div className="flex items-start gap-3 sm:gap-4 mb-6 sm:mb-8">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[1rem] sm:rounded-2xl bg-[#F2F2F2] flex items-center justify-center shrink-0 shadow-sm border border-[#2E2E2F]/5">
+                      <ICONS.MapPin className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: brandColor }} />
+                    </div>
+                    <p className="text-[15px] sm:text-[17px] text-[#2E2E2F] font-bold leading-tight">{event.locationText}</p>
+                  </div>
+                  
+                  <div className="rounded-[1.25rem] sm:rounded-[2rem] overflow-hidden border border-[#2E2E2F]/10 shadow-inner bg-[#F2F2F2]">
                     <iframe
                       src={mapEmbedUrl}
                       title="Event location map"
-                      className="w-full h-72"
+                      className="w-full h-64 sm:h-80 grayscale-[0.2] contrast-[1.1] brightness-[1.05]"
                       loading="lazy"
                       referrerPolicy="no-referrer-when-downgrade"
                     />
@@ -1266,14 +1311,14 @@ export const EventDetails: React.FC = () => {
         </div>
 
         {/* Global Related Content Sections - Span Full Width Below Main Content */}
-        <div className="mt-32 space-y-24">
+        <div className="mt-16 sm:mt-32 space-y-16 sm:space-y-24">
           {organizerEvents.length > 0 && (
             <div>
-              <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tighter mb-10 flex items-center gap-4">
+              <h2 className="text-xl sm:text-3xl font-black text-[#2E2E2F] tracking-tighter mb-6 sm:mb-10 flex items-center gap-3 sm:gap-4">
                 More events from this organizer
                 <div className="h-px flex-1 bg-[#2E2E2F]/10" />
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 sm:gap-x-12 gap-y-6 sm:gap-y-8">
                 {organizerEvents.map(e => (
                   <CompactEventRow key={e.eventId} event={e} brandColor={brandColor} />
                 ))}
@@ -1283,11 +1328,11 @@ export const EventDetails: React.FC = () => {
 
           {/* Recommended Events - Always Visible */}
           <div>
-            <h2 className="text-3xl font-black text-[#2E2E2F] tracking-tighter mb-10 flex items-center gap-4">
+            <h2 className="text-xl sm:text-3xl font-black text-[#2E2E2F] tracking-tighter mb-6 sm:mb-10 flex items-center gap-3 sm:gap-4">
               You might also like...
               <div className="h-px flex-1 bg-[#2E2E2F]/10" />
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 sm:gap-x-12 gap-y-6 sm:gap-y-8">
               {recommendedEvents.length > 0 ? (
                 recommendedEvents.map(e => (
                   <CompactEventRow key={e.eventId} event={e} brandColor={brandColor} />
@@ -1299,11 +1344,11 @@ export const EventDetails: React.FC = () => {
               )}
             </div>
             {recommendedEvents.length > 0 && (
-              <div className="mt-12 flex justify-center">
+              <div className="mt-8 sm:mt-12 flex justify-center">
                 <Button
                   variant="outline"
                   onClick={() => navigate('/browse-events')}
-                  className="rounded-full px-10 font-black uppercase tracking-widest text-[11px] hover:opacity-90 !text-white border-none shadow-md"
+                  className="rounded-full px-8 sm:px-10 font-black uppercase tracking-widest text-[11px] hover:opacity-90 !text-white border-none shadow-md"
                   style={{ backgroundColor: brandColor }}
                 >
                   Explore All Events
@@ -1316,31 +1361,45 @@ export const EventDetails: React.FC = () => {
 
       {!isOwnEvent && !isDone && (
         <>
-          {/* Compact Bar (Visible only when sheet is closed) */}
+          {/* Floating Action Dock (Visible only when sheet is closed) */}
           {!isSheetExpanded && (
-            <div 
-              className="fixed inset-x-0 bottom-0 z-[60] lg:hidden bg-[#F2F2F2] border-t border-[#2E2E2F]/10 px-6 py-4 flex items-center justify-between shadow-[0_-10px_30px_rgba(0,0,0,0.1)]"
-              style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}
-              onClick={() => setIsSheetExpanded(true)}
-            >
-              <div className="flex flex-col">
-                <span className="text-[17px] font-black text-[#2E2E2F] tracking-tight">
-                  {totalQuantity > 0 ? `₱${grandTotal.toLocaleString()}` : (
-                    event.ticketTypes && event.ticketTypes.length > 0
-                      ? (event.ticketTypes.some(t => t.priceAmount === 0) ? 'Free' : `From ₱${Math.min(...event.ticketTypes.map(t => t.priceAmount)).toLocaleString()}`)
-                      : 'Free'
-                  )}
-                </span>
-                <span className="text-[13px] font-medium text-[#2E2E2F]/50">
-                  {totalQuantity > 0 ? `${totalQuantity} Ticket${totalQuantity > 1 ? 's' : ''}` : (event.ticketTypes && event.ticketTypes.length > 1 ? 'Multiple dates' : (event.startAt ? formatDate(event.startAt, event.timezone, { month: 'short', day: 'numeric' }) : 'Multiple dates'))}
-                </span>
-              </div>
-              <Button
-                className={`transform transition-all active:scale-90 ${totalQuantity > 0 ? 'px-6 py-3.5 text-[11px] uppercase tracking-widest' : 'w-11 h-11 p-0'}`}
-                style={{ backgroundColor: brandColor, color: '#F2F2F2' }}
+            <div className="fixed bottom-0 inset-x-0 z-[60] lg:hidden flex justify-center px-4 pb-6 pointer-events-none">
+              <div 
+                className="w-full max-w-md pointer-events-auto bg-[#F2F2F2]/95 backdrop-blur-xl border border-[#2E2E2F]/10 rounded-[2.5rem] px-6 py-4 flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.2)] animate-in slide-in-from-bottom-10 duration-500"
+                onClick={() => setIsSheetExpanded(true)}
               >
-                {totalQuantity > 0 ? 'Reserve Access' : <ICONS.Plus className="w-5 h-5 mx-auto" strokeWidth={4} />}
-              </Button>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]/40 mb-0.5">
+                    {totalQuantity > 0 ? 'Total Investment' : 'Starting From'}
+                  </span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[20px] font-black text-[#2E2E2F] tracking-tighter">
+                      {totalQuantity > 0 ? `₱${grandTotal.toLocaleString()}` : (
+                        event.ticketTypes && event.ticketTypes.length > 0
+                          ? (event.ticketTypes.some(t => t.priceAmount === 0) ? 'Free' : `₱${Math.min(...event.ticketTypes.map(t => t.priceAmount)).toLocaleString()}`)
+                          : 'Free'
+                      )}
+                    </span>
+                    {totalQuantity === 0 && event.ticketTypes && event.ticketTypes.length > 0 && !event.ticketTypes.some(t => t.priceAmount === 0) && (
+                      <span className="text-[10px] font-bold text-[#2E2E2F]/40">+ tax</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {totalQuantity > 0 && (
+                    <div className="flex flex-col items-end mr-1">
+                      <span className="text-[11px] font-black text-[#2E2E2F]">{totalQuantity} Ticket{totalQuantity > 1 ? 's' : ''}</span>
+                    </div>
+                  )}
+                  <button
+                    className="flex items-center justify-center gap-2 px-6 py-4 rounded-[1.5rem] font-black text-[11px] uppercase tracking-widest text-white shadow-lg active:scale-95 transition-all"
+                    style={{ backgroundColor: brandColor }}
+                  >
+                    {totalQuantity > 0 ? 'RESERVE' : 'GET TICKETS'}
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M14 5l7 7-7 7M5 12h16" /></svg>
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -1374,7 +1433,7 @@ export const EventDetails: React.FC = () => {
                   </div>
                 </div>
                         {/* Ticket List */}
-                <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-4 space-y-3 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-6 space-y-4 custom-scrollbar">
                   {event.ticketTypes.map(ticket => {
                     const qty = quantities[ticket.ticketTypeId] || 0;
                     const available = ticket.quantityTotal - ticket.quantitySold;
@@ -1385,43 +1444,59 @@ export const EventDetails: React.FC = () => {
                     return (
                       <div
                         key={ticket.ticketTypeId}
-                        className="p-5 rounded-2xl border-2 transition-colors bg-[#F2F2F2]"
-                        style={{ borderColor: qty > 0 ? brandColor : '#2E2E2F1A' }}
+                        className="p-6 rounded-[2rem] border-2 transition-all duration-300 bg-[#F2F2F2] shadow-sm"
+                        style={{ 
+                          borderColor: qty > 0 ? brandColor : '#2E2E2F0A',
+                          transform: qty > 0 ? 'scale(1.02)' : 'scale(1)'
+                        }}
                       >
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex flex-col gap-1">
-                            <span className="text-[#2E2E2F] text-[13px] uppercase tracking-wider font-bold">{ticket.name}</span>
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex flex-col gap-1.5">
+                            <span className="text-[#2E2E2F] text-[15px] uppercase tracking-wider font-black">{ticket.name}</span>
+                            {ticket.capacityPerTicket && ticket.capacityPerTicket > 1 && (
+                                <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 bg-black/5 rounded-full w-fit" style={{ color: brandColor }}>
+                                  Bundle • {ticket.capacityPerTicket} Guests
+                                </span>
+                              )}
                           </div>
                           <span
-                            className="text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest text-[#F2F2F2]"
+                            className="text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest text-white shadow-sm"
                             style={{ backgroundColor: salesEnded ? '#2E2E2F' : (isSoldOut ? '#2E2E2F' : brandColor) }}
                           >
-                            {salesEnded ? 'SALES ENDED' : (isSoldOut ? 'SOLD OUT' : 'AVAILABLE')}
+                            {salesEnded ? 'Ended' : (isSoldOut ? 'Sold Out' : 'Available')}
                           </span>
                         </div>
-                        
-                        <div className="text-xl font-black text-[#2E2E2F] mb-6 tracking-tighter">
-                          {ticket.priceAmount === 0 ? 'FREE' : (
-                            <><span className="">PHP</span> <span className="font-black">{ticket.priceAmount.toLocaleString()}.00</span></>
-                          )}
-                        </div>
 
-                        <div className="pt-6 border-t border-[#2E2E2F]/10 flex items-center justify-between">
-                          <span className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em]">QUANTITY</span>
-                          <div className="flex items-center gap-5">
+                        {ticket.description && (
+                          <p className="text-[12px] text-[#2E2E2F]/60 mb-5 font-medium leading-relaxed italic">
+                            "{ticket.description}"
+                          </p>
+                        )}
+                        
+                        <div className="flex items-end justify-between">
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-black text-[#2E2E2F]/30 uppercase tracking-widest mb-1">Investment</span>
+                            <div className="text-2xl font-black text-[#2E2E2F] tracking-tighter">
+                              {ticket.priceAmount === 0 ? 'FREE' : (
+                                <><span className="text-sm font-bold opacity-40 mr-1">₱</span>{ticket.priceAmount.toLocaleString()}</>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4 bg-white p-1.5 rounded-[1.25rem] border border-[#2E2E2F]/5">
                             <button
                               onClick={() => updateQuantity(ticket.ticketTypeId, -1, available)}
                               disabled={qty === 0 || isSoldOut}
-                              className="w-8 h-8 flex items-center justify-center rounded-xl transition-colors disabled:opacity-20 disabled:cursor-not-allowed border border-[#2E2E2F]/10"
-                              style={qty > 0 && !isSoldOut ? { backgroundColor: brandColor, color: '#F2F2F2' } : {}}
+                              className="w-10 h-10 flex items-center justify-center rounded-xl transition-all disabled:opacity-10 disabled:cursor-not-allowed bg-[#F2F2F2] shadow-sm border border-[#2E2E2F]/5 active:scale-90"
+                              style={qty > 0 && !isSoldOut ? { color: brandColor } : {}}
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M20 12H4" /></svg>
                             </button>
-                            <span className="font-black text-lg text-[#2E2E2F] w-4 text-center">{qty}</span>
+                            <span className="font-black text-xl text-[#2E2E2F] min-w-[1.5rem] text-center">{qty}</span>
                             <button
                               onClick={() => updateQuantity(ticket.ticketTypeId, 1, available)}
                               disabled={isSoldOut || qty >= available}
-                              className="w-8 h-8 flex items-center justify-center rounded-xl text-[#F2F2F2] transition-colors disabled:opacity-20 disabled:cursor-not-allowed border border-[#2E2E2F]/10"
+                              className="w-10 h-10 flex items-center justify-center rounded-xl text-white transition-all disabled:opacity-10 disabled:cursor-not-allowed shadow-md active:scale-90"
                               style={!isSoldOut && qty < available ? { backgroundColor: brandColor } : {}}
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M12 4v16m8-8H4" /></svg>

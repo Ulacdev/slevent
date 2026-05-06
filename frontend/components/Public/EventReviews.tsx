@@ -103,19 +103,19 @@ export const EventReviews: React.FC<EventReviewsProps> = ({
   const displayReviews = getFilteredReviews().slice(0, 6);
 
   return (
-    <div className="p-5 sm:p-8 bg-[#F2F2F2] rounded-2xl border border-[#2E2E2F]/10 mb-10 overflow-hidden relative">
+    <div className="p-4 sm:p-8 bg-[#F2F2F2] rounded-[1.5rem] sm:rounded-[2rem] border border-[#2E2E2F]/10 mb-10 overflow-hidden relative shadow-sm">
       {/* Header with Stats */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-12">
         <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10">
           <div className="space-y-1">
-            <h3 className="text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.4em] mb-4">REVIEWS & FEEDBACK</h3>
+            <h3 className="text-[12px] font-black text-[#2E2E2F] mb-4 opacity-40">Reviews & Feedback</h3>
             <div className="flex items-center gap-6">
               <div className="text-5xl sm:text-6xl font-black text-[#2E2E2F] tracking-tighter">
                 {avgRating > 0 ? avgRating.toFixed(1) : '0.0'}
               </div>
               <div className="space-y-1">
                 {renderStars(avgRating, "w-5 h-5 sm:w-6 sm:h-6")}
-                <p className="text-[11px] sm:text-[13px] font-bold text-[#2E2E2F]/60 uppercase tracking-widest">
+                <p className="text-[11px] sm:text-[13px] font-bold text-[#2E2E2F]/40">
                   {reviewCount.toLocaleString()} Ratings
                 </p>
               </div>
@@ -149,13 +149,13 @@ export const EventReviews: React.FC<EventReviewsProps> = ({
         </div>
         
         <div className="hidden lg:flex flex-col items-end">
-            <div className="bg-white/40 border border-[#2E2E2F]/5 rounded-2xl p-4 flex items-center gap-4 backdrop-blur-sm shadow-sm hover:shadow-md transition-all group">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-[#2E2E2F]/5 group-hover:scale-110 transition-transform shadow-inner">
+            <div className="bg-[#E8E8E8] border border-[#2E2E2F]/5 rounded-[1.5rem] p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-all group">
+                <div className="w-10 h-10 rounded-xl bg-[#F2F2F2] flex items-center justify-center border border-[#2E2E2F]/5 group-hover:scale-110 transition-transform shadow-inner">
                     <ICONS.ShieldCheck className="w-5 h-5" style={{ color: brandColor }} />
                 </div>
                 <div className="text-left">
-                    <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-[#2E2E2F]">
-                        Attendee Feedback
+                    <div className="flex items-center gap-1.5 text-[12px] font-black text-[#2E2E2F]">
+                        Attendee feedback
                     </div>
                     <p className="text-[9px] font-bold text-[#2E2E2F]/40 uppercase tracking-[0.2em] leading-tight mt-0.5">
                         Trusted reviews from<br />actual event attendees
@@ -166,12 +166,12 @@ export const EventReviews: React.FC<EventReviewsProps> = ({
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-6 border-b border-[#2E2E2F]/10 mb-10 overflow-x-auto pb-px custom-scrollbar">
+      <div className="flex items-center gap-8 border-b border-[#2E2E2F]/10 mb-10 overflow-x-auto pb-px custom-scrollbar flex-nowrap">
           {filters.map((filter) => (
               <button 
                   key={filter} 
                   onClick={() => setActiveFilter(filter)}
-                  className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all relative ${activeFilter === filter ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                  className={`pb-4 text-[13px] font-black whitespace-nowrap transition-all relative shrink-0 ${activeFilter === filter ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
               >
                   {filter}
                   {activeFilter === filter && (
@@ -198,20 +198,20 @@ export const EventReviews: React.FC<EventReviewsProps> = ({
                       {(review.isVerified || review.is_verified) && (
                         <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#38BDF2]/10 border border-[#38BDF2]/20">
                           <ICONS.CheckCircle className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-[#38BDF2]" strokeWidth={3} />
-                          <span className="text-[7px] sm:text-[8px] font-black text-[#38BDF2] uppercase tracking-widest">Attendee</span>
+                          <span className="text-[9px] font-black text-[#38BDF2]">Attendee</span>
                         </div>
                       )}
                     </div>
-                    <span className="text-[9px] sm:text-[10px] font-bold text-[#2E2E2F]/30 uppercase tracking-widest whitespace-nowrap">
+                    <span className="text-[11px] font-bold text-[#2E2E2F]/30 whitespace-nowrap">
                       {new Date(review.created_at || review.date).toLocaleDateString()}
                     </span>
                   </div>
                   
                   <div className="mb-3">
-                    {renderStars(review.rating, "w-3 sm:w-3.5 h-3 sm:h-3.5")}
+                    {renderStars(review.rating, "w-3.5 sm:w-4 h-3.5 sm:h-4")}
                   </div>
 
-                  <p className="text-[13px] sm:text-sm text-[#2E2E2F] leading-relaxed font-medium">
+                  <p className="text-[13px] sm:text-[15px] text-[#2E2E2F] leading-relaxed font-medium mt-1">
                     {review.comment}
                   </p>
 
@@ -228,7 +228,7 @@ export const EventReviews: React.FC<EventReviewsProps> = ({
                    <div className="mt-4 flex items-center gap-6">
                        <button 
                          onClick={() => handleHelpful(review.id || review.reviewId)}
-                         className={`flex items-center gap-1.5 text-[10px] font-black transition-colors uppercase tracking-widest ${helpfulReviews[review.id || review.reviewId] ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
+                         className={`flex items-center gap-1.5 text-[12px] font-black transition-colors ${helpfulReviews[review.id || review.reviewId] ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40 hover:text-[#2E2E2F]'}`}
                        >
                            <ICONS.Heart className={`w-3.5 h-3.5 ${helpfulReviews[review.id || review.reviewId] ? 'fill-current' : ''}`} />
                            {review.helpful_count || 0} Helpful
@@ -236,7 +236,7 @@ export const EventReviews: React.FC<EventReviewsProps> = ({
                        {isOrganizer && (
                            <button 
                              onClick={() => handleReply(review.id || review.reviewId)}
-                             className="flex items-center gap-1.5 text-[10px] font-black text-[#2E2E2F]/40 hover:text-[#2E2E2F] transition-colors uppercase tracking-widest"
+                             className="flex items-center gap-1.5 text-[12px] font-black text-[#2E2E2F]/40 hover:text-[#2E2E2F] transition-colors"
                            >
                                <ICONS.MessageSquare className="w-3.5 h-3.5" />
                                Reply
@@ -250,29 +250,29 @@ export const EventReviews: React.FC<EventReviewsProps> = ({
                              {!expandedReplies[review.id || review.reviewId] ? (
                                  <button 
                                      onClick={() => setExpandedReplies(prev => ({ ...prev, [review.id || review.reviewId]: true }))}
-                                     className="flex items-center gap-2 py-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/40 hover:text-[#2E2E2F] transition-colors"
+                                     className="flex items-center gap-2 py-2 text-[11px] font-black text-[#2E2E2F]/40 hover:text-[#2E2E2F] transition-colors"
                                  >
                                      <div className="w-4 h-px bg-[#2E2E2F]/10" />
-                                     View {review.review_replies.length} {review.review_replies.length === 1 ? 'Reply' : 'Replies'}
+                                     View {review.review_replies.length} {review.review_replies.length === 1 ? 'reply' : 'replies'}
                                  </button>
                              ) : (
                                  <div className="space-y-3">
                                      <button 
                                          onClick={() => setExpandedReplies(prev => ({ ...prev, [review.id || review.reviewId]: false }))}
-                                         className="flex items-center gap-2 py-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-[#2E2E2F]/40 hover:text-[#2E2E2F] transition-colors mb-2"
+                                         className="flex items-center gap-2 py-2 text-[11px] font-black text-[#2E2E2F]/40 hover:text-[#2E2E2F] transition-colors mb-2"
                                      >
                                          <div className="w-4 h-px bg-[#2E2E2F]/10" />
-                                         Hide Replies
+                                         Hide replies
                                      </button>
                                      
                                      <div className="space-y-3 pl-3 sm:pl-4 border-l border-[#2E2E2F]/10">
                                         {review.review_replies.map((reply: any) => (
-                                            <div key={reply.replyId} className="bg-white/40 rounded-xl p-4 border border-[#2E2E2F]/5">
+                                            <div key={reply.replyId} className="bg-black/5 rounded-xl p-4 border border-[#2E2E2F]/5">
                                                 <div className="flex items-center gap-2 mb-1.5">
                                                     <div className="w-5 h-5 rounded-full bg-[#2E2E2F]/5 flex items-center justify-center border border-[#2E2E2F]/5">
                                                         <ICONS.User className="w-2.5 h-2.5 text-[#2E2E2F]/40" />
                                                     </div>
-                                                    <span className="text-[9px] font-black uppercase tracking-widest text-[#2E2E2F]">Organizer</span>
+                                                    <span className="text-[10px] font-black text-[#2E2E2F]">Organizer</span>
                                                 </div>
                                                 <p className="text-[12px] text-[#2E2E2F] leading-relaxed font-medium">
                                                     {reply.comment}
@@ -291,7 +291,7 @@ export const EventReviews: React.FC<EventReviewsProps> = ({
           ))
         ) : (
           <div className="py-20 text-center">
-            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-[#2E2E2F]/20">No reviews found for this filter</p>
+            <p className="text-[13px] font-black text-[#2E2E2F]/20">No reviews found for this filter</p>
           </div>
         )}
       </div>
@@ -301,7 +301,7 @@ export const EventReviews: React.FC<EventReviewsProps> = ({
         <div className="mt-12 flex justify-center">
           <button 
               onClick={() => navigate(`/events/${eventSlug}/reviews`)}
-              className="text-[11px] font-black uppercase tracking-[0.3em] hover:opacity-70 transition-opacity"
+              className="text-[13px] font-black hover:opacity-70 transition-opacity"
               style={{ color: brandColor }}
           >
             See all {reviewCount} reviews

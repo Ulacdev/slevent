@@ -173,6 +173,9 @@ export interface Event {
   reviews?: any[];
   avgRating?: number;
   reviewCount?: number;
+
+  // Category
+  category?: string;
 }
 
 export interface TicketType {

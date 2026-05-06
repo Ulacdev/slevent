@@ -1,7 +1,7 @@
 import supabase from '../database/db.js';
 import { notifyUserByPreference } from './notificationService.js';
 
-const DEFAULT_CHECK_INTERVAL_MS = 15 * 60_000; // 15 minutes
+const DEFAULT_CHECK_INTERVAL_MS = 1 * 60_000; // 1 minute
 
 export const runEventFeedbackReminders = async () => {
   const now = new Date();
