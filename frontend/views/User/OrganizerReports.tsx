@@ -257,33 +257,31 @@ export const OrganizerReports: React.FC = () => {
   }
 
   return (
-    <div className="pb-16 space-y-6">
-      {/* Page Header */}
-      <div className="px-2 bg-transparent border-2 border-sidebar-border rounded-xl p-6 md:p-8 mb-4">
-        <div className="flex flex-col md:flex-row justify-between gap-6">
-          <div className="max-w-2xl">
-            <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] dark:text-white tracking-tight uppercase">
-              Transaction Reports
-            </h1>
-            <p className="mt-1 text-sm font-semibold text-[#2E2E2F] dark:text-white/60">
-              Analyze revenue flow, monitor audience conversions, and export operational datasets.
-            </p>
-          </div>
-          <div className="flex flex-row md:flex-col gap-3 shrink-0">
-            <Button
-              onClick={handleExport}
-              className={`px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${!hasAdvancedReports ? 'opacity-50 grayscale bg-[#2E2E2F]/10 text-[#2E2E2F] dark:text-white' : 'bg-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:-translate-y-0.5 shadow-sm'}`}
-            >
-              {!hasAdvancedReports && <ICONS.Shield className="w-4 h-4" />}
-              Export CSV
-            </Button>
-            <Button
-              onClick={loadTransactions}
-              className="px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest bg-transparent border border-sidebar-border text-[#2E2E2F] dark:text-white hover:bg-background/5 dark:bg-white/5"
-            >
-              Refresh
-            </Button>
-          </div>
+    <div className="dashboard-main-content pb-16 space-y-8 px-2 sm:px-4">
+      {/* Header */}
+      <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
+        <div>
+          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-[#2E2E2F] dark:text-white tracking-tight uppercase">Transaction Reports</h1>
+          <p className="mt-2 text-xs sm:text-sm font-bold text-[#2E2E2F]/50 dark:text-white/50 max-w-md">
+            Analyze revenue flow, monitor audience conversions, and export operational datasets.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 no-print">
+          <Button
+            onClick={handleExport}
+            className={`flex-1 sm:flex-none h-12 px-6 flex items-center justify-center gap-2 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all ${!hasAdvancedReports ? 'opacity-50 grayscale bg-[#F2F2F2] dark:bg-[#111111] border border-sidebar-border text-[#2E2E2F] dark:text-white' : 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/25 hover:bg-[#38BDF2]/90 active:scale-95'}`}
+          >
+            {!hasAdvancedReports && <ICONS.Shield className="w-4 h-4" />}
+            Export CSV
+          </Button>
+          <Button
+            onClick={loadTransactions}
+            className="flex-1 sm:flex-none h-12 px-6 flex items-center justify-center gap-2 bg-background border border-sidebar-border rounded-2xl text-[#2E2E2F] dark:text-white hover:bg-[#38BDF2]/10 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
+          >
+            <ICONS.RefreshCw className="w-4 h-4" />
+            Refresh
+          </Button>
         </div>
       </div>
 

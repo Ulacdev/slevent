@@ -253,40 +253,43 @@ export const SubscriptionPlans: React.FC = () => {
   if (loading) return <PageLoader variant="page" label="Loading Subscription Plans..." />;
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-700 pb-20">
-      {notification && (
-        <Card className={`px-5 py-4 rounded-xl border ${notification.type === 'success' ? 'bg-[#38BDF2]/20 border-[#38BDF2]/40 text-text dark:text-white' : 'bg-background border-sidebar-border text-text dark:text-white'}`}>
-          <p className="font-bold text-sm tracking-tight">{notification.message}</p>
-        </Card>
-      )}
-
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
+    <div className="space-y-8">
+      {/* ── Header Section ── */}
+      <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
         <div>
-          <label className="block text-[10px] font-black text-text/60 dark:text-white/60 uppercase tracking-[0.2em] mb-3 ml-1">Pricing Plans</label>
-          <div className="bg-background p-1 rounded-xl border border-sidebar-border flex items-center self-start">
+          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-text dark:text-white tracking-tight uppercase">Subscription Plans</h1>
+          <p className="mt-2 text-xs sm:text-sm font-bold text-text/50 dark:text-white/50 max-w-md">
+            Manage administrative billing tiers and service quotas for platform organizers.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 no-print">
+          <div className="bg-background p-1 rounded-2xl border border-sidebar-border flex items-center self-start">
             <button
               onClick={() => setBillingCycle('monthly')}
-              className={`min-h-[32px] px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors ${billingCycle === 'monthly' ? 'bg-[#38BDF2] text-white' : 'bg-background text-text dark:text-white/60 hover:bg-text hover:text-background dark:hover:bg-white dark:hover:text-[#2E2E2F]'}`}
+              className={`h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${billingCycle === 'monthly' ? 'bg-[#38BDF2] text-white shadow-md' : 'text-text/40 dark:text-white/40 hover:bg-[#38BDF2]/10'}`}
             >
               Monthly
             </button>
             <button
               onClick={() => setBillingCycle('yearly')}
-              className={`min-h-[32px] px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-2 ${billingCycle === 'yearly' ? 'bg-[#38BDF2] text-white' : 'bg-background text-text dark:text-white/60 hover:bg-text hover:text-background dark:hover:bg-white dark:hover:text-[#2E2E2F]'}`}
+              className={`h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${billingCycle === 'yearly' ? 'bg-[#38BDF2] text-white shadow-md' : 'text-text/40 dark:text-white/40 hover:bg-[#38BDF2]/10'}`}
             >
               Yearly
-              <span className={`text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest ${billingCycle === 'yearly' ? 'bg-background text-[#38BDF2] shadow-sm' : 'bg-[#38BDF2] text-white'}`}>SAVE 20%</span>
+              <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-md ${billingCycle === 'yearly' ? 'bg-white text-[#38BDF2]' : 'bg-[#38BDF2] text-white'}`}>-20%</span>
             </button>
           </div>
+
+          {isAdmin && (
+            <Button 
+              onClick={openAddModal}
+              className="h-12 px-8 flex items-center justify-center gap-2 bg-[#38BDF2] rounded-2xl text-white shadow-lg shadow-[#38BDF2]/25 hover:bg-[#38BDF2]/90 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
+            >
+              <ICONS.Plus className="w-4 h-4 stroke-[3px]" />
+              New Plan
+            </Button>
+          )}
         </div>
-        {isAdmin && (
-          <Button onClick={openAddModal} className="rounded-xl px-8 py-3.5 text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-[#38BDF2]/20 active:scale-95 transition-transform">
-            <span className="flex items-center gap-2">
-              <ICONS.Plus className="w-3.5 h-3.5" strokeWidth={3} />
-              Add New Plan
-            </span>
-          </Button>
-        )}
       </div>
 
       <PricingPlansGrid

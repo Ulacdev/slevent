@@ -40,11 +40,13 @@ import { HashRouter as Router, Routes, Route, Link, useLocation, useSearchParams
 
 
 
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { FloatingSupportModal } from './components/FloatingSupportModal';
 
 
 import { ONLINE_LOCATION_VALUE } from './components/BrowseEventsNavigator';
 import { ICONS } from './constants';
+import { CreatePlanModal } from './components/CreatePlanModal';
 import { Button, Input, Modal, PageLoader } from './components/Shared';
 import { useToast } from './context/ToastContext';
 import { ToastContainer } from './components/ToastContainer';
@@ -117,7 +119,7 @@ const Branding: React.FC<{ className?: string, theme?: string }> = ({ className 
 
   // Use footer logo in dark mode for branding transition
   const logoSrc = theme === 'dark'
-    ? "/lgo-footer.png"
+    ? (employerLogoUrl || "/lgo-footer.png")
     : (employerLogoUrl || "https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg");
 
   return (
@@ -197,6 +199,14 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   } = useUser();
   const isStaff = role === UserRole.STAFF;
   const { showToast } = useToast();
+  
+  const [isCreatePlanOpen, setIsCreatePlanOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleOpen = () => setIsCreatePlanOpen(true);
+    window.addEventListener('open-create-plan', handleOpen);
+    return () => window.removeEventListener('open-create-plan', handleOpen);
+  }, []);
 
   const handleLogout = React.useCallback(async (message?: string) => {
     try {
@@ -626,21 +636,22 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
               { label: 'Team and Access', path: '/settings?tab=team', icon: <ICONS.Users className="w-6 h-6" /> },
               { label: 'Email Settings', path: '/settings?tab=email', icon: <ICONS.Mail className="w-6 h-6" /> },
               { label: 'Payment Settings', path: '/settings?tab=payments', icon: <ICONS.CreditCard className="w-6 h-6" /> },
-              { label: 'Support', path: '/organizer-support', icon: <ICONS.MessageSquare className="w-6 h-6" /> },
-              { label: 'Account Settings', path: '/settings?tab=profile', icon: <ICONS.Settings className="w-6 h-6" />, separator: true },
             ]
   );
 
-  const checkIsActiveAdmin = (itemPath: string) => {
-    if (itemPath.includes('?')) {
-      const [base, query] = itemPath.split('?');
+  const checkIsActiveAdmin = (path: string) => {
+    if (path.includes('?')) {
+      const [base, query] = path.split('?');
       if (location.pathname !== base) return false;
       const tab = new URLSearchParams(query).get('tab');
       const currentTab = new URLSearchParams(location.search).get('tab');
       if (!currentTab && tab === 'team') return true;
       return currentTab === tab;
     }
-    return location.pathname === itemPath || location.pathname.startsWith(`${itemPath}/`);
+    if (path === '/events' || path === '/my-events') {
+      return location.pathname === path || location.pathname.startsWith(`${path}/`);
+    }
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
 
@@ -659,7 +670,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           <Link to={role === UserRole.ADMIN ? "/dashboard" : (role === UserRole.STAFF ? "/events" : "/user-home")} className="flex items-center justify-center group transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98]">
             {employerLogoUrl ? (
               <img
-                src={theme === 'dark' ? "/lgo-footer.png" : employerLogoUrl}
+                src={employerLogoUrl}
                 alt={employerName || 'Logo'}
                 className={desktopSidebarOpen
                   ? `${theme === 'dark' ? 'h-10' : 'h-20'} w-auto max-w-full object-contain px-4 transform ${theme === 'dark' ? 'scale-110 origin-left' : ''}`
@@ -723,7 +734,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       <main
         className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}
       >
-        <header className="h-24 bg-background border-b border-sidebar-border px-4 sm:px-8 flex items-center justify-between sticky top-0 z-[500] w-full" style={{ zoom: 0.8 }}>
+        <header className="h-24 bg-background border-b border-sidebar-border px-4 sm:px-6 flex items-center justify-between sticky top-0 z-[500] w-full">
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
@@ -740,14 +751,19 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            {/* Mobile Logo removed as per user request - branded inside sidebar only */}
             <div className="hidden sm:block">
               <p className="text-[10px] uppercase font-black text-[#2E2E2F] dark:text-[#F2F2F2] tracking-[0.2em]">
                 {isStaff ? 'Staff Panel' : role === UserRole.ADMIN ? 'Admin Center' : 'Organizer Portal'}
               </p>
             </div>
+
+            {/* Branding Logo - Visible on mobile only */}
+            <div className="flex items-center ml-2 transition-all duration-500 animate-in fade-in slide-in-from-left-4 md:hidden">
+               <Branding className="h-9 w-auto" theme={theme} />
+            </div>
           </div>
-          <div className="flex items-center gap-4 min-w-0">
+
+          <div className="flex items-center gap-4 min-w-0 flex-1 lg:flex-none justify-end">
             {/* Theme Toggle Button */}
             <button
               onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
@@ -1077,7 +1093,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           </div>
         )}
 
-        <div id="main-scroll-container" className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <div id="main-scroll-container" className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 md:pb-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto" style={{ fontSize: '1.1rem' }}>
             {(noStaffPerms && location.pathname !== '/attendees') ? (
               <div className="flex flex-col items-center justify-center min-h-[40vh]">
@@ -1137,6 +1153,8 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             </div>
           </div>
         </Modal>
+        <MobileBottomNav />
+        <CreatePlanModal isOpen={isCreatePlanOpen} onClose={() => setIsCreatePlanOpen(false)} />
       </main>
     </div>
   );
@@ -2609,6 +2627,8 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
       if (!currentTab && tab === 'organizer') return true;
       return currentTab === tab;
     }
+    // Handle subpaths for events management
+    if (itemPath === '/my-events' && location.pathname.startsWith('/my-events')) return true;
     return location.pathname === itemPath;
   };
 
@@ -2643,10 +2663,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
               desktopSidebarOpen ? (
                 <Branding className="h-20 w-auto" />
               ) : (
-                <>
-                  <img src="/lgo.webp" alt="Logo" className="h-10 w-10 object-contain dark:hidden" />
-                  <img src="/lgo-footer.png" alt="Logo" className="h-10 w-10 object-contain hidden dark:block" />
-                </>
+                <img src={theme === 'dark' ? "/lgo-footer.png" : "/lgo.webp"} alt="Logo" className="h-10 w-10 object-contain" />
               )
             )}
           </Link>
@@ -2715,7 +2732,12 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            {/* Mobile Logo removed as per user request - branded inside sidebar only */}
+            
+            {/* Organizer Branding Logo - Mobile Only */}
+            <div className="flex items-center ml-1 transition-all duration-500 animate-in fade-in slide-in-from-left-4 md:hidden">
+               <Branding className="h-10 w-auto" theme={theme} />
+            </div>
+
             <div className="ml-1 hidden sm:block">
               <p className="text-[10px] uppercase font-black text-primary-text tracking-[0.2em]">
                 Organizer Portal
@@ -3037,7 +3059,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
           </div>
         )}
 
-        <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 md:pb-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto w-full" style={{ fontSize: '1.1rem' }}>
             {children}
           </div>
@@ -3078,6 +3100,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
             </div>
           </div>
         </Modal>
+        <MobileBottomNav />
       </main>
     </div>
   );

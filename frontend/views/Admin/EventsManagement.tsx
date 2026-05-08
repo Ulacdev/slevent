@@ -497,17 +497,19 @@ export const EventsManagement: React.FC = () => {
         </div>
       </div>
 
-      <div className="space-y-8" style={{ zoom: 0.85 }}>
-      {/* ── Header Section (Mirrored from Dashboard) ── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2">
+      <div className="space-y-8">
+      {/* ── Header Section ── */}
+      <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-text dark:text-white uppercase tracking-tight">Moderation Hub</h1>
-          <p className="text-[10px] sm:text-xs font-bold text-text/40 dark:text-white/40 mt-1 uppercase tracking-widest">Centralized control for event oversight and compliance removal.</p>
+          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-text dark:text-white tracking-tight uppercase">Moderation Hub</h1>
+          <p className="mt-2 text-xs sm:text-sm font-bold text-text/50 dark:text-white/50 max-w-md">
+            Centralized control for event oversight, compliance monitoring, and platform-wide moderation.
+          </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 no-print">
           {/* Search bar */}
-          <div className="relative w-full sm:w-64 no-print">
+          <div className="relative flex-1 sm:w-64">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text/30">
               <ICONS.Search className="h-4 w-4" strokeWidth={3} />
             </div>
@@ -516,49 +518,48 @@ export const EventsManagement: React.FC = () => {
               placeholder="Search platform events..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-4 py-2.5 bg-background border border-sidebar-border rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-all dark:text-white placeholder:text-text/20"
+              className="block w-full pl-10 pr-4 h-12 bg-background dark:bg-[#1E293B] border border-sidebar-border rounded-2xl text-[11px] font-black focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-all dark:text-white placeholder:text-text/20"
             />
           </div>
 
-          {/* Date Range Picker (Dashboard Style) */}
-          <div className="flex items-center gap-2 bg-surface border border-sidebar-border rounded-xl p-1.5 shadow-sm">
-            <div className="flex items-center gap-2 px-2">
-              <span className="text-[10px] font-black text-text/30 dark:text-white/30 uppercase tracking-widest pl-1">From</span>
+          {/* Date Range Picker */}
+          <div className="flex items-center gap-2 bg-background dark:bg-[#1E293B] border border-sidebar-border p-2 rounded-2xl shadow-sm overflow-hidden">
+            <div className="flex items-center gap-2 px-3 border-r border-sidebar-border">
+              <ICONS.Calendar className="w-4 h-4 text-[#38BDF2]" />
               <input
                 type="date"
                 value={dateRange.start}
                 onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                className="bg-transparent text-[11px] font-bold text-text dark:text-white outline-none px-2 py-1 cursor-pointer"
+                className="bg-transparent text-[11px] font-black text-text dark:text-white outline-none"
               />
             </div>
-            <div className="w-[1px] h-4 bg-sidebar-border" />
-            <div className="flex items-center gap-2 px-2">
-              <span className="text-[10px] font-black text-text/30 dark:text-white/30 uppercase tracking-widest">To</span>
+            <div className="flex items-center gap-2 px-3">
               <input
                 type="date"
                 value={dateRange.end}
                 onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                className="bg-transparent text-[11px] font-bold text-text dark:text-white outline-none px-2 py-1 cursor-pointer"
+                className="bg-transparent text-[11px] font-black text-text dark:text-white outline-none"
               />
             </div>
           </div>
 
-          {/* Circular Print/Export Buttons (Dashboard Style) - Moved to far right */}
-          <div className="flex items-center gap-2 no-print">
+          {/* Actions */}
+          <div className="flex items-center gap-3">
             <button
               onClick={handlePrint}
-              className="w-9 h-9 flex items-center justify-center bg-[#38BDF2] border-2 border-[#38BDF2] rounded-full text-white hover:bg-text dark:hover:bg-white dark:hover:text-background transition-all shadow-lg group active:scale-95"
-              title="Print Moderation Report"
+              className="flex-1 sm:flex-none h-12 px-5 flex items-center justify-center gap-2 bg-background dark:bg-[#1E293B] border border-sidebar-border rounded-2xl text-text dark:text-white hover:bg-[#38BDF2]/10 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
             >
-              <ICONS.Printer className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <ICONS.Printer className="w-4 h-4" />
             </button>
-            <button
-              onClick={handleExport}
-              className="w-9 h-9 flex items-center justify-center bg-[#38BDF2] border-2 border-[#38BDF2] rounded-full text-white hover:bg-text dark:hover:bg-white dark:hover:text-background transition-all shadow-lg group active:scale-95"
-              title="Export Documentation"
-            >
-              <ICONS.FileText className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            </button>
+            {!isStaff && (
+              <button
+                onClick={handleOpenCreate}
+                className="flex-[2] sm:flex-none h-12 px-6 flex items-center justify-center gap-2 bg-[#38BDF2] rounded-2xl text-white shadow-lg shadow-[#38BDF2]/25 hover:bg-[#38BDF2]/90 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
+              >
+                <ICONS.Plus className="w-4 h-4 stroke-[3px]" />
+                <span className="hidden sm:inline">Launch Event</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

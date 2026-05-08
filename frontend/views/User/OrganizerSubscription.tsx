@@ -89,16 +89,16 @@ export const OrganizerSubscription: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 dashboard-main-content space-y-8 px-2 sm:px-4">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] py-12">
-        <div className="max-w-6xl mx-auto px-5">
-          <h1 className="text-3xl font-black text-white mb-2">Subscription</h1>
-          <p className="text-white/80">Manage your plan and billing</p>
+      <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
+        <div>
+          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-[#2E2E2F] dark:text-white tracking-tight uppercase">Subscription</h1>
+          <p className="mt-2 text-xs sm:text-sm font-bold text-[#2E2E2F]/50 dark:text-white/50 max-w-md">Manage your plan and billing</p>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-5 -mt-8">
+      <div className="max-w-6xl mx-auto px-2 sm:px-0 mt-8">
         {/* Current Plan */}
         {currentSubscription && (
           <Card className="mb-8 p-8 rounded-xl border-2 border-sidebar-border bg-surface shadow-sm">

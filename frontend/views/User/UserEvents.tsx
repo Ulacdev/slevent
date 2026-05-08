@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { apiService, API_BASE } from '../../services/apiService';
 import type { Event } from '../../types';
 import { TicketType, EventStatus, RegistrationView, OrganizerProfile, UserRole } from '../../types';
@@ -57,6 +57,21 @@ const MoreVerticalIcon: React.FC<any> = (props) => (
         <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
         <circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none" />
         <circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+);
+
+const SaveIcon: React.FC<any> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+        <polyline points="17 21 17 13 7 13 7 21" />
+        <polyline points="7 3 7 8 15 8" />
+    </svg>
+);
+
+const XIcon: React.FC<any> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
 );
 
@@ -2035,11 +2050,40 @@ const MobileWizardActions = React.memo(({
     setPreviewDevice
 }: any) => {
     return (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 md:hidden z-50 flex gap-2 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] animate-in slide-in-from-bottom duration-300">
-            <button type="button" onClick={handleNextWizardStep} className="flex-1 py-3 bg-[#38BDF2] text-white rounded-xl font-bold text-sm active:scale-95 transition-transform">Next</button>
-            <button type="button" onClick={handleSubmit} className="flex-1 py-3 bg-[#38BDF2] text-white rounded-xl font-bold text-sm active:scale-95 transition-transform">Save</button>
-            <button type="button" onClick={() => { if (isPreviewMode) { setIsPreviewMode(false); } else { setPreviewDevice('mobile'); setIsPreviewMode(true); } }} className="flex-1 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#3A3247] rounded-xl font-bold text-sm border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 flex items-center justify-center gap-2 active:scale-95 transition-transform">
-                {isPreviewMode ? 'Close' : 'Preview'}
+        <div className="fixed bottom-0 left-0 right-0 p-5 bg-transparent border-t border-sidebar-border md:hidden z-[1000] flex gap-3 pb-[env(safe-area-inset-bottom)] rounded-t-[2.5rem] overflow-hidden">
+            <div className="absolute inset-0 bg-[#F2F2F2]/95 backdrop-blur-xl -z-10" />
+            
+            <button 
+                type="button" 
+                onClick={handleNextWizardStep} 
+                className="flex flex-col items-center justify-center gap-1.5 flex-1 text-[#2E2E2F] active:scale-90 transition-all py-1"
+            >
+                <div className="w-10 h-10 rounded-xl bg-[#38BDF2]/10 flex items-center justify-center text-[#38BDF2]">
+                    <ICONS.ChevronRight className="w-6 h-6" />
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-widest">Next</span>
+            </button>
+
+            <button 
+                type="button" 
+                onClick={handleSubmit} 
+                className="flex flex-col items-center justify-center gap-1.5 flex-1 text-[#2E2E2F] active:scale-90 transition-all py-1"
+            >
+                <div className="w-10 h-10 rounded-xl bg-[#38BDF2] flex items-center justify-center text-white shadow-lg shadow-[#38BDF2]/30">
+                    <SaveIcon className="w-5 h-5" />
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-widest text-[#38BDF2]">Save</span>
+            </button>
+
+            <button 
+                type="button" 
+                onClick={() => { if (isPreviewMode) { setIsPreviewMode(false); } else { setPreviewDevice('mobile'); setIsPreviewMode(true); } }} 
+                className="flex flex-col items-center justify-center gap-1.5 flex-1 text-[#2E2E2F] active:scale-90 transition-all py-1"
+            >
+                <div className="w-10 h-10 rounded-xl bg-[#2E2E2F]/5 flex items-center justify-center text-[#2E2E2F]">
+                    {isPreviewMode ? <XIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-widest">{isPreviewMode ? 'Close' : 'Preview'}</span>
             </button>
         </div>
     );
@@ -2241,6 +2285,7 @@ export const UserEvents: React.FC = () => {
     }, []);
 
     const navigate = useNavigate();
+    const location = useLocation();
     const [searchParams, setSearchParams] = useSearchParams();
 
     const initialFormData = {
@@ -2360,7 +2405,22 @@ export const UserEvents: React.FC = () => {
         setPreviewDevice('mobile');
         setFinalStatusDecision('');
         setIsPreviewSheetExpanded(false);
-    }, []);
+
+        if (location.pathname === '/my-events/create' || location.pathname.includes('/my-events/edit/')) {
+            navigate('/my-events', { replace: true });
+        }
+    }, [location.pathname, navigate]);
+
+    useEffect(() => {
+        const isCreationPath = location.pathname === '/my-events/create' || location.pathname.includes('/my-events/edit/');
+        if (!isCreationPath && isModalOpen) {
+            // Close modal state but don't trigger navigate (since we already navigated away)
+            setIsModalOpen(false);
+            setWizardStep(1);
+            setIsPreviewMode(false);
+            setIsSidebarHidden(false);
+        }
+    }, [location.pathname, isModalOpen]);
 
     const [isPreviewSheetExpanded, setIsPreviewSheetExpanded] = useState(false);
 
@@ -2639,7 +2699,14 @@ export const UserEvents: React.FC = () => {
         setPreviewDevice('mobile');
         setFinalStatusDecision('');
         setIsModalOpen(true);
+        navigate('/my-events/create');
     }, [isOrganizerProfileReady, showToast, navigate, initialFormData, organizerProfile, parseLimit]);
+
+    useEffect(() => {
+        if (location.pathname === '/my-events/create' && !organizerLoading && !isModalOpen && !isFetching && canStartCreation) {
+            handleOpenCreate();
+        }
+    }, [location.pathname, organizerLoading, isModalOpen, isFetching, canStartCreation, handleOpenCreate]);
 
     useEffect(() => {
         const handler = window.setTimeout(() => setDebouncedSearch(searchTerm.trim()), 350);
@@ -2767,7 +2834,8 @@ export const UserEvents: React.FC = () => {
         void loadEventTicketReadiness(event.eventId);
         void loadEventPromotions(event.eventId);
         setIsModalOpen(true);
-    }, []);
+        navigate(`/my-events/edit/${event.eventId}`);
+    }, [navigate, loadEventTicketReadiness, loadEventPromotions]);
 
     const handleOpenTickets = React.useCallback((event: Event) => {
         setSelectedEvent(event);
@@ -2821,6 +2889,7 @@ export const UserEvents: React.FC = () => {
                 setIsTicketModalOpen(false);
                 setIsModalOpen(true);
                 showToast('success', 'Tickets saved. Final step: set the event status.');
+                if (currentEventId) navigate(`/my-events/edit/${currentEventId}`);
                 fetchEvents();
                 return;
             }
@@ -2942,6 +3011,7 @@ export const UserEvents: React.FC = () => {
         setWizardStep(4);
         setIsPreviewMode(false);
         showToast('error', 'Ticket setup cancelled. Complete tickets to continue to Event Status.');
+        if (currentEventId) navigate(`/my-events/edit/${currentEventId}`);
     };
 
 
@@ -2970,128 +3040,124 @@ export const UserEvents: React.FC = () => {
 
             {!isModalOpen && (
                 <>
-                    {/* Header section - Refined with Title/Subtitle aligned to Controls */}
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2">
-                        <div className="flex-1 min-w-0">
+                    <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
+                        <div>
                             <div className="flex items-center gap-3">
-                                <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] dark:text-white dark:text-white tracking-tight">Events</h1>
+                                <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-[#2E2E2F] dark:text-white tracking-tight uppercase">My Events</h1>
                                 {!isStaff && (
                                     <button
                                         type="button"
                                         onClick={() => setIsWorkflowNoticeOpen(true)}
                                         title="Show Organizer Event Workflow guide"
-                                        className="h-[38px] w-[38px] shrink-0 rounded-xl border-2 border-[#2E2E2F]/20 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white/70 hover:text-[#2E2E2F] dark:text-white dark:text-white hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/10 transition-colors flex items-center justify-center"
+                                        className="h-[38px] w-[38px] shrink-0 rounded-xl border-2 border-[#2E2E2F]/20 bg-[#F2F2F2] dark:bg-[#111111] text-[#2E2E2F] dark:text-white/70 hover:text-[#2E2E2F] dark:text-white hover:border-[#38BDF2]/40 hover:bg-[#38BDF2]/10 transition-colors flex items-center justify-center"
                                     >
                                         <ICONS.Info className="w-4 h-4" />
                                     </button>
                                 )}
                             </div>
-                            <p className="mt-1 text-sm font-semibold text-[#2E2E2F] dark:text-white dark:text-white/65">Configure and manage your session lifecycle.</p>
+                            <p className="mt-2 text-xs sm:text-sm font-bold text-[#2E2E2F]/50 dark:text-white/50 max-w-md">
+                                Create and manage your events efficiently.
+                            </p>
                         </div>
 
-                        <div className="flex flex-col gap-3 w-full lg:w-auto lg:items-end">
-                            {/* Plan Status & Promotions Quota - Top Right */}
-                            <div className="flex flex-wrap items-center gap-3 justify-end">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 no-print">
+                            {isOrganizerProfileReady && (
+                                <>
+                                    {promotionQuota && promotionQuota.limit > 0 && (
+                                        <div className="flex items-center gap-2 px-3 py-2 bg-[#F2F2F2] dark:bg-[#111111] border border-sidebar-border rounded-2xl shadow-sm whitespace-nowrap">
+                                            <ICONS.Zap className="w-3.5 h-3.5 text-[#2E2E2F] dark:text-white/40" />
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/60">
+                                                Promotions
+                                            </span>
+                                            <span className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/30">|</span>
+                                            <span className={`text-[10px] font-bold ${promotionQuota.used < promotionQuota.limit
+                                                ? 'text-[#2E2E2F] dark:text-white/50'
+                                                : 'text-red-500'
+                                                }`}>
+                                                {promotionQuota.used}/{promotionQuota.limit}
+                                            </span>
+                                        </div>
+                                    )}
 
-                                {!isStaff && (
-                                    <>
-                                        {promotionQuota && (
-                                            <div className="flex items-center gap-2 px-3 py-1.5 border-2 rounded-xl shadow-sm whitespace-nowrap border-[#D1D5DB] bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111]">
-                                                <ICONS.Zap className="w-3.5 h-3.5 text-[#2E2E2F] dark:text-white dark:text-white/40" />
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/60">
-                                                    Promotions
+                                    {organizerProfile && (() => {
+                                        const pricedLimit = Number(organizerProfile?.plan?.limits?.max_priced_events || organizerProfile?.plan?.max_priced_events || organizerProfile?.plan?.maxPricedEvents || 0);
+                                        const currentPaidCount = events.filter(e => (e.ticketTypes || []).some((t: any) => (t.priceAmount || 0) > 0)).length;
+
+                                        return (
+                                            <div className={`flex items-center gap-2 px-3 py-2 bg-[#F2F2F2] dark:bg-[#111111] border border-sidebar-border rounded-2xl shadow-sm whitespace-nowrap`}>
+                                                <ICONS.CreditCard className="w-3.5 h-3.5 text-[#2E2E2F] dark:text-white/40" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/60">
+                                                    Paid Events
                                                 </span>
-                                                <span className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/30">|</span>
-                                                <span className={`text-[10px] font-bold ${promotionQuota.used < promotionQuota.limit
-                                                    ? 'text-[#2E2E2F] dark:text-white dark:text-white/50'
-                                                    : 'text-red-500'
-                                                    }`}>
-                                                    {promotionQuota.used}/{promotionQuota.limit}
+                                                <span className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/30">|</span>
+                                                <span className={`text-[10px] font-bold ${currentPaidCount >= pricedLimit ? 'text-red-500' : 'text-[#2E2E2F] dark:text-white/40'}`}>
+                                                    {currentPaidCount}/{pricedLimit}
                                                 </span>
                                             </div>
-                                        )}
+                                        );
+                                    })()}
+                                </>
+                            )}
+                        </div>
+                    </div>
 
-                                        {organizerProfile && (() => {
-                                            const pricedLimit = Number(organizerProfile?.plan?.limits?.max_priced_events || organizerProfile?.plan?.max_priced_events || organizerProfile?.plan?.maxPricedEvents || 0);
-                                            const currentPaidCount = events.filter(e => (e.ticketTypes || []).some((t: any) => (t.priceAmount || 0) > 0)).length;
-
-                                            return (
-                                                <div className={`flex items-center gap-2 px-3 py-1.5 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 rounded-xl shadow-sm whitespace-nowrap border-[#D1D5DB]`}>
-                                                    <ICONS.CreditCard className="w-3.5 h-3.5 text-[#2E2E2F] dark:text-white dark:text-white/40" />
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white dark:text-white/60">
-                                                        Paid Events
-                                                    </span>
-                                                    <span className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/30">|</span>
-                                                    <span className={`text-[10px] font-bold ${currentPaidCount >= pricedLimit ? 'text-red-500' : 'text-[#2E2E2F] dark:text-white dark:text-white/40'}`}>
-                                                        {currentPaidCount}/{pricedLimit}
-                                                    </span>
-                                                </div>
-                                            );
-                                        })()}
-                                    </>
-                                )}
-
-
-                            </div>
-
-                            <div className="flex flex-wrap items-center gap-3 w-full">
-
-                                <div className="relative w-full sm:w-64">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#2E2E2F] dark:text-white dark:text-white/60">
-                                        <ICONS.Search className="h-4 w-4" strokeWidth={3} />
-                                    </div>
-                                    <input
-                                        type="text"
-                                        placeholder="Search events..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="block w-full pl-10 pr-10 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors"
-                                    />
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full mt-8 px-2 sm:px-0">
+                        <div className="flex flex-1 items-center gap-3">
+                            <div className="relative flex-1 sm:w-64">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#2E2E2F] dark:text-white/60">
+                                    <ICONS.Search className="h-4 w-4" strokeWidth={3} />
                                 </div>
-                                <select
-                                    className="px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl text-[11px] font-bold uppercase tracking-widest outline-none transition-colors"
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                <input
+                                    type="text"
+                                    placeholder="Search events..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="block w-full pl-10 pr-10 h-12 bg-[#F2F2F2] dark:bg-[#111111] border border-sidebar-border rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors font-medium"
+                                />
+                            </div>
+                            <select
+                                className="h-12 px-4 bg-[#F2F2F2] dark:bg-[#111111] border border-sidebar-border rounded-2xl text-[11px] font-black uppercase tracking-widest outline-none transition-colors"
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                            >
+                                <option value="ALL">All Status</option>
+                                <option value="PUBLISHED">Published</option>
+                                <option value="DRAFT">Draft</option>
+                                <option value="CLOSED">Closed</option>
+                            </select>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center bg-[#F2F2F2] dark:bg-[#111111] border border-sidebar-border rounded-2xl p-1 h-12">
+                                <button
+                                    className={`px-4 h-full text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${viewMode === 'list' ? 'bg-[#38BDF2] text-white shadow-sm' : 'text-[#2E2E2F] dark:text-white/40 hover:text-[#2E2E2F] dark:hover:text-white'}`}
+                                    onClick={() => setViewMode('list')}
                                 >
-                                    <option value="ALL">All Status</option>
-                                    <option value="PUBLISHED">Published</option>
-                                    <option value="DRAFT">Draft</option>
-                                    <option value="CLOSED">Closed</option>
-                                </select>
-
-                                <div className="flex items-center bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-xl p-1">
-                                    <button
-                                        className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${viewMode === 'list' ? 'bg-[#38BDF2] text-white shadow-sm' : 'text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
-                                        onClick={() => setViewMode('list')}
-                                    >
-                                        List
-                                    </button>
-                                    <button
-                                        className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${viewMode === 'calendar' ? 'bg-[#38BDF2] text-white shadow-sm' : 'text-[#2E2E2F] dark:text-white dark:text-white/40 hover:text-[#2E2E2F] dark:text-white dark:text-white'}`}
-                                        onClick={() => setViewMode('calendar')}
-                                    >
-                                        Calendar
-                                    </button>
-                                </div>
-
-                                {canCreate && (
-                                    <div className="flex flex-col items-end">
-                                        <Button
-                                            onClick={handleOpenCreate}
-                                            className="rounded-xl px-6 py-3 bg-[#38BDF2] text-[#F2F2F2] hover:text-[#F2F2F2] font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                            disabled={!canStartCreation || organizerLoading || isAtTotalLimit}
-                                        >
-                                            <span className="flex items-center gap-2 font-bold text-sm">
-                                                <ICONS.Calendar className="w-4 h-4" />
-                                                {isAtTotalLimit ? 'Limit Reached' : 'Create Event'}
-                                            </span>
-                                        </Button>
-                                        {isAtTotalLimit && (
-                                            <p className="mt-1.5 text-[10px] text-[#2E2E2F] dark:text-white dark:text-white/50 font-bold uppercase tracking-tight">Upgrade for more events</p>
-                                        )}
-                                    </div>
-                                )}
+                                    List
+                                </button>
+                                <button
+                                    className={`px-4 h-full text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${viewMode === 'calendar' ? 'bg-[#38BDF2] text-white shadow-sm' : 'text-[#2E2E2F] dark:text-white/40 hover:text-[#2E2E2F] dark:hover:text-white'}`}
+                                    onClick={() => setViewMode('calendar')}
+                                >
+                                    Calendar
+                                </button>
                             </div>
+
+                            {canCreate && (
+                                <div className="flex flex-col items-end ml-auto sm:ml-0">
+                                    <Button
+                                        onClick={handleOpenCreate}
+                                        className="h-[42px] px-5 bg-[#38BDF2] rounded-xl text-white shadow-lg shadow-[#38BDF2]/25 hover:bg-[#38BDF2]/90 transition-all font-black text-[10px] uppercase tracking-widest active:scale-95 flex items-center gap-2"
+                                        disabled={!canStartCreation || organizerLoading || isAtTotalLimit}
+                                    >
+                                        <ICONS.Plus className="w-3.5 h-3.5 stroke-[3px]" />
+                                        {isAtTotalLimit ? 'Limit Reached' : 'Create Event'}
+                                    </Button>
+                                    {isAtTotalLimit && (
+                                        <p className="mt-1 text-[8px] text-red-500 font-black uppercase tracking-widest">Upgrade for more events</p>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -3181,11 +3247,11 @@ export const UserEvents: React.FC = () => {
                                                 <div className="h-8 w-[2px] bg-[#2E2E2F]/10 mx-1" />
                                             </>
                                         )}
-                                        <button onClick={handlePrintEvents} className="flex items-center justify-center h-[52px] w-[52px] bg-[#38BDF2] border-2 border-[#38BDF2] rounded-2xl text-[#F2F2F2] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group" title={`Print List (${selectedRows.size > 0 ? selectedRows.size : filteredEvents.length})`}>
-                                            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                                        <button onClick={handlePrintEvents} className="flex items-center justify-center h-[42px] w-[42px] bg-[#38BDF2] border-2 border-[#38BDF2] rounded-xl text-[#F2F2F2] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group" title={`Print List (${selectedRows.size > 0 ? selectedRows.size : filteredEvents.length})`}>
+                                            <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
                                         </button>
-                                        <button onClick={handleExportEvents} className="flex items-center justify-center h-[52px] w-[52px] bg-[#38BDF2] border-2 border-[#38BDF2] rounded-2xl text-[#F2F2F2] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group" title={`Export CSV (${selectedRows.size > 0 ? selectedRows.size : filteredEvents.length})`}>
-                                            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                        <button onClick={handleExportEvents} className="flex items-center justify-center h-[42px] w-[42px] bg-[#38BDF2] border-2 border-[#38BDF2] rounded-xl text-[#F2F2F2] hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group" title={`Export CSV (${selectedRows.size > 0 ? selectedRows.size : filteredEvents.length})`}>
+                                            <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                         </button>
                                     </div>
                                 </div>

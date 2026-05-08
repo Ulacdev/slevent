@@ -29,14 +29,17 @@ const HeroCard = React.memo<{
   iconBg: string;
   trendColor: string;
 }>(({ title, value, sub, icon, iconBg, trendColor }) => (
-  <div className="p-4 sm:p-5 rounded-2xl border border-sidebar-border bg-surface flex items-center gap-4 hover:scale-[1.01] transition-transform cursor-default shadow-sm">
-    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white flex-shrink-0 ${iconBg}`}>
-      <div className="[&>svg]:w-5 [&>svg]:h-5 sm:[&>svg]:w-6 sm:[&>svg]:h-6">{icon}</div>
+  <div className="p-4 sm:p-6 rounded-[2rem] border border-sidebar-border bg-transparent flex flex-col items-start gap-4 hover:shadow-xl hover:shadow-[#38BDF2]/5 transition-all cursor-default group">
+    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white flex-shrink-0 shadow-lg ${iconBg} group-hover:scale-110 transition-transform`}>
+      <div className="[&>svg]:w-6 [&>svg]:h-6 stroke-[2.5px]">{icon}</div>
     </div>
-    <div>
-      <p className="text-[10px] sm:text-xs font-bold text-text/50 dark:text-white/40 mb-0.5 uppercase tracking-wider">{title}</p>
-      <p className="text-xl sm:text-2xl font-black text-text dark:text-white">{value}</p>
-      <p className={`text-[9px] sm:text-[10px] font-bold mt-1 ${trendColor}`}>{sub}</p>
+    <div className="space-y-1">
+      <p className="text-[10px] font-black text-[#2E2E2F]/40 dark:text-white/40 uppercase tracking-[0.2em]">{title}</p>
+      <p className="text-2xl sm:text-3xl font-black text-[#2E2E2F] dark:text-white tracking-tight">{value}</p>
+      <div className="flex items-center gap-1.5 mt-2">
+        <span className={`w-1.5 h-1.5 rounded-full ${iconBg} animate-pulse`} />
+        <p className={`text-[10px] font-bold ${trendColor} uppercase tracking-wider`}>{sub}</p>
+      </div>
     </div>
   </div>
 ));
@@ -236,7 +239,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="space-y-8" style={{ zoom: 0.85 }}>
+      <div className="space-y-8">
         <style>{`
           @media screen {
             .no-print-screen { display: none !important; }
@@ -535,61 +538,60 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-background pb-16 space-y-6 px-2 font-sans dashboard-main-content">
+        <div className="bg-background pb-16 space-y-8 px-2 sm:px-4 font-sans dashboard-main-content">
           {/* ── Header ── */}
-          <div className="pt-4 flex flex-col md:flex-row md:items-start justify-between gap-6 px-2">
+          <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
             <div>
-              <h1 className="text-3xl md:text-[2rem] font-black text-text dark:text-white tracking-tighter uppercase">Dashboard</h1>
-              <p className="mt-1 text-sm font-semibold text-text/60 dark:text-white/60">
+              <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-text dark:text-white tracking-tight uppercase">Dashboard</h1>
+              <p className="mt-2 text-xs sm:text-sm font-bold text-text/50 dark:text-white/50 max-w-md">
                 Manage organizers, subscriptions, and platform health
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row items-center gap-4 no-print">
-              <div className="flex items-center gap-2 bg-surface border border-sidebar-border p-1.5 rounded-xl shadow-sm">
-                <input
-                  type="date"
-                  value={dateRange.start}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                  className="bg-transparent text-[11px] font-bold text-text dark:text-white outline-none px-2 py-1"
-                />
-                <span className="text-text/30 text-[10px] font-black uppercase">to</span>
-                <input
-                  type="date"
-                  value={dateRange.end}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                  className="bg-transparent text-[11px] font-bold text-text dark:text-white outline-none px-2 py-1"
-                />
+            
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 no-print">
+              {/* Date Filter */}
+              <div className="flex items-center gap-2 bg-background border border-sidebar-border p-2 rounded-2xl shadow-sm overflow-hidden">
+                <div className="flex items-center gap-2 px-3 border-r border-sidebar-border">
+                  <ICONS.Calendar className="w-4 h-4 text-[#38BDF2]" />
+                  <input
+                    type="date"
+                    value={dateRange.start}
+                    onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                    className="bg-transparent text-[11px] font-black text-text dark:text-white outline-none"
+                  />
+                </div>
+                <div className="flex items-center gap-2 px-3">
+                  <input
+                    type="date"
+                    value={dateRange.end}
+                    onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                    className="bg-transparent text-[11px] font-black text-text dark:text-white outline-none"
+                  />
+                </div>
               </div>
 
+              {/* Actions */}
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handlePrint}
-                    className="w-9 h-9 flex items-center justify-center bg-[#38BDF2] border-2 border-[#38BDF2] rounded-full text-white hover:bg-text dark:hover:bg-white dark:hover:text-background transition-all shadow-lg group active:scale-95"
-                    title="Print Dashboard"
-                  >
-                    <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                  </button>
-                  <button
-                    onClick={handleExport}
-                    className="w-9 h-9 flex items-center justify-center bg-[#38BDF2] border-2 border-[#38BDF2] rounded-full text-white hover:bg-text dark:hover:bg-white dark:hover:text-background transition-all shadow-lg group active:scale-95"
-                    title="Export Report"
-                  >
-                    <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                  </button>
-                </div>
+                <button
+                  onClick={handlePrint}
+                  className="flex-1 sm:flex-none h-12 px-5 flex items-center justify-center gap-2 bg-background border border-sidebar-border rounded-2xl text-text dark:text-white hover:bg-[#38BDF2]/10 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
+                >
+                  <ICONS.Printer className="w-4 h-4" />
+                  <span className="hidden sm:inline">Print</span>
+                </button>
                 <button
                   onClick={() => setIsCreatePlanOpen(true)}
-                  className="bg-[#38BDF2] text-white px-6 py-2.5 rounded-xl font-black text-[13px] uppercase tracking-wide flex items-center gap-2 shadow-lg hover:bg-text dark:hover:bg-white dark:hover:text-background transition-all active:scale-95"
+                  className="flex-[2] sm:flex-none h-12 px-6 flex items-center justify-center gap-2 bg-[#38BDF2] rounded-2xl text-white shadow-lg shadow-[#38BDF2]/25 hover:bg-[#38BDF2]/90 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
                 >
-                  <ICONS.Plus className="w-4 h-4" /> Create New Plan
+                  <ICONS.Plus className="w-4 h-4 stroke-[3px]" />
+                  Create Plan
                 </button>
               </div>
             </div>
           </div>
 
           {/* ── Row 1: Hero Stats ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <HeroCard
               title="Total Organizers"
               value={totalOrganizers}
@@ -618,11 +620,10 @@ export const AdminDashboard: React.FC = () => {
               title="Support Queue"
               value={pendingSupport}
               sub="Open tickets pending"
-              icon={<ICONS.MessageSquare />}
+              icon={<ICONS.Headphones />}
               iconBg="bg-[#38BDF2]"
               trendColor="text-[#38BDF2]"
             />
-
           </div>
 
 
@@ -662,7 +663,7 @@ export const AdminDashboard: React.FC = () => {
                           className="w-full rounded-t-md bg-[#38BDF2] group-hover:bg-[#0E94C5] transition-colors"
                           style={{ height: `${h}%` }}
                         />
-                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-text dark:bg-white text-background dark:text-[#2E2E2F] text-[9px] px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 whitespace-nowrap z-10 font-bold transition-all shadow-xl">
+                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-text dark:bg-background text-background dark:text-[#F2F2F2] text-[9px] px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 whitespace-nowrap z-10 font-bold transition-all shadow-xl">
                           {val} new
                         </div>
                       </div>

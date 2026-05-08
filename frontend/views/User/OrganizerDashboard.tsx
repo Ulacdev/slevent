@@ -311,58 +311,46 @@ export const OrganizerDashboard: React.FC = () => {
                 </div>
             </div>
 
-            <div className="dashboard-main-content">
-            {/* ── Header ── */}
-            <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-                <div>
-                    <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] dark:text-white tracking-tighter uppercase">Dashboard Overview</h1>
-                    <p className="mt-1 text-sm font-semibold text-[#2E2E2F] dark:text-white/60">
-                        See your latest registrations, tickets, and revenue at a glance.
-                    </p>
-                </div>
-                <div className="flex flex-col items-end gap-4 no-print">
-                    <div className="flex items-center gap-2 bg-background border border-sidebar-border p-1.5 rounded-xl shadow-sm">
-                        <input
-                            type="date"
-                            value={dateRange.start}
-                            onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                            className="bg-transparent text-[11px] font-bold text-[#2E2E2F] dark:text-white outline-none px-2 py-1"
-                        />
-                        <span className="text-[#2E2E2F]/30 text-[10px] font-black uppercase">to</span>
-                        <input
-                            type="date"
-                            value={dateRange.end}
-                            onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                            className="bg-transparent text-[11px] font-bold text-[#2E2E2F] dark:text-white outline-none px-2 py-1"
-                        />
+            <div className="dashboard-main-content pb-16 space-y-8 px-2 sm:px-4">
+                <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
+                    <div>
+                        <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-[#2E2E2F] dark:text-white tracking-tight uppercase">Dashboard</h1>
+                        <p className="mt-2 text-xs sm:text-sm font-bold text-[#2E2E2F]/50 dark:text-white/50 max-w-md">Performance Overview</p>
                     </div>
-                    
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={handlePrint}
-                                className="w-9 h-9 flex items-center justify-center bg-[#38BDF2] border-2 border-[#38BDF2] rounded-full text-white hover:bg-[#2E2E2F] dark:hover:bg-white dark:hover:text-[#2E2E2F] transition-all shadow-lg group active:scale-95"
-                                title="Print Dashboard"
-                            >
-                                <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                            </button>
-                            <button
-                                onClick={handleExport}
-                                className="w-9 h-9 flex items-center justify-center bg-[#38BDF2] border-2 border-[#38BDF2] rounded-full text-white hover:bg-[#2E2E2F] dark:hover:bg-white dark:hover:text-[#2E2E2F] transition-all shadow-lg group active:scale-95"
-                                title="Export Report"
-                            >
-                                <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            </button>
+
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 no-print">
+                        <div className="flex items-center gap-2 bg-[#F2F2F2] dark:bg-[#111111] p-2 rounded-2xl border border-sidebar-border shadow-sm">
+                            <input
+                                type="date"
+                                value={dateRange.start}
+                                onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                                className="bg-transparent text-[11px] font-black text-[#2E2E2F] dark:text-white outline-none px-2"
+                            />
+                            <span className="text-[#2E2E2F] dark:text-white/30">/</span>
+                            <input
+                                type="date"
+                                value={dateRange.end}
+                                onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                                className="bg-transparent text-[11px] font-black text-[#2E2E2F] dark:text-white outline-none px-2"
+                            />
                         </div>
-                        <button
-                            onClick={() => navigate('/my-events?openModal=true')}
-                            className="bg-[#38BDF2] text-white px-6 py-2.5 rounded-xl font-black text-[13px] uppercase tracking-wide flex items-center gap-2 shadow-lg hover:bg-[#2E2E2F] dark:hover:bg-white dark:hover:text-[#2E2E2F] transition-all active:scale-95 whitespace-nowrap"
-                        >
-                            <ICONS.Plus className="w-4 h-4" /> Create New Event
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <Button
+                                variant="outline"
+                                onClick={handlePrint}
+                                className="flex-1 sm:flex-none h-12 px-5 flex items-center justify-center gap-2 bg-background border border-sidebar-border rounded-2xl text-[#2E2E2F] dark:text-white hover:bg-[#38BDF2]/10 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
+                            >
+                                <ICONS.Download className="w-4 h-4 mr-2" /> Print Report
+                            </Button>
+                            <Button
+                                onClick={() => navigate('/my-events?openModal=true')}
+                                className="flex-[2] sm:flex-none h-12 px-6 flex items-center justify-center gap-2 bg-[#38BDF2] rounded-2xl text-white shadow-lg shadow-[#38BDF2]/25 hover:bg-[#38BDF2]/90 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
+                            >
+                                <ICONS.Plus className="w-4 h-4 mr-2" /> Create Event
+                            </Button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
             {/* ── Hero Stats ── */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">

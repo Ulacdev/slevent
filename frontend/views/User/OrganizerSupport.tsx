@@ -310,46 +310,44 @@ export const OrganizerSupport: React.FC = () => {
   }
 
   return (
-    <div className="pb-16 space-y-6 max-w-7xl mx-auto">
-      {/* Navigation Toggle */}
-      <div className="flex items-center justify-end gap-3 mb-2">
-        <button 
-          onClick={() => setShowHistory(!showHistory)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-transparent border border-[#2E2E2F]/5 dark:border-white/5 rounded-xl text-[#2E2E2F] dark:text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-[#2E2E2F]/5 dark:bg-white/5 transition-all"
-        >
-          {showHistory ? (
-            <>
-              <ICONS.ArrowLeft className="w-4 h-4" />
-              New Inquiry
-            </>
-          ) : (
-            <>
-              <ICONS.History className="w-4 h-4" />
-              View History
-            </>
-          )}
-        </button>
-      </div>
-
-      <div className="bg-transparent border border-[#2E2E2F]/5 dark:border-white/5 rounded-xl p-6 md:p-8 relative overflow-hidden group">
-        <div className="flex flex-col gap-4 relative z-10">
-          <div className="max-w-2xl">
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-widest mb-4 flex-shrink-0 w-fit ${hasPrioritySupport ? 'bg-[#38BDF2]/10 border-[#38BDF2]/20 text-[#38BDF2]' : 'bg-[#2E2E2F]/5 dark:bg-white/5 border-[#2E2E2F]/10 dark:border-white/10 text-[#2E2E2F] dark:text-white'}`}>
-              {hasPrioritySupport ? 'Pro Support Active' : 'Standard Support'}
-            </div>
-            <h1 className="text-3xl md:text-[2rem] font-semibold text-[#2E2E2F] dark:text-white tracking-tight uppercase">
-              {showHistory ? 'Support History' : 'Organizer Support'}
-            </h1>
-            <p className="mt-1 text-sm font-semibold text-[#2E2E2F] dark:text-white/60">
-              {showHistory 
-                ? 'Review your previous conversations and admin responses.'
-                : hasPrioritySupport
-                ? 'Welcome to the Priority Support Center. Your tickets bypass the standard queue for lightning-fast resolutions.'
-                : 'Need assistance? Open a ticket to connect with our standard support staff.'}
-            </p>
+    <div className="dashboard-main-content pb-16 space-y-8 px-2 sm:px-4">
+      {/* Header */}
+      <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
+        <div>
+          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest mb-4 ${hasPrioritySupport ? 'bg-[#38BDF2]/10 border-[#38BDF2]/20 text-[#38BDF2]' : 'bg-[#F2F2F2] dark:bg-[#111111] border-sidebar-border text-[#2E2E2F] dark:text-white/40'}`}>
+            <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${hasPrioritySupport ? 'bg-[#38BDF2]' : 'bg-[#2E2E2F]/40'}`} />
+            {hasPrioritySupport ? 'Pro Support Active' : 'Standard Support'}
           </div>
+          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-[#2E2E2F] dark:text-white tracking-tight uppercase">
+            {showHistory ? 'Support History' : 'Organizer Support'}
+          </h1>
+          <p className="mt-2 text-xs sm:text-sm font-bold text-[#2E2E2F]/50 dark:text-white/50 max-w-md">
+            {showHistory 
+              ? 'Review your previous conversations and admin responses.'
+              : hasPrioritySupport
+              ? 'Your tickets bypass the standard queue for lightning-fast resolutions.'
+              : 'Need assistance? Open a ticket to connect with our standard support staff.'}
+          </p>
         </div>
-        <div className="absolute -right-20 -top-40 w-96 h-96 bg-[#38BDF2]/5 rounded-full blur-3xl pointer-events-none group-hover:bg-[#38BDF2]/10 transition-all duration-700" />
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 no-print">
+          <button 
+            onClick={() => setShowHistory(!showHistory)}
+            className="h-12 px-6 flex items-center justify-center gap-2 bg-background border border-sidebar-border rounded-2xl text-[#2E2E2F] dark:text-white hover:bg-[#38BDF2]/10 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95 shadow-sm"
+          >
+            {showHistory ? (
+              <>
+                <ICONS.Plus className="w-4 h-4" />
+                New Inquiry
+              </>
+            ) : (
+              <>
+                <ICONS.History className="w-4 h-4" />
+                View History
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {!showHistory ? (

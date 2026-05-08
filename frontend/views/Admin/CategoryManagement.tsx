@@ -120,19 +120,25 @@ export const CategoryManagement: React.FC = () => {
   if (loading) return <PageLoader variant="page" label="Loading Categories..." />;
 
   return (
-    <div className="space-y-8" style={{ zoom: 0.85 }}>
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-2">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-text dark:text-white tracking-tight">Smart Categories</h1>
-          <p className="text-text dark:text-white/60 font-medium text-sm mt-1">Manage how events are automatically tagged and browsed.</p>
+    <div className="space-y-8">
+      {/* ── Header Section ── */}
+      <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
+        <div>
+          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-text dark:text-white tracking-tight uppercase">Smart Categories</h1>
+          <p className="mt-2 text-xs sm:text-sm font-bold text-text/50 dark:text-white/50 max-w-md">
+            Manage how events are automatically tagged, organized, and discovered across the platform.
+          </p>
         </div>
-        <Button 
-          onClick={() => handleOpenModal()}
-          className="bg-[#38BDF2] text-white px-8 py-3.5 rounded-xl font-black shadow-lg shadow-[#38BDF2]/20 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all text-[11px] uppercase tracking-widest"
-        >
-          <ICONS.Plus className="w-5 h-5" />
-          Add New Category
-        </Button>
+
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => handleOpenModal()}
+            className="flex-1 sm:flex-none h-12 px-8 flex items-center justify-center gap-2 bg-[#38BDF2] rounded-2xl text-white shadow-lg shadow-[#38BDF2]/25 hover:bg-[#38BDF2]/90 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
+          >
+            <ICONS.Plus className="w-4 h-4 stroke-[3px]" />
+            Add Category
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

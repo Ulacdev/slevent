@@ -411,17 +411,20 @@ export const RegistrationsList: React.FC = () => {
   if (loading) return <PageLoader variant="page" label="Loading Attendees..." />;
 
   return (
-    <div className="pb-16 space-y-6">
-      <div className="px-2 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+    <div className="space-y-8 pb-10">
+      {/* ── Header Section ── */}
+      <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
         <div>
-          <h1 className="text-3xl md:text-[2rem] font-semibold text-text dark:text-white tracking-tight">Attendee List</h1>
-          <p className="mt-1 text-sm font-semibold text-text dark:text-white/60">
-            Full visibility of confirmed registrations and financial transactions.
+          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-text dark:text-white tracking-tight uppercase">Attendee List</h1>
+          <p className="mt-2 text-xs sm:text-sm font-bold text-text/50 dark:text-white/50 max-w-md">
+            Full visibility of confirmed registrations, transaction history, and check-in status.
           </p>
         </div>
-        <div className="flex w-full md:w-auto gap-3 items-center">
-          <div className="w-full md:w-80 relative group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text dark:text-white/40">
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 no-print">
+          {/* Search bar */}
+          <div className="relative flex-1 sm:w-64">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text/30">
               <ICONS.Search className="h-4 w-4" strokeWidth={3} />
             </div>
             <input
@@ -429,22 +432,25 @@ export const RegistrationsList: React.FC = () => {
               placeholder="Search directory..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-10 py-3 bg-background border border-sidebar-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors dark:text-white"
+              className="block w-full pl-10 pr-4 h-12 bg-background border border-sidebar-border rounded-2xl text-[11px] font-black focus:outline-none focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-all dark:text-white placeholder:text-text/20"
             />
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-text dark:text-white">
-              {isFetching && <div className="w-4 h-4 border-2 border-[#38BDF2]/30 border-t-transparent rounded-full animate-spin" />}
-            </div>
           </div>
-          {eventId && (
-            <Button
-              variant="outline"
-              onClick={() => apiService.exportEventReport(eventId)}
-              className="px-4 py-3 rounded-xl font-black text-[10px] whitespace-nowrap hidden sm:flex items-center gap-2 border-2 border-[#38BDF2] text-[#38BDF2] hover:bg-[#38BDF2] hover:text-white"
+
+          {/* Actions */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handlePrint}
+              className="flex-1 sm:flex-none h-12 px-5 flex items-center justify-center gap-2 bg-background border border-sidebar-border rounded-2xl text-text dark:text-white hover:bg-[#38BDF2]/10 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
             >
-              <ICONS.CreditCard className="w-4 h-4" />
-              Export CSV
-            </Button>
-          )}
+              <ICONS.Printer className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleExport}
+              className="flex-1 sm:flex-none h-12 px-5 flex items-center justify-center gap-2 bg-background border border-sidebar-border rounded-2xl text-text dark:text-white hover:bg-[#38BDF2]/10 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
+            >
+              <ICONS.FileText className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 

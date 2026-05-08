@@ -1,51 +1,35 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ICONS } from '../constants';
 import { useUser } from '../context/UserContext';
 import { UserRole } from '../types';
 
 export const MobileBottomNav: React.FC = () => {
     const location = useLocation();
-    const { role, isAuthenticated, openAuthModal } = useUser();
+    const navigate = useNavigate();
+    const { role, isAuthenticated, imageUrl, name, email } = useUser();
 
-    interface NavItem {
-        label: string;
-        path: string;
-        icon: React.ReactNode;
-        action?: () => void;
-    }
+    if (!isAuthenticated) return null;
+    
+    const isCreateOrEditPage = location.pathname.includes('/my-events/create') || location.pathname.includes('/my-events/edit');
+    if (isCreateOrEditPage) return null;
 
-    const navItems: NavItem[] = !isAuthenticated
-        ? [
-            { label: 'Explore', path: '/', icon: <ICONS.Home className="w-6 h-6" /> },
-            { label: 'Browse', path: '/browse-events', icon: <ICONS.Search className="w-6 h-6" /> },
-            { label: 'Tickets', path: '/my-tickets', icon: <ICONS.Ticket className="w-6 h-6" /> },
-            { label: 'Login', path: '/login', icon: <ICONS.User className="w-6 h-6" /> },
-        ]
-        : role === UserRole.STAFF
-        ? [
-            { label: 'Events', path: '/events', icon: <ICONS.Calendar className="w-6 h-6" /> },
-            { label: 'Attendees', path: '/attendees', icon: <ICONS.Users className="w-6 h-6" /> },
-            { label: 'Scan', path: '/checkin', icon: <ICONS.CheckCircle className="w-6 h-6" /> },
-            { label: 'Menu', path: '/settings', icon: <ICONS.Settings className="w-6 h-6" /> },
-        ]
-        : role === UserRole.ADMIN
-            ? [
-                { label: 'Home', path: '/dashboard', icon: <ICONS.Home className="w-6 h-6" /> },
-                { label: 'Events', path: '/events', icon: <ICONS.Shield className="w-6 h-6" /> },
-                { label: 'Users', path: '/settings?tab=team', icon: <ICONS.Users className="w-6 h-6" /> },
-                { label: 'Menu', path: '/settings', icon: <ICONS.Settings className="w-6 h-6" /> },
-            ]
-            : [
-                { label: 'Home', path: '/dashboard', icon: <ICONS.Home className="w-6 h-6" /> },
-                { label: 'Events', path: '/events', icon: <ICONS.Calendar className="w-6 h-6" /> },
-                { label: 'Attendees', path: '/attendees', icon: <ICONS.Users className="w-6 h-6" /> },
-                { label: 'Menu', path: '/settings', icon: <ICONS.Settings className="w-6 h-6" /> },
-            ];
+    const isAdmin = role === UserRole.ADMIN;
+    
+    // Items as per design
+    const navItems = [
+        { label: 'Dashboard', path: '/dashboard', icon: <ICONS.Layout className="w-6 h-6" /> },
+        { label: 'Attendees', path: isAdmin ? '/attendees' : '/user/attendees', icon: <ICONS.Users className="w-6 h-6" /> },
+        { label: 'Support', path: isAdmin ? '/settings?tab=support' : '/organizer-support', icon: <ICONS.Headphones className="w-6 h-6" /> },
+        { 
+            label: isAdmin ? 'Announcements' : 'Scan', 
+            path: isAdmin ? '/admin/announcements' : '/user/checkin', 
+            icon: isAdmin ? <ICONS.Megaphone className="w-6 h-6" /> : <ICONS.CheckCircle className="w-6 h-6" /> 
+        },
+    ];
 
     const isActive = (path: string) => {
-        if (path === '#' || !path) return false;
         if (path.includes('?')) {
             const [base, query] = path.split('?');
             if (location.pathname !== base) return false;
@@ -53,53 +37,72 @@ export const MobileBottomNav: React.FC = () => {
             const currentTab = new URLSearchParams(location.search).get('tab');
             return currentTab === tab;
         }
-        return location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
+        // Handle subpaths for events management
+        if (path === '/my-events' && location.pathname.startsWith('/my-events')) return true;
+        return location.pathname === path;
     };
 
+    const initials = (email?.split('@')[0] || name?.trim() || 'U')
+        .split(' ')
+        .filter(Boolean)
+        .map((part) => part[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
+
     return (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#F2F2F2]/95 backdrop-blur-xl z-[600] pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.1)]">
-            <div className="h-[2px] w-full bg-[#38BDF2]" />
-            <div className="flex items-center justify-around h-16 relative">
-                {navItems.map((item) => {
-                    const active = isActive(item.path);
-                    const content = (
-                        <>
-                            <div className={`transition-all duration-300 ${active ? 'text-[#38BDF2] transform -translate-y-1' : 'text-[#2E2E2F] opacity-60'}`}>
-                                {React.cloneElement(item.icon as React.ReactElement<any>, {
-                                    className: `w-5 h-5 ${active ? 'stroke-[2.5px]' : 'stroke-[2px]'}`
-                                })}
-                            </div>
-                            <span className={`text-[10px] font-black uppercase tracking-widest mt-1 transition-all duration-300 ${active ? 'text-[#38BDF2] opacity-100' : 'text-[#2E2E2F] opacity-40'}`}>
-                                {item.label}
-                            </span>
-                            {active && (
-                                <div className="absolute -top-[1px] left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#38BDF2] rounded-full shadow-[0_0_10px_#38BDF2]" />
-                            )}
-                        </>
-                    );
-
-                    if ('action' in item && item.action) {
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-transparent border-t border-sidebar-border z-[600] pb-[env(safe-area-inset-bottom)]">
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-lg -z-10" />
+            <div className="flex items-center h-20 relative px-2">
+                {/* Dashboard & Events */}
+                <div className="flex flex-1 justify-around items-center">
+                    {navItems.slice(0, 2).map((item) => {
+                        const active = isActive(item.path);
                         return (
-                            <button
-                                key={item.label}
-                                onClick={item.action}
-                                className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group active:scale-90`}
-                            >
-                                {content}
-                            </button>
+                            <Link key={item.path} to={item.path} className="flex flex-col items-center gap-1 group">
+                                <div className={`transition-all duration-300 ${active ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40 dark:text-white/30'}`}>
+                                    {React.cloneElement(item.icon as React.ReactElement, { className: `w-6 h-6 ${active ? 'stroke-[2.5px]' : 'stroke-[1.8px]'}` } as any)}
+                                </div>
+                                <span className={`text-[10px] font-black tracking-tight transition-all duration-300 ${active ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40 dark:text-white/30'}`}>
+                                    {item.label}
+                                </span>
+                            </Link>
                         );
-                    }
+                    })}
+                </div>
 
-                    return (
-                        <Link
-                            key={item.path}
-                            to={item.path}
-                            className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 relative group active:scale-90`}
-                        >
-                            {content}
-                        </Link>
-                    );
-                })}
+                {/* Floating Plus Button */}
+                <div className="relative -top-6">
+                    <button 
+                        onClick={() => {
+                            if (isAdmin) {
+                                window.dispatchEvent(new CustomEvent('open-create-plan'));
+                            } else {
+                                navigate('/my-events/create');
+                            }
+                        }}
+                        className="w-16 h-16 rounded-full bg-[#38BDF2] flex items-center justify-center text-white shadow-lg shadow-[#38BDF2]/40 active:scale-90 transition-transform border-[6px] border-[#F2F2F2] dark:border-background"
+                    >
+                        <ICONS.Plus className="w-8 h-8 stroke-[3.5px]" />
+                    </button>
+                </div>
+
+                {/* Support & Profile */}
+                <div className="flex flex-1 justify-around items-center">
+                    {navItems.slice(2, 4).map((item, idx) => {
+                        const active = isActive(item.path);
+                        return (
+                            <Link key={item.path} to={item.path} className="flex flex-col items-center gap-1 group">
+                                <div className={`transition-all duration-300 ${active ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40 dark:text-white/30'}`}>
+                                    {React.cloneElement(item.icon as React.ReactElement, { className: `w-6 h-6 ${active ? 'stroke-[2.5px]' : 'stroke-[1.8px]'}` } as any)}
+                                </div>
+                                <span className={`text-[10px] font-black tracking-tight transition-all duration-300 ${active ? 'text-[#38BDF2]' : 'text-[#2E2E2F]/40 dark:text-white/30'}`}>
+                                    {item.label}
+                                </span>
+                            </Link>
+                        );
+                    })}
+                </div>
             </div>
         </nav>
     );

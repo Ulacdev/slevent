@@ -256,7 +256,16 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
   const fallbackInitial = (formData.organizerName || name || 'O').charAt(0).toUpperCase();
 
   return (
-    <div className="space-y-8 pb-20">
+    <div className="dashboard-main-content pb-16 space-y-8 px-2 sm:px-4">
+      {/* Header */}
+      <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
+        <div>
+          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-[#2E2E2F] dark:text-white tracking-tight uppercase">Settings</h1>
+          <p className="mt-2 text-xs sm:text-sm font-bold text-[#2E2E2F]/50 dark:text-white/50 max-w-md">
+            Update your organizer identity, cover imagery, and branding preferences.
+          </p>
+        </div>
+      </div>
 
       <form onSubmit={handleSave} className="space-y-6">
         <Card className="p-8 rounded-xl border-2 border-sidebar-border bg-surface">

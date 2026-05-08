@@ -202,22 +202,28 @@ export const DiscoveryHub: React.FC = () => {
   if (loading) return <PageLoader variant="page" label="Loading Discovery Hub..." />;
 
   return (
-    <div className="space-y-10" style={{ zoom: 0.85 }}>
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-2">
-        <div className="space-y-1">
+    <div className="space-y-8">
+      {/* ── Header Section ── */}
+      <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
+        <div>
           <div className="flex items-center gap-3">
-             <h1 className="text-3xl font-bold text-text dark:text-white tracking-tight">Discovery Hub</h1>
-             <span className="px-3 py-1 bg-[#38BDF2] rounded-lg text-[10px] font-black text-white uppercase tracking-widest">Premium</span>
+            <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-text dark:text-white tracking-tight uppercase">Discovery Hub</h1>
+            <span className="hidden sm:inline-block px-3 py-1 bg-[#38BDF2] rounded-lg text-[10px] font-black text-white uppercase tracking-widest shadow-lg shadow-[#38BDF2]/20">Premium</span>
           </div>
-          <p className="text-text dark:text-white/60 font-medium text-sm mt-1">Curate top-tier destinations for the marketplace discovery slider.</p>
+          <p className="mt-2 text-xs sm:text-sm font-bold text-text/50 dark:text-white/50 max-w-md">
+            Curate top-tier destinations for the marketplace discovery slider to drive engagement and ticket sales.
+          </p>
         </div>
-        <Button 
-          onClick={() => handleOpenModal()}
-          className="bg-[#38BDF2] text-white px-10 py-5 rounded-2xl font-black shadow-2xl shadow-[#38BDF2]/30 flex items-center gap-3 hover:scale-105 active:scale-95 transition-all text-[12px] uppercase tracking-[0.2em]"
-        >
-          <ICONS.Plus className="w-6 h-6" strokeWidth={3} />
-          Feature New City
-        </Button>
+
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => handleOpenModal()}
+            className="flex-1 sm:flex-none h-12 px-8 flex items-center justify-center gap-2 bg-[#38BDF2] rounded-2xl text-white shadow-lg shadow-[#38BDF2]/25 hover:bg-[#38BDF2]/90 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
+          >
+            <ICONS.Plus className="w-4 h-4 stroke-[3px]" />
+            Feature New City
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
