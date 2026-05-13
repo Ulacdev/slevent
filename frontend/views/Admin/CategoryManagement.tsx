@@ -141,26 +141,26 @@ export const CategoryManagement: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {categories.map((cat) => {
           const IconComp = (ICONS as any)[cat.icon_name] || ICONS.Layout;
           return (
-            <div key={cat.id} className="bg-surface rounded-2xl p-6 border border-sidebar-border shadow-sm transition-all hover:shadow-md">
-              <div className="flex items-start justify-between mb-6">
-                <div className="p-4 rounded-xl bg-[#38BDF2] text-white shadow-sm">
-                  <IconComp className="w-8 h-8" strokeWidth={2.5} />
+            <div key={cat.id} className="bg-[#F2F2F2] dark:bg-surface rounded-2xl p-5 sm:p-6 border border-sidebar-border shadow-sm transition-all hover:shadow-md">
+              <div className="flex items-start justify-between mb-5 sm:mb-6">
+                <div className="p-3 sm:p-4 rounded-xl bg-[#38BDF2] text-white shadow-sm">
+                  <IconComp className="w-7 h-7 sm:w-8 sm:h-8" strokeWidth={2.5} />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5 sm:gap-2">
                   <button 
                     onClick={() => handleOpenModal(cat)}
-                    className="p-2.5 rounded-lg bg-text/5 text-text dark:bg-white/5 dark:text-white hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-all"
+                    className="p-2 sm:p-2.5 rounded-lg bg-text/5 text-text dark:bg-white/5 dark:text-white hover:bg-[#38BDF2]/10 hover:text-[#38BDF2] transition-all"
                     title="Edit"
                   >
                     <ICONS.Edit className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={() => handleDelete(cat)}
-                    className="p-2.5 rounded-lg bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                    className="p-2 sm:p-2.5 rounded-lg bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
                     title="Delete Permanently"
                   >
                     <ICONS.Trash className="w-4 h-4" />
@@ -169,15 +169,15 @@ export const CategoryManagement: React.FC = () => {
               </div>
                 
               <div className="mb-4">
-                <h3 className="text-xl font-black text-text dark:text-white mb-1">{cat.label}</h3>
-                <code className="text-[11px] font-bold uppercase tracking-wider text-[#38BDF2] bg-[#38BDF2]/5 px-2 py-0.5 rounded-md">
+                <h3 className="text-lg sm:text-xl font-black text-text dark:text-white mb-1.5 sm:mb-1">{cat.label}</h3>
+                <code className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#38BDF2] bg-[#38BDF2]/5 px-2 py-0.5 rounded-md">
                   {cat.key}
                 </code>
               </div>
 
               <div className="flex flex-wrap gap-1.5">
                 {cat.keywords.slice(0, 5).map(k => (
-                  <span key={k} className="text-[10px] font-bold text-text dark:text-white/40 bg-text/5 dark:bg-white/5 px-2 py-1 rounded-lg">
+                  <span key={k} className="text-[10px] font-bold text-text dark:text-white/40 bg-background dark:bg-white/5 px-2 py-1 rounded-lg">
                     {k}
                   </span>
                 ))}

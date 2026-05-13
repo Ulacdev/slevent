@@ -149,6 +149,7 @@ export interface Event {
   brandColor?: string;
   externalLogoUrl?: string;
   enableDiscountCodes?: boolean;
+  faqs?: { question: string; answer: string }[];
 
   // Audit fields from DB
   created_at?: string;

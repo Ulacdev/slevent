@@ -1906,6 +1906,23 @@ export const apiService = {
     if (!res.ok) throw new Error(data?.error || `AI field suggestion failed: ${res.status}`);
     return data;
   },
+
+  suggestFaqs: async (payload: {
+    eventName: string;
+    description?: string;
+    locationType?: string;
+    organizerName?: string;
+  }): Promise<{ suggestions: { question: string; answer: string }[] }> => {
+    const res = await apiService._fetch(`${API_BASE}/api/ai/faq-suggest`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || `AI FAQ suggestion failed: ${res.status}`);
+    return data;
+  },
 };
 
 

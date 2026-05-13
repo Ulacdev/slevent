@@ -226,9 +226,9 @@ export const DiscoveryHub: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
         {destinations.map((dest) => (
-          <div key={dest.id} className={`group relative bg-surface rounded-3xl overflow-hidden border border-sidebar-border shadow-2xl shadow-black/5 transition-all hover:-translate-y-2 ${!dest.is_active ? 'opacity-50 grayscale' : ''}`}>
+          <div key={dest.id} className={`group relative bg-[#F2F2F2] dark:bg-surface rounded-2xl sm:rounded-3xl overflow-hidden border border-sidebar-border shadow-lg sm:shadow-2xl shadow-black/5 transition-all hover:-translate-y-2 ${!dest.is_active ? 'opacity-50 grayscale' : ''}`}>
             <div className="aspect-[4/5] relative overflow-hidden bg-background">
                 <img 
                     src={dest.image_url} 
@@ -238,30 +238,30 @@ export const DiscoveryHub: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                 
                 {/* Overlay Controls */}
-                <div className="absolute top-6 right-6 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+                <div className="absolute top-4 sm:top-6 right-4 sm:right-6 flex flex-col gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all translate-x-0 sm:translate-x-4 sm:group-hover:translate-x-0">
                     <button 
                         onClick={() => handleOpenModal(dest)}
-                        className="w-10 h-10 rounded-xl bg-white/90 backdrop-blur-md text-black flex items-center justify-center hover:bg-[#38BDF2] hover:text-white transition-all shadow-xl"
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/90 backdrop-blur-md text-black flex items-center justify-center hover:bg-[#38BDF2] hover:text-white transition-all shadow-xl"
                     >
-                        <ICONS.Edit className="w-5 h-5" />
+                        <ICONS.Edit className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                     <button 
                         onClick={() => toggleStatus(dest)}
-                        className={`w-10 h-10 rounded-xl bg-white/90 backdrop-blur-md flex items-center justify-center transition-all shadow-xl ${dest.is_active ? 'text-emerald-500 hover:bg-emerald-500 hover:text-white' : 'text-rose-500 hover:bg-rose-500 hover:text-white'}`}
+                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/90 backdrop-blur-md flex items-center justify-center transition-all shadow-xl ${dest.is_active ? 'text-emerald-500 hover:bg-emerald-500 hover:text-white' : 'text-rose-500 hover:bg-rose-500 hover:text-white'}`}
                     >
-                        {dest.is_active ? <ICONS.Eye className="w-5 h-5" /> : <ICONS.EyeOff className="w-5 h-5" />}
+                        {dest.is_active ? <ICONS.Eye className="w-4 h-4 sm:w-5 sm:h-5" /> : <ICONS.EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />}
                     </button>
                     <button 
                         onClick={() => handleDelete(dest)}
-                        className="w-10 h-10 rounded-xl bg-white/90 backdrop-blur-md text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all shadow-xl"
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/90 backdrop-blur-md text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all shadow-xl"
                     >
-                        <ICONS.Trash className="w-5 h-5" />
+                        <ICONS.Trash className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                 </div>
 
-                <div className="absolute bottom-8 left-8 text-left">
-                    <p className="text-[9px] font-black text-[#38BDF2] uppercase tracking-[0.4em] mb-1">{dest.country}</p>
-                    <h3 className="text-2xl font-black text-white tracking-tighter uppercase leading-none mb-2">{dest.city}</h3>
+                <div className="absolute bottom-6 sm:bottom-8 left-6 sm:left-8 text-left">
+                    <p className="text-[9px] font-black text-[#38BDF2] uppercase tracking-[0.3em] sm:tracking-[0.4em] mb-1">{dest.country}</p>
+                    <h3 className="text-xl sm:text-2xl font-black text-white tracking-tighter uppercase leading-none mb-2">{dest.city}</h3>
                 </div>
             </div>
           </div>
@@ -269,9 +269,9 @@ export const DiscoveryHub: React.FC = () => {
         
         {/* Placeholder for empty state */}
         {destinations.length === 0 && !loading && (
-            <div className="col-span-full py-20 flex flex-col items-center justify-center border-4 border-dashed border-sidebar-border rounded-[3rem]">
-                <ICONS.MapPin className="w-16 h-16 text-text/10 dark:text-white/10 mb-4" />
-                <p className="text-text/30 dark:text-white/30 font-black uppercase tracking-widest">No featured destinations found.</p>
+            <div className="col-span-full py-16 sm:py-20 flex flex-col items-center justify-center border-4 border-dashed border-sidebar-border rounded-2xl sm:rounded-[3rem]">
+                <ICONS.MapPin className="w-12 h-12 sm:w-16 sm:h-16 text-text/10 dark:text-white/10 mb-4" />
+                <p className="text-text/30 dark:text-white/30 font-black uppercase tracking-widest text-xs sm:text-sm">No featured destinations found.</p>
                 <button onClick={() => handleOpenModal()} className="mt-4 text-[#38BDF2] font-black uppercase tracking-widest text-xs hover:underline">Start Curating Hubs</button>
             </div>
         )}

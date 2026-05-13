@@ -551,15 +551,6 @@ export const EventsManagement: React.FC = () => {
             >
               <ICONS.Printer className="w-4 h-4" />
             </button>
-            {!isStaff && (
-              <button
-                onClick={handleOpenCreate}
-                className="flex-[2] sm:flex-none h-12 px-6 flex items-center justify-center gap-2 bg-[#38BDF2] rounded-2xl text-white shadow-lg shadow-[#38BDF2]/25 hover:bg-[#38BDF2]/90 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
-              >
-                <ICONS.Plus className="w-4 h-4 stroke-[3px]" />
-                <span className="hidden sm:inline">Launch Event</span>
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -603,7 +594,8 @@ export const EventsManagement: React.FC = () => {
             </div>
           )}
 
-      <Card className="overflow-hidden border-sidebar-border rounded-xl bg-surface">
+      {/* Desktop Table View - Hidden on Mobile */}
+      <Card className="hidden lg:block overflow-hidden border-sidebar-border rounded-xl bg-surface">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-background border-b border-sidebar-border">
@@ -732,6 +724,88 @@ export const EventsManagement: React.FC = () => {
           </table>
         </div>
       </Card>
+
+      {/* Mobile Card View - Visible only on Mobile */}
+      <div className="lg:hidden space-y-4">
+        {currentItems.map(event => (
+          <Card key={event.eventId} className={`overflow-hidden border-sidebar-border rounded-2xl bg-[#F2F2F2] dark:bg-surface transition-all ${selectedIds.includes(event.eventId) ? 'ring-2 ring-[#38BDF2]' : ''}`}>
+            <div className="p-4 space-y-4">
+              {/* Checkbox and Image Row */}
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  className="w-[16px] h-[16px] mt-1 rounded border-2 border-[#2E2E2F]/20 accent-[#38BDF2] shrink-0"
+                  checked={selectedIds.includes(event.eventId)}
+                  onChange={() => toggleSelect(event.eventId)}
+                />
+                <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 border border-sidebar-border">
+                  <img
+                    src={getImageUrl(event.imageUrl)}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-text dark:text-white text-lg tracking-tight line-clamp-2 leading-tight">{event.eventName}</h3>
+                  <div className="text-[11px] font-bold text-text/40 dark:text-white/40 uppercase tracking-wide mt-1.5">
+                    STATUS: {event.status}
+                  </div>
+                </div>
+              </div>
+
+              {/* Date and Location */}
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2.5 text-sm">
+                  <ICONS.Calendar className="w-[18px] h-[18px] text-text/40 dark:text-white/40" />
+                  <span className="font-semibold text-text dark:text-white">
+                    {new Date(event.startAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </span>
+                </div>
+                <div className="flex items-start gap-2.5 text-sm">
+                  <ICONS.MapPin className="w-[18px] h-[18px] text-text/40 dark:text-white/40 shrink-0 mt-0.5" />
+                  <span className="text-text/60 dark:text-white/60 line-clamp-2 leading-snug">{event.locationText}</span>
+                </div>
+              </div>
+
+              {/* Safety Status - Only show this one */}
+              <div>
+                {(event as any).reportCount > 0 ? (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg text-red-600">
+                    <ICONS.AlertTriangle className="w-3.5 h-3.5" />
+                    <span className="text-[10px] font-black">{(event as any).reportCount} REPORTS</span>
+                  </div>
+                ) : (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-100 rounded-lg text-green-600">
+                    <ICONS.CheckCircle className="w-3.5 h-3.5" />
+                    <span className="text-[10px] font-black uppercase tracking-wide">Clear</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 pt-2 border-t border-sidebar-border">
+                <button
+                  onClick={() => handleTogglePromotion(event)}
+                  disabled={event.is_promoted || event.isPromoted}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wide transition-all ${
+                    (event.is_promoted || event.isPromoted)
+                      ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 cursor-not-allowed'
+                      : 'bg-[#38BDF2]/10 text-[#38BDF2] border border-[#38BDF2]/30 active:scale-95'
+                  }`}
+                >
+                  <ICONS.Star className={`w-4 h-4 ${(event.is_promoted || event.isPromoted) ? 'fill-current' : ''}`} />
+                </button>
+                <button
+                  onClick={() => { setIsBulkMode(false); setDeleteConfirm(event); }}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wide bg-red-50 text-red-600 border border-red-200 transition-all active:scale-95"
+                >
+                  <ICONS.Trash className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
 
       {totalPages > 1 && (
         <div className="mt-8 flex items-center justify-center gap-2">

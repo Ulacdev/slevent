@@ -147,10 +147,10 @@ export const Announcements: React.FC = () => {
 
   return (
     <div className="space-y-8" style={{ zoom: 0.85 }}>
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 px-2">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-text dark:text-white tracking-tight">Platform Announcements</h1>
-          <p className="text-text dark:text-white/60 font-medium text-sm mt-1">Broadcast updates, maintenance alerts, and news to the community.</p>
+      <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
+        <div>
+          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-text dark:text-white tracking-tight uppercase">Platform Announcements</h1>
+          <p className="mt-2 text-xs sm:text-sm font-bold text-text/50 dark:text-white/50 max-w-md">Broadcast updates, maintenance alerts, and news to the community.</p>
         </div>
         <Button 
           onClick={() => handleOpenModal()}

@@ -11,6 +11,7 @@ import { getEventCategoryKeys } from '../../utils/eventCategories';
 import { EventReportModal } from '../../components/Public/EventReportModal';
 import { getImageUrl } from '../../utils/imageUtils';
 import { EventReviews } from '../../components/Public/EventReviews';
+import { EventFaqs } from '../../components/Public/EventFaqs';
 
 const BRAND_LOGO_URL = 'https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg';
 
@@ -851,6 +852,9 @@ export const EventDetails: React.FC = () => {
                   {event.description}
                 </p>
               </div>
+
+              {/* Event FAQs */}
+              <EventFaqs brandColor={brandColor} faqs={event.faqs} />
 
               {/* Organizer Card */}
               <div className="p-6 sm:p-8 bg-[#F2F2F2] rounded-xl border border-[#2E2E2F]/10 mb-10">

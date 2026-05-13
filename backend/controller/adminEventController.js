@@ -611,7 +611,8 @@ export const createEvent = async (req, res) => {
       streamingPlatform,
       streaming_url,
       enableDiscountCodes,
-      brandColor
+      brandColor,
+      faqs
     } = req.body || {};
 
     if (!eventName) return res.status(400).json({ error: 'eventName is required' });
@@ -652,6 +653,7 @@ export const createEvent = async (req, res) => {
       streaming_url: streaming_url || null,
       enableDiscountCodes: !!enableDiscountCodes,
       brandColor: brandColor || null,
+      faqs: Array.isArray(faqs) ? faqs : [],
       organizerId,
       createdBy: req.user?.id || null,
       updated_at: new Date().toISOString()

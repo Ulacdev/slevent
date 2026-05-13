@@ -71,7 +71,7 @@ export const SettingsView: React.FC = () => {
     { id: 'profile', label: 'Profile & Security', description: 'Personal security' }
   ] : [
     { id: 'team', label: 'Teams & Access', description: 'Internal team management and permissions' },
-    { id: 'plans', label: 'Subscription Plans', description: 'Tier configuration' },
+    { id: 'plans', label: 'Subscription Plans', description: 'Manage administrative billing tiers' },
     { id: 'email', label: 'Email Configuration', description: 'SMTP server settings' },
     { id: 'payments', label: 'Payment Gateway', description: 'HitPay credentials' },
     { id: 'support', label: 'Support Tickets', description: 'Organizer inquiries' },
@@ -309,10 +309,10 @@ export const SettingsView: React.FC = () => {
   return (
     <div className="pb-16 space-y-6">
       {/* Local notification JSX removed */}
-      <div className="px-2 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
         <div>
-          <h1 className="text-3xl md:text-[2rem] font-semibold text-text dark:text-white tracking-tight">{activeTabMeta.label}</h1>
-          <p className="mt-1 text-sm font-semibold text-text dark:text-white/60">{activeTabMeta.description}</p>
+          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-text dark:text-white tracking-tight uppercase">{activeTabMeta.label}</h1>
+          <p className="mt-2 text-xs sm:text-sm font-bold text-text/50 dark:text-white/50 max-w-md">{activeTabMeta.description}</p>
         </div>
       </div>
 
@@ -348,7 +348,8 @@ export const SettingsView: React.FC = () => {
                     </span>
                   </Button>
                 </div>
-                <Card className="overflow-hidden border-sidebar-border rounded-xl bg-surface">
+                {/* Desktop Table View - Hidden on Mobile */}
+                <Card className="hidden lg:block overflow-hidden border-sidebar-border rounded-xl bg-surface">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
                       <thead className="bg-background border-b border-sidebar-border">
@@ -412,6 +413,50 @@ export const SettingsView: React.FC = () => {
                     </table>
                   </div>
                 </Card>
+
+                {/* Mobile Card View - Visible only on Mobile */}
+                <div className="lg:hidden space-y-4">
+                  {teamMembers.map((member) => (
+                    <Card key={member.id} className="overflow-hidden border-sidebar-border rounded-2xl bg-[#F2F2F2] dark:bg-surface p-4">
+                      <div className="flex items-start gap-3 mb-4">
+                        <div className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-black text-lg bg-[#38BDF2] text-white shadow-sm shrink-0`}>
+                          {member.imageUrl ? (
+                            <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
+                          ) : (
+                            member.name.charAt(0)
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-black text-text dark:text-white text-base tracking-tight line-clamp-1">{member.name}</h3>
+                          <p className="text-[11px] text-text/60 dark:text-white/60 font-medium mt-0.5 truncate">{member.email}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-text/40 dark:text-white/40 uppercase tracking-wide">Role</span>
+                          <span className="text-[11px] font-black text-text dark:text-white uppercase tracking-wide">{member.role}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-text/40 dark:text-white/40 uppercase tracking-wide">Registered</span>
+                          <span className="text-[11px] font-bold text-text dark:text-white/60">
+                            {member.createdAt ? format(new Date(member.createdAt), 'MMM dd, yyyy') : 'N/A'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between pt-2 border-t border-sidebar-border">
+                          <span className="text-[10px] font-bold text-text/40 dark:text-white/40 uppercase tracking-wide">Status</span>
+                          <Badge 
+                            type={member.status === 'Active' ? 'success' : member.status === 'Pending' ? 'warning' : 'neutral'}
+                            className="font-black text-[8px] uppercase tracking-widest cursor-pointer hover:scale-105 transition-transform active:scale-95"
+                            onClick={() => toggleUserStatus(member.id, member.status)}
+                          >
+                            {member.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="space-y-6 animate-in fade-in duration-300">
@@ -419,7 +464,9 @@ export const SettingsView: React.FC = () => {
                   <label className="block text-[10px] font-black text-[#2E2E2F] uppercase tracking-[0.2em] mb-3 ml-1">Access Control</label>
                   <Badge type="info" className="font-black text-[9px] tracking-widest uppercase bg-[#38BDF2]/20 text-[#2E2E2F]">Manage Team Permissions</Badge>
                 </div>
-                <Card className="overflow-hidden border-sidebar-border rounded-xl bg-surface">
+                
+                {/* Desktop Table View - Hidden on Mobile */}
+                <Card className="hidden lg:block overflow-hidden border-sidebar-border rounded-xl bg-surface">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
                       <thead className="bg-background border-b border-sidebar-border">
@@ -477,6 +524,46 @@ export const SettingsView: React.FC = () => {
                     </table>
                   </div>
                 </Card>
+
+                {/* Mobile Card View - Visible only on Mobile */}
+                <div className="lg:hidden space-y-4">
+                  {teamMembers.map((member) => (
+                    <Card key={member.id} className="overflow-hidden border-sidebar-border rounded-2xl bg-[#F2F2F2] dark:bg-surface p-4">
+                      <div className="flex items-start gap-3 mb-4">
+                        <div className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-black text-lg bg-[#38BDF2] text-white shadow-sm shrink-0`}>
+                          {member.imageUrl ? (
+                            <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
+                          ) : (
+                            member.name.charAt(0)
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-black text-text dark:text-white text-base tracking-tight line-clamp-1">{member.name}</h3>
+                          <p className="text-[10px] text-text/60 dark:text-white/60 font-black uppercase tracking-widest mt-0.5">{member.role}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="flex flex-col items-center gap-2 p-3 bg-background rounded-xl">
+                          <span className="text-[9px] font-bold text-text/40 dark:text-white/40 uppercase tracking-wide">View</span>
+                          <PermissionShield active={member.permissions.includes('view_events')} disabled={member.perspective !== UserRole.STAFF} onClick={() => toggleMemberPermission(member.id, 'view_events')} />
+                        </div>
+                        <div className="flex flex-col items-center gap-2 p-3 bg-background rounded-xl">
+                          <span className="text-[9px] font-bold text-text/40 dark:text-white/40 uppercase tracking-wide">Edit</span>
+                          <PermissionShield active={member.permissions.includes('edit_events')} disabled={member.perspective !== UserRole.STAFF} onClick={() => toggleMemberPermission(member.id, 'edit_events')} />
+                        </div>
+                        <div className="flex flex-col items-center gap-2 p-3 bg-background rounded-xl">
+                          <span className="text-[9px] font-bold text-text/40 dark:text-white/40 uppercase tracking-wide">Check-in</span>
+                          <PermissionShield active={member.permissions.includes('manual_checkin')} disabled={member.perspective !== UserRole.STAFF} onClick={() => toggleMemberPermission(member.id, 'manual_checkin')} />
+                        </div>
+                        <div className="flex flex-col items-center gap-2 p-3 bg-background rounded-xl">
+                          <span className="text-[9px] font-bold text-text/40 dark:text-white/40 uppercase tracking-wide">Notify</span>
+                          <PermissionShield iconType="bell" active={member.permissions.includes('receive_notifications')} disabled={member.perspective !== UserRole.STAFF} onClick={() => toggleMemberPermission(member.id, 'receive_notifications')} />
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               </div>
             )}
           </div>

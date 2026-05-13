@@ -319,34 +319,34 @@ export const OrganizerDashboard: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 no-print">
-                        <div className="flex items-center gap-2 bg-[#F2F2F2] dark:bg-[#111111] p-2 rounded-2xl border border-sidebar-border shadow-sm">
+                        <div className="flex items-center gap-2 bg-[#F2F2F2] dark:bg-[#111111] p-2 rounded-2xl border border-sidebar-border shadow-sm overflow-x-auto w-full sm:w-auto">
                             <input
                                 type="date"
                                 value={dateRange.start}
                                 onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                                className="bg-transparent text-[11px] font-black text-[#2E2E2F] dark:text-white outline-none px-2"
+                                className="bg-transparent text-[11px] font-black text-[#2E2E2F] dark:text-white outline-none px-2 min-w-[100px]"
                             />
                             <span className="text-[#2E2E2F] dark:text-white/30">/</span>
                             <input
                                 type="date"
                                 value={dateRange.end}
                                 onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                                className="bg-transparent text-[11px] font-black text-[#2E2E2F] dark:text-white outline-none px-2"
+                                className="bg-transparent text-[11px] font-black text-[#2E2E2F] dark:text-white outline-none px-2 min-w-[100px]"
                             />
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-row items-center gap-3 w-full sm:w-auto">
                             <Button
                                 variant="outline"
                                 onClick={handlePrint}
-                                className="flex-1 sm:flex-none h-12 px-5 flex items-center justify-center gap-2 bg-background border border-sidebar-border rounded-2xl text-[#2E2E2F] dark:text-white hover:bg-[#38BDF2]/10 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
+                                className="flex-1 sm:flex-none h-12 px-3 sm:px-5 flex items-center justify-center gap-1 sm:gap-2 bg-background border border-sidebar-border rounded-2xl text-[#2E2E2F] dark:text-white hover:bg-[#38BDF2]/10 transition-all font-black text-[10px] sm:text-[11px] uppercase tracking-widest active:scale-95 whitespace-nowrap"
                             >
-                                <ICONS.Download className="w-4 h-4 mr-2" /> Print Report
+                                <ICONS.Download className="w-4 h-4 sm:mr-1 shrink-0" /> <span className="hidden sm:inline">Print Report</span><span className="sm:hidden">Print</span>
                             </Button>
                             <Button
                                 onClick={() => navigate('/my-events?openModal=true')}
-                                className="flex-[2] sm:flex-none h-12 px-6 flex items-center justify-center gap-2 bg-[#38BDF2] rounded-2xl text-white shadow-lg shadow-[#38BDF2]/25 hover:bg-[#38BDF2]/90 transition-all font-black text-[11px] uppercase tracking-widest active:scale-95"
+                                className="flex-[2] sm:flex-none h-12 px-3 sm:px-6 flex items-center justify-center gap-1 sm:gap-2 bg-[#38BDF2] rounded-2xl text-white shadow-lg shadow-[#38BDF2]/25 hover:bg-[#38BDF2]/90 transition-all font-black text-[10px] sm:text-[11px] uppercase tracking-widest active:scale-95 whitespace-nowrap"
                             >
-                                <ICONS.Plus className="w-4 h-4 mr-2" /> Create Event
+                                <ICONS.Plus className="w-4 h-4 sm:mr-1 shrink-0" /> Create Event
                             </Button>
                         </div>
                     </div>
@@ -485,18 +485,18 @@ export const OrganizerDashboard: React.FC = () => {
                             <div 
                                 key={tx.orderId || i} 
                                 onClick={() => setSelectedTx(tx)}
-                                className="p-6 flex justify-between items-center hover:bg-[#38BDF2]/5 transition-colors cursor-pointer group/item border-b border-sidebar-border last:border-0"
+                                className="p-4 sm:p-6 flex justify-between items-center hover:bg-[#38BDF2]/5 transition-colors cursor-pointer group/item border-b border-sidebar-border last:border-0 gap-2"
                             >
-                                <div className="space-y-1">
-                                    <p className="font-bold text-sm text-[#2E2E2F] dark:text-white group-hover/item:text-[#38BDF2] transition-colors">{tx.customerName || tx.buyerName || 'Organizer'}</p>
-                                    <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/40">
+                                <div className="space-y-1 min-w-0 flex-1">
+                                    <p className="font-bold text-sm text-[#2E2E2F] dark:text-white group-hover/item:text-[#38BDF2] transition-colors truncate">{tx.customerName || tx.buyerName || 'Organizer'}</p>
+                                    <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/40 truncate">
                                         {tx.planName || tx.eventName || 'Ticket Purchase'} • {new Date(tx.createdAt || tx.created_at).toLocaleString()}
                                     </p>
                                 </div>
-                                <div className="text-right">
-                                    <span className="text-[9px] font-bold bg-[#38BDF2]/10 text-[#38BDF2] px-2 py-1 rounded-md mb-2 inline-block">PAID</span>
-                                    <p className="font-bold text-sm text-[#2E2E2F] dark:text-white">PHP {Number(tx.netAmount || tx.amount || 0).toLocaleString()}</p>
-                                    <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/30 tracking-tight">Net Payout</p>
+                                <div className="text-right shrink-0">
+                                    <span className="text-[9px] font-bold bg-[#38BDF2]/10 text-[#38BDF2] px-2 py-1 rounded-md mb-1 sm:mb-2 inline-block">PAID</span>
+                                    <p className="font-bold text-xs sm:text-sm text-[#2E2E2F] dark:text-white">PHP {Number(tx.netAmount || tx.amount || 0).toLocaleString()}</p>
+                                    <p className="hidden sm:block text-[10px] font-bold text-[#2E2E2F] dark:text-white/30 tracking-tight">Net Payout</p>
                                 </div>
                             </div>
                         ))}
@@ -520,18 +520,18 @@ export const OrganizerDashboard: React.FC = () => {
                             <div 
                                 key={order.orderId || i} 
                                 onClick={() => setSelectedOrder(order)}
-                                className="p-6 flex justify-between items-center hover:bg-[#38BDF2]/5 transition-colors cursor-pointer group/item border-b border-sidebar-border last:border-0"
+                                className="p-4 sm:p-6 flex justify-between items-center hover:bg-[#38BDF2]/5 transition-colors cursor-pointer group/item border-b border-sidebar-border last:border-0 gap-2"
                             >
-                                <div className="space-y-1">
-                                    <p className="font-bold text-sm text-[#2E2E2F] dark:text-white dark:text-white group-hover/item:text-[#38BDF2] transition-colors">{order.buyerName}</p>
-                                    <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40">
+                                <div className="space-y-1 min-w-0 flex-1">
+                                    <p className="font-bold text-sm text-[#2E2E2F] dark:text-white dark:text-white group-hover/item:text-[#38BDF2] transition-colors truncate">{order.buyerName}</p>
+                                    <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40 truncate">
                                         {order.eventName} • Order #{order.orderId?.slice(-8)} • {new Date(order.createdAt).toLocaleString()}
                                     </p>
                                 </div>
-                                <div className="text-right">
-                                    <span className="text-[9px] font-bold bg-[#38BDF2]/10 text-[#38BDF2] px-2 py-1 rounded-md mb-2 inline-block">PAID</span>
-                                    <p className="font-bold text-sm text-[#2E2E2F] dark:text-white">PHP {Number(order.netAmount || order.totalAmount || 0).toLocaleString()}</p>
-                                    <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/30 tracking-tight">Net Payout</p>
+                                <div className="text-right shrink-0">
+                                    <span className="text-[9px] font-bold bg-[#38BDF2]/10 text-[#38BDF2] px-2 py-1 rounded-md mb-1 sm:mb-2 inline-block">PAID</span>
+                                    <p className="font-bold text-xs sm:text-sm text-[#2E2E2F] dark:text-white">PHP {Number(order.netAmount || order.totalAmount || 0).toLocaleString()}</p>
+                                    <p className="hidden sm:block text-[10px] font-bold text-[#2E2E2F] dark:text-white/30 tracking-tight">Net Payout</p>
                                 </div>
                             </div>
                         ))}
@@ -562,23 +562,23 @@ export const OrganizerDashboard: React.FC = () => {
                     {auditLogs.map((log, i) => (
                         <div 
                             key={log.id || i} 
-                            className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#38BDF2]/5 transition-colors group/log cursor-pointer active:bg-[#38BDF2]/10 border-b border-sidebar-border last:border-0"
+                            className="p-4 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#38BDF2]/5 transition-colors group/log cursor-pointer active:bg-[#38BDF2]/10 border-b border-sidebar-border last:border-0"
                             onClick={() => setSelectedLog(log)}
                         >
-                            <div className="flex items-center gap-5">
+                            <div className="flex items-center gap-4 sm:gap-5 min-w-0">
                                 <div className="w-10 h-10 rounded-xl bg-[#38BDF2] flex items-center justify-center shrink-0 shadow-sm text-white">
                                     {log.action?.includes('LOGIN') ? <ICONS.Shield className="w-4 h-4" /> : <ICONS.Activity className="w-4 h-4" />}
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-sm font-bold text-[#2E2E2F] dark:text-white">{log.action || 'System Action'}</p>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-bold text-[#38BDF2] bg-[#38BDF2]/5 px-1.5 py-0.5 rounded-sm">{log.actorName || log.performedBy || 'System'}</span>
-                                        <span className="text-[10px] text-[#2E2E2F] dark:text-white/40 font-bold">•</span>
-                                        <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/60">Target — {log.target || 'General'}</p>
+                                <div className="space-y-1 min-w-0 flex-1">
+                                    <p className="text-sm font-bold text-[#2E2E2F] dark:text-white truncate">{log.action || 'System Action'}</p>
+                                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                                        <span className="text-[10px] font-bold text-[#38BDF2] bg-[#38BDF2]/5 px-1.5 py-0.5 rounded-sm truncate max-w-[100px] sm:max-w-none">{log.actorName || log.performedBy || 'System'}</span>
+                                        <span className="text-[10px] text-[#2E2E2F] dark:text-white/40 font-bold hidden sm:inline">•</span>
+                                        <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/60 truncate">Target — {log.target || 'General'}</p>
                                     </div>
                                 </div>
                             </div>
-                            <div className="text-left md:text-right">
+                            <div className="text-left md:text-right pl-14 md:pl-0 shrink-0 mt-[-10px] md:mt-0">
                                 <p className="text-xs font-bold text-[#2E2E2F] dark:text-white dark:text-white/80">{new Date(log.timestamp).toLocaleDateString()}</p>
                                 <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                             </div>
@@ -604,25 +604,25 @@ export const OrganizerDashboard: React.FC = () => {
             >
                 {selectedTx && (
                     <div className="space-y-6">
-                        <div className="flex items-center gap-4 p-5 bg-background rounded-2xl border border-sidebar-border">
-                            <div className="w-14 h-14 rounded-full bg-[#38BDF2] flex items-center justify-center text-white text-xl font-bold shadow-sm">
+                        <div className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5 bg-background rounded-2xl border border-sidebar-border min-w-0">
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-full bg-[#38BDF2] flex items-center justify-center text-white text-lg sm:text-xl font-bold shadow-sm">
                                 {(selectedTx.customerName || selectedTx.buyerName || 'O').charAt(0).toUpperCase()}
                             </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40 leading-none mb-1">Customer / Subscriber</p>
-                                <p className="text-lg font-bold text-[#2E2E2F] dark:text-white dark:text-white leading-tight">{selectedTx.customerName || selectedTx.buyerName || 'Subscriber'}</p>
-                                <p className="text-xs font-bold text-[#38BDF2]">{selectedTx.customerEmail || selectedTx.buyerEmail || 'No email provided'}</p>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40 leading-none mb-1 truncate">Customer / Subscriber</p>
+                                <p className="text-base sm:text-lg font-bold text-[#2E2E2F] dark:text-white dark:text-white leading-tight truncate">{selectedTx.customerName || selectedTx.buyerName || 'Subscriber'}</p>
+                                <p className="text-[10px] sm:text-xs font-bold text-[#38BDF2] truncate">{selectedTx.customerEmail || selectedTx.buyerEmail || 'No email provided'}</p>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="p-4 bg-background rounded-xl border border-sidebar-border">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            <div className="p-4 bg-background rounded-xl border border-sidebar-border min-w-0">
                                 <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40 mb-1">Reference ID</p>
-                                <p className="text-xs font-bold text-[#2E2E2F] dark:text-white dark:text-white font-mono">{selectedTx.orderId || 'N/A'}</p>
+                                <p className="text-xs font-bold text-[#2E2E2F] dark:text-white dark:text-white font-mono truncate">{selectedTx.orderId || 'N/A'}</p>
                             </div>
-                            <div className="p-4 bg-background rounded-xl border border-sidebar-border">
+                            <div className="p-4 bg-background rounded-xl border border-sidebar-border min-w-0">
                                 <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40 mb-1">Payment Date</p>
-                                <p className="text-xs font-bold text-[#2E2E2F] dark:text-white dark:text-white">{new Date(selectedTx.createdAt || selectedTx.created_at).toLocaleString()}</p>
+                                <p className="text-xs font-bold text-[#2E2E2F] dark:text-white dark:text-white truncate">{new Date(selectedTx.createdAt || selectedTx.created_at).toLocaleString()}</p>
                             </div>
                         </div>
 
@@ -658,48 +658,48 @@ export const OrganizerDashboard: React.FC = () => {
             >
                 {selectedOrder && (
                     <div className="space-y-6">
-                        <div className="p-6 bg-background border border-sidebar-border rounded-2xl flex justify-between items-center shadow-sm">
-                            <div>
+                        <div className="p-4 sm:p-6 bg-background border border-sidebar-border rounded-2xl flex justify-between items-center shadow-sm gap-2">
+                            <div className="min-w-0 flex-1">
                                 <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40 mb-1">Net Payout</p>
-                                <h2 className="text-3xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight">PHP {(selectedOrder.netAmount || selectedOrder.totalAmount || 0).toLocaleString()}</h2>
-                                <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/40 dark:text-white/20 mt-1">From gross PHP {Number(selectedOrder.totalAmount || 0).toLocaleString()}</p>
+                                <h2 className="text-2xl sm:text-3xl font-black text-[#2E2E2F] dark:text-white dark:text-white tracking-tight truncate">PHP {(selectedOrder.netAmount || selectedOrder.totalAmount || 0).toLocaleString()}</h2>
+                                <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white/40 dark:text-white/20 mt-1 truncate">From gross PHP {Number(selectedOrder.totalAmount || 0).toLocaleString()}</p>
                             </div>
-                            <div className="bg-[#38BDF2]/10 px-3 py-1.5 rounded-lg border border-[#38BDF2]/20">
+                            <div className="bg-[#38BDF2]/10 px-3 py-1.5 rounded-lg border border-[#38BDF2]/20 shrink-0">
                                 <span className="text-xs font-bold text-[#38BDF2]">PAID</span>
                             </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <div className="flex items-start gap-4 p-4 bg-background rounded-xl border border-sidebar-border">
-                                <div className="w-10 h-10 rounded-xl bg-[#38BDF2] flex items-center justify-center text-white">
+                        <div className="space-y-3 sm:space-y-4">
+                            <div className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-background rounded-xl border border-sidebar-border">
+                                <div className="w-10 h-10 shrink-0 rounded-xl bg-[#38BDF2] flex items-center justify-center text-white">
                                     <ICONS.Calendar className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40 leading-none mb-1">Event</p>
-                                    <p className="text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white truncate">{selectedOrder.eventName || 'Unnamed Event'}</p>
+                                    <p className="text-xs sm:text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white truncate">{selectedOrder.eventName || 'Unnamed Event'}</p>
                                 </div>
                             </div>
 
-                            <div className="flex items-start gap-4 p-4 bg-background rounded-xl border border-sidebar-border">
-                                <div className="w-10 h-10 rounded-xl bg-[#38BDF2] flex items-center justify-center text-white">
+                            <div className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-background rounded-xl border border-sidebar-border">
+                                <div className="w-10 h-10 shrink-0 rounded-xl bg-[#38BDF2] flex items-center justify-center text-white">
                                     <ICONS.Users className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-[10px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/40 leading-none mb-1">Buyer</p>
-                                    <p className="text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white truncate">{selectedOrder.buyerName}</p>
-                                    <p className="text-[10px] font-bold text-[#38BDF2]">{selectedOrder.buyerEmail}</p>
+                                    <p className="text-xs sm:text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white truncate">{selectedOrder.buyerName}</p>
+                                    <p className="text-[10px] font-bold text-[#38BDF2] truncate">{selectedOrder.buyerEmail}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="p-5 bg-surface rounded-2xl border border-sidebar-border space-y-4 shadow-sm">
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white/60">Order ID</span>
-                                <span className="text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white font-mono">{selectedOrder.orderId}</span>
+                        <div className="p-4 sm:p-5 bg-surface rounded-2xl border border-sidebar-border space-y-3 sm:space-y-4 shadow-sm">
+                            <div className="flex justify-between items-center gap-2">
+                                <span className="text-xs sm:text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white/60 shrink-0">Order ID</span>
+                                <span className="text-xs sm:text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white font-mono truncate">{selectedOrder.orderId}</span>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white/60">Date</span>
-                                <span className="text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white">{new Date(selectedOrder.createdAt).toLocaleString()}</span>
+                            <div className="flex justify-between items-center gap-2">
+                                <span className="text-xs sm:text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white/60 shrink-0">Date</span>
+                                <span className="text-xs sm:text-sm font-bold text-[#2E2E2F] dark:text-white dark:text-white truncate">{new Date(selectedOrder.createdAt).toLocaleString()}</span>
                             </div>
                         </div>
 
@@ -718,30 +718,30 @@ export const OrganizerDashboard: React.FC = () => {
             >
                 {selectedLog && (
                     <div className="space-y-6">
-                        <div className="flex items-center gap-4 p-5 bg-background rounded-2xl border border-sidebar-border">
-                            <div className="w-14 h-14 rounded-full bg-[#38BDF2] flex items-center justify-center text-white text-xl font-bold shadow-sm">
-                                {selectedLog.action?.includes('LOGIN') ? <ICONS.Shield className="w-6 h-6" /> : <ICONS.Activity className="w-6 h-6" />}
+                        <div className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5 bg-background rounded-2xl border border-sidebar-border min-w-0">
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-full bg-[#38BDF2] flex items-center justify-center text-white text-lg sm:text-xl font-bold shadow-sm">
+                                {selectedLog.action?.includes('LOGIN') ? <ICONS.Shield className="w-5 h-5 sm:w-6 sm:h-6" /> : <ICONS.Activity className="w-5 h-5 sm:w-6 sm:h-6" />}
                             </div>
-                            <div>
-                                <h2 className="text-lg font-black text-[#2E2E2F] dark:text-white">{selectedLog.action || 'System Action'}</h2>
-                                <p className="text-xs font-bold text-[#2E2E2F] dark:text-white/40">
+                            <div className="min-w-0 flex-1">
+                                <h2 className="text-base sm:text-lg font-black text-[#2E2E2F] dark:text-white truncate">{selectedLog.action || 'System Action'}</h2>
+                                <p className="text-[10px] sm:text-xs font-bold text-[#2E2E2F] dark:text-white/40 truncate">
                                     {new Date(selectedLog.timestamp).toLocaleString()}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="p-5 bg-background rounded-2xl border border-sidebar-border">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            <div className="p-4 sm:p-5 bg-background rounded-2xl border border-sidebar-border min-w-0">
                                 <p className="text-[10px] font-black text-[#1E293B] dark:text-white/30 dark:text-white/20 mb-1 flex items-center gap-2">
-                                    <ICONS.Users className="w-3 h-3" /> Actor
+                                    <ICONS.Users className="w-3 h-3 shrink-0" /> Actor
                                 </p>
-                                <p className="text-sm font-black text-[#1E293B] dark:text-white dark:text-white">{selectedLog.actorName || selectedLog.performedBy || 'System'}</p>
+                                <p className="text-xs sm:text-sm font-black text-[#1E293B] dark:text-white dark:text-white truncate">{selectedLog.actorName || selectedLog.performedBy || 'System'}</p>
                             </div>
-                            <div className="p-5 bg-background rounded-2xl border border-sidebar-border">
+                            <div className="p-4 sm:p-5 bg-background rounded-2xl border border-sidebar-border min-w-0">
                                 <p className="text-[10px] font-black text-[#1E293B] dark:text-white/30 dark:text-white/20 mb-1 flex items-center gap-2">
-                                    <ICONS.Users className="w-3 h-3" /> Target
+                                    <ICONS.Users className="w-3 h-3 shrink-0" /> Target
                                 </p>
-                                <p className="text-sm font-black text-[#1E293B] dark:text-white dark:text-white truncate">{selectedLog.target || 'N/A'}</p>
+                                <p className="text-xs sm:text-sm font-black text-[#1E293B] dark:text-white dark:text-white truncate">{selectedLog.target || 'N/A'}</p>
                             </div>
                         </div>
 

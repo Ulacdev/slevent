@@ -1660,7 +1660,9 @@ const WizardStepContent = React.memo(({
     isPersonalProfileReady,
     isOrganizerProfileReady,
     navigate,
-    submitting
+    submitting,
+    generateAiFaqs,
+    faqAiLoading
 }: any) => {
     return (
         <div className="animate-in fade-in duration-300">
@@ -1769,6 +1771,103 @@ const WizardStepContent = React.memo(({
                                 <div className="absolute bottom-3 right-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-lg px-3 py-1 text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white uppercase tracking-wide group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors pointer-events-none">Browse</div>
                             </div>
                             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
+                        </div>
+                    </div>
+
+                    {/* FAQs Editor */}
+                    <div className="md:col-span-2">
+                        <div className="flex flex-col gap-2 mb-1 px-1">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                                <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Frequently Asked Questions</label>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={generateAiFaqs}
+                                        disabled={faqAiLoading || !formData.eventName.trim()}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-violet-500/10 to-[#38BDF2]/10 text-violet-600 dark:text-violet-400 text-[10px] font-black uppercase tracking-widest hover:from-violet-500/20 hover:to-[#38BDF2]/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed group"
+                                        title={!formData.eventName.trim() ? 'Enter an event name first' : 'Generate FAQs with AI based on your event'}
+                                    >
+                                        {faqAiLoading ? (
+                                            <div className="w-3 h-3 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+                                        ) : (
+                                            <WandIcon className="w-3 h-3 group-hover:rotate-12 group-hover:scale-110 transition-transform" />
+                                        )}
+                                        {faqAiLoading ? 'Generating...' : '✨ AI Generate'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData((prev: any) => ({ ...prev, faqs: [...(prev.faqs || []), { question: '', answer: '' }] }))}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-widest hover:bg-[#38BDF2]/20 transition-colors"
+                                    >
+                                        <ICONS.Plus className="w-3 h-3" strokeWidth={3} /> Add FAQ
+                                    </button>
+                                </div>
+                            </div>
+                            {(!formData.faqs || formData.faqs.length === 0) ? (
+                                <div className="py-8 text-center border-2 border-dashed border-[#2E2E2F]/10 dark:border-white/10 rounded-2xl">
+                                    <ICONS.Info className="w-6 h-6 text-[#2E2E2F]/20 dark:text-white/20 mx-auto mb-2" />
+                                    <p className="text-[10px] font-black text-[#2E2E2F]/30 dark:text-white/25 uppercase tracking-widest">No FAQs added yet</p>
+                                    <p className="text-[9px] text-[#2E2E2F]/25 dark:text-white/20 font-medium mt-1">Help attendees by answering common questions</p>
+                                    <button
+                                        type="button"
+                                        onClick={generateAiFaqs}
+                                        disabled={faqAiLoading || !formData.eventName.trim()}
+                                        className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-500 to-[#38BDF2] text-white text-[10px] font-black uppercase tracking-widest hover:shadow-lg hover:shadow-violet-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed group"
+                                    >
+                                        {faqAiLoading ? (
+                                            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                        ) : (
+                                            <WandIcon className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
+                                        )}
+                                        {faqAiLoading ? 'Generating FAQs...' : '✨ Auto-Generate FAQs with AI'}
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {formData.faqs.map((faq: { question: string; answer: string }, idx: number) => (
+                                        <div key={idx} className="relative p-5 bg-[#F2F2F2] dark:bg-[#111111] border-2 border-[#2E2E2F]/10 dark:border-white/10 rounded-2xl group">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <span className="text-[9px] font-black text-[#38BDF2] uppercase tracking-widest">FAQ #{idx + 1}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData((prev: any) => ({ ...prev, faqs: prev.faqs.filter((_: any, i: number) => i !== idx) }))}
+                                                    className="w-7 h-7 rounded-lg flex items-center justify-center text-[#2E2E2F]/30 dark:text-white/30 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                                                    title="Remove FAQ"
+                                                >
+                                                    <ICONS.Trash className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <label className="block text-[10px] font-semibold text-[#2E2E2F]/60 dark:text-white/40 uppercase tracking-wide mb-1.5 ml-0.5">Question</label>
+                                                    <Input
+                                                        placeholder="e.g. What should I bring to the event?"
+                                                        value={faq.question}
+                                                        onChange={(e: any) => {
+                                                            const updated = [...formData.faqs];
+                                                            updated[idx] = { ...updated[idx], question: e.target.value };
+                                                            setFormData((prev: any) => ({ ...prev, faqs: updated }));
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-semibold text-[#2E2E2F]/60 dark:text-white/40 uppercase tracking-wide mb-1.5 ml-0.5">Answer</label>
+                                                    <textarea
+                                                        className="w-full px-4 py-3 bg-[#F2F2F2] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 rounded-xl text-sm min-h-[80px] focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors outline-none resize-none"
+                                                        placeholder="Provide a helpful answer..."
+                                                        value={faq.answer}
+                                                        onChange={(e: any) => {
+                                                            const updated = [...formData.faqs];
+                                                            updated[idx] = { ...updated[idx], answer: e.target.value };
+                                                            setFormData((prev: any) => ({ ...prev, faqs: updated }));
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -2310,8 +2409,10 @@ export const UserEvents: React.FC = () => {
         brandColor: '#38BDF2',
         enableDiscountCodes: false,
         ticketTypes: [] as TicketType[],
+        faqs: [] as { question: string; answer: string }[],
     };
     const [formData, setFormData] = useState(initialFormData);
+    const [faqAiLoading, setFaqAiLoading] = useState(false);
     const isPersonalProfileReady = !!name?.trim();
     const isOrganizerProfileReady = !!organizerProfile?.organizerId && !!organizerProfile?.organizerName?.trim();
     const isPaymentReady = !!hitpaySettings?.settings?.isConfigured;
@@ -2561,8 +2662,38 @@ export const UserEvents: React.FC = () => {
             streamingPlatform: formData.streamingPlatform,
             streaming_url: formData.streamingUrl || null,
             organizerId: organizerProfile?.organizerId || null,
+            faqs: formData.faqs || [],
         };
     }, [formData, organizerProfile]);
+
+    const generateAiFaqs = React.useCallback(async () => {
+        if (!formData.eventName.trim()) {
+            showToast('error', 'Enter an event name first so AI can generate relevant FAQs.');
+            return;
+        }
+        setFaqAiLoading(true);
+        try {
+            const result = await apiService.suggestFaqs({
+                eventName: formData.eventName,
+                description: formData.description || undefined,
+                locationType: formData.locationType || undefined,
+                organizerName: organizerProfile?.organizerName || undefined,
+            });
+            if (result.suggestions?.length) {
+                setFormData((prev: any) => ({
+                    ...prev,
+                    faqs: [...(prev.faqs || []), ...result.suggestions],
+                }));
+                showToast('success', `✨ ${result.suggestions.length} FAQs generated! You can edit or remove any of them.`);
+            } else {
+                showToast('error', 'AI returned no suggestions. Try again.');
+            }
+        } catch (err: any) {
+            showToast('error', err?.message || 'AI FAQ generation failed.');
+        } finally {
+            setFaqAiLoading(false);
+        }
+    }, [formData.eventName, formData.description, formData.locationType, organizerProfile?.organizerName, showToast]);
 
 
     const saveDraftAndContinueToTickets = React.useCallback(async () => {
@@ -2822,6 +2953,7 @@ export const UserEvents: React.FC = () => {
             brandColor: event.brandColor || '#38BDF2',
             enableDiscountCodes: !!event.enableDiscountCodes,
             ticketTypes: event.ticketTypes,
+            faqs: event.faqs || [],
         });
         setInitialEventStatus(event.status || 'DRAFT');
         setCurrentEventId(event.eventId);
@@ -3531,6 +3663,8 @@ export const UserEvents: React.FC = () => {
                                     isOrganizerProfileReady={isOrganizerProfileReady}
                                     navigate={navigate}
                                     submitting={submitting}
+                                    generateAiFaqs={generateAiFaqs}
+                                    faqAiLoading={faqAiLoading}
                                 />
 
                                 <div className="hidden md:flex gap-4 pt-8 border-t border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">

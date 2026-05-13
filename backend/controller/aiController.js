@@ -301,3 +301,66 @@ export const proxyImage = async (req, res) => {
     return res.status(500).json({ error: 'Internal proxy error.' });
   }
 };
+
+/**
+ * POST /api/ai/faq-suggest
+ * Generates FAQ suggestions based on event context.
+ * Body: { eventName, description?, locationType?, organizerName? }
+ * Returns: { suggestions: { question: string, answer: string }[] }
+ */
+export const suggestFaqs = async (req, res) => {
+  const { eventName, description, locationType, organizerName } = req.body;
+
+  if (!process.env.GEMINI_API_KEY)
+    return res.status(503).json({ error: 'AI suggestions are not configured on this server.' });
+  if (!eventName?.trim())
+    return res.status(400).json({ error: 'Event name is required to generate FAQ suggestions.' });
+
+  const orgLine = organizerName ? `Organized by: "${organizerName}".` : '';
+  const fmtLabel = locationType === 'ONLINE' ? 'online/virtual' : locationType === 'HYBRID' ? 'hybrid (in-person + online)' : 'in-person';
+  const descLine = description ? `Event description: "${description.substring(0, 300)}"` : '';
+
+  try {
+    const prompt = `
+You are an expert event organizer helping create an FAQ section for an event listing page (similar to Eventbrite).
+
+Event context:
+- Event Name: "${eventName}"
+${descLine}
+- Format: ${fmtLabel}
+${orgLine}
+
+Generate exactly 5 highly relevant FAQ items that attendees would commonly ask about this specific type of event.
+
+Rules:
+- Questions should be natural, conversational, and specific to THIS event type
+- Answers should be helpful, concise (1-3 sentences), and professional
+- Cover topics like: what to expect, who should attend, preparation needed, logistics, and post-event value
+- Do NOT include generic questions about refunds/cancellations (those are handled by the platform)
+- Tailor the FAQs to the event format (${fmtLabel})
+
+Respond ONLY with a valid JSON array (no markdown, no code blocks, no extra text):
+[
+  { "question": "Question 1?", "answer": "Answer 1." },
+  { "question": "Question 2?", "answer": "Answer 2." },
+  { "question": "Question 3?", "answer": "Answer 3." },
+  { "question": "Question 4?", "answer": "Answer 4." },
+  { "question": "Question 5?", "answer": "Answer 5." }
+]`;
+
+    const jsonText = await callGemini(prompt);
+    let suggestions;
+    try { suggestions = JSON.parse(jsonText); } catch {
+      return res.status(500).json({ error: 'AI returned an unexpected format. Please try again.' });
+    }
+    if (!Array.isArray(suggestions) || !suggestions.length)
+      return res.status(500).json({ error: 'AI returned empty suggestions. Please try again.' });
+
+    const sanitized = suggestions.slice(0, 5)
+      .map(s => ({ question: String(s.question || '').trim(), answer: String(s.answer || '').trim() }))
+      .filter(s => s.question && s.answer);
+
+    console.log(`[AI Controller] SUCCESS: Generated ${sanitized.length} FAQ suggestions for "${eventName}"`);
+    return res.json({ suggestions: sanitized });
+  } catch (err) { return handleErrors(err, res); }
+};
