@@ -1118,29 +1118,29 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                 </div>
 
                 {/* Stats Block - Tucked tightly under the buttons */}
-                <div className="mt-10 sm:mt-12 w-full grid grid-cols-2 sm:grid-cols-3 gap-x-6 sm:gap-x-10 gap-y-8 sm:gap-y-12">
-                  <div className="flex-1 min-w-[140px]">
-                    <h4 className="text-[32px] font-bold text-black tracking-tighter leading-tight mb-1">
+                <div className="mt-10 sm:mt-12 w-full grid grid-cols-3 gap-x-4 sm:gap-x-10 gap-y-8 sm:gap-y-12 text-center sm:text-left">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-[24px] sm:text-[32px] font-bold text-black tracking-tighter leading-tight mb-1">
                       6+ Core<br />Event<br />Modules
                     </h4>
-                    <p className="text-[20px] font-normal text-black leading-tight tracking-tight mt-0.5">
+                    <p className="text-[14px] sm:text-[20px] font-normal text-black leading-tight tracking-tight mt-0.5">
                       Ticketing, Registration,<br />Check-in, Analytics,<br />Seats, Reports
                     </p>
                   </div>
-                  <div className="flex-1 min-w-[140px]">
-                    <h4 className="text-[32px] font-bold text-black tracking-tighter leading-tight mb-1">
-                      8+ Active<br />Event<br />Organizers
-                    </h4>
-                    <p className="text-[20px] font-normal text-black leading-tight tracking-tight mt-0.5">
-                      Built with real-world<br />organizer experience
-                    </p>
-                  </div>
-                  <div className="flex-1 min-w-[140px]">
-                    <h4 className="text-[32px] font-bold text-black tracking-tighter leading-tight mb-1">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-[24px] sm:text-[32px] font-bold text-black tracking-tighter leading-tight mb-1">
                       10+ Hosted<br />Event<br />Workflows
                     </h4>
-                    <p className="text-[20px] font-normal text-black leading-tight tracking-tight mt-0.5">
+                    <p className="text-[14px] sm:text-[20px] font-normal text-black leading-tight tracking-tight mt-0.5">
                       From event planning to<br />secure payouts
+                    </p>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-[24px] sm:text-[32px] font-bold text-black tracking-tighter leading-tight mb-1">
+                      8+ Active<br />Event<br />Organizers
+                    </h4>
+                    <p className="text-[14px] sm:text-[20px] font-normal text-black leading-tight tracking-tight mt-0.5">
+                      Built with real-world<br />organizer experience
                     </p>
                   </div>
                 </div>
