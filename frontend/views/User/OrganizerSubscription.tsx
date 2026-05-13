@@ -173,6 +173,7 @@ export const OrganizerSubscription: React.FC = () => {
                       { label: 'Staff Accounts', val: currentSubscription.plan.limits?.max_staff_accounts || 0, icon: <ICONS.Users /> },
                       { label: 'Monthly Attendees', val: currentSubscription.plan.limits?.monthly_attendees || currentSubscription.plan.limits?.max_attendees_per_month || 0, icon: <ICONS.Users /> },
                       { label: 'Paid Events Limit', val: currentSubscription.plan.limits?.max_priced_events || 0, icon: <ICONS.Zap /> },
+                      { label: 'Max FAQs Per Event', val: currentSubscription.plan.limits?.max_faqs_per_event || 3, icon: <ICONS.Info /> },
                       { label: 'Daily Email Quota', val: (currentSubscription.plan.limits?.email_quota_per_day || 500) + ' /day', icon: <ICONS.Mail /> },
                     ].map((limit, idx) => (
                       <div key={idx} className="p-4 bg-background rounded-xl border-2 border-sidebar-border hover:border-[#38BDF2]/30 transition-all group/limit hover:shadow-sm">

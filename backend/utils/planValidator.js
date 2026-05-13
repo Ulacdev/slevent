@@ -96,7 +96,8 @@ export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 
             max_staff_accounts: 2,
             monthly_attendees: 500,
             max_tickets_per_event: 5,
-            max_attendees_per_event: 500
+            max_attendees_per_event: 500,
+            max_faqs_per_event: 3
         };
 
         const defaultFeatures = {
@@ -311,6 +312,18 @@ export const checkPlanLimits = async (organizerId, featureKey, requestedValue = 
                     return {
                         allowed: false,
                         message: `Event capacity limit reached. Your current plan allows up to ${limitValue} attendees per event.`,
+                        limit: limitValue
+                    };
+                }
+                break;
+            }
+
+            case 'max_faqs_per_event': {
+                const limitValue = limits.max_faqs_per_event ?? 3;
+                if (requestedValue > limitValue) {
+                    return {
+                        allowed: false,
+                        message: `FAQ limit reached. Your current plan allows up to ${limitValue} FAQs per event. Upgrade to add more.`,
                         limit: limitValue
                     };
                 }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ICONS } from '../constants';
 import { apiService } from '../services/apiService';
 import { AdminPlan } from '../types';
+import { PlanBillingCycle, formatPlanCurrency, getPlanAmount, sortPlansForDisplay, formatLimitValue } from '../utils/pricingPlans';
 import { Button, Modal, Input } from './Shared';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -39,6 +40,7 @@ const defaultDraft: PlanDraft = {
     max_attendees_per_month: 100,
     email_quota_per_day: 500,
     max_priced_events: 0,
+    max_faqs_per_event: 3,
   },
   promotions: {
     max_promoted_events: 0,
@@ -48,8 +50,12 @@ const defaultDraft: PlanDraft = {
 
 const parseNumeric = (value: string, fallback = 0) => {
   const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return fallback;
-  return parsed;
+  return isNaN(parsed) ? fallback : parsed;
+};
+
+const parseLimitValue = (value: string): number | string => {
+  if (/^unlimited$/i.test(value.trim())) return 'unlimited';
+  return parseNumeric(value, 0);
 };
 
 const toPayload = (draft: PlanDraft): Partial<AdminPlan> => ({
@@ -76,6 +82,7 @@ const toPayload = (draft: PlanDraft): Partial<AdminPlan> => ({
     max_attendees_per_month: draft.limits.max_attendees_per_month,
     email_quota_per_day: draft.limits.email_quota_per_day,
     max_priced_events: draft.limits.max_priced_events,
+    max_faqs_per_event: draft.limits.max_faqs_per_event,
   },
   promotions: {
     max_promoted_events: Math.max(0, Math.floor(draft.promotions?.max_promoted_events ?? 0)),
@@ -272,6 +279,17 @@ export const CreatePlanModal: React.FC<CreatePlanModalProps> = ({ isOpen, onClos
                 value={draft.limits.max_priced_events}
                 onChange={(e: any) => setDraft(p => ({ ...p, limits: { ...p.limits, max_priced_events: Math.max(0, parseNumeric(e.target.value, 0)) } }))}
               />
+              <div className="space-y-1">
+                <Input
+                  label="Max FAQs Per Event"
+                  placeholder="e.g. 3 or 'unlimited'"
+                  value={draft.limits.max_faqs_per_event}
+                  onChange={(e: any) => setDraft(p => ({ ...p, limits: { ...p.limits, max_faqs_per_event: parseLimitValue(e.target.value) } }))}
+                />
+                <p className="text-[9px] font-bold text-[#38BDF2] uppercase tracking-widest ml-1 animate-pulse">
+                  Preview: {formatLimitValue(draft.limits.max_faqs_per_event)} FAQs Allowed
+                </p>
+              </div>
               <Input
                 label="Monthly Attendees"
                 type="number"

@@ -5,7 +5,7 @@ import { apiService } from '../../services/apiService';
 import { Event, UserRole, TicketType, RegistrationView, EventStatus, Ticket } from '../../types';
 import { Card, Badge, Button, Modal, Input, PageLoader } from '../../components/Shared';
 import { OnsiteLocationAssistant } from '../../components/OnsiteLocationAssistant';
-import { ICONS } from '../../constants';
+import { ICONS, WandIcon } from '../../constants';
 import { useToast } from '../../context/ToastContext';
 import { useUser } from '../../context/UserContext';
 
@@ -29,6 +29,7 @@ export const EventsManagement: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentEventId, setCurrentEventId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [faqAiLoading, setFaqAiLoading] = useState(false);
   // Removed local notification state in favor of global useToast
   // const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -86,7 +87,8 @@ export const EventsManagement: React.FC = () => {
     regCloseTime: '',
     streamingPlatform: '',
     streamingUrl: '',
-    ticketTypes: [] as TicketType[]
+    ticketTypes: [] as TicketType[],
+    faqs: [] as { question: string; answer: string }[]
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -223,7 +225,8 @@ export const EventsManagement: React.FC = () => {
       regCloseDate: closeDT.date,
       regCloseTime: closeDT.time,
       streamingPlatform: event.streamingPlatform || '',
-      ticketTypes: event.ticketTypes
+      ticketTypes: event.ticketTypes,
+      faqs: Array.isArray(event.faqs) ? event.faqs : []
     });
     setCurrentEventId(event.eventId);
     setIsEditMode(true);
@@ -286,9 +289,10 @@ export const EventsManagement: React.FC = () => {
         imageUrl: formData.imageUrl,
         status: formData.status,
         regOpenAt: formData.regOpenDate || null,
-        regCloseAt: formData.regCloseDate || null,
+        regCloseAt: formData.regOpenDate || null,
         streamingPlatform: formData.streamingPlatform,
-        streaming_url: formData.streamingUrl || null
+        streaming_url: formData.streamingUrl || null,
+        faqs: formData.faqs
       };
 
       if (isEditMode && currentEventId) {
@@ -476,6 +480,34 @@ export const EventsManagement: React.FC = () => {
     link.click();
     document.body.removeChild(link);
   };
+
+    const generateAiFaqs = async () => {
+        if (!formData.eventName.trim()) {
+            showToast('error', 'Enter a session name first so AI can generate relevant FAQs.');
+            return;
+        }
+        setFaqAiLoading(true);
+        try {
+            const result = await apiService.suggestFaqs({
+                eventName: formData.eventName,
+                description: formData.description || undefined,
+                locationType: formData.locationType || undefined,
+            });
+            if (result.suggestions?.length) {
+                setFormData(prev => ({
+                    ...prev,
+                    faqs: [...(prev.faqs || []), ...result.suggestions]
+                }));
+                showToast('success', `✨ ${result.suggestions.length} FAQs generated!`);
+            } else {
+                showToast('error', 'AI returned no suggestions.');
+            }
+        } catch (err: any) {
+            showToast('error', err?.message || 'AI FAQ generation failed.');
+        } finally {
+            setFaqAiLoading(false);
+        }
+    };
 
   return (
     <React.Fragment>
@@ -1007,10 +1039,88 @@ export const EventsManagement: React.FC = () => {
                       label="Connection URL"
                       placeholder="Link to stream or meeting"
                       value={formData.streamingUrl}
-                      onChange={(e: any) => applyLocationValue(e.target.value)}
                     />
-                  </div>
                 </div>
+              </div>
+            </div>
+
+            {/* FAQs Editor */}
+            <div className="md:col-span-2 space-y-6">
+                  <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-black text-text dark:text-white/60 uppercase tracking-[0.2em] ml-1">Frequently Asked Questions</label>
+                      <div className="flex items-center gap-2">
+                          <button
+                              type="button"
+                              onClick={generateAiFaqs}
+                              disabled={faqAiLoading || !formData.eventName.trim()}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-widest hover:bg-[#38BDF2]/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed group"
+                          >
+                              {faqAiLoading ? (
+                                  <div className="w-3 h-3 border-2 border-[#38BDF2] border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                  <WandIcon className="w-3 h-3 group-hover:rotate-12 transition-transform" />
+                              )}
+                              {faqAiLoading ? 'Generating...' : '✨ AI Generate'}
+                          </button>
+                          <button
+                              type="button"
+                              onClick={() => setFormData(prev => ({ ...prev, faqs: [...(prev.faqs || []), { question: '', answer: '' }] }))}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-widest hover:bg-[#38BDF2]/20 transition-colors"
+                          >
+                              <ICONS.Plus className="w-3 h-3" strokeWidth={3} /> Add FAQ
+                          </button>
+                      </div>
+                  </div>
+
+                  {(!formData.faqs || formData.faqs.length === 0) ? (
+                      <div className="py-12 text-center border-2 border-dashed border-sidebar-border dark:border-white/10 rounded-2xl bg-background/50">
+                          <ICONS.Info className="w-6 h-6 text-text/20 dark:text-white/20 mx-auto mb-2" />
+                          <p className="text-[10px] font-black text-text/30 dark:text-white/25 uppercase tracking-widest">No FAQs configured</p>
+                          <p className="text-[9px] text-text/25 dark:text-white/20 font-medium mt-1">Help attendees with session-specific guidance</p>
+                      </div>
+                  ) : (
+                      <div className="space-y-4">
+                          {formData.faqs.map((faq, idx) => (
+                              <div key={idx} className="relative p-6 bg-background rounded-2xl border border-sidebar-border dark:border-white/10 group shadow-sm">
+                                  <div className="flex items-center justify-between mb-4">
+                                      <span className="text-[9px] font-black text-[#38BDF2] uppercase tracking-widest bg-[#38BDF2]/10 px-2 py-0.5 rounded-md">FAQ #{idx + 1}</span>
+                                      <button
+                                          type="button"
+                                          onClick={() => setFormData(prev => ({ ...prev, faqs: prev.faqs.filter((_, i) => i !== idx) }))}
+                                          className="w-8 h-8 rounded-xl flex items-center justify-center text-text/30 dark:text-white/30 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all active:scale-90"
+                                      >
+                                          <ICONS.Trash className="w-4 h-4" />
+                                      </button>
+                                  </div>
+                                  <div className="space-y-4">
+                                      <Input
+                                          label="Question"
+                                          placeholder="e.g. What is the entry requirement?"
+                                          value={faq.question}
+                                          onChange={(e: any) => {
+                                              const updated = [...formData.faqs];
+                                              updated[idx] = { ...updated[idx], question: e.target.value };
+                                              setFormData(prev => ({ ...prev, faqs: updated }));
+                                          }}
+                                      />
+                                      <div className="space-y-2">
+                                          <label className="block text-[10px] font-black text-text/60 dark:text-white/40 uppercase tracking-widest ml-1">Answer</label>
+                                          <textarea
+                                              className="w-full px-5 py-4 bg-background border border-sidebar-border dark:border-white/10 rounded-xl text-sm min-h-[100px] focus:ring-2 focus:ring-[#38BDF2]/30 focus:border-[#38BDF2] transition-colors outline-none dark:text-white"
+                                              placeholder="Provide a clear, helpful response..."
+                                              value={faq.answer}
+                                              onChange={e => {
+                                                  const updated = [...formData.faqs];
+                                                  updated[idx] = { ...updated[idx], answer: e.target.value };
+                                                  setFormData(prev => ({ ...prev, faqs: updated }));
+                                              }}
+                                          />
+                                      </div>
+                                  </div>
+                              </div>
+                          ))}
+                      </div>
+                  )}
               </div>
             </div>
 

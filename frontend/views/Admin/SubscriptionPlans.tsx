@@ -42,6 +42,7 @@ const defaultDraft: PlanDraft = {
     max_attendees_per_month: 100,
     email_quota_per_day: 500,
     max_priced_events: 0,
+    max_faqs_per_event: 3,
   },
   promotions: {
     max_promoted_events: 0,
@@ -58,8 +59,12 @@ const defaultDraft: PlanDraft = {
 );
 const parseNumeric = (value: string, fallback = 0) => {
   const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return fallback;
-  return parsed;
+  return isNaN(parsed) ? fallback : parsed;
+};
+
+const parseLimitValue = (value: string): number | string => {
+  if (/^unlimited$/i.test(value.trim())) return 'unlimited';
+  return parseNumeric(value, 0);
 };
 
 const toDraft = (plan: AdminPlan): PlanDraft => ({
@@ -82,6 +87,7 @@ const toDraft = (plan: AdminPlan): PlanDraft => ({
     max_attendees_per_month: plan.limits?.max_attendees_per_month ?? 0,
     email_quota_per_day: plan.limits?.email_quota_per_day ?? 500,
     max_priced_events: plan.limits?.max_priced_events ?? 0,
+    max_faqs_per_event: plan.limits?.max_faqs_per_event ?? 3,
   },
   promotions: {
     max_promoted_events: (plan as any)?.promotions?.max_promoted_events ?? 0,
@@ -113,6 +119,7 @@ const toPayload = (draft: PlanDraft): Partial<AdminPlan> => ({
     max_attendees_per_month: draft.limits.max_attendees_per_month,
     email_quota_per_day: draft.limits.email_quota_per_day,
     max_priced_events: draft.limits.max_priced_events,
+    max_faqs_per_event: draft.limits.max_faqs_per_event,
   },
   promotions: {
     max_promoted_events: Math.max(0, Math.floor(draft.promotions?.max_promoted_events ?? 0)),
@@ -349,6 +356,17 @@ export const SubscriptionPlans: React.FC = () => {
                   <Input label="Promoted Event Duration (Days)" type="number" value={draft.promotions?.promotion_duration_days ?? 0} onChange={(e: any) => setDraft((prev) => ({ ...prev, promotions: { ...prev.promotions, promotion_duration_days: Math.max(0, parseNumeric(e.target.value, 0)) } }))} />
                   <Input label="Max Staff Accounts" type="number" value={draft.limits.max_staff_accounts} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, max_staff_accounts: parseNumeric(e.target.value, 0) } }))} />
                   <Input label="Max Paid Events" type="number" value={draft.limits.max_priced_events} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, max_priced_events: Math.max(0, parseNumeric(e.target.value, 0)) } }))} />
+                  <div className="space-y-1">
+                    <Input 
+                      label="Max FAQs Per Event" 
+                      placeholder="e.g. 3 or 'unlimited'"
+                      value={draft.limits.max_faqs_per_event} 
+                      onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, max_faqs_per_event: parseLimitValue(e.target.value) } }))} 
+                    />
+                    <p className="text-[9px] font-bold text-[#38BDF2] uppercase tracking-widest ml-1 animate-pulse">
+                      Preview: {formatLimitValue(draft.limits.max_faqs_per_event)} FAQs Allowed
+                    </p>
+                  </div>
                   <Input label="Monthly Attendees" type="number" value={draft.limits.max_attendees_per_month} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, max_attendees_per_month: parseNumeric(e.target.value, 0) } }))} />
                   {/* Free Trial Days input removed */}
                   <Input label="Daily Email Quota" type="number" value={(draft.limits.email_quota_per_day as any) || 500} onChange={(e: any) => setDraft((prev) => ({ ...prev, limits: { ...prev.limits, email_quota_per_day: Math.max(0, parseNumeric(e.target.value, 500)) } }))} />

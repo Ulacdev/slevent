@@ -110,6 +110,11 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
               icon: <ICONS.Ticket className="w-4 h-4" /> 
             },
             { 
+              label: `${formatLimitValue(plan.limits?.max_faqs_per_event || 0)} FAQs Per Event`, 
+              enabled: Number(plan.limits?.max_faqs_per_event || 0) > 0, 
+              icon: <ICONS.Info className="w-4 h-4" /> 
+            },
+            { 
               label: `${formatLimitValue((plan as any)?.promotions?.max_promoted_events || 0)} Promoted Event Slots`, 
               enabled: Number((plan as any)?.promotions?.max_promoted_events || 0) > 0, 
               icon: <ICONS.Sparkles className="w-4 h-4" /> 

@@ -1778,17 +1778,26 @@ const WizardStepContent = React.memo(({
                     <div className="md:col-span-2">
                         <div className="flex flex-col gap-2 mb-1 px-1">
                             <div className="flex items-center justify-between flex-wrap gap-2">
-                                <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Frequently Asked Questions</label>
+                                <div className="flex items-center gap-2">
+                                    <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Frequently Asked Questions</label>
+                                    <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border ${
+                                        (formData.faqs?.length || 0) >= (organizerProfile?.plan?.limits?.max_faqs_per_event || 3)
+                                            ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                                            : 'bg-[#38BDF2]/10 text-[#38BDF2] border-[#38BDF2]/20'
+                                    }`}>
+                                        {(formData.faqs?.length || 0)} / {organizerProfile?.plan?.limits?.max_faqs_per_event || 3} Used
+                                    </span>
+                                </div>
                                 <div className="flex items-center gap-2">
                                     <button
                                         type="button"
                                         onClick={generateAiFaqs}
-                                        disabled={faqAiLoading || !formData.eventName.trim()}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-violet-500/10 to-[#38BDF2]/10 text-violet-600 dark:text-violet-400 text-[10px] font-black uppercase tracking-widest hover:from-violet-500/20 hover:to-[#38BDF2]/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed group"
-                                        title={!formData.eventName.trim() ? 'Enter an event name first' : 'Generate FAQs with AI based on your event'}
+                                        disabled={faqAiLoading || !formData.eventName.trim() || (formData.faqs?.length || 0) >= (organizerProfile?.plan?.limits?.max_faqs_per_event || 3)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-widest hover:bg-[#38BDF2]/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed group"
+                                        title={!formData.eventName.trim() ? 'Enter an event name first' : (formData.faqs?.length || 0) >= (organizerProfile?.plan?.limits?.max_faqs_per_event || 3) ? 'FAQ limit reached for your plan' : 'Generate FAQs with AI based on your event'}
                                     >
                                         {faqAiLoading ? (
-                                            <div className="w-3 h-3 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+                                            <div className="w-3 h-3 border-2 border-[#38BDF2] border-t-transparent rounded-full animate-spin" />
                                         ) : (
                                             <WandIcon className="w-3 h-3 group-hover:rotate-12 group-hover:scale-110 transition-transform" />
                                         )}
@@ -1797,7 +1806,9 @@ const WizardStepContent = React.memo(({
                                     <button
                                         type="button"
                                         onClick={() => setFormData((prev: any) => ({ ...prev, faqs: [...(prev.faqs || []), { question: '', answer: '' }] }))}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-widest hover:bg-[#38BDF2]/20 transition-colors"
+                                        disabled={(formData.faqs?.length || 0) >= (organizerProfile?.plan?.limits?.max_faqs_per_event || 3)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#38BDF2]/10 text-[#38BDF2] text-[10px] font-black uppercase tracking-widest hover:bg-[#38BDF2]/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                        title={(formData.faqs?.length || 0) >= (organizerProfile?.plan?.limits?.max_faqs_per_event || 3) ? 'Upgrade to add more FAQs' : ''}
                                     >
                                         <ICONS.Plus className="w-3 h-3" strokeWidth={3} /> Add FAQ
                                     </button>
@@ -1808,19 +1819,6 @@ const WizardStepContent = React.memo(({
                                     <ICONS.Info className="w-6 h-6 text-[#2E2E2F]/20 dark:text-white/20 mx-auto mb-2" />
                                     <p className="text-[10px] font-black text-[#2E2E2F]/30 dark:text-white/25 uppercase tracking-widest">No FAQs added yet</p>
                                     <p className="text-[9px] text-[#2E2E2F]/25 dark:text-white/20 font-medium mt-1">Help attendees by answering common questions</p>
-                                    <button
-                                        type="button"
-                                        onClick={generateAiFaqs}
-                                        disabled={faqAiLoading || !formData.eventName.trim()}
-                                        className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-500 to-[#38BDF2] text-white text-[10px] font-black uppercase tracking-widest hover:shadow-lg hover:shadow-violet-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed group"
-                                    >
-                                        {faqAiLoading ? (
-                                            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                        ) : (
-                                            <WandIcon className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
-                                        )}
-                                        {faqAiLoading ? 'Generating FAQs...' : '✨ Auto-Generate FAQs with AI'}
-                                    </button>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
@@ -2680,11 +2678,27 @@ export const UserEvents: React.FC = () => {
                 organizerName: organizerProfile?.organizerName || undefined,
             });
             if (result.suggestions?.length) {
+                const limit = Number(organizerProfile?.plan?.limits?.max_faqs_per_event || 3);
+                const currentCount = formData.faqs?.length || 0;
+                const slotsLeft = Math.max(0, limit - currentCount);
+                
+                const finalSuggestions = result.suggestions.slice(0, slotsLeft);
+                
+                if (finalSuggestions.length === 0) {
+                    showToast('error', `FAQ limit reached (${limit}). Upgrade your plan to add more FAQs.`);
+                    return;
+                }
+
                 setFormData((prev: any) => ({
                     ...prev,
-                    faqs: [...(prev.faqs || []), ...result.suggestions],
+                    faqs: [...(prev.faqs || []), ...finalSuggestions],
                 }));
-                showToast('success', `✨ ${result.suggestions.length} FAQs generated! You can edit or remove any of them.`);
+
+                if (finalSuggestions.length < result.suggestions.length) {
+                    showToast('success', `✨ Added ${finalSuggestions.length} FAQs (plan limit reached).`);
+                } else {
+                    showToast('success', `✨ ${finalSuggestions.length} FAQs generated! You can edit or remove any of them.`);
+                }
             } else {
                 showToast('error', 'AI returned no suggestions. Try again.');
             }
@@ -2693,7 +2707,7 @@ export const UserEvents: React.FC = () => {
         } finally {
             setFaqAiLoading(false);
         }
-    }, [formData.eventName, formData.description, formData.locationType, organizerProfile?.organizerName, showToast]);
+    }, [formData.eventName, formData.description, formData.locationType, formData.faqs, organizerProfile, showToast]);
 
 
     const saveDraftAndContinueToTickets = React.useCallback(async () => {

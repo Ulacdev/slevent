@@ -119,6 +119,7 @@ export interface AdminPlan {
     max_active_events?: number | string;
     max_total_events?: number | string;
     max_priced_events?: number | string; // Max number of paid events organizer can create
+    max_faqs_per_event?: number | string;
   };
   promotions?: {
     max_promoted_events: number;

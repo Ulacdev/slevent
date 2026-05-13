@@ -252,4 +252,16 @@ export const ICONS = {
   ),
 };
 
+export const WandIcon = (props: any) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="m15 12-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0-.83-.83-.83-2.17 0-3L12 9" />
+    <path d="M17.65 6.74 21 10" />
+    <path d="m14 7 3 3" />
+    <path d="M8 6h.01" />
+    <path d="M16 2h.01" />
+    <path d="M12 4h.01" />
+    <path d="M20 6h.01" />
+  </svg>
+);
+
 
