@@ -1125,8 +1125,8 @@ export const EventsManagement: React.FC = () => {
             </div>
 
             <div className="flex gap-4 pt-10 border-t border-sidebar-border">
-              <Button className="flex-1 py-1 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-transparent border-2 border-sidebar-border text-text dark:text-white hover:bg-text hover:text-background dark:hover:bg-white dark:hover:text-[#2E2E2F] transition-all min-h-[48px]" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-              <Button type="submit" className="flex-[2] py-1 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[#38BDF2] text-white hover:bg-[#2E2E2F] transition-all min-h-[48px] shadow-lg shadow-[#38BDF2]/20" disabled={submitting}>
+              <Button className="flex-1 py-1 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 transition-all min-h-[48px] shadow-lg shadow-red-500/20" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+              <Button type="submit" className="flex-[2] py-1 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest bg-[#38BDF2] text-white hover:bg-[#2E9FD9] transition-all min-h-[48px] shadow-lg shadow-[#38BDF2]/30" disabled={submitting}>
                 {submitting ? 'Propagating...' : (isEditMode ? 'Sync Changes' : 'Launch Session')}
               </Button>
             </div>

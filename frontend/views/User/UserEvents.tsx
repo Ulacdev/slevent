@@ -3684,7 +3684,7 @@ export const UserEvents: React.FC = () => {
                                 <div className="hidden md:flex gap-4 pt-8 border-t border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10">
                                     <Button
                                         type="button"
-                                        className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 hover:bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 transition-colors min-h-[32px]"
+                                        className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-red-500 text-white hover:bg-red-600 transition-all min-h-[32px] shadow-lg shadow-red-500/20"
                                         onClick={() => {
                                             if (wizardStep === 1) {
                                                 handleCloseEventModal();
@@ -3700,7 +3700,7 @@ export const UserEvents: React.FC = () => {
                                         <Button
                                             type="submit"
                                             data-quick-update="true"
-                                            className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] text-[#2E2E2F] dark:text-white dark:text-white border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 hover:bg-[#2E2E2F]/5 dark:bg-white/5 dark:bg-white/5 transition-colors min-h-[32px]"
+                                            className="flex-1 py-2 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest bg-[#38BDF2] text-white hover:bg-[#2E9FD9] transition-all min-h-[32px] shadow-lg shadow-[#38BDF2]/30"
                                             disabled={submitting}
                                         >
                                             {submitting ? 'Saving...' : 'Save Changes'}
