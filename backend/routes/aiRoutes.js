@@ -1,5 +1,5 @@
 import express from 'express';
-import { suggestEventContent, suggestFieldContent, suggestFaqs, proxyImage } from '../controller/aiController.js';
+import { suggestEventContent, suggestFieldContent, suggestFaqs, proxyImage, chat } from '../controller/aiController.js';
 import { authMiddleware } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -14,5 +14,8 @@ router.post('/field-suggest', authMiddleware, suggestFieldContent);
 router.post('/faq-suggest', authMiddleware, suggestFaqs);
 // GET /api/ai/proxy-image — secure proxy for AI images
 router.get('/proxy-image', proxyImage);
+
+// POST /api/ai/chat — generic chat endpoint
+router.post('/chat', chat);
 
 export default router;

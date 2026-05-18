@@ -1067,7 +1067,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
             {/* Premium Hero Section */}
             <div className="flex flex-col lg:flex-row items-center lg:items-stretch justify-between gap-8 lg:gap-14 mb-20 lg:mb-24">
               {/* Left Column: Content */}
-              <div className="flex-1 min-w-0 flex flex-col items-start justify-center text-left w-full">
+              <div className="flex-1 min-w-0 flex flex-col items-center lg:items-start justify-center text-center lg:text-left w-full">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#38BDF2] border border-white/20 text-[11px] font-black text-white mb-8 tracking-wide">
                     <span role="img" aria-label="megaphone">📢</span>
@@ -1084,7 +1084,7 @@ export const EventList: React.FC<EventListProps> = ({ mode = 'landing', listing 
                     Manage registrations, tickets, attendee check-ins, and performance in one simple, compliance-ready event platform — built specifically for growth-focused organizers.
                   </p>
 
-                  <div className="flex flex-row items-center gap-3 sm:gap-4">
+                  <div className="flex flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4">
                     <button
                       type="button"
                       onClick={() => {

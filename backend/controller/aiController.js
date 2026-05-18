@@ -364,3 +364,22 @@ Respond ONLY with a valid JSON array (no markdown, no code blocks, no extra text
     return res.json({ suggestions: sanitized });
   } catch (err) { return handleErrors(err, res); }
 };
+
+/**
+ * POST /api/ai/chat
+ * Generic chat endpoint for the AI Assistant.
+ */
+export const chat = async (req, res) => {
+  const { message } = req.body;
+  if (!message?.trim()) return res.status(400).json({ error: 'Message is required' });
+
+  try {
+    const prompt = `You are a helpful AI assistant for Startuplab, an event ticketing and management platform.
+Keep your answers brief, friendly, and helpful. Do not use markdown if possible.
+User: ${message}`;
+    const reply = await callGemini(prompt);
+    return res.json({ reply });
+  } catch (err) {
+    return handleErrors(err, res);
+  }
+};

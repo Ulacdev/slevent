@@ -101,6 +101,7 @@ const SearchPage = React.lazy(() => import('./views/Public/SearchPage').then(mod
 const MyTicketsPage = React.lazy(() => import('./views/Public/MyTicketsPage'));
 const EventReviewsPage = React.lazy(() => import('./views/Public/EventReviewsPage').then(module => ({ default: module.EventReviewsPage })));
 const WelcomeView = React.lazy(() => import('./views/User/WelcomeView'));
+const DocsPage = React.lazy(() => import('./views/Public/DocsPage').then(module => ({ default: module.DocsPage })));
 const API = import.meta.env.VITE_API_BASE;
 const DEFAULT_HEADER_LOCATION = 'Your Location';
 const BROWSE_LOCATION_STORAGE_KEY = 'browse_events_location';
@@ -199,7 +200,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   } = useUser();
   const isStaff = role === UserRole.STAFF;
   const { showToast } = useToast();
-  
+
   const [isCreatePlanOpen, setIsCreatePlanOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -759,7 +760,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
             {/* Branding Logo - Visible on mobile only */}
             <div className="flex items-center ml-1 sm:ml-2 transition-all duration-500 animate-in fade-in slide-in-from-left-4 md:hidden">
-               <Branding className="h-8 sm:h-9 w-auto" theme={theme} />
+              <Branding className="h-8 sm:h-9 w-auto" theme={theme} />
             </div>
           </div>
 
@@ -1719,6 +1720,14 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                   <ICONS.Plus className="w-7 h-7" />
                 </button>
 
+                <button
+                  onClick={() => navigate('/docs')}
+                  className="lg:hidden w-16 h-16 flex items-center justify-center rounded-xl transition-all text-[#2E2E2F] hover:bg-[#38BDF2]/10 active:bg-[#38BDF2]/20"
+                  aria-label="Read docs"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                </button>
+
                 {showHeaderSearchBar && (
                   <button
                     onClick={() => navigate('/search')}
@@ -1753,14 +1762,8 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 <div className="flex items-center gap-1 shrink-0">
                   {isAuthenticated ? (
                     <>
-                      <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
-                        Watch Live
-                        {hasLiveEvents && (
-                          <span className="relative flex h-2 w-2 ml-0.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
-                          </span>
-                        )}
+                      <Link to="/docs" className="hidden lg:flex items-center px-4 py-2 text-[11px] font-black tracking-widest text-[#2E2E2F] hover:text-[#38BDF2] transition-colors">
+                        Read docs
                       </Link>
 
                       <div className="relative">
@@ -1963,21 +1966,15 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     </>
                   ) : (
                     <>
+                      <Link to="/docs" className="hidden lg:flex items-center px-4 py-2 text-[11px] font-black tracking-widest text-[#2E2E2F] hover:text-[#38BDF2] transition-colors">
+                        Read docs
+                      </Link>
                       <button
                         onClick={() => navigate('/login')}
-                        className={`hidden lg:flex ${landingLoginButtonClass}`}
+                        className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20"
                       >
                         Login
                       </button>
-                      <Link to="/live" className="hidden lg:flex items-center gap-2 px-6 py-2.5 bg-[#38BDF2] border border-[#38BDF2] text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#38BDF2]/20">
-                        Watch Live
-                        {hasLiveEvents && (
-                          <span className="relative flex h-2 w-2 ml-0.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
-                          </span>
-                        )}
-                      </Link>
                     </>
                   )}
                 </div>
@@ -2243,7 +2240,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             {/* Left Section: Branding */}
             <div className="flex flex-col items-start text-left">
               <img src="/lgo-footer.png" className="h-14 w-auto" alt="StartupLab" />
-              
+
               {/* Subscribe Section */}
               <div className="mt-6 w-full max-w-[280px]">
                 <h4 className="font-black text-white text-[13px] mb-2 uppercase tracking-wider">Join our newsletter</h4>
@@ -2733,10 +2730,10 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            
+
             {/* Organizer Branding Logo - Mobile Only */}
             <div className="flex items-center ml-1 transition-all duration-500 animate-in fade-in slide-in-from-left-4 md:hidden">
-               <Branding className="h-8 sm:h-10 w-auto" theme={theme} />
+              <Branding className="h-8 sm:h-10 w-auto" theme={theme} />
             </div>
 
             <div className="ml-1 hidden sm:block">
@@ -3362,6 +3359,7 @@ const App: React.FC = () => (
           <Route path="/organizers/discover" element={<PublicLayout><OrganizerDiscoveryPage /></PublicLayout>} />
           <Route path="/faq" element={<PublicLayout><FaqPage /></PublicLayout>} />
           <Route path="/refund-policy" element={<PublicLayout><RefundPolicyPage /></PublicLayout>} />
+          <Route path="/docs" element={<DocsPage />} />
           <Route path="/onboarding" element={<RequireRoleRoute allow={[UserRole.ORGANIZER]}><WelcomeView /></RequireRoleRoute>} />
 
           {/* User Portal Routes */}
