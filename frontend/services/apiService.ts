@@ -36,16 +36,22 @@ initializeData();
 
 // Helper to determine the best API base URL
 const getApiBase = () => {
-  const envBase = import.meta.env.VITE_API_BASE;
+  let envBase = import.meta.env.VITE_API_BASE;
   if (!envBase) return '';
-  // If we're on a hosted site (not localhost) and the env says localhost,
-  // we should probably use relative URLs to avoid "Failed to fetch"
-  if (typeof window !== 'undefined' &&
-    window.location.hostname !== 'localhost' &&
-    envBase.includes('localhost')) {
-    console.warn(`[API] Deployment mismatch: VITE_API_BASE is set to localhost but site is hosted at ${window.location.hostname}. Falling back to relative paths.`);
-    return '';
+
+  if (typeof window !== 'undefined') {
+    const currentHost = window.location.hostname;
+    // If the current host is an IP address or not localhost, and the API base is local,
+    // dynamically point to the current host so mobile devices on local network can connect
+    if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+      if (envBase.includes('localhost')) {
+        envBase = envBase.replace('localhost', currentHost);
+      } else if (envBase.includes('127.0.0.1')) {
+        envBase = envBase.replace('127.0.0.1', currentHost);
+      }
+    }
   }
+
   return envBase.replace(/\/$/, '');
 };
 
