@@ -666,7 +666,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       {/* Sidebar for desktop */}
       <aside
         className={`bg-sidebar border-r border-sidebar-border hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-80' : 'w-24'}`}
-        style={{ overflow: desktopSidebarOpen ? 'hidden' : 'visible', zoom: 0.8 }}
+        style={{ overflow: desktopSidebarOpen ? 'hidden' : 'visible', zoom: 0.7 }}
       >
         <div className={`flex items-center justify-center border-b border-sidebar-border shrink-0 h-24`}>
           <Link to={role === UserRole.ADMIN ? "/dashboard" : (role === UserRole.STAFF ? "/events" : "/user-home")} className="flex items-center justify-center group transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98]">
@@ -736,7 +736,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       <main
         className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}
       >
-        <header className="h-20 sm:h-24 bg-background border-b border-sidebar-border px-2 sm:px-6 flex items-center justify-between sticky top-0 z-[500] w-full">
+        <header className="h-20 sm:h-24 bg-background border-b border-sidebar-border px-2 sm:px-6 flex items-center justify-between sticky top-0 z-[500] w-full" style={{ zoom: 0.7 }}>
           <div className="flex items-center gap-1 sm:gap-3">
             <button
               onClick={() => {
@@ -1095,7 +1095,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           </div>
         )}
 
-        <div id="main-scroll-container" className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 md:pb-6 overflow-y-auto">
+        <div id="main-scroll-container" className="flex-1 p-3 sm:p-4 lg:p-5 pb-20 md:pb-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto" style={{ fontSize: '1.1rem' }}>
             {(noStaffPerms && location.pathname !== '/attendees') ? (
               <div className="flex flex-col items-center justify-center min-h-[40vh]">

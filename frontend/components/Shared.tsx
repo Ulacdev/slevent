@@ -92,7 +92,7 @@ export const Button: React.FC<{
         {loading && (
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite] z-0" />
         )}
-        <span className={`transition-opacity duration-200 ${loading ? 'opacity-40' : 'opacity-100'}`}>
+        <span className={`inline-flex items-center justify-center gap-2 transition-opacity duration-200 ${loading ? 'opacity-40' : 'opacity-100'}`}>
           {children}
         </span>
       </button>

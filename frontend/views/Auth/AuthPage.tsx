@@ -374,7 +374,7 @@ export const AuthPage: React.FC = () => {
         <div className="hidden lg:flex w-[70%] lg:h-screen lg:sticky lg:top-0 flex-col pl-10 pr-4 pt-4 justify-between bg-[#F2F2F2] border-r border-black/[0.05] relative overflow-hidden isolate">
 
           {/* Mockup Display: Premium Dark Shells */}
-          <div className="absolute left-[74%] -translate-x-1/2 top-[40%] -translate-y-1/2 z-0 pointer-events-none transform scale-[0.6] lg:scale-[0.75] opacity-[0.9] transition-opacity duration-700">
+          <div className="absolute left-[68%] -translate-x-1/2 top-[40%] -translate-y-1/2 z-0 pointer-events-none transform scale-[0.6] lg:scale-[0.75] opacity-[0.9] transition-opacity duration-700">
 
             {/* Laptop Mockup (Clay Blue Shell - Off Axis 1 Left) */}
             <div

@@ -260,9 +260,9 @@ export const SubscriptionPlans: React.FC = () => {
   if (loading) return <PageLoader variant="page" label="Loading Subscription Plans..." />;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" style={{ zoom: 0.8 }}>
       {/* Billing Cycle Toggle */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 no-print">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 no-print w-full">
         <div className="bg-background p-1 rounded-2xl border border-sidebar-border flex items-center self-start">
           <button
             onClick={() => setBillingCycle('monthly')}

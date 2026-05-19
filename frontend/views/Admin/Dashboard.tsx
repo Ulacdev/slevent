@@ -538,9 +538,9 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-background pb-16 space-y-8 px-2 sm:px-4 font-sans dashboard-main-content">
+        <div className="bg-background pb-8 space-y-6 px-0 font-sans dashboard-main-content">
           {/* ── Header ── */}
-          <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
+          <div className="pt-1 flex flex-col lg:flex-row lg:items-center justify-between gap-4 px-0">
             <div>
               <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-text dark:text-white tracking-tight uppercase">Dashboard</h1>
               <p className="mt-2 text-xs sm:text-sm font-bold text-text/50 dark:text-white/50 max-w-md">
