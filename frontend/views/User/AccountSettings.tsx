@@ -154,7 +154,7 @@ export const AccountSettings: React.FC = () => {
                 <div className="space-y-10">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-8">
                         <div
-                            className="relative group w-28 h-28 rounded-xl overflow-hidden border-2 border-sidebar-border bg-background flex items-center justify-center cursor-pointer hover:border-[#38BDF2] transition-all"
+                            className="relative group w-28 h-28 rounded-full overflow-hidden border-2 border-sidebar-border bg-background flex items-center justify-center cursor-pointer hover:border-[#38BDF2] transition-all"
                             onClick={() => fileInputRef.current?.click()}
                         >
                             {previewUrl ? (

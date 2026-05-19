@@ -330,7 +330,7 @@ export const OrganizerProfilePage: React.FC = () => {
                         </div>
  
                         {/* Name and Stats - Pushed below the cover line visually */}
-                        <div className="flex-1 pb-2 md:pt-24">
+                        <div className="flex-1 pb-2 md:pt-12">
                             <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2">
                                 <h1 className="text-3xl md:text-4xl font-bold text-[#2E2E2F] tracking-tighter leading-tight drop-shadow-sm">
                                     {organizer.organizerName}

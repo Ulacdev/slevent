@@ -330,6 +330,11 @@ export const EventDetails: React.FC = () => {
   const [showRefundPolicyModal, setShowRefundPolicyModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [isSheetExpanded, setIsSheetExpanded] = useState(false);
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
+
+  useEffect(() => {
+    setActiveImageIdx(0);
+  }, [slug]);
 
   useEffect(() => {
     let mounted = true;
@@ -768,26 +773,111 @@ export const EventDetails: React.FC = () => {
                 </div>
               </div>
 
-              {/* Visual Header / Hero Background */}
-              <div className="relative -mx-4 sm:mx-0 mb-8 overflow-hidden sm:rounded-[2rem] border-b sm:border border-[#2E2E2F]/10 shadow-2xl group">
-                <img
-                  src={getImageUrl(event.imageUrl)}
-                  alt={event.eventName}
-                  className="w-full aspect-[4/3] sm:aspect-video object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent sm:hidden" />
-                
-                {/* Category Badge - Mobile Overlay */}
-                <div className="absolute bottom-4 left-4 sm:hidden">
-                   <div className="flex flex-wrap gap-2">
-                     {getEventCategoryKeys(event).map(cat => (
-                       <span key={cat} className="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-[10px] font-black text-white uppercase tracking-widest">
-                         {cat}
-                       </span>
-                     ))}
-                   </div>
-                </div>
-              </div>
+              {/* Visual Header / Hero Background / Gallery */}
+              {(() => {
+                const imageUrlList = event.imageUrl
+                  ? event.imageUrl.split(',').map((s: string) => s.trim()).filter(Boolean)
+                  : [];
+
+                if (imageUrlList.length <= 1) {
+                  return (
+                    <div className="relative -mx-4 sm:mx-0 mb-8 overflow-hidden sm:rounded-[2rem] border-b sm:border border-[#2E2E2F]/10 shadow-2xl group">
+                      <img
+                        src={getImageUrl(event.imageUrl)}
+                        alt={event.eventName}
+                        className="w-full aspect-[4/3] sm:aspect-video object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent sm:hidden" />
+                      
+                      {/* Category Badge - Mobile Overlay */}
+                      <div className="absolute bottom-4 left-4 sm:hidden">
+                         <div className="flex flex-wrap gap-2">
+                           {getEventCategoryKeys(event).map(cat => (
+                             <span key={cat} className="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-[10px] font-black text-white uppercase tracking-widest">
+                               {cat}
+                             </span>
+                           ))}
+                         </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="flex flex-col gap-4 mb-8">
+                    <div className="relative -mx-4 sm:mx-0 overflow-hidden sm:rounded-[2rem] border-b sm:border border-[#2E2E2F]/10 shadow-2xl group aspect-[4/3] sm:aspect-video">
+                      <img
+                        src={getImageUrl(imageUrlList[activeImageIdx])}
+                        alt={`${event.eventName} - Image ${activeImageIdx + 1}`}
+                        className="w-full h-full object-cover transition-all duration-500"
+                      />
+                      
+                      {/* Navigation Arrows */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveImageIdx(prev => (prev === 0 ? imageUrlList.length - 1 : prev - 1));
+                        }}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-black/60 hover:scale-105 active:scale-95 transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <svg className="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveImageIdx(prev => (prev === imageUrlList.length - 1 ? 0 : prev + 1));
+                        }}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-black/60 hover:scale-105 active:scale-95 transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
+                      </button>
+
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent sm:hidden" />
+                      
+                      {/* Counter Badge */}
+                      <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md border border-white/10 text-white text-[10px] font-black tracking-widest px-3 py-1 rounded-full uppercase">
+                        {activeImageIdx + 1} / {imageUrlList.length}
+                      </div>
+
+                      {/* Category Badge - Mobile Overlay */}
+                      <div className="absolute bottom-4 left-4 sm:hidden">
+                         <div className="flex flex-wrap gap-2">
+                           {getEventCategoryKeys(event).map(cat => (
+                             <span key={cat} className="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-[10px] font-black text-white uppercase tracking-widest">
+                               {cat}
+                             </span>
+                           ))}
+                         </div>
+                      </div>
+                    </div>
+
+                    {/* Thumbnail Selector */}
+                    <div className="flex flex-wrap items-center gap-2 px-1">
+                      {imageUrlList.map((url: string, idx: number) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setActiveImageIdx(idx)}
+                          className={`w-16 h-10 sm:w-24 sm:h-14 rounded-xl overflow-hidden border-2 transition-all relative shrink-0 ${
+                            activeImageIdx === idx 
+                              ? 'border-[#38BDF2] scale-105 shadow-md' 
+                              : 'border-[#2E2E2F]/10 hover:border-[#2E2E2F]/30 hover:scale-[1.02]'
+                          }`}
+                        >
+                          <img
+                            src={getImageUrl(url)}
+                            alt={`Thumbnail ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {interactionNotice && (
                 <div

@@ -102,6 +102,7 @@ const MyTicketsPage = React.lazy(() => import('./views/Public/MyTicketsPage'));
 const EventReviewsPage = React.lazy(() => import('./views/Public/EventReviewsPage').then(module => ({ default: module.EventReviewsPage })));
 const WelcomeView = React.lazy(() => import('./views/User/WelcomeView'));
 const DocsPage = React.lazy(() => import('./views/Public/DocsPage').then(module => ({ default: module.DocsPage })));
+const NotFound = React.lazy(() => import('./views/Public/NotFound').then(module => ({ default: module.NotFound })));
 const API = import.meta.env.VITE_API_BASE;
 const DEFAULT_HEADER_LOCATION = 'Your Location';
 const BROWSE_LOCATION_STORAGE_KEY = 'browse_events_location';
@@ -929,7 +930,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 className="flex items-center gap-2 p-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl border border-sidebar-border bg-surface hover:bg-[#38BDF2]/10 transition-colors shadow-sm"
                 onClick={() => setUserMenuOpen((v) => !v)}
               >
-                <div className="w-8 h-8 rounded-lg sm:rounded-xl overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] dark:text-white flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] dark:text-white flex items-center justify-center shrink-0">
                   {imageUrl ? (
                     <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
@@ -1115,7 +1116,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         >
           <div className="space-y-5">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-xl overflow-hidden border border-sidebar-border bg-background flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full overflow-hidden border border-sidebar-border bg-background flex items-center justify-center">
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Profile preview" className="w-full h-full object-cover" />
                 ) : (
@@ -1222,6 +1223,13 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       setScrolled(currentScrollY > 10);
+
+      // In desktop mode (>= 1024px), the header should never disappear/close when scrolling
+      if (window.innerWidth >= 1024) {
+        setHeaderVisible(true);
+        lastScrollY.current = currentScrollY;
+        return;
+      }
 
       if (currentScrollY <= 50) {
         setHeaderVisible(true);
@@ -1531,7 +1539,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   return (
     <div className="min-h-screen flex flex-col bg-background" style={{ zoom: 0.9 }}>
       {showMainHeader && (
-        <header className={`fixed top-0 left-0 w-full z-[1000] bg-background/90 dark:bg-background/80 backdrop-blur-xl transition-all duration-500 ease-in-out ${headerVisible ? 'translate-y-0' : '-translate-y-full'} ${scrolled
+        <header className={`fixed top-0 left-0 w-full z-[1000] bg-background dark:bg-background transition-all duration-500 ease-in-out ${headerVisible ? 'translate-y-0' : 'lg:translate-y-0 -translate-y-full'} ${scrolled
           ? 'border-b border-sidebar-border'
           : 'border-b border-transparent'
           } shadow-none`} style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
@@ -1771,7 +1779,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                           className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl border border-sidebar-border bg-background hover:bg-[#38BDF2]/10 transition-colors"
                           onClick={() => setUserMenuOpen((v) => !v)}
                         >
-                          <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] dark:text-white flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-full overflow-hidden bg-[#38BDF2]/20 text-[#2E2E2F] dark:text-white flex items-center justify-center">
                             {imageUrl ? (
                               <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
                             ) : (
@@ -2015,7 +2023,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                       title="Profile"
                       className={`w-16 h-16 flex items-center justify-center rounded-2xl transition-all relative ${(location.pathname.startsWith('/my-tickets') || location.pathname.startsWith('/user-settings') || location.pathname.startsWith('/liked') || location.pathname.startsWith('/followings') || mobileUserMenuOpen) ? 'text-[#38BDF2]' : 'text-[#2E2E2F]'}`}
                     >
-                      <div className={`w-10 h-10 rounded-xl overflow-hidden bg-[#2E2E2F]/5 flex items-center justify-center border-2 ${(location.pathname.startsWith('/my-tickets') || location.pathname.startsWith('/user-settings') || location.pathname.startsWith('/liked') || location.pathname.startsWith('/followings') || mobileUserMenuOpen) ? 'border-[#38BDF2]/50' : 'border-transparent'}`}>
+                      <div className={`w-10 h-10 rounded-full overflow-hidden bg-[#2E2E2F]/5 flex items-center justify-center border-2 ${(location.pathname.startsWith('/my-tickets') || location.pathname.startsWith('/user-settings') || location.pathname.startsWith('/liked') || location.pathname.startsWith('/followings') || mobileUserMenuOpen) ? 'border-[#38BDF2]/50' : 'border-transparent'}`}>
                         {imageUrl ? (
                           <img src={imageUrl} alt="Profile" className={`w-full h-full object-cover transition-all ${(mobileUserMenuOpen || location.pathname.startsWith('/my-tickets') || location.pathname.startsWith('/user-settings') || location.pathname.startsWith('/liked') || location.pathname.startsWith('/followings')) ? 'opacity-100' : 'opacity-70'}`} />
                         ) : (
@@ -2871,7 +2879,7 @@ const UserPortalLayout: React.FC<{ children: React.ReactNode }> = ({ children })
               className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border border-sidebar-border bg-background hover:bg-surface transition-all active:scale-95"
               onClick={() => setUserMenuOpen((v) => !v)}
             >
-              <div className="w-8 h-8 rounded-lg overflow-hidden bg-background text-primary-text flex items-center justify-center border border-sidebar-border">
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-background text-primary-text flex items-center justify-center border border-sidebar-border">
                 {imageUrl ? (
                   <img src={imageUrl} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
@@ -3390,7 +3398,7 @@ const App: React.FC = () => (
           <Route path="/admin/announcements" element={<RequireRoleRoute allow={[UserRole.ADMIN]}><PortalLayout><Announcements /></PortalLayout></RequireRoleRoute>} />
           <Route path="/settings" element={<RequireRoleRoute allow={[UserRole.ADMIN, UserRole.STAFF]}><PortalLayout><SettingsView /></PortalLayout></RequireRoleRoute>} />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
         </Routes>
       </React.Suspense>
     </GlobalOnboardingGuard>

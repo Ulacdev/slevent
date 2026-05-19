@@ -311,14 +311,14 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
               <div className="space-y-3">
                 <label className="text-[11px] font-semibold text-[#2E2E2F] dark:text-white uppercase tracking-wide">Brand Logo / Avatar</label>
                 <div
-                  className={`w-32 relative rounded-xl border-2 border-dashed ${dragActive ? 'border-[#38BDF2] bg-[#38BDF2]/10' : 'border-sidebar-border bg-background'
+                  className={`w-32 relative rounded-full border-2 border-dashed ${dragActive ? 'border-[#38BDF2] bg-[#38BDF2]/10' : 'border-sidebar-border bg-background'
                     } p-3 transition-colors`}
                   onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
                   onDragLeave={() => setDragActive(false)}
                   onDrop={(e) => handleDrop(e, false)}
                 >
                   <div
-                    className="aspect-square rounded-xl overflow-hidden bg-background border border-sidebar-border flex items-center justify-center cursor-pointer"
+                    className="aspect-square rounded-full overflow-hidden bg-background border border-sidebar-border flex items-center justify-center cursor-pointer"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     {displayImageUrl ? (
@@ -335,7 +335,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                     onChange={handleFileInputChange}
                   />
                   {!canCustomBrand && (
-                    <div className="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-[1px] flex flex-col items-center justify-center rounded-xl">
+                    <div className="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-[1px] flex flex-col items-center justify-center rounded-full">
                       <Badge type="info" className="mb-2 bg-[#2E2E2F] dark:bg-white text-white dark:text-black text-[8px]">PRO</Badge>
                     </div>
                   )}

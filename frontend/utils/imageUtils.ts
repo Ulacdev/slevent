@@ -22,6 +22,11 @@ export const getImageUrl = (img: any): string => {
     if (!url || url.trim() === '') {
         return 'https://via.placeholder.com/800x400';
     }
+
+    // Support multiple images separated by comma
+    if (url.includes(',')) {
+        url = url.split(',')[0].trim();
+    }
     
     // If it's already an absolute URL (including relative to root like /assets), return as is
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {

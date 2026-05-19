@@ -123,7 +123,7 @@ export const OrganizerDashboard: React.FC = () => {
                 <img src="https://xmjdcbzgdfylbqkjoyyb.supabase.co/storage/v1/object/public/startuplab-business-ticketing/assets/assets/image%20(1).svg" alt="Watermark" />
             </div>
 
-            <div className="space-y-10 max-w-7xl mx-auto pt-4 px-2 font-sans">
+            <div className="max-w-7xl mx-auto pt-4 px-2 font-sans">
             <style>{`
                 @media print {
                     body {
@@ -312,7 +312,7 @@ export const OrganizerDashboard: React.FC = () => {
             </div>
 
             <div className="dashboard-main-content pb-16 space-y-8 px-2 sm:px-4">
-                <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
+                <div className="pt-0 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
                     <div>
                         <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-[#2E2E2F] dark:text-white tracking-tight uppercase">Dashboard</h1>
                         <p className="mt-2 text-xs sm:text-sm font-bold text-[#2E2E2F]/50 dark:text-white/50 max-w-md">Performance Overview</p>

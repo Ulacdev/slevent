@@ -1746,31 +1746,62 @@ const WizardStepContent = React.memo(({
                             <div className="flex items-center justify-between">
                                 <label className="text-[11px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Visual Media</label>
                                 <AIImageGenerator
-                                    onApply={url => setFormData((p: any) => ({ ...p, imageUrl: url }))}
+                                    onApply={url => setFormData((p: any) => ({ ...p, imageUrl: p.imageUrl ? `${p.imageUrl},${url}` : url }))}
                                     showToast={showToast}
                                     eventName={formData.eventName}
                                 />
                             </div>
-                            <div
-                                className="relative group w-full h-44 rounded-[1.5rem] border-2 border-dashed border-[#2E2E2F]/30 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#38BDF2] hover:bg-[#38BDF2]/10 transition-colors"
-                                onClick={() => fileInputRef.current?.click()}
-                            >
-                                {formData.imageUrl ? (
-                                    <img
-                                        src={getImageUrl(formData.imageUrl)}
-                                        alt="Preview"
-                                        crossOrigin="use-credentials"
-                                        className="w-full h-full object-cover rounded-[1.5rem]"
-                                    />
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center w-full h-full">
+                            <div className="flex flex-col gap-3">
+                                <div
+                                    className="relative group w-full h-44 rounded-[1.5rem] border-2 border-dashed border-[#2E2E2F]/30 bg-[#F2F2F2] dark:bg-[#111111] flex items-center justify-center overflow-hidden cursor-pointer hover:border-[#38BDF2] hover:bg-[#38BDF2]/10 transition-colors"
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    <div className="flex flex-col items-center justify-center w-full h-full p-4">
                                         <svg className="w-10 h-10 text-[#2E2E2F] dark:text-white dark:text-white/40 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="2.5" /><path d="M21 15l-5-5L5 21" /></svg>
-                                        <span className="text-[12px] font-medium text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wide">Upload Event Image</span>
+                                        <span className="text-[11px] font-bold text-[#2E2E2F] dark:text-white dark:text-white/60 uppercase tracking-wider text-center">
+                                            Upload Event Images (Multiple Allowed)
+                                        </span>
+                                    </div>
+                                    <div className="absolute bottom-3 right-3 bg-[#F2F2F2] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 rounded-lg px-3 py-1 text-[11px] font-semibold text-[#2E2E2F] dark:text-white uppercase tracking-wide group-hover:bg-[#38BDF2] group-hover:text-white transition-colors pointer-events-none">Browse</div>
+                                </div>
+
+                                {formData.imageUrl && (
+                                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-1">
+                                        {formData.imageUrl.split(',').map((url, idx) => {
+                                            const trimmedUrl = url.trim();
+                                            if (!trimmedUrl) return null;
+                                            return (
+                                                <div key={idx} className="relative aspect-video rounded-xl overflow-hidden border border-[#2E2E2F]/10 dark:border-white/10 group">
+                                                    <img
+                                                        src={getImageUrl(trimmedUrl)}
+                                                        alt={`Uploaded ${idx + 1}`}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setFormData(prev => {
+                                                                const list = prev.imageUrl.split(',').map(s => s.trim()).filter(Boolean);
+                                                                list.splice(idx, 1);
+                                                                return { ...prev, imageUrl: list.join(',') };
+                                                            });
+                                                        }}
+                                                        className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                                        title="Delete Image"
+                                                    >
+                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                    </button>
+                                                    {idx === 0 && (
+                                                        <span className="absolute bottom-1 left-1 bg-[#38BDF2] text-white text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md">Main</span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 )}
-                                <div className="absolute bottom-3 right-3 bg-[#F2F2F2] dark:bg-[#111111] dark:bg-[#111111] border-2 border-[#2E2E2F]/15 dark:border-white/10 dark:border-white/10 rounded-lg px-3 py-1 text-[11px] font-semibold text-[#2E2E2F] dark:text-white dark:text-white uppercase tracking-wide group-hover:bg-[#38BDF2] group-hover:text-[#F2F2F2] transition-colors pointer-events-none">Browse</div>
                             </div>
-                            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
+                            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handleImageUpload} />
                         </div>
                     </div>
 
@@ -3053,12 +3084,20 @@ export const UserEvents: React.FC = () => {
     };
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
         setSubmitting(true);
         try {
-            const { publicUrl } = await apiService.uploadUserEventImage(file, currentEventId || undefined);
-            setFormData(prev => ({ ...prev, imageUrl: publicUrl }));
+            const urls: string[] = [];
+            for (let i = 0; i < files.length; i++) {
+                const { publicUrl } = await apiService.uploadUserEventImage(files[i], currentEventId || undefined);
+                urls.push(publicUrl);
+            }
+            setFormData(prev => {
+                const existing = prev.imageUrl ? prev.imageUrl.split(',').map(s => s.trim()).filter(Boolean) : [];
+                const combined = [...existing, ...urls];
+                return { ...prev, imageUrl: combined.join(',') };
+            });
         } catch {
             showToast('error', 'Image upload failed.');
         } finally {
