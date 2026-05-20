@@ -4,7 +4,7 @@ import { HitPayGatewaySettings } from '../../components/HitPayGatewaySettings';
 export const PaymentSettings: React.FC = () => {
   return (
     <div className="space-y-8">
-      <section className="bg-surface border border-sidebar-border rounded-xl p-6">
+      <section className="bg-surface border border-sidebar-border rounded-xl p-4 sm:p-6">
         <HitPayGatewaySettings
           scope="organizer"
           badgeLabel="Universal Payout System"

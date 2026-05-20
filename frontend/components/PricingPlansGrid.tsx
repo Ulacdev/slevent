@@ -39,7 +39,7 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
             <button
               type="button"
               onClick={() => onBillingCycleChange('monthly')}
-              className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${billingCycle === 'monthly'
+              className={`px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${billingCycle === 'monthly'
                 ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/25'
                 : 'text-[#2E2E2F] dark:text-white/70 hover:bg-sidebar-border'
                 }`}
@@ -49,7 +49,7 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
             <button
               type="button"
               onClick={() => onBillingCycleChange('yearly')}
-              className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${billingCycle === 'yearly'
+              className={`px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${billingCycle === 'yearly'
                 ? 'bg-[#38BDF2] text-white shadow-lg shadow-[#38BDF2]/25'
                 : 'text-[#2E2E2F] dark:text-white/70 hover:bg-sidebar-border'
                 }`}
@@ -142,7 +142,7 @@ export const PricingPlansGrid: React.FC<PricingPlansGridProps> = ({
                 </div>
               )}
               <Card className={`h-full flex flex-col border border-sidebar-border rounded-2xl bg-surface text-[#2E2E2F] dark:text-white transition-all duration-500 group-hover:shadow-xl group-hover:shadow-[#2E2E2F]/5 ${!isCurrentPlan && plan.isRecommended ? 'ring-2 ring-[#38BDF2] ring-offset-0' : ''}`}>
-                <div className="p-8 flex-1 flex flex-col items-start text-left">
+                <div className="p-5 sm:p-8 flex-1 flex flex-col items-start text-left">
                   {/* Top: Name and Description */}
                   <div className="mb-4 w-full">
                     <div className="flex items-center justify-between mb-2">

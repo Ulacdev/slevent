@@ -40,6 +40,7 @@ const PermissionShield: React.FC<{
                     : 'bg-background text-[#2E2E2F] dark:text-white/20'
                 }
             `}
+            style={{ minWidth: '32px', minHeight: '32px', width: '32px', height: '32px', padding: 0 }}
         >
             <Icon className={`w-4 h-4 ${active ? 'animate-pulse' : ''}`} />
         </button>
@@ -264,11 +265,11 @@ export const TeamSettings: React.FC = () => {
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 px-2 sm:px-0">
             {/* Staff Quota Bar - Top Aligned */}
-            <div className="flex items-center gap-4">
-                <div className="flex-1 flex gap-3">
-                    <div className="px-5 py-3 bg-surface border border-sidebar-border rounded-2xl shadow-sm flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex flex-row gap-3 w-full sm:w-auto">
+                    <div className="flex-1 sm:flex-none px-5 py-3 bg-surface border border-sidebar-border rounded-2xl shadow-sm flex items-center gap-4">
                         <div className="w-8 h-8 rounded-lg bg-[#38BDF2]/10 flex items-center justify-center">
                             <ICONS.Users className="w-4 h-4 text-[#38BDF2]" />
                         </div>
@@ -277,7 +278,7 @@ export const TeamSettings: React.FC = () => {
                             <p className="text-[8px] font-bold text-[#2E2E2F] dark:text-white/40 uppercase tracking-widest leading-none">Active Staff</p>
                         </div>
                     </div>
-                    <div className="px-5 py-3 bg-surface border border-sidebar-border rounded-2xl shadow-sm flex items-center gap-4">
+                    <div className="flex-1 sm:flex-none px-5 py-3 bg-surface border border-sidebar-border rounded-2xl shadow-sm flex items-center gap-4">
                         <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center">
                             <ICONS.Monitor className="w-4 h-4 text-[#2E2E2F] dark:text-white/40" />
                         </div>
@@ -287,33 +288,40 @@ export const TeamSettings: React.FC = () => {
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
                     <Button 
                         variant="outline" 
-                        className="!h-8 !min-h-0 px-4 rounded-lg border-sidebar-border bg-surface text-[#2E2E2F] dark:text-white/60 hover:bg-[#38BDF2] hover:text-white transition-all duration-300 font-bold uppercase tracking-widest text-[8px]" 
+                        className="flex-1 sm:flex-none !h-10 sm:!h-9 !min-h-0 px-4 rounded-xl border-sidebar-border bg-surface text-[#2E2E2F] dark:text-white/60 hover:bg-[#38BDF2] hover:text-white transition-all duration-300 font-black uppercase tracking-widest text-[10px]" 
                         onClick={handlePrintTeam}
+                        style={{ minWidth: 'auto', padding: '0 16px' }}
                     >
-                        <ICONS.Download className="w-3 h-3 mr-1.5" /> Export
+                        <ICONS.Download className="w-3.5 h-3.5 mr-1.5" /> Export
                     </Button>
                     <Button 
-                        className="!h-8 !min-h-0 px-5 rounded-lg bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20 hover:scale-105 transition-all duration-300 font-black uppercase tracking-widest text-[8px]" 
+                        className="flex-1 sm:flex-none !h-10 sm:!h-9 !min-h-0 px-5 rounded-xl bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20 hover:scale-105 transition-all duration-300 font-black uppercase tracking-widest text-[10px]" 
                         onClick={() => setIsInviteModalOpen(true)}
+                        style={{ minWidth: 'auto', padding: '0 16px' }}
                     >
-                        <ICONS.Plus className="w-3 h-3 mr-1.5" /> Add Member
+                        <ICONS.Plus className="w-3.5 h-3.5 mr-1.5" /> Add Member
                     </Button>
                 </div>
             </div>
 
-            <div className="flex gap-1.5 p-1 bg-background rounded-xl w-fit border border-sidebar-border">
+            <div 
+                className="flex gap-1.5 p-1 bg-background rounded-xl w-fit border border-sidebar-border"
+                style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap' }}
+            >
                 <button 
                     onClick={() => setActiveSubTab('directory')} 
-                    className={`h-8 px-5 rounded-lg font-black uppercase tracking-[0.1em] text-[10px] transition-all duration-300 ${activeSubTab === 'directory' ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20' : 'text-[#2E2E2F] dark:text-white/40 hover:text-[#2E2E2F] dark:hover:text-white/60'}`}
+                    className={`rounded-lg font-black uppercase tracking-[0.1em] text-[10px] transition-all duration-300 ${activeSubTab === 'directory' ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20' : 'text-[#2E2E2F] dark:text-white/40 hover:text-[#2E2E2F] dark:hover:text-white/60'}`}
+                    style={{ minWidth: 'auto', height: 'auto', padding: '8px 16px', flexShrink: 0 }}
                 >
                     Directory
                 </button>
                 <button 
                     onClick={() => setActiveSubTab('permissions')} 
-                    className={`h-8 px-5 rounded-lg font-black uppercase tracking-[0.1em] text-[10px] transition-all duration-300 ${activeSubTab === 'permissions' ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20' : 'text-[#2E2E2F] dark:text-white/40 hover:text-[#2E2E2F] dark:hover:text-white/60'}`}
+                    className={`rounded-lg font-black uppercase tracking-[0.1em] text-[10px] transition-all duration-300 ${activeSubTab === 'permissions' ? 'bg-[#38BDF2] text-white shadow-md shadow-[#38BDF2]/20' : 'text-[#2E2E2F] dark:text-white/40 hover:text-[#2E2E2F] dark:hover:text-white/60'}`}
+                    style={{ minWidth: 'auto', height: 'auto', padding: '8px 16px', flexShrink: 0 }}
                 >
                     Permissions
                 </button>
@@ -336,8 +344,8 @@ export const TeamSettings: React.FC = () => {
                             </div>
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
+                        <div className="overflow-x-auto scrollbar-none">
+                            <table className="w-full text-left min-w-[600px] lg:min-w-0">
                                 <thead>
                                     <tr className="bg-surface dark:bg-surface/40 border-b border-sidebar-border">
                                         <th className="px-6 py-4 text-[9px] font-black uppercase tracking-widest text-[#2E2E2F] dark:text-white/40">Staff Name</th>
@@ -360,12 +368,12 @@ export const TeamSettings: React.FC = () => {
                                 <tbody>
                                     {teamMembers.map(member => (
                                         <tr key={member.id} className="border-b border-sidebar-border hover:bg-[#38BDF2]/5 transition-colors">
-                                            <td className="px-6 py-4 font-bold text-[#2E2E2F] dark:text-white">
+                                            <td className="px-6 py-4 font-bold text-[#2E2E2F] dark:text-white" data-label="Staff Name">
                                                 <div className="flex items-center gap-3">
                                                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] ${member.isOwner ? 'bg-[#38BDF2] text-white' : 'bg-background'}`}>
                                                         {member.imageUrl ? <img src={member.imageUrl} className="w-full h-full object-cover rounded-lg" /> : member.name.charAt(0)}
                                                     </div>
-                                                    <div>
+                                                    <div className="text-left">
                                                         <div className="text-[12px] font-black leading-none mb-1">{member.name}</div>
                                                         <div className="text-[8px] opacity-40 font-bold uppercase tracking-widest">{member.email}</div>
                                                     </div>
@@ -373,23 +381,28 @@ export const TeamSettings: React.FC = () => {
                                             </td>
                                             {activeSubTab === 'directory' ? (
                                                 <>
-                                                    <td className="px-4 py-4 text-center">
-                                                        <div className={`inline-flex px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${member.status === 'Active' ? 'bg-[#38BDF2]/10 text-[#38BDF2]' : 'bg-amber-500/10 text-amber-500'}`}>
-                                                            {member.status}
+                                                    <td className="px-4 py-4 text-center" data-label="Status">
+                                                        <div className="flex justify-end md:justify-center">
+                                                            <div className={`inline-flex px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${member.status === 'Active' ? 'bg-[#38BDF2]/10 text-[#38BDF2]' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                                {member.status}
+                                                            </div>
                                                         </div>
                                                     </td>
-                                                    <td className="px-4 py-4 text-center">
-                                                        <span className="text-[9px] font-black uppercase text-[#2E2E2F] dark:text-white/60 tracking-wider">
-                                                            {member.role}
-                                                        </span>
+                                                    <td className="px-4 py-4 text-center" data-label="Hierarchy">
+                                                        <div className="flex justify-end md:justify-center">
+                                                            <span className="text-[9px] font-black uppercase text-[#2E2E2F] dark:text-white/60 tracking-wider">
+                                                                {member.role}
+                                                            </span>
+                                                        </div>
                                                     </td>
-                                                    <td className="px-4 py-4 text-center">
+                                                    <td className="px-4 py-4 text-center" data-label="Actions">
                                                         {!member.isOwner && (
-                                                            <div className="flex justify-center">
+                                                            <div className="flex justify-end md:justify-center">
                                                                 <button 
                                                                     onClick={() => handleDeleteStaff(member)}
                                                                     disabled={!!isDeleting}
                                                                     className="w-8 h-8 rounded-lg flex items-center justify-center bg-red-500/5 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 border border-red-500/10"
+                                                                    style={{ minWidth: '32px', minHeight: '32px', width: '32px', height: '32px', padding: 0 }}
                                                                 >
                                                                     {isDeleting === member.id ? <div className="w-3 h-3 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" /> : <ICONS.Trash className="w-3.5 h-3.5" />}
                                                                 </button>
@@ -399,10 +412,10 @@ export const TeamSettings: React.FC = () => {
                                                 </>
                                             ) : (
                                                 <>
-                                                    <td className="px-4 py-4 text-center"><PermissionShield active={member.permissions.includes('view_events')} disabled={member.isOwner} onClick={() => toggleMemberPermission(member.id, 'view_events')} /></td>
-                                                    <td className="px-4 py-4 text-center"><PermissionShield active={member.permissions.includes('edit_events')} disabled={member.isOwner} onClick={() => toggleMemberPermission(member.id, 'edit_events')} /></td>
-                                                    <td className="px-4 py-4 text-center"><PermissionShield active={member.permissions.includes('manual_checkin')} disabled={member.isOwner} onClick={() => toggleMemberPermission(member.id, 'manual_checkin')} /></td>
-                                                    <td className="px-4 py-4 text-center"><PermissionShield iconType="bell" active={member.permissions.includes('receive_notifications')} disabled={member.isOwner} onClick={() => toggleMemberPermission(member.id, 'receive_notifications')} /></td>
+                                                    <td className="px-4 py-4 text-center" data-label="View"><div className="flex justify-end md:justify-center"><PermissionShield active={member.permissions.includes('view_events')} disabled={member.isOwner} onClick={() => toggleMemberPermission(member.id, 'view_events')} /></div></td>
+                                                    <td className="px-4 py-4 text-center" data-label="Edit"><div className="flex justify-end md:justify-center"><PermissionShield active={member.permissions.includes('edit_events')} disabled={member.isOwner} onClick={() => toggleMemberPermission(member.id, 'edit_events')} /></div></td>
+                                                    <td className="px-4 py-4 text-center" data-label="Check-In"><div className="flex justify-end md:justify-center"><PermissionShield active={member.permissions.includes('manual_checkin')} disabled={member.isOwner} onClick={() => toggleMemberPermission(member.id, 'manual_checkin')} /></div></td>
+                                                    <td className="px-4 py-4 text-center" data-label="Inbox"><div className="flex justify-end md:justify-center"><PermissionShield iconType="bell" active={member.permissions.includes('receive_notifications')} disabled={member.isOwner} onClick={() => toggleMemberPermission(member.id, 'receive_notifications')} /></div></td>
                                                 </>
                                             )}
                                         </tr>
@@ -417,9 +430,9 @@ export const TeamSettings: React.FC = () => {
             <Modal isOpen={isInviteModalOpen} onClose={() => setIsInviteModalOpen(false)} title="Invite Staff">
                 <form onSubmit={handleInviteSubmit} className="space-y-6">
                     <Input label="Email Address" type="email" value={inviteData.email} onChange={(e: any) => setInviteData({ ...inviteData, email: e.target.value })} required placeholder="staff@example.com" />
-                    <div className="flex justify-end gap-4 pt-4">
-                        <Button variant="outline" onClick={() => setIsInviteModalOpen(false)}>Cancel</Button>
-                        <Button type="submit" disabled={isInviting}>{isInviting ? 'Inviting...' : 'Invite Staff'}</Button>
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
+                        <Button variant="outline" onClick={() => setIsInviteModalOpen(false)} className="w-full sm:w-auto h-12 rounded-xl text-xs font-bold uppercase tracking-wider">Cancel</Button>
+                        <Button type="submit" disabled={isInviting} className="w-full sm:w-auto h-12 rounded-xl text-xs font-black uppercase tracking-wider bg-[#38BDF2] text-white">{isInviting ? 'Inviting...' : 'Invite Staff'}</Button>
                     </div>
                 </form>
             </Modal>

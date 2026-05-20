@@ -28,13 +28,13 @@ const IconInput = (props: any) => {
   return (
     <div className="relative group/input w-full">
       {icon && (
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20 group-focus-within/input:text-[#38BDF2] transition-colors z-10 w-4 h-4 flex items-center justify-center">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-black/30 group-focus-within/input:text-[#38BDF2] transition-colors z-10 w-4 h-4 flex items-center justify-center">
           {icon}
         </div>
       )}
       <input
         {...inputProps}
-        className={`w-full px-5 py-3 bg-[#F2F2F2] border-b border-black/[0.08] rounded-[16px] text-[14px] font-medium text-black outline-none focus:border-[#38BDF2] transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] ${icon ? 'pl-11' : 'pl-4'} ${inputProps.className || ''}`}
+        className={`w-full px-5 py-3.5 bg-white border border-black/10 rounded-[16px] text-[14px] font-medium text-black placeholder-black/30 outline-none focus:border-[#38BDF2] focus:ring-1 focus:ring-[#38BDF2] transition-all shadow-sm ${icon ? 'pl-11' : 'pl-4'} ${inputProps.className || ''}`}
       />
     </div>
   );
@@ -369,9 +369,9 @@ export const AuthPage: React.FC = () => {
 
   return (
     <>
-      <div className="relative min-h-screen w-full flex bg-[#F2F2F2] lg:overflow-y-auto font-sans">
+      <div className="relative min-h-screen w-full flex bg-[#F9F9FA] lg:overflow-y-auto font-sans">
         {/* LEFT: Branding (55%) */}
-        <div className="hidden lg:flex w-[70%] lg:h-screen lg:sticky lg:top-0 flex-col pl-10 pr-4 pt-4 justify-between bg-[#F2F2F2] border-r border-black/[0.05] relative overflow-hidden isolate">
+        <div className="hidden lg:flex w-[67%] lg:h-screen lg:sticky lg:top-0 flex-col pl-10 pr-4 pt-4 justify-between bg-[#F9F9FA] border-r border-black/[0.05] relative overflow-hidden isolate">
 
           {/* Mockup Display: Premium Dark Shells */}
           <div className="absolute left-[68%] -translate-x-1/2 top-[40%] -translate-y-1/2 z-0 pointer-events-none transform scale-[0.6] lg:scale-[0.75] opacity-[0.9] transition-opacity duration-700">
@@ -641,9 +641,10 @@ export const AuthPage: React.FC = () => {
               {[
                 { title: 'Create events easily', desc: 'Quickly set up and automate your event workflows.', icon: ICONS.Megaphone },
                 { title: 'Manage attendees', desc: 'Track check-ins and engagement in real-time.', icon: ICONS.CheckCircle },
-                { title: 'Sell tickets effortlessly', desc: 'Boost sales with seamless QR code ticketing.', icon: ICONS.Zap }
+                { title: 'Sell tickets effortlessly', desc: 'Boost sales with seamless QR code ticketing.', icon: ICONS.Zap },
+                { title: 'Secure. Reliable. Built for creators.', desc: 'Your data is safe with enterprise-grade security.', icon: ICONS.Shield }
               ].map((card, i) => (
-                <div key={i} className="w-full bg-[#F2F2F2] p-4 rounded-[1.2rem] flex items-center gap-4 transition-transform hover:scale-[1.02] animate-in fade-in slide-in-from-left duration-700 cursor-default" style={{ animationDelay: `${i * 150 + 200}ms` }}>
+                <div key={i} className="w-full bg-white border border-black/[0.04] shadow-sm p-4 rounded-[1.2rem] flex items-center gap-4 transition-transform hover:scale-[1.02] animate-in fade-in slide-in-from-left duration-700 cursor-default" style={{ animationDelay: `${i * 150 + 200}ms` }}>
                   <div className="w-11 h-11 rounded-[14px] bg-[#38BDF2] flex items-center justify-center flex-shrink-0 shadow-[0_4px_12px_rgba(56,189,242,0.3),inset_0_-2px_4px_rgba(0,0,0,0.1),inset_0_2px_4px_rgba(255,255,255,0.4)]">
                     <card.icon className="w-5 h-5 text-white drop-shadow-sm" />
                   </div>
@@ -655,10 +656,11 @@ export const AuthPage: React.FC = () => {
               ))}
             </div>
           </div>
+
         </div>
 
         {/* RIGHT: Auth Forms (45%) */}
-        <div className="w-full lg:w-[30%] min-h-full flex flex-col relative overflow-y-auto bg-[#F2F2F2] scrollbar-none">
+        <div className="w-full lg:w-[33%] min-h-full flex flex-col relative overflow-y-auto bg-[#F9F9FA] scrollbar-none">
           <div className="min-h-full flex flex-col items-center justify-center p-8 w-full relative">
             <div className="w-full max-w-[350px] pb-12 lg:-translate-y-24">
 
@@ -697,7 +699,7 @@ export const AuthPage: React.FC = () => {
                 </p>
               </div>
 
-              <div className="w-full lg:bg-[#F2F2F2] lg:p-0 lg:rounded-[24px] overflow-visible">
+              <div className="w-full lg:bg-[#F9F9FA] lg:p-0 lg:rounded-[24px] overflow-visible">
                 {view === 'login' && (
                   <form onSubmit={handleLogin} className="flex flex-col items-stretch">
                     <div className="space-y-3">
@@ -715,9 +717,9 @@ export const AuthPage: React.FC = () => {
 
                       <div className="space-y-0.5 text-left relative">
                         <label className="text-[10px] font-bold text-black/40 ml-0.5 uppercase tracking-wider">Password <span className="text-red-500">*</span></label>
-                        <PasswordInput value={password} onChange={(e: any) => setPassword(e.target.value)} required placeholder="••••••••"
+                        <PasswordInput value={password} onChange={(e: any) => setPassword(e.target.value)} required placeholder="Enter your password"
                           icon={<LockIcon className="w-4 h-4" />}
-                          inputClassName="!bg-[#F2F2F2] !border-b !border-black/[0.08] !rounded-[16px] !py-3 !text-[14px] !font-medium !outline-none focus:!border-[#38BDF2] !transition-all" />
+                          inputClassName="!bg-white !border !border-black/10 !rounded-[16px] !py-3.5 !text-[14px] !font-medium !outline-none focus:!border-[#38BDF2] focus:!ring-1 focus:!ring-[#38BDF2] !transition-all shadow-sm" />
                         <button type="button" onClick={() => setView('forgot-password')} className="text-[11px] font-bold text-[#38BDF2] hover:underline mt-1.5 flex justify-end w-full">Forgot password?</button>
                       </div>
                     </div>
@@ -737,14 +739,14 @@ export const AuthPage: React.FC = () => {
                       Login
                     </Button>
 
-                    <div className="flex items-center gap-3 mt-2 mb-2">
-                      <div className="h-px bg-transparent flex-1"></div>
-                      <span className="text-[13px] font-bold text-black/20">Or continue with</span>
-                      <div className="h-px bg-transparent flex-1"></div>
+                    <div className="flex items-center gap-3 mt-3 mb-3">
+                      <div className="h-px bg-black/[0.06] flex-1"></div>
+                      <span className="text-[11px] font-bold text-black/35 uppercase tracking-wider">Or continue with</span>
+                      <div className="h-px bg-black/[0.06] flex-1"></div>
                     </div>
 
                     <button type="button" onClick={() => handleSocialLogin('google')} disabled={!!socialLoading}
-                      className="flex items-center justify-center gap-3 w-full py-3 bg-[#F2F2F2] border-none rounded-[16px] shadow-[inset_0_-2px_6px_rgba(0,0,0,0.02),inset_0_2px_6px_rgba(255,255,255,0.7),0_4px_12px_rgba(0,0,0,0.03)] hover:scale-[1.02] transition-all"
+                      className="flex items-center justify-center gap-3 w-full py-3.5 bg-white border border-black/10 hover:border-black/20 rounded-[16px] shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
                       <ICONS.Google className="w-4 h-4" />
                       <span className="text-[13px] font-bold text-black/80">Continue with Google</span>

@@ -91,36 +91,36 @@ export const EmailSettings: React.FC = () => {
 
     if (!canCustomSmtp) {
         return (
-            <div className="max-w-4xl mx-auto p-12">
-                <Card className="relative overflow-hidden border-2 border-sidebar-border bg-surface rounded-[2.5rem] p-12 text-center shadow-sm">
-                    <div className="absolute top-0 right-0 p-8 opacity-5">
+            <div className="max-w-4xl mx-auto p-4 sm:p-12">
+                <Card className="relative overflow-hidden border-2 border-sidebar-border bg-surface rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-12 text-center shadow-sm">
+                    <div className="absolute top-0 right-0 p-4 sm:p-8 opacity-5">
                         <ICONS.Mail className="w-64 h-64 -mr-20 -mt-20" />
                     </div>
                     
-                    <div className="relative z-10 space-y-8">
-                        <div className="w-24 h-24 bg-background rounded-3xl flex items-center justify-center mx-auto mb-8 ring-8 ring-background/50">
-                            <ICONS.Mail className="w-12 h-12 text-[#2E2E2F] dark:text-white" />
+                    <div className="relative z-10 space-y-6 sm:space-y-8">
+                        <div className="w-16 h-16 sm:w-24 sm:h-24 bg-background rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-6 sm:mb-8 ring-4 sm:ring-8 ring-background/50">
+                            <ICONS.Mail className="w-8 h-8 sm:w-12 sm:h-12 text-[#2E2E2F] dark:text-white" />
                         </div>
                         
-                        <div className="space-y-4">
-                            <h2 className="text-4xl font-black text-[#2E2E2F] dark:text-white tracking-tight leading-tight uppercase">
+                        <div className="space-y-3 sm:space-y-4">
+                            <h2 className="text-2xl sm:text-4xl font-black text-[#2E2E2F] dark:text-white tracking-tight leading-tight uppercase">
                                 Professional <br/>
                                 <span className="opacity-40 tracking-widest text-[0.4em] block mt-2 font-bold italic">Email Support</span>
                             </h2>
-                            <p className="text-lg text-[#2E2E2F] dark:text-white/60 font-medium max-w-lg mx-auto leading-relaxed">
+                            <p className="text-sm sm:text-lg text-[#2E2E2F] dark:text-white/60 font-medium max-w-lg mx-auto leading-relaxed">
                                 Deliver event communications from your <span className="text-[#2E2E2F] dark:text-white font-bold underline decoration-[#2E2E2F]/20 dark:decoration-white/20 underline-offset-4">official domain</span> and unlock high-volume sending quotas.
                             </p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto pt-4">
-                            <div className="flex items-center gap-4 bg-background p-5 rounded-2xl border border-sidebar-border">
+                            <div className="flex items-center gap-4 bg-background p-4 sm:p-5 rounded-2xl border border-sidebar-border">
                                 <div className="bg-surface p-2 rounded-xl shadow-sm text-[#2E2E2F] dark:text-white"><ICONS.CheckCircle className="w-5 h-5" /></div>
                                 <div className="text-left">
                                     <p className="text-[13px] font-black text-[#2E2E2F] dark:text-white">White-Label Presence</p>
                                     <p className="text-[11px] text-[#2E2E2F] dark:text-white/60 font-bold uppercase tracking-wide">Brand Your Outbound Emails</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4 bg-background p-5 rounded-2xl border border-sidebar-border">
+                            <div className="flex items-center gap-4 bg-background p-4 sm:p-5 rounded-2xl border border-sidebar-border">
                                 <div className="bg-surface p-2 rounded-xl shadow-sm text-[#2E2E2F] dark:text-white"><ICONS.Send className="w-5 h-5" /></div>
                                 <div className="text-left">
                                     <p className="text-[13px] font-black text-[#2E2E2F] dark:text-white">Unrestricted Quota</p>
@@ -129,27 +129,28 @@ export const EmailSettings: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="pt-8">
+                        <div className="pt-4 sm:pt-8">
                             <Button
                                 onClick={() => navigate('/user-settings?tab=subscription')}
-                                className="bg-[#2E2E2F] hover:bg-[#38BDF2] text-white px-12 py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl transition-all"
+                                className="bg-[#2E2E2F] hover:bg-[#38BDF2] text-white px-8 sm:px-12 py-3.5 sm:py-5 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-[0.2em] shadow-xl transition-all w-full sm:w-auto"
+                                style={{ minWidth: 'auto' }}
                             >
                                 Upgrade Plan
                             </Button>
-                            <p className="mt-6 text-[11px] font-bold text-[#2E2E2F] dark:text-white uppercase tracking-widest">
+                            <p className="mt-4 sm:mt-6 text-[10px] sm:text-[11px] font-bold text-[#2E2E2F] dark:text-white uppercase tracking-widest">
                                 Enforced for <span className="text-[#2E2E2F] dark:text-white">Custom Branding</span> Compliance
                             </p>
                         </div>
                     </div>
                 </Card>
 
-                <div className="mt-12 p-8 bg-surface rounded-3xl border border-sidebar-border flex items-start gap-6">
-                    <div className="w-12 h-12 bg-background rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-sidebar-border">
-                        <ICONS.Info className="w-6 h-6 text-[#2E2E2F] dark:text-white" />
+                <div className="mt-6 sm:mt-12 p-5 sm:p-8 bg-surface rounded-2xl sm:rounded-3xl border border-sidebar-border flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-background rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-sidebar-border">
+                        <ICONS.Info className="w-5 h-5 sm:w-6 sm:h-6 text-[#2E2E2F] dark:text-white" />
                     </div>
-                    <div className="space-y-2">
-                        <h4 className="text-sm font-black text-[#2E2E2F] dark:text-white uppercase tracking-wide">Infrastructure Notice</h4>
-                        <p className="text-sm text-[#2E2E2F] dark:text-white/60 leading-relaxed font-medium">
+                    <div className="space-y-1 sm:space-y-2 text-left">
+                        <h4 className="text-xs sm:text-sm font-black text-[#2E2E2F] dark:text-white uppercase tracking-wide">Infrastructure Notice</h4>
+                        <p className="text-xs sm:text-sm text-[#2E2E2F] dark:text-white/60 leading-relaxed font-medium">
                             Your account is using the <span className="font-bold underline decoration-[#2E2E2F]/10 dark:decoration-white/20">StartupLab Shared SMTP</span>. Activity is monitored and subject to daily volume restrictions to ensure platform performance.
                         </p>
                     </div>
@@ -162,12 +163,12 @@ export const EmailSettings: React.FC = () => {
         <div className="pb-16 space-y-6 animate-in fade-in duration-500 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             {/* Header Area */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6">
-                <div></div>
+            <div className="flex justify-end pb-4">
                 <Button
                     onClick={handleSave}
-                    className="bg-[#38BDF2] hover:bg-[#2E2E2F] text-white px-8 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm active:scale-95"
+                    className="w-full sm:w-auto bg-[#38BDF2] hover:bg-[#2E2E2F] text-white px-8 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] sm:text-xs flex items-center justify-center gap-2 transition-colors shadow-sm active:scale-95"
                     disabled={saving}
+                    style={{ minWidth: 'auto' }}
                 >
                     <ICONS.CheckCircle className="w-4 h-4" />
                     {saving ? 'Saving...' : 'Save Changes'}
@@ -176,8 +177,8 @@ export const EmailSettings: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Form */}
-                <Card className="lg:col-span-2 p-8 rounded-xl bg-surface border-sidebar-border shadow-sm space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="lg:col-span-2 p-6 sm:p-8 rounded-xl bg-surface border-sidebar-border shadow-sm space-y-6 sm:space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         <div className="space-y-1.5 opacity-60">
                             <label className="text-[11px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest pl-1">Email Provider</label>
                             <div className="w-full px-6 py-3 bg-[#E8E8E8] dark:bg-white/10 border border-[#2E2E2F]/10 dark:border-white/10 rounded-full font-bold text-[#2E2E2F] dark:text-white">

@@ -332,7 +332,8 @@ export const HitPayGatewaySettings: React.FC<HitPayGatewaySettingsProps> = ({
           <button
             onClick={() => handleSave()}
             disabled={saving}
-            className="px-8 py-3 bg-[#38BDF2] hover:bg-[#2E2E2F] text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50"
+            className="w-full sm:w-auto px-8 py-3 bg-[#38BDF2] hover:bg-[#2E2E2F] text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50 text-center flex items-center justify-center"
+            style={{ minWidth: 'auto', height: 'auto' }}
           >
             {saving ? 'Saving...' : 'Save HitPay Settings'}
           </button>

@@ -261,7 +261,7 @@ export const OrganizerReports: React.FC = () => {
       {/* Header */}
       <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
         <div>
-          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-[#2E2E2F] dark:text-white tracking-tight uppercase">Transaction Reports</h1>
+          <h1 className="text-2xl sm:text-4xl lg:text-[2.5rem] font-black text-[#2E2E2F] dark:text-white tracking-tight uppercase">Transaction Reports</h1>
           <p className="mt-2 text-xs sm:text-sm font-bold text-[#2E2E2F]/50 dark:text-white/50 max-w-md">
             Analyze revenue flow, monitor audience conversions, and export operational datasets.
           </p>
@@ -287,20 +287,20 @@ export const OrganizerReports: React.FC = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="group bg-transparent border-2 border-sidebar-border rounded-xl p-6 transition-all duration-300 hover:border-[#38BDF2] hover:shadow-sm">
+        <div className="group bg-transparent border-2 border-sidebar-border rounded-xl p-4 sm:p-6 transition-all duration-300 hover:border-[#38BDF2] hover:shadow-sm">
           <p className="text-xs font-bold text-[#38BDF2] uppercase tracking-widest mb-3">Total Transactions</p>
-          <p className="text-3xl font-extrabold text-[#2E2E2F] dark:text-white leading-none mb-1">{transactions.length}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-[#2E2E2F] dark:text-white leading-none mb-1">{transactions.length}</p>
         </div>
 
-        <div className="group bg-transparent border-2 border-sidebar-border rounded-xl p-6 transition-all duration-300 hover:border-green-500 hover:shadow-sm">
+        <div className="group bg-transparent border-2 border-sidebar-border rounded-xl p-4 sm:p-6 transition-all duration-300 hover:border-green-500 hover:shadow-sm">
           <p className="text-xs font-bold text-green-500 uppercase tracking-widest mb-3">Completed Revenue</p>
-          <p className="text-3xl font-extrabold text-[#2E2E2F] dark:text-white leading-none mb-1">{formatCurrency(completedAmount)}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-[#2E2E2F] dark:text-white leading-none mb-1">{formatCurrency(completedAmount)}</p>
         </div>
 
-        <div className={`relative group bg-transparent border-2 border-sidebar-border rounded-xl p-6 transition-all duration-300 ${!hasAdvancedReports ? 'cursor-not-allowed border-sidebar-border/20' : 'hover:border-[#2E2E2F] dark:hover:border-white/40 hover:shadow-sm'}`}>
+        <div className={`relative group bg-transparent border-2 border-sidebar-border rounded-xl p-4 sm:p-6 transition-all duration-300 ${!hasAdvancedReports ? 'cursor-not-allowed border-sidebar-border/20' : 'hover:border-[#2E2E2F] dark:hover:border-white/40 hover:shadow-sm'}`}>
           <p className="text-xs font-bold text-[#2E2E2F] dark:text-white/60 uppercase tracking-widest mb-3">Total Pending & Failed</p>
           <div className={`${!hasAdvancedReports ? 'blur-md select-none opacity-50' : ''}`}>
-             <p className="text-3xl font-extrabold text-[#2E2E2F] dark:text-white leading-none mb-1">{formatCurrency(totalAmount - completedAmount)}</p>
+             <p className="text-2xl sm:text-3xl font-extrabold text-[#2E2E2F] dark:text-white leading-none mb-1">{formatCurrency(totalAmount - completedAmount)}</p>
           </div>
           {!hasAdvancedReports && (
             <div className="absolute inset-0 flex items-center justify-center p-4 text-center z-10">
@@ -314,13 +314,13 @@ export const OrganizerReports: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="flex bg-transparent border-2 border-sidebar-border/10 rounded-xl p-1.5 w-full md:w-auto">
+      <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+        <div className="flex flex-nowrap bg-transparent border-2 border-sidebar-border/10 rounded-xl p-1.5 w-full md:w-auto overflow-x-auto scrollbar-none gap-1 select-none">
           {(['all', 'completed', 'pending', 'failed'] as const).map((status) => (
             <button
               key={status}
               onClick={() => setFilter(status)}
-              className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === status
+              className={`flex-none shrink-0 px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === status
                   ? 'bg-surface text-[#2E2E2F] dark:text-white shadow-lg border border-sidebar-border'
                   : 'bg-transparent text-[#2E2E2F] dark:text-white/60 hover:text-[#2E2E2F] dark:hover:text-white'
                 }`}
@@ -330,34 +330,36 @@ export const OrganizerReports: React.FC = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 w-full md:w-auto">
           {selectedRows.size > 0 && (
-            <div className="flex items-center gap-3 mr-2 animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="w-2 h-2 rounded-full bg-[#38BDF2] animate-pulse" />
-              <span className="text-[10px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest bg-surface px-3.5 py-1.5 rounded-lg border border-sidebar-border">
-                {selectedRows.size} Selected
-              </span>
+            <div className="flex flex-wrap items-center gap-3 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-[#38BDF2] animate-pulse" />
+                <span className="text-[10px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest bg-surface px-3.5 py-1.5 rounded-lg border border-sidebar-border">
+                  {selectedRows.size} Selected
+                </span>
+              </div>
               <button 
                 onClick={handleBulkArchive} 
-                className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-red-500 !text-red-500 px-6 py-2.5 text-[12px] hover:!bg-red-500 hover:!text-white flex items-center gap-2 group"
+                className="inline-flex items-center justify-center font-black tracking-wide rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !bg-transparent border-2 border-solid border-red-500 !text-red-500 px-3 sm:px-6 py-2.5 text-[11px] sm:text-[12px] hover:!bg-red-500 hover:!text-white flex items-center gap-2 group"
               >
-                <ICONS.Trash className="w-5 h-5 text-red-500 group-hover:text-white transition-colors" />
+                <ICONS.Trash className="w-4 h-4 text-red-500 group-hover:text-white transition-colors" />
                 ARCHIVE ({selectedRows.size})
               </button>
             </div>
           )}
 
-          <div className="flex items-center gap-3 ml-2">
+          <div className="flex items-center gap-3">
             <button 
               onClick={handlePrintReports} 
-              className="flex items-center justify-center h-[52px] w-[52px] bg-[#38BDF2] border-2 border-[#38BDF2] rounded-2xl text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group" 
+              className="flex items-center justify-center h-12 w-12 sm:h-[52px] sm:w-[52px] bg-[#38BDF2] border-2 border-[#38BDF2] rounded-2xl text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group" 
               title="Print Reports"
             >
               <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
             </button>
             <button 
               onClick={handleExportReports} 
-              className="flex items-center justify-center h-[52px] w-[52px] bg-[#38BDF2] border-2 border-[#38BDF2] rounded-2xl text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group" 
+              className="flex items-center justify-center h-12 w-12 sm:h-[52px] sm:w-[52px] bg-[#38BDF2] border-2 border-[#38BDF2] rounded-2xl text-white hover:bg-[#2E2E2F] hover:border-[#2E2E2F] transition-all shadow-md group" 
               title="Export CSV"
             >
               <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -373,9 +375,11 @@ export const OrganizerReports: React.FC = () => {
         </Card>
       )}
 
-      {/* Transactions Table */}
+      {/* Transactions Container */}
       <div className="bg-transparent border-2 border-sidebar-border rounded-xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto scrollbar-none">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-transparent border-b border-sidebar-border">
@@ -400,7 +404,7 @@ export const OrganizerReports: React.FC = () => {
             <tbody>
               {transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-[#2E2E2F] dark:text-white font-bold text-sm">
+                  <td colSpan={8} className="px-6 py-12 text-center text-[#2E2E2F] dark:text-white font-bold text-sm">
                     No transactions found
                   </td>
                 </tr>
@@ -465,24 +469,103 @@ export const OrganizerReports: React.FC = () => {
           </table>
         </div>
 
+        {/* Mobile Cards View */}
+        <div className="block md:hidden p-4 space-y-4">
+          {transactions.length === 0 ? (
+            <div className="p-8 text-center text-[#2E2E2F] dark:text-white font-bold text-sm bg-transparent">
+              No transactions found
+            </div>
+          ) : (
+            transactions.map((transaction, index) => (
+              <div
+                key={transaction.orderId || index}
+                className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                  selectedRows.has(transaction.orderId || '')
+                    ? 'border-[#38BDF2] bg-[#38BDF2]/5 shadow-sm'
+                    : 'border-sidebar-border bg-transparent'
+                }`}
+              >
+                {/* Card Header */}
+                <div className="flex items-center justify-between mb-3 gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Checkbox 
+                      checked={selectedRows.has(transaction.orderId || '')} 
+                      onChange={() => toggleRow(transaction.orderId || '')} 
+                      size="sm"
+                    />
+                    <span className="text-[11px] font-bold font-mono text-[#2E2E2F] dark:text-white uppercase tracking-widest bg-[#F2F2F2] dark:bg-[#111111] px-2 py-0.5 rounded truncate">
+                      #{transaction.orderId?.slice(0, 8) || '-'}
+                    </span>
+                  </div>
+                  <div className="shrink-0">
+                    {getStatusBadge(transaction.paymentStatus)}
+                  </div>
+                </div>
+
+                {/* Card Content */}
+                <div className="space-y-3 mb-3">
+                  <div>
+                    <span className="text-[9px] font-bold text-[#2E2E2F]/40 dark:text-white/40 uppercase tracking-widest block">Event</span>
+                    <span className="text-xs sm:text-sm font-bold text-[#2E2E2F] dark:text-white line-clamp-1">
+                      {transaction.eventName || 'Unknown Event'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="min-w-0">
+                      <span className="text-[9px] font-bold text-[#2E2E2F]/40 dark:text-white/40 uppercase tracking-widest block">Attendee</span>
+                      <span className="text-xs font-bold text-[#2E2E2F] dark:text-white block truncate">
+                        {transaction.customerName || 'Unknown'}
+                      </span>
+                      <span className="text-[10px] text-[#2E2E2F]/50 dark:text-white/50 block truncate">
+                        {transaction.customerEmail || '-'}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[9px] font-bold text-[#2E2E2F]/40 dark:text-white/40 uppercase tracking-widest block">Date</span>
+                      <span className="text-[11px] font-medium text-[#2E2E2F]/60 dark:text-white/60 block">
+                        {formatDate(transaction.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Footer */}
+                <div className="flex items-center justify-between pt-3 border-t border-sidebar-border/10">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs sm:text-sm font-bold text-[#2E2E2F] dark:text-white">{transaction.quantity || 1}</span>
+                    <span className="text-[9px] font-black text-[#2E2E2F]/60 dark:text-white/60 uppercase tracking-widest">Qty</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[9px] font-bold text-[#2E2E2F]/40 dark:text-white/40 uppercase tracking-widest block">Amount</span>
+                    <span className="text-sm sm:text-base font-black text-[#2E2E2F] dark:text-white">
+                      {formatCurrency(transaction.amount, transaction.currency)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-8 py-5 border-t-2 border-sidebar-border flex justify-between items-center bg-surface">
+          <div className="px-4 sm:px-8 py-4 sm:py-5 border-t-2 border-sidebar-border flex flex-col sm:flex-row gap-4 items-center justify-between bg-surface">
             <p className="text-[10px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest">
               Page {page} of {totalPages}
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               <Button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-background border-2 border-sidebar-border text-[#2E2E2F] dark:text-white hover:border-[#2E2E2F]/20 disabled:opacity-50 transition-all"
+                className="flex-1 sm:flex-none px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-background border-2 border-sidebar-border text-[#2E2E2F] dark:text-white hover:border-[#2E2E2F]/20 disabled:opacity-50 transition-all"
               >
                 Previous
               </Button>
               <Button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-background border-2 border-sidebar-border text-[#2E2E2F] dark:text-white hover:border-[#2E2E2F]/20 disabled:opacity-50 transition-all"
+                className="flex-1 sm:flex-none px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-background border-2 border-sidebar-border text-[#2E2E2F] dark:text-white hover:border-[#2E2E2F]/20 disabled:opacity-50 transition-all"
               >
                 Next
               </Button>

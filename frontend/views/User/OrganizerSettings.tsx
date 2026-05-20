@@ -256,19 +256,9 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
   const fallbackInitial = (formData.organizerName || name || 'O').charAt(0).toUpperCase();
 
   return (
-    <div className="dashboard-main-content pb-16 space-y-8 px-2 sm:px-4">
-      {/* Header */}
-      <div className="pt-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2 sm:px-0">
-        <div>
-          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-black text-[#2E2E2F] dark:text-white tracking-tight uppercase">Settings</h1>
-          <p className="mt-2 text-xs sm:text-sm font-bold text-[#2E2E2F]/50 dark:text-white/50 max-w-md">
-            Update your organizer identity, cover imagery, and branding preferences.
-          </p>
-        </div>
-      </div>
-
+    <div className="space-y-6">
       <form onSubmit={handleSave} className="space-y-6">
-        <Card className="p-8 rounded-xl border-2 border-sidebar-border bg-surface">
+        <Card className="p-4 sm:p-8 rounded-xl border-2 border-sidebar-border bg-surface">
           <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8 items-start">
             <div className="space-y-6">
               <div className="space-y-3">
@@ -352,11 +342,11 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                     {!canCustomBrand && <Badge type="info" className="text-[8px] bg-[#2E2E2F] text-white uppercase px-2 font-black">Professional Feature</Badge>}
                   </div>
 
-                  <div className="p-5 rounded-xl border-2 border-sidebar-border bg-background/50 space-y-4 relative overflow-hidden group">
+                  <div className="p-4 sm:p-5 rounded-xl border-2 border-sidebar-border bg-background/50 space-y-4 relative overflow-hidden group">
                     <div className={`flex items-center gap-5 ${!canCustomBrand ? 'opacity-40 grayscale' : ''}`}>
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest ml-1">Brand Color</label>
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5">
                           <input
                             type="color"
                             value={formData.brandColor}
@@ -366,7 +356,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                           />
                           <div>
                             <p className="text-xs font-bold text-[#2E2E2F] dark:text-white">{formData.brandColor.toUpperCase()}</p>
-                            <p className="text-[10px] text-[#2E2E2F] dark:text-white font-medium">Global default for your events</p>
+                            <p className="text-[10px] text-[#2E2E2F]/60 dark:text-white/60 font-medium">Global default for your events</p>
                           </div>
                         </div>
                       </div>
@@ -404,7 +394,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                   }
                 />
 
-                <div className="flex items-end pb-1">
+                <div className="flex items-center pt-2 pb-1">
                   <Checkbox
                     checked={formData.emailOptIn}
                     onChange={(val) => handleFormChange('emailOptIn', val)}
@@ -461,7 +451,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <label className="block text-[11px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-widest mb-1">Brand Identity</label>
-                      <p className="text-[12px] text-[#2E2E2F] dark:text-white font-medium">This color will be applied to your event pages and buttons.</p>
+                      <p className="text-[12px] text-[#2E2E2F]/60 dark:text-white/60 font-medium">This color will be applied to your event pages and buttons.</p>
                     </div>
                      {!canCustomBrand && (
                       <Badge type="neutral" className="bg-background text-[#2E2E2F] dark:text-white border-none text-[9px] font-black py-1 px-3">PRO FEATURE</Badge>
@@ -473,7 +463,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                       <label className="text-[10px] font-bold text-[#2E2E2F] dark:text-white uppercase tracking-widest">Hex Code</label>
                       <div className="flex items-center gap-3">
                         <div
-                          className="w-12 h-12 rounded-xl shadow-sm border border-sidebar-border transition-transform hover:scale-105"
+                          className="w-12 h-12 rounded-xl shadow-sm border border-sidebar-border transition-transform hover:scale-105 animate-in fade-in"
                           style={{ backgroundColor: formData.brandColor }}
                         />
                         <input
@@ -499,7 +489,7 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
                         <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px]" style={{ backgroundColor: formData.brandColor }}>
                           <ICONS.CheckCircle className="w-4 h-4" />
                         </div>
-                        <p className="text-[11px] font-bold text-[#2E2E2F] uppercase tracking-widest">Brand System Active</p>
+                        <p className="text-[11px] font-bold text-[#2E2E2F] dark:text-white uppercase tracking-widest">Brand System Active</p>
                       </div>
                     </div>
                   </div>
@@ -509,28 +499,28 @@ export const OrganizerSettings: React.FC<OrganizerSettingsProps> = ({
           </div>
         </Card>
 
-        <Card className="p-6 rounded-xl border-2 border-sidebar-border bg-surface">
+        <Card className="p-4 sm:p-6 rounded-xl border-2 border-sidebar-border bg-surface">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <p className="text-[11px] font-semibold text-[#2E2E2F] uppercase tracking-wide">Organizer Snapshot</p>
-              <p className="text-sm text-[#2E2E2F] mt-1">
-                Followers: <span className="font-bold text-[#2E2E2F]">{profile?.followersCount || 0}</span>
-                {' '}| Events Hosted: <span className="font-bold text-[#2E2E2F]">{profile?.eventsHostedCount || 0}</span>
+              <p className="text-[11px] font-black text-[#2E2E2F] dark:text-white uppercase tracking-wider">Organizer Snapshot</p>
+              <p className="text-xs sm:text-sm text-[#2E2E2F]/80 dark:text-white/80 mt-1">
+                Followers: <span className="font-bold text-[#2E2E2F] dark:text-white">{profile?.followersCount || 0}</span>
+                {' '}| Events Hosted: <span className="font-bold text-[#2E2E2F] dark:text-white">{profile?.eventsHostedCount || 0}</span>
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               {!onboardingMode && (
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => navigate('/subscription')}
-                  className="px-6 py-3 rounded-xl font-black tracking-widest text-[10px]"
+                  className="w-full sm:w-auto px-6 py-2.5 h-10 rounded-xl font-bold uppercase tracking-wider text-[10px]"
                 >
                   Subscription
                 </Button>
               )}
-              <Button type="submit" className="px-8 py-3 rounded-xl font-black tracking-widest text-[10px]" disabled={loading || saving || uploading}>
+              <Button type="submit" className="w-full sm:w-auto px-8 py-2.5 h-10 rounded-xl font-bold uppercase tracking-wider text-[10px]" disabled={loading || saving || uploading}>
                 {saving
                   ? (onboardingMode ? 'Finishing Setup...' : 'Saving...')
                   : (onboardingMode ? 'Complete Setup' : 'Save Organizer Profile')}
