@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import { useToast } from '../../context/ToastContext';
@@ -57,6 +58,115 @@ export const UserHome: React.FC = () => {
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const [promotedEvents, setPromotedEvents] = useState<any[]>([]);
     const [now, setNow] = useState(new Date());
+
+    // AI Assistant state variables
+    const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+    const [assistantMessages, setAssistantMessages] = useState<Array<{ sender: 'volt' | 'user'; text: string; time: Date }>>([
+        {
+            sender: 'volt',
+            text: `Oh hello, ${displayName}! 🐺 I'm Volt, your neon cyber-husky AI Event Co-Pilot! I'm here to help you optimize event strategies, draft high-impact announcements, or analyze your dashboard metrics. What can I sniff out for you today?`,
+            time: new Date()
+        }
+    ]);
+    const [assistantInput, setAssistantInput] = useState('');
+    const [isVoltTyping, setIsVoltTyping] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Mascot 3D Cursor-Tracking Parallax States
+    const [mascotRotation, setMascotRotation] = useState({ x: 0, y: 0 });
+    const mascotContainerRef = useRef<HTMLDivElement>(null);
+    const [mascotActionClass, setMascotActionClass] = useState<'idle' | 'think' | 'jump'>('idle');
+
+    const handleMascotMouseMove = (e: React.MouseEvent) => {
+        if (!mascotContainerRef.current) return;
+        const rect = mascotContainerRef.current.getBoundingClientRect();
+        
+        // Find cursor coordinates relative to center of the banner container
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        const deltaX = (e.clientX - centerX) / 40; // smooth tracking scale
+        const deltaY = (e.clientY - centerY) / 40;
+        
+        // Cap the maximum rotation tilt to 12 degrees
+        const tiltX = Math.max(-12, Math.min(12, deltaX));
+        const tiltY = Math.max(-12, Math.min(12, deltaY));
+        
+        setMascotRotation({ x: tiltX, y: -tiltY });
+    };
+
+    const handleMascotMouseLeave = () => {
+        setMascotRotation({ x: 0, y: 0 });
+    };
+
+    // Auto-scroll messages
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [assistantMessages, isVoltTyping]);
+
+    // Lock background body scroll when co-pilot assistant is open
+    useEffect(() => {
+        if (isAssistantOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isAssistantOpen]);
+
+    const handleSendAssistantMessage = (customText?: string) => {
+        const query = (customText || assistantInput).trim();
+        if (!query) return;
+
+        // Add user message
+        const newMsg = { sender: 'user' as const, text: query, time: new Date() };
+        setAssistantMessages(prev => [...prev, newMsg]);
+        setAssistantInput('');
+        setIsVoltTyping(true);
+        setMascotActionClass('think');
+
+        // Simulated AI response logic utilizing real portal statistics
+        setTimeout(() => {
+            let voltText = '';
+            const lower = query.toLowerCase();
+
+            if (lower.includes('sales') || lower.includes('ticket') || lower.includes('stats') || lower.includes('analyze') || lower.includes('registrations')) {
+                voltText = `Sniffing out your sales tracker... 🐾 You currently have **${stats.liveEventsCount} live events** and **${stats.ticketsSold} tickets sold** across your active experiences. This is a solid foundation!\n\n💡 **Co-Pilot Recommendation:** To double your conversion rates this week, I suggest configuring a *Time-Limited Flash Sale* at 15% off for regular tickets. This will generate quick momentum. Would you like me to draft an email invitation layout for you?`;
+            } else if (lower.includes('announcement') || lower.includes('draft') || lower.includes('broadcast') || lower.includes('news')) {
+                voltText = `Here is a high-impact broadcast announcement draft tailored for your attendees:\n\n📢 **EXCITED TO WELCOME YOU!** 🚀\n*Hello everyone! We're putting the finishing touches on our upcoming session. Expect elite guest speakers, high-energy networking workshops, and premium catering. Gates open at 9:00 AM sharp!*\n\n📝 Feel free to copy this directly into your announcements dashboard!`;
+            } else if (lower.includes('pricing') || lower.includes('cost') || lower.includes('price') || lower.includes('tier')) {
+                voltText = `For optimal ticket monetization, I always recommend the **Triple Tier pricing rule**:\n\n1. **Early Bird (20% Discount):** Drive 30% of sales early to build social proof.\n2. **Regular Tier:** Your main revenue engine.\n3. **VIP Experience (2.5x Standard Price):** Include front-row access or priority registration. VIPs usually account for only 15% of tickets but generate over 40% of the overall profit!\n\nWhich ticket tier would you like me to help you details?`;
+            } else {
+                voltText = `Bark! 🐺 I'm tracking with you! As your Event Co-Pilot, I can help you analyze your current ${stats.liveEventsCount} live events, draft copywriting announcements, or outline ticket tier plans. What should we tackle next?`;
+            }
+
+            setAssistantMessages(prev => [...prev, { sender: 'volt', text: voltText, time: new Date() }]);
+            setIsVoltTyping(false);
+            setMascotActionClass('jump');
+            
+            // Return back to smooth breathing after jump physics animation (800ms)
+            setTimeout(() => {
+                setMascotActionClass('idle');
+            }, 800);
+        }, 1200);
+    };
+
+    const getDynamicMascotGreeting = () => {
+        if (loadingStats) {
+            return "Sniffing out your dashboard statistics... 🐾 Hold tight, I'm fetching your latest event data!";
+        }
+        if (stats.liveEventsCount === 0) {
+            return `Bark! 🐺 You don't have any live events running right now. Let's launch your first experience! Click 'New Event' below, and I'll help you draft a perfect description!`;
+        }
+        if (stats.ticketsSold === 0) {
+            return `We are live! 🚀 You have ${stats.liveEventsCount} active ${stats.liveEventsCount === 1 ? 'event' : 'events'} running, but no registrations yet. I suggest drafting an announcement to share with your audience! Click me to open my AI panel!`;
+        }
+        return `Awesome job, ${displayName}! 🎉 You've sold ${stats.ticketsSold} ${stats.ticketsSold === 1 ? 'ticket' : 'tickets'} across ${stats.liveEventsCount} active ${stats.liveEventsCount === 1 ? 'event' : 'events'}! Your event engine is buzzing. Click me to analyze your latest metrics!`;
+    };
 
     // Check if organizer's plan has priority support
     const hasPrioritySupport = organizerProfile?.plan?.features?.enable_priority_support ||
@@ -196,21 +306,58 @@ export const UserHome: React.FC = () => {
         <div className="space-y-12 max-w-6xl mx-auto pt-10 -mt-4">
             {/* Local notification JSX removed */}
 
-            {/* Welcome Section */}
-            <div className="bg-[#38BDF2] border-2 border-[#38BDF2] rounded-xl p-10 md:p-14 mb-4 shadow-[0_20px_40px_-10px_rgba(56,189,242,0.3)]">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
-                    <div className="max-w-2xl">
-                        <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-8">
-                            <ICONS.Home className="w-6 h-6 text-white" />
+            {/* Welcome Section with AI Mascot */}
+            <div className="bg-[#38BDF2] border-2 border-[#38BDF2] rounded-[2.5rem] p-4 py-2 md:p-14 lg:p-16 mb-4 shadow-[0_20px_40px_-10px_rgba(56,189,242,0.3)] relative min-h-[72px] md:min-h-[260px] flex items-center">
+                
+                {/* Absolute Mascot - Pops out of the bottom border exactly like reference */}
+                <div 
+                    onClick={() => setIsAssistantOpen(true)}
+                    className={`absolute -bottom-8 md:-bottom-10 lg:-bottom-12 xl:-bottom-16 left-3 xs:left-5 w-32 h-32 xs:w-36 xs:h-36 md:w-56 md:h-56 lg:w-64 lg:h-64 xl:w-80 xl:h-80 z-20 cursor-pointer transform-gpu transition-[transform,filter] duration-300 ${
+                        isAssistantOpen 
+                            ? 'scale-105 filter drop-shadow-[0_0_25px_rgba(255,255,255,0.75)]' 
+                            : 'hover:scale-[1.03]'
+                    }`}
+                >
+                    <img 
+                        src="/mascot.png?v=3" 
+                        alt="AI Assistant Mascot" 
+                        className="w-full h-full object-contain" 
+                        onError={(e) => {
+                            e.currentTarget.src = "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=150";
+                        }}
+                    />
+                </div>
+
+                <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 relative z-10 w-full">
+                    
+                    {/* Left Side: Mascot and Speech Bubble */}
+                    <div className="flex flex-col md:flex-row items-center gap-6 pl-[116px] xs:pl-32 md:pl-48 lg:pl-56 xl:pl-72">
+                        
+                        {/* Speech Bubble Wrap */}
+                        <div className="flex flex-row items-end gap-3 shrink-0 relative w-full md:w-auto justify-start">
+                            {/* Speech Bubble containing welcome message */}
+                            <div 
+                                onClick={() => setIsAssistantOpen(true)}
+                                className={`bg-[#F2F2F2] rounded-2xl p-3 sm:p-4 shadow-lg text-left w-full max-w-[210px] xs:max-w-[250px] sm:max-w-[340px] relative border cursor-pointer transition-[transform,border-color,box-shadow,ring] duration-300 ${
+                                    isAssistantOpen 
+                                        ? 'border-[#38BDF2] ring-4 ring-[#38BDF2]/20 scale-[1.02]' 
+                                        : 'border-[#E8E8E8] hover:border-[#38BDF2]/30 hover:scale-[1.01]'
+                                }`}
+                                style={{ filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.05))' }}
+                            >
+                                {/* Speech bubble pointing left tail (visible on both mobile and desktop) */}
+                                <div className="absolute top-1/2 -left-2 -translate-y-1/2 w-0 h-0 border-t-8 border-t-transparent border-r-8 border-r-[#F2F2F2] border-b-8 border-b-transparent" />
+                                
+                                <p className="text-[11px] font-black text-[#38BDF2] mb-0.5 leading-none">Volt</p>
+                                <p className="text-[10px] text-[#2E2E2F]/70 font-semibold leading-relaxed">
+                                    {getDynamicMascotGreeting()}
+                                </p>
+                            </div>
                         </div>
-                        <h1 className="text-3xl md:text-[2rem] font-black text-white tracking-tight">
-                            Oh hello, {displayName}
-                        </h1>
-                        <p className="mt-1 text-sm font-semibold text-white/80">
-                            Welcome back to your event nerve center. Craft new experiences, engage your audience, and scale your influence with StartupLab.
-                        </p>
                     </div>
-                    <div className="flex gap-10 shrink-0">
+
+                    {/* Stats Counter (Hidden on mobile for clean Tarsi-style thin stripe, visible on md: screens and up) */}
+                    <div className="hidden md:flex gap-8 shrink-0 justify-center xl:justify-end border-t xl:border-t-0 xl:border-l border-white/20 pt-6 xl:pt-0 xl:pl-8">
                         <div className="text-center group">
                             <p className={`text-white text-5xl font-black leading-none mb-3 transition-all duration-700 ${loadingStats ? 'opacity-0 scale-50' : 'opacity-100 scale-100'}`}>
                                 {stats.liveEventsCount}
@@ -636,6 +783,135 @@ export const UserHome: React.FC = () => {
                 onClose={() => setIsSupportCenterOpen(false)}
                 organizerName={organizerProfile?.organizerName || ''}
             />
+
+            {/* Premium Floating AI Assistant Modal Widget */}
+            {isAssistantOpen && createPortal(
+                <>
+                    {/* Dark glass backdrop overlay */}
+                    <div 
+                        className="fixed inset-0 bg-black/20 dark:bg-black/50 backdrop-blur-[2px] z-[9999] animate-in fade-in duration-200"
+                        onClick={() => setIsAssistantOpen(false)}
+                    />
+                    
+                    {/* Floating Chat Modal Box */}
+                    <div 
+                        className="fixed bottom-0 sm:bottom-6 right-0 sm:right-6 left-0 sm:left-auto w-full sm:w-[340px] h-[85vh] sm:h-[550px] bg-[#F2F2F2] dark:bg-[#09090B] border-t-2 sm:border-2 border-[#2E2E2F]/10 dark:border-white/10 rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.08),0_20px_50px_rgba(0,0,0,0.15)] z-[10000] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-24 sm:slide-in-from-bottom-12 duration-300"
+                    >
+                        {/* Header */}
+                        <div className="p-4 border-b border-[#2E2E2F]/10 dark:border-white/10 flex items-center justify-between bg-[#F2F2F2]/60 dark:bg-black/40">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-9 h-9 rounded-xl bg-[#38BDF2]/10 dark:bg-[#38BDF2]/20 p-0.5 flex items-center justify-center border border-[#38BDF2]/20">
+                                    <img src="/mascot.png?v=3" alt="Volt Avatar" className="w-full h-full object-contain" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-black text-[#2E2E2F] dark:text-white tracking-tight leading-none mb-0.5">Volt</h3>
+                                    <p className="text-[8px] uppercase tracking-widest text-[#38BDF2] font-black">AI Co-Pilot</p>
+                                </div>
+                            </div>
+                            
+                            <button 
+                                onClick={() => setIsAssistantOpen(false)}
+                                className="w-8 h-8 rounded-lg bg-[#2E2E2F]/5 dark:bg-white/5 flex items-center justify-center text-[#2E2E2F] dark:text-white hover:bg-red-50 hover:text-red-500 transition-colors"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Message History */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-none">
+                            {assistantMessages.map((msg, index) => (
+                                <div 
+                                    key={index}
+                                    className={`flex items-start gap-2.5 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
+                                >
+                                    {msg.sender === 'volt' && (
+                                        <div className="w-7 h-7 rounded-lg bg-[#38BDF2]/10 dark:bg-[#38BDF2]/20 p-0.5 shrink-0 flex items-center justify-center border border-[#38BDF2]/15">
+                                            <img src="/mascot.png?v=3" alt="Volt" className="w-full h-full object-contain" />
+                                        </div>
+                                    )}
+                                    
+                                    <div className="max-w-[82%] space-y-1">
+                                        <div 
+                                            className={`rounded-2xl p-3 text-xs font-semibold leading-relaxed shadow-sm border ${
+                                                msg.sender === 'user' 
+                                                    ? 'bg-[#38BDF2] text-white border-[#38BDF2]' 
+                                                    : 'bg-[#F2F2F2] dark:bg-[#18181B] text-[#2E2E2F] dark:text-white border-[#2E2E2F]/5 dark:border-white/5'
+                                            }`}
+                                        >
+                                            <p className="whitespace-pre-wrap">{msg.text}</p>
+                                        </div>
+                                        <p className={`text-[8px] font-black uppercase text-[#2E2E2F]/30 dark:text-white/30 tracking-wider ${msg.sender === 'user' ? 'text-right' : ''}`}>
+                                            {msg.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                            
+                            {/* Volt Typing Indicator */}
+                            {isVoltTyping && (
+                                <div className="flex items-start gap-2.5">
+                                    <div className="w-7 h-7 rounded-lg bg-[#38BDF2]/10 dark:bg-[#38BDF2]/20 p-0.5 shrink-0 flex items-center justify-center border border-[#38BDF2]/15">
+                                        <img src="/mascot.png?v=3" alt="Volt" className="w-full h-full object-contain" />
+                                    </div>
+                                    <div className="bg-[#F2F2F2] dark:bg-[#18181B] rounded-2xl p-3 border border-[#2E2E2F]/5 dark:border-white/5 shadow-sm flex items-center gap-1">
+                                        <div className="w-1.5 h-1.5 bg-[#38BDF2] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                        <div className="w-1.5 h-1.5 bg-[#38BDF2] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                        <div className="w-1.5 h-1.5 bg-[#38BDF2] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                    </div>
+                                </div>
+                            )}
+                            
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        {/* Suggestion Chips */}
+                        <div className="px-4 py-2 border-t border-[#2E2E2F]/10 dark:border-white/10 flex flex-wrap gap-1.5 bg-[#F2F2F2]/60 dark:bg-black/20">
+                            <button 
+                                onClick={() => handleSendAssistantMessage('Analyze my sales metrics')}
+                                className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#18181B] text-[9px] font-black text-[#2E2E2F] dark:text-white border border-[#2E2E2F]/10 dark:border-white/10 hover:border-[#38BDF2]/30 hover:text-[#38BDF2] transition-colors"
+                            >
+                                📊 Analyze Sales
+                            </button>
+                            <button 
+                                onClick={() => handleSendAssistantMessage('Draft a new event announcement')}
+                                className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#18181B] text-[9px] font-black text-[#2E2E2F] dark:text-white border border-[#2E2E2F]/10 dark:border-white/10 hover:border-[#38BDF2]/30 hover:text-[#38BDF2] transition-colors"
+                            >
+                                📢 Draft Announcement
+                            </button>
+                            <button 
+                                onClick={() => handleSendAssistantMessage('What is your pricing advice?')}
+                                className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#18181B] text-[9px] font-black text-[#2E2E2F] dark:text-white border border-[#2E2E2F]/10 dark:border-white/10 hover:border-[#38BDF2]/30 hover:text-[#38BDF2] transition-colors"
+                            >
+                                💡 Pricing Strategy
+                            </button>
+                        </div>
+
+                        {/* Input Footer */}
+                        <div className="p-4 border-t border-[#2E2E2F]/10 dark:border-white/10 bg-[#F2F2F2]/60 dark:bg-black/40">
+                            <div className="flex gap-2">
+                                <input 
+                                    type="text" 
+                                    value={assistantInput}
+                                    onChange={(e) => setAssistantInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') handleSendAssistantMessage();
+                                    }}
+                                    placeholder="Ask Volt..."
+                                    className="flex-1 bg-white dark:bg-[#18181B] border border-[#2E2E2F]/10 dark:border-white/10 rounded-xl px-3 py-2 text-[11px] font-semibold focus:outline-none focus:border-[#38BDF2]/50 text-[#2E2E2F] dark:text-white"
+                                />
+                                <button 
+                                    onClick={() => handleSendAssistantMessage()}
+                                    className="px-3 bg-[#38BDF2] text-white rounded-xl hover:bg-[#2E2E2F] transition-all flex items-center justify-center shadow-md shadow-[#38BDF2]/10"
+                                >
+                                    <ICONS.ChevronRight className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            , document.body)}
         </div>
     );
 };

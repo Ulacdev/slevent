@@ -119,6 +119,35 @@ h1 {
   animation: soft-float 9s ease-in-out infinite;
 }
 
+@keyframes mascot-breath {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.02); }
+}
+
+.animate-mascot-breath {
+  animation: mascot-breath 3.5s ease-in-out infinite;
+}
+
+@keyframes mascot-think {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.04); filter: drop-shadow(0 0 15px rgba(56, 189, 242, 0.4)); }
+}
+
+.animate-mascot-think {
+  animation: mascot-think 0.8s ease-in-out infinite;
+}
+
+@keyframes mascot-jump {
+  0%, 100% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-30px) scaleY(1.1) scaleX(0.9); }
+  50% { transform: translateY(-35px) rotate(5deg); }
+  70% { transform: translateY(5px) scaleY(0.9) scaleX(1.1); }
+}
+
+.animate-mascot-jump {
+  animation: mascot-jump 0.8s cubic-bezier(0.25, 1, 0.5, 1) 1;
+}
+
 p,
 span,
 div,

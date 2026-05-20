@@ -662,7 +662,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-background font-sans selection:bg-[#38BDF2]/30">
+    <div className="h-screen overflow-hidden flex flex-col md:flex-row bg-background font-sans selection:bg-[#38BDF2]/30">
       {/* Sidebar for desktop */}
       <aside
         className={`bg-sidebar border-r border-sidebar-border hidden md:flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'w-80' : 'w-24'}`}
@@ -734,7 +734,7 @@ const PortalLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       </aside>
 
       <main
-        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}
+        className={`h-screen overflow-hidden flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${desktopSidebarOpen ? 'md:pl-64' : 'md:pl-20'}`}
       >
         <header className="h-20 sm:h-24 bg-background border-b border-sidebar-border px-2 sm:px-6 flex items-center justify-between sticky top-0 z-[500] w-full" style={{ zoom: 0.7 }}>
           <div className="flex items-center gap-1 sm:gap-3">
